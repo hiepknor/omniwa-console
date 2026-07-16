@@ -7,104 +7,9 @@
 <!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
 <style>
-  :root{
-    --canvas:#0b0c0e; --panel:#121316; --elevated:#1a1c20; --recessed:#08090a;
-    --text-1:#f4f5f6; --text-2:#b6bcc4; --text-3:#7c828c; --text-4:#565b63;
-    --accent:#10b981; --accent-hover:#34d399; --accent-tint:rgba(16,185,129,.12);
-    --ok:#10b981; --pending:#f59e0b; --degraded:#f97316; --failed:#ef4444; --info:#38bdf8; --inactive:#7c828c;
-    --border:rgba(255,255,255,.07); --border-subtle:rgba(255,255,255,.05); --border-strong:rgba(255,255,255,.12);
-    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--canvas);color:var(--text-1);font:400 14px/1.5 Inter,-apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
-  .num{font-feature-settings:"tnum"}
-  .mono{font-family:var(--mono);font-size:12px;color:var(--text-2)}
-
-  .shell{display:flex;min-height:100vh}
-  .sidebar{width:224px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column}
-  .logo{padding:16px;border-bottom:1px solid var(--border-subtle)}
-  .logo b{font-size:14px;font-weight:600;letter-spacing:-.01em}
-  .logo .env{display:block;margin-top:2px;font-family:var(--mono);font-size:11px;color:var(--text-4)}
-  nav{flex:1;padding:8px}
-  nav a{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;
-    font-size:13px;font-weight:500;color:var(--text-3);text-decoration:none}
-  nav a:hover{background:rgba(255,255,255,.03);color:var(--text-2)}
-  nav a.active{background:var(--accent-tint);color:var(--accent)}
-  nav .count{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--recessed);
-    border:1px solid var(--border-subtle);border-radius:4px;padding:0 5px}
-  .side-foot{padding:12px;border-top:1px solid var(--border-subtle);font-size:12px;color:var(--text-4)}
-  .side-foot .key{font-family:var(--mono);font-size:11px}
-
-  .btn{display:inline-flex;align-items:center;gap:6px;font:500 13px Inter,sans-serif;color:var(--text-1);
-    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:6px;
-    padding:6px 12px;cursor:pointer}
-  .btn:hover{background:rgba(255,255,255,.06)}
-  .btn.primary{background:var(--accent);border-color:transparent;color:#06281d}
-  .btn.primary:hover{background:var(--accent-hover)}
-  .btn.danger{color:var(--failed);border-color:rgba(239,68,68,.35)}
-  .btn.danger:hover{background:rgba(239,68,68,.08)}
-  .btn.block{width:100%;justify-content:center;margin-top:8px;color:var(--text-2)}
-
-  main{flex:1;min-width:0;padding:0 24px 24px}
-  .page-head{display:flex;align-items:center;justify-content:space-between;height:48px;border-bottom:1px solid var(--border-subtle);margin-bottom:16px}
-  h1{font-size:18px;font-weight:600;letter-spacing:-.01em}
-  .head-right{display:flex;align-items:center;gap:12px}
-  .live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
-  .live .dot{background:var(--ok);animation:pulse 2s infinite}
-  @keyframes pulse{50%{opacity:.35}}
-
-  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
-  .status{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-1)}
-
-  .filterbar{display:flex;gap:8px;margin-bottom:12px}
-  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-2);
-    background:rgba(255,255,255,.04);border:1px solid var(--border-subtle);border-radius:9999px;padding:2px 10px;cursor:pointer}
-  .chip .x{color:var(--text-4)}
-  .chip.add{border-style:dashed;color:var(--text-4)}
-
-  .tablewrap{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-  table{width:100%;border-collapse:collapse}
-  th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);
-    text-align:left;padding:0 12px;height:32px;border-bottom:1px solid var(--border-subtle)}
-  td{font-size:13px;padding:0 12px;height:36px;border-bottom:1px solid var(--border-subtle)}
-  th,td{white-space:nowrap}
-  tr:last-child td{border-bottom:none}
-  tbody tr:hover{background:var(--elevated)}
-  tbody tr.selected{background:var(--accent-tint);box-shadow:inset 2px 0 0 var(--accent)}
-  .ts{font-size:12px;color:var(--text-4)}
-  .table-foot{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--border-subtle)}
-  .table-foot span{font-size:12px;color:var(--text-4)}
-
-  .layout{display:flex;gap:16px;align-items:flex-start}
-  .layout .listcol{flex:1;min-width:0}
-
-  .drawer{width:460px;flex-shrink:0;background:var(--elevated);border:1px solid var(--border);
-    border-left:1px solid var(--border-strong);border-radius:8px;overflow:hidden}
-  .drawer header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border-subtle)}
-  .drawer header .t b{display:block;font-size:14px;font-weight:600}
-  .drawer header .close{color:var(--text-3);background:none;border:none;font-size:16px;cursor:pointer;width:26px;height:26px;border-radius:6px}
-  .drawer header .close:hover{background:rgba(255,255,255,.06)}
-  .drawer section{padding:16px;border-bottom:1px solid var(--border-subtle)}
-  .drawer section:last-child{border-bottom:none}
-  .drawer h3{font-size:14px;font-weight:600;margin-bottom:10px}
-  .kv{display:grid;grid-template-columns:120px 1fr;row-gap:6px;font-size:13px}
-  .kv dt{color:var(--text-3)}
-  .kv dd{color:var(--text-1)}
-
-  .qrwell{background:var(--recessed);border:1px solid var(--border-subtle);border-radius:8px;
-    display:flex;flex-direction:column;align-items:center;padding:20px;gap:12px}
-  .qr{background:#fff;border-radius:12px;padding:12px;width:240px;height:240px}
-  .qr svg{display:block;width:100%;height:100%}
-  .qrmeta{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text-2)}
-  .qrmeta .countdown{font-family:var(--mono);color:var(--pending)}
-  .steps{display:flex;gap:16px;font-size:12px;color:var(--text-3)}
-  .steps .on{color:var(--text-1)}
-
-  .actions{display:flex;gap:8px}
-  .minitable td,.minitable th{height:30px;font-size:12px}
   .capchips{display:flex;flex-wrap:wrap;gap:6px}
-  @media(max-width:1200px){.drawer{width:400px}}
 </style>
 </head>
 <body>
@@ -114,10 +19,10 @@
     <nav>
       <a href="overview.html">Overview</a>
       <a class="active" href="#">Instances</a>
-      <a href="#">Queue &amp; Jobs <span class="count num">142</span></a>
-      <a href="#">Webhooks</a>
-      <a href="#">Events</a>
-      <a href="#">Settings</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="webhooks.html">Webhooks</a>
+      <a href="events.html">Events</a>
+      <a href="settings.html">Settings</a>
     </nav>
     <div class="side-foot">
       <div>key <span class="key">omni…a1b2</span> · api</div>
@@ -223,10 +128,10 @@
             <thead><tr><th>Session</th><th>State</th><th>Since</th></tr></thead>
             <tbody>
               <tr><td><span class="mono">ses_71bb0e</span></td>
-                <td><span class="status" style="font-size:12px"><span class="dot" style="background:var(--pending)"></span>handshake</span></td>
+                <td><span class="status sm"><span class="dot" style="background:var(--pending)"></span>handshake</span></td>
                 <td class="ts">12m ago</td></tr>
               <tr><td><span class="mono">ses_09zu4p</span></td>
-                <td><span class="status" style="font-size:12px"><span class="dot" style="background:var(--inactive)"></span>expired</span></td>
+                <td><span class="status sm"><span class="dot" style="background:var(--inactive)"></span>expired</span></td>
                 <td class="ts">3h ago</td></tr>
             </tbody>
           </table>

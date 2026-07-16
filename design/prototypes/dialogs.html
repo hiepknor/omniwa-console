@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Dialog patterns (prototype)</title>
+<!-- Component sheet: dialog and feedback patterns rendered side by side.
+     In the app these float over an rgba(0,0,0,.7) overlay. Sample data only. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+<style>
+  main{padding:24px}
+  .sheet{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+  .demo>.caption{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:10px}
+  .secretwell{display:flex;gap:8px;align-items:center}
+  .secretwell .codewell{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+</head>
+<body>
+<main>
+  <div class="page-head" style="margin-bottom:24px">
+    <h1>Dialog &amp; feedback patterns</h1>
+    <span class="ts">component sheet · binds to design/DESIGN.md §4</span>
+  </div>
+
+  <div class="sheet">
+
+    <div class="demo">
+      <div class="caption">Compose message (sendInstanceTextMessage / MediaMessage)</div>
+      <div class="dialog">
+        <header><b>Send message</b><span class="mono">inst_2bq81c</span></header>
+        <div class="body">
+          <div class="field">
+            <label>Chat</label>
+            <input class="input" value="chat_x91k2m">
+            <p class="help">Opaque chat id — the API never exposes raw phone numbers.</p>
+          </div>
+          <div class="field">
+            <label>Type</label>
+            <select class="input"><option>text</option><option>image</option><option>video</option><option>document</option><option>audio</option></select>
+          </div>
+          <div class="field">
+            <label>Body</label>
+            <textarea class="input">Chào anh, đơn hàng #1042 đã sẵn sàng giao.</textarea>
+          </div>
+        </div>
+        <footer>
+          <button class="btn">Cancel</button>
+          <button class="btn primary">Send</button>
+        </footer>
+      </div>
+      <p class="help" style="margin-top:8px;max-width:480px">On submit the button shows a pending
+        state, then the dialog closes and a toast reports <b>accepted</b> — never "sent" or "delivered".</p>
+    </div>
+
+    <div class="demo">
+      <div class="caption">Destructive confirmation (destroyInstance)</div>
+      <div class="dialog">
+        <header><b>Destroy instance</b><span class="mono">inst_9f2ka7</span></header>
+        <div class="body">
+          <p style="font-size:13px;color:var(--text-2);margin-bottom:12px">
+            This permanently destroys <b>support-vn</b>, its sessions, and pairing
+            state. Message history follows retention policy. This cannot be undone.
+          </p>
+          <div class="field">
+            <label>Type <span class="mono" style="color:var(--failed)">support-vn</span> to confirm</label>
+            <input class="input" placeholder="support-vn">
+          </div>
+        </div>
+        <footer>
+          <button class="btn">Cancel</button>
+          <button class="btn danger solid" disabled>Destroy instance</button>
+        </footer>
+      </div>
+      <p class="help" style="margin-top:8px;max-width:480px">The solid-red confirm button stays
+        disabled until the typed name matches exactly.</p>
+    </div>
+
+    <div class="demo">
+      <div class="caption">Show-once secret (provisionApiKey / rotateApiKey)</div>
+      <div class="dialog">
+        <header><b>API key provisioned</b><span class="mono">key_31mm8r</span></header>
+        <div class="body">
+          <p style="font-size:13px;color:var(--text-2);margin-bottom:12px">
+            Copy the secret now. For security it is <b>shown only once</b> and cannot
+            be retrieved again — only rotated.
+          </p>
+          <div class="secretwell">
+            <div class="codewell">omni_live_9f2ka7q0x81mzw4hh2…</div>
+            <button class="btn sm">Copy</button>
+          </div>
+        </div>
+        <footer>
+          <button class="btn primary">Done</button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="caption">Error toast (bottom-right, always carries requestId)</div>
+      <div class="toast">
+        <b>Failed to connect instance</b>
+        <span>business · instance is already connecting</span>
+        <span class="mono">req_01j2m9xq44</span>
+      </div>
+      <p class="help" style="margin-top:8px;max-width:380px">Category and message come from the
+        error envelope verbatim; the mono requestId links the operator to platform logs. A
+        "Retry" action appears only when <span class="mono">details.retryable</span> is true.</p>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>

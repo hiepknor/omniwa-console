@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Webhooks (prototype)</title>
+<!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a href="overview.html">Overview</a>
+      <a href="instances.html">Instances</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a class="active" href="#">Webhooks</a>
+      <a href="events.html">Events</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <h1>Webhooks</h1>
+      <div class="head-right">
+        <span class="live"><span class="dot"></span>live</span>
+        <button class="btn primary">Register webhook</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="listcol">
+        <div class="tablewrap">
+          <div class="scroll">
+          <table>
+            <thead><tr><th>Name</th><th>Endpoint</th><th>Status</th><th>Success 24h</th><th>Last delivery</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>order-events</td><td><span class="mono">https://api.acme.vn/hooks/wa</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+                <td class="num">99.8%</td><td class="ts" title="2026-07-16T08:53:25Z">5s ago</td>
+              </tr>
+              <tr class="selected">
+                <td>billing-events</td><td><span class="mono">https://billing.acme.vn/wh</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--degraded)"></span>suspended</span></td>
+                <td class="num">61.2%</td><td class="ts" title="2026-07-16T06:02:00Z">2h ago</td>
+              </tr>
+              <tr>
+                <td>legacy-sink</td><td><span class="mono">https://old.acme.vn/callback</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span></td>
+                <td class="num">—</td><td class="ts" title="2026-06-02T00:00:00Z">44d ago</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <div class="table-foot">
+            <span class="num">3 of 3 webhooks</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="drawer">
+        <header>
+          <div class="t"><b>billing-events</b><span class="mono">wh_c41x02</span></div>
+          <button class="close" aria-label="Close">✕</button>
+        </header>
+
+        <section>
+          <div class="kv">
+            <dt>Status</dt><dd><span class="status"><span class="dot" style="background:var(--degraded)"></span>suspended</span></dd>
+            <dt>Endpoint</dt><dd><span class="mono">https://billing.acme.vn/wh</span></dd>
+            <dt>Secret</dt><dd><span class="mono">whsec_••••••••</span></dd>
+            <dt>Suspended</dt><dd class="ts" title="2026-07-16T06:02:00Z">2h ago · failure threshold</dd>
+          </div>
+        </section>
+
+        <section>
+          <h3>Subscribed events</h3>
+          <div class="actions">
+            <span class="chip">message.delivered</span>
+            <span class="chip">message.failed</span>
+            <span class="chip">instance.*</span>
+          </div>
+        </section>
+
+        <section>
+          <h3>Lifecycle</h3>
+          <div class="actions">
+            <button class="btn primary">Activate</button>
+            <button class="btn">Edit…</button>
+            <button class="btn danger">Retire…</button>
+          </div>
+          <p class="help" style="margin-top:8px">Activate resumes delivery; pending failed deliveries stay failed until redriven.</p>
+        </section>
+
+        <section>
+          <h3>Recent deliveries <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 4 of 220</span></h3>
+          <div style="overflow-x:auto">
+          <table class="minitable">
+            <thead><tr><th>Delivery</th><th>Event</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="mono">del_88am2k</span></td><td><span class="mono">message.failed</span></td>
+                <td><span class="status sm"><span class="dot" style="background:var(--failed)"></span>failed · 503</span></td>
+                <td style="text-align:right"><button class="btn sm">Redrive</button></td>
+              </tr>
+              <tr>
+                <td><span class="mono">del_87zz1p</span></td><td><span class="mono">message.delivered</span></td>
+                <td><span class="status sm"><span class="dot" style="background:var(--failed)"></span>failed · timeout</span></td>
+                <td style="text-align:right"><button class="btn sm">Redrive</button></td>
+              </tr>
+              <tr>
+                <td><span class="mono">del_86kj9w</span></td><td><span class="mono">message.delivered</span></td>
+                <td><span class="status sm"><span class="dot" style="background:var(--ok)"></span>delivered</span></td>
+                <td style="text-align:right"><button class="btn sm">History</button></td>
+              </tr>
+              <tr>
+                <td><span class="mono">del_85rr4n</span></td><td><span class="mono">instance.connected</span></td>
+                <td><span class="status sm"><span class="dot" style="background:var(--ok)"></span>delivered</span></td>
+                <td style="text-align:right"><button class="btn sm">History</button></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <div class="actions" style="margin-top:10px">
+            <button class="btn">Bulk redrive failed <span class="num" style="color:var(--text-3)">· 84</span></button>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>

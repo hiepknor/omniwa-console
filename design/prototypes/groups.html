@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Groups (prototype)</title>
+<!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+<style>
+  .invite{display:flex;gap:8px;align-items:center}
+  .invite .codewell{flex:1;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a href="overview.html">Overview</a>
+      <a class="active" href="instances.html">Instances</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="webhooks.html">Webhooks</a>
+      <a href="events.html">Events</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <span class="crumb"><a href="instances.html">Instances</a> / <b>sales-primary</b> <span class="mono">inst_2bq81c</span></span>
+      <div class="head-right">
+        <span class="live"><span class="dot"></span>live</span>
+        <button class="btn">Refresh groups</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <a href="chats.html">Chats</a><a href="chats.html">Contacts</a><a href="chats.html">Labels</a>
+      <a class="active" href="#">Groups</a><a href="messages.html">Messages</a>
+    </div>
+
+    <div class="filterbar">
+      <input class="search" placeholder="Search groups…">
+      <span class="chip add">+ filter</span>
+    </div>
+
+    <div class="layout">
+      <div class="listcol">
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Group</th><th>ID</th><th>Members</th><th>Our role</th><th>Updated</th></tr></thead>
+            <tbody>
+              <tr class="selected">
+                <td>Khách sỉ miền Nam</td><td><span class="mono">grp_44he2n</span></td>
+                <td class="num">86</td>
+                <td><span class="pill">admin</span></td>
+                <td class="ts" title="2026-07-16T08:12:44Z">41m ago</td>
+              </tr>
+              <tr>
+                <td>Đại lý Hà Nội</td><td><span class="mono">grp_90weu2</span></td>
+                <td class="num">42</td>
+                <td><span class="pill">member</span></td>
+                <td class="ts" title="2026-07-16T06:55:01Z">2h ago</td>
+              </tr>
+              <tr>
+                <td>Nội bộ vận hành</td><td><span class="mono">grp_iw02mm</span></td>
+                <td class="num">12</td>
+                <td><span class="pill">admin</span></td>
+                <td class="ts" title="2026-07-15T15:30:00Z">17h ago</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-foot">
+            <span class="num">3 of 3 groups</span>
+            <span class="ts">synced 41m ago</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="drawer">
+        <header>
+          <div class="t"><b>Khách sỉ miền Nam</b><span class="mono">grp_44he2n</span></div>
+          <button class="close" aria-label="Close">✕</button>
+        </header>
+
+        <section>
+          <div class="kv">
+            <dt>Members</dt><dd class="num">86</dd>
+            <dt>Our role</dt><dd>admin</dd>
+            <dt>Local state</dt><dd><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></dd>
+            <dt>Updated</dt><dd class="ts" title="2026-07-16T08:12:44Z">41m ago</dd>
+          </div>
+        </section>
+
+        <section>
+          <h3>Invite link</h3>
+          <div class="invite">
+            <div class="codewell">https://chat.whatsapp.com/Fk20…9dQz</div>
+            <button class="btn sm">Copy</button>
+            <button class="btn sm">Refresh</button>
+          </div>
+          <p class="help" style="margin-top:6px">Refreshing invalidates the previous link.</p>
+        </section>
+
+        <section>
+          <h3>Members <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 3 of 86</span></h3>
+          <table class="minitable">
+            <thead><tr><th>Member</th><th>Role</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="mono">ctc_71bd0q</span></td>
+                <td><span class="pill">admin</span></td>
+                <td style="text-align:right"><button class="btn sm">Demote</button> <button class="btn sm danger">Remove</button></td>
+              </tr>
+              <tr>
+                <td><span class="mono">ctc_20mmx4</span></td>
+                <td><span class="pill">member</span></td>
+                <td style="text-align:right"><button class="btn sm">Promote</button> <button class="btn sm danger">Remove</button></td>
+              </tr>
+              <tr>
+                <td><span class="mono">ctc_58aa1p</span></td>
+                <td><span class="pill">member</span></td>
+                <td style="text-align:right"><button class="btn sm">Promote</button> <button class="btn sm danger">Remove</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="actions" style="margin-top:10px">
+            <button class="btn">Add member…</button>
+            <button class="btn">View all members</button>
+          </div>
+        </section>
+
+        <section>
+          <h3>Send text to group</h3>
+          <div class="field">
+            <textarea class="input" placeholder="Message text…"></textarea>
+          </div>
+          <div class="actions">
+            <button class="btn primary">Send</button>
+          </div>
+          <p class="help" style="margin-top:8px">Send returns <b>accepted</b>; track delivery in Messages.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>

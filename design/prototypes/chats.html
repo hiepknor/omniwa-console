@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Chats (prototype)</title>
+<!-- Static prototype. Sample data only. Binds to design/DESIGN.md.
+     Contacts and Labels reuse this read-only browser pattern (same tabs row,
+     search + cursor-paginated table, no drawer). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a href="overview.html">Overview</a>
+      <a class="active" href="instances.html">Instances</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="webhooks.html">Webhooks</a>
+      <a href="events.html">Events</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <span class="crumb"><a href="instances.html">Instances</a> / <b>sales-primary</b> <span class="mono">inst_2bq81c</span></span>
+      <div class="head-right">
+        <span class="live"><span class="dot"></span>live</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <a class="active" href="#">Chats</a><a href="#">Contacts</a><a href="#">Labels</a>
+      <a href="groups.html">Groups</a><a href="messages.html">Messages</a>
+    </div>
+
+    <div class="filterbar">
+      <input class="search" placeholder="Search chats…">
+      <span class="chip">type: direct <span class="x">✕</span></span>
+      <span class="chip add">+ filter</span>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Chat</th><th>ID</th><th>Type</th><th>Labels</th><th>Unread</th><th>Last message</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Trần Minh Hòa</td><td><span class="mono">chat_x91k2m</span></td><td>direct</td>
+            <td><span class="chip">vip</span></td>
+            <td class="num">2</td><td class="ts" title="2026-07-16T08:51:14Z">2m ago</td>
+          </tr>
+          <tr>
+            <td>Lê Thu Cúc</td><td><span class="mono">chat_p03wa8</span></td><td>direct</td>
+            <td><span class="chip">lead</span> <span class="chip">q3</span></td>
+            <td class="num">0</td><td class="ts" title="2026-07-16T08:39:47Z">13m ago</td>
+          </tr>
+          <tr>
+            <td>Phạm Quang Duy</td><td><span class="mono">chat_h55dn0</span></td><td>direct</td>
+            <td><span class="ts">—</span></td>
+            <td class="num">0</td><td class="ts" title="2026-07-16T07:58:00Z">55m ago</td>
+          </tr>
+          <tr>
+            <td>Khách sỉ miền Nam</td><td><span class="mono">chat_44he2n</span></td><td>group</td>
+            <td><span class="chip">vip</span></td>
+            <td class="num">17</td><td class="ts" title="2026-07-16T08:12:44Z">41m ago</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-foot">
+        <span class="num">4 of 1,206 chats</span>
+        <button class="btn">Load more</button>
+      </div>
+    </div>
+
+    <p class="help" style="margin-top:12px">
+      Read-only browser. <b>Contacts</b> (contact id, verified name, labels) and
+      <b>Labels</b> (label id, name, color chip, chat count) reuse this exact
+      pattern per <span class="mono">docs/PANELS.md</span>.
+    </p>
+  </main>
+</div>
+</body>
+</html>

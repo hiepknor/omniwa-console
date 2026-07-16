@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Events (prototype)</title>
+<!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a href="overview.html">Overview</a>
+      <a href="instances.html">Instances</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="webhooks.html">Webhooks</a>
+      <a class="active" href="#">Events</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <h1>Events</h1>
+      <div class="head-right">
+        <span class="live"><span class="dot"></span>live tail</span>
+        <button class="btn">Pause</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <a class="active" href="#">Event stream</a><a href="#">Audit records</a>
+    </div>
+
+    <div class="filterbar">
+      <input class="search" placeholder="Search type or resource…">
+      <span class="chip">instance: inst_2bq81c <span class="x">✕</span></span>
+      <span class="chip">category: message <span class="x">✕</span></span>
+      <span class="chip add">+ filter</span>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Time</th><th>Type</th><th>Resource</th><th>Instance</th><th>Request</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="ts" title="2026-07-16T08:53:29Z">08:53:29</td>
+            <td><span class="status"><span class="dot" style="background:var(--ok)"></span><span class="mono">message.delivered</span></span></td>
+            <td><span class="mono">msg_81kq0d</span></td>
+            <td><span class="mono">inst_2bq81c</span></td>
+            <td><span class="mono">req_01j2m9aa</span></td>
+          </tr>
+          <tr>
+            <td class="ts" title="2026-07-16T08:53:20Z">08:53:20</td>
+            <td><span class="status"><span class="dot" style="background:var(--pending)"></span><span class="mono">message.queued</span></span></td>
+            <td><span class="mono">msg_09zzm1</span></td>
+            <td><span class="mono">inst_2bq81c</span></td>
+            <td><span class="mono">req_01j2m99x</span></td>
+          </tr>
+          <tr>
+            <td class="ts" title="2026-07-16T08:52:41Z">08:52:41</td>
+            <td><span class="status"><span class="dot" style="background:var(--pending)"></span><span class="mono">message.accepted</span></span></td>
+            <td><span class="mono">msg_09zzm1</span></td>
+            <td><span class="mono">inst_2bq81c</span></td>
+            <td><span class="mono">req_01j2m99x</span></td>
+          </tr>
+          <tr>
+            <td class="ts" title="2026-07-16T08:46:31Z">08:46:31</td>
+            <td><span class="status"><span class="dot" style="background:var(--failed)"></span><span class="mono">message.failed</span></span></td>
+            <td><span class="mono">msg_74nn2b</span></td>
+            <td><span class="mono">inst_2bq81c</span></td>
+            <td><span class="mono">req_01j2m8jw</span></td>
+          </tr>
+          <tr>
+            <td class="ts" title="2026-07-16T08:44:02Z">08:44:02</td>
+            <td><span class="status"><span class="dot" style="background:var(--pending)"></span><span class="mono">message.accepted</span></span></td>
+            <td><span class="mono">msg_74nn2b</span></td>
+            <td><span class="mono">inst_2bq81c</span></td>
+            <td><span class="mono">req_01j2m8jw</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-foot">
+        <span class="num">5 newest · cursor history below</span>
+        <button class="btn">Load older</button>
+      </div>
+    </div>
+
+    <p class="help" style="margin-top:12px">
+      Live tail prepends new events from the SSE stream (bounded to 200 rows);
+      "Load older" pages backward through <span class="mono">listEvents</span> cursors.
+      The <b>Audit records</b> tab reuses this table with actor, action, and
+      outcome columns from <span class="mono">listAuditRecords</span>.
+    </p>
+  </main>
+</div>
+</body>
+</html>
