@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Overview (prototype)</title>
+<!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --canvas:#0b0c0e; --panel:#121316; --elevated:#1a1c20; --recessed:#08090a;
+    --text-1:#f4f5f6; --text-2:#b6bcc4; --text-3:#7c828c; --text-4:#565b63;
+    --accent:#10b981; --accent-hover:#34d399; --accent-tint:rgba(16,185,129,.12);
+    --ok:#10b981; --pending:#f59e0b; --degraded:#f97316; --failed:#ef4444; --info:#38bdf8; --inactive:#7c828c;
+    --border:rgba(255,255,255,.07); --border-subtle:rgba(255,255,255,.05); --border-strong:rgba(255,255,255,.12);
+    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--canvas);color:var(--text-1);font:400 14px/1.5 Inter,-apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  .num{font-feature-settings:"tnum"}
+  .mono{font-family:var(--mono);font-size:12px;color:var(--text-2)}
+
+  .shell{display:flex;min-height:100vh}
+  .sidebar{width:224px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column}
+  .logo{padding:16px;border-bottom:1px solid var(--border-subtle)}
+  .logo b{font-size:14px;font-weight:600;letter-spacing:-.01em}
+  .logo .env{display:block;margin-top:2px;font-family:var(--mono);font-size:11px;color:var(--text-4)}
+  nav{flex:1;padding:8px}
+  nav a{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;
+    font-size:13px;font-weight:500;color:var(--text-3);text-decoration:none}
+  nav a:hover{background:rgba(255,255,255,.03);color:var(--text-2)}
+  nav a.active{background:var(--accent-tint);color:var(--accent)}
+  nav .count{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--recessed);
+    border:1px solid var(--border-subtle);border-radius:4px;padding:0 5px}
+  .side-foot{padding:12px;border-top:1px solid var(--border-subtle);font-size:12px;color:var(--text-4)}
+  .side-foot .key{font-family:var(--mono);font-size:11px}
+  .btn{display:inline-flex;align-items:center;gap:6px;font:500 13px Inter,sans-serif;color:var(--text-1);
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:6px;
+    padding:6px 12px;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.06)}
+  .btn.block{width:100%;justify-content:center;margin-top:8px;color:var(--text-2)}
+
+  main{flex:1;min-width:0;padding:0 24px 24px}
+  .page-head{display:flex;align-items:center;justify-content:space-between;height:48px;border-bottom:1px solid var(--border-subtle);margin-bottom:24px}
+  h1{font-size:18px;font-weight:600;letter-spacing:-.01em}
+  .head-right{display:flex;align-items:center;gap:12px}
+
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .status{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2)}
+  .live .dot{background:var(--ok);animation:pulse 2s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+
+  .health{display:flex;gap:8px;margin-bottom:16px}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-2);
+    background:rgba(255,255,255,.04);border:1px solid var(--border-subtle);border-radius:9999px;padding:2px 10px 2px 6px}
+
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px}
+  .card .label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3)}
+  .card .value{font-size:26px;font-weight:600;line-height:1.1;margin-top:8px}
+  .card .ctx{font-size:12px;color:var(--text-4);margin-top:4px}
+  .card .ctx.warn{color:var(--pending)}
+
+  .section{margin-bottom:24px}
+  .section>h2{font-size:14px;font-weight:600;margin-bottom:12px}
+  .tablewrap{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);
+    text-align:left;padding:0 12px;height:32px;border-bottom:1px solid var(--border-subtle)}
+  td{font-size:13px;padding:0 12px;height:36px;border-bottom:1px solid var(--border-subtle)}
+  th,td{white-space:nowrap}
+  td:last-child{text-align:right}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--elevated)}
+  td .status{font-size:13px;color:var(--text-1)}
+  .ts{font-size:12px;color:var(--text-4)}
+  .table-foot{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--border-subtle)}
+  .table-foot span{font-size:12px;color:var(--text-4)}
+
+  .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+  .ticker{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .ticker header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border-subtle)}
+  .ticker header b{font-size:14px;font-weight:600}
+  .event{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border-subtle);font-size:12px}
+  .event:last-child{border-bottom:none}
+  .event .type{font-family:var(--mono);color:var(--text-2)}
+  .event .ts{margin-left:auto}
+  @media(max-width:1024px){.cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a class="active" href="#">Overview</a>
+      <a href="instances.html">Instances</a>
+      <a href="#">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="#">Webhooks</a>
+      <a href="#">Events</a>
+      <a href="#">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <h1>Overview</h1>
+      <div class="head-right">
+        <span class="live"><span class="dot"></span>live</span>
+        <button class="btn">Refresh</button>
+      </div>
+    </div>
+
+    <div class="health">
+      <span class="pill"><span class="dot" style="background:var(--ok)"></span>API healthy</span>
+      <span class="pill"><span class="dot" style="background:var(--ok)"></span>Readiness ok</span>
+      <span class="pill"><span class="dot" style="background:var(--pending)"></span>Provider degraded · 1 instance</span>
+    </div>
+
+    <div class="metrics">
+      <div class="card"><div class="label">Active instances</div><div class="value num">6 / 8</div><div class="ctx">1 pairing · 1 disconnected</div></div>
+      <div class="card"><div class="label">Messages · 24h</div><div class="value num">12,408</div><div class="ctx num">98.2% delivered (sample)</div></div>
+      <div class="card"><div class="label">Queue depth</div><div class="value num">142</div><div class="ctx warn num">▲ 38 in last 10m</div></div>
+      <div class="card"><div class="label">Webhook success · 24h</div><div class="value num">99.1%</div><div class="ctx num">14 redriven</div></div>
+      <div class="card"><div class="label">Media processed · 24h</div><div class="value num">1,036</div><div class="ctx num">2 failed</div></div>
+    </div>
+
+    <div class="cols">
+      <div class="section">
+        <h2>Action required <span class="num" style="font-weight:400;color:var(--text-4)">· 3</span></h2>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Item</th><th>Resource</th><th>Since</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="status"><span class="dot" style="background:var(--pending)"></span>Pairing required</span></td>
+                <td><span class="mono">inst_9f2ka7</span> support-vn</td>
+                <td class="ts" title="2026-07-16T08:41:00Z">12m ago</td>
+                <td><button class="btn">Show QR</button></td>
+              </tr>
+              <tr>
+                <td><span class="status"><span class="dot" style="background:var(--degraded)"></span>Webhook suspended</span></td>
+                <td><span class="mono">wh_c41x02</span> billing-events</td>
+                <td class="ts" title="2026-07-16T06:02:00Z">2h ago</td>
+                <td><button class="btn">Review</button></td>
+              </tr>
+              <tr>
+                <td><span class="status"><span class="dot" style="background:var(--failed)"></span>Job dead-lettered</span></td>
+                <td><span class="mono">job_77am1q</span> media-transcode</td>
+                <td class="ts" title="2026-07-15T22:17:00Z">10h ago</td>
+                <td><button class="btn">Inspect</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-foot"><span class="num">3 of 3 items</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Live events</h2>
+        <div class="ticker">
+          <header><b>Stream</b><span class="live"><span class="dot"></span>live</span></header>
+          <div class="event"><span class="dot" style="background:var(--ok)"></span><span class="type">message.delivered</span><span class="mono">inst_2bq81c</span><span class="ts">2s</span></div>
+          <div class="event"><span class="dot" style="background:var(--info)"></span><span class="type">webhook.delivery.sent</span><span class="mono">wh_88fj20</span><span class="ts">5s</span></div>
+          <div class="event"><span class="dot" style="background:var(--pending)"></span><span class="type">message.queued</span><span class="mono">inst_2bq81c</span><span class="ts">9s</span></div>
+          <div class="event"><span class="dot" style="background:var(--ok)"></span><span class="type">instance.connected</span><span class="mono">inst_5rr0znd</span><span class="ts">31s</span></div>
+          <div class="event"><span class="dot" style="background:var(--failed)"></span><span class="type">webhook.delivery.failed</span><span class="mono">wh_c41x02</span><span class="ts">1m</span></div>
+          <div class="event"><span class="dot" style="background:var(--info)"></span><span class="type">session.refreshed</span><span class="mono">inst_9f2ka7</span><span class="ts">2m</span></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
