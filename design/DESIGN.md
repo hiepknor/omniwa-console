@@ -247,7 +247,8 @@ this subsection binds to it.
 
 ## 5. Layout Principles
 
-- **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed). Sidebar: logo block, nav items (13px/500, 8px radius, active = accent text + accent-bg tint), footer with masked key fingerprint + disconnect.
+- **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed).
+- **Sidebar anatomy**: logo block (28px logomark — radius 8, accent-tint bg, accent chat glyph — beside the app name 14px/600 and the connected base URL in mono 11px); nav items (13px/500, 8px radius, 10px gap) each carrying a **16px stroke icon** (inline SVG, 1.7px stroke, round caps, `currentColor` so active items tint the icon accent) + flexing label + optional mono count badge; active = accent text + accent-tint bg. Settings lives in a border-separated `navfoot` slot pinned above the footer. The **session footer** is a Recessed block: status dot + masked key fingerprint (mono 11px) + key-kind pill + a disconnect icon-button that turns red on hover. Icons are what make the 56px icon-rail collapse (§8) possible.
 - **Nav hierarchy**: **Overview** sits alone at the top (the landing page,
   spanning both concerns). Then two labeled sections — **Operations**:
   Instances (the foundational resource first), Queue & Jobs, Webhooks,
