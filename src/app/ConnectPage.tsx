@@ -1,10 +1,15 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { createApiClient } from '@/api/client';
-import { Logo } from '@/components/Logo';
 import { ApiFailure, unwrap } from '@/api/envelopes';
 import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
 
 const DEFAULT_BASE_URL = import.meta.env.DEV ? window.location.origin : 'http://localhost:3000';
+
+type ConnectError = {
+  category: string;
+  message: string;
+  requestId?: string;
+};
 
 async function detectKeyKind(client: ReturnType<typeof createApiClient>): Promise<KeyKind> {
   try {
@@ -16,25 +21,39 @@ async function detectKeyKind(client: ReturnType<typeof createApiClient>): Promis
   }
 }
 
+function isValidOrigin(value: string) {
+  try {
+    const url = new URL(value);
+    return url.origin === value.replace(/\/$/, '');
+  } catch {
+    return false;
+  }
+}
+
 export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSession) => void }) {
   const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
   const [apiKey, setApiKey] = useState('');
+  const [showApiKey, setShowApiKey] = useState(false);
   const [remember, setRemember] = useState(false);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ConnectError | null>(null);
+  const baseUrlInput = useRef<HTMLInputElement>(null);
+  const apiKeyInput = useRef<HTMLInputElement>(null);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
 
-    let origin: string;
-    try {
-      origin = new URL(baseUrl).origin;
-    } catch {
-      setError('API base URL must be a valid URL, e.g. http://localhost:3000');
+    if (!isValidOrigin(baseUrl)) {
+      setError({
+        category: 'validation',
+        message: 'API base URL must be a valid URL, e.g. http://localhost:3000',
+      });
+      baseUrlInput.current?.focus();
       return;
     }
 
+    const origin = new URL(baseUrl).origin;
     setPending(true);
     try {
       const client = createApiClient({ baseUrl: origin, apiKey });
@@ -49,59 +68,180 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
       onConnected(session);
     } catch (err) {
       if (err instanceof ApiFailure) {
-        setError(`${err.category}: ${err.message}${err.requestId ? ` (request ${err.requestId})` : ''}`);
+        setError({ category: err.category, message: err.message, requestId: err.requestId });
       } else {
-        setError('Could not reach the OmniWA API at that address.');
+        setError({
+          category: 'network',
+          message: 'Could not reach the OmniWA API at that address.',
+        });
       }
     } finally {
       setPending(false);
     }
   };
 
+  const canSubmit = isValidOrigin(baseUrl) && apiKey.trim().length > 0 && !pending;
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <form onSubmit={submit} className="card w-full max-w-sm space-y-4 p-6">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <Logo size={32} />
-            <h1 className="text-lg font-medium">OmniWA Console</h1>
+    <main className="connect-screen">
+      <header className="connect-masthead">
+        <div className="connect-brand">
+          <span className="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 1 0-18 0c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 21 12z" />
+              <path d="M7.5 12.5h2l1.5 2.5 2-6 1.5 3.5h2" />
+            </svg>
+          </span>
+          <div>
+            <strong>OmniWA Console</strong>
+            <span>Operations workspace</span>
           </div>
-          <p className="mt-2 text-sm text-(--muted)">Connect to an OmniWA Platform API.</p>
         </div>
-        <label className="block text-sm">
-          <span className="text-(--fg-2)">API base URL</span>
-          <input
-            type="url"
-            required
-            value={baseUrl}
-            onChange={(e) => setBaseUrl(e.target.value)}
-            className="input mt-1"
-          />
-        </label>
-        <label className="block text-sm">
-          <span className="text-(--fg-2)">API key</span>
-          <input
-            type="password"
-            required
-            autoComplete="off"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="input mt-1"
-          />
-        </label>
-        <label className="flex items-center gap-2 text-sm text-(--muted)">
-          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-          Remember on this device (stores the key in this browser)
-        </label>
-        {error && <p className="help error">{error}</p>}
-        <button
-          type="submit"
-          disabled={pending}
-          className="btn primary w-full justify-center"
-        >
-          {pending ? 'Connecting…' : 'Connect'}
-        </button>
-      </form>
-    </div>
+        <div className="connect-session-state">
+          <span className="dot" style={{ background: 'var(--inactive)' }} />
+          No active session
+        </div>
+      </header>
+
+      <div className="connect-layout">
+        <section className="connect-intro" aria-labelledby="connect-title">
+          <div className="connect-intro-copy">
+            <span className="eyebrow">Self-hosted platform access</span>
+            <h1 id="connect-title">Connect to your OmniWA runtime.</h1>
+            <p>
+              Enter the platform origin and an API key. The console verifies health before creating
+              a browser session.
+            </p>
+          </div>
+          <div className="connect-intro-note">
+            <span className="dot" style={{ background: 'var(--info)' }} />
+            <p>Direct browser connection. No platform credentials pass through another service.</p>
+          </div>
+        </section>
+
+        <section className="connect-panel" aria-labelledby="connection-form-title">
+          <div className="connect-panel-head">
+            <div>
+              <span className="eyebrow">Platform session</span>
+              <h2 id="connection-form-title">Connection details</h2>
+            </div>
+          </div>
+
+          <form className="connect-form" onSubmit={submit}>
+            <ol className="connect-sequence" aria-label="Connection checks">
+              <li>
+                <span className="connect-sequence-index num">01</span>
+                <strong>Validate origin</strong>
+              </li>
+              <li>
+                <span className="connect-sequence-index num">02</span>
+                <strong>Probe health</strong>
+              </li>
+              <li>
+                <span className="connect-sequence-index num">03</span>
+                <strong>Detect scope</strong>
+              </li>
+            </ol>
+
+            <div className="connect-field">
+              <div className="connect-label-row">
+                <label htmlFor="connect-base-url">API base URL</label>
+                <span>Origin only</span>
+              </div>
+              <input
+                ref={baseUrlInput}
+                className="input"
+                id="connect-base-url"
+                name="baseUrl"
+                type="url"
+                value={baseUrl}
+                required
+                autoComplete="url"
+                aria-describedby="connect-base-url-help"
+                onChange={(event) => setBaseUrl(event.target.value)}
+              />
+              <p id="connect-base-url-help">
+                In local development, use the console origin to route requests through the Vite
+                proxy.
+              </p>
+            </div>
+
+            <div className="connect-field">
+              <div className="connect-label-row">
+                <label htmlFor="connect-api-key">API key</label>
+                <button
+                  className="connect-key-toggle"
+                  type="button"
+                  aria-controls="connect-api-key"
+                  aria-pressed={showApiKey}
+                  onClick={() => {
+                    setShowApiKey((shown) => !shown);
+                    apiKeyInput.current?.focus();
+                  }}
+                >
+                  {showApiKey ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <input
+                ref={apiKeyInput}
+                className="input"
+                id="connect-api-key"
+                name="apiKey"
+                type={showApiKey ? 'text' : 'password'}
+                placeholder="Paste API key"
+                required
+                autoComplete="off"
+                aria-describedby="connect-api-key-help"
+                value={apiKey}
+                onChange={(event) => setApiKey(event.target.value)}
+              />
+              <p id="connect-api-key-help">Never displayed again after entry.</p>
+            </div>
+
+            <label className="connect-remember">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(event) => setRemember(event.target.checked)}
+              />
+              <span>
+                <strong>Remember on this device</strong>
+                <small>Unchecked sessions end when this tab closes.</small>
+              </span>
+            </label>
+
+            {remember && (
+              <div className="connect-storage-warning">
+                <span className="status">
+                  <span className="dot" style={{ background: 'var(--pending)' }} />
+                  persistent browser storage
+                </span>
+                <p>This stores the API key in this browser. Use only on a trusted device.</p>
+              </div>
+            )}
+
+            {error && (
+              <div className="connect-error" role="alert">
+                <span className="status">
+                  <span className="dot" style={{ background: 'var(--failed)' }} />
+                  <strong>{error.category}</strong>
+                </span>
+                <p>{error.message}</p>
+                {error.requestId && <span className="mono">request {error.requestId}</span>}
+              </div>
+            )}
+
+            <button
+              className="btn primary connect-submit"
+              type="submit"
+              disabled={!canSubmit}
+              aria-busy={pending ? 'true' : undefined}
+            >
+              {pending ? 'Connecting…' : 'Connect to platform'}
+            </button>
+          </form>
+        </section>
+      </div>
+    </main>
   );
 }
