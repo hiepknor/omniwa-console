@@ -195,15 +195,30 @@ this subsection binds to it.
   The workspace serves direct chats only — groups are a management
   table, not a conversation surface.
 
-### Management table with selection (Groups)
+### Management page template (Groups; reuse for Instances, Webhooks, Queue)
 
-- Checkbox column: 36px, native checkboxes with `accent-color` emerald;
-  header checkbox = select all (indeterminate when partial).
-- **Bulk bar** above the table, visible only with ≥1 selection: Panel bg,
-  default border, 8px radius — "N selected" (13px/500) + one primary
-  action ("Add to Named List") + a muted "Clear selection" on the right.
-- Row click (outside the checkbox) opens the detail drawer; the checkbox
-  never opens the drawer.
+- **Layout**: content column (own vertical scroll, 24px side padding) +
+  **full-height detail panel docked to the right viewport edge** (400px,
+  Panel bg, left border, own scroll — same construction as the workspace
+  context panel). Never render detail views as floating cards beside the
+  table.
+- **Page header**: title + instance picker together on the left (context
+  before actions); header-right holds only the live indicator and at most
+  one panel-level action. Refresh actions live in the **table footer**
+  next to the sync-freshness text, not in the header.
+- **Filter ⇄ selection bar**: one row below the header. With no selection
+  it holds search + filter chips; with ≥1 row checked it swaps in place to
+  "N selected · [primary bulk action] · Clear selection" — no extra strip,
+  no layout jump.
+- **Checkbox column**: 36px, native checkboxes with `accent-color`
+  emerald; header checkbox = select all (indeterminate when partial).
+- **Row state semantics** (two independent states, may combine):
+  `checked` → accent-tint background only; `open` (detail panel showing
+  this row) → 2px accent inset left edge only. Never one style for both.
+- **Column discipline**: name and tag-like columns flex; numeric and
+  time columns right-align (`tnum`); everything else sizes to content.
+- Row click (outside the checkbox) opens the detail panel; the checkbox
+  never does.
 
 ### Modal (Named Lists)
 

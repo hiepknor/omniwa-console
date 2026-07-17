@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniWA Console — Groups (prototype)</title>
-<!-- Static prototype. Sample data only. Groups is a management table:
-     all groups with key metadata, row checkboxes feeding Named Lists
-     (see lists.html for the Named Lists modal). No conversation view. -->
+<!-- Static prototype. Sample data only. Groups is the template management page:
+     content column + full-height docked detail panel. The filter row swaps to
+     selection actions while rows are checked (shown here with 2 checked).
+     Named Lists open as a modal — see lists.html. No conversation view. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="console.css">
@@ -39,153 +40,149 @@
     </div>
   </aside>
 
-  <main>
-    <div class="page-head">
-      <h1>Groups</h1>
-      <div class="head-right">
-        <button class="instpick" style="width:auto"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
-        <span class="live"><span class="dot"></span>live</span>
-        <a class="btn" href="lists.html" style="text-decoration:none">Named Lists <span class="count num" style="font-family:var(--mono);font-size:11px;background:var(--recessed);border:1px solid var(--border-subtle);border-radius:4px;padding:0 5px">3</span></a>
-        <button class="btn">Refresh groups</button>
-      </div>
-    </div>
-
-    <div class="filterbar">
-      <input class="search" placeholder="Search groups…">
-      <span class="chip">role: admin <span class="x">✕</span></span>
-      <span class="chip add">+ filter</span>
-    </div>
-
-    <div class="bulkbar">
-      <span class="count num">2 selected</span>
-      <button class="btn primary sm">Add to Named List ▾</button>
-      <button class="clear">Clear selection</button>
-    </div>
-
-    <div class="layout">
-      <div class="listcol">
-        <div class="tablewrap">
-          <div class="scroll">
-          <table>
-            <thead>
-              <tr>
-                <th class="check"><input type="checkbox"></th>
-                <th>Group</th><th>ID</th><th>Members</th><th>Our role</th>
-                <th>Local state</th><th>In lists</th><th>Last activity</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="selected">
-                <td class="check"><input type="checkbox" checked></td>
-                <td>Khách sỉ miền Nam</td>
-                <td><span class="mono">grp_44he2n</span></td>
-                <td class="num">86</td>
-                <td><span class="pill">admin</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-                <td class="inlists"><span class="chip">Đại lý toàn quốc</span></td>
-                <td class="ts" title="2026-07-16T08:12:44Z">41m ago</td>
-              </tr>
-              <tr>
-                <td class="check"><input type="checkbox" checked></td>
-                <td>Đại lý Hà Nội</td>
-                <td><span class="mono">grp_90weu2</span></td>
-                <td class="num">42</td>
-                <td><span class="pill">member</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-                <td class="inlists"><span class="chip">Đại lý toàn quốc</span> <span class="chip">Miền Bắc</span></td>
-                <td class="ts" title="2026-07-16T06:55:01Z">2h ago</td>
-              </tr>
-              <tr>
-                <td class="check"><input type="checkbox"></td>
-                <td>Nội bộ vận hành</td>
-                <td><span class="mono">grp_iw02mm</span></td>
-                <td class="num">12</td>
-                <td><span class="pill">admin</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-                <td class="ts">—</td>
-                <td class="ts" title="2026-07-15T15:30:00Z">17h ago</td>
-              </tr>
-              <tr>
-                <td class="check"><input type="checkbox"></td>
-                <td>Khuyến mãi 2024 (cũ)</td>
-                <td><span class="mono">grp_pp81xd</span></td>
-                <td class="num">204</td>
-                <td><span class="pill">member</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>archived</span></td>
-                <td class="ts">—</td>
-                <td class="ts" title="2026-05-02T00:00:00Z">75d ago</td>
-              </tr>
-            </tbody>
-          </table>
-          </div>
-          <div class="table-foot">
-            <span class="num">4 of 37 groups · synced 41m ago</span>
-            <button class="btn">Load more</button>
-          </div>
+  <main class="workspace">
+    <section class="pagecol">
+      <div class="page-head">
+        <span style="display:flex;align-items:center;gap:12px">
+          <h1>Groups</h1>
+          <button class="instpick" style="width:auto"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
+        </span>
+        <div class="head-right">
+          <span class="live"><span class="dot"></span>live</span>
+          <a class="btn" href="lists.html" style="text-decoration:none">Named Lists <span class="count num" style="font-family:var(--mono);font-size:11px;background:var(--recessed);border:1px solid var(--border-subtle);border-radius:4px;padding:0 5px">3</span></a>
         </div>
       </div>
 
-      <aside class="drawer">
-        <header>
-          <div class="t"><b>Khách sỉ miền Nam</b><span class="mono">grp_44he2n</span></div>
-          <button class="close" aria-label="Close">✕</button>
-        </header>
+      <!-- With no selection this row shows: [search] [role: admin ✕] [+ filter] -->
+      <div class="filterbar">
+        <span class="count num">2 selected</span>
+        <button class="btn primary sm">Add to Named List ▾</button>
+        <button class="clear">Clear selection</button>
+      </div>
 
-        <section>
-          <div class="kv">
-            <dt>Members</dt><dd class="num">86</dd>
-            <dt>Our role</dt><dd>admin</dd>
-            <dt>Local state</dt><dd><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></dd>
-            <dt>In lists</dt><dd><span class="chip">Đại lý toàn quốc</span></dd>
-            <dt>Updated</dt><dd class="ts" title="2026-07-16T08:12:44Z">41m ago</dd>
-          </div>
-          <div class="actions" style="margin-top:12px">
-            <button class="btn">Send text…</button>
-            <button class="btn">Add to Named List ▾</button>
-          </div>
-          <p class="help" style="margin-top:8px">Send text opens the compose dialog
-            (<span class="mono">sendGroupTextMessage</span>) — accepted, delivery per member policy.
-            Recurring sends belong in <a href="campaigns.html" style="color:var(--accent)">Messages</a> campaigns.</p>
-        </section>
+      <div class="tablewrap">
+        <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="check"><input type="checkbox"></th>
+              <th>Group</th><th>ID</th><th class="r">Members</th><th>Our role</th>
+              <th>Local state</th><th>In lists</th><th class="r">Last activity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="checked open">
+              <td class="check"><input type="checkbox" checked></td>
+              <td>Khách sỉ miền Nam</td>
+              <td><span class="mono">grp_44he2n</span></td>
+              <td class="r num">86</td>
+              <td><span class="pill">admin</span></td>
+              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+              <td class="inlists"><span class="chip">Đại lý toàn quốc</span></td>
+              <td class="r ts" title="2026-07-16T08:12:44Z">41m ago</td>
+            </tr>
+            <tr class="checked">
+              <td class="check"><input type="checkbox" checked></td>
+              <td>Đại lý Hà Nội</td>
+              <td><span class="mono">grp_90weu2</span></td>
+              <td class="r num">42</td>
+              <td><span class="pill">member</span></td>
+              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+              <td class="inlists"><span class="chip">Đại lý toàn quốc</span> <span class="chip">Miền Bắc</span></td>
+              <td class="r ts" title="2026-07-16T06:55:01Z">2h ago</td>
+            </tr>
+            <tr>
+              <td class="check"><input type="checkbox"></td>
+              <td>Nội bộ vận hành</td>
+              <td><span class="mono">grp_iw02mm</span></td>
+              <td class="r num">12</td>
+              <td><span class="pill">admin</span></td>
+              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+              <td class="ts">—</td>
+              <td class="r ts" title="2026-07-15T15:30:00Z">17h ago</td>
+            </tr>
+            <tr>
+              <td class="check"><input type="checkbox"></td>
+              <td>Khuyến mãi 2024 (cũ)</td>
+              <td><span class="mono">grp_pp81xd</span></td>
+              <td class="r num">204</td>
+              <td><span class="pill">member</span></td>
+              <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>archived</span></td>
+              <td class="ts">—</td>
+              <td class="r ts" title="2026-05-02T00:00:00Z">75d ago</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="table-foot">
+          <span class="num">4 of 37 groups · synced 41m ago</span>
+          <span style="display:flex;gap:8px">
+            <button class="btn">Refresh groups</button>
+            <button class="btn">Load more</button>
+          </span>
+        </div>
+      </div>
+    </section>
 
-        <section>
-          <h3>Invite link</h3>
-          <div class="invite">
-            <div class="codewell">https://chat.whatsapp.com/Fk20…9dQz</div>
-            <button class="btn sm">Copy</button>
-            <button class="btn sm">Refresh</button>
-          </div>
-          <p class="help" style="margin-top:6px">Refreshing invalidates the previous link.</p>
-        </section>
+    <aside class="context wide">
+      <section>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+          <div><b style="font-size:14px">Khách sỉ miền Nam</b><br><span class="mono">grp_44he2n</span></div>
+          <button class="btn sm" aria-label="Close" style="padding:3px 8px">✕</button>
+        </div>
+        <div class="kv">
+          <dt>Members</dt><dd class="num">86</dd>
+          <dt>Our role</dt><dd>admin</dd>
+          <dt>Local state</dt><dd><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></dd>
+          <dt>In lists</dt><dd><span class="chip">Đại lý toàn quốc</span></dd>
+          <dt>Updated</dt><dd class="ts" title="2026-07-16T08:12:44Z">41m ago</dd>
+        </div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn">Send text…</button>
+          <button class="btn">Add to Named List ▾</button>
+        </div>
+        <p class="help" style="margin-top:8px">Send text opens the compose dialog
+          (<span class="mono">sendGroupTextMessage</span>) — accepted, delivery per member policy.
+          Recurring sends belong in <a href="campaigns.html" style="color:var(--accent)">Messages</a> campaigns.</p>
+      </section>
 
-        <section>
-          <h3>Members <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 3 of 86</span></h3>
-          <table class="minitable">
-            <tbody>
-              <tr>
-                <td>Nguyễn Văn Bình</td>
-                <td><span class="pill">member</span></td>
-                <td style="text-align:right"><button class="btn sm">Promote</button> <button class="btn sm danger">Remove</button></td>
-              </tr>
-              <tr>
-                <td>Đỗ Thị Lan</td>
-                <td><span class="pill">member</span></td>
-                <td style="text-align:right"><button class="btn sm">Promote</button> <button class="btn sm danger">Remove</button></td>
-              </tr>
-              <tr>
-                <td>Trần Minh Hòa</td>
-                <td><span class="pill">admin</span></td>
-                <td style="text-align:right"><button class="btn sm">Demote</button> <button class="btn sm danger">Remove</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="actions" style="margin-top:10px">
-            <button class="btn sm">Add member…</button>
-            <button class="btn sm">All members</button>
-          </div>
-        </section>
-      </aside>
-    </div>
+      <section>
+        <h3>Invite link</h3>
+        <div class="invite">
+          <div class="codewell">https://chat.whatsapp.com/Fk20…9dQz</div>
+          <button class="btn sm">Copy</button>
+          <button class="btn sm">Refresh</button>
+        </div>
+        <p class="help" style="margin-top:6px">Refreshing invalidates the previous link.</p>
+      </section>
+
+      <section>
+        <h3>Members <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 3 of 86</span></h3>
+        <table class="minitable">
+          <tbody>
+            <tr>
+              <td>Nguyễn Văn Bình</td>
+              <td><span class="pill">member</span></td>
+              <td style="text-align:right"><button class="btn sm">Promote</button> <button class="btn sm danger">Remove</button></td>
+            </tr>
+            <tr>
+              <td>Đỗ Thị Lan</td>
+              <td><span class="pill">member</span></td>
+              <td style="text-align:right"><button class="btn sm">Promote</button> <button class="btn sm danger">Remove</button></td>
+            </tr>
+            <tr>
+              <td>Trần Minh Hòa</td>
+              <td><span class="pill">admin</span></td>
+              <td style="text-align:right"><button class="btn sm">Demote</button> <button class="btn sm danger">Remove</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn sm">Add member…</button>
+          <button class="btn sm">All members</button>
+        </div>
+      </section>
+    </aside>
   </main>
 </div>
 </body>
