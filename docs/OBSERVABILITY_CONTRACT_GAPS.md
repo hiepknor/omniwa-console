@@ -43,16 +43,19 @@ must parse prefixes such as `instance:` and `worker-job:` to build deep links.
 
 ## 4. Empty read projections surface as 503
 
-**Evidence:** A missing fresh-system projection returns
-`read_projection_not_found` from
-`../omniwa/packages/infrastructure-persistence/src/read-projection-store.ts`,
-is classified as infrastructure, and reaches the client as HTTP 503. This was
-observed on `/v1/dashboard`, `/v1/metrics/*`, and `/v1/action-required`; only
-`/v1/metrics/queue` had a projection record. A console cannot distinguish
-“platform broken” from “nothing yet.”
+**Evidence:** The platform distinguishes an unavailable read from a real
+failure with a data envelope carrying
+`ResourceReadData.readStatus: "unavailable"` and a `reasonCode` under HTTP 503.
+The observed reason code was
+`application_handler_not_implemented` on `/v1/dashboard`,
+`/v1/metrics/messages`, `/v1/metrics/webhooks`, `/v1/metrics/media`, and
+`/v1/action-required`. The console now parses this shape and renders it as an
+empty state rather than an outage.
 
-**Proposed contract change:** Treat an absent read projection as an empty 200
-collection or resource payload.
+**Proposed contract change:** Consider returning HTTP 200 for unavailable
+reads, because HTTP 503 causes generic clients and uptime monitors to report
+an outage. Explicitly document the `readStatus` and `reasonCode` semantics in
+the OpenAPI schema descriptions.
 
 ## 5. Readiness fails closed permanently in local development
 
