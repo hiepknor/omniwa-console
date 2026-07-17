@@ -4,9 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniWA Console — Chats (prototype)</title>
-<!-- Static prototype. Sample data only. Binds to design/DESIGN.md.
-     Contacts and Labels reuse this read-only browser pattern (same tabs row,
-     search + cursor-paginated table, no drawer). -->
+<!-- Static prototype. Sample data only. Binds to design/DESIGN.md §4 Workspace.
+     Direct chats with contacts only — groups live in groups.html. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="console.css">
@@ -16,8 +15,13 @@
   <aside class="sidebar">
     <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
     <nav>
+      <a data-nav="chats" class="active" href="chats.html">Chats</a>
+      <a data-nav="groups" href="groups.html">Groups</a>
+      <a data-nav="directory" href="directory.html">Directory</a>
+      <a data-nav="bulk" href="campaigns.html">Bulk messages</a>
+      <span class="navlabel">Operations</span>
       <a href="overview.html">Overview</a>
-      <a class="active" href="instances.html">Instances</a>
+      <a href="instances.html">Instances</a>
       <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
       <a href="webhooks.html">Webhooks</a>
       <a href="events.html">Events</a>
@@ -29,62 +33,130 @@
     </div>
   </aside>
 
-  <main>
-    <div class="page-head">
-      <span class="crumb"><a href="instances.html">Instances</a> / <b>sales-primary</b> <span class="mono">inst_2bq81c</span></span>
-      <div class="head-right">
+  <main class="workspace">
+    <aside class="convos">
+      <div class="head">
+        <button class="instpick"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
+        <input class="search" placeholder="Search direct chats…">
+        <div class="filters">
+          <span class="chip">unread <span class="x">✕</span></span>
+          <span class="chip add">+ label</span>
+        </div>
+      </div>
+      <div class="list">
+        <a class="convo selected" href="#">
+          <span class="avatar">TH</span>
+          <span class="meta">
+            <span class="name">Trần Minh Hòa</span>
+            <span class="sub"><span class="chip" style="padding:0 7px">vip</span><span class="mono" style="font-size:11px">chat_x91k2m</span></span>
+          </span>
+          <span class="right"><span class="when">2m</span></span>
+        </a>
+        <a class="convo" href="#">
+          <span class="avatar">LC</span>
+          <span class="meta">
+            <span class="name">Lê Thu Cúc</span>
+            <span class="sub"><span class="chip" style="padding:0 7px">lead</span><span class="chip" style="padding:0 7px">q3</span></span>
+          </span>
+          <span class="right"><span class="when">13m</span></span>
+        </a>
+        <a class="convo" href="#">
+          <span class="avatar">PD</span>
+          <span class="meta">
+            <span class="name">Phạm Quang Duy</span>
+            <span class="sub"><span class="mono" style="font-size:11px">chat_h55dn0</span></span>
+          </span>
+          <span class="right"><span class="when">55m</span></span>
+        </a>
+      </div>
+      <div class="table-foot" style="border-top:1px solid var(--border-subtle)">
+        <span class="num">3 of 1,120 direct chats</span>
+        <button class="btn sm">More</button>
+      </div>
+    </aside>
+
+    <section class="thread">
+      <div class="head">
+        <span class="avatar" style="width:28px;height:28px;border-radius:50%;background:var(--elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text-3)">TH</span>
+        <div class="t"><b>Trần Minh Hòa</b><span class="mono">chat_x91k2m</span></div>
+        <span class="chip" style="padding:0 8px">vip</span>
+        <div class="spacer"></div>
         <span class="live"><span class="dot"></span>live</span>
+        <button class="btn sm">Contact</button>
       </div>
-    </div>
 
-    <div class="tabs">
-      <a class="active" href="#">Chats</a><a href="#">Contacts</a><a href="#">Labels</a>
-      <a href="groups.html">Groups</a><a href="messages.html">Messages</a>
-    </div>
+      <div class="timeline-pane">
+        <div class="day-sep">Today</div>
 
-    <div class="filterbar">
-      <input class="search" placeholder="Search chats…">
-      <span class="chip">type: direct <span class="x">✕</span></span>
-      <span class="chip add">+ filter</span>
-    </div>
+        <div class="bubble in">
+          Cho mình hỏi đơn hàng #1042 đã giao chưa vậy shop?
+          <span class="foot">08:38</span>
+        </div>
 
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>Chat</th><th>ID</th><th>Type</th><th>Labels</th><th>Unread</th><th>Last message</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Trần Minh Hòa</td><td><span class="mono">chat_x91k2m</span></td><td>direct</td>
-            <td><span class="chip">vip</span></td>
-            <td class="num">2</td><td class="ts" title="2026-07-16T08:51:14Z">2m ago</td>
-          </tr>
-          <tr>
-            <td>Lê Thu Cúc</td><td><span class="mono">chat_p03wa8</span></td><td>direct</td>
-            <td><span class="chip">lead</span> <span class="chip">q3</span></td>
-            <td class="num">0</td><td class="ts" title="2026-07-16T08:39:47Z">13m ago</td>
-          </tr>
-          <tr>
-            <td>Phạm Quang Duy</td><td><span class="mono">chat_h55dn0</span></td><td>direct</td>
-            <td><span class="ts">—</span></td>
-            <td class="num">0</td><td class="ts" title="2026-07-16T07:58:00Z">55m ago</td>
-          </tr>
-          <tr>
-            <td>Khách sỉ miền Nam</td><td><span class="mono">chat_44he2n</span></td><td>group</td>
-            <td><span class="chip">vip</span></td>
-            <td class="num">17</td><td class="ts" title="2026-07-16T08:12:44Z">41m ago</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="table-foot">
-        <span class="num">4 of 1,206 chats</span>
-        <button class="btn">Load more</button>
+        <div class="bubble out">
+          Chào anh, đơn hàng #1042 đã sẵn sàng giao.
+          <span class="foot"><span class="dot" style="background:var(--ok)"></span>delivered · 08:51</span>
+        </div>
+
+        <div class="bubble out failed selected">
+          <div class="media">image · med_40pl2s</div>
+          Chương trình khuyến mãi tháng 7 — xem ảnh đính kèm.
+          <span class="foot"><span class="dot" style="background:var(--failed)"></span>failed · retryable · 08:46</span>
+          <div class="inline-actions">
+            <button class="btn sm">Retry</button>
+            <button class="btn sm danger">Cancel</button>
+          </div>
+        </div>
+
+        <div class="sysline">session refreshed · 08:50</div>
+
+        <div class="bubble out">
+          Bên em gửi lại ảnh qua email nhé anh.
+          <span class="foot"><span class="dot" style="background:var(--pending)"></span>queued · 08:53</span>
+        </div>
       </div>
-    </div>
 
-    <p class="help" style="margin-top:12px">
-      Read-only browser. <b>Contacts</b> (contact id, verified name, labels) and
-      <b>Labels</b> (label id, name, color chip, chat count) reuse this exact
-      pattern per <span class="mono">docs/PANELS.md</span>.
-    </p>
+      <div class="composer">
+        <button class="btn" title="Attach media">＋</button>
+        <textarea class="input" placeholder="Message Trần Minh Hòa…"></textarea>
+        <button class="btn primary">Send</button>
+      </div>
+      <div class="composer-note">Sends are <b>accepted</b> by the platform — delivery status appears on the bubble.</div>
+    </section>
+
+    <aside class="context">
+      <section>
+        <h3>Contact</h3>
+        <div class="kv">
+          <dt>Name</dt><dd>Trần Minh Hòa</dd>
+          <dt>Contact</dt><dd><span class="mono">ctc_71bd0q</span></dd>
+          <dt>Chat</dt><dd><span class="mono">chat_x91k2m</span></dd>
+          <dt>Labels</dt><dd><span class="chip" style="padding:0 8px">vip</span></dd>
+        </div>
+        <p class="help" style="margin-top:8px">Labels are synced from WhatsApp — read-only here.</p>
+      </section>
+
+      <section>
+        <h3>Selected message <span style="font-weight:400;font-size:12px;color:var(--text-4)">· msg_74nn2b</span></h3>
+        <div class="kv" style="margin-bottom:10px">
+          <dt>Status</dt><dd><span class="status"><span class="dot" style="background:var(--failed)"></span>failed · retryable</span></dd>
+          <dt>Type</dt><dd>image · <span class="mono">med_40pl2s</span></dd>
+          <dt>Request</dt><dd><span class="mono">req_01j2m8jw</span></dd>
+        </div>
+        <ul class="timeline">
+          <li><span class="dot" style="background:var(--ok)"></span><span class="what">accepted</span><span class="ts">08:44:02</span></li>
+          <li><span class="dot" style="background:var(--ok)"></span><span class="what">queued</span><span class="ts">08:44:02</span></li>
+          <li><span class="dot" style="background:var(--degraded)"></span><span class="what">dispatch retried
+            <span class="detail">provider timeout · attempt 2 of 3</span></span><span class="ts">08:45:10</span></li>
+          <li><span class="dot" style="background:var(--failed)"></span><span class="what">dispatch failed
+            <span class="detail">provider_error · retryable</span></span><span class="ts">08:46:31</span></li>
+        </ul>
+        <div class="actions" style="margin-top:10px">
+          <button class="btn">Retry</button>
+          <button class="btn danger">Cancel</button>
+        </div>
+      </section>
+    </aside>
   </main>
 </div>
 </body>

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Bulk messages (prototype)</title>
+<!-- Static prototype. Sample data only. PROPOSED contract — no v1 operations
+     exist yet; see docs/CAMPAIGNS_PROPOSAL.md. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a data-nav="chats" href="chats.html">Chats</a>
+      <a data-nav="groups" href="groups.html">Groups</a>
+      <a data-nav="directory" href="directory.html">Directory</a>
+      <a data-nav="bulk" class="active" href="campaigns.html">Bulk messages</a>
+      <span class="navlabel">Operations</span>
+      <a href="overview.html">Overview</a>
+      <a href="instances.html">Instances</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="webhooks.html">Webhooks</a>
+      <a href="events.html">Events</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <h1>Bulk messages <span class="pill" style="margin-left:8px"><span class="dot" style="background:var(--info)"></span>proposed contract</span></h1>
+      <div class="head-right">
+        <span class="live"><span class="dot"></span>live</span>
+        <a class="btn primary" href="campaign-new.html" style="text-decoration:none">New campaign</a>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="listcol">
+        <div class="tablewrap">
+          <div class="scroll">
+          <table>
+            <thead><tr><th>Campaign</th><th>List</th><th>Status</th><th>Progress</th><th>Updated</th></tr></thead>
+            <tbody>
+              <tr class="selected">
+                <td>Thông báo giá sỉ T7</td>
+                <td>Khách VIP tháng 7 <span class="mono">· 128</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--pending);animation:pulse 2s infinite"></span>running</span></td>
+                <td>
+                  <div class="progress">
+                    <span class="seg ok" style="width:62%"></span>
+                    <span class="seg pend" style="width:23%"></span>
+                    <span class="seg bad" style="width:3%"></span>
+                  </div>
+                  <div class="counts num"><span class="ok">79 delivered</span> · <span class="pend">30 queued</span> · <span class="bad">4 failed</span></div>
+                </td>
+                <td class="ts" title="2026-07-16T08:53:00Z">just now</td>
+              </tr>
+              <tr>
+                <td>Lịch nghỉ lễ 2/9</td>
+                <td>Đại lý miền Bắc <span class="mono">· 42</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--info)"></span>scheduled</span></td>
+                <td><span class="ts">starts 2026-08-30 09:00</span></td>
+                <td class="ts" title="2026-07-15T14:00:00Z">19h ago</td>
+              </tr>
+              <tr>
+                <td>Khảo sát chất lượng Q2</td>
+                <td>Khuyến mãi Q2 (cũ) <span class="mono">· 310</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>completed</span></td>
+                <td>
+                  <div class="progress">
+                    <span class="seg ok" style="width:94%"></span>
+                    <span class="seg bad" style="width:6%"></span>
+                  </div>
+                  <div class="counts num"><span class="ok">292 delivered</span> · <span class="bad">18 failed</span></div>
+                </td>
+                <td class="ts" title="2026-06-28T00:00:00Z">18d ago</td>
+              </tr>
+              <tr>
+                <td>Test pacing thấp</td>
+                <td>Đại lý miền Bắc <span class="mono">· 42</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--failed)"></span>aborted</span></td>
+                <td>
+                  <div class="progress">
+                    <span class="seg ok" style="width:20%"></span>
+                    <span class="seg bad" style="width:12%"></span>
+                  </div>
+                  <div class="counts num"><span class="ok">8 delivered</span> · <span class="bad">5 failed</span> · 29 not sent</div>
+                </td>
+                <td class="ts" title="2026-07-01T00:00:00Z">15d ago</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <div class="table-foot"><span class="num">4 of 4 campaigns</span></div>
+        </div>
+      </div>
+
+      <aside class="drawer">
+        <header>
+          <div class="t"><b>Thông báo giá sỉ T7</b><span class="mono">cmp_11ee9k</span></div>
+          <button class="close" aria-label="Close">✕</button>
+        </header>
+
+        <section>
+          <div class="kv">
+            <dt>Status</dt><dd><span class="status"><span class="dot" style="background:var(--pending);animation:pulse 2s infinite"></span>running</span></dd>
+            <dt>List</dt><dd>Khách VIP tháng 7 <span class="mono">sl_88mm1a</span></dd>
+            <dt>Instance</dt><dd><span class="mono">inst_2bq81c</span> sales-primary</dd>
+            <dt>Pacing</dt><dd class="num">12 / min (cap 20)</dd>
+            <dt>Started</dt><dd class="ts" title="2026-07-16T08:45:00Z">8m ago · est. 3m left</dd>
+          </div>
+          <div style="margin-top:12px">
+            <div class="progress">
+              <span class="seg ok" style="width:62%"></span>
+              <span class="seg pend" style="width:23%"></span>
+              <span class="seg bad" style="width:3%"></span>
+            </div>
+            <div class="counts num"><span class="ok">79 delivered</span> · <span class="pend">30 queued</span> · <span class="bad">4 failed</span> · 15 pending</div>
+          </div>
+          <p class="help" style="margin-top:8px">Auto-pauses if failures exceed the settings threshold.
+            Counts are message lifecycle states — <b>accepted is never shown as delivered</b>.</p>
+        </section>
+
+        <section>
+          <h3>Message</h3>
+          <div class="bubble out" style="max-width:100%">
+            Chào anh/chị, bảng giá sỉ tháng 7 đã cập nhật. Đơn trên 10 thùng
+            giảm thêm 2%. Phản hồi tin này nếu cần báo giá chi tiết.
+            <span class="foot">template · text</span>
+          </div>
+        </section>
+
+        <section>
+          <h3>Recipients <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 3 of 128</span></h3>
+          <table class="minitable">
+            <tbody>
+              <tr>
+                <td>Trần Minh Hòa</td>
+                <td><span class="status sm"><span class="dot" style="background:var(--ok)"></span>delivered</span></td>
+                <td style="text-align:right"><a class="btn sm" href="chats.html" style="text-decoration:none">Open chat</a></td>
+              </tr>
+              <tr>
+                <td>Lê Thu Cúc</td>
+                <td><span class="status sm"><span class="dot" style="background:var(--pending)"></span>queued</span></td>
+                <td style="text-align:right"><a class="btn sm" href="chats.html" style="text-decoration:none">Open chat</a></td>
+              </tr>
+              <tr>
+                <td>Phạm Quang Duy</td>
+                <td><span class="status sm"><span class="dot" style="background:var(--failed)"></span>failed</span></td>
+                <td style="text-align:right"><a class="btn sm" href="chats.html" style="text-decoration:none">Open chat</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h3>Controls</h3>
+          <div class="actions">
+            <button class="btn">Pause</button>
+            <button class="btn danger">Abort…</button>
+          </div>
+          <p class="help" style="margin-top:8px">Abort requires typed confirmation and cannot be resumed.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>

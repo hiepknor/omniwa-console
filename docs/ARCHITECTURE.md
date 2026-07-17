@@ -70,28 +70,30 @@ public OpenAPI surface only. The generated client plays the role the Rust
 
 ## Routing
 
-One route per panel, instance-scoped routes nested under the instance:
+The messaging workflow is primary; operations panels are secondary:
 
 ```
 /connect
+/chats/:instanceId?/:chatId?         # primary: direct conversations (3-pane)
+/groups/:instanceId?/:groupId?       # primary: group conversations + management
+/groups/lists                        # send lists (proposed contract)
+/directory/:instanceId?              # contacts & labels directory
+/bulk-messages                       # campaigns (proposed contract)
+/bulk-messages/new                   # campaign wizard (proposed)
 /overview
 /instances
 /instances/:instanceId
-/instances/:instanceId/chats
-/instances/:instanceId/contacts
-/instances/:instanceId/labels
-/instances/:instanceId/groups
-/instances/:instanceId/groups/:groupId
-/instances/:instanceId/messages
-/messages/:messageId
 /queue
 /webhooks
 /webhooks/:webhookId
 /events
 /settings
+/settings/api-keys
 ```
 
-Unauthenticated visits to any route redirect to `/connect`.
+The workspace remembers the last instance + chat in the URL so every
+conversation is a shareable deep link. Unauthenticated visits to any route
+redirect to `/connect`.
 
 ## Error and safety posture
 

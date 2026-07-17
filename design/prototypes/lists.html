@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Groups · Send lists (prototype)</title>
+<!-- Static prototype. Sample data only. PROPOSED contract — no v1 operations
+     exist yet; see docs/CAMPAIGNS_PROPOSAL.md. Members come from existing
+     contacts/chats only: there is no raw-number import surface by design. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a data-nav="chats" href="chats.html">Chats</a>
+      <a data-nav="groups" class="active" href="groups.html">Groups</a>
+      <a data-nav="directory" href="directory.html">Directory</a>
+      <a data-nav="bulk" href="campaigns.html">Bulk messages</a>
+      <span class="navlabel">Operations</span>
+      <a href="overview.html">Overview</a>
+      <a href="instances.html">Instances</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="webhooks.html">Webhooks</a>
+      <a href="events.html">Events</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <span class="crumb"><a href="groups.html">Groups</a> / <b>Send lists</b></span>
+      <div class="head-right">
+        <span class="pill"><span class="dot" style="background:var(--info)"></span>proposed contract</span>
+        <button class="btn primary">New list</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="listcol">
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>List</th><th>ID</th><th>Instance</th><th>Members</th><th>State</th><th>Updated</th></tr></thead>
+            <tbody>
+              <tr class="selected">
+                <td>Khách VIP tháng 7</td><td><span class="mono">sl_88mm1a</span></td>
+                <td><span class="mono">inst_2bq81c</span></td>
+                <td class="num">128</td>
+                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+                <td class="ts" title="2026-07-15T10:00:00Z">1d ago</td>
+              </tr>
+              <tr>
+                <td>Đại lý miền Bắc</td><td><span class="mono">sl_41xx7q</span></td>
+                <td><span class="mono">inst_2bq81c</span></td>
+                <td class="num">42</td>
+                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+                <td class="ts" title="2026-07-10T09:12:00Z">6d ago</td>
+              </tr>
+              <tr>
+                <td>Khuyến mãi Q2 (cũ)</td><td><span class="mono">sl_02qd9e</span></td>
+                <td><span class="mono">inst_2bq81c</span></td>
+                <td class="num">310</td>
+                <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span></td>
+                <td class="ts" title="2026-06-30T00:00:00Z">16d ago</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-foot"><span class="num">3 of 3 lists</span></div>
+        </div>
+      </div>
+
+      <aside class="drawer">
+        <header>
+          <div class="t"><b>Khách VIP tháng 7</b><span class="mono">sl_88mm1a</span></div>
+          <button class="close" aria-label="Close">✕</button>
+        </header>
+
+        <section>
+          <div class="kv">
+            <dt>Instance</dt><dd><span class="mono">inst_2bq81c</span> sales-primary</dd>
+            <dt>Members</dt><dd class="num">128 contacts</dd>
+            <dt>Used by</dt><dd class="num">2 campaigns</dd>
+            <dt>State</dt><dd><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></dd>
+          </div>
+        </section>
+
+        <section>
+          <h3>Add members</h3>
+          <input class="search" style="width:100%" placeholder="Search directory (contacts, labels)…">
+          <div class="actions" style="margin-top:8px">
+            <span class="chip">label: vip → adds 96</span>
+            <span class="chip add">+ from directory</span>
+          </div>
+          <p class="help" style="margin-top:8px">Members are existing contacts of this instance only —
+            there is no number import, by design (see <span class="mono">docs/CAMPAIGNS_PROPOSAL.md</span>).</p>
+        </section>
+
+        <section>
+          <h3>Members <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 3 of 128</span></h3>
+          <table class="minitable">
+            <tbody>
+              <tr>
+                <td>Trần Minh Hòa</td><td><span class="mono">ctc_71bd0q</span></td>
+                <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
+              </tr>
+              <tr>
+                <td>Nguyễn Văn Bình</td><td><span class="mono">ctc_09kkm2</span></td>
+                <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
+              </tr>
+              <tr>
+                <td>Lê Thu Cúc</td><td><span class="mono">ctc_20mmx4</span></td>
+                <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h3>Lifecycle</h3>
+          <div class="actions">
+            <button class="btn">Rename…</button>
+            <button class="btn danger">Retire…</button>
+          </div>
+          <p class="help" style="margin-top:8px">Lists referenced by campaigns are retired, never deleted.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -159,9 +159,66 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 - Header-right: 8px dot + 12px label. `live` emerald pulsing dot, `reconnecting` amber, `polling` sky, `offline` red. Clicking opens connection detail popover.
 
+### Workspace (primary surface)
+
+The messaging workspace is the console's center of gravity; everything in
+this subsection binds to it.
+
+- **Three-pane layout**: conversation list (300px, Panel bg) · conversation
+  timeline (fluid, Canvas bg) · context panel (320px, Panel bg, collapsible).
+  The workspace fills the viewport; only the timeline scrolls vertically.
+- **Conversation list item**: 56px, two lines — name (13px/500) + last
+  activity (12px faint) — with unread count badge (mono, accent-tint bg) and
+  label chips. Selected item = accent-bg tint + 2px accent left edge. List
+  header holds the instance selector (dot + name + chevron) and search.
+- **Message bubbles**: max-width 68%, radius 10px, 13px text, timestamp +
+  status footer (11px). Inbound = Elevated bg, left-aligned. Outbound =
+  accent-tint bg with subtle border, right-aligned — the one sanctioned use
+  of accent as surface. Failed outbound adds a 3px red left edge and inline
+  Retry/Cancel ghost buttons. Group bubbles show the sender's verified name
+  (12px/500, secondary) above the text. Media bubbles show a Recessed
+  placeholder block + caption. Clicking a bubble opens its delivery timeline
+  in the context panel.
+- **Bubble status vocabulary** (footer, dot + label): `accepted` /
+  `queued` amber · `delivered` emerald · `failed` red · `canceled` gray.
+  Never a bare double-check mark — words, not glyphs.
+- **System lines**: centered 12px muted text for non-message facts
+  ("instance disconnected · 12:40"), never bubbles.
+- **Day separators**: centered 11px uppercase muted label on a subtle rule.
+- **Composer**: Recessed bg bar with textarea (auto-grow to 5 lines),
+  attach ghost icon-button, Send primary. When the instance is not
+  connected the composer is replaced by an amber warning bar with a
+  "Reconnect" ghost action. Microcopy under composer: sends are
+  *accepted*, delivery shows on the bubble.
+- **Context panel** (right): contact card (verified name, mono id,
+  read-only label chips) for direct chats; group card (member count, role,
+  invite link, member mini-list with promote/demote/remove) for groups;
+  when a bubble is selected it shows that message's delivery timeline with
+  `requestId` and retry affordance.
+
+### Campaign components (proposed contract — see docs/CAMPAIGNS_PROPOSAL.md)
+
+- **Progress bar**: 6px track (Recessed), segments colored by outcome —
+  delivered emerald, accepted/queued amber, failed red — with a mono
+  `delivered / accepted / failed` count line under it. Never a single
+  undifferentiated bar: outcomes stay visible.
+- **Campaign status vocabulary**: `draft` gray · `scheduled` sky ·
+  `running` amber (pulsing dot) · `paused` orange · `completed` emerald ·
+  `aborted` red.
+- **Wizard steps**: numbered dot + label row (Audience → Message → Review),
+  current step accent, completed steps emerald, future muted. One primary
+  action per step, always bottom-right; Back is ghost.
+- **Send lists** are built only from existing contacts/chats of an
+  instance — the UI offers no raw-number import surface, by design.
+
 ## 5. Layout Principles
 
-- **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding. Sidebar: logo block, nav items (13px/500, 8px radius, active = accent text + accent-bg tint), footer with masked key fingerprint + disconnect.
+- **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed). Sidebar: logo block, nav items (13px/500, 8px radius, active = accent text + accent-bg tint), footer with masked key fingerprint + disconnect.
+- **Nav hierarchy**: the messaging workflow is primary — **Chats** (direct
+  conversations only), **Groups** (all WhatsApp groups + the Send lists
+  tab), **Directory**, **Bulk messages** (campaigns) at the top; an 11px
+  uppercase "Operations" section label separates the secondary panels
+  (Overview, Instances, Queue & Jobs, Webhooks, Events, Settings).
 - **Content header** per page: title left; live indicator, refresh, and primary action right. 48px tall, bottom border.
 - **Grid**: 8px base unit. Vertical rhythm 16px between related blocks, 24px between sections.
 - **Density**: tables full-width; Overview metric cards in `repeat(auto-fit, minmax(200px, 1fr))` grid; never center-constrain content below 1440px.

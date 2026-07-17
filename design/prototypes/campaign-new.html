@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Bulk messages · New campaign (prototype)</title>
+<!-- Static prototype. Sample data only. PROPOSED contract — see
+     docs/CAMPAIGNS_PROPOSAL.md. Shown at step 3 (Review); steps 1–2 completed. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+<style>
+  .wizardwrap{max-width:720px}
+  .panelcard{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px}
+  .panelcard h3{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  .panelcard h3 .btn{font-weight:500}
+  .wfooter{display:flex;justify-content:space-between;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a data-nav="chats" href="chats.html">Chats</a>
+      <a data-nav="groups" href="groups.html">Groups</a>
+      <a data-nav="directory" href="directory.html">Directory</a>
+      <a data-nav="bulk" class="active" href="campaigns.html">Bulk messages</a>
+      <span class="navlabel">Operations</span>
+      <a href="overview.html">Overview</a>
+      <a href="instances.html">Instances</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="webhooks.html">Webhooks</a>
+      <a href="events.html">Events</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <span class="crumb"><a href="campaigns.html">Bulk messages</a> / <b>New campaign</b></span>
+      <div class="head-right"></div>
+    </div>
+
+    <div class="wizardwrap">
+      <div class="wizard">
+        <span class="wstep done"><span class="n">✓</span>Audience</span>
+        <span class="sep"></span>
+        <span class="wstep done"><span class="n">✓</span>Message</span>
+        <span class="sep"></span>
+        <span class="wstep current"><span class="n">3</span>Review</span>
+      </div>
+
+      <div class="panelcard">
+        <h3>Audience <button class="btn sm">Edit</button></h3>
+        <div class="kv">
+          <dt>Send list</dt><dd>Khách VIP tháng 7 <span class="mono">sl_88mm1a</span></dd>
+          <dt>Instance</dt><dd><span class="mono">inst_2bq81c</span> sales-primary <span class="status sm" style="margin-left:6px"><span class="dot" style="background:var(--ok)"></span>connected</span></dd>
+          <dt>Recipients</dt><dd class="num">128 contacts (resolved now; re-resolved at start)</dd>
+        </div>
+      </div>
+
+      <div class="panelcard">
+        <h3>Message <button class="btn sm">Edit</button></h3>
+        <div class="bubble out" style="max-width:100%">
+          Chào anh/chị, bảng giá sỉ tháng 7 đã cập nhật. Đơn trên 10 thùng
+          giảm thêm 2%. Phản hồi tin này nếu cần báo giá chi tiết.
+          <span class="foot">text · no media</span>
+        </div>
+      </div>
+
+      <div class="panelcard">
+        <h3>Schedule &amp; pacing</h3>
+        <div class="kv" style="margin-bottom:12px">
+          <dt>Start</dt><dd>Immediately on create</dd>
+          <dt>Pacing</dt>
+          <dd>
+            <input class="input num" style="width:80px;display:inline-block" value="12"> msgs / min
+            <span class="help" style="display:inline;margin-left:8px">platform cap: 20 / min</span>
+          </dd>
+          <dt>Est. duration</dt><dd class="num">~11 minutes</dd>
+          <dt>Auto-pause</dt><dd class="num">on 10 failures within 5 min (from settings)</dd>
+        </div>
+        <p class="help">Execution runs platform-side on the queue runtime — closing this browser
+          does not affect the campaign. Each recipient gets a normal message with the standard
+          lifecycle: <b>accepted → queued → delivered / failed</b>. The campaign never reports
+          "sent" as an outcome.</p>
+      </div>
+
+      <div class="wfooter">
+        <button class="btn">← Back</button>
+        <div class="actions">
+          <button class="btn">Save as draft</button>
+          <button class="btn primary">Create &amp; start</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

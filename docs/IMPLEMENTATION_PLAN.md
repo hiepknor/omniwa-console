@@ -33,13 +33,14 @@ Exit: operator can connect to a local platform and read real state.
 Exit: full instance lifecycle from the browser, including first-time QR
 pairing.
 
-## M3 — Messages
+## M3 — Workspace core (primary surface)
 
-- Message history with cursor pagination and filters, message detail with
-  delivery timeline, compose text + media (via `registerMedia`), retry /
-  cancel, async-accepted status rendering.
+- Three-pane workspace: conversation list (chats with search/label filters),
+  message timeline with bubble statuses, composer (text + media via
+  `registerMedia`), retry/cancel, delivery timeline in the context panel.
+- Async-accepted rendering on bubbles; disconnected-instance composer state.
 
-Exit: operator can send and trace a message end to end.
+Exit: operator can converse and trace any message end to end from one screen.
 
 ## M4 — Realtime
 
@@ -56,14 +57,24 @@ Exit: instance and queue panels update without manual refresh.
 
 Exit: operational troubleshooting parity with `omniwa-tui`.
 
-## M6 — Resource browsers + Settings
+## M6 — Workspace completion + Directory + Settings
 
-- Chats, Contacts, Labels browsers (read-only).
-- Groups (browser, members, member ops, invite link, group text send).
+- Group conversations in the workspace (sender attribution, group context
+  panel: members, promote/demote/remove, invite link).
+- Directory (contacts + labels, jump-to-conversation).
 - Settings (get / validate / activate) and admin-keys panel (admin scope
   only, show-once secret dialog).
 
-Exit: full resource console surface from `docs/PANELS.md` complete.
+Exit: full v1-contract surface from `docs/PANELS.md` complete.
+
+## M6.5 — Campaigns & send lists (blocked on platform contract)
+
+- Blocked until the operations in `docs/CAMPAIGNS_PROPOSAL.md` exist in the
+  platform OpenAPI contract. Then: send lists CRUD, campaign wizard,
+  campaign monitoring with segmented progress and per-recipient drill-down.
+
+Exit: an opt-in notification campaign can be created, observed, paused, and
+aborted entirely through platform APIs.
 
 ## M7 — Hardening
 

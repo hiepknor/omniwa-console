@@ -34,45 +34,60 @@ Operations: `listInstances`, `getInstance`, `createInstance`,
 Destructive actions (`destroyInstance`, `disconnectInstance`) require a
 typed confirmation dialog.
 
-## chats — `/instances/:instanceId/chats`
+## chats — `/chats/:instanceId?/:chatId?` (realtime) — PRIMARY
 
-Read-only chat browser with cursor pagination and filtering.
+Direct conversations with contacts only (groups are excluded from this
+surface). A three-pane messaging workspace: conversation list · bubble
+timeline · context panel (contact card, labels, selected-message delivery
+timeline). Sending is async-accepted: bubbles render accepted/queued and
+follow delivery history — the UI never claims upstream WhatsApp delivery on
+its own.
 
-Operations: `listInstanceChats`, `listChats`, `getChat`.
+Operations: `listInstanceChats`, `getChat`, `listInstanceMessages`,
+`getMessage`, `getMessageDeliveryHistory`, `sendInstanceTextMessage`,
+`sendInstanceMediaMessage`, `sendInstanceMessage`, `retryMessage`,
+`cancelMessage`, `registerMedia`, `getMedia`, `getContact`, `getLabel`,
+`streamEvents`.
 
-## contacts — `/instances/:instanceId/contacts`
+## groups — `/groups/:instanceId?/:groupId?`, `/groups/lists` (realtime) — PRIMARY
 
-Read-only contact browser.
-
-Operations: `listInstanceContacts`, `listContacts`, `getContact`.
-
-## labels — `/instances/:instanceId/labels`
-
-Read-only label browser.
-
-Operations: `listInstanceLabels`, `listLabels`, `getLabel`.
-
-## groups — `/instances/:instanceId/groups`, `.../groups/:groupId` (realtime)
-
-Group browser and management: members, promote/demote, invite link, local
-state, group text send.
+All WhatsApp groups of the instance in the same three-pane workspace:
+group conversations with sender attribution, group management in the
+context panel (members promote/demote/remove, invite link, local state),
+plus the **Send lists** tab — create/edit/retire recipient lists used by
+Bulk messages (send-list operations are proposed contract, see below).
 
 Operations: `listInstanceGroups`, `getGroup`, `updateGroup`,
 `updateGroupLocalState`, `refreshInstanceGroups`, `refreshGroupInviteLink`,
 `listGroupMembers`, `addGroupMember`, `removeGroupMember`,
 `promoteGroupMember`, `demoteGroupMember`, `sendGroupTextMessage`,
-`streamEvents`.
+`getMessage`, `getMessageDeliveryHistory`, `streamEvents` — plus proposed
+`listSendLists`, `createSendList`, `getSendList`, `updateSendList`,
+`retireSendList`.
 
-## messages — `/instances/:instanceId/messages`, `/messages/:messageId`
+## directory — `/directory/:instanceId?`
 
-Message history, delivery timeline, compose (text + media), retry/cancel.
-Sending is async-accepted: the UI shows the accepted/queued state and follows
-status transitions, never claiming upstream WhatsApp delivery on its own.
+Read-only contact and label directory for the messaging workflow: search a
+contact or label, then jump into its chat. Labels are synced projections —
+the API exposes no create/assign operations, so the directory renders them
+as filters and badges only. Send lists are built from these rows.
 
-Operations: `listInstanceMessages`, `getMessage`,
-`getMessageDeliveryHistory`, `sendInstanceTextMessage`,
-`sendInstanceMediaMessage`, `sendInstanceMessage`, `retryMessage`,
-`cancelMessage`, `registerMedia`, `getMedia`.
+Operations: `listInstanceContacts`, `listContacts`, `getContact`,
+`listInstanceLabels`, `listLabels`, `getLabel`, `listChats`,
+`listInstanceChats`.
+
+## bulk-messages — `/bulk-messages`, `/bulk-messages/new` — PROPOSED
+
+Campaign management and send setup: campaign table with segmented outcome
+progress, 3-step creation wizard (Audience → Message → Review), pause /
+resume / abort. **No v1 operations exist for this panel** — it is a
+proposed platform contract extension documented in
+`docs/CAMPAIGNS_PROPOSAL.md` (proposed operation IDs: `listCampaigns`,
+`createCampaign`, `getCampaign`, `listCampaignRecipients`,
+`pauseCampaign`, `resumeCampaign`, `abortCampaign`). The prototypes exist
+to validate the UX and to drive the contract proposal; the panel must not
+ship by looping `send*` operations client-side (business logic stays
+platform-side per the Phase J guardrail).
 
 ## queue — `/queue` (realtime)
 
@@ -118,6 +133,9 @@ never stored.
 
 ## Coverage
 
-Every operation in the v1 contract (77 total) is owned by exactly one panel
-above, except `streamEvents`, which is shared by the realtime panels through
-the single SSE connection described in `docs/REALTIME.md`.
+Every operation in the v1 contract (77 total) is owned by at least one panel
+above; `streamEvents` is shared by the realtime panels through the single
+SSE connection described in `docs/REALTIME.md`, and the read operations for
+contacts/labels/chats are shared between `workspace` and `directory`. The
+`campaigns + send-lists` panel references proposed (not yet existing)
+operations only.

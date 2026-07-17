@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Directory (prototype)</title>
+<!-- Static prototype. Sample data only. Read-only contacts & labels directory;
+     every row jumps into its workspace conversation. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
+    <nav>
+      <a data-nav="chats" href="chats.html">Chats</a>
+      <a data-nav="groups" href="groups.html">Groups</a>
+      <a data-nav="directory" class="active" href="directory.html">Directory</a>
+      <a data-nav="bulk" href="campaigns.html">Bulk messages</a>
+      <span class="navlabel">Operations</span>
+      <a href="overview.html">Overview</a>
+      <a href="instances.html">Instances</a>
+      <a href="queue.html">Queue &amp; Jobs <span class="count num">142</span></a>
+      <a href="webhooks.html">Webhooks</a>
+      <a href="events.html">Events</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+    <div class="side-foot">
+      <div>key <span class="key">omni…a1b2</span> · api</div>
+      <button class="btn block">Disconnect</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-head">
+      <h1>Directory</h1>
+      <div class="head-right">
+        <button class="instpick" style="width:auto"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <a class="active" href="#">Contacts</a><a href="#">Labels</a>
+    </div>
+
+    <div class="filterbar">
+      <input class="search" placeholder="Search contacts…">
+      <span class="chip">label: vip <span class="x">✕</span></span>
+      <span class="chip add">+ filter</span>
+    </div>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Contact</th><th>ID</th><th>Labels</th><th>Chat</th><th>Last activity</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Trần Minh Hòa</td><td><span class="mono">ctc_71bd0q</span></td>
+            <td><span class="chip">vip</span></td>
+            <td><span class="mono">chat_x91k2m</span></td>
+            <td class="ts" title="2026-07-16T08:51:14Z">2m ago</td>
+            <td style="text-align:right"><a class="btn sm" href="chats.html" style="text-decoration:none">Open chat</a></td>
+          </tr>
+          <tr>
+            <td>Lê Thu Cúc</td><td><span class="mono">ctc_20mmx4</span></td>
+            <td><span class="chip">lead</span> <span class="chip">q3</span></td>
+            <td><span class="mono">chat_p03wa8</span></td>
+            <td class="ts" title="2026-07-16T08:39:47Z">13m ago</td>
+            <td style="text-align:right"><a class="btn sm" href="chats.html" style="text-decoration:none">Open chat</a></td>
+          </tr>
+          <tr>
+            <td>Nguyễn Văn Bình</td><td><span class="mono">ctc_09kkm2</span></td>
+            <td><span class="chip">vip</span></td>
+            <td><span class="ts">—</span></td>
+            <td class="ts" title="2026-07-16T08:31:00Z">22m ago</td>
+            <td style="text-align:right"><a class="btn sm" href="groups.html" style="text-decoration:none">Open group</a></td>
+          </tr>
+          <tr>
+            <td>Phạm Quang Duy</td><td><span class="mono">ctc_58aa1p</span></td>
+            <td><span class="ts">—</span></td>
+            <td><span class="mono">chat_h55dn0</span></td>
+            <td class="ts" title="2026-07-16T07:58:00Z">55m ago</td>
+            <td style="text-align:right"><a class="btn sm" href="chats.html" style="text-decoration:none">Open chat</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-foot">
+        <span class="num">4 of 942 contacts</span>
+        <button class="btn">Load more</button>
+      </div>
+    </div>
+
+    <p class="help" style="margin-top:12px">
+      Contacts and labels are read-only projections synced from WhatsApp
+      (<span class="mono">listInstanceContacts / listInstanceLabels</span>). The
+      <b>Labels</b> tab lists each label with its chat count and filters this
+      table on click. Send lists for campaigns are built from these rows —
+      see <span class="mono">lists.html</span>.
+    </p>
+  </main>
+</div>
+</body>
+</html>
