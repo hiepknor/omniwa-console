@@ -17,8 +17,8 @@ visual spec (structure, spacing, states, status vocabulary).
 | `groups.html` | Groups | All WhatsApp groups: group conversations with sender attribution, group management context panel (members, invite link), Send lists tab |
 | `lists.html` | Groups › Send lists | Send list add/edit/retire: members from existing contacts only, add-from-directory — **proposed contract** |
 | `directory.html` | Directory | Read-only contacts & labels; every row jumps into its chat |
-| `campaigns.html` | Bulk messages | Campaign management: segmented progress bars, running-campaign drawer (counters, recipients, pause/abort) — **proposed contract** |
-| `campaign-new.html` | Bulk messages › New | 3-step send-setup wizard at Review: audience, message preview, platform-capped pacing — **proposed contract** |
+| `campaigns.html` | Messages | Campaign management: segmented progress bars, running-campaign drawer (counters, recipients, pause/abort) — **proposed contract** |
+| `campaign-new.html` | Messages › New | 3-step send-setup wizard at Review: audience, message preview, platform-capped pacing — **proposed contract** |
 
 Campaign/list screens reference operations that do not exist in the v1
 contract yet — see [`../../docs/CAMPAIGNS_PROPOSAL.md`](../../docs/CAMPAIGNS_PROPOSAL.md).

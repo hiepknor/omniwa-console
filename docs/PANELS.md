@@ -55,7 +55,7 @@ All WhatsApp groups of the instance in the same three-pane workspace:
 group conversations with sender attribution, group management in the
 context panel (members promote/demote/remove, invite link, local state),
 plus the **Send lists** tab — create/edit/retire recipient lists used by
-Bulk messages (send-list operations are proposed contract, see below).
+the Messages panel (send-list operations are proposed contract, see below).
 
 Operations: `listInstanceGroups`, `getGroup`, `updateGroup`,
 `updateGroupLocalState`, `refreshInstanceGroups`, `refreshGroupInviteLink`,
@@ -76,7 +76,7 @@ Operations: `listInstanceContacts`, `listContacts`, `getContact`,
 `listInstanceLabels`, `listLabels`, `getLabel`, `listChats`,
 `listInstanceChats`.
 
-## bulk-messages — `/bulk-messages`, `/bulk-messages/new` — PROPOSED
+## messages — `/messages`, `/messages/new` — PROPOSED
 
 Campaign management and send setup: campaign table with segmented outcome
 progress, 3-step creation wizard (Audience → Message → Review), pause /
@@ -136,6 +136,6 @@ never stored.
 Every operation in the v1 contract (77 total) is owned by at least one panel
 above; `streamEvents` is shared by the realtime panels through the single
 SSE connection described in `docs/REALTIME.md`, and the read operations for
-contacts/labels/chats are shared between `workspace` and `directory`. The
-`campaigns + send-lists` panel references proposed (not yet existing)
-operations only.
+contacts/labels/chats are shared between `chats` and `directory`. The
+`messages` panel (campaigns) and the send-lists tab of `groups` reference
+proposed (not yet existing) operations only.

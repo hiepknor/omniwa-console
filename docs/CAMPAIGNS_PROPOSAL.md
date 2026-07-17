@@ -82,11 +82,11 @@ pacing (msgs/min ≤ platform cap), schedule (now | at), state
 - **Send lists** (`/groups/lists`, the Send lists tab of Groups): table +
   drawer; members added by picking from
   the instance's directory (search contacts/chats), never by import.
-- **New campaign** (`/bulk-messages/new`): 3-step wizard — Audience (pick list,
+- **New campaign** (`/messages/new`): 3-step wizard — Audience (pick list,
   see resolved member count) → Message (text/media, preview as workspace
   bubble) → Review (pacing capped by settings, estimated duration, explicit
   accepted≠delivered note) → create as draft or schedule.
-- **Bulk messages** (`/bulk-messages`): table with segmented progress bars
+- **Messages** (`/messages`): table with segmented progress bars
   (delivered/queued/failed always distinguishable) + drawer with counters,
   per-recipient table (each row links to the workspace conversation),
   pause/resume, abort with typed confirmation.

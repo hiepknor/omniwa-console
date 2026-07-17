@@ -78,8 +78,8 @@ The messaging workflow is primary; operations panels are secondary:
 /groups/:instanceId?/:groupId?       # primary: group conversations + management
 /groups/lists                        # send lists (proposed contract)
 /directory/:instanceId?              # contacts & labels directory
-/bulk-messages                       # campaigns (proposed contract)
-/bulk-messages/new                   # campaign wizard (proposed)
+/messages                            # campaigns (proposed contract)
+/messages/new                        # campaign wizard (proposed)
 /overview
 /instances
 /instances/:instanceId

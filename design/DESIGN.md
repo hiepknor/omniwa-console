@@ -216,7 +216,7 @@ this subsection binds to it.
 - **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed). Sidebar: logo block, nav items (13px/500, 8px radius, active = accent text + accent-bg tint), footer with masked key fingerprint + disconnect.
 - **Nav hierarchy**: the messaging workflow is primary — **Chats** (direct
   conversations only), **Groups** (all WhatsApp groups + the Send lists
-  tab), **Directory**, **Bulk messages** (campaigns) at the top; an 11px
+  tab), **Directory**, **Messages** (campaigns) at the top; an 11px
   uppercase "Operations" section label separates the secondary panels
   (Overview, Instances, Queue & Jobs, Webhooks, Events, Settings).
 - **Content header** per page: title left; live indicator, refresh, and primary action right. 48px tall, bottom border.
