@@ -6,8 +6,6 @@
 <title>OmniWA Console — Chats (prototype)</title>
 <!-- Static prototype. Sample data only. Binds to design/DESIGN.md §4 Workspace.
      Direct chats with contacts only — groups live in groups.html. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="console.css">
 </head>
 <body>
@@ -42,7 +40,7 @@
     </div>
   </aside>
 
-  <main class="workspace">
+<main class="workspace" data-od-id="chats-workspace">
     <aside class="convos">
       <div class="head">
         <button class="instpick"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
@@ -86,8 +84,8 @@
 
     <section class="thread">
       <div class="head">
-        <span class="avatar" style="width:28px;height:28px;border-radius:50%;background:var(--elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text-3)">TH</span>
-        <div class="t"><b>Trần Minh Hòa</b><span class="mono">chat_x91k2m</span></div>
+        <span class="avatar" style="width:28px;height:28px;border-radius:50%;background:var(--elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--text-3)">TH</span>
+        <div class="t"><h1>Trần Minh Hòa</h1><span class="mono">chat_x91k2m</span></div>
         <span class="chip" style="padding:0 8px">vip</span>
         <div class="spacer"></div>
         <span class="live"><span class="dot"></span>live</span>

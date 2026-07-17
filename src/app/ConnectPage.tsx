@@ -59,37 +59,37 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-100">
-      <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-lg border border-zinc-800 p-6">
+    <div className="flex min-h-screen items-center justify-center text-[#faf9f6]">
+      <form onSubmit={submit} className="warp-block w-full max-w-sm space-y-4 rounded-xl p-6">
         <div>
           <div className="flex items-center gap-2.5">
             <Logo size={32} />
-            <h1 className="text-lg font-semibold">OmniWA Console</h1>
+            <h1 className="text-lg font-medium">OmniWA Console</h1>
           </div>
-          <p className="mt-2 text-sm text-zinc-400">Connect to an OmniWA Platform API.</p>
+          <p className="mt-2 text-sm text-[#868584]">Connect to an OmniWA Platform API.</p>
         </div>
         <label className="block text-sm">
-          <span className="text-zinc-400">API base URL</span>
+          <span className="text-[#afaeac]">API base URL</span>
           <input
             type="url"
             required
             value={baseUrl}
             onChange={(e) => setBaseUrl(e.target.value)}
-            className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2"
+            className="warp-input mt-1 w-full rounded-lg px-3 py-2"
           />
         </label>
         <label className="block text-sm">
-          <span className="text-zinc-400">API key</span>
+          <span className="text-[#afaeac]">API key</span>
           <input
             type="password"
             required
             autoComplete="off"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            className="mt-1 w-full rounded border border-zinc-700 bg-zinc-900 px-3 py-2"
+            className="warp-input mt-1 w-full rounded-lg px-3 py-2"
           />
         </label>
-        <label className="flex items-center gap-2 text-sm text-zinc-400">
+        <label className="flex items-center gap-2 text-sm text-[#868584]">
           <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
           Remember on this device (stores the key in this browser)
         </label>
@@ -97,7 +97,7 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded bg-emerald-600 px-3 py-2 text-sm font-medium hover:bg-emerald-500 disabled:opacity-50"
+          className="warp-primary w-full rounded-full px-3 py-2 text-sm font-medium disabled:opacity-50"
         >
           {pending ? 'Connecting…' : 'Connect'}
         </button>

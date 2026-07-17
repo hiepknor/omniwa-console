@@ -13,12 +13,12 @@ export function PanelStub({ panel }: { panel: string }) {
     .join(', ');
 
   return (
-    <div className="rounded-lg border border-dashed border-zinc-700 p-8 text-center">
-      <h2 className="text-base font-semibold capitalize">{panel}</h2>
-      <p className="mt-2 text-sm text-zinc-400">
+    <div className="warp-block rounded-xl border-dashed p-8 text-center">
+      <h2 className="text-base font-medium capitalize">{panel}</h2>
+      <p className="mt-2 text-sm text-[#868584]">
         Not implemented yet. See <code>docs/PANELS.md#{panel}</code>.
       </p>
-      {scope && <p className="mt-1 text-xs text-zinc-500">{scope}</p>}
+      {scope && <p className="mt-1 text-xs text-[#666469]">{scope}</p>}
     </div>
   );
 }

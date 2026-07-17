@@ -22,13 +22,13 @@ export function Shell({
   const items = NAV_ITEMS.filter((item) => !item.adminOnly || session.keyKind === 'admin');
 
   return (
-    <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
-      <aside className="flex w-56 shrink-0 flex-col border-r border-zinc-800">
-        <div className="flex items-center gap-2.5 border-b border-zinc-800 px-4 py-3.5">
+    <div className="flex min-h-screen text-[#faf9f6]">
+      <aside className="warp-sidebar flex w-56 shrink-0 flex-col border-r">
+        <div className="warp-divider flex items-center gap-2.5 border-b px-4 py-3.5">
           <Logo />
           <div className="min-w-0">
-            <div className="text-sm font-semibold tracking-wide">OmniWA Console</div>
-            <div className="truncate font-mono text-xs text-zinc-500">{session.baseUrl}</div>
+            <div className="text-sm font-medium">OmniWA Console</div>
+            <div className="truncate font-mono text-xs text-[#666469]">{session.baseUrl}</div>
           </div>
         </div>
         <nav className="flex-1 space-y-1 p-2">
@@ -38,23 +38,19 @@ export function Shell({
               to={item.to}
               end={item.to === '/settings'}
               className={({ isActive }) =>
-                `block rounded px-3 py-2 text-sm ${
-                  isActive
-                    ? 'bg-zinc-800 text-white'
-                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
-                }`
+                `warp-nav-link block rounded-lg px-3 py-2 text-sm ${isActive ? 'warp-nav-link-active' : ''}`
               }
             >
               {item.label}
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-zinc-800 p-3 text-xs text-zinc-500">
+        <div className="warp-divider border-t p-3 text-xs text-[#868584]">
           <div>key {keyFingerprint(session.apiKey)}</div>
           <button
             type="button"
             onClick={onDisconnect}
-            className="mt-2 w-full rounded border border-zinc-700 px-2 py-1 text-zinc-300 hover:bg-zinc-800"
+            className="warp-ghost mt-2 w-full rounded-lg px-2 py-1"
           >
             Disconnect
           </button>

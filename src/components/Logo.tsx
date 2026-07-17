@@ -2,7 +2,7 @@
 export function Logo({ size = 28 }: { size?: number }) {
   return (
     <span
-      className="flex shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500"
+      className="flex shrink-0 items-center justify-center rounded-lg border border-white/10 bg-[#353534] text-[#faf9f6]"
       style={{ width: size, height: size }}
     >
       <svg

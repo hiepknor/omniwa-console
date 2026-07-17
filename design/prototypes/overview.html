@@ -5,15 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniWA Console — Overview (prototype)</title>
 <!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="console.css">
 <style>
   .health{display:flex;gap:8px;margin-bottom:16px}
   .actioncol{text-align:right}
   .ticker{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden}
   .ticker header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border-subtle)}
-  .ticker header b{font-size:14px;font-weight:600}
+  .ticker header b{font-size:14px;font-weight:500}
   .event{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border-subtle);font-size:12px}
   .event:last-child{border-bottom:none}
   .event .type{font-family:var(--mono);color:var(--text-2)}
@@ -52,7 +50,7 @@
     </div>
   </aside>
 
-  <main>
+<main data-od-id="overview-screen">
     <div class="page-head">
       <h1>Overview</h1>
       <div class="head-right">

@@ -6,19 +6,17 @@
 <title>OmniWA Console — Dialog patterns (prototype)</title>
 <!-- Component sheet: dialog and feedback patterns rendered side by side.
      In the app these float over an rgba(0,0,0,.7) overlay. Sample data only. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="console.css">
 <style>
   main{padding:24px}
   .sheet{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
-  .demo>.caption{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:10px}
+  .demo>.caption{font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.15em;color:var(--text-3);margin-bottom:10px}
   .secretwell{display:flex;gap:8px;align-items:center}
   .secretwell .codewell{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
-<main>
+<main data-od-id="dialogs-screen">
   <div class="page-head" style="margin-bottom:24px">
     <h1>Dialog &amp; feedback patterns</h1>
     <span class="ts">component sheet · binds to design/DESIGN.md §4</span>

@@ -1,7 +1,8 @@
 # OmniWA Console Design System
 
 > Category: Operations & Infrastructure
-> WhatsApp platform operations console. Dense, dark-first, emerald accent.
+> WhatsApp platform operations console using the Open Design Warp system.
+> Source: `od://design-systems/warp/DESIGN.md`.
 
 This is the brand contract for `omniwa-console`. Prototypes in
 `design/prototypes/` and all implemented panels bind to it. Where this file
@@ -14,17 +15,16 @@ OmniWA Console is a **dense operational console**, not a marketing dashboard.
 The operator lives here during incidents: scanning instance lifecycles,
 tracing a message through queue → provider → delivery, redriving webhook
 batches. Everything optimizes for scanability under stress — high information
-density, unambiguous status vocabulary, and zero decoration that does not
-carry meaning.
+density and unambiguous status vocabulary. The visual language follows Open
+Design's Warp system: warm near-black surfaces, parchment text, regular-weight
+typography, mist borders, and almost monochromatic controls.
 
-The canvas is near-black neutral (`#0b0c0e`) with content surfaces that step
-up in luminance rather than casting shadows. Structure comes from
-whisper-thin semi-transparent white borders, not from filled boxes. Text is
-the primary interface material; color is reserved almost entirely for
-**status**. The single brand accent is a desaturated emerald — a deliberate
-nod to the WhatsApp domain without cosplaying WhatsApp's UI — and it appears
-only on primary actions, active navigation, and the live-connection
-indicator.
+The canvas is warm near-black (`#171715`), not cold blue-black. Panels use
+barely visible warm overlays and semi-transparent mist borders. Primary text
+is Warm Parchment (`#faf9f6`), never pure white. Interaction is communicated
+through opacity and border brightness instead of saturated accent colors.
+Operational statuses retain muted semantic hues because this is a live console,
+but those hues never become decorative chrome.
 
 Identifiers are first-class citizens: instance IDs, request IDs, cursors,
 and job IDs always render in monospace with a copy affordance. An operator
@@ -32,9 +32,10 @@ should be able to go from any error toast to a log query in one copy-paste.
 
 **Key characteristics:**
 
-- Dark-mode-native: `#0b0c0e` canvas, `#121316` panels, `#1a1c20` elevated surfaces
-- Inter for UI text, tabular numerals on all metrics; JetBrains Mono for identifiers and technical values
-- Emerald accent (`#10b981`) strictly for actions and "live" affordances — never decoration
+- Dark-mode-native: `#171715` canvas, `#1d1d1b` panels, `#292927` elevated surfaces
+- Matter Regular for UI text; Matter Mono / Geist Mono for identifiers and technical values
+- Warm Parchment (`#faf9f6`) foreground with Ash and Stone gray hierarchy
+- No brand accent, gradients, or glow; interaction uses opacity and mist borders
 - Status is always **dot + label**, never color alone
 - Tables at 13px are the workhorse component; cards exist only on Overview
 - Borders `rgba(255,255,255,0.06–0.09)`; elevation by luminance stepping, not shadow
@@ -43,68 +44,69 @@ should be able to go from any error toast to a log query in one copy-paste.
 
 ### Background surfaces
 
-- **Canvas** (`#0b0c0e`): page background.
-- **Panel** (`#121316`): sidebar, table containers, cards.
-- **Elevated** (`#1a1c20`): dropdowns, drawers, dialogs, row hover.
-- **Recessed** (`#08090a`): code/QR wells, input backgrounds.
+- **Canvas** (`#171715`): warm near-black page background.
+- **Panel** (`#1d1d1b`): sidebar, table containers, cards.
+- **Elevated** (`#292927`): dropdowns, drawers, dialogs, row hover.
+- **Recessed** (`#111110`): code/QR wells, input backgrounds.
 
 ### Text
 
-- **Primary** (`#f4f5f6`): headings, cell values.
-- **Secondary** (`#b6bcc4`): body, descriptions.
-- **Muted** (`#7c828c`): metadata, column headers, placeholders.
-- **Faint** (`#565b63`): timestamps, disabled, de-emphasized counts.
+- **Primary / Warm Parchment** (`#faf9f6`): headings, cell values.
+- **Secondary / Ash Gray** (`#afaeac`): body, descriptions.
+- **Muted / Stone Gray** (`#868584`): metadata, column headers, placeholders.
+- **Faint / Purple-Tint Gray** (`#666469`): timestamps, disabled, de-emphasized counts.
 
 ### Brand & accent
 
-- **Accent** (`#10b981` emerald-500): primary buttons, active nav item, live indicator, links.
-- **Accent hover** (`#34d399` emerald-400).
-- **Accent pressed/bg** (`#065f46` emerald-800 at 25% opacity for selected rows/pills).
+- **Earth Gray** (`#353534`): button backgrounds and interactive surfaces.
+- **Frosted Veil** (`rgba(255,255,255,0.04)`): selected rows and surface differentiation.
+- **Mist Border** (`rgba(226,226,226,0.35)`): primary containment.
+- **Healthy/live** uses a muted semantic green only where status meaning requires it.
 
 ### Status vocabulary (the only other chromatic colors)
 
 | Status | Color | Used for |
 | --- | --- | --- |
-| `ok / connected / delivered / active` | `#10b981` | Healthy lifecycle states |
-| `pending / pairing / queued / accepted` | `#f59e0b` amber-500 | In-flight, waiting states |
-| `degraded / retrying / suspended` | `#f97316` orange-500 | Needs attention, self-recovering |
-| `failed / disconnected / dead` | `#ef4444` red-500 | Terminal failures, action required |
-| `info / streaming` | `#38bdf8` sky-400 | Neutral events, SSE activity |
-| `retired / archived / unknown` | `#7c828c` muted | Inactive, no action possible |
+| `ok / connected / delivered / active` | `#8fae99` | Healthy lifecycle states |
+| `pending / pairing / queued / accepted` | `#b2a17f` | In-flight, waiting states |
+| `degraded / retrying / suspended` | `#b08d79` | Needs attention, self-recovering |
+| `failed / disconnected / dead` | `#b78486` | Terminal failures, action required |
+| `info / streaming` | `#8e9eaa` | Neutral events, SSE activity |
+| `retired / archived / unknown` | `#777674` | Inactive, no action possible |
 
 Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 (accessibility and print).
 
 ### Borders
 
-- **Default** (`rgba(255,255,255,0.07)`): tables, cards, inputs.
-- **Subtle** (`rgba(255,255,255,0.05)`): row dividers, section separators.
-- **Strong** (`rgba(255,255,255,0.12)`): focused inputs, active drawer edge.
+- **Default / Mist** (`rgba(226,226,226,0.35)`): tables, cards, major containment.
+- **Subtle** (`rgba(226,226,226,0.12)`): row dividers, section separators.
+- **Strong** (`rgba(226,226,226,0.50)`): focused inputs, active drawer edge.
 
 ## 3. Typography Rules
 
 ### Families
 
-- **UI**: `Inter`, fallback `-apple-system, system-ui, "Segoe UI", Roboto, sans-serif`. Enable `font-feature-settings: "tnum"` wherever numbers align vertically (tables, metrics).
-- **Mono**: `"JetBrains Mono"`, fallback `ui-monospace, "SF Mono", Menlo, monospace`. All IDs, cursors, JIDs, payload keys, code.
+- **UI**: `Matter Regular`, fallback `Inter`, system sans-serif. Enable `font-feature-settings: "tnum"` wherever numbers align vertically.
+- **Mono**: `Matter Mono Regular`, fallback `Geist Mono`, `JetBrains Mono`, system monospace. All IDs, cursors, JIDs, payload keys, code.
 
 ### Hierarchy
 
 | Role | Size | Weight | Notes |
 | --- | --- | --- | --- |
-| Page title | 18px | 600 | One per page, top-left of content area |
-| Section heading | 14px | 600 | Card titles, drawer sections |
-| Metric value | 26px | 600 | Tabular numerals, tight line-height 1.1 |
+| Page title | 18px | 400 | One per page, top-left of content area |
+| Section heading | 14px | 500 | Card titles, drawer sections |
+| Metric value | 26px | 400 | Tabular numerals, tight line-height 1.1 |
 | Body | 14px | 400 | Forms, descriptions, empty states |
 | Table cell / dense UI | 13px | 400 | The console's default text size |
-| Table header / label | 11px | 600 | Uppercase, letter-spacing 0.05em, muted color |
+| Table header / label | 11px | 400 | Uppercase, letter-spacing 0.15em, muted color |
 | Metadata / timestamp | 12px | 400 | Faint color |
-| Mono ID | 12px | 400 | JetBrains Mono, secondary color |
+| Mono ID | 12px | 400 | Matter Mono / Geist Mono, secondary color |
 | Button | 13px | 500 | Never bold |
 
 ### Principles
 
-- Maximum weight is 600. Emphasis comes from luminance (text color tier),
+- Maximum weight is 500. Emphasis comes from luminance (text color tier),
   not from bolding.
 - Uppercase is reserved for 11px labels (table headers, badge text).
 - No display typography anywhere — this is a tool, not a landing page.
@@ -113,7 +115,7 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 ### Buttons
 
-- **Primary**: `#10b981` bg, `#06281d` text (dark-on-accent for contrast), 6px radius, 13px/500, padding 6px 12px. Hover `#34d399`. One per view maximum.
+- **Primary**: Earth Gray `#353534`, Warm Parchment text, pill radius, 13px/500, padding 6px 12px. Hover changes brightness only. One per view maximum.
 - **Ghost (default)**: `rgba(255,255,255,0.03)` bg, `1px solid rgba(255,255,255,0.08)` border, primary text. Hover bg `0.06`.
 - **Danger**: ghost shape with red-500 text and border `rgba(239,68,68,0.35)`; solid red only inside typed-confirmation dialogs.
 - **Icon button**: 26×26px, 6px radius, ghost treatment.
@@ -122,8 +124,8 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 ### Tables (workhorse)
 
 - Container: Panel bg, default border, 8px radius, no outer padding.
-- Header row: 11px/600 uppercase muted labels, subtle bottom border, sticky.
-- Rows: 36px height, 13px text, subtle border between rows; hover = Elevated bg; selected = accent-bg tint + 2px accent left edge.
+- Header row: 11px/400 uppercase muted labels with wide tracking, subtle bottom border, sticky.
+- Rows: 36px height, 13px text, subtle border between rows; hover/selection use Frosted Veil opacity changes.
 - Cells: status = dot+label; IDs = mono 12px with copy-on-hover icon; timestamps = relative ("3m ago") with absolute ISO on `title`.
 - Footer: cursor pagination — "Load more" ghost button + shown-count in faint text. Never page numbers.
 
@@ -134,7 +136,7 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 ### Forms & inputs
 
-- Input: Recessed bg, default border, 6px radius, 13px text, padding 7px 10px. Focus: strong border + accent ring `0 0 0 3px rgba(16,185,129,0.15)`. Error: red border + 12px red help text below.
+- Input: Recessed bg, subtle border, 6px radius, 13px text, padding 7px 10px. Focus increases border brightness without a colored ring. Error: muted-red border + 12px error text below.
 - Selects and filters render as ghost buttons with a chevron; active filters become dismissible pills in a filter bar above tables.
 
 ### Cards (Overview only)
@@ -168,13 +170,13 @@ this subsection binds to it.
   timeline (fluid, Canvas bg) · context panel (320px, Panel bg, collapsible).
   The workspace fills the viewport; only the timeline scrolls vertically.
 - **Conversation list item**: 56px, two lines — name (13px/500) + last
-  activity (12px faint) — with unread count badge (mono, accent-tint bg) and
-  label chips. Selected item = accent-bg tint + 2px accent left edge. List
+  activity (12px faint) — with unread count badge (mono, Frosted Veil bg) and
+  label chips. Selected item = slightly brighter Frosted Veil. List
   header holds the instance selector (dot + name + chevron) and search.
 - **Message bubbles**: max-width 68%, radius 10px, 13px text, timestamp +
   status footer (11px). Inbound = Elevated bg, left-aligned. Outbound =
-  accent-tint bg with subtle border, right-aligned — the one sanctioned use
-  of accent as surface. Failed outbound adds a 3px red left edge and inline
+  Frosted Veil bg with Mist Border, right-aligned. Failed outbound adds a
+  3px muted-red left edge and inline
   Retry/Cancel ghost buttons. Media bubbles show a Recessed
   placeholder block + caption. Clicking a bubble opens its delivery timeline
   in the context panel.
@@ -219,8 +221,8 @@ this subsection binds to it.
 - **Checkbox column**: 36px, native checkboxes with `accent-color`
   emerald; header checkbox = select all (indeterminate when partial).
 - **Row state semantics** (two independent states, may combine):
-  `checked` → accent-tint background only; `open` (detail panel showing
-  this row) → 2px accent inset left edge only. Never one style for both.
+  `checked` → Frosted Veil background only; `open` (detail panel showing
+  this row) → stronger Mist Border inset edge only. Never one style for both.
 - **Column discipline**: name and tag-like columns flex; numeric and
   time columns right-align (`tnum`); everything else sizes to content.
 - Row click (outside the checkbox) opens the detail panel; the checkbox
@@ -241,10 +243,10 @@ this subsection binds to it.
   docked detail panel into list-management mode — never a modal, so the
   table stays visible and selectable. Deep link `?list=nl_*`.
 - Panel anatomy top-to-bottom: mode header with close; list picker
-  (accent-tint active item; each row shows name, mono id, group count,
+  (Frosted Veil active item; each row shows name, mono id, group count,
   and "used by N campaigns") with an inline create input; selected-list
   section with Rename/Delete (guarded), a **selection strip**
-  (accent-tint band: "N groups selected on the table → Add to this
+  (Frosted Veil band: "N groups selected on the table → Add to this
   list") whenever table rows are checked, a member search input, and the
   member list with per-row Remove.
 
@@ -258,7 +260,7 @@ this subsection binds to it.
   `running` amber (pulsing dot) · `paused` orange · `completed` emerald ·
   `aborted` red.
 - **Wizard steps**: numbered dot + label row (Audience → Message → Review),
-  current step accent, completed steps emerald, future muted. One primary
+  current step uses an Earth Gray pill, completed steps use muted healthy status, future muted. One primary
   action per step, always bottom-right; Back is ghost.
 - **Named Lists** contain groups only, added by row-selection on the
   Groups table — the UI offers no raw-number or contact import surface,
@@ -269,7 +271,7 @@ this subsection binds to it.
 ## 5. Layout Principles
 
 - **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed).
-- **Sidebar anatomy**: logo block (28px logomark — radius 8, accent-tint bg, accent chat glyph — beside the app name 14px/600 and the connected base URL in mono 11px); nav items (13px/500, 8px radius, 10px gap) each carrying a **16px stroke icon** (inline SVG, 1.7px stroke, round caps, `currentColor` so active items tint the icon accent) + flexing label + optional mono count badge; active = accent text + accent-tint bg. Settings lives in a border-separated `navfoot` slot pinned above the footer. The **session footer** is a Recessed block: status dot + masked key fingerprint (mono 11px) + key-kind pill + a disconnect icon-button that turns red on hover. Icons are what make the 56px icon-rail collapse (§8) possible.
+- **Sidebar anatomy**: logo block (28px mark on Earth Gray — beside the app name 14px/500 and base URL in mono 11px); nav items (13px/400, 8px radius, 10px gap) each carry a 16px stroke icon + label + optional mono count badge; active = Warm Parchment text on Frosted Veil. Settings stays pinned above the session footer.
 - **Nav hierarchy**: **Overview** sits alone at the top (the landing page,
   spanning both concerns). Then two labeled sections — **Operations**:
   Instances (the foundational resource first), Queue & Jobs, Webhooks,
@@ -289,14 +291,15 @@ this subsection binds to it.
 
 | Level | Treatment | Use |
 | --- | --- | --- |
-| 0 Canvas | `#0b0c0e`, no border | Page background |
-| 1 Panel | `#121316` + default border | Tables, cards, sidebar |
-| 2 Elevated | `#1a1c20` + default border | Hover rows, drawers, dropdowns |
-| 2b Recessed | `#08090a` + subtle border | Inputs, code wells, QR container |
+| 0 Canvas | `#171715`, no gradient | Page background |
+| 1 Panel | `#1d1d1b` + Frosted Veil | Tables, cards, sidebar |
+| 2 Elevated | `#292927` + Mist Border | Hover rows, drawers, dropdowns |
+| 2b Recessed | `#111110` + subtle border | Inputs, code wells, QR container |
 | 3 Overlay | Elevated + `rgba(0,0,0,0.7)` backdrop | Dialogs, command palette |
 
-No drop shadows except a single `0 8px 24px rgba(0,0,0,0.4)` on floating
-elements (dropdowns, toasts, popovers). Depth = luminance stepping.
+Base content uses luminance stepping and borders. Regular cards have no shadow;
+only floating elements may use `0 5px 15px rgba(0,0,0,0.2)`. There is no glow
+or backdrop blur.
 
 ## 7. Do's and Don'ts
 
@@ -305,18 +308,19 @@ elements (dropdowns, toasts, popovers). Depth = luminance stepping.
 - Render every status as dot + label using the frozen vocabulary in §2.
 - Put every ID in mono with copy affordance; surface `requestId` on every error.
 - Use tabular numerals on all metrics and counts.
-- Keep exactly one primary (emerald) action per view.
+- Keep exactly one restrained Earth Gray primary action per view.
 - Show async-accepted states honestly: "Accepted", "Queued" — never "Sent" until the delivery history says so.
 - Reflect filters/cursors into the URL; every view is a shareable deep link.
 
 ### Don't
 
-- Don't use gradients, glassmorphism, illustrations, or decorative icons.
+- Don't use decorative gradients or glow.
+- Don't use cold blue-tinted dark backgrounds.
 - Don't signal with color alone, and don't invent status colors outside §2.
 - Don't use weight 700+, display sizes, or letter-spacing tricks.
 - Don't use shadows for elevation on dark surfaces (luminance steps instead).
 - Don't center-max-width the app like a document; this is a full-bleed tool.
-- Don't render WhatsApp-green (`#25D366`) UI chrome — the accent is emerald `#10b981`, and the console is not a WhatsApp clone.
+- Don't render WhatsApp-green (`#25D366`) UI chrome. Muted green is reserved for healthy/live/delivered status only.
 
 ## 8. Responsive Behavior
 
@@ -336,19 +340,19 @@ Touch targets minimum 32px on interactive rows and buttons at all sizes.
 
 ### Quick reference
 
-- Canvas `#0b0c0e` · Panel `#121316` · Elevated `#1a1c20` · Recessed `#08090a`
-- Text `#f4f5f6` / `#b6bcc4` / `#7c828c` / `#565b63`
-- Accent `#10b981` (hover `#34d399`) — actions and live states only
-- Status: ok `#10b981` · pending `#f59e0b` · degraded `#f97316` · failed `#ef4444` · info `#38bdf8` · inactive `#7c828c`
-- Border `rgba(255,255,255,0.07)` default, `0.05` subtle, `0.12` strong
-- Inter 13px is the default; mono = JetBrains Mono 12px; max weight 600
-- Radius: 6px controls, 8px containers, 9999px pills
+- Canvas `#171715` · Panel `#1d1d1b` · Elevated `#292927` · Recessed `#111110`
+- Text `#faf9f6` / `#afaeac` / `#868584` / `#666469`
+- Controls `#353534`; no saturated brand accent
+- Status: muted semantic hues only; never reused as chrome
+- Border `rgba(226,226,226,0.35)` default, `0.12` subtle, `0.50` strong
+- Matter Regular 13px is the default; mono = Matter Mono / Geist Mono 12px; max weight 500
+- Radius: 6px inputs, 12px blocks, 9999px buttons and pills
 
 ### Example component prompts
 
-- "Build an instance table on `#121316` with `1px solid rgba(255,255,255,0.07)` border, 8px radius. Sticky header row: 11px/600 uppercase `#7c828c`. Rows 36px, 13px `#f4f5f6`, hover `#1a1c20`. Status cell: 8px dot (`#10b981` connected / `#f59e0b` pairing / `#ef4444` disconnected) + 12px `#b6bcc4` label. ID cell: JetBrains Mono 12px `#b6bcc4`."
-- "Metric card: `#121316` bg, default border, 8px radius, 16px padding. Label 11px/600 uppercase `#7c828c`, value 26px/600 `#f4f5f6` with `font-feature-settings:'tnum'`, context line 12px `#565b63`."
-- "QR pairing panel: `#08090a` recessed container, inside it a 240px white well (12px radius) holding the QR, expiry countdown in JetBrains Mono 12px turning `#f59e0b` under 10s, 'Refresh QR' ghost button below."
+- "Build an instance table on a 4% white veil with a 35%-alpha Mist Border and 12px radius. Sticky header row: 11px/400 uppercase Stone Gray with 2.4px tracking. Rows 36px, 13px Warm Parchment; hover uses a barely visible white veil. Status remains muted semantic dot + label."
+- "Metric block: Frosted Veil surface, Mist Border, 12px radius, 16px padding, no shadow. Label 11px/400 uppercase Stone Gray, value 26px/400 Warm Parchment with tabular numerals, context line 12px Purple-Tint Gray."
+- "QR pairing block: `#111110` recessed container, inside it a 240px white well holding the QR, expiry countdown in Matter Mono 12px turning muted amber under 10s, Earth Gray pill button below."
 
 ### Iteration guide
 
