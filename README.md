@@ -85,6 +85,7 @@ This repository does not own:
 | [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | API key entry, storage, and scope handling |
 | [docs/REALTIME.md](docs/REALTIME.md) | SSE ingestion, reconnect, cache invalidation |
 | [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Milestones and per-panel build order |
+| [docs/INSTANCES_CONTRACT_GAPS.md](docs/INSTANCES_CONTRACT_GAPS.md) | Contract gaps discovered while implementing Instances |
 | [AGENTS.md](AGENTS.md) | Working agreement for AI coding agents in this repo |
 
 ## Development

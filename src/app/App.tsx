@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { ApiProvider } from '@/api/ApiProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { OverviewPage } from '@/features/overview/OverviewPage';
+import { InstancesPage } from '@/features/instances/InstancesPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { ConnectPage } from './ConnectPage';
 import { PanelStub } from './PanelStub';
@@ -55,8 +56,8 @@ export function App() {
               { path: '/messages', element: <PanelStub panel="messages" /> },
               { path: '/messages/new', element: <PanelStub panel="messages" /> },
               { path: '/overview', element: <OverviewPage /> },
-              { path: '/instances', element: <PanelStub panel="instances" /> },
-              { path: '/instances/:instanceId', element: <PanelStub panel="instances" /> },
+              { path: '/instances', element: <InstancesPage /> },
+              { path: '/instances/:instanceId', element: <InstancesPage /> },
               { path: '/queue', element: <PanelStub panel="queue" /> },
               { path: '/webhooks', element: <PanelStub panel="webhooks" /> },
               { path: '/webhooks/:webhookId', element: <PanelStub panel="webhooks" /> },

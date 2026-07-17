@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
+import { InlineError } from '@/components/InlineError';
 import { relativeTime } from '@/lib/format';
-import { InlineError } from './InlineError';
 import { useActionRequiredItems, type ActionRequiredItem } from './hooks';
 
 function statusDot(status: string | undefined): string {
