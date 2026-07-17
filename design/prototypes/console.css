@@ -216,6 +216,20 @@ tbody tr.open{box-shadow:inset 2px 0 0 var(--accent)}
 /* Management page: content column + full-height docked detail panel */
 .pagecol{flex:1;min-width:0;overflow-y:auto;padding:0 24px 24px}
 .context.wide{width:400px}
+/* On-demand slide-over variant: floats above content from the right edge,
+   no backdrop — the table underneath stays visible and interactive. */
+.context.over{position:fixed;top:0;right:0;bottom:0;z-index:8;
+  box-shadow:-16px 0 40px rgba(0,0,0,.45)}
+
+/* Stat strip (compact overview above management tables) */
+.statrow{display:flex;gap:0;background:var(--panel);border:1px solid var(--border);
+  border-radius:8px;margin-bottom:12px;overflow:hidden}
+.stat{flex:1;padding:10px 16px;border-right:1px solid var(--border-subtle)}
+.stat:last-child{border-right:none}
+.stat .label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--text-3)}
+.stat b{font-size:18px;font-weight:600;font-feature-settings:"tnum";line-height:1.3}
+.stat .sub{font-size:11px;color:var(--text-4);margin-left:6px}
 
 /* Modal overlay (dialogs) */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;

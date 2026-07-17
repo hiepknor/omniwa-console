@@ -197,11 +197,17 @@ this subsection binds to it.
 
 ### Management page template (Groups; reuse for Instances, Webhooks, Queue)
 
-- **Layout**: content column (own vertical scroll, 24px side padding) +
-  **full-height detail panel docked to the right viewport edge** (400px,
-  Panel bg, left border, own scroll — same construction as the workspace
-  context panel). Never render detail views as floating cards beside the
-  table.
+- **Layout**: the table is full-width by default — nothing reserves
+  horizontal space. Detail views and panel modes open **on demand as a
+  400px slide-over** fixed to the right viewport edge (Panel bg, left
+  border, own scroll, `-16px 0 40px` shadow, **no backdrop** so the table
+  underneath stays visible and interactive); closed via ✕ or Esc. Never
+  render detail views as floating cards beside the table, and never dock
+  a permanently-open panel on management pages (the docked context panel
+  is a workspace-page pattern only).
+- **Stat strip** above the filter row: one bordered bar of flex cells
+  (11px uppercase label over an 18px tabular value, optional faint sub
+  like a percentage), giving the page its at-a-glance overview.
 - **Page header**: title + instance picker together on the left (context
   before actions); header-right holds only the live indicator and at most
   one panel-level action. Refresh actions live in the **table footer**

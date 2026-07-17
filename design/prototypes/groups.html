@@ -4,10 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniWA Console — Groups (prototype)</title>
-<!-- Static prototype. Sample data only. Groups is the template management page:
-     content column + full-height docked detail panel. The filter row swaps to
-     selection actions while rows are checked (shown here with 2 checked).
-     Named Lists open as a modal — see lists.html. No conversation view. -->
+<!-- Static prototype. Sample data only. Groups default state: stat strip +
+     full-width table; the filter row swaps to selection actions while rows
+     are checked (2 checked here, quick-add dropdown open). Clicking a row —
+     or the Named Lists button — opens an on-demand slide-over panel from the
+     right (see lists.html); nothing reserves space by default. Row detail
+     carries meta, invite link, member management, and one-off Send text. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="console.css">
@@ -49,8 +51,7 @@
     </div>
   </aside>
 
-  <main class="workspace">
-    <section class="pagecol">
+  <main>
       <div class="page-head">
         <span style="display:flex;align-items:center;gap:12px">
           <h1>Groups</h1>
@@ -60,6 +61,14 @@
           <span class="live"><span class="dot"></span>live</span>
           <a class="btn" href="lists.html" style="text-decoration:none">Named Lists <span class="count num" style="font-family:var(--mono);font-size:11px;background:var(--recessed);border:1px solid var(--border-subtle);border-radius:4px;padding:0 5px">3</span></a>
         </div>
+      </div>
+
+      <div class="statrow">
+        <div class="stat"><span class="label">Groups</span><b class="num">37</b></div>
+        <div class="stat"><span class="label">In Named Lists</span><b class="num">24</b><span class="sub">65%</span></div>
+        <div class="stat"><span class="label">Admin role</span><b class="num">12</b></div>
+        <div class="stat"><span class="label">Archived</span><b class="num">1</b></div>
+        <div class="stat"><span class="label">Named Lists</span><b class="num">3</b><span class="sub">2 in use</span></div>
       </div>
 
       <!-- With no selection this row shows: [search] [role: admin ✕] [+ filter].
@@ -144,67 +153,6 @@
           </span>
         </div>
       </div>
-    </section>
-
-    <aside class="context wide">
-      <section>
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
-          <div><b style="font-size:14px">Khách sỉ miền Nam</b><br><span class="mono">grp_44he2n</span></div>
-          <button class="btn sm" aria-label="Close" style="padding:3px 8px">✕</button>
-        </div>
-        <div class="kv">
-          <dt>Members</dt><dd class="num">86</dd>
-          <dt>Our role</dt><dd>admin</dd>
-          <dt>Local state</dt><dd><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></dd>
-          <dt>In lists</dt><dd><span class="chip">Đại lý toàn quốc</span></dd>
-          <dt>Updated</dt><dd class="ts" title="2026-07-16T08:12:44Z">41m ago</dd>
-        </div>
-        <div class="actions" style="margin-top:12px">
-          <button class="btn">Send text…</button>
-          <button class="btn">Add to Named List ▾</button>
-        </div>
-        <p class="help" style="margin-top:8px">Send text opens the compose dialog
-          (<span class="mono">sendGroupTextMessage</span>) — accepted, delivery per member policy.
-          Recurring sends belong in <a href="campaigns.html" style="color:var(--accent)">Messages</a> campaigns.</p>
-      </section>
-
-      <section>
-        <h3>Invite link</h3>
-        <div class="invite">
-          <div class="codewell">https://chat.whatsapp.com/Fk20…9dQz</div>
-          <button class="btn sm">Copy</button>
-          <button class="btn sm">Refresh</button>
-        </div>
-        <p class="help" style="margin-top:6px">Refreshing invalidates the previous link.</p>
-      </section>
-
-      <section>
-        <h3>Members <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 3 of 86</span></h3>
-        <table class="minitable">
-          <tbody>
-            <tr>
-              <td>Nguyễn Văn Bình</td>
-              <td><span class="pill">member</span></td>
-              <td style="text-align:right"><button class="btn sm">Promote</button> <button class="btn sm danger">Remove</button></td>
-            </tr>
-            <tr>
-              <td>Đỗ Thị Lan</td>
-              <td><span class="pill">member</span></td>
-              <td style="text-align:right"><button class="btn sm">Promote</button> <button class="btn sm danger">Remove</button></td>
-            </tr>
-            <tr>
-              <td>Trần Minh Hòa</td>
-              <td><span class="pill">admin</span></td>
-              <td style="text-align:right"><button class="btn sm">Demote</button> <button class="btn sm danger">Remove</button></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="actions" style="margin-top:10px">
-          <button class="btn sm">Add member…</button>
-          <button class="btn sm">All members</button>
-        </div>
-      </section>
-    </aside>
   </main>
 </div>
 </body>
