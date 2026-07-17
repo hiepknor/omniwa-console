@@ -516,3 +516,24 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
   .dropdown-menu-foot{display:none}.dropdown-option{min-height:44px}
 }
 @media(prefers-reduced-motion:reduce){.dropdown-trigger>svg{transition-duration:.01ms!important}}
+
+/* Synced verbatim from design/prototypes/console.css — Settings navigation utility. */
+/* ===== Settings navigation utility ===== */
+.navfoot{display:grid;gap:6px}
+.navfoot a[title="Settings"]{display:grid;grid-template-columns:28px minmax(0,1fr) 12px;align-items:center;gap:10px;min-height:52px;padding:6px 8px;border-color:var(--border-subtle);background:color-mix(in oklab,var(--fg) 2.5%,transparent)}
+.navfoot a[title="Settings"]>svg{box-sizing:border-box;width:28px;height:28px;padding:5px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--recessed);opacity:1}
+.navfoot a[title="Settings"] .lbl{display:grid;gap:1px;font-size:12px;line-height:15px;color:var(--fg-2)}
+.navfoot a[title="Settings"] .lbl::after{content:"Workspace preferences";overflow:hidden;font-size:9px;line-height:12px;font-weight:400;color:var(--meta);text-overflow:ellipsis;white-space:nowrap}
+.navfoot a[title="Settings"]::after{content:"›";font:400 16px/1 var(--font-body);color:var(--meta)}
+.navfoot a[title="Settings"]:hover{border-color:var(--border);background:color-mix(in oklab,var(--fg) 5%,transparent)}
+.navfoot a[title="Settings"].active{border-color:var(--border-strong);background:color-mix(in oklab,var(--fg) 8%,transparent)}
+.navfoot a[title="Settings"].active>svg{border-color:var(--border);background:var(--accent)}
+.navfoot a[title="Settings"].active::after{color:var(--fg-2)}
+@media(max-width:900px){
+  .navfoot{gap:0}
+  .navfoot a[title="Settings"]{display:flex;grid-template-columns:none;min-height:44px;padding:10px;border-color:transparent;background:none}
+  .navfoot a[title="Settings"]>svg{width:17px;height:17px;padding:0;border:0;background:none}
+  .navfoot a[title="Settings"] .lbl{font-size:inherit;line-height:inherit;color:inherit}
+  .navfoot a[title="Settings"] .lbl::after,.navfoot a[title="Settings"]::after{display:none}
+  .navfoot a[title="Settings"].active>svg{border:0;background:none}
+}

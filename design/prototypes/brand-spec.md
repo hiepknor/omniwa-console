@@ -24,5 +24,9 @@ The system uses a warm near-black base, Matter Regular, and a Parchment/Ash/Ston
 - Almost monochromatic; no saturated accents, gradients, glow, or glass effects.
 - Section labels are uppercase with wide tracking; headlines and navigation use weight 400, with 500 reserved for emphasis.
 - The desktop sidebar is 224px wide; cards and controls use Frosted Veil and Mist Border instead of shadows.
+- Settings is a contained utility destination above the session footer: a
+  52px row with a 28px recessed icon well, primary label, quiet workspace
+  context, and trailing disclosure. It collapses back to the standard nav
+  item treatment on the rail and mobile bar.
 - Active, hover, and focus states adjust luminance and opacity within the same warm palette.
 - Rail and mobile layouts retain thin-stroke icons, clear labels, and interaction targets of at least 44px.

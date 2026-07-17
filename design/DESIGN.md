@@ -383,7 +383,7 @@ this subsection binds to it.
 ## 5. Layout Principles
 
 - **Shell**: sticky 224px warm near-black sidebar (subtle right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed).
-- **Sidebar anatomy**: 64px-tall logo block (32px mark on Earth Gray — beside the app name 14px/500 and base URL in mono 10px); nav items (13px/400, 6px radius, 10px gap) each carry a 17px stroke icon + label + optional mono count badge; active = Warm Parchment text on Frosted Veil with a subtle Mist edge. Settings stays pinned above a contained session footer showing connected status, fingerprint, key kind, and disconnect.
+- **Sidebar anatomy**: 64px-tall logo block (32px mark on Earth Gray — beside the app name 14px/500 and base URL in mono 10px); nav items (13px/400, 6px radius, 10px gap) each carry a 17px stroke icon + label + optional mono count badge; active = Warm Parchment text on Frosted Veil with a subtle Mist edge. Settings stays pinned above the session footer as a 52px contained utility row with a recessed 28px icon well, "Workspace preferences" context, and a quiet disclosure mark. On the compact rail and mobile bar it returns to the standard navigation-item treatment.
 - **Nav hierarchy**: **Overview** sits alone at the top (the landing page,
   spanning both concerns). Then two labeled sections — **Operations**:
   Instances (the foundational resource first), Queue & Jobs, Webhooks,
