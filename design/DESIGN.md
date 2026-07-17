@@ -19,7 +19,7 @@ density and unambiguous status vocabulary. The visual language follows Open
 Design's Warp system: warm near-black surfaces, parchment text, regular-weight
 typography, mist borders, and almost monochromatic controls.
 
-The canvas is warm near-black (`#171715`), not cold blue-black. Panels use
+The canvas is warm near-black (`#161412`), not cold blue-black. Panels use
 barely visible warm overlays and semi-transparent mist borders. Primary text
 is Warm Parchment (`#faf9f6`), never pure white. Interaction is communicated
 through opacity and border brightness instead of saturated accent colors.
@@ -32,7 +32,7 @@ should be able to go from any error toast to a log query in one copy-paste.
 
 **Key characteristics:**
 
-- Dark-mode-native: `#171715` canvas, `#1d1d1b` panels, `#292927` elevated surfaces
+- Dark-mode-native: `#161412` canvas, `#1f1d1b` panels, `color-mix(in oklab, var(--surface), var(--fg) 4%)` elevated surfaces
 - Matter Regular for UI text; Matter Mono / Geist Mono for identifiers and technical values
 - Warm Parchment (`#faf9f6`) foreground with Ash and Stone gray hierarchy
 - No brand accent, gradients, or glow; interaction uses opacity and mist borders
@@ -44,10 +44,10 @@ should be able to go from any error toast to a log query in one copy-paste.
 
 ### Background surfaces
 
-- **Canvas** (`#171715`): warm near-black page background.
-- **Panel** (`#1d1d1b`): sidebar, table containers, cards.
-- **Elevated** (`#292927`): dropdowns, drawers, dialogs, row hover.
-- **Recessed** (`#111110`): code/QR wells, input backgrounds.
+- **Canvas** (`#161412`): warm near-black page background.
+- **Panel** (`#1f1d1b`): sidebar, table containers, cards.
+- **Elevated** (`color-mix(in oklab, var(--surface), var(--fg) 4%)`): dropdowns, drawers, dialogs, row hover.
+- **Recessed** (`color-mix(in oklab, var(--bg), black 12%)`): code/QR wells, input backgrounds.
 
 ### Text
 
@@ -67,12 +67,12 @@ should be able to go from any error toast to a log query in one copy-paste.
 
 | Status | Color | Used for |
 | --- | --- | --- |
-| `ok / connected / delivered / active` | `#8fae99` | Healthy lifecycle states |
-| `pending / pairing / queued / accepted` | `#b2a17f` | In-flight, waiting states |
-| `degraded / retrying / suspended` | `#b08d79` | Needs attention, self-recovering |
-| `failed / disconnected / dead` | `#b78486` | Terminal failures, action required |
-| `info / streaming` | `#8e9eaa` | Neutral events, SSE activity |
-| `retired / archived / unknown` | `#777674` | Inactive, no action possible |
+| `ok / connected / delivered / active` | `color-mix(in oklab, var(--success), var(--fg-2) 52%)` | Healthy lifecycle states |
+| `pending / pairing / queued / accepted` | `color-mix(in oklab, var(--warn), var(--fg-2) 56%)` | In-flight, waiting states |
+| `degraded / retrying / suspended` | `color-mix(in oklab, var(--warn), var(--danger) 38%)` | Needs attention, self-recovering |
+| `failed / disconnected / dead` | `color-mix(in oklab, var(--danger), var(--fg-2) 55%)` | Terminal failures, action required |
+| `info / streaming` | `color-mix(in oklab, var(--muted), var(--fg-2) 44%)` | Neutral events, SSE activity |
+| `retired / archived / unknown` | `var(--muted)` | Inactive, no action possible |
 
 Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 (accessibility and print).
@@ -391,10 +391,10 @@ this subsection binds to it.
 
 | Level | Treatment | Use |
 | --- | --- | --- |
-| 0 Canvas | `#171715`, no gradient | Page background |
-| 1 Panel | `#1d1d1b` + Frosted Veil | Tables, cards, sidebar |
-| 2 Elevated | `#292927` + Mist Border | Hover rows, drawers, dropdowns |
-| 2b Recessed | `#111110` + subtle border | Inputs, code wells, QR container |
+| 0 Canvas | `#161412`, no gradient | Page background |
+| 1 Panel | `#1f1d1b` + Frosted Veil | Tables, cards, sidebar |
+| 2 Elevated | `color-mix(in oklab, var(--surface), var(--fg) 4%)` + Mist Border | Hover rows, drawers, dropdowns |
+| 2b Recessed | `color-mix(in oklab, var(--bg), black 12%)` + subtle border | Inputs, code wells, QR container |
 | 3 Overlay | Elevated + `rgba(0,0,0,0.7)` backdrop | Dialogs, command palette |
 
 Base content uses luminance stepping and borders. Regular cards have no shadow;
@@ -440,7 +440,7 @@ Navigation touch targets are at least 44px; mobile controls use 44px where densi
 
 ### Quick reference
 
-- Canvas `#171715` · Panel `#1d1d1b` · Elevated `#292927` · Recessed `#111110`
+- Canvas `#161412` · Panel `#1f1d1b` · Elevated `color-mix(in oklab, var(--surface), var(--fg) 4%)` · Recessed `color-mix(in oklab, var(--bg), black 12%)`
 - Text `#faf9f6` / `#afaeac` / `#868584` / `#666469`
 - Controls `#353534`; no saturated brand accent
 - Status: muted semantic hues only; never reused as chrome
@@ -452,7 +452,7 @@ Navigation touch targets are at least 44px; mobile controls use 44px where densi
 
 - "Build an instance table on a 4% white veil with a 35%-alpha Mist Border and 12px radius. Sticky header row: 11px/400 uppercase Stone Gray with 2.4px tracking. Rows 36px, 13px Warm Parchment; hover uses a barely visible white veil. Status remains muted semantic dot + label."
 - "Metric block: Frosted Veil surface, Mist Border, 12px radius, 16px padding, no shadow. Label 11px/400 uppercase Stone Gray, value 26px/400 Warm Parchment with tabular numerals, context line 12px Purple-Tint Gray."
-- "QR pairing block: `#111110` recessed container, inside it a 240px white well holding the QR, expiry countdown in Matter Mono 12px turning muted amber under 10s, Earth Gray pill button below."
+- "QR pairing block: `color-mix(in oklab, var(--bg), black 12%)` recessed container, inside it a 240px white well holding the QR, expiry countdown in Matter Mono 12px turning muted amber under 10s, Earth Gray pill button below."
 
 ### Iteration guide
 
