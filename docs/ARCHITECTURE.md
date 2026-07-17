@@ -76,7 +76,7 @@ The messaging workflow is primary; operations panels are secondary:
 /connect
 /chats/:instanceId?/:chatId?         # primary: direct conversations (3-pane)
 /groups/:instanceId?                 # primary: group management table
-                                     #   ?list=nl_* opens the Named Lists modal
+                                     #   ?list=nl_* opens the Named Lists panel mode
 /messages                            # campaigns (proposed contract)
 /messages/new                        # campaign wizard (proposed)
 /overview

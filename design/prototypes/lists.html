@@ -3,22 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OmniWA Console — Groups · Named Lists modal (prototype)</title>
-<!-- Static prototype. Sample data only. The Named Lists modal open over the
-     Groups page (deep link: /groups?list=nl_77aq2k). PROPOSED contract —
-     see docs/CAMPAIGNS_PROPOSAL.md. Members are groups only. -->
+<title>OmniWA Console — Groups · Named Lists panel (prototype)</title>
+<!-- Static prototype. Sample data only. The Named Lists PANEL MODE of the
+     Groups page (deep link: /groups?list=nl_77aq2k): the right panel manages
+     lists while the table stays visible and selectable — the selection strip
+     adds checked rows to the open list. PROPOSED contract, see
+     docs/CAMPAIGNS_PROPOSAL.md. Quick-add dropdown lives in groups.html. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="console.css">
 <style>
-  .modalgrid{display:grid;grid-template-columns:240px 1fr;min-height:320px}
-  .modalgrid .lcol{border-right:1px solid var(--border-subtle);padding:8px}
-  .modalgrid .rcol{padding:16px}
-  .nlitem{display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
-    padding:8px 10px;border-radius:8px;color:var(--text-3);font:500 13px Inter,sans-serif}
-  .nlitem:hover{background:rgba(255,255,255,.03);color:var(--text-2)}
-  .nlitem.active{background:var(--accent-tint);color:var(--accent)}
-  .nlitem .sub{display:block;font-family:var(--mono);font-size:11px;color:var(--text-4);font-weight:400}
+  .invite{display:flex;gap:8px;align-items:center}
+  .invite .codewell{flex:1;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .inlists{display:flex;gap:4px}
 </style>
 </head>
 <body>
@@ -53,82 +50,148 @@
     </div>
   </aside>
 
-  <main>
-    <div class="page-head">
-      <span style="display:flex;align-items:center;gap:12px">
-        <h1>Groups</h1>
-        <button class="instpick" style="width:auto"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
-      </span>
-      <div class="head-right">
-        <a class="btn" href="#" style="text-decoration:none">Named Lists</a>
+  <main class="workspace">
+    <section class="pagecol">
+      <div class="page-head">
+        <span style="display:flex;align-items:center;gap:12px">
+          <h1>Groups</h1>
+          <button class="instpick" style="width:auto"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
+        </span>
+        <div class="head-right">
+          <span class="live"><span class="dot"></span>live</span>
+          <a class="btn" href="groups.html" style="text-decoration:none;border-color:var(--border-strong)">Named Lists <span class="count num" style="font-family:var(--mono);font-size:11px;background:var(--recessed);border:1px solid var(--border-subtle);border-radius:4px;padding:0 5px">3</span></a>
+        </div>
       </div>
-    </div>
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th class="check"><input type="checkbox"></th><th>Group</th><th>ID</th><th>Members</th><th>Our role</th></tr></thead>
-        <tbody>
-          <tr><td class="check"><input type="checkbox"></td><td>Khách sỉ miền Nam</td><td><span class="mono">grp_44he2n</span></td><td class="num">86</td><td><span class="pill">admin</span></td></tr>
-          <tr><td class="check"><input type="checkbox"></td><td>Đại lý Hà Nội</td><td><span class="mono">grp_90weu2</span></td><td class="num">42</td><td><span class="pill">member</span></td></tr>
-          <tr><td class="check"><input type="checkbox"></td><td>Nội bộ vận hành</td><td><span class="mono">grp_iw02mm</span></td><td class="num">12</td><td><span class="pill">admin</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
-</div>
 
-<div class="overlay">
-  <div class="dialog wide">
-    <header>
-      <b>Named Lists <span class="pill" style="margin-left:6px"><span class="dot" style="background:var(--info)"></span>proposed contract</span></b>
-      <button class="close" style="color:var(--text-3);background:none;border:none;font-size:16px;cursor:pointer;width:26px;height:26px;border-radius:6px" aria-label="Close">✕</button>
-    </header>
-    <div class="modalgrid">
-      <div class="lcol">
-        <button class="nlitem active">Đại lý toàn quốc
-          <span class="sub">nl_77aq2k · 24 groups</span></button>
-        <button class="nlitem">Miền Bắc
-          <span class="sub">nl_31mmd8 · 9 groups</span></button>
-        <button class="nlitem">Khách sỉ VIP
-          <span class="sub">nl_08qq1z · 5 groups</span></button>
+      <div class="filterbar">
+        <span class="count num">2 selected</span>
+        <span class="rel"><button class="btn primary sm">Add to Named List ▾</button></span>
+        <button class="clear">Clear selection</button>
       </div>
-      <div class="rcol">
+
+      <div class="tablewrap">
+        <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="check"><input type="checkbox"></th>
+              <th>Group</th><th>ID</th><th class="r">Members</th><th>Our role</th>
+              <th>Local state</th><th>In lists</th><th class="r">Last activity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="checked">
+              <td class="check"><input type="checkbox" checked></td>
+              <td>Khách sỉ miền Nam</td>
+              <td><span class="mono">grp_44he2n</span></td>
+              <td class="r num">86</td>
+              <td><span class="pill">admin</span></td>
+              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+              <td class="inlists"><span class="chip">Đại lý toàn quốc</span></td>
+              <td class="r ts" title="2026-07-16T08:12:44Z">41m ago</td>
+            </tr>
+            <tr class="checked">
+              <td class="check"><input type="checkbox" checked></td>
+              <td>Đại lý Hà Nội</td>
+              <td><span class="mono">grp_90weu2</span></td>
+              <td class="r num">42</td>
+              <td><span class="pill">member</span></td>
+              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+              <td class="inlists"><span class="chip">Đại lý toàn quốc</span> <span class="chip">Miền Bắc</span></td>
+              <td class="r ts" title="2026-07-16T06:55:01Z">2h ago</td>
+            </tr>
+            <tr>
+              <td class="check"><input type="checkbox"></td>
+              <td>Nội bộ vận hành</td>
+              <td><span class="mono">grp_iw02mm</span></td>
+              <td class="r num">12</td>
+              <td><span class="pill">admin</span></td>
+              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
+              <td class="ts">—</td>
+              <td class="r ts" title="2026-07-15T15:30:00Z">17h ago</td>
+            </tr>
+            <tr>
+              <td class="check"><input type="checkbox"></td>
+              <td>Khuyến mãi 2024 (cũ)</td>
+              <td><span class="mono">grp_pp81xd</span></td>
+              <td class="r num">204</td>
+              <td><span class="pill">member</span></td>
+              <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>archived</span></td>
+              <td class="ts">—</td>
+              <td class="r ts" title="2026-05-02T00:00:00Z">75d ago</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="table-foot">
+          <span class="num">4 of 37 groups · synced 41m ago</span>
+          <span style="display:flex;gap:8px">
+            <button class="btn">Refresh groups</button>
+            <button class="btn">Load more</button>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="context wide">
+      <section>
+        <div style="display:flex;align-items:center;gap:8px">
+          <b style="font-size:14px">Named Lists</b>
+          <span class="pill"><span class="dot" style="background:var(--info)"></span>proposed contract</span>
+          <a class="btn sm" href="groups.html" style="margin-left:auto;text-decoration:none" aria-label="Close">✕</a>
+        </div>
+      </section>
+
+      <section>
+        <button class="nlitem active">Đại lý toàn quốc
+          <span class="sub">nl_77aq2k · 24 groups · used by 2 campaigns</span></button>
+        <button class="nlitem">Miền Bắc
+          <span class="sub">nl_31mmd8 · 9 groups · used by 1 campaign</span></button>
+        <button class="nlitem">Khách sỉ VIP
+          <span class="sub">nl_08qq1z · 5 groups · unused</span></button>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <input class="input" placeholder="New Named List…">
+          <button class="btn sm">Create</button>
+        </div>
+      </section>
+
+      <section>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-          <b style="font-size:14px">Đại lý toàn quốc</b>
-          <span class="mono">nl_77aq2k</span>
+          <div><b style="font-size:14px">Đại lý toàn quốc</b><br><span class="mono">nl_77aq2k</span></div>
           <span style="margin-left:auto"></span>
           <button class="btn sm">Rename…</button>
           <button class="btn sm danger">Delete…</button>
         </div>
+
+        <div class="selstrip">
+          <span class="num"><b>2 groups</b> selected on the table</span>
+          <button class="btn primary sm">Add to this list</button>
+        </div>
+
+        <input class="search" style="width:100%;margin-bottom:10px" placeholder="Search 24 groups in this list…">
+
         <table class="minitable">
-          <thead><tr><th>Group</th><th>Members</th><th></th></tr></thead>
           <tbody>
             <tr>
               <td>Khách sỉ miền Nam <span class="mono">grp_44he2n</span></td>
-              <td class="num">86</td>
               <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
             </tr>
             <tr>
               <td>Đại lý Hà Nội <span class="mono">grp_90weu2</span></td>
-              <td class="num">42</td>
               <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
             </tr>
             <tr>
               <td>Đại lý Cần Thơ <span class="mono">grp_66eh0m</span></td>
-              <td class="num">31</td>
               <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
             </tr>
           </tbody>
         </table>
-        <p class="help" style="margin-top:8px">3 of 24 groups · add groups by selecting rows on the
-          Groups table → <b>Add to Named List</b>. Campaigns snapshot the list at start; deletion is
-          blocked while a scheduled or running campaign references it.</p>
-      </div>
-    </div>
-    <footer>
-      <input class="input" placeholder="New Named List name…" style="max-width:260px">
-      <button class="btn primary">Create</button>
-    </footer>
-  </div>
+        <p class="help" style="margin-top:8px">3 of 24 groups. Campaigns snapshot the list at start;
+          deletion is blocked while a scheduled or running campaign references it.
+          Deep link: <span class="mono">/groups?list=nl_77aq2k</span></p>
+      </section>
+    </aside>
+  </main>
 </div>
 </body>
 </html>

@@ -82,9 +82,10 @@ pacing (msgs/min ≤ platform cap), schedule (now | at), state
 
 ## Console UX summary
 
-- **Named Lists** (modal on Groups, deep link `/groups?list=nl_*`): left
-  pane lists Named Lists, right pane shows member groups; groups are added
-  by row-selection on the Groups table ("Add to Named List"), never by
+- **Named Lists** (right-panel mode on Groups, deep link
+  `/groups?list=nl_*`): the docked panel manages lists while the Groups
+  table stays visible — quick-add via a dropdown on the bulk action, or
+  check rows and use the panel's "Add to this list" strip; never by
   import. Add/edit/delete with the reference guard above.
 - **New campaign** (`/messages/new`): 3-step wizard — Audience (pick a
   Named List, see resolved group count) → Message (text/media, preview as

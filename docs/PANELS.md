@@ -62,9 +62,10 @@ checkbox on every row. Selecting rows raises a bulk bar whose single
 action is **Add to Named List**. There is no group conversation view: a
 row opens a detail drawer (meta, invite link, member management, one-off
 "Send text…" compose dialog); recurring sends go through Messages
-campaigns. **Named Lists** open as a modal (deep link `?list=nl_*`) for
-add/edit/delete of group lists — named-list operations are proposed
-contract, see below.
+campaigns. Quick-add runs through a dropdown on the bulk action;
+**Named Lists** management opens as a right-panel mode (deep link
+`?list=nl_*`) so the table stays selectable while editing lists —
+named-list operations are proposed contract, see below.
 
 Operations: `listInstanceGroups`, `getGroup`, `updateGroup`,
 `updateGroupLocalState`, `refreshInstanceGroups`, `refreshGroupInviteLink`,
@@ -133,5 +134,5 @@ never stored.
 Every operation in the v1 contract (77 total) is owned by at least one panel
 above; `streamEvents` is shared by the realtime panels through the single
 SSE connection described in `docs/REALTIME.md`. The `messages` panel
-(campaigns) and the Named Lists tab of `groups` reference proposed (not yet
-existing) operations only.
+(campaigns) and the Named Lists panel mode of `groups` reference proposed
+(not yet existing) operations only.

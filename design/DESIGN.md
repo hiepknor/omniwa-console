@@ -220,12 +220,27 @@ this subsection binds to it.
 - Row click (outside the checkbox) opens the detail panel; the checkbox
   never does.
 
-### Modal (Named Lists)
+### Dropdown menu (quick actions)
 
-- 640px wide variant of the dialog spec, Elevated bg over the standard
-  `rgba(0,0,0,0.7)` overlay; deep-linkable via `?list=nl_*`.
-- Two-pane body: list picker left (240px, active item = accent tint),
-  member table right; creation input lives in the footer.
+- Anchored below its trigger button (6px gap): Elevated bg, default
+  border, 8px radius, floating shadow, 4px inner padding; items are
+  13px/500 rows (6px radius, hover = white 5%) with a mono count on the
+  right; a subtle divider separates an inline "create from selection"
+  input row at the bottom. Used by "Add to Named List ▾" on the bulk bar
+  and in the group detail panel.
+
+### Named Lists panel mode (Groups)
+
+- The "Named Lists" header button (and any "In lists" chip) switches the
+  docked detail panel into list-management mode — never a modal, so the
+  table stays visible and selectable. Deep link `?list=nl_*`.
+- Panel anatomy top-to-bottom: mode header with close; list picker
+  (accent-tint active item; each row shows name, mono id, group count,
+  and "used by N campaigns") with an inline create input; selected-list
+  section with Rename/Delete (guarded), a **selection strip**
+  (accent-tint band: "N groups selected on the table → Add to this
+  list") whenever table rows are checked, a member search input, and the
+  member list with per-row Remove.
 
 ### Campaign components (proposed contract — see docs/CAMPAIGNS_PROPOSAL.md)
 

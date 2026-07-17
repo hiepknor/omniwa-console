@@ -14,8 +14,8 @@ visual spec (structure, spacing, states, status vocabulary).
 | File | Nav item | Shows |
 | --- | --- | --- |
 | `chats.html` | Chats | Direct conversations only: three-pane workspace, instance selector + label filters, bubble timeline with per-message delivery status, failed-message retry, composer, contact context panel; contact/label lookup via search + filters |
-| `groups.html` | Groups | Management table of all groups (metadata, row checkboxes, bulk "Add to Named List" bar) + detail drawer (invite link, members, one-off send) |
-| `lists.html` | Groups › Named Lists modal | Named Lists as a modal over Groups: list picker + member groups, add/edit/delete — **proposed contract** |
+| `groups.html` | Groups | Management table of all groups (metadata, row checkboxes, bulk "Add to Named List" dropdown) + detail drawer (invite link, members, one-off send) |
+| `lists.html` | Groups › Named Lists panel | Named Lists as a right-panel mode over the live table: list picker with campaign usage, add-from-selection strip, member search, add/edit/delete — **proposed contract** |
 | `campaigns.html` | Messages | Campaign management: segmented progress bars, running-campaign drawer (counters, recipients, pause/abort) — **proposed contract** |
 | `campaign-new.html` | Messages › New | 3-step send-setup wizard at Review: audience, message preview, platform-capped pacing — **proposed contract** |
 
