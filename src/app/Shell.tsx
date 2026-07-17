@@ -8,6 +8,9 @@ type IconName =
   | 'queue'
   | 'webhooks'
   | 'events'
+  | 'chats'
+  | 'groups'
+  | 'messages'
   | 'settings'
   | 'keys';
 
@@ -25,6 +28,12 @@ const OPERATION_ITEMS: NavItem[] = [
   { to: '/queue', label: 'Queue & Jobs', icon: 'queue' },
   { to: '/webhooks', label: 'Webhooks', icon: 'webhooks' },
   { to: '/events', label: 'Events', icon: 'events' },
+];
+
+const MESSAGING_ITEMS: NavItem[] = [
+  { to: '/chats', label: 'Chats', icon: 'chats' },
+  { to: '/groups', label: 'Groups', icon: 'groups' },
+  { to: '/messages', label: 'Messages', icon: 'messages' },
 ];
 
 const SYSTEM_ITEMS: NavItem[] = [
@@ -55,6 +64,21 @@ function NavIcon({ name }: { name: IconName }) {
       </>
     ),
     events: <path d="M3 12h4l3 8 4-16 3 8h4" />,
+    chats: <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
+    groups: (
+      <>
+        <path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9.5" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.9" />
+        <path d="M15.5 3.1a4 4 0 0 1 0 7.8" />
+      </>
+    ),
+    messages: (
+      <>
+        <path d="m22 2-7 20-4-9-9-4z" />
+        <path d="M22 2 11 13" />
+      </>
+    ),
     settings: (
       <>
         <circle cx="12" cy="12" r="3" />
@@ -120,6 +144,10 @@ export function Shell({
           <NavigationLink item={OVERVIEW_ITEM} />
           <span className="navlabel">Operations</span>
           {OPERATION_ITEMS.map((item) => (
+            <NavigationLink key={item.to} item={item} />
+          ))}
+          <span className="navlabel">Messaging</span>
+          {MESSAGING_ITEMS.map((item) => (
             <NavigationLink key={item.to} item={item} />
           ))}
         </nav>
