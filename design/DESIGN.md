@@ -210,6 +210,7 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 The messaging workspace is the console's center of gravity; everything in
 this subsection binds to it.
 
+- At 900px and below, replace the simultaneous three-pane layout with a deliberate single-pane switcher. The selected thread is the default pane; Conversations and Context remain one action away and all mobile controls meet 44px targets.
 - **Three-pane layout**: conversation list (300px, Panel bg) · conversation
   timeline (fluid, Canvas bg) · context panel (320px, Panel bg, collapsible).
   The workspace fills the viewport; only the timeline scrolls vertically.
@@ -220,10 +221,10 @@ this subsection binds to it.
 - **Message bubbles**: max-width 68%, radius 10px, 13px text, timestamp +
   status footer (11px). Inbound = Elevated bg, left-aligned. Outbound =
   Frosted Veil bg with Mist Border, right-aligned. Failed outbound adds a
-  3px muted-red left edge and inline
-  Retry/Cancel ghost buttons. Media bubbles show a Recessed
-  placeholder block + caption. Clicking a bubble opens its delivery timeline
-  in the context panel.
+  3px muted-red left edge. Media bubbles show a purposeful Recessed
+  placeholder with media identity when a preview is unavailable. Clicking a
+  bubble opens its delivery timeline in the context panel; selected-message
+  actions live only in that panel and are never duplicated inside the bubble.
 - **Bubble status vocabulary** (footer, dot + label): `accepted` /
   `queued` amber · `delivered` emerald · `failed` red · `canceled` gray.
   Never a bare double-check mark — words, not glyphs.
@@ -231,7 +232,8 @@ this subsection binds to it.
   ("instance disconnected · 12:40"), never bubbles.
 - **Day separators**: centered 11px uppercase muted label on a subtle rule.
 - **Composer**: Recessed bg bar with textarea (auto-grow to 5 lines),
-  attach ghost icon-button, Send primary. When the instance is not
+  attach ghost icon-button, Send primary. Send remains disabled until the
+  trimmed message contains content. When the instance is not
   connected the composer is replaced by an amber warning bar with a
   "Reconnect" ghost action. Microcopy under composer: sends are
   *accepted*, delivery shows on the bubble.
