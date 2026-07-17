@@ -5,6 +5,7 @@ export type CollectionEnvelope = components['schemas']['CollectionEnvelope'];
 export type ErrorEnvelope = components['schemas']['ErrorEnvelope'];
 export type ApiErrorBody = components['schemas']['ApiError'];
 export type ResponseMeta = components['schemas']['ResponseMeta'];
+export type PublicData = components['schemas']['PublicData'];
 
 export type ErrorCategory =
   | 'authentication'
@@ -46,4 +47,24 @@ export function unwrap<T>(result: {
 }): T {
   if (result.data !== undefined) return result.data;
   throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
+}
+
+/** Narrow a SuccessEnvelope's data to one resourceType; undefined if it doesn't match. */
+export function pickResource<T extends PublicData['resourceType']>(
+  data: PublicData | undefined,
+  resourceType: T,
+): Extract<PublicData, { resourceType: T }> | undefined {
+  if (data?.resourceType !== resourceType) return undefined;
+  return data as Extract<PublicData, { resourceType: T }>;
+}
+
+/** Narrow a CollectionEnvelope's data array, keeping only the given resourceType. */
+export function pickResources<T extends PublicData['resourceType']>(
+  data: PublicData[] | undefined,
+  resourceType: T,
+): Extract<PublicData, { resourceType: T }>[] {
+  return (data ?? []).filter(
+    (item): item is Extract<PublicData, { resourceType: T }> =>
+      item?.resourceType === resourceType,
+  );
 }
