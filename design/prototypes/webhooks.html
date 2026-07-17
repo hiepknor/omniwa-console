@@ -44,7 +44,7 @@
       <div class="head-context"><div class="head-title-row"><h1>Webhooks</h1></div></div>
       <div class="head-right">
         <span class="live"><span class="dot"></span>live</span>
-        <button class="btn primary">Register webhook</button>
+        <button class="btn primary" type="button">Register webhook</button>
       </div>
     </header>
 
@@ -280,9 +280,15 @@
     }));
 
     const drawer = document.querySelector('.webhook-drawer');
-    document.querySelector('.webhook-drawer .close').addEventListener('click', () => {
+    const selectedWebhook = document.querySelector('.webhooks-table tr.selected');
+    const closeDrawer = () => {
       drawer.hidden = true;
-      document.querySelector('.webhooks-table tr.selected').focus();
+      selectedWebhook.focus();
+    };
+    document.querySelector('.webhook-drawer .close').addEventListener('click', closeDrawer);
+    selectedWebhook.addEventListener('click', () => {
+      drawer.hidden = false;
+      if (matchMedia('(max-width: 900px)').matches) drawer.scrollIntoView({ block: 'start' });
     });
 
     const overlay = document.querySelector('#retire-dialog');
@@ -309,6 +315,7 @@
     });
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && !overlay.hidden) closeRetire();
+      else if (event.key === 'Escape' && !drawer.hidden) closeDrawer();
     });
   })();
 </script>

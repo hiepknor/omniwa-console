@@ -10,11 +10,6 @@
      adds checked rows to the open list. PROPOSED contract, see
      docs/CAMPAIGNS_PROPOSAL.md. Quick-add dropdown lives in groups.html. -->
 <link rel="stylesheet" href="console.css">
-<style>
-  .invite{display:flex;gap:8px;align-items:center}
-  .invite .codewell{flex:1;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .inlists{display:flex;gap:4px}
-</style>
 </head>
 <body>
 <div class="shell">
@@ -70,8 +65,8 @@
 
       <div class="filterbar">
         <span class="count num">2 selected</span>
-        <span class="rel"><button class="btn primary sm">Add to Named List ▾</button></span>
-        <button class="clear">Clear selection</button>
+        <span class="rel"><button class="btn primary sm" type="button">Add to Named List ▾</button></span>
+        <button class="clear" type="button">Clear selection</button>
       </div>
 
       <div class="tablewrap">
@@ -79,35 +74,35 @@
         <table>
           <thead>
             <tr>
-              <th class="check"><input type="checkbox"></th>
+              <th class="check"><input type="checkbox" aria-label="Select all shown groups"></th>
               <th>Group</th><th>ID</th><th class="r">Members</th><th>Our role</th>
               <th>Local state</th><th>In lists</th><th class="r">Last activity</th>
             </tr>
           </thead>
           <tbody>
             <tr class="checked">
-              <td class="check"><input type="checkbox" checked></td>
-              <td>Khách sỉ miền Nam</td>
+              <td class="check"><input type="checkbox" checked aria-label="Select South wholesale partners"></td>
+              <td>South wholesale partners</td>
               <td><span class="mono">grp_44he2n</span></td>
               <td class="r num">86</td>
               <td><span class="pill">admin</span></td>
               <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-              <td class="inlists"><span class="chip">Đại lý toàn quốc</span></td>
+              <td class="inlists"><span class="chip">National dealers</span></td>
               <td class="r ts" title="2026-07-16T08:12:44Z">41m ago</td>
             </tr>
             <tr class="checked">
-              <td class="check"><input type="checkbox" checked></td>
-              <td>Đại lý Hà Nội</td>
+              <td class="check"><input type="checkbox" checked aria-label="Select Hanoi dealers"></td>
+              <td>Hanoi dealers</td>
               <td><span class="mono">grp_90weu2</span></td>
               <td class="r num">42</td>
               <td><span class="pill">member</span></td>
               <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-              <td class="inlists"><span class="chip">Đại lý toàn quốc</span> <span class="chip">Miền Bắc</span></td>
+              <td class="inlists"><span class="chip">National dealers</span> <span class="chip">North region</span></td>
               <td class="r ts" title="2026-07-16T06:55:01Z">2h ago</td>
             </tr>
             <tr>
-              <td class="check"><input type="checkbox"></td>
-              <td>Nội bộ vận hành</td>
+              <td class="check"><input type="checkbox" aria-label="Select Operations core"></td>
+              <td>Operations core</td>
               <td><span class="mono">grp_iw02mm</span></td>
               <td class="r num">12</td>
               <td><span class="pill">admin</span></td>
@@ -116,8 +111,8 @@
               <td class="r ts" title="2026-07-15T15:30:00Z">17h ago</td>
             </tr>
             <tr>
-              <td class="check"><input type="checkbox"></td>
-              <td>Khuyến mãi 2024 (cũ)</td>
+              <td class="check"><input type="checkbox" aria-label="Select Promotion 2024 legacy"></td>
+              <td>Promotion 2024 legacy</td>
               <td><span class="mono">grp_pp81xd</span></td>
               <td class="r num">204</td>
               <td><span class="pill">member</span></td>
@@ -130,66 +125,66 @@
         </div>
         <div class="table-foot">
           <span class="num">4 of 37 groups · synced 41m ago</span>
-          <span style="display:flex;gap:8px">
-            <button class="btn">Refresh groups</button>
-            <button class="btn">Load more</button>
+          <span class="named-lists-table-actions">
+            <button class="btn" type="button">Refresh groups</button>
+            <button class="btn" type="button">Load more</button>
           </span>
         </div>
       </div>
     <aside class="context wide over">
       <section>
-        <div style="display:flex;align-items:center;gap:8px">
-          <b style="font-size:14px">Named Lists</b>
+        <div class="named-lists-panel-head">
+          <b>Named Lists</b>
           <span class="pill"><span class="dot" style="background:var(--info)"></span>proposed contract</span>
-          <a class="btn sm" href="groups.html" style="margin-left:auto;text-decoration:none" aria-label="Close">✕</a>
+          <a class="btn sm named-lists-close" href="groups.html" aria-label="Close">✕</a>
         </div>
       </section>
 
       <section>
-        <button class="nlitem active">Đại lý toàn quốc
+        <button class="nlitem active" type="button">National dealers
           <span class="sub">nl_77aq2k · 24 groups · used by 2 campaigns</span></button>
-        <button class="nlitem">Miền Bắc
+        <button class="nlitem" type="button">North region
           <span class="sub">nl_31mmd8 · 9 groups · used by 1 campaign</span></button>
-        <button class="nlitem">Khách sỉ VIP
+        <button class="nlitem" type="button">VIP wholesale
           <span class="sub">nl_08qq1z · 5 groups · unused</span></button>
-        <div style="display:flex;gap:6px;margin-top:8px">
-          <input class="input" placeholder="New Named List…">
-          <button class="btn sm">Create</button>
+        <div class="named-lists-create-row">
+          <input class="input" aria-label="New Named List name" placeholder="New Named List…">
+          <button class="btn sm" type="button">Create</button>
         </div>
       </section>
 
       <section>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-          <div><b style="font-size:14px">Đại lý toàn quốc</b><br><span class="mono">nl_77aq2k</span></div>
-          <span style="margin-left:auto"></span>
-          <button class="btn sm">Rename…</button>
-          <button class="btn sm danger">Delete…</button>
+        <div class="named-lists-detail-head">
+          <div><b>National dealers</b><br><span class="mono">nl_77aq2k</span></div>
+          <span class="named-lists-spacer"></span>
+          <button class="btn sm" type="button">Rename…</button>
+          <button class="btn sm danger" type="button">Delete…</button>
         </div>
 
         <div class="selstrip">
           <span class="num"><b>2 groups</b> selected on the table</span>
-          <button class="btn primary sm">Add to this list</button>
+          <button class="btn primary sm" type="button">Add to this list</button>
         </div>
 
-        <input class="search" style="width:100%;margin-bottom:10px" placeholder="Search 24 groups in this list…">
+        <input class="search named-lists-search" aria-label="Search groups in National dealers" placeholder="Search 24 groups in this list…">
 
         <table class="minitable">
           <tbody>
             <tr>
-              <td>Khách sỉ miền Nam <span class="mono">grp_44he2n</span></td>
-              <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
+              <td>South wholesale partners <span class="mono">grp_44he2n</span></td>
+              <td class="named-lists-remove"><button class="btn sm danger" type="button">Remove</button></td>
             </tr>
             <tr>
-              <td>Đại lý Hà Nội <span class="mono">grp_90weu2</span></td>
-              <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
+              <td>Hanoi dealers <span class="mono">grp_90weu2</span></td>
+              <td class="named-lists-remove"><button class="btn sm danger" type="button">Remove</button></td>
             </tr>
             <tr>
-              <td>Đại lý Cần Thơ <span class="mono">grp_66eh0m</span></td>
-              <td style="text-align:right"><button class="btn sm danger">Remove</button></td>
+              <td>Can Tho dealers <span class="mono">grp_66eh0m</span></td>
+              <td class="named-lists-remove"><button class="btn sm danger" type="button">Remove</button></td>
             </tr>
           </tbody>
         </table>
-        <p class="help" style="margin-top:8px">3 of 24 groups. Campaigns snapshot the list at start;
+        <p class="help named-lists-help">3 of 24 groups. Campaigns snapshot the list at start;
           deletion is blocked while a scheduled or running campaign references it.
           Deep link: <span class="mono">/groups?list=nl_77aq2k</span></p>
       </section>

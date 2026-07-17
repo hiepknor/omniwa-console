@@ -44,7 +44,7 @@
       <div class="head-context"><div class="head-title-row"><h1>Instances</h1></div></div>
       <div class="head-right">
         <span class="live"><span class="dot"></span>live</span>
-        <button class="btn primary">New instance</button>
+        <button class="btn primary" type="button">New instance</button>
       </div>
     </header>
 
@@ -194,6 +194,23 @@
       }
     document.getElementById('qr').innerHTML =
       `<svg viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges">${rects}${finder(0, 0)}${finder(n - 7, 0)}${finder(0, n - 7)}</svg>`;
+  })();
+
+  (() => {
+    const drawer = document.querySelector('.instances-drawer');
+    const selectedRow = document.querySelector('.instances-table tr.selected');
+    const closeDrawer = () => {
+      drawer.hidden = true;
+      selectedRow.focus();
+    };
+    drawer.querySelector('.close').addEventListener('click', closeDrawer);
+    selectedRow.addEventListener('click', () => {
+      drawer.hidden = false;
+      if (matchMedia('(max-width: 900px)').matches) drawer.scrollIntoView({ block: 'start' });
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !drawer.hidden) closeDrawer();
+    });
   })();
 </script>
 </body>

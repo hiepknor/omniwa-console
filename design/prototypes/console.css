@@ -518,7 +518,7 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
   .page-head h1{line-height:24px}.head-meta{line-height:18px}
   .filterbar,.wizard{overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:4px}.filterbar>*{flex:0 0 auto}
   .search{width:min(220px,72vw)}.metrics,.overview-metrics{grid-template-columns:1fr;gap:12px}
-  .cols,.settings-grid{grid-template-columns:minmax(0,1fr)}.kv{grid-template-columns:minmax(90px,.8fr) minmax(0,1fr)}
+  .cols{grid-template-columns:minmax(0,1fr)}.kv{grid-template-columns:minmax(90px,.8fr) minmax(0,1fr)}
   .dialog,.dialog.wide{width:calc(100vw - 32px);max-width:none}.overlay{padding:16px}.toast{width:min(380px,calc(100vw - 32px))}
   .btn{min-height:44px;padding-inline:14px}.btn.sm{min-height:36px}.input,.search,.instpick{min-height:44px}
   .qr{width:min(240px,100%);height:auto;aspect-ratio:1}
@@ -580,11 +580,12 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
 .jobs-table tbody tr.selected{background:color-mix(in oklab,var(--fg) 7%,transparent);box-shadow:inset 3px 0 0 var(--fg)}
 .jobs-table tbody tr.terminal .status{color:var(--fg)}
 .jobs-table .table-foot{position:sticky;left:0;min-width:760px;min-height:48px;padding-inline:var(--space-4);background:var(--surface)}
-.queue-cursor{display:flex;align-items:center;gap:var(--space-3)}
+.queue-cursor,.queue-footer-actions{display:flex;align-items:center;gap:var(--space-3)}
 .queue-cursor .freshness,.queue-cursor .mono{padding-left:var(--space-3);border-left:1px solid var(--border-subtle);font-size:11px;color:var(--muted)}
 
 .queue-drawer{position:fixed;top:0;right:0;bottom:0;z-index:8;display:flex;flex-direction:column;width:440px;max-width:calc(100vw - 64px);
   border:0;border-left:1px solid var(--border);border-radius:0;background:var(--surface);box-shadow:var(--elev-raised);overflow:hidden}
+.queue-drawer[hidden]{display:none}
 .queue-drawer .drawer-head{flex:0 0 auto;align-items:flex-start;min-height:112px;padding:var(--space-5) var(--space-6);background:var(--bg)}
 .queue-drawer .drawer-title-row{flex-wrap:wrap}.queue-drawer .drawer-title-row h2{font-size:24px}
 .terminal-status{padding:2px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-pill);font-size:11px;color:var(--fg-2)}
@@ -659,6 +660,7 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
 
 .instances-drawer{position:fixed;top:0;right:0;bottom:0;z-index:8;display:flex;flex-direction:column;width:440px;max-width:calc(100vw - 64px);
   border:0;border-left:1px solid var(--border);border-radius:0;background:var(--surface);box-shadow:var(--elev-raised);overflow:hidden}
+.instances-drawer[hidden]{display:none}
 .instances-drawer .drawer-head{flex:0 0 auto;align-items:flex-start;min-height:112px;padding:var(--space-5) var(--space-6);background:var(--bg)}
 .drawer-identity{min-width:0}.drawer-identity .eyebrow{margin-bottom:var(--space-2)}
 .drawer-title-row{display:flex;align-items:center;gap:var(--space-3);min-width:0;margin-bottom:var(--space-1)}
@@ -1474,3 +1476,31 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
   .settings-dialog-overlay .dialog{max-width:100%}
 }
 @media(prefers-reduced-motion:reduce){.settings-screen *{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+/* ===== Prototype component sheets ===== */
+.dialog-sheet-screen{padding:24px}
+.dialog-sheet-screen .sheet{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.dialog-sheet-screen .demo>.caption{margin-bottom:10px;font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.15em;color:var(--text-3)}
+.dialog-sheet-screen .secretwell{display:flex;align-items:center;gap:8px}
+.dialog-sheet-screen .secretwell .codewell{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dialog-sheet-copy{margin-bottom:12px;font-size:13px;line-height:19px;color:var(--text-2)}
+.dialog-sheet-confirm-name{color:var(--failed)}
+.dialog-sheet-note{max-width:480px;margin-top:8px}
+.dialog-sheet-note-narrow{max-width:380px}
+.inlists{display:flex;gap:4px}
+.named-lists-table-actions,.named-lists-panel-head,.named-lists-detail-head{display:flex;align-items:center;gap:8px}
+.named-lists-panel-head>b,.named-lists-detail-head b{font-size:14px;font-weight:500}
+.named-lists-close{margin-left:auto;text-decoration:none}
+.named-lists-create-row{display:flex;gap:6px;margin-top:8px}
+.named-lists-detail-head{margin-bottom:12px}
+.named-lists-spacer{margin-left:auto}
+.named-lists-search{width:100%;margin-bottom:10px}
+.named-lists-remove{text-align:right}
+.named-lists-help{margin-top:8px}
+@media(max-width:640px){
+  .dialog-sheet-screen{padding:var(--space-3) 0 84px}
+  .dialog-sheet-screen .sheet{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-4)}
+  .dialog-sheet-screen .dialog,.dialog-sheet-screen .toast{max-width:100%}
+  .named-lists-detail-head{align-items:flex-start;flex-wrap:wrap}
+  .named-lists-spacer{display:none}
+}

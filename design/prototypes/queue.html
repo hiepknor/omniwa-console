@@ -44,7 +44,6 @@
       <div class="head-context"><div class="head-title-row"><h1>Queue &amp; Jobs</h1></div></div>
       <div class="head-right">
         <span class="live"><span class="dot"></span>live</span>
-        <button class="btn">Refresh</button>
       </div>
     </header>
 
@@ -121,7 +120,7 @@
           </div>
           <div class="table-foot">
             <div class="queue-cursor"><span class="num">5 of 142 jobs</span><span class="freshness">live</span><span class="mono">cursor · more available</span></div>
-            <button class="btn" type="button">Load more</button>
+            <div class="queue-footer-actions"><button class="btn" type="button">Refresh</button><button class="btn" type="button">Load more</button></div>
           </div>
         </div>
       </div>
@@ -183,5 +182,23 @@
     </section>
   </main>
 </div>
+<script>
+(() => {
+  const drawer = document.querySelector('.queue-drawer');
+  const selectedRow = document.querySelector('.jobs-table tr.selected');
+  const closeDrawer = () => {
+    drawer.hidden = true;
+    selectedRow.focus();
+  };
+  drawer.querySelector('.close').addEventListener('click', closeDrawer);
+  selectedRow.addEventListener('click', () => {
+    drawer.hidden = false;
+    if (matchMedia('(max-width: 900px)').matches) drawer.scrollIntoView({ block: 'start' });
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !drawer.hidden) closeDrawer();
+  });
+})();
+</script>
 </body>
 </html>
