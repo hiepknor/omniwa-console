@@ -144,6 +144,14 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 - Panel bg, default border, 8px radius, 16px padding.
 - Metric card: 11px uppercase label → 26px tabular value → 12px faint delta/context line.
 
+### Overview command surface
+
+- Scan order is fixed: compact system-health posture → five comparable metrics → action-required work queue → bounded live-event stream.
+- Health uses a quiet bordered strip with dot + label states; degraded services remain visible without becoming a saturated alert banner.
+- The five metric cards share equal visual weight and dense spacing. They may wrap from five to three, two, then one column, but values and labels remain directly comparable.
+- Action required is the primary content column. Its semantic table keeps status, resource ID/name, age, and a contextual row action aligned; horizontal overflow stays inside the table container.
+- Live events is secondary and uses a bounded, keyboard-reachable stream with monospaced event/resource fields and right-aligned age.
+
 ### Drawers & dialogs
 
 - Detail views open as right-side drawers: 420–480px, Elevated bg, strong left border; header = title + mono ID + close.

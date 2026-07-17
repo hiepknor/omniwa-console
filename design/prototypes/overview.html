@@ -6,17 +6,6 @@
 <title>OmniWA Console — Overview (prototype)</title>
 <!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
 <link rel="stylesheet" href="console.css">
-<style>
-  .health{display:flex;gap:8px;margin-bottom:16px}
-  .actioncol{text-align:right}
-  .ticker{background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-  .ticker header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--border-subtle)}
-  .ticker header b{font-size:14px;font-weight:500}
-  .event{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--border-subtle);font-size:12px}
-  .event:last-child{border-bottom:none}
-  .event .type{font-family:var(--mono);color:var(--text-2)}
-  .event .ts{margin-left:auto}
-</style>
 </head>
 <body>
 <div class="shell">
@@ -59,62 +48,77 @@
       </div>
     </header>
 
-    <div class="health">
-      <span class="pill"><span class="dot" style="background:var(--ok)"></span>API healthy</span>
-      <span class="pill"><span class="dot" style="background:var(--ok)"></span>Readiness ok</span>
-      <span class="pill"><span class="dot" style="background:var(--pending)"></span>Provider degraded · 1 instance</span>
-    </div>
-
-    <div class="metrics">
-      <div class="card"><div class="label">Active instances</div><div class="value num">6 / 8</div><div class="ctx">1 pairing · 1 disconnected</div></div>
-      <div class="card"><div class="label">Messages · 24h</div><div class="value num">12,408</div><div class="ctx num">98.2% delivered (sample)</div></div>
-      <div class="card"><div class="label">Queue depth</div><div class="value num">142</div><div class="ctx warn num">▲ 38 in last 10m</div></div>
-      <div class="card"><div class="label">Webhook success · 24h</div><div class="value num">99.1%</div><div class="ctx num">14 redriven</div></div>
-      <div class="card"><div class="label">Media processed · 24h</div><div class="value num">1,036</div><div class="ctx num">2 failed</div></div>
-    </div>
-
-    <div class="cols">
-      <div class="section">
-        <h2>Action required <span class="muted num">· 3</span></h2>
-        <div class="tablewrap">
-          <table>
-            <thead><tr><th>Item</th><th>Resource</th><th>Since</th><th></th></tr></thead>
-            <tbody>
-              <tr>
-                <td><span class="status"><span class="dot" style="background:var(--pending)"></span>Pairing required</span></td>
-                <td><span class="mono">inst_9f2ka7</span> support-vn</td>
-                <td class="ts" title="2026-07-16T08:41:00Z">12m ago</td>
-                <td class="actioncol"><button class="btn">Show QR</button></td>
-              </tr>
-              <tr>
-                <td><span class="status"><span class="dot" style="background:var(--degraded)"></span>Webhook suspended</span></td>
-                <td><span class="mono">wh_c41x02</span> billing-events</td>
-                <td class="ts" title="2026-07-16T06:02:00Z">2h ago</td>
-                <td class="actioncol"><button class="btn">Review</button></td>
-              </tr>
-              <tr>
-                <td><span class="status"><span class="dot" style="background:var(--failed)"></span>Job dead-lettered</span></td>
-                <td><span class="mono">job_77am1q</span> media-transcode</td>
-                <td class="ts" title="2026-07-15T22:17:00Z">10h ago</td>
-                <td class="actioncol"><button class="btn">Inspect</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="table-foot"><span class="num">3 of 3 items</span></div>
+    <div class="overview-content">
+      <section class="overview-health" aria-labelledby="overview-health-title" data-od-id="overview-health">
+        <h2 id="overview-health-title">Health</h2>
+        <div class="health" aria-label="System health posture">
+          <span class="health-item"><span class="dot dot-ok"></span><span>API healthy</span></span>
+          <span class="health-item"><span class="dot dot-ok"></span><span>Readiness ok</span></span>
+          <span class="health-item health-item-degraded"><span class="dot dot-pending"></span><span>Provider degraded · 1 instance</span></span>
         </div>
-      </div>
+      </section>
 
-      <div class="section">
-        <h2>Live events</h2>
-        <div class="ticker">
-          <header><b>Stream</b><span class="live"><span class="dot"></span>live</span></header>
-          <div class="event"><span class="dot" style="background:var(--ok)"></span><span class="type">message.delivered</span><span class="mono">inst_2bq81c</span><span class="ts">2s</span></div>
-          <div class="event"><span class="dot" style="background:var(--info)"></span><span class="type">webhook.delivery.sent</span><span class="mono">wh_88fj20</span><span class="ts">5s</span></div>
-          <div class="event"><span class="dot" style="background:var(--pending)"></span><span class="type">message.queued</span><span class="mono">inst_2bq81c</span><span class="ts">9s</span></div>
-          <div class="event"><span class="dot" style="background:var(--ok)"></span><span class="type">instance.connected</span><span class="mono">inst_5rr0znd</span><span class="ts">31s</span></div>
-          <div class="event"><span class="dot" style="background:var(--failed)"></span><span class="type">webhook.delivery.failed</span><span class="mono">wh_c41x02</span><span class="ts">1m</span></div>
-          <div class="event"><span class="dot" style="background:var(--info)"></span><span class="type">session.refreshed</span><span class="mono">inst_9f2ka7</span><span class="ts">2m</span></div>
+      <section class="overview-metric-section" aria-labelledby="overview-metrics-title" data-od-id="overview-metrics">
+        <h2 id="overview-metrics-title">Key metrics</h2>
+        <div class="metrics overview-metrics">
+          <article class="card overview-metric-card" data-od-id="metric-active-instances"><div class="label">Active instances</div><div class="value num">6 / 8</div><div class="ctx">1 pairing · 1 disconnected</div></article>
+          <article class="card overview-metric-card" data-od-id="metric-messages"><div class="label">Messages · 24h</div><div class="value num">12,408</div><div class="ctx num">98.2% delivered (sample)</div></article>
+          <article class="card overview-metric-card" data-od-id="metric-queue-depth"><div class="label">Queue depth</div><div class="value num">142</div><div class="ctx warn num">▲ 38 in last 10m</div></article>
+          <article class="card overview-metric-card" data-od-id="metric-webhook-success"><div class="label">Webhook success · 24h</div><div class="value num">99.1%</div><div class="ctx num">14 redriven</div></article>
+          <article class="card overview-metric-card" data-od-id="metric-media-processed"><div class="label">Media processed · 24h</div><div class="value num">1,036</div><div class="ctx num">2 failed</div></article>
         </div>
+      </section>
+
+      <div class="overview-workspace">
+        <section class="section overview-actions" aria-labelledby="overview-actions-title" data-od-id="overview-action-required">
+          <div class="overview-section-head">
+            <h2 id="overview-actions-title">Action required <span class="muted num">· 3</span></h2>
+          </div>
+          <div class="tablewrap overview-action-table" tabindex="0" role="region" aria-label="Action required work queue">
+            <table>
+              <thead><tr><th scope="col">Item</th><th scope="col">Resource</th><th scope="col">Since</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><span class="status"><span class="dot dot-pending"></span>Pairing required</span></td>
+                  <td><span class="resource"><span class="mono">inst_9f2ka7</span><span>support-vn</span></span></td>
+                  <td class="ts" title="2026-07-16T08:41:00Z">12m ago</td>
+                  <td class="actioncol"><button class="btn" aria-label="Show QR for inst_9f2ka7 support-vn">Show QR</button></td>
+                </tr>
+                <tr>
+                  <td><span class="status"><span class="dot dot-degraded"></span>Webhook suspended</span></td>
+                  <td><span class="resource"><span class="mono">wh_c41x02</span><span>billing-events</span></span></td>
+                  <td class="ts" title="2026-07-16T06:02:00Z">2h ago</td>
+                  <td class="actioncol"><button class="btn" aria-label="Review wh_c41x02 billing-events">Review</button></td>
+                </tr>
+                <tr>
+                  <td><span class="status"><span class="dot dot-failed"></span>Job dead-lettered</span></td>
+                  <td><span class="resource"><span class="mono">job_77am1q</span><span>media-transcode</span></span></td>
+                  <td class="ts" title="2026-07-15T22:17:00Z">10h ago</td>
+                  <td class="actioncol"><button class="btn" aria-label="Inspect job_77am1q media-transcode">Inspect</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="table-foot"><span class="num">3 of 3 items</span></div>
+          </div>
+        </section>
+
+        <section class="section overview-events" aria-labelledby="overview-events-title" data-od-id="overview-live-events">
+          <div class="overview-section-head">
+            <h2 id="overview-events-title">Live events</h2>
+            <span class="live"><span class="dot"></span>live</span>
+          </div>
+          <div class="ticker">
+            <header><span>Stream</span><span class="ticker-label">Event · Resource · Age</span></header>
+            <div class="event-list" tabindex="0" role="region" aria-label="Live event stream">
+              <div class="event"><span class="dot dot-ok"></span><span class="type">message.delivered</span><span class="mono">inst_2bq81c</span><span class="ts">2s</span></div>
+              <div class="event"><span class="dot dot-info"></span><span class="type">webhook.delivery.sent</span><span class="mono">wh_88fj20</span><span class="ts">5s</span></div>
+              <div class="event"><span class="dot dot-pending"></span><span class="type">message.queued</span><span class="mono">inst_2bq81c</span><span class="ts">9s</span></div>
+              <div class="event"><span class="dot dot-ok"></span><span class="type">instance.connected</span><span class="mono">inst_5rr0znd</span><span class="ts">31s</span></div>
+              <div class="event"><span class="dot dot-failed"></span><span class="type">webhook.delivery.failed</span><span class="mono">wh_c41x02</span><span class="ts">1m</span></div>
+              <div class="event"><span class="dot dot-info"></span><span class="type">session.refreshed</span><span class="mono">inst_9f2ka7</span><span class="ts">2m</span></div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </main>
