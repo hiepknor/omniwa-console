@@ -4,7 +4,7 @@ import { Logo } from '@/components/Logo';
 import { ApiFailure, unwrap } from '@/api/envelopes';
 import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
 
-const DEFAULT_BASE_URL = 'http://localhost:3000';
+const DEFAULT_BASE_URL = import.meta.env.DEV ? window.location.origin : 'http://localhost:3000';
 
 async function detectKeyKind(client: ReturnType<typeof createApiClient>): Promise<KeyKind> {
   try {

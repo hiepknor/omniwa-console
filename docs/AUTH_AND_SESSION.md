@@ -14,8 +14,11 @@ Nothing is baked into the build; there is no backend-for-frontend in v1.
 
 Inputs:
 
-- **API base URL** — default `http://localhost:3000`, validated as an
-  origin.
+- **API base URL** — in Vite development, defaults to the console origin so
+  `/v1` requests use the local proxy to `http://localhost:3000` and avoid
+  browser CORS preflight requirements. Production builds retain
+  `http://localhost:3000` as the initial value. The submitted value is
+  validated as an origin.
 - **API key** — password-style input, never echoed after submit.
 
 On submit the console probes `getHealth` with the provided credentials. On
