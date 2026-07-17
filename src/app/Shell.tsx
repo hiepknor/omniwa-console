@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Logo } from '@/components/Logo';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
 
@@ -12,7 +13,8 @@ type IconName =
   | 'groups'
   | 'messages'
   | 'settings'
-  | 'keys';
+  | 'keys'
+  | 'more';
 
 type NavItem = {
   to: string;
@@ -40,6 +42,15 @@ const SYSTEM_ITEMS: NavItem[] = [
   { to: '/settings', label: 'Settings', icon: 'settings' },
   { to: '/settings/api-keys', label: 'API Keys', icon: 'keys', adminOnly: true },
 ];
+
+const MOBILE_PRIMARY_ITEMS: NavItem[] = [
+  OVERVIEW_ITEM,
+  OPERATION_ITEMS[0],
+  { ...OPERATION_ITEMS[1], label: 'Queue' },
+  MESSAGING_ITEMS[0],
+];
+
+const TABLET_RAIL_STORAGE_KEY = 'omniwa-console:tablet-rail-expanded';
 
 function NavIcon({ name }: { name: IconName }) {
   const content = {
@@ -91,6 +102,13 @@ function NavIcon({ name }: { name: IconName }) {
         <path d="m11 12 8-8M15 8l2 2M17 6l2 2" />
       </>
     ),
+    more: (
+      <>
+        <circle cx="5" cy="12" r="1" />
+        <circle cx="12" cy="12" r="1" />
+        <circle cx="19" cy="12" r="1" />
+      </>
+    ),
   }[name];
 
   return (
@@ -100,7 +118,7 @@ function NavIcon({ name }: { name: IconName }) {
   );
 }
 
-function NavigationLink({ item }: { item: NavItem }) {
+function NavigationLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
   return (
     <NavLink
       to={item.to}
@@ -108,6 +126,7 @@ function NavigationLink({ item }: { item: NavItem }) {
       title={item.label}
       aria-label={item.label}
       className={({ isActive }) => (isActive ? 'active' : undefined)}
+      onClick={onClick}
     >
       <NavIcon name={item.icon} />
       <span className="lbl">{item.label}</span>
@@ -125,11 +144,89 @@ export function Shell({
   const systemItems = SYSTEM_ITEMS.filter(
     (item) => !item.adminOnly || session.keyKind === 'admin',
   );
+  const moreItems = [
+    OPERATION_ITEMS[2],
+    OPERATION_ITEMS[3],
+    MESSAGING_ITEMS[1],
+    MESSAGING_ITEMS[2],
+    ...systemItems,
+  ];
   const fingerprint = keyFingerprint(session.apiKey);
+  const location = useLocation();
+  const [tabletExpanded, setTabletExpanded] = useState(() => {
+    try {
+      return window.localStorage.getItem(TABLET_RAIL_STORAGE_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const moreTriggerRef = useRef<HTMLButtonElement>(null);
+  const moreDialogRef = useRef<HTMLDivElement>(null);
+  const moreActive = moreItems.some(
+    (item) =>
+      location.pathname === item.to || location.pathname.startsWith(`${item.to}/`),
+  );
+
+  useEffect(() => {
+    if (!mobileMoreOpen) return;
+
+    const dialog = moreDialogRef.current;
+    const previousOverflow = document.body.style.overflow;
+    const focusable = dialog?.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled])',
+    );
+    document.body.style.overflow = 'hidden';
+    focusable?.[0]?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileMoreOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab' || !focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      moreTriggerRef.current?.focus();
+    };
+  }, [mobileMoreOpen]);
+
+  useEffect(() => {
+    setMobileMoreOpen(false);
+  }, [location.pathname]);
+
+  const toggleTabletRail = () => {
+    setTabletExpanded((expanded) => {
+      const next = !expanded;
+      try {
+        window.localStorage.setItem(TABLET_RAIL_STORAGE_KEY, String(next));
+      } catch {
+        // The preference remains in memory when browser storage is unavailable.
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="shell">
-      <aside className="sidebar" aria-label="OmniWA primary navigation">
+      <aside
+        className={`sidebar${tabletExpanded ? ' is-expanded' : ''}`}
+        aria-label="OmniWA primary navigation"
+      >
         <div className="logo">
           <Logo size={32} />
           <div>
@@ -140,7 +237,7 @@ export function Shell({
           </div>
         </div>
 
-        <nav aria-label="Primary">
+        <nav className="desktop-nav" aria-label="Primary">
           <NavigationLink item={OVERVIEW_ITEM} />
           <span className="navlabel">Operations</span>
           {OPERATION_ITEMS.map((item) => (
@@ -152,35 +249,120 @@ export function Shell({
           ))}
         </nav>
 
-        <div className="navfoot">
+        <div className="navfoot desktop-utility">
+          <button
+            type="button"
+            className="rail-toggle"
+            onClick={toggleTabletRail}
+            aria-label={tabletExpanded ? 'Collapse navigation' : 'Expand navigation'}
+            aria-expanded={tabletExpanded}
+            title={tabletExpanded ? 'Collapse navigation' : 'Expand navigation'}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+            <span className="lbl">{tabletExpanded ? 'Collapse' : 'Expand'}</span>
+          </button>
           {systemItems.map((item) => (
             <NavigationLink key={item.to} item={item} />
           ))}
         </div>
 
+        <nav className="mobile-nav" aria-label="Mobile primary navigation">
+          {MOBILE_PRIMARY_ITEMS.map((item) => (
+            <NavigationLink key={item.to} item={item} />
+          ))}
+          <button
+            ref={moreTriggerRef}
+            type="button"
+            className={moreActive ? 'active' : undefined}
+            onClick={() => setMobileMoreOpen(true)}
+            aria-label="More navigation"
+            aria-haspopup="dialog"
+            aria-expanded={mobileMoreOpen}
+            aria-controls="mobile-more-navigation"
+          >
+            <NavIcon name="more" />
+            <span className="lbl">More</span>
+          </button>
+        </nav>
+
         <div className="side-foot">
           <div
             className="session"
-            aria-label={`Connected session ${fingerprint}, ${session.keyKind}`}
-            title={`Connected · ${fingerprint} · ${session.keyKind}`}
+            aria-label={`Connected session. API key ${fingerprint}.`}
+            title={`Connected · API key ${fingerprint}`}
           >
-            <span className="dot" style={{ background: 'var(--ok)' }} />
-            <span className="key">{fingerprint}</span>
-            <span className="pill">{session.keyKind}</span>
+            <span
+              className="dot"
+              style={{ background: 'var(--ok)' }}
+              aria-hidden="true"
+            />
+            <span className="session-copy">
+              <strong>Connected</strong>
+              <span className="key">API key · {fingerprint}</span>
+            </span>
             <button
               type="button"
               onClick={onDisconnect}
               className="out"
-              aria-label="Disconnect session"
-              title="Disconnect"
+              aria-label="Sign out of API session"
+              title="Sign out of API session"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M18.4 6.6a9 9 0 1 1-12.8 0M12 2v8" />
+                <path d="M14 8l4 4-4 4" />
+                <path d="M18 12H8" />
+                <path d="M10 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
               </svg>
+              <span>Sign out</span>
             </button>
           </div>
         </div>
       </aside>
+
+      {mobileMoreOpen ? (
+        <div
+          className="mobile-more-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setMobileMoreOpen(false);
+          }}
+        >
+          <div
+            ref={moreDialogRef}
+            id="mobile-more-navigation"
+            className="mobile-more-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-more-title"
+          >
+            <header>
+              <div>
+                <span className="eyebrow">Navigation</span>
+                <h2 id="mobile-more-title">More</h2>
+              </div>
+              <button
+                type="button"
+                className="mobile-more-close"
+                onClick={() => setMobileMoreOpen(false)}
+                aria-label="Close navigation"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </header>
+            <nav aria-label="More destinations">
+              {moreItems.map((item) => (
+                <NavigationLink
+                  key={item.to}
+                  item={item}
+                  onClick={() => setMobileMoreOpen(false)}
+                />
+              ))}
+            </nav>
+          </div>
+        </div>
+      ) : null}
 
       <main>
         <Outlet />
