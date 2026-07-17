@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniWA Console — Groups (prototype)</title>
-<!-- Static prototype. Sample data only. Groups default state: stat strip +
+<!-- Static prototype. Sample data only. Groups default state: metric cards +
      full-width table; the filter row swaps to selection actions while rows
      are checked (2 checked here, quick-add dropdown open). Clicking a row —
      or the Named Lists button — opens an on-demand slide-over panel from the
@@ -61,12 +61,12 @@
         </div>
       </div>
 
-      <div class="statrow">
-        <div class="stat"><span class="label">Groups</span><b class="num">37</b></div>
-        <div class="stat"><span class="label">In Named Lists</span><b class="num">24</b><span class="sub">65%</span></div>
-        <div class="stat"><span class="label">Admin role</span><b class="num">12</b></div>
-        <div class="stat"><span class="label">Archived</span><b class="num">1</b></div>
-        <div class="stat"><span class="label">Named Lists</span><b class="num">3</b><span class="sub">2 in use</span></div>
+      <div class="metrics">
+        <div class="card"><div class="label">Groups</div><div class="value num">37</div><div class="ctx">all synced groups</div></div>
+        <div class="card"><div class="label">In Named Lists</div><div class="value num">24</div><div class="ctx num">65% of groups</div></div>
+        <div class="card"><div class="label">Admin role</div><div class="value num">12</div><div class="ctx">can manage members</div></div>
+        <div class="card"><div class="label">Archived</div><div class="value num">1</div><div class="ctx">excluded from active work</div></div>
+        <div class="card"><div class="label">Named Lists</div><div class="value num">3</div><div class="ctx num">2 in use</div></div>
       </div>
 
       <!-- With no selection this row shows: [search] [role: admin ✕] [+ filter].

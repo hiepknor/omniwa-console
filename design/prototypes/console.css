@@ -297,16 +297,6 @@ tbody tr.open{box-shadow:inset 2px 0 0 var(--fg)}
    no backdrop — the table underneath stays visible and interactive. */
 .context.over{position:fixed;top:0;right:0;bottom:0;z-index:8;box-shadow:var(--elev-raised)}
 
-/* Stat strip (compact overview above management tables) */
-.statrow{display:flex;gap:0;background:var(--panel);border:1px solid var(--border);
-  border-radius:8px;margin-bottom:12px;overflow:hidden}
-.stat{flex:1;padding:10px 16px;border-right:1px solid var(--border-subtle)}
-.stat:last-child{border-right:none}
-.stat .label{display:block;font-size:11px;font-weight:400;text-transform:uppercase;
-  letter-spacing:.15em;color:var(--text-3)}
-.stat b{font-size:18px;font-weight:400;font-feature-settings:"tnum";line-height:1.3}
-.stat .sub{font-size:11px;color:var(--text-4);margin-left:6px}
-
 /* Modal overlay (dialogs) */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;
   align-items:center;justify-content:center;z-index:10}
@@ -441,7 +431,7 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
   main,.pagecol{width:100%;padding:0 var(--container-gutter-phone) var(--space-6)}
   .page-head{height:auto;min-height:56px;gap:12px;flex-wrap:wrap;padding-block:10px}.head-right{gap:8px;flex-wrap:wrap}
   .filterbar,.health,.wizard{overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:4px}.filterbar>*{flex:0 0 auto}
-  .search{width:min(220px,72vw)}.metrics{grid-template-columns:1fr;gap:12px}.statrow{display:grid;grid-template-columns:1fr 1fr}.stat{border-bottom:1px solid var(--border-subtle)}
+  .search{width:min(220px,72vw)}.metrics{grid-template-columns:1fr;gap:12px}
   .cols,.settings-grid{grid-template-columns:minmax(0,1fr)}.kv{grid-template-columns:minmax(90px,.8fr) minmax(0,1fr)}
   .dialog,.dialog.wide{width:calc(100vw - 32px);max-width:none}.overlay{padding:16px}.toast{width:min(380px,calc(100vw - 32px))}
   .btn{min-height:44px;padding-inline:14px}.btn.sm{min-height:36px}.input,.search,.instpick{min-height:44px}

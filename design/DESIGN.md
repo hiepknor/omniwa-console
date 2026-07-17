@@ -207,9 +207,9 @@ this subsection binds to it.
   render detail views as floating cards beside the table, and never dock
   a permanently-open panel on management pages (the docked context panel
   is a workspace-page pattern only).
-- **Stat strip** above the filter row: one bordered bar of flex cells
-  (11px uppercase label over an 18px tabular value, optional faint sub
-  like a percentage), giving the page its at-a-glance overview.
+- **Metric cards** above the filter row: use the same `.metrics > .card`
+  component as Queue & Jobs (uppercase label, 26px tabular value, faint
+  context line). Management pages must not introduce a second summary style.
 - **Page header**: title + instance picker together on the left (context
   before actions); header-right holds only the live indicator and at most
   one panel-level action. Refresh actions live in the **table footer**
