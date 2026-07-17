@@ -18,15 +18,21 @@ function statusDot(status: string | undefined): string {
 }
 
 function itemAction(item: ActionRequiredItem) {
-  if (!item.id) return null;
-  const resourceType: string = item.resourceType;
-  switch (resourceType.toLowerCase()) {
+  const subjectRef = safeSubjectRef(item.subjectRef);
+  if (subjectRef === undefined) return null;
+  const separatorIndex = subjectRef.indexOf(':');
+  if (separatorIndex === -1) return null;
+  const prefix = subjectRef.slice(0, separatorIndex);
+  const id = subjectRef.slice(separatorIndex + 1);
+  if (!id) return null;
+  switch (prefix) {
     case 'instance':
-      return { to: `/instances/${item.id}`, label: 'Open' };
+      return { to: `/instances/${id}`, label: 'Open' };
     case 'webhook':
-      return { to: `/webhooks/${item.id}`, label: 'Review' };
+      return { to: `/webhooks/${id}`, label: 'Review' };
+    case 'worker-job':
     case 'job':
-      return { to: `/queue?job=${encodeURIComponent(item.id)}`, label: 'Inspect' };
+      return { to: `/queue?job=${encodeURIComponent(id)}`, label: 'Inspect' };
     default:
       return null;
   }
@@ -39,8 +45,11 @@ function paginationTotal(pagination: unknown, fallback: number): number {
 }
 
 function safeSubjectRef(subjectRef: string | undefined): string | undefined {
-  if (subjectRef === undefined || subjectRef.includes('@')) return undefined;
-  if (/^\+?\d[\d\s()-]{5,}$/.test(subjectRef)) return undefined;
+  if (subjectRef === undefined) return undefined;
+  const separatorIndex = subjectRef.indexOf(':');
+  const identity = separatorIndex === -1 ? subjectRef : subjectRef.slice(separatorIndex + 1);
+  if (identity.includes('@')) return undefined;
+  if (/^\+?\d[\d\s()-]{5,}$/.test(identity)) return undefined;
   return subjectRef;
 }
 
