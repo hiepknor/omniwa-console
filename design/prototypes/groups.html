@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniWA Console — Groups (prototype)</title>
 <!-- Static prototype. Sample data only. All WhatsApp groups of the instance:
-     group conversations, group management, and the door to send lists. -->
+     group conversations, group management, and Named Lists management. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="console.css">
@@ -19,9 +19,9 @@
   <aside class="sidebar">
     <div class="logo"><b>OmniWA Console</b><span class="env">http://localhost:3000</span></div>
     <nav>
+      <span class="navlabel" style="padding-top:6px">Messaging</span>
       <a data-nav="chats" href="chats.html">Chats</a>
       <a data-nav="groups" class="active" href="groups.html">Groups</a>
-      <a data-nav="directory" href="directory.html">Directory</a>
       <a data-nav="bulk" href="campaigns.html">Messages</a>
       <span class="navlabel">Operations</span>
       <a href="overview.html">Overview</a>
@@ -43,7 +43,7 @@
         <button class="instpick"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
         <input class="search" placeholder="Search groups…">
         <div class="tabs" style="margin-bottom:0;border-bottom:none">
-          <a class="active" href="#">Conversations</a><a href="lists.html">Send lists</a>
+          <a class="active" href="#">Conversations</a><a href="lists.html">Named Lists</a>
         </div>
       </div>
       <div class="list">

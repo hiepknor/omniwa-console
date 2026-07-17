@@ -208,17 +208,19 @@ this subsection binds to it.
 - **Wizard steps**: numbered dot + label row (Audience → Message → Review),
   current step accent, completed steps emerald, future muted. One primary
   action per step, always bottom-right; Back is ghost.
-- **Send lists** are built only from existing contacts/chats of an
+- **Named Lists** are built only from existing contacts/chats of an
   instance — the UI offers no raw-number import surface, by design.
+  Deleting a list is allowed; campaigns snapshot recipients at start, and
+  deletion is blocked while a scheduled or running campaign references it.
 
 ## 5. Layout Principles
 
 - **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed). Sidebar: logo block, nav items (13px/500, 8px radius, active = accent text + accent-bg tint), footer with masked key fingerprint + disconnect.
-- **Nav hierarchy**: the messaging workflow is primary — **Chats** (direct
-  conversations only), **Groups** (all WhatsApp groups + the Send lists
-  tab), **Directory**, **Messages** (campaigns) at the top; an 11px
-  uppercase "Operations" section label separates the secondary panels
-  (Overview, Instances, Queue & Jobs, Webhooks, Events, Settings).
+- **Nav hierarchy**: two labeled sections. **Messaging** — Chats (direct
+  conversations only), Groups (all WhatsApp groups + the Named Lists tab),
+  Messages (campaigns). **Operations** — Overview, Instances, Queue & Jobs,
+  Webhooks, Events, Settings. There is no separate directory panel:
+  contact/label lookup lives in the Chats search and filters.
 - **Content header** per page: title left; live indicator, refresh, and primary action right. 48px tall, bottom border.
 - **Grid**: 8px base unit. Vertical rhythm 16px between related blocks, 24px between sections.
 - **Density**: tables full-width; Overview metric cards in `repeat(auto-fit, minmax(200px, 1fr))` grid; never center-constrain content below 1440px.

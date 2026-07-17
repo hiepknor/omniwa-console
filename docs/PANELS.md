@@ -43,38 +43,33 @@ timeline). Sending is async-accepted: bubbles render accepted/queued and
 follow delivery history — the UI never claims upstream WhatsApp delivery on
 its own.
 
-Operations: `listInstanceChats`, `getChat`, `listInstanceMessages`,
-`getMessage`, `getMessageDeliveryHistory`, `sendInstanceTextMessage`,
-`sendInstanceMediaMessage`, `sendInstanceMessage`, `retryMessage`,
-`cancelMessage`, `registerMedia`, `getMedia`, `getContact`, `getLabel`,
-`streamEvents`.
+Contact and label lookup lives here too: the conversation-list search
+matches contacts, and labels (read-only synced projections) act as
+filters — there is no separate directory panel.
 
-## groups — `/groups/:instanceId?/:groupId?`, `/groups/lists` (realtime) — PRIMARY
+Operations: `listInstanceChats`, `listChats`, `getChat`,
+`listInstanceMessages`, `getMessage`, `getMessageDeliveryHistory`,
+`sendInstanceTextMessage`, `sendInstanceMediaMessage`,
+`sendInstanceMessage`, `retryMessage`, `cancelMessage`, `registerMedia`,
+`getMedia`, `listInstanceContacts`, `listContacts`, `getContact`,
+`listInstanceLabels`, `listLabels`, `getLabel`, `streamEvents`.
+
+## groups — `/groups/:instanceId?/:groupId?`, `/groups/named-lists` (realtime) — PRIMARY
 
 All WhatsApp groups of the instance in the same three-pane workspace:
 group conversations with sender attribution, group management in the
 context panel (members promote/demote/remove, invite link, local state),
-plus the **Send lists** tab — create/edit/retire recipient lists used by
-the Messages panel (send-list operations are proposed contract, see below).
+plus the **Named Lists** tab — add/edit/delete named recipient lists used
+by the Messages panel (named-list operations are proposed contract, see
+below).
 
 Operations: `listInstanceGroups`, `getGroup`, `updateGroup`,
 `updateGroupLocalState`, `refreshInstanceGroups`, `refreshGroupInviteLink`,
 `listGroupMembers`, `addGroupMember`, `removeGroupMember`,
 `promoteGroupMember`, `demoteGroupMember`, `sendGroupTextMessage`,
 `getMessage`, `getMessageDeliveryHistory`, `streamEvents` — plus proposed
-`listSendLists`, `createSendList`, `getSendList`, `updateSendList`,
-`retireSendList`.
-
-## directory — `/directory/:instanceId?`
-
-Read-only contact and label directory for the messaging workflow: search a
-contact or label, then jump into its chat. Labels are synced projections —
-the API exposes no create/assign operations, so the directory renders them
-as filters and badges only. Send lists are built from these rows.
-
-Operations: `listInstanceContacts`, `listContacts`, `getContact`,
-`listInstanceLabels`, `listLabels`, `getLabel`, `listChats`,
-`listInstanceChats`.
+`listNamedLists`, `createNamedList`, `getNamedList`, `updateNamedList`,
+`deleteNamedList`.
 
 ## messages — `/messages`, `/messages/new` — PROPOSED
 
@@ -135,7 +130,6 @@ never stored.
 
 Every operation in the v1 contract (77 total) is owned by at least one panel
 above; `streamEvents` is shared by the realtime panels through the single
-SSE connection described in `docs/REALTIME.md`, and the read operations for
-contacts/labels/chats are shared between `chats` and `directory`. The
-`messages` panel (campaigns) and the send-lists tab of `groups` reference
-proposed (not yet existing) operations only.
+SSE connection described in `docs/REALTIME.md`. The `messages` panel
+(campaigns) and the Named Lists tab of `groups` reference proposed (not yet
+existing) operations only.

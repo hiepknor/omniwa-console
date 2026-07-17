@@ -13,10 +13,9 @@ visual spec (structure, spacing, states, status vocabulary).
 
 | File | Nav item | Shows |
 | --- | --- | --- |
-| `chats.html` | Chats | Direct conversations only: three-pane workspace, instance selector + label filters, bubble timeline with per-message delivery status, failed-message retry, composer, contact context panel |
-| `groups.html` | Groups | All WhatsApp groups: group conversations with sender attribution, group management context panel (members, invite link), Send lists tab |
-| `lists.html` | Groups › Send lists | Send list add/edit/retire: members from existing contacts only, add-from-directory — **proposed contract** |
-| `directory.html` | Directory | Read-only contacts & labels; every row jumps into its chat |
+| `chats.html` | Chats | Direct conversations only: three-pane workspace, instance selector + label filters, bubble timeline with per-message delivery status, failed-message retry, composer, contact context panel; contact/label lookup via search + filters |
+| `groups.html` | Groups | All WhatsApp groups: group conversations with sender attribution, group management context panel (members, invite link), Named Lists tab |
+| `lists.html` | Groups › Named Lists | Named List add/edit/delete: members from existing contacts only — **proposed contract** |
 | `campaigns.html` | Messages | Campaign management: segmented progress bars, running-campaign drawer (counters, recipients, pause/abort) — **proposed contract** |
 | `campaign-new.html` | Messages › New | 3-step send-setup wizard at Review: audience, message preview, platform-capped pacing — **proposed contract** |
 

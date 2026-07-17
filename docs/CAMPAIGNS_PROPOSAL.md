@@ -1,8 +1,8 @@
-# Campaigns & Send Lists — Platform Contract Proposal
+# Campaigns & Named Lists — Platform Contract Proposal
 
 Status: **proposal**. Nothing in this document exists in the v1 OpenAPI
 contract. The console prototypes (`design/prototypes/campaigns.html`,
-`campaign-new.html`, `lists.html`) validate the UX; shipping the feature
+`campaign-new.html`, `lists.html` — the Named Lists tab) validate the UX; shipping the feature
 requires the platform to expose the operations below.
 
 ## Positioning conflict to resolve first
@@ -27,7 +27,7 @@ the console only orchestrates and observes through the API.
 
 ## Responsible-use guardrails (baked into the contract, not the UI)
 
-1. **Members come from existing contacts/chats only.** `createSendList`
+1. **Members come from existing contacts/chats only.** `createNamedList`
    accepts contact/chat resource IDs — there is no raw-phone-number input
    anywhere in the contract, so cold lists cannot be constructed.
 2. **Pacing is platform-enforced** from the active settings rate limits;
@@ -42,22 +42,21 @@ the console only orchestrates and observes through the API.
 
 ## Proposed resources & operations
 
-### SendList
+### NamedList
 
-`sl_*` — name, instance scope, member count, created/updated, state
-(`active | retired`).
+`nl_*` — name, instance scope, member count, created/updated.
 
 | Operation | Method & path | Notes |
 | --- | --- | --- |
-| `listSendLists` | `GET /v1/send-lists` | Cursor pagination, filter by instance |
-| `createSendList` | `POST /v1/send-lists` | Name + instance + member resource IDs |
-| `getSendList` | `GET /v1/send-lists/{listId}` | Includes member page |
-| `updateSendList` | `PATCH /v1/send-lists/{listId}` | Rename, add/remove member IDs |
-| `retireSendList` | `POST /v1/send-lists/{listId}/retire` | Lists referenced by campaigns are retired, never deleted |
+| `listNamedLists` | `GET /v1/named-lists` | Cursor pagination, filter by instance |
+| `createNamedList` | `POST /v1/named-lists` | Name + instance + member resource IDs |
+| `getNamedList` | `GET /v1/named-lists/{listId}` | Includes member page |
+| `updateNamedList` | `PATCH /v1/named-lists/{listId}` | Rename, add/remove member IDs |
+| `deleteNamedList` | `DELETE /v1/named-lists/{listId}` | Rejected while a scheduled/running campaign references the list; campaigns snapshot recipients at start, so past campaigns are unaffected |
 
 ### Campaign
 
-`cmp_*` — name, instance, send list, message template (text or media ref),
+`cmp_*` — name, instance, Named List (recipients snapshotted at start), message template (text or media ref),
 pacing (msgs/min ≤ platform cap), schedule (now | at), state
 (`draft | scheduled | running | paused | completed | aborted`), counters
 (`total / accepted / delivered / failed / canceled`).
@@ -79,9 +78,9 @@ pacing (msgs/min ≤ platform cap), schedule (now | at), state
 
 ## Console UX summary
 
-- **Send lists** (`/groups/lists`, the Send lists tab of Groups): table +
-  drawer; members added by picking from
-  the instance's directory (search contacts/chats), never by import.
+- **Named Lists** (`/groups/named-lists`, the Named Lists tab of Groups):
+  table + drawer; members added by picking existing contacts/chats of the
+  instance, never by import. Add/edit/delete with the reference guard above.
 - **New campaign** (`/messages/new`): 3-step wizard — Audience (pick list,
   see resolved member count) → Message (text/media, preview as workspace
   bubble) → Review (pacing capped by settings, estimated duration, explicit

@@ -76,8 +76,7 @@ The messaging workflow is primary; operations panels are secondary:
 /connect
 /chats/:instanceId?/:chatId?         # primary: direct conversations (3-pane)
 /groups/:instanceId?/:groupId?       # primary: group conversations + management
-/groups/lists                        # send lists (proposed contract)
-/directory/:instanceId?              # contacts & labels directory
+/groups/named-lists                  # Named Lists (proposed contract)
 /messages                            # campaigns (proposed contract)
 /messages/new                        # campaign wizard (proposed)
 /overview
