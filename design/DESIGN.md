@@ -333,6 +333,22 @@ this subsection binds to it.
   at start, and deletion is blocked while a scheduled or running campaign
   references it.
 
+### Settings command surface
+
+- Runtime configuration begins with a compact active-revision strip, then
+  separates read-only active values from the validated draft command flow.
+  Activation is the single primary action and must describe an atomic
+  revision replacement, never an in-place field save.
+- Draft payload, pending field changes, validation state, and the validation
+  `requestId` remain visible together so operators can review evidence before
+  activation.
+- Console session facts are local browser state and stay visually separate
+  from platform settings. Only the masked key fingerprint may be rendered;
+  disconnect explains that it clears browser storage, not platform work.
+- The admin-only API key inventory is a full-width table. Provision and
+  rotation use a show-once secret dialog; revocation uses typed confirmation
+  and never reveals the current secret.
+
 ## 5. Layout Principles
 
 - **Shell**: sticky 224px warm near-black sidebar (subtle right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed).

@@ -6,14 +6,6 @@
 <title>OmniWA Console — Settings (prototype)</title>
 <!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
 <link rel="stylesheet" href="console.css">
-<style>
-  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-  @media(max-width:1100px){.settings-grid{grid-template-columns:1fr}}
-  .panelcard{background:var(--panel);border:1px solid var(--border);border-radius:8px}
-  .panelcard>header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border-subtle)}
-  .panelcard>header b{font-size:14px;font-weight:500}
-  .panelcard .inner{padding:16px}
-</style>
 </head>
 <body>
 <div class="shell">
@@ -47,93 +39,225 @@
     </div>
   </aside>
 
-<main data-od-id="settings-screen">
+<main class="settings-screen" data-od-id="settings-screen">
     <header class="page-head" data-od-id="settings-page-header">
-      <div class="head-context"><div class="head-title-row"><h1>Settings</h1></div></div>
+      <div class="head-context">
+        <div class="head-title-row"><h1>Settings</h1></div>
+        <p class="head-meta">Platform configuration and privileged access.</p>
+      </div>
       <div class="head-right">
-        <span class="pill"><span class="dot" style="background:var(--ok)"></span>revision <span class="mono">set_00412</span> active</span>
+        <span class="live"><span class="dot"></span>connected</span>
+        <span class="pill"><span class="dot" style="background:var(--ok)"></span>admin session</span>
       </div>
     </header>
 
-    <div class="settings-grid">
-      <div class="panelcard">
-        <header><b>Active configuration</b><span class="ts" title="2026-07-14T09:00:00Z">activated 2d ago</span></header>
-        <div class="inner">
-          <div class="kv" style="grid-template-columns:200px 1fr">
-            <dt>Message rate / instance</dt><dd class="num">20 / min</dd>
-            <dt>Media max size</dt><dd class="num">16 MB</dd>
-            <dt>Message body retention</dt><dd class="num">30 days</dd>
-            <dt>Webhook payload retention</dt><dd class="num">14 days</dd>
-            <dt>Webhook failure threshold</dt><dd class="num">50 in 1h → suspend</dd>
-            <dt>Event stream buffer</dt><dd class="num">200 events</dd>
+    <section class="settings-runtime" aria-labelledby="settings-runtime-heading" data-od-id="settings-runtime-status">
+      <div>
+        <h2 id="settings-runtime-heading">Runtime configuration</h2>
+        <p>The active revision governs platform-side limits and retention.</p>
+      </div>
+      <div class="settings-runtime-state">
+        <span class="status status-active"><span class="dot"></span>active</span>
+        <span class="mono">set_00412</span>
+        <span class="ts" title="2026-07-14T09:00:00Z">activated 2d ago</span>
+      </div>
+    </section>
+
+    <div class="settings-layout">
+      <div class="settings-main-column">
+        <section class="settings-panel" aria-labelledby="active-configuration-heading" data-od-id="settings-active-configuration">
+          <header class="settings-panel-head">
+            <div><h2 id="active-configuration-heading">Active configuration</h2><p>Read-only values currently enforced by the platform.</p></div>
+            <span class="pill"><span class="dot" style="background:var(--ok)"></span>revision 412</span>
+          </header>
+          <dl class="settings-config-list">
+            <div><dt>Message rate / instance</dt><dd class="num">20 / min</dd></div>
+            <div><dt>Media max size</dt><dd class="num">16 MB</dd></div>
+            <div><dt>Message body retention</dt><dd class="num">30 days</dd></div>
+            <div><dt>Webhook payload retention</dt><dd class="num">14 days</dd></div>
+            <div><dt>Webhook failure threshold</dt><dd class="num">50 in 1h</dd></div>
+            <div><dt>Event stream buffer</dt><dd class="num">200 events</dd></div>
+          </dl>
+        </section>
+
+        <section class="settings-panel settings-draft" aria-labelledby="draft-revision-heading" data-od-id="settings-draft-revision">
+          <header class="settings-panel-head">
+            <div><h2 id="draft-revision-heading">Draft revision</h2><p>Validate the complete payload before activation.</p></div>
+            <span class="status"><span class="dot" style="background:var(--pending)"></span>validated · not active</span>
+          </header>
+          <div class="settings-draft-body">
+            <div class="settings-payload">
+              <div class="settings-subhead"><span>Draft payload</span><span class="mono">draft_set_00413</span></div>
+              <textarea class="settings-code-editor" aria-label="Draft settings JSON" spellcheck="false">{
+  "messageRatePerMinute": 30,
+  "mediaMaxSizeMb": 16,
+  "messageBodyRetentionDays": 30,
+  "webhookPayloadRetentionDays": 14,
+  "webhookFailureThreshold": 50,
+  "eventStreamBuffer": 200
+}</textarea>
+            </div>
+            <div class="settings-change-summary">
+              <div class="settings-subhead"><span>Pending change</span><span class="num">1 field</span></div>
+              <dl><div><dt>Message rate / instance</dt><dd><span class="mono">20</span><span aria-hidden="true">→</span><strong class="mono">30 / min</strong></dd></div></dl>
+              <div class="settings-validation">
+                <span class="status status-active"><span class="dot"></span>validation passed</span>
+                <span class="mono">req_01j31q6y2a</span>
+                <p>No schema or policy violations found.</p>
+              </div>
+            </div>
           </div>
-        </div>
+          <footer class="settings-panel-actions">
+            <span>Activation replaces the current revision atomically.</span>
+            <div><button class="btn" type="button">Discard draft</button><button class="btn" type="button">Validate again</button><button class="btn primary" type="button">Activate revision</button></div>
+          </footer>
+        </section>
       </div>
 
-      <div class="panelcard">
-        <header><b>Draft revision</b><span class="status sm"><span class="dot" style="background:var(--pending)"></span>validated · not active</span></header>
-        <div class="inner">
-          <div class="field">
-            <label>Draft payload</label>
-            <div class="codewell">{
-  <span class="k">"messageRatePerMinute"</span>: 30,
-  <span class="k">"mediaMaxSizeMb"</span>: 16,
-  <span class="k">"messageBodyRetentionDays"</span>: 30
-}</div>
-          </div>
-          <div class="actions">
-            <button class="btn">Validate</button>
-            <button class="btn primary">Activate</button>
-          </div>
-          <p class="help" style="margin-top:8px">
-            Validate never mutates state (<span class="mono">validateSettings</span>);
-            Activate applies the last validated draft (<span class="mono">activateSettings</span>).
-          </p>
+      <aside class="settings-session" aria-labelledby="console-session-heading" data-od-id="settings-console-session">
+        <div class="settings-session-head">
+          <div><span class="eyebrow">Local console</span><h2 id="console-session-heading">Console session</h2></div>
+          <span class="status status-active"><span class="dot"></span>connected</span>
         </div>
-      </div>
+        <dl class="settings-session-facts">
+          <div><dt>API base URL</dt><dd class="mono">http://localhost:3000</dd></div>
+          <div><dt>Key fingerprint</dt><dd class="mono">omni…9xf4</dd></div>
+          <div><dt>Key kind</dt><dd><span class="pill">admin</span></dd></div>
+          <div><dt>Storage</dt><dd>Session storage · this tab</dd></div>
+          <div><dt>Connected</dt><dd class="ts" title="2026-07-17T08:41:00Z">35m ago</dd></div>
+        </dl>
+        <div class="settings-session-note"><span class="eyebrow">Credential boundary</span><p>The API key is never displayed after entry and never appears in URLs or logs.</p></div>
+        <div class="settings-session-actions"><p>Disconnect clears this browser session and returns to the connect screen.</p><button class="btn danger" type="button" data-disconnect-open>Disconnect session</button></div>
+      </aside>
     </div>
 
-    <div class="section" style="margin-top:24px">
-      <h2>API keys <span class="muted">· admin key required</span></h2>
-      <div class="filterbar">
-        <button class="btn">Provision key…</button>
+    <section class="settings-keys" aria-labelledby="api-keys-heading" data-od-id="settings-api-keys">
+      <div class="settings-section-head">
+        <div><h2 id="api-keys-heading">API keys</h2><p>Admin-scoped inventory. Secrets are shown once after provision or rotation.</p></div>
+        <div class="settings-section-actions"><span class="settings-result-count num">3 keys</span><button class="btn" type="button" data-provision-open>Provision key…</button></div>
       </div>
-      <div class="tablewrap">
+      <div class="tablewrap settings-keys-table" tabindex="0" role="region" aria-label="API key inventory with horizontal scrolling">
         <table>
-          <thead><tr><th>Name</th><th>Kind</th><th>Fingerprint</th><th>Created</th><th>Last used</th><th></th></tr></thead>
+          <caption>API key names, kinds, masked fingerprints, creation and usage times, and lifecycle actions.</caption>
+          <thead><tr><th scope="col">Name</th><th scope="col">Kind</th><th scope="col">Fingerprint</th><th scope="col">Created</th><th scope="col">Last used</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
           <tbody>
             <tr>
-              <td>console-hiep</td><td><span class="pill">admin</span></td>
+              <td><span class="settings-key-name">console-hiep</span><span class="row-id mono">key_31mm8r</span></td><td><span class="pill">admin</span></td>
               <td><span class="mono">omni…9xf4</span></td>
               <td class="ts" title="2026-06-01T00:00:00Z">45d ago</td>
-              <td class="ts" title="2026-07-16T08:53:00Z">just now</td>
-              <td style="text-align:right"><button class="btn sm">Rotate</button> <button class="btn sm danger">Revoke</button></td>
+              <td><span class="status status-active"><span class="dot"></span>just now</span></td>
+              <td class="settings-key-actions"><button class="btn sm" type="button" data-rotate-key="console-hiep">Rotate</button><button class="btn sm danger" type="button" data-revoke-key="console-hiep">Revoke</button></td>
             </tr>
             <tr>
-              <td>backend-prod</td><td><span class="pill">api</span></td>
+              <td><span class="settings-key-name">backend-prod</span><span class="row-id mono">key_20az4p</span></td><td><span class="pill">api</span></td>
               <td><span class="mono">omni…a1b2</span></td>
               <td class="ts" title="2026-05-12T00:00:00Z">65d ago</td>
-              <td class="ts" title="2026-07-16T08:52:58Z">2s ago</td>
-              <td style="text-align:right"><button class="btn sm">Rotate</button> <button class="btn sm danger">Revoke</button></td>
+              <td class="ts" title="2026-07-17T09:15:58Z">2s ago</td>
+              <td class="settings-key-actions"><button class="btn sm" type="button" data-rotate-key="backend-prod">Rotate</button><button class="btn sm danger" type="button" data-revoke-key="backend-prod">Revoke</button></td>
             </tr>
             <tr>
-              <td>grafana-scrape</td><td><span class="pill">monitoring</span></td>
+              <td><span class="settings-key-name">grafana-scrape</span><span class="row-id mono">key_19fs7w</span></td><td><span class="pill">monitoring</span></td>
               <td><span class="mono">omni…m7k0</span></td>
               <td class="ts" title="2026-05-12T00:00:00Z">65d ago</td>
-              <td class="ts" title="2026-07-16T08:53:10Z">50s ago</td>
-              <td style="text-align:right"><button class="btn sm">Rotate</button> <button class="btn sm danger">Revoke</button></td>
+              <td class="ts" title="2026-07-17T09:15:10Z">50s ago</td>
+              <td class="settings-key-actions"><button class="btn sm" type="button" data-rotate-key="grafana-scrape">Rotate</button><button class="btn sm danger" type="button" data-revoke-key="grafana-scrape">Revoke</button></td>
             </tr>
           </tbody>
         </table>
-        <div class="table-foot"><span class="num">3 of 3 keys</span></div>
+        <div class="table-foot"><span class="num">3 of 3 admin-visible keys</span><span>Freshness · just now</span></div>
       </div>
-      <p class="help" style="margin-top:8px">
-        Secrets are shown once at provision/rotate time (see the show-once dialog in
-        <span class="mono">dialogs.html</span>) and never again. With a non-admin key this
-        entire section is hidden.
-      </p>
+    </section>
+
+    <div class="overlay settings-dialog-overlay" data-dialog="disconnect" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="disconnect-dialog-title">
+        <header><b id="disconnect-dialog-title">Disconnect console session</b><span class="mono">omni…9xf4</span></header>
+        <div class="body"><p>This clears the API key and endpoint from browser storage. Platform operations continue independently.</p></div>
+        <footer><button class="btn" type="button" data-dialog-cancel>Cancel</button><button class="btn danger solid" type="button">Disconnect</button></footer>
+      </div>
+    </div>
+
+    <div class="overlay settings-dialog-overlay" data-dialog="revoke" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="revoke-dialog-title">
+        <header><b id="revoke-dialog-title">Revoke API key</b><span class="mono" data-revoke-title>console-hiep</span></header>
+        <div class="body">
+          <p class="settings-dialog-copy">Revocation is immediate and cannot be undone. Clients using this key will fail authentication.</p>
+          <div class="field"><label for="revoke-key-confirmation">Type <span class="mono" data-revoke-name>console-hiep</span> to confirm</label><input class="input" id="revoke-key-confirmation" autocomplete="off"></div>
+        </div>
+        <footer><button class="btn" type="button" data-dialog-cancel>Cancel</button><button class="btn danger solid" type="button" data-revoke-confirm disabled>Revoke key</button></footer>
+      </div>
+    </div>
+
+    <div class="overlay settings-dialog-overlay" data-dialog="provision" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="provision-dialog-title">
+        <header><b id="provision-dialog-title">Provision API key</b><span class="mono">admin command</span></header>
+        <div class="body">
+          <div class="field"><label for="provision-key-name">Key name</label><input class="input" id="provision-key-name" value="operations-console" autocomplete="off"></div>
+          <div class="field"><label for="provision-key-kind">Key kind</label><select class="input" id="provision-key-kind"><option>api</option><option>monitoring</option><option>admin</option></select></div>
+          <p class="help">The secret is returned once after the provision command succeeds.</p>
+        </div>
+        <footer><button class="btn" type="button" data-dialog-cancel>Cancel</button><button class="btn primary" type="button" data-provision-submit>Provision key</button></footer>
+      </div>
+    </div>
+
+    <div class="overlay settings-dialog-overlay" data-dialog="secret" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="secret-dialog-title">
+        <header><b id="secret-dialog-title" data-secret-title>API key provisioned</b><span class="mono">show once</span></header>
+        <div class="body"><p class="settings-dialog-copy">Copy this secret now. It cannot be retrieved again; only rotated.</p><div class="settings-secret-well"><span class="codewell">omni_live_9f2ka7q0x81mzw4hh2…</span><button class="btn sm" type="button">Copy</button></div></div>
+        <footer><button class="btn primary" type="button" data-dialog-cancel>Done</button></footer>
+      </div>
     </div>
   </main>
 </div>
+<script>
+(() => {
+  const dialogs = [...document.querySelectorAll('.settings-dialog-overlay')];
+  const revokeDialog = document.querySelector('[data-dialog="revoke"]');
+  const revokeInput = document.querySelector('#revoke-key-confirmation');
+  const revokeConfirm = document.querySelector('[data-revoke-confirm]');
+  let revokeName = '';
+  let returnFocus = null;
+
+  const closeDialog = (dialog) => {
+    dialog.hidden = true;
+    if (dialog === revokeDialog) { revokeInput.value = ''; revokeConfirm.disabled = true; }
+    returnFocus?.focus();
+  };
+  const openDialog = (dialog, trigger) => {
+    returnFocus = trigger;
+    dialog.hidden = false;
+    dialog.querySelector('button, input')?.focus();
+  };
+
+  document.querySelector('[data-disconnect-open]').addEventListener('click', (event) => openDialog(document.querySelector('[data-dialog="disconnect"]'), event.currentTarget));
+  const provisionDialog = document.querySelector('[data-dialog="provision"]');
+  const secretDialog = document.querySelector('[data-dialog="secret"]');
+  document.querySelector('[data-provision-open]').addEventListener('click', (event) => openDialog(provisionDialog, event.currentTarget));
+  document.querySelector('[data-provision-submit]').addEventListener('click', () => {
+    provisionDialog.hidden = true;
+    document.querySelector('[data-secret-title]').textContent = 'API key provisioned';
+    secretDialog.hidden = false;
+    secretDialog.querySelector('button').focus();
+  });
+  document.querySelectorAll('[data-rotate-key]').forEach((button) => button.addEventListener('click', () => {
+    document.querySelector('[data-secret-title]').textContent = `${button.dataset.rotateKey} rotated`;
+    openDialog(secretDialog, button);
+  }));
+  document.querySelectorAll('[data-revoke-key]').forEach((button) => button.addEventListener('click', () => {
+    revokeName = button.dataset.revokeKey;
+    revokeDialog.querySelector('[data-revoke-title]').textContent = revokeName;
+    revokeDialog.querySelector('[data-revoke-name]').textContent = revokeName;
+    openDialog(revokeDialog, button);
+    revokeInput.focus();
+  }));
+  revokeInput.addEventListener('input', () => { revokeConfirm.disabled = revokeInput.value !== revokeName; });
+  document.querySelectorAll('[data-dialog-cancel]').forEach((button) => button.addEventListener('click', () => closeDialog(button.closest('.settings-dialog-overlay'))));
+  dialogs.forEach((dialog) => dialog.addEventListener('click', (event) => { if (event.target === dialog) closeDialog(dialog); }));
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const open = dialogs.find((dialog) => !dialog.hidden);
+    if (open) closeDialog(open);
+  });
+})();
+</script>
 </body>
 </html>
