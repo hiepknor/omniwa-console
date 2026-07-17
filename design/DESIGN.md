@@ -161,6 +161,25 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 - Bottom-right, Elevated bg, status-colored 3px left edge, title 13px/500 + detail 12px, and **always** the mono `requestId` when the toast reports an API error.
 
+### Connect entry surface
+
+- Connect is the only full-screen surface without the application sidebar.
+  It uses a compact brand masthead, a platform-access explanation, and one
+  bounded connection form. The three connection checks live inside the form
+  so operational context stays attached to the action it describes.
+- The form owns only API origin, masked API key, and the explicit
+  remember-device choice. Remembering reveals an inline trusted-device
+  warning before submission; session-only storage remains the default. The
+  connect action remains disabled until both credentials are valid and uses
+  an explicit `Connecting…` busy state after submission.
+- Connection status follows the contract: validate origin → probe
+  `getHealth` → detect admin scope with `listApiKeys`. Errors render category,
+  message, and `requestId` when present. The key is never rendered after a
+  session is created.
+- At tablet widths the explanation precedes the form in one flow. At phone
+  widths the checks remain a compact three-column strip and every primary
+  input/action remains at least 44px tall.
+
 ### QR pairing panel
 
 - QR renders on a white 12px-radius well (QR needs light background) inside a Recessed container, 240×240px, with expiry countdown (mono, amber when <10s) and a "Refresh QR" ghost button. Pairing state machine renders as dot+label steps: `waiting → scanned → paired`.

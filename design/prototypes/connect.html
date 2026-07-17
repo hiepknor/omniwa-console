@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Connect (prototype)</title>
+<!-- Static prototype. Sample data only. Binds to docs/AUTH_AND_SESSION.md. -->
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<main class="connect-screen" data-od-id="connect-screen">
+  <header class="connect-masthead" data-od-id="connect-masthead">
+    <div class="connect-brand">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 0-18 0c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 21 12z"/><path d="M7.5 12.5h2l1.5 2.5 2-6 1.5 3.5h2"/></svg>
+      </span>
+      <div><strong>OmniWA Console</strong><span>Operations workspace</span></div>
+    </div>
+    <div class="connect-session-state"><span class="dot" style="background:var(--inactive)"></span>No active session</div>
+  </header>
+
+  <div class="connect-layout">
+    <section class="connect-intro" aria-labelledby="connect-title" data-od-id="connect-introduction">
+      <div class="connect-intro-copy">
+        <span class="eyebrow">Self-hosted platform access</span>
+        <h1 id="connect-title">Connect to your OmniWA runtime.</h1>
+        <p>Enter the platform origin and an API key. The console verifies health before creating a browser session.</p>
+      </div>
+      <div class="connect-intro-note">
+        <span class="dot" style="background:var(--info)"></span>
+        <p>Direct browser connection. No platform credentials pass through another service.</p>
+      </div>
+    </section>
+
+    <section class="connect-panel" aria-labelledby="connection-form-title" data-od-id="connect-form-panel">
+      <div class="connect-panel-head">
+        <div><span class="eyebrow">Platform session</span><h2 id="connection-form-title">Connection details</h2></div>
+      </div>
+
+      <form class="connect-form" data-connect-form>
+        <ol class="connect-sequence" aria-label="Connection checks">
+          <li><span class="connect-sequence-index num">01</span><strong>Validate origin</strong></li>
+          <li><span class="connect-sequence-index num">02</span><strong>Probe health</strong></li>
+          <li><span class="connect-sequence-index num">03</span><strong>Detect scope</strong></li>
+        </ol>
+
+        <div class="connect-field">
+          <div class="connect-label-row">
+            <label for="connect-base-url">API base URL</label>
+            <span>Origin only</span>
+          </div>
+          <input class="input" id="connect-base-url" name="baseUrl" type="url" value="http://localhost:3000" required autocomplete="url" aria-describedby="connect-base-url-help">
+          <p id="connect-base-url-help">In local development, use the console origin to route requests through the Vite proxy.</p>
+        </div>
+
+        <div class="connect-field">
+          <div class="connect-label-row">
+            <label for="connect-api-key">API key</label>
+            <button class="connect-key-toggle" type="button" aria-controls="connect-api-key" aria-pressed="false" data-key-toggle>Show</button>
+          </div>
+          <input class="input" id="connect-api-key" name="apiKey" type="password" placeholder="Paste API key" required autocomplete="off" aria-describedby="connect-api-key-help">
+          <p id="connect-api-key-help">Never displayed again after entry.</p>
+        </div>
+
+        <label class="connect-remember">
+          <input type="checkbox" data-remember>
+          <span><strong>Remember on this device</strong><small>Unchecked sessions end when this tab closes.</small></span>
+        </label>
+
+        <div class="connect-storage-warning" hidden data-storage-warning>
+          <span class="status"><span class="dot" style="background:var(--pending)"></span>persistent browser storage</span>
+          <p>This stores the API key in this browser. Use only on a trusted device.</p>
+        </div>
+
+        <div class="connect-error" role="alert" hidden data-connect-error>
+          <span class="status"><span class="dot" style="background:var(--failed)"></span><strong data-error-category>validation</strong></span>
+          <p data-error-message>API base URL must be a valid origin.</p>
+          <span class="mono" data-error-request>request ID unavailable</span>
+        </div>
+
+        <button class="btn primary connect-submit" type="submit" disabled data-connect-submit>Connect to platform</button>
+      </form>
+
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+  const form = document.querySelector('[data-connect-form]');
+  const baseUrl = document.querySelector('#connect-base-url');
+  const apiKey = document.querySelector('#connect-api-key');
+  const keyToggle = document.querySelector('[data-key-toggle]');
+  const remember = document.querySelector('[data-remember]');
+  const storageWarning = document.querySelector('[data-storage-warning]');
+  const error = document.querySelector('[data-connect-error]');
+  const submit = document.querySelector('[data-connect-submit]');
+
+  const hasValidOrigin = () => {
+    try {
+      const url = new URL(baseUrl.value);
+      return url.origin === baseUrl.value.replace(/\/$/, '');
+    } catch {
+      return false;
+    }
+  };
+  const updateSubmitState = () => {
+    if (submit.getAttribute('aria-busy') === 'true') return;
+    submit.disabled = !hasValidOrigin() || !apiKey.value.trim();
+  };
+
+  keyToggle.addEventListener('click', () => {
+    const reveal = apiKey.type === 'password';
+    apiKey.type = reveal ? 'text' : 'password';
+    keyToggle.textContent = reveal ? 'Hide' : 'Show';
+    keyToggle.setAttribute('aria-pressed', String(reveal));
+    apiKey.focus();
+  });
+  remember.addEventListener('change', () => { storageWarning.hidden = !remember.checked; });
+  baseUrl.addEventListener('input', updateSubmitState);
+  apiKey.addEventListener('input', updateSubmitState);
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    error.hidden = true;
+    try {
+      const url = new URL(baseUrl.value);
+      if (url.origin !== baseUrl.value.replace(/\/$/, '')) throw new Error('origin');
+      if (!apiKey.value) return apiKey.focus();
+      submit.disabled = true;
+      submit.setAttribute('aria-busy', 'true');
+      submit.textContent = 'Connecting…';
+    } catch {
+      error.hidden = false;
+      baseUrl.focus();
+      updateSubmitState();
+    }
+  });
+  updateSubmitState();
+})();
+</script>
+</body>
+</html>
