@@ -12,7 +12,10 @@ import {
   getQueueMetrics,
   getWebhookMetrics,
   listActionRequiredItems,
+  type ReadResult,
 } from '@/api/overview';
+
+export type { ReadResult };
 
 const OVERVIEW_REFETCH_INTERVAL = 15_000;
 

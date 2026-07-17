@@ -7,6 +7,8 @@ export type ApiErrorBody = components['schemas']['ApiError'];
 export type ResponseMeta = components['schemas']['ResponseMeta'];
 export type PublicData = components['schemas']['PublicData'];
 
+export type UnavailableRead = { readStatus: 'unavailable'; reasonCode?: string };
+
 export type ErrorCategory =
   | 'authentication'
   | 'authorization'
@@ -34,6 +36,32 @@ export class ApiFailure extends Error {
     this.retryable = error?.details?.retryable === true;
     this.requestId = envelope?.meta?.requestId;
   }
+}
+
+/** Detect a non-2xx body that is a data envelope reporting an unavailable read. */
+export function parseUnavailableRead(body: unknown): UnavailableRead | undefined {
+  if (typeof body !== 'object' || body === null || !('data' in body)) return undefined;
+
+  const { data } = body;
+  const unavailable = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' &&
+    value !== null &&
+    'readStatus' in value &&
+    value.readStatus === 'unavailable';
+
+  const first = Array.isArray(data)
+    ? data.length > 0 && data.every(unavailable)
+      ? data[0]
+      : undefined
+    : unavailable(data)
+      ? data
+      : undefined;
+
+  if (first === undefined) return undefined;
+  return {
+    readStatus: 'unavailable',
+    ...(typeof first.reasonCode === 'string' ? { reasonCode: first.reasonCode } : {}),
+  };
 }
 
 /**

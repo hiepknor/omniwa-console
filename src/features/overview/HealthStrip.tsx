@@ -1,7 +1,14 @@
-import { InlineError } from './InlineError';
+import { ApiFailure } from '@/api/envelopes';
 import { useDashboardSummary, useHealth, useHealthReadiness } from './hooks';
 
-function healthPosture(prefix: string, status: string | undefined) {
+type HealthPosture = {
+  dotClass: string;
+  label: string;
+  degraded?: boolean;
+  title?: string;
+};
+
+function healthPosture(prefix: string, status: string | undefined): HealthPosture {
   const normalized = status?.toLowerCase();
   if (normalized === 'ok' || normalized === 'healthy') {
     return { dotClass: 'dot-ok', label: `${prefix} ${prefix === 'API' ? 'healthy' : 'ok'}` };
@@ -12,22 +19,27 @@ function healthPosture(prefix: string, status: string | undefined) {
   return { dotClass: 'dot-info', label: `${prefix} ${status ?? '—'}` };
 }
 
+function failureTitle(error: unknown): string | undefined {
+  if (!(error instanceof ApiFailure)) return undefined;
+  return `${error.category}: ${error.message}${error.requestId ? ` · ${error.requestId}` : ''}`;
+}
+
 export function HealthStrip() {
   const health = useHealth();
   const readiness = useHealthReadiness();
   const dashboard = useDashboardSummary();
 
-  const apiPosture = health.isError
-    ? { dotClass: 'dot-failed', label: 'API unreachable' }
-    : healthPosture('API', health.data?.status);
-  const readinessPosture = readiness.isError
-    ? { dotClass: 'dot-failed', label: 'Readiness unreachable' }
-    : healthPosture('Readiness', readiness.data?.status);
+  const apiPosture: HealthPosture = health.isError
+    ? { dotClass: 'dot-failed', label: 'API unreachable', degraded: false, title: failureTitle(health.error) }
+    : healthPosture('API', health.data?.resource?.status);
+  const readinessPosture: HealthPosture = readiness.isError
+    ? { dotClass: 'dot-failed', label: 'Readiness unreachable', degraded: false, title: failureTitle(readiness.error) }
+    : healthPosture('Readiness', readiness.data?.resource?.status);
 
-  const connected = dashboard.data?.connectedInstanceCount;
-  const total = dashboard.data?.instanceCount;
+  const connected = dashboard.data?.resource?.connectedInstanceCount;
+  const total = dashboard.data?.resource?.instanceCount;
   const hasInstanceCounts = connected !== undefined && total !== undefined;
-  const instancesPosture = !hasInstanceCounts
+  const instancesPosture: HealthPosture = !hasInstanceCounts
     ? { dotClass: 'dot-info', label: 'Instances —' }
     : connected === total
       ? { dotClass: 'dot-ok', label: `Instances ${connected}/${total} connected` }
@@ -45,19 +57,13 @@ export function HealthStrip() {
           <span
             className={`health-item${posture.degraded ? ' health-item-degraded' : ''}`}
             key={posture.label}
+            title={posture.title}
           >
             <span className={`dot ${posture.dotClass}`}></span>
             <span>{posture.label}</span>
           </span>
         ))}
       </div>
-      {health.isError && <InlineError error={health.error} onRetry={health.refetch} />}
-      {readiness.isError && (
-        <InlineError error={readiness.error} onRetry={readiness.refetch} />
-      )}
-      {dashboard.isError && (
-        <InlineError error={dashboard.error} onRetry={dashboard.refetch} />
-      )}
     </section>
   );
 }

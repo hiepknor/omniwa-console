@@ -56,7 +56,7 @@ function safeSubjectRef(subjectRef: string | undefined): string | undefined {
 export function ActionRequiredTable() {
   const query = useActionRequiredItems();
   const items = query.data?.items ?? [];
-  const total = paginationTotal(query.data?.pagination, items.length);
+  const total = query.data?.unavailable ? 0 : paginationTotal(query.data?.pagination, items.length);
 
   return (
     <section className="section overview-actions" aria-labelledby="overview-actions-title">
@@ -65,7 +65,16 @@ export function ActionRequiredTable() {
           Action required <span className="muted num">· {total}</span>
         </h2>
       </div>
-      {query.isError ? (
+      {query.data?.unavailable ? (
+        <div
+          className="tablewrap overview-action-table"
+          tabIndex={0}
+          role="region"
+          aria-label="Action required work queue"
+        >
+          <div className="empty">No activity yet. Action items appear once the platform records events.</div>
+        </div>
+      ) : query.isError ? (
         <InlineError error={query.error} onRetry={query.refetch} />
       ) : (
         <div
