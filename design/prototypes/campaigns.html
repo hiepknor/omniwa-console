@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniWA Console — Messages (prototype)</title>
 <!-- Static prototype. Sample data only. PROPOSED contract — no v1 operations
-     exist yet; see docs/CAMPAIGNS_PROPOSAL.md. -->
+     exist yet; see CAMPAIGNS_PROPOSAL.md. -->
 <link rel="stylesheet" href="console.css">
 </head>
 <body>
@@ -40,145 +40,453 @@
     </div>
   </aside>
 
-<main data-od-id="campaigns-screen">
-    <header class="page-head" data-od-id="campaigns-page-header">
-      <div class="head-context"><div class="head-title-row"><h1>Messages</h1><span class="pill head-contract"><span class="dot" style="background:var(--info)"></span>proposed contract</span></div></div>
+  <main class="messages-screen" data-od-id="messages-screen">
+    <header class="page-head" data-od-id="messages-page-header">
+      <div class="head-context">
+        <div class="head-title-row">
+          <h1>Messages</h1>
+          <span class="pill head-contract"><span class="dot" style="background:var(--info)"></span>proposed contract</span>
+        </div>
+        <p class="head-meta">Campaign execution continues after this console closes.</p>
+      </div>
       <div class="head-right">
         <span class="live"><span class="dot"></span>live</span>
-        <a class="btn primary" href="campaign-new.html">New campaign</a>
+        <a class="btn primary" href="campaign-new.html" data-od-id="new-campaign-action">New campaign</a>
       </div>
     </header>
 
-    <div class="layout">
-      <div class="listcol">
-        <div class="tablewrap">
-          <div class="scroll">
-          <table>
-            <thead><tr><th>Campaign</th><th>List</th><th>Status</th><th>Progress</th><th>Updated</th></tr></thead>
-            <tbody>
-              <tr class="selected">
-                <td>Thông báo giá sỉ T7</td>
-                <td>Đại lý toàn quốc <span class="mono">· 24 groups</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--pending);animation:pulse 2s infinite"></span>running</span></td>
-                <td>
-                  <div class="progress">
-                    <span class="seg ok" style="width:62%"></span>
-                    <span class="seg pend" style="width:23%"></span>
-                    <span class="seg bad" style="width:3%"></span>
-                  </div>
-                  <div class="counts num"><span class="ok">15 delivered</span> · <span class="pend">6 queued</span> · <span class="bad">2 failed</span></div>
-                </td>
-                <td class="ts" title="2026-07-16T08:53:00Z">just now</td>
-              </tr>
-              <tr>
-                <td>Lịch nghỉ lễ 2/9</td>
-                <td>Miền Bắc <span class="mono">· 9 groups</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--info)"></span>scheduled</span></td>
-                <td><span class="ts">starts 2026-08-30 09:00</span></td>
-                <td class="ts" title="2026-07-15T14:00:00Z">19h ago</td>
-              </tr>
-              <tr>
-                <td>Khảo sát chất lượng Q2</td>
-                <td>Khách sỉ VIP <span class="mono">· 5 groups</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>completed</span></td>
-                <td>
-                  <div class="progress">
-                    <span class="seg ok" style="width:94%"></span>
-                    <span class="seg bad" style="width:6%"></span>
-                  </div>
-                  <div class="counts num"><span class="ok">5 delivered</span></div>
-                </td>
-                <td class="ts" title="2026-06-28T00:00:00Z">18d ago</td>
-              </tr>
-              <tr>
-                <td>Test pacing thấp</td>
-                <td>Miền Bắc <span class="mono">· 9 groups</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--failed)"></span>aborted</span></td>
-                <td>
-                  <div class="progress">
-                    <span class="seg ok" style="width:20%"></span>
-                    <span class="seg bad" style="width:12%"></span>
-                  </div>
-                  <div class="counts num"><span class="ok">3 delivered</span> · <span class="bad">1 failed</span> · 5 not sent</div>
-                </td>
-                <td class="ts" title="2026-07-01T00:00:00Z">15d ago</td>
-              </tr>
-            </tbody>
-          </table>
+    <section class="messages-summary" aria-label="Campaign posture" data-od-id="messages-summary">
+      <article class="card messages-summary-card" data-od-id="campaign-summary-drafts">
+        <span class="label">Drafts</span>
+        <span class="value num">1</span>
+        <span class="ctx">Awaiting review or schedule selection.</span>
+      </article>
+      <article class="card messages-summary-card" data-od-id="campaign-summary-active">
+        <span class="label">Active + scheduled</span>
+        <span class="value num">4</span>
+        <span class="ctx">1 running · 1 scheduled · 2 paused.</span>
+      </article>
+      <article class="card messages-summary-card" data-od-id="campaign-summary-attention">
+        <span class="label">Need Attention</span>
+        <span class="value num">1</span>
+        <span class="ctx">A failure spike auto-paused execution.</span>
+      </article>
+      <article class="card messages-summary-card" data-od-id="campaign-summary-groups">
+        <span class="label">Resolved Groups</span>
+        <span class="value num">83</span>
+        <span class="ctx">Across the seven campaigns shown below.</span>
+      </article>
+    </section>
+
+    <section class="messages-workbench" data-od-id="campaigns-workbench">
+      <div class="messages-section-head">
+        <div>
+          <h2>Campaign workbench</h2>
+          <p class="messages-section-note">Each segment represents a distinct recipient outcome.</p>
+        </div>
+        <span class="messages-result-count num">7 results</span>
+      </div>
+
+      <div class="messages-toolbar" data-od-id="campaigns-toolbar">
+        <div class="messages-toolbar-primary">
+          <label class="messages-search-field" for="campaign-search">
+            <span class="sr-only">Search campaigns</span>
+            <input id="campaign-search" class="search messages-search" type="search" placeholder="Search by name, ID, list, or instance">
+          </label>
+          <div class="messages-filter-chips" aria-label="Active filters">
+            <button class="chip active" type="button">Instance: Sales primary</button>
+            <button class="chip" type="button">+ State</button>
           </div>
-          <div class="table-foot"><span class="num">4 of 4 campaigns</span></div>
+        </div>
+        <div class="messages-toolbar-meta">
+          <span><b>Freshness</b> just now</span>
+          <span class="mono">cursor cur_cmp_00017</span>
         </div>
       </div>
 
-      <aside class="drawer">
-        <header>
-          <div class="t"><b>Thông báo giá sỉ T7</b><span class="mono">cmp_11ee9k</span></div>
-          <button class="close" aria-label="Close">✕</button>
-        </header>
-
-        <section>
-          <div class="kv">
-            <dt>Status</dt><dd><span class="status"><span class="dot" style="background:var(--pending);animation:pulse 2s infinite"></span>running</span></dd>
-            <dt>Named List</dt><dd>Đại lý toàn quốc <span class="mono">nl_77aq2k</span> · 24 groups</dd>
-            <dt>Instance</dt><dd><span class="mono">inst_2bq81c</span> sales-primary</dd>
-            <dt>Pacing</dt><dd class="num">12 group sends / min (cap 20)</dd>
-            <dt>Started</dt><dd class="ts" title="2026-07-16T08:45:00Z">2m ago · est. 1m left</dd>
-          </div>
-          <div style="margin-top:12px">
-            <div class="progress">
-              <span class="seg ok" style="width:62%"></span>
-              <span class="seg pend" style="width:23%"></span>
-              <span class="seg bad" style="width:3%"></span>
-            </div>
-            <div class="counts num"><span class="ok">15 delivered</span> · <span class="pend">6 queued</span> · <span class="bad">2 failed</span> · 1 pending</div>
-          </div>
-          <p class="help" style="margin-top:8px">Auto-pauses if failures exceed the settings threshold.
-            Counts are message lifecycle states — <b>accepted is never shown as delivered</b>.</p>
-        </section>
-
-        <section>
-          <h3>Message</h3>
-          <div class="bubble out" style="max-width:100%">
-            Chào anh/chị, bảng giá sỉ tháng 7 đã cập nhật. Đơn trên 10 thùng
-            giảm thêm 2%. Phản hồi tin này nếu cần báo giá chi tiết.
-            <span class="foot">template · text</span>
-          </div>
-        </section>
-
-        <section>
-          <h3>Recipient groups <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 3 of 24</span></h3>
-          <table class="minitable">
+      <div class="tablewrap messages-table" tabindex="0" data-od-id="campaigns-table">
+        <div class="scroll">
+          <table>
+            <caption>Campaign list with audience resolution, progress accounting, schedule, pacing, and last update time.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Campaign</th>
+                <th scope="col">Audience</th>
+                <th scope="col">State</th>
+                <th scope="col">Lifecycle progress</th>
+                <th scope="col">Pacing / schedule</th>
+                <th scope="col">Updated</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr>
-                <td>Khách sỉ miền Nam <span class="mono">grp_44he2n</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--ok)"></span>delivered</span></td>
-                <td style="text-align:right"><button class="btn sm">History</button></td>
+              <tr class="selected" tabindex="0" aria-selected="true" data-od-id="campaign-row-july-price-briefing">
+                <td>
+                  <div class="messages-namecell">
+                    <div>
+                      <span class="messages-resource-name">July price briefing</span>
+                      <span class="row-id mono">cmp_71qx3m</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="messages-audience-name">National dealer groups</span>
+                  <span class="row-id mono">nl_77aq2k · 24 groups</span>
+                </td>
+                <td><span class="status messages-state-running"><span class="dot" style="background:var(--pending)"></span>running</span></td>
+                <td>
+                  <div class="messages-progress" aria-hidden="true">
+                    <span class="messages-progress-seg is-delivered" style="width:50%"></span>
+                    <span class="messages-progress-seg is-accepted" style="width:13%"></span>
+                    <span class="messages-progress-seg is-queued" style="width:21%"></span>
+                    <span class="messages-progress-seg is-failed" style="width:8%"></span>
+                    <span class="messages-progress-seg is-canceled" style="width:8%"></span>
+                  </div>
+                  <dl class="messages-progress-counts num">
+                    <div><dt>Delivered</dt><dd>12</dd></div>
+                    <div><dt>Accepted</dt><dd>3</dd></div>
+                    <div><dt>Queued</dt><dd>5</dd></div>
+                    <div><dt>Failed</dt><dd>2</dd></div>
+                    <div><dt>Canceled</dt><dd>2</dd></div>
+                  </dl>
+                </td>
+                <td>
+                  <span class="messages-pacing num">12 groups/min</span>
+                  <span class="row-id">Started Jul 17, 2026 09:12</span>
+                </td>
+                <td class="ts" title="2026-07-17T09:14:00+07:00">2m ago</td>
               </tr>
-              <tr>
-                <td>Đại lý Hà Nội <span class="mono">grp_90weu2</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--pending)"></span>queued</span></td>
-                <td style="text-align:right"><button class="btn sm">History</button></td>
+              <tr tabindex="0" data-od-id="campaign-row-promo-preview">
+                <td><span class="messages-resource-name">Weekend promo preview</span><span class="row-id mono">cmp_62pl8d</span></td>
+                <td><span class="messages-audience-name">Retail north region</span><span class="row-id mono">nl_52kr4b · 9 groups</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--muted)"></span>draft</span></td>
+                <td>
+                  <div class="messages-progress messages-progress--empty" aria-hidden="true"></div>
+                  <dl class="messages-progress-counts num">
+                    <div><dt>Delivered</dt><dd>0</dd></div>
+                    <div><dt>Accepted</dt><dd>0</dd></div>
+                    <div><dt>Queued</dt><dd>0</dd></div>
+                    <div><dt>Failed</dt><dd>0</dd></div>
+                    <div><dt>Canceled</dt><dd>0</dd></div>
+                  </dl>
+                </td>
+                <td><span class="messages-pacing num">Awaiting review</span><span class="row-id">No start time</span></td>
+                <td class="ts" title="2026-07-17T08:43:00+07:00">33m ago</td>
               </tr>
-              <tr>
-                <td>Đại lý Cần Thơ <span class="mono">grp_66eh0m</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--failed)"></span>failed</span></td>
-                <td style="text-align:right"><button class="btn sm">History</button></td>
+              <tr tabindex="0" data-od-id="campaign-row-maintenance-notice">
+                <td><span class="messages-resource-name">Maintenance window notice</span><span class="row-id mono">cmp_55vs1x</span></td>
+                <td><span class="messages-audience-name">Service advisories</span><span class="row-id mono">nl_11tz9p · 14 groups</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--info)"></span>scheduled</span></td>
+                <td>
+                  <div class="messages-progress messages-progress--empty" aria-hidden="true"></div>
+                  <dl class="messages-progress-counts num">
+                    <div><dt>Delivered</dt><dd>0</dd></div>
+                    <div><dt>Accepted</dt><dd>0</dd></div>
+                    <div><dt>Queued</dt><dd>0</dd></div>
+                    <div><dt>Failed</dt><dd>0</dd></div>
+                    <div><dt>Canceled</dt><dd>0</dd></div>
+                  </dl>
+                </td>
+                <td><span class="messages-pacing num">8 groups/min</span><span class="row-id">Jul 18, 2026 08:30</span></td>
+                <td class="ts" title="2026-07-17T07:10:00+07:00">2h ago</td>
+              </tr>
+              <tr tabindex="0" data-od-id="campaign-row-failure-spike">
+                <td><span class="messages-resource-name">Receipt fallback wave</span><span class="row-id mono">cmp_48ah2w</span></td>
+                <td><span class="messages-audience-name">Receipts backlog groups</span><span class="row-id mono">nl_20ma7f · 18 groups</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--degraded)"></span>auto-paused</span></td>
+                <td>
+                  <div class="messages-progress" aria-hidden="true">
+                    <span class="messages-progress-seg is-delivered" style="width:22%"></span>
+                    <span class="messages-progress-seg is-accepted" style="width:6%"></span>
+                    <span class="messages-progress-seg is-queued" style="width:11%"></span>
+                    <span class="messages-progress-seg is-failed" style="width:44%"></span>
+                    <span class="messages-progress-seg is-canceled" style="width:17%"></span>
+                  </div>
+                  <dl class="messages-progress-counts num">
+                    <div><dt>Delivered</dt><dd>4</dd></div>
+                    <div><dt>Accepted</dt><dd>1</dd></div>
+                    <div><dt>Queued</dt><dd>2</dd></div>
+                    <div><dt>Failed</dt><dd>8</dd></div>
+                    <div><dt>Canceled</dt><dd>3</dd></div>
+                  </dl>
+                </td>
+                <td><span class="messages-pacing num">10 groups/min</span><span class="row-id">Paused by threshold</span></td>
+                <td class="ts" title="2026-07-17T06:51:00+07:00">2h ago</td>
+              </tr>
+              <tr tabindex="0" data-od-id="campaign-row-follow-up-checkin">
+                <td><span class="messages-resource-name">August follow-up check-in</span><span class="row-id mono">cmp_38fd6e</span></td>
+                <td><span class="messages-audience-name">VIP store managers</span><span class="row-id mono">nl_90ce1j · 6 groups</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>paused</span></td>
+                <td>
+                  <div class="messages-progress" aria-hidden="true">
+                    <span class="messages-progress-seg is-delivered" style="width:34%"></span>
+                    <span class="messages-progress-seg is-accepted" style="width:16%"></span>
+                    <span class="messages-progress-seg is-queued" style="width:0%"></span>
+                    <span class="messages-progress-seg is-failed" style="width:0%"></span>
+                    <span class="messages-progress-seg is-canceled" style="width:50%"></span>
+                  </div>
+                  <dl class="messages-progress-counts num">
+                    <div><dt>Delivered</dt><dd>2</dd></div>
+                    <div><dt>Accepted</dt><dd>1</dd></div>
+                    <div><dt>Queued</dt><dd>0</dd></div>
+                    <div><dt>Failed</dt><dd>0</dd></div>
+                    <div><dt>Canceled</dt><dd>3</dd></div>
+                  </dl>
+                </td>
+                <td><span class="messages-pacing num">6 groups/min</span><span class="row-id">Manual pause Jul 16</span></td>
+                <td class="ts" title="2026-07-16T17:42:00+07:00">16h ago</td>
+              </tr>
+              <tr tabindex="0" data-od-id="campaign-row-q2-survey-closeout">
+                <td><span class="messages-resource-name">Q2 survey closeout</span><span class="row-id mono">cmp_22an9h</span></td>
+                <td><span class="messages-audience-name">Wholesale insights</span><span class="row-id mono">nl_15gt4z · 5 groups</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>completed</span></td>
+                <td>
+                  <div class="messages-progress" aria-hidden="true">
+                    <span class="messages-progress-seg is-delivered" style="width:80%"></span>
+                    <span class="messages-progress-seg is-accepted" style="width:0%"></span>
+                    <span class="messages-progress-seg is-queued" style="width:0%"></span>
+                    <span class="messages-progress-seg is-failed" style="width:20%"></span>
+                    <span class="messages-progress-seg is-canceled" style="width:0%"></span>
+                  </div>
+                  <dl class="messages-progress-counts num">
+                    <div><dt>Delivered</dt><dd>4</dd></div>
+                    <div><dt>Accepted</dt><dd>0</dd></div>
+                    <div><dt>Queued</dt><dd>0</dd></div>
+                    <div><dt>Failed</dt><dd>1</dd></div>
+                    <div><dt>Canceled</dt><dd>0</dd></div>
+                  </dl>
+                </td>
+                <td><span class="messages-pacing num">5 groups/min</span><span class="row-id">Completed Jul 12</span></td>
+                <td class="ts" title="2026-07-12T14:20:00+07:00">5d ago</td>
+              </tr>
+              <tr tabindex="0" data-od-id="campaign-row-compliance-stop">
+                <td><span class="messages-resource-name">Compliance escalation stop</span><span class="row-id mono">cmp_14cw8r</span></td>
+                <td><span class="messages-audience-name">Policy review cohort</span><span class="row-id mono">nl_60qb5n · 7 groups</span></td>
+                <td><span class="status"><span class="dot" style="background:var(--failed)"></span>aborted</span></td>
+                <td>
+                  <div class="messages-progress" aria-hidden="true">
+                    <span class="messages-progress-seg is-delivered" style="width:14%"></span>
+                    <span class="messages-progress-seg is-accepted" style="width:0%"></span>
+                    <span class="messages-progress-seg is-queued" style="width:15%"></span>
+                    <span class="messages-progress-seg is-failed" style="width:29%"></span>
+                    <span class="messages-progress-seg is-canceled" style="width:42%"></span>
+                  </div>
+                  <dl class="messages-progress-counts num">
+                    <div><dt>Delivered</dt><dd>1</dd></div>
+                    <div><dt>Accepted</dt><dd>0</dd></div>
+                    <div><dt>Queued</dt><dd>1</dd></div>
+                    <div><dt>Failed</dt><dd>2</dd></div>
+                    <div><dt>Canceled</dt><dd>3</dd></div>
+                  </dl>
+                </td>
+                <td><span class="messages-pacing num">Stopped by operator</span><span class="row-id">Abort Jul 11</span></td>
+                <td class="ts" title="2026-07-11T18:05:00+07:00">6d ago</td>
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="table-foot">
+          <div class="messages-table-meta">
+            <span>Showing <b>7</b> of <b>7</b> proposed campaigns</span>
+            <span class="freshness">List refresh: 12s ago</span>
+          </div>
+          <div class="messages-cursor">
+            <button class="btn" type="button">Load older</button>
+            <span class="mono">next cur_cmp_00018</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="messages-drawer" id="campaign-detail-drawer" aria-label="Selected campaign details" data-od-id="campaign-detail-drawer">
+      <div class="drawer-head">
+        <div class="drawer-identity">
+          <p class="eyebrow">Selected campaign</p>
+          <div class="drawer-title-row">
+            <h2>July price briefing</h2>
+            <span class="status messages-state-running"><span class="dot" style="background:var(--pending)"></span>running</span>
+          </div>
+          <p class="mono">cmp_71qx3m</p>
+        </div>
+        <button class="close" type="button" aria-label="Close campaign details">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="drawer-scroll">
+        <section data-od-id="campaign-drawer-facts">
+          <div class="messages-facts-grid">
+            <div class="messages-fact-card">
+              <span class="label">Named List</span>
+              <strong>National dealer groups</strong>
+              <span class="mono">nl_77aq2k · 24 groups</span>
+            </div>
+            <div class="messages-fact-card">
+              <span class="label">Instance</span>
+              <strong>sales-primary</strong>
+              <span class="mono">inst_2bq81c</span>
+            </div>
+            <div class="messages-fact-card">
+              <span class="label">Pacing</span>
+              <strong class="num">12 groups/min</strong>
+              <span class="ts">platform cap 20 groups/min</span>
+            </div>
+            <div class="messages-fact-card">
+              <span class="label">Update age</span>
+              <strong>2 minutes</strong>
+              <span class="ts">Started Jul 17, 2026 09:12</span>
+            </div>
+          </div>
+
+          <div class="messages-counter-grid" aria-label="Lifecycle counters">
+            <article class="messages-counter" data-od-id="campaign-counter-delivered">
+              <span class="label">Delivered</span>
+              <strong class="num">12</strong>
+            </article>
+            <article class="messages-counter" data-od-id="campaign-counter-accepted">
+              <span class="label">Accepted</span>
+              <strong class="num">3</strong>
+            </article>
+            <article class="messages-counter" data-od-id="campaign-counter-queued">
+              <span class="label">Queued</span>
+              <strong class="num">5</strong>
+            </article>
+            <article class="messages-counter" data-od-id="campaign-counter-failed">
+              <span class="label">Failed</span>
+              <strong class="num">2</strong>
+            </article>
+            <article class="messages-counter" data-od-id="campaign-counter-canceled">
+              <span class="label">Canceled</span>
+              <strong class="num">2</strong>
+            </article>
+          </div>
+
         </section>
 
-        <section>
-          <h3>Controls</h3>
-          <div class="actions">
-            <button class="btn">Pause</button>
-            <button class="btn danger">Abort…</button>
+        <section data-od-id="campaign-drawer-template">
+          <div class="drawer-section-head">
+            <h3>Message template</h3>
+            <span class="pill"><span class="dot" style="background:var(--info)"></span>text only</span>
           </div>
-          <p class="help" style="margin-top:8px">Abort requires typed confirmation and cannot be resumed.</p>
+          <div class="messages-template-card">
+            <p class="messages-template-subject">July wholesale pricing update</p>
+            <p>Hello team, the July wholesale sheet is live. Orders above ten cases keep the extra 2% reduction. Reply in your normal operations channel if the group needs the detailed breakdown.</p>
+            <div class="messages-template-meta">
+              <span>Template identity</span>
+              <span class="mono">tmpl_july_pricing_v4</span>
+            </div>
+          </div>
         </section>
-      </aside>
-    </div>
+
+        <section data-od-id="campaign-drawer-recipients">
+          <div class="drawer-section-head">
+            <h3>Recipient group outcomes</h3>
+            <span class="delivery-count">Showing 4 of 24 groups</span>
+          </div>
+          <div class="delivery-scroll" tabindex="0">
+            <table class="delivery-table">
+              <caption>Resolved group outcomes for the selected campaign.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Group</th>
+                  <th scope="col">Lifecycle</th>
+                  <th scope="col">History</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>South retail cluster <span class="row-id mono">grp_44he2n · wamid.HBgNODkxMTAxMDE</span></td>
+                  <td><span class="status sm"><span class="dot" style="background:var(--ok)"></span>delivered</span></td>
+                  <td class="delivery-action"><button class="btn sm" type="button">History</button></td>
+                </tr>
+                <tr>
+                  <td>Hanoi dealer council <span class="row-id mono">grp_90weu2 · wamid.HBgNODkxMTAxMjI</span></td>
+                  <td><span class="status sm"><span class="dot" style="background:var(--pending)"></span>queued</span></td>
+                  <td class="delivery-action"><button class="btn sm" type="button">History</button></td>
+                </tr>
+                <tr>
+                  <td>Can Tho channel partners <span class="row-id mono">grp_66eh0m · wamid.HBgNODkxMTAxMzQ</span></td>
+                  <td><span class="status sm"><span class="dot" style="background:var(--failed)"></span>failed</span></td>
+                  <td class="delivery-action"><button class="btn sm" type="button">History</button></td>
+                </tr>
+                <tr>
+                  <td>Da Nang service points <span class="row-id mono">grp_29qq7p · no message ID</span></td>
+                  <td><span class="status sm"><span class="dot" style="background:var(--inactive)"></span>canceled</span></td>
+                  <td class="delivery-action"><button class="btn sm" type="button">History</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="messages-actions" data-od-id="campaign-drawer-actions">
+          <div class="drawer-section-head">
+            <h3>Lifecycle controls</h3>
+            <span class="status sm"><span class="dot" style="background:var(--pending)"></span>running supports pause</span>
+          </div>
+          <div class="messages-action-stack">
+            <div class="action-group">
+              <button class="btn" type="button">Pause campaign</button>
+              <span>Accepts a pause command only. In-flight sends keep their existing lifecycle state.</span>
+            </div>
+            <div class="action-group">
+              <button class="btn" type="button" disabled>Resume campaign</button>
+              <span>Available only after the campaign reaches the paused state.</span>
+            </div>
+            <div class="action-group destructive">
+              <button class="btn danger" type="button" data-abort-open>Abort campaign</button>
+              <span>Abort is terminal and requires typed confirmation of the campaign name.</span>
+            </div>
+          </div>
+          <div class="messages-confirm-card" hidden>
+            <label for="abort-confirmation">Type <span class="messages-confirm-name">July price briefing</span> to confirm abort</label>
+            <input id="abort-confirmation" class="input" type="text" value="" placeholder="Campaign name">
+            <div class="messages-confirm-actions">
+              <button class="btn" type="button" data-abort-cancel>Cancel</button>
+              <button class="btn danger" type="button" data-abort-confirm disabled>Confirm abort</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
   </main>
 </div>
+<script>
+(() => {
+  const drawer = document.querySelector('#campaign-detail-drawer');
+  const selectedRow = document.querySelector('[data-od-id="campaign-row-july-price-briefing"]');
+  const confirmCard = document.querySelector('.messages-confirm-card');
+  const confirmInput = document.querySelector('#abort-confirmation');
+  const confirmButton = document.querySelector('[data-abort-confirm]');
+
+  const setDrawerOpen = (open) => {
+    drawer.hidden = !open;
+    if (!open) selectedRow.focus();
+  };
+  drawer.querySelector('.close').addEventListener('click', () => setDrawerOpen(false));
+  selectedRow.addEventListener('click', () => {
+    setDrawerOpen(true);
+    if (matchMedia('(max-width: 900px)').matches) drawer.scrollIntoView({ block: 'start' });
+  });
+  document.querySelector('[data-abort-open]').addEventListener('click', () => {
+    confirmCard.hidden = false;
+    confirmInput.focus();
+  });
+  document.querySelector('[data-abort-cancel]').addEventListener('click', () => {
+    confirmInput.value = '';
+    confirmCard.hidden = true;
+    confirmButton.disabled = true;
+  });
+  confirmInput.addEventListener('input', () => {
+    confirmButton.disabled = confirmInput.value !== 'July price briefing';
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !confirmCard.hidden) {
+      confirmCard.hidden = true;
+      return;
+    }
+    if (event.key === 'Escape' && !drawer.hidden) setDrawerOpen(false);
+  });
+})();
+</script>
 </body>
 </html>

@@ -249,7 +249,10 @@ this subsection binds to it.
 - The group table is the primary surface. Search, active filters, result count, freshness, bulk selection, and cursor pagination remain attached to one continuous workbench.
 - Every row exposes selection, group identity, member count, operator role, local state, Named List membership, and last activity. Status always uses a semantic dot plus a text label.
 - Bulk selection owns one action only: **Add to Named List**. The quick-add menu may create a proposed local Named List, but must not imply any change to WhatsApp group membership.
-- Selecting a group opens a 440px on-demand right drawer. The table yields space only while the drawer is open; closing it restores the full-width table. Below 900px the drawer becomes a full-width in-flow panel.
+- Selecting a group opens the shared 440px on-demand overlay drawer used by
+  Webhooks. The table never reflows; closing the drawer restores focus to
+  the selected row. Below 900px the drawer becomes a full-width in-flow
+  panel.
 - Drawer hierarchy is fixed: identity and local state → compact facts → invite link → local-state controls → member management → one-off text command. Member and send commands render acceptance, never synchronous completion.
 - Named Lists management reuses the right-panel mode and supports the `?list=nl_*` deep link. It remains explicitly local operator organization, separate from provider-side membership.
 
@@ -309,15 +312,21 @@ this subsection binds to it.
 ### Campaign components (proposed contract — see docs/CAMPAIGNS_PROPOSAL.md)
 
 - **Progress bar**: 6px track (Recessed), segments colored by outcome —
-  delivered emerald, accepted/queued amber, failed red — with a mono
-  `delivered / accepted / failed` count line under it. Never a single
-  undifferentiated bar: outcomes stay visible.
+  delivered emerald, accepted and queued as distinct amber steps, failed
+  red, and canceled gray — with aligned mono counts under it. Never a
+  single undifferentiated bar and never merge accepted into queued or
+  delivered: every lifecycle outcome stays explicit.
 - **Campaign status vocabulary**: `draft` gray · `scheduled` sky ·
   `running` amber (pulsing dot) · `paused` orange · `completed` emerald ·
   `aborted` red.
 - **Wizard steps**: numbered dot + label row (Audience → Message → Review),
   current step uses an Earth Gray pill, completed steps use muted healthy status, future muted. One primary
   action per step, always bottom-right; Back is ghost.
+- **Campaign workbench**: search, active filters, result count, freshness,
+  cursor pagination, and segmented lifecycle accounting stay attached to
+  the six-column table. Campaign detail follows the Webhooks master-detail
+  pattern: an on-demand 440px overlay drawer that closes without reflowing
+  the table, and becomes an in-flow panel below 900px.
 - **Named Lists** contain groups only, added by row-selection on the
   Groups table — the UI offers no raw-number or contact import surface,
   by design. Deleting a list is allowed; campaigns snapshot member groups

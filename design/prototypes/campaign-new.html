@@ -4,16 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OmniWA Console — Messages · New campaign (prototype)</title>
-<!-- Static prototype. Sample data only. PROPOSED contract — see
-     docs/CAMPAIGNS_PROPOSAL.md. Shown at step 3 (Review); steps 1–2 completed. -->
+<!-- Static prototype. Sample data only. PROPOSED contract — no v1 operations
+     exist yet; see CAMPAIGNS_PROPOSAL.md. -->
 <link rel="stylesheet" href="console.css">
-<style>
-  .wizardwrap{max-width:720px}
-  .panelcard{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px}
-  .panelcard h3{font-size:14px;font-weight:500;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-  .panelcard h3 .btn{font-weight:500}
-  .wfooter{display:flex;justify-content:space-between;margin-top:20px}
-</style>
 </head>
 <body>
 <div class="shell">
@@ -47,70 +40,265 @@
     </div>
   </aside>
 
-<main data-od-id="campaign-wizard-screen">
+  <main class="campaign-flow-screen" data-step="review" data-od-id="campaign-new-screen">
     <header class="page-head" data-od-id="campaign-new-page-header">
       <div class="head-context">
         <nav class="crumb" aria-label="Breadcrumb"><a href="campaigns.html">Messages</a><span class="crumb-separator" aria-hidden="true">/</span></nav>
-        <div class="head-title-row"><h1>New campaign</h1></div>
+        <div class="head-title-row">
+          <h1>New campaign</h1>
+          <span class="pill head-contract"><span class="dot" style="background:var(--info)"></span>proposed contract</span>
+        </div>
+        <p class="head-meta">Recipients come from one Named List of existing groups. Campaign execution stays in the platform runtime.</p>
       </div>
-      <div class="head-right"></div>
+      <div class="head-right">
+        <a class="btn" href="campaigns.html">Back to Messages</a>
+      </div>
     </header>
 
-    <div class="wizardwrap">
-      <div class="wizard">
-        <span class="wstep done"><span class="n">✓</span>Audience</span>
-        <span class="sep"></span>
-        <span class="wstep done"><span class="n">✓</span>Message</span>
-        <span class="sep"></span>
-        <span class="wstep current"><span class="n">3</span>Review</span>
-      </div>
-
-      <div class="panelcard">
-        <h3>Audience <button class="btn sm">Edit</button></h3>
-        <div class="kv">
-          <dt>Named List</dt><dd>Đại lý toàn quốc <span class="mono">nl_77aq2k</span></dd>
-          <dt>Instance</dt><dd><span class="mono">inst_2bq81c</span> sales-primary <span class="status sm" style="margin-left:6px"><span class="dot" style="background:var(--ok)"></span>connected</span></dd>
-          <dt>Recipients</dt><dd class="num">24 groups (resolved now; re-resolved at start)</dd>
+    <section class="campaign-flow-steps" aria-label="Campaign creation steps" data-od-id="campaign-flow-steps">
+      <article class="campaign-step is-complete" role="button" tabindex="0" data-step-target="audience" data-od-id="campaign-step-audience">
+        <div class="campaign-step-index" aria-hidden="true">1</div>
+        <div>
+          <h2>Audience</h2>
+          <p>Choose one Named List and confirm the resolved group snapshot.</p>
         </div>
-      </div>
-
-      <div class="panelcard">
-        <h3>Message <button class="btn sm">Edit</button></h3>
-        <div class="bubble out" style="max-width:100%">
-          Chào anh/chị, bảng giá sỉ tháng 7 đã cập nhật. Đơn trên 10 thùng
-          giảm thêm 2%. Phản hồi tin này nếu cần báo giá chi tiết.
-          <span class="foot">text · no media</span>
+        <span class="campaign-step-state">Complete</span>
+      </article>
+      <article class="campaign-step is-complete" role="button" tabindex="0" data-step-target="message" data-od-id="campaign-step-message">
+        <div class="campaign-step-index" aria-hidden="true">2</div>
+        <div>
+          <h2>Message</h2>
+          <p>Define text or media identity without turning the flow into chat composition.</p>
         </div>
-      </div>
-
-      <div class="panelcard">
-        <h3>Schedule &amp; pacing</h3>
-        <div class="kv" style="margin-bottom:12px">
-          <dt>Start</dt><dd>Immediately on create</dd>
-          <dt>Pacing</dt>
-          <dd>
-            <input class="input num" style="width:80px;display:inline-block" value="12"> group sends / min
-            <span class="help" style="display:inline;margin-left:8px">platform cap: 20 / min</span>
-          </dd>
-          <dt>Est. duration</dt><dd class="num">~2 minutes</dd>
-          <dt>Auto-pause</dt><dd class="num">on 10 failures within 5 min (from settings)</dd>
+        <span class="campaign-step-state">Complete</span>
+      </article>
+      <article class="campaign-step is-current" role="button" tabindex="0" data-step-target="review" aria-current="step" data-od-id="campaign-step-review">
+        <div class="campaign-step-index" aria-hidden="true">3</div>
+        <div>
+          <h2>Review</h2>
+          <p>Confirm schedule, pacing, duration, and accepted is not delivered.</p>
         </div>
-        <p class="help">Execution runs platform-side on the queue runtime — closing this browser
-          does not affect the campaign. Each group gets one <span class="mono">sendGroupTextMessage</span>
-          with the standard lifecycle: <b>accepted → queued → delivered / failed</b> — and one group
-          send reaches every member, so pace responsibly. The campaign never reports "sent" as an
-          outcome.</p>
-      </div>
+        <span class="campaign-step-state">Current</span>
+      </article>
+    </section>
 
-      <div class="wfooter">
-        <button class="btn">← Back</button>
-        <div class="actions">
-          <button class="btn">Save as draft</button>
-          <button class="btn primary">Create &amp; start</button>
-        </div>
-      </div>
+    <div class="campaign-flow-layout">
+      <section class="campaign-flow-main" data-od-id="campaign-flow-main">
+        <article class="campaign-panel is-complete" data-od-id="campaign-panel-audience">
+          <header class="campaign-panel-head">
+            <div>
+              <p class="eyebrow">Step 1</p>
+              <h3>Audience</h3>
+            </div>
+            <span class="campaign-step-state">Draft values</span>
+          </header>
+          <div class="campaign-panel-body">
+            <div class="campaign-field-grid">
+              <label class="campaign-field">
+                <span class="campaign-field-label">Named List</span>
+                <select class="input" aria-label="Named List">
+                  <option selected>National dealer groups · nl_77aq2k</option>
+                </select>
+              </label>
+              <label class="campaign-field">
+                <span class="campaign-field-label">Instance</span>
+                <div class="campaign-static-field">
+                  <strong>sales-primary</strong>
+                  <span class="mono">inst_2bq81c</span>
+                </div>
+              </label>
+            </div>
+            <div class="campaign-audience-summary">
+              <div class="campaign-audience-count">
+                <span class="label">Resolved groups</span>
+                <strong class="num">24</strong>
+                <span class="ts">Snapshot resolves platform-side at campaign start.</span>
+              </div>
+              <p>Named Lists contain existing groups only. There is no contact import, raw number entry, or cold audience construction in this flow.</p>
+            </div>
+          </div>
+          <footer class="campaign-panel-footer">
+            <button class="btn" type="button" disabled>Back</button>
+            <button class="btn primary" type="button" data-step-target="message">Continue to Message</button>
+          </footer>
+        </article>
+
+        <article class="campaign-panel is-complete" data-od-id="campaign-panel-message">
+          <header class="campaign-panel-head">
+            <div>
+              <p class="eyebrow">Step 2</p>
+              <h3>Message</h3>
+            </div>
+            <span class="campaign-step-state">Draft values</span>
+          </header>
+          <div class="campaign-panel-body">
+            <div class="campaign-field-grid">
+              <label class="campaign-field">
+                <span class="campaign-field-label">Message type</span>
+                <select class="input" aria-label="Message type">
+                  <option selected>Text message</option>
+                  <option>Media attachment</option>
+                </select>
+              </label>
+              <label class="campaign-field">
+                <span class="campaign-field-label">Template identity</span>
+                <div class="campaign-static-field">
+                  <strong>July wholesale pricing update</strong>
+                  <span class="mono">tmpl_july_pricing_v4</span>
+                </div>
+              </label>
+            </div>
+            <div class="campaign-message-preview" data-od-id="campaign-message-preview">
+              <div class="campaign-preview-chip">Preview</div>
+              <p>Hello team, the July wholesale sheet is live. Orders above ten cases keep the extra 2% reduction. Reply in your normal operations channel if the group needs the detailed breakdown.</p>
+              <div class="campaign-preview-meta">
+                <span>Media identity</span>
+                <span class="mono">None attached</span>
+              </div>
+            </div>
+          </div>
+          <footer class="campaign-panel-footer">
+            <button class="btn" type="button" data-step-target="audience">Back</button>
+            <button class="btn primary" type="button" data-step-target="review">Continue to Review</button>
+          </footer>
+        </article>
+
+        <article class="campaign-panel is-current" data-od-id="campaign-panel-review">
+          <header class="campaign-panel-head">
+            <div>
+              <p class="eyebrow">Step 3</p>
+              <h3>Review</h3>
+            </div>
+            <span class="pill"><span class="dot" style="background:var(--pending)"></span>schedule selected</span>
+          </header>
+          <div class="campaign-panel-body">
+            <div class="campaign-review-grid">
+              <div class="campaign-field">
+                <span class="campaign-field-label">Audience</span>
+                <div class="campaign-static-field">
+                  <strong>National dealer groups</strong>
+                  <span class="mono">nl_77aq2k · 24 groups</span>
+                </div>
+              </div>
+              <div class="campaign-field">
+                <span class="campaign-field-label">Message</span>
+                <div class="campaign-static-field">
+                  <strong>July wholesale pricing update</strong>
+                  <span class="mono">tmpl_july_pricing_v4 · text</span>
+                </div>
+              </div>
+              <label class="campaign-field">
+                <span class="campaign-field-label">Start</span>
+                <select class="input" aria-label="Campaign start">
+                  <option>Start immediately</option>
+                  <option selected>Schedule for later</option>
+                </select>
+              </label>
+              <label class="campaign-field">
+                <span class="campaign-field-label">Scheduled time</span>
+                <input class="input" type="text" value="Jul 18, 2026 · 08:30" aria-label="Scheduled time">
+              </label>
+              <label class="campaign-field">
+                <span class="campaign-field-label">Pacing</span>
+                <div class="campaign-inline-field">
+                  <input class="input" type="text" value="12" aria-label="Pacing groups per minute">
+                  <span>groups / min</span>
+                </div>
+                <span class="campaign-field-note">Platform cap: 20 groups / min.</span>
+              </label>
+              <div class="campaign-field">
+                <span class="campaign-field-label">Estimated duration</span>
+                <div class="campaign-static-field">
+                  <strong>~2 minutes</strong>
+                  <span class="ts">Calculated from 24 groups at 12 groups / min.</span>
+                </div>
+              </div>
+              <div class="campaign-field">
+                <span class="campaign-field-label">Auto-pause threshold</span>
+                <div class="campaign-static-field">
+                  <strong class="num">10 failed groups in 5 minutes</strong>
+                  <span class="ts">Taken from platform settings.</span>
+                </div>
+              </div>
+              <div class="campaign-field">
+                <span class="campaign-field-label">Resolved groups</span>
+                <div class="campaign-static-field">
+                  <strong class="num">24 groups</strong>
+                  <span class="ts">Recipients are resolved snapshots, not ad hoc entries.</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="campaign-review-callout" data-od-id="campaign-review-honesty">
+              <h4>Execution semantics</h4>
+              <ul>
+                <li>The browser never loops sends or implies synchronous completion.</li>
+                <li>Each group send is accepted first, then queued, and only later delivered, failed, or canceled.</li>
+                <li>One group send reaches every member of that existing group, so pacing stays capped by the platform.</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="campaign-panel-footer">
+            <button class="btn" type="button" data-step-target="message">Back</button>
+            <div class="campaign-final-actions">
+              <button class="btn" type="button">Save as draft</button>
+              <button class="btn primary" type="button">Schedule campaign</button>
+            </div>
+          </footer>
+        </article>
+      </section>
+
+      <aside class="campaign-flow-sidebar" data-od-id="campaign-flow-sidebar">
+        <section class="campaign-side-card" data-od-id="campaign-side-contract">
+          <h3>Proposed contract notice</h3>
+          <p>No v1 API operations exist yet. This panel validates orchestration and observability language for a future platform contract.</p>
+        </section>
+        <section class="campaign-side-card" data-od-id="campaign-side-responsible-use">
+          <h3>Responsible use</h3>
+          <ul>
+            <li>Named Lists can reference existing groups only.</li>
+            <li>Failure spikes auto-pause instead of retrying forever.</li>
+            <li>Audit events should record create, pause, resume, and abort.</li>
+          </ul>
+        </section>
+      </aside>
     </div>
   </main>
 </div>
+<script>
+(() => {
+  const screen = document.querySelector('.campaign-flow-screen');
+  const steps = ['audience', 'message', 'review'];
+  const stepCards = [...document.querySelectorAll('.campaign-step')];
+  const panels = [...document.querySelectorAll('.campaign-panel')];
+
+  const activateStep = (step, reveal = true) => {
+    const activeIndex = steps.indexOf(step);
+    screen.dataset.step = step;
+    stepCards.forEach((card, index) => {
+      card.classList.toggle('is-current', index === activeIndex);
+      card.classList.toggle('is-complete', index < activeIndex);
+      card.querySelector('.campaign-step-state').textContent = index === activeIndex ? 'Current' : index < activeIndex ? 'Complete' : 'Upcoming';
+      if (index === activeIndex) card.setAttribute('aria-current', 'step');
+      else card.removeAttribute('aria-current');
+    });
+    panels.forEach((panel, index) => panel.classList.toggle('is-current', index === activeIndex));
+    if (reveal && matchMedia('(max-width: 900px)').matches) panels[activeIndex].scrollIntoView({ block: 'start' });
+  };
+
+  document.querySelectorAll('[data-step-target]').forEach((control) => {
+    control.addEventListener('click', () => activateStep(control.dataset.stepTarget));
+    if (control.classList.contains('campaign-step')) {
+      control.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          activateStep(control.dataset.stepTarget);
+        }
+      });
+    }
+  });
+  activateStep(screen.dataset.step, false);
+})();
+</script>
 </body>
 </html>

@@ -492,12 +492,21 @@
   const bulkCount = document.querySelector('.groups-bulkbar-count .num');
   const rowCheckboxes = [...document.querySelectorAll('.groups-table tbody input[type="checkbox"]')];
   const selectAll = document.querySelector('.groups-table thead input[type="checkbox"]');
+  const selectedRow = document.querySelector('[data-od-id="group-row-west-dealers"]');
 
   const setPanel = (panel) => {
     screen.dataset.panel = panel;
     detailDrawer.hidden = panel !== 'detail';
     listsDrawer.hidden = panel !== 'lists';
     manageLists.setAttribute('aria-expanded', String(panel === 'lists'));
+  };
+
+  const closePanel = () => {
+    const panel = screen.dataset.panel;
+    setPanel('');
+    history.replaceState(null, '', location.pathname);
+    if (panel === 'lists') manageLists.focus();
+    else selectedRow.focus();
   };
 
   const syncSelection = () => {
@@ -514,10 +523,7 @@
     if (matchMedia('(max-width: 900px)').matches) listsDrawer.scrollIntoView({ block: 'start' });
   });
   document.querySelectorAll('.groups-drawer .close').forEach((button) => {
-    button.addEventListener('click', () => {
-      setPanel('');
-      history.replaceState(null, '', location.pathname);
-    });
+    button.addEventListener('click', closePanel);
   });
   rowCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', syncSelection));
   selectAll.addEventListener('change', () => {
@@ -528,7 +534,7 @@
     rowCheckboxes.forEach((checkbox) => { checkbox.checked = false; });
     syncSelection();
   });
-  document.querySelector('[data-od-id="group-row-west-dealers"]').addEventListener('click', (event) => {
+  selectedRow.addEventListener('click', (event) => {
     if (event.target.closest('input, button, a, summary')) return;
     setPanel('detail');
     history.replaceState(null, '', location.pathname);
@@ -536,8 +542,7 @@
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && screen.dataset.panel) {
-      setPanel('');
-      history.replaceState(null, '', location.pathname);
+      closePanel();
     }
   });
 
