@@ -5,6 +5,9 @@ contract in [`../DESIGN.md`](../DESIGN.md). Open any file directly in a
 browser; sidebar and in-page links navigate between them. Shared styles
 live in `console.css`; sample data is fictional and labeled.
 
+The navbar-specific Warp token binding and responsive contract are captured
+in [`brand-spec.md`](brand-spec.md).
+
 These are **markup reference only** — the implemented React panels follow
 `docs/ARCHITECTURE.md` and `docs/PANELS.md`, using these files as the
 visual spec (structure, spacing, states, status vocabulary).

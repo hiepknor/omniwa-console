@@ -270,8 +270,8 @@ this subsection binds to it.
 
 ## 5. Layout Principles
 
-- **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed).
-- **Sidebar anatomy**: logo block (28px mark on Earth Gray — beside the app name 14px/500 and base URL in mono 11px); nav items (13px/400, 8px radius, 10px gap) each carry a 16px stroke icon + label + optional mono count badge; active = Warm Parchment text on Frosted Veil. Settings stays pinned above the session footer.
+- **Shell**: sticky 224px warm near-black sidebar (subtle right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed).
+- **Sidebar anatomy**: 64px-tall logo block (32px mark on Earth Gray — beside the app name 14px/500 and base URL in mono 10px); nav items (13px/400, 6px radius, 10px gap) each carry a 17px stroke icon + label + optional mono count badge; active = Warm Parchment text on Frosted Veil with a subtle Mist edge. Settings stays pinned above a contained session footer showing connected status, fingerprint, key kind, and disconnect.
 - **Nav hierarchy**: **Overview** sits alone at the top (the landing page,
   spanning both concerns). Then two labeled sections — **Operations**:
   Instances (the foundational resource first), Queue & Jobs, Webhooks,
@@ -324,17 +324,17 @@ or backdrop blur.
 
 ## 8. Responsive Behavior
 
-Primary target is desktop ≥1280px. The console must remain *usable*, not
-optimized, down to 768px:
+Primary target is desktop ≥1280px. The shell remains operable across narrower
+viewports without changing its information hierarchy:
 
 | Range | Behavior |
 | --- | --- |
 | ≥1280px | Full shell, drawers overlay content |
-| 1024–1280px | Sidebar collapses to 56px icon rail with tooltips |
-| 768–1024px | Metric grid wraps; tables gain horizontal scroll within their container (never page-level) |
-| <768px | Not supported; show a "best on desktop" note, keep read-only views functional |
+| 641–900px | Sidebar collapses to a 64px icon rail; every link retains `title` and `aria-label`, and session status/disconnect remain available |
+| 641–1024px | Metric grid wraps; tables gain horizontal scroll within their container (never page-level) |
+| ≤640px | Navigation becomes a fixed 72px bottom bar with icon + visible label; items scroll horizontally and Settings remains separated at the end |
 
-Touch targets minimum 32px on interactive rows and buttons at all sizes.
+Navigation touch targets are at least 44px; mobile controls use 44px where density permits.
 
 ## 9. Agent Prompt Guide
 
