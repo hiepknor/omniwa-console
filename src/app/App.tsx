@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { ApiProvider } from '@/api/ApiProvider';
 import { ApiFailure } from '@/api/envelopes';
+import { OverviewPage } from '@/features/overview/OverviewPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { ConnectPage } from './ConnectPage';
 import { PanelStub } from './PanelStub';
@@ -53,7 +54,7 @@ export function App() {
               { path: '/groups/:instanceId', element: <PanelStub panel="groups" /> },
               { path: '/messages', element: <PanelStub panel="messages" /> },
               { path: '/messages/new', element: <PanelStub panel="messages" /> },
-              { path: '/overview', element: <PanelStub panel="overview" /> },
+              { path: '/overview', element: <OverviewPage /> },
               { path: '/instances', element: <PanelStub panel="instances" /> },
               { path: '/instances/:instanceId', element: <PanelStub panel="instances" /> },
               { path: '/queue', element: <PanelStub panel="queue" /> },
