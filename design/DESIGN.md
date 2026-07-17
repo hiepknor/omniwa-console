@@ -281,7 +281,7 @@ this subsection binds to it.
   the key/disconnect footer, separated by a border. There is no separate
   directory panel: contact/label lookup lives in the Chats search and
   filters.
-- **Content header** per page: title left; live indicator, refresh, and primary action right. 48px tall, bottom border.
+- **Page header**: a 64px shared contract on desktop with a subtle bottom border. The left context cluster contains an optional 10px uppercase section label or breadcrumb, the 18px/400 title, and compact contextual metadata such as an instance selector or contract badge. The right action cluster contains connection state and at most one primary action; refresh and pause remain restrained secondary controls. At ≤640px the header becomes a single-column stack with context before actions and 44px action targets. Workspace pages apply the same hierarchy to their internal thread header instead of adding a global header.
 - **Grid**: 8px base unit. Vertical rhythm 16px between related blocks, 24px between sections.
 - **Density**: tables full-width; Overview metric cards in `repeat(auto-fit, minmax(200px, 1fr))` grid; never center-constrain content below 1440px.
 - **Instance-scoped pages** show a breadcrumb: `Instances / {name}` with mono ID, and a horizontal tab row (Chats · Contacts · Labels · Groups · Messages) under the header.

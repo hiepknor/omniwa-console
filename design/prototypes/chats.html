@@ -43,8 +43,8 @@
 <main class="workspace" data-od-id="chats-workspace">
     <aside class="convos">
       <div class="head">
-        <button class="instpick"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
-        <input class="search" placeholder="Search direct chats…">
+        <button class="instpick" type="button" aria-label="Select instance"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
+        <input class="search" aria-label="Search direct chats" placeholder="Search direct chats…">
         <div class="filters">
           <span class="chip">unread <span class="x">✕</span></span>
           <span class="chip add">+ label</span>
@@ -83,14 +83,14 @@
     </aside>
 
     <section class="thread">
-      <div class="head">
-        <span class="avatar" style="width:28px;height:28px;border-radius:50%;background:var(--elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--text-3)">TH</span>
+      <header class="head" data-od-id="chat-thread-header">
+        <span class="thread-avatar" aria-hidden="true">TH</span>
         <div class="t"><h1>Trần Minh Hòa</h1><span class="mono">chat_x91k2m</span></div>
-        <span class="chip" style="padding:0 8px">vip</span>
+        <span class="chip thread-label">vip</span>
         <div class="spacer"></div>
         <span class="live"><span class="dot"></span>live</span>
         <button class="btn sm">Contact</button>
-      </div>
+      </header>
 
       <div class="timeline-pane">
         <div class="day-sep">Today</div>

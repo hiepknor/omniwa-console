@@ -1,4 +1,35 @@
 import { useParams } from 'react-router-dom';
+import { PageHeader } from '@/components/PageHeader';
+
+const PANEL_TITLES: Record<string, string> = {
+  overview: 'Overview',
+  instances: 'Instances',
+  chats: 'Chats',
+  contacts: 'Contacts',
+  labels: 'Labels',
+  groups: 'Groups',
+  messages: 'Messages',
+  queue: 'Queue & Jobs',
+  webhooks: 'Webhooks',
+  events: 'Events',
+  settings: 'Settings',
+  'admin-keys': 'API Keys',
+};
+
+const PANEL_SECTIONS: Record<string, string> = {
+  overview: 'Console',
+  instances: 'Operations',
+  queue: 'Operations',
+  webhooks: 'Operations',
+  events: 'Operations',
+  chats: 'Messaging',
+  contacts: 'Messaging',
+  labels: 'Messaging',
+  groups: 'Messaging',
+  messages: 'Messaging',
+  settings: 'System',
+  'admin-keys': 'System',
+};
 
 /**
  * Placeholder for a panel that has not been implemented yet.
@@ -11,14 +42,18 @@ export function PanelStub({ panel }: { panel: string }) {
   const scope = Object.entries(params)
     .map(([key, value]) => `${key}=${value}`)
     .join(', ');
+  const title = PANEL_TITLES[panel] ?? panel;
 
   return (
-    <div className="warp-block rounded-xl border-dashed p-8 text-center">
-      <h2 className="text-base font-medium capitalize">{panel}</h2>
-      <p className="mt-2 text-sm text-[#868584]">
-        Not implemented yet. See <code>docs/PANELS.md#{panel}</code>.
-      </p>
-      {scope && <p className="mt-1 text-xs text-[#666469]">{scope}</p>}
-    </div>
+    <>
+      <PageHeader title={title} eyebrow={PANEL_SECTIONS[panel]} />
+      <div className="warp-block rounded-xl border-dashed p-8 text-center">
+        <h2 className="text-base font-medium">Panel scaffold</h2>
+        <p className="mt-2 text-sm text-[#868584]">
+          Not implemented yet. See <code>docs/PANELS.md#{panel}</code>.
+        </p>
+        {scope && <p className="mt-1 text-xs text-[#666469]">{scope}</p>}
+      </div>
+    </>
   );
 }
