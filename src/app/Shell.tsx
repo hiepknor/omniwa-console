@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { Logo } from '@/components/Logo';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
 
 const NAV_ITEMS: Array<{ to: string; label: string; adminOnly?: boolean }> = [
@@ -23,9 +24,12 @@ export function Shell({
   return (
     <div className="flex min-h-screen bg-zinc-950 text-zinc-100">
       <aside className="flex w-56 shrink-0 flex-col border-r border-zinc-800">
-        <div className="border-b border-zinc-800 px-4 py-4">
-          <div className="text-sm font-semibold tracking-wide">OmniWA Console</div>
-          <div className="mt-1 truncate text-xs text-zinc-500">{session.baseUrl}</div>
+        <div className="flex items-center gap-2.5 border-b border-zinc-800 px-4 py-3.5">
+          <Logo />
+          <div className="min-w-0">
+            <div className="text-sm font-semibold tracking-wide">OmniWA Console</div>
+            <div className="truncate font-mono text-xs text-zinc-500">{session.baseUrl}</div>
+          </div>
         </div>
         <nav className="flex-1 space-y-1 p-2">
           {items.map((item) => (

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { createApiClient } from '@/api/client';
+import { Logo } from '@/components/Logo';
 import { ApiFailure, unwrap } from '@/api/envelopes';
 import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
 
@@ -61,8 +62,11 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
     <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-100">
       <form onSubmit={submit} className="w-full max-w-sm space-y-4 rounded-lg border border-zinc-800 p-6">
         <div>
-          <h1 className="text-lg font-semibold">OmniWA Console</h1>
-          <p className="mt-1 text-sm text-zinc-400">Connect to an OmniWA Platform API.</p>
+          <div className="flex items-center gap-2.5">
+            <Logo size={32} />
+            <h1 className="text-lg font-semibold">OmniWA Console</h1>
+          </div>
+          <p className="mt-2 text-sm text-zinc-400">Connect to an OmniWA Platform API.</p>
         </div>
         <label className="block text-sm">
           <span className="text-zinc-400">API base URL</span>
