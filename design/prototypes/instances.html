@@ -6,9 +6,6 @@
 <title>OmniWA Console — Instances (prototype)</title>
 <!-- Static prototype. Sample data only. Binds to design/DESIGN.md. -->
 <link rel="stylesheet" href="console.css">
-<style>
-  .capchips{display:flex;flex-wrap:wrap;gap:6px}
-</style>
 </head>
 <body>
 <div class="shell">
@@ -51,58 +48,76 @@
       </div>
     </header>
 
-    <div class="filterbar">
-      <span class="chip">status: pairing <span class="x">✕</span></span>
-      <span class="chip add">+ filter</span>
-    </div>
+    <section class="instances-workspace" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-workspace">
+      <div class="instances-toolbar" data-od-id="instances-filter-bar">
+        <div class="instances-toolbar-primary">
+          <label class="search-field">
+            <span class="visually-hidden">Search instances</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input class="search" type="search" placeholder="Search name or instance ID" aria-label="Search instances">
+          </label>
+          <span class="chip">status: pairing <span class="x" aria-hidden="true">✕</span></span>
+          <button class="chip add" type="button">+ filter</button>
+        </div>
+        <div class="instances-toolbar-meta">
+          <span><span class="num">1</span> filter active</span>
+          <span class="toolbar-separator" aria-hidden="true"></span>
+          <span>Updated <span class="num">14s</span> ago</span>
+        </div>
+      </div>
 
-    <div class="layout">
-      <div class="listcol">
-        <div class="tablewrap">
+      <div class="tablewrap instances-table" tabindex="0" role="region" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-table">
           <table>
-            <thead><tr><th>Name</th><th>ID</th><th>Status</th><th>Msgs 24h</th><th>Last activity</th></tr></thead>
+            <caption id="instances-table-title" class="visually-hidden">Instance lifecycle and recent activity</caption>
+            <thead><tr><th scope="col">Name</th><th scope="col">ID</th><th scope="col">Status</th><th scope="col" class="r">Msgs 24h</th><th scope="col">Last activity</th></tr></thead>
             <tbody>
-              <tr>
-                <td>sales-primary</td><td><span class="mono">inst_2bq81c</span></td>
+              <tr tabindex="0">
+                <td><span class="resource-name">sales-primary</span></td><td><span class="mono">inst_2bq81c</span></td>
                 <td><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
-                <td class="num">8,204</td><td class="ts" title="2026-07-16T08:52:41Z">14s ago</td>
+                <td class="num r">8,204</td><td class="ts" title="2026-07-16T08:52:41Z">14s ago</td>
               </tr>
-              <tr class="selected">
-                <td>support-vn</td><td><span class="mono">inst_9f2ka7</span></td>
+              <tr class="selected open" tabindex="0" aria-selected="true">
+                <td><span class="resource-name">support-vn</span><span class="row-state">Open</span></td><td><span class="mono">inst_9f2ka7</span></td>
                 <td><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span></td>
-                <td class="num">0</td><td class="ts" title="2026-07-16T08:41:00Z">12m ago</td>
+                <td class="num r">0</td><td class="ts" title="2026-07-16T08:41:00Z">12m ago</td>
               </tr>
-              <tr>
-                <td>ops-alerts</td><td><span class="mono">inst_5rr0zn</span></td>
+              <tr tabindex="0">
+                <td><span class="resource-name">ops-alerts</span></td><td><span class="mono">inst_5rr0zn</span></td>
                 <td><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
-                <td class="num">1,882</td><td class="ts" title="2026-07-16T08:52:20Z">35s ago</td>
+                <td class="num r">1,882</td><td class="ts" title="2026-07-16T08:52:20Z">35s ago</td>
               </tr>
-              <tr>
-                <td>legacy-bot</td><td><span class="mono">inst_0aa41m</span></td>
+              <tr tabindex="0">
+                <td><span class="resource-name">legacy-bot</span></td><td><span class="mono">inst_0aa41m</span></td>
                 <td><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span></td>
-                <td class="num">0</td><td class="ts" title="2026-07-15T21:03:11Z">12h ago</td>
+                <td class="num r">0</td><td class="ts" title="2026-07-15T21:03:11Z">12h ago</td>
               </tr>
-              <tr>
-                <td>archived-mkt</td><td><span class="mono">inst_qq17zz</span></td>
+              <tr tabindex="0">
+                <td><span class="resource-name">archived-mkt</span></td><td><span class="mono">inst_qq17zz</span></td>
                 <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span></td>
-                <td class="num">—</td><td class="ts" title="2026-06-30T10:00:00Z">16d ago</td>
+                <td class="num r">—</td><td class="ts" title="2026-06-30T10:00:00Z">16d ago</td>
               </tr>
             </tbody>
           </table>
           <div class="table-foot">
-            <span class="num">5 of 8 instances</span>
-            <button class="btn">Load more</button>
+            <div><span class="num">5 of 8 instances</span><span class="freshness">Updated 14s ago</span></div>
+            <div class="pagination"><span>Showing 1–5</span><button class="btn" type="button">Load more</button></div>
           </div>
-        </div>
       </div>
+    </section>
 
-      <aside class="drawer">
-        <header>
-          <div class="t"><b>support-vn</b><span class="mono">inst_9f2ka7</span></div>
-          <button class="close" aria-label="Close">✕</button>
+      <aside class="drawer instances-drawer" aria-labelledby="instance-detail-title" data-od-id="instance-detail-drawer">
+        <header class="drawer-head">
+          <div class="drawer-identity">
+            <span class="eyebrow">Instance management</span>
+            <div class="drawer-title-row"><h2 id="instance-detail-title">support-vn</h2><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span></div>
+            <span class="mono">inst_9f2ka7</span>
+          </div>
+          <button class="close" type="button" aria-label="Close instance details" title="Close">✕</button>
         </header>
 
-        <section>
+        <div class="drawer-scroll">
+        <section aria-labelledby="instance-facts-title">
+          <h3 id="instance-facts-title" class="visually-hidden">Instance facts</h3>
           <div class="kv">
             <dt>Status</dt><dd><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span></dd>
             <dt>Provider</dt><dd>baileys</dd>
@@ -111,33 +126,34 @@
           </div>
         </section>
 
-        <section>
-          <h3>Pair device</h3>
+        <section aria-labelledby="pair-device-title">
+          <div class="drawer-section-head"><div><span class="eyebrow">Pairing workflow</span><h3 id="pair-device-title">Pair device</h3></div><span class="expiry">Expires in <span class="countdown num">00:37</span></span></div>
           <div class="qrwell">
-            <div class="qr" id="qr"></div>
+            <div class="qr" id="qr" role="img" aria-label="Prototype pairing QR code"></div>
             <div class="qrmeta">
-              <span>expires in <span class="countdown num">00:37</span></span>
-              <button class="btn">Refresh QR</button>
+              <span>Scan from the provider app</span>
+              <button class="btn" type="button">Refresh QR</button>
             </div>
-            <div class="steps">
-              <span class="on">● waiting for scan</span><span>○ scanned</span><span>○ paired</span>
+            <div class="steps" aria-label="Pairing progress">
+              <span class="on"><b>1</b> waiting for scan</span><span><b>2</b> scanned</span><span><b>3</b> paired</span>
             </div>
           </div>
         </section>
 
-        <section>
-          <h3>Lifecycle</h3>
-          <div class="actions">
-            <button class="btn">Reconnect</button>
-            <button class="btn danger">Disconnect</button>
-            <button class="btn danger">Destroy…</button>
+        <section aria-labelledby="lifecycle-title">
+          <span class="eyebrow">Instance controls</span>
+          <h3 id="lifecycle-title">Lifecycle</h3>
+          <div class="lifecycle-groups">
+            <div class="action-group"><span>Recovery</span><button class="btn" type="button">Reconnect</button></div>
+            <div class="action-group destructive"><span>Destructive actions require confirmation</span><div class="actions"><button class="btn danger" type="button">Disconnect</button><button class="btn danger" type="button">Destroy…</button></div></div>
           </div>
         </section>
 
-        <section>
-          <h3>Sessions</h3>
+        <section aria-labelledby="sessions-title">
+          <span class="eyebrow">Current and recent</span>
+          <h3 id="sessions-title">Sessions</h3>
           <table class="minitable">
-            <thead><tr><th>Session</th><th>State</th><th>Since</th></tr></thead>
+            <thead><tr><th scope="col">Session</th><th scope="col">State</th><th scope="col">Since</th></tr></thead>
             <tbody>
               <tr><td><span class="mono">ses_71bb0e</span></td>
                 <td><span class="status sm"><span class="dot" style="background:var(--pending)"></span>handshake</span></td>
@@ -149,15 +165,16 @@
           </table>
         </section>
 
-        <section>
-          <h3>Provider capabilities</h3>
+        <section aria-labelledby="capabilities-title">
+          <span class="eyebrow">Provider surface</span>
+          <h3 id="capabilities-title">Provider capabilities</h3>
           <div class="capchips">
             <span class="chip">text</span><span class="chip">image</span><span class="chip">video</span>
             <span class="chip">document</span><span class="chip">audio</span><span class="chip">groups</span>
           </div>
         </section>
+        </div>
       </aside>
-    </div>
   </main>
 </div>
 

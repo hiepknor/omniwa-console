@@ -165,6 +165,14 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 - QR renders on a white 12px-radius well (QR needs light background) inside a Recessed container, 240×240px, with expiry countdown (mono, amber when <10s) and a "Refresh QR" ghost button. Pairing state machine renders as dot+label steps: `waiting → scanned → paired`.
 
+### Instances lifecycle surface
+
+- The lifecycle table is always the primary surface. It combines search, active filters, freshness, dense status scanning, right-aligned message counts, and cursor pagination without switching to device cards.
+- Opening an instance marks the row with both a restrained edge and a text label, then presents a 440px right slide-over without a backdrop or reserved table column. Below 900px, the slide-over becomes a full-width in-flow panel.
+- Drawer hierarchy is fixed: identity + status → compact facts → QR pairing → lifecycle controls → sessions → provider capabilities.
+- Recovery actions are separated from destructive actions. Disconnect and Destroy only launch the typed-confirmation pattern; confirmation is never rendered inline in the drawer.
+- QR remains on a light well with a visible expiry and numbered `waiting for scan → scanned → paired` progression. The UI must not imply that pairing completed before the lifecycle state confirms it.
+
 ### Live indicator
 
 - Header-right: 8px dot + 12px label. `live` emerald pulsing dot, `reconnecting` amber, `polling` sky, `offline` red. Clicking opens connection detail popover.
