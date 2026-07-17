@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniWA Console — Dropdown patterns (prototype)</title>
+<!-- Component sheet. Static sample data only. Binds to design/DESIGN.md. -->
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<main class="dialog-sheet-screen dropdown-sheet-screen">
+  <header class="page-head">
+    <div class="head-context">
+      <div class="head-title-row"><h1>Dropdown patterns</h1></div>
+      <span class="head-meta">Shared selection and quick-action contract</span>
+    </div>
+  </header>
+
+  <div class="sheet">
+    <section class="demo">
+      <div class="caption">Single select · open</div>
+      <div class="dropdown is-open" data-dropdown>
+        <button class="dropdown-trigger" type="button" aria-haspopup="listbox" aria-expanded="true">
+          <span class="dropdown-trigger-copy"><span class="dropdown-trigger-label">Status</span><span class="dropdown-trigger-value">Pairing</span></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+        </button>
+        <div class="dropdown-menu" role="listbox" aria-label="Filter by status">
+          <div class="dropdown-menu-head"><span class="eyebrow">Instance status</span><span class="mono">5 options</span></div>
+          <button class="dropdown-option" type="button" role="option" aria-selected="false"><span class="dropdown-check">✓</span><span><strong>All statuses</strong><small>Do not filter the table</small></span></button>
+          <button class="dropdown-option is-selected" type="button" role="option" aria-selected="true"><span class="dropdown-check">✓</span><span><strong>Pairing</strong><small>Waiting for device pairing</small></span><span class="dropdown-option-meta num">1</span></button>
+          <button class="dropdown-option" type="button" role="option" aria-selected="false"><span class="dropdown-check">✓</span><span><strong>Connected</strong></span><span class="dropdown-option-meta num">2</span></button>
+          <button class="dropdown-option" type="button" role="option" aria-selected="false"><span class="dropdown-check">✓</span><span><strong>Disconnected</strong></span><span class="dropdown-option-meta num">1</span></button>
+          <button class="dropdown-option" type="button" role="option" aria-selected="false"><span class="dropdown-check">✓</span><span><strong>Retired</strong></span><span class="dropdown-option-meta num">1</span></button>
+          <div class="dropdown-menu-foot"><span>↑↓ Navigate</span><span>Enter Select</span><span>Esc Close</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="demo">
+      <div class="caption">Instance picker · closed</div>
+      <div class="dropdown" data-dropdown>
+        <button class="dropdown-trigger dropdown-trigger-wide" type="button" aria-haspopup="listbox" aria-expanded="false">
+          <span class="dot dot-ok"></span>
+          <span class="dropdown-trigger-copy"><span class="dropdown-trigger-label">Instance</span><span class="dropdown-trigger-value">sales-primary</span></span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <section class="demo">
+      <div class="caption">Quick actions · open</div>
+      <div class="dropdown is-open dropdown-align-end" data-dropdown>
+        <button class="btn primary dropdown-action-trigger" type="button" aria-haspopup="menu" aria-expanded="true">Add to Named List <span aria-hidden="true">⌄</span></button>
+        <div class="dropdown-menu" role="menu" aria-label="Add selected groups to a Named List">
+          <div class="dropdown-menu-head"><span class="eyebrow">Named Lists</span><span class="mono">2 selected</span></div>
+          <button class="dropdown-option" type="button" role="menuitem"><span class="dropdown-check">+</span><span><strong>West region</strong><small>9 groups</small></span></button>
+          <button class="dropdown-option" type="button" role="menuitem"><span class="dropdown-check">+</span><span><strong>Priority retail</strong><small>5 groups</small></span></button>
+          <button class="dropdown-option" type="button" role="menuitem"><span class="dropdown-check">+</span><span><strong>Pause outbound</strong><small>3 groups</small></span></button>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-create-row"><input class="input" value="July reconciliation" aria-label="New Named List name"><button class="btn" type="button">Create</button></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+<script>
+document.querySelectorAll('[data-dropdown]').forEach((dropdown) => {
+  const trigger = dropdown.querySelector('[aria-haspopup]');
+  const menu = dropdown.querySelector('.dropdown-menu');
+  if (!menu) return;
+  trigger.addEventListener('click', () => {
+    const open = !dropdown.classList.contains('is-open');
+    dropdown.classList.toggle('is-open', open);
+    trigger.setAttribute('aria-expanded', String(open));
+  });
+});
+</script>
+</body>
+</html>

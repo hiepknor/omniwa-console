@@ -477,3 +477,42 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
   .connect-sequence strong{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){.connect-screen *{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}.connect-submit[aria-busy=true]::before{border-right-color:currentColor}}
+
+/* Synced verbatim from design/prototypes/console.css — Shared dropdown contract. */
+/* ===== Shared dropdown contract ===== */
+.dropdown{position:relative;display:inline-flex;min-width:0}
+.dropdown-trigger{display:grid;grid-template-columns:minmax(0,1fr) 16px;align-items:center;gap:var(--space-2);min-width:176px;min-height:36px;padding:5px 10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);color:var(--fg-2);text-align:left;cursor:pointer}
+.dropdown-trigger-wide{grid-template-columns:8px minmax(0,1fr) 16px;min-width:220px}
+.dropdown-trigger:hover{border-color:var(--border);background:color-mix(in oklab,var(--fg) 4%,transparent);color:var(--fg)}
+.dropdown-trigger:focus-visible{outline:none;border-color:var(--border-strong);box-shadow:var(--focus-ring)}
+.dropdown-trigger-copy{display:grid;min-width:0;line-height:1.1}
+.dropdown-trigger-label{font-size:9px;line-height:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--meta)}
+.dropdown-trigger-value{overflow:hidden;font-size:12px;line-height:15px;color:currentColor;text-overflow:ellipsis;white-space:nowrap}
+.dropdown-trigger>svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform .12s ease}
+.dropdown.is-open .dropdown-trigger{border-color:var(--border-strong);background:var(--elevated);color:var(--fg)}
+.dropdown.is-open .dropdown-trigger>svg{transform:rotate(180deg)}
+.dropdown-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:12;display:none;width:max-content;min-width:max(100%,240px);max-width:min(320px,calc(100vw - 32px));max-height:360px;padding:6px;overflow-y:auto;overscroll-behavior:contain;background:var(--elevated);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:var(--elev-raised)}
+.dropdown.is-open>.dropdown-menu,.dropdown[open]>.dropdown-menu{display:grid}
+.dropdown-align-end .dropdown-menu{right:0;left:auto}
+.dropdown-menu-head,.dropdown-menu-foot{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:5px 8px}
+.dropdown-menu-head .mono{font-size:10px;color:var(--meta)}
+.dropdown-menu-foot{margin-top:4px;padding-top:8px;border-top:1px solid var(--border-subtle);font:400 9px/12px var(--font-mono);color:var(--meta)}
+.dropdown-option{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:var(--space-2);width:100%;min-height:40px;padding:5px 8px;background:none;border:1px solid transparent;border-radius:var(--radius-sm);color:var(--fg-2);text-align:left;cursor:pointer}
+.dropdown-option:hover,.dropdown-option:focus-visible{outline:none;border-color:var(--border-subtle);background:color-mix(in oklab,var(--fg) 5%,transparent);color:var(--fg)}
+.dropdown-option.is-selected{background:color-mix(in oklab,var(--fg) 7%,transparent);color:var(--fg)}
+.dropdown-check{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border:1px solid transparent;border-radius:50%;font:500 10px/1 var(--font-mono);color:transparent}
+.dropdown-option.is-selected .dropdown-check{border-color:var(--border-subtle);background:var(--accent);color:var(--fg)}
+.dropdown-option strong,.dropdown-option small{display:block;font-weight:400}
+.dropdown-option strong{overflow:hidden;font-size:12px;line-height:16px;text-overflow:ellipsis;white-space:nowrap}
+.dropdown-option small{margin-top:1px;font-size:10px;line-height:13px;color:var(--muted)}
+.dropdown-option-meta{padding-left:var(--space-2);font-size:10px;color:var(--meta)}
+.dropdown-divider{height:1px;margin:6px 8px;background:var(--border-subtle)}
+.dropdown-create-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--space-2);padding:2px}
+.dropdown-create-row .input{min-height:34px;font-size:12px}
+.dropdown-action-trigger{justify-content:space-between}
+.dropdown-sheet-screen .sheet{min-height:420px}
+@media(max-width:640px){
+  .dropdown{max-width:100%}.dropdown-trigger{min-height:44px}.dropdown-menu{position:fixed;top:auto;right:16px;bottom:88px;left:16px;width:auto;max-width:none;max-height:min(420px,calc(100vh - 120px))}
+  .dropdown-menu-foot{display:none}.dropdown-option{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){.dropdown-trigger>svg{transition-duration:.01ms!important}}

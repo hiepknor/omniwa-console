@@ -306,14 +306,26 @@ this subsection binds to it.
 - Row click (outside the checkbox) opens the detail panel; the checkbox
   never does.
 
-### Dropdown menu (quick actions)
+### Dropdowns and quick-action menus
 
-- Anchored below its trigger button (6px gap): Elevated bg, default
-  border, 8px radius, floating shadow, 4px inner padding; items are
-  13px/500 rows (6px radius, hover = white 5%) with a mono count on the
-  right; a subtle divider separates an inline "create from selection"
-  input row at the bottom. Used by "Add to Named List ▾" on the bulk bar
-  and in the group detail panel.
+- A dropdown trigger is a 36px ghost control with a subtle border, 6px
+  radius, compact label/value stack, and trailing chevron. The open trigger
+  uses the strong border and Elevated background; it never resembles a text
+  input.
+- The anchored menu opens 6px below the trigger on Elevated background with
+  default border, 8px radius, floating shadow, and 6px inner padding. It is at
+  least as wide as its trigger and no narrower than 240px.
+- Single-select options are 40px minimum rows with a reserved 20px selection
+  column. The selected option uses Frosted Veil plus a visible checkmark;
+  hover never changes selection. Supporting descriptions and right-aligned
+  counts are optional and remain secondary.
+- Menus may include an uppercase context header, search, section labels, a
+  subtle divider, or an inline create row. Quick actions reuse the same menu
+  shell but use `role="menu"` and action glyphs instead of selected state.
+- Keyboard contract: Enter/Space opens and selects, Up/Down moves active
+  option, Home/End jumps, Escape closes and restores trigger focus. Clicking
+  outside closes. Active filters still become dismissible pills in the table
+  toolbar.
 
 ### Named Lists panel mode (Groups)
 

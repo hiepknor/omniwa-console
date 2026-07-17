@@ -112,15 +112,17 @@
           <span>Bulk actions apply only to local Named List membership.</span>
         </div>
         <div class="groups-bulkbar-actions">
-          <details class="groups-quick-add">
-            <summary class="btn primary" data-od-id="groups-bulk-add-list">Add to Named List</summary>
-            <div class="groups-quick-add-menu">
-              <button class="groups-list-option" type="button">West region <span class="mono">9 groups</span></button>
-              <button class="groups-list-option" type="button">Priority retail <span class="mono">5 groups</span></button>
-              <button class="groups-list-option" type="button">Pause outbound <span class="mono">3 groups</span></button>
-              <div class="groups-quick-add-create">
+          <details class="groups-quick-add dropdown dropdown-align-end">
+            <summary class="btn primary dropdown-action-trigger" data-od-id="groups-bulk-add-list">Add to Named List <span aria-hidden="true">⌄</span></summary>
+            <div class="dropdown-menu" role="menu" aria-label="Add selected groups to a Named List">
+              <div class="dropdown-menu-head"><span class="eyebrow">Named Lists</span><span class="mono">2 selected</span></div>
+              <button class="dropdown-option" type="button" role="menuitem"><span class="dropdown-check">+</span><span><strong>West region</strong><small>9 groups</small></span></button>
+              <button class="dropdown-option" type="button" role="menuitem"><span class="dropdown-check">+</span><span><strong>Priority retail</strong><small>5 groups</small></span></button>
+              <button class="dropdown-option" type="button" role="menuitem"><span class="dropdown-check">+</span><span><strong>Pause outbound</strong><small>3 groups</small></span></button>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-create-row">
                 <label class="sr-only" for="groups-new-list">Create a new Named List</label>
-                <input id="groups-new-list" class="search" type="text" value="July reconciliation" placeholder="Create new list from selection">
+                <input id="groups-new-list" class="input" type="text" value="July reconciliation" placeholder="Create new list from selection">
                 <button class="btn" type="button">Create list</button>
               </div>
             </div>

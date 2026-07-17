@@ -4,6 +4,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { instanceKeys } from '@/api/keys';
 import { InlineError } from '@/components/InlineError';
 import { PageHeader } from '@/components/PageHeader';
+import { SelectDropdown } from '@/components/SelectDropdown';
 import { relativeTime } from '@/lib/format';
 import { CreateInstanceDialog } from './CreateInstanceDialog';
 import { InstanceDrawer } from './InstanceDrawer';
@@ -101,10 +102,19 @@ export function InstancesPage() {
               <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
               <input className="search" type="search" value={search} onChange={(event) => setParam('search', event.target.value)} placeholder="Search name or instance ID" />
             </label>
-            <select className="input w-auto min-w-36" aria-label="Filter by status" value={status} onChange={(event) => setParam('status', event.target.value)}>
-              <option value="">All statuses</option>
-              {statuses.map((item) => <option key={item} value={item}>{item}</option>)}
-            </select>
+            <SelectDropdown
+              label="Status"
+              value={status}
+              options={[
+                { value: '', label: 'All statuses', description: 'Do not filter the table' },
+                ...statuses.map((item) => ({
+                  value: item,
+                  label: item,
+                  meta: String(instances.filter((instance) => instance.status === item).length),
+                })),
+              ]}
+              onChange={(nextStatus) => setParam('status', nextStatus)}
+            />
           </div>
           <div className="instances-toolbar-meta">
             <span><span className="num">{Number(Boolean(search)) + Number(Boolean(status))}</span> filters active</span>
