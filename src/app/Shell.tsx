@@ -83,10 +83,10 @@ function NavigationLink({ item }: { item: NavItem }) {
       end={item.to === '/settings'}
       title={item.label}
       aria-label={item.label}
-      className={({ isActive }) => `warp-nav-link${isActive ? ' warp-nav-link-active' : ''}`}
+      className={({ isActive }) => (isActive ? 'active' : undefined)}
     >
       <NavIcon name={item.icon} />
-      <span className="warp-nav-label">{item.label}</span>
+      <span className="lbl">{item.label}</span>
     </NavLink>
   );
 }
@@ -104,43 +104,45 @@ export function Shell({
   const fingerprint = keyFingerprint(session.apiKey);
 
   return (
-    <div className="warp-shell">
-      <aside className="warp-sidebar" aria-label="OmniWA primary navigation">
-        <div className="warp-brand">
+    <div className="shell">
+      <aside className="sidebar" aria-label="OmniWA primary navigation">
+        <div className="logo">
           <Logo size={32} />
-          <div className="warp-brand-copy">
-            <strong>OmniWA Console</strong>
-            <span title={`API endpoint: ${session.baseUrl}`}>{session.baseUrl}</span>
+          <div>
+            <b>OmniWA Console</b>
+            <span className="env" title={`API endpoint: ${session.baseUrl}`}>
+              {session.baseUrl}
+            </span>
           </div>
         </div>
 
-        <nav className="warp-nav" aria-label="Primary">
+        <nav aria-label="Primary">
           <NavigationLink item={OVERVIEW_ITEM} />
-          <span className="warp-nav-section">Operations</span>
+          <span className="navlabel">Operations</span>
           {OPERATION_ITEMS.map((item) => (
             <NavigationLink key={item.to} item={item} />
           ))}
         </nav>
 
-        <div className="warp-nav-foot">
+        <div className="navfoot">
           {systemItems.map((item) => (
             <NavigationLink key={item.to} item={item} />
           ))}
         </div>
 
-        <div className="warp-session-wrap">
+        <div className="side-foot">
           <div
-            className="warp-session"
+            className="session"
             aria-label={`Connected session ${fingerprint}, ${session.keyKind}`}
             title={`Connected · ${fingerprint} · ${session.keyKind}`}
           >
-            <span className="warp-session-dot" aria-hidden="true" />
-            <span className="warp-session-key">{fingerprint}</span>
-            <span className="warp-session-kind">{session.keyKind}</span>
+            <span className="dot" style={{ background: 'var(--ok)' }} />
+            <span className="key">{fingerprint}</span>
+            <span className="pill">{session.keyKind}</span>
             <button
               type="button"
               onClick={onDisconnect}
-              className="warp-disconnect"
+              className="out"
               aria-label="Disconnect session"
               title="Disconnect"
             >
@@ -152,7 +154,7 @@ export function Shell({
         </div>
       </aside>
 
-      <main className="warp-main">
+      <main>
         <Outlet />
       </main>
     </div>

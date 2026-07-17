@@ -1,0 +1,188 @@
+/* Synced from design/prototypes/console.css lines 91–122. */
+/* Shell */
+.shell{display:flex;min-height:100vh;background:var(--canvas)}
+.sidebar{position:sticky;top:0;width:224px;height:100vh;flex-shrink:0;background:var(--bg);border-right:1px solid var(--border-subtle);display:flex;flex-direction:column;overflow:hidden}
+.logo{display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 14px;border-bottom:1px solid var(--border-subtle)}
+.logo .mark{width:32px;height:32px;border-radius:var(--radius-sm);background:var(--accent);color:var(--fg);border:1px solid var(--border-subtle);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo .mark svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.logo b{display:block;font-size:14px;font-weight:500;letter-spacing:-.01em;line-height:1.2;color:var(--fg)}
+.logo .env{display:block;max-width:150px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono);font-size:10px;color:var(--meta)}
+.sidebar nav{flex:1;padding:10px 8px;overflow-y:auto}
+.navlabel{display:block;padding:16px 10px 6px;font-size:10px;line-height:1;text-transform:uppercase;letter-spacing:2.4px;color:var(--meta)}
+.navfoot{padding:8px;border-top:1px solid var(--border-subtle)}
+.sidebar nav a,.navfoot a{position:relative;display:flex;align-items:center;gap:10px;min-height:40px;padding:8px 10px;border:1px solid transparent;border-radius:var(--radius-sm);
+  font-size:13px;font-weight:400;color:var(--muted);text-decoration:none}
+.sidebar nav a svg,.navfoot a svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;opacity:.9}
+.sidebar nav a .lbl,.navfoot a .lbl{flex:1;min-width:0}
+.sidebar nav a:hover,.navfoot a:hover{background:color-mix(in oklab,var(--fg) 4%,transparent);color:var(--fg-2)}
+.sidebar nav a.active,.navfoot a.active{background:color-mix(in oklab,var(--fg) 8%,transparent);border-color:var(--border-subtle);color:var(--fg)}
+.sidebar nav a:focus-visible,.navfoot a:focus-visible,.session .out:focus-visible{outline:none;box-shadow:var(--focus-ring);color:var(--fg)}
+.sidebar nav .count{min-width:28px;padding:1px 6px;border:1px solid var(--border-subtle);border-radius:var(--radius-pill);background:var(--accent);font-family:var(--mono);font-size:10px;line-height:16px;text-align:center;color:var(--accent-on)}
+.side-foot{padding:10px;border-top:1px solid var(--border-subtle)}
+.session{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:8px;min-height:44px;padding:7px 8px;background:var(--surface);
+  border:1px solid var(--border-subtle);border-radius:var(--radius-md)}
+.session .dot{box-shadow:0 0 0 2px var(--bg)}
+.session .key{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono);font-size:10px;color:var(--fg-2)}
+.session .pill{padding:1px 7px;border-color:var(--border-subtle);background:var(--accent);color:var(--accent-on);font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.session .out{width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border:1px solid transparent;border-radius:var(--radius-sm);background:none;color:var(--muted);cursor:pointer}
+.session .out:hover{border-color:var(--border-subtle);background:color-mix(in oklab,var(--fg) 4%,transparent);color:var(--fg)}
+.session .out svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+main{flex:1;min-width:0;padding:0 24px 24px}
+
+/* Synced from design/prototypes/console.css lines 124–143. */
+/* Shared page-header contract */
+.page-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:var(--space-6);min-height:64px;padding:var(--space-2) 0;
+  border-bottom:1px solid var(--border-subtle);margin-bottom:var(--space-4);background:var(--canvas)}
+.head-context{display:flex;flex-direction:column;justify-content:center;gap:var(--space-1);min-width:0}
+.head-title-row{display:flex;align-items:center;gap:var(--space-3);min-width:0}
+.page-head h1,.thread .head h1{min-width:0;font-family:var(--font-display);font-size:18px;font-weight:400;line-height:24px;letter-spacing:-.02em;color:var(--fg);
+  overflow-wrap:anywhere}
+.head-right{display:flex;align-items:center;justify-content:flex-end;gap:var(--space-2);min-width:0}
+.head-meta{font-size:12px;line-height:16px;color:var(--muted)}
+.crumb{display:flex;align-items:center;gap:var(--space-2);min-width:0;font-size:12px;line-height:16px;color:var(--muted)}
+.crumb a{color:var(--muted);text-decoration:none}
+.crumb a:hover{color:var(--fg-2);text-decoration:underline;text-underline-offset:3px}
+.crumb-separator{color:var(--meta);user-select:none}
+.head-contract{flex-shrink:0}
+.page-head .instpick{width:auto;max-width:min(240px,34vw);min-height:36px;padding:6px 10px;font-weight:400;background:var(--surface)}
+.page-head .btn,.thread .head .btn{min-height:36px}
+.page-head a.btn{text-decoration:none}
+.head-count{min-width:22px;padding:0 5px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--recessed);
+  font-family:var(--mono);font-size:11px;line-height:18px;text-align:center;color:var(--fg-2)}
+.head-action-current{border-color:var(--border-strong)}
+
+/* Synced from design/prototypes/console.css lines 152–165. */
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;font:500 13px var(--ui);color:var(--accent-on);
+  background:var(--accent);border:1px solid transparent;border-radius:var(--radius-pill);
+  padding:6px 12px;cursor:pointer;white-space:nowrap}
+.btn:hover{color:var(--text-1);filter:brightness(1.12)}
+.btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.btn.primary{background:var(--accent);border-color:var(--border-strong);color:var(--text-1);box-shadow:var(--elev-ring)}
+.btn.primary:hover{background:var(--accent-hover);box-shadow:var(--elev-ring);filter:none}
+.btn.danger{color:var(--failed);border-color:rgba(239,68,68,.35)}
+.btn.danger:hover{background:rgba(239,68,68,.08)}
+.btn.danger.solid{background:var(--failed);border-color:transparent;color:var(--bg)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.btn.block{width:100%;justify-content:center;margin-top:8px;color:var(--text-2)}
+.btn.sm{padding:3px 8px;font-size:12px}
+
+/* Synced from design/prototypes/console.css lines 167–173 and 234–235. */
+/* Status */
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-1)}
+.status.sm{font-size:12px;color:var(--text-2)}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);white-space:nowrap}
+.live .dot{background:var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.dot-ok{background:var(--ok)}.dot-pending{background:var(--pending)}.dot-degraded{background:var(--degraded)}
+.dot-failed{background:var(--failed)}.dot-info{background:var(--info)}
+
+/* Synced from design/prototypes/console.css lines 175–186. */
+/* Pills, chips, filters */
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-2);
+  background:rgba(255,255,255,.04);border:1px solid var(--border-subtle);border-radius:9999px;padding:2px 10px 2px 6px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-2);
+  background:rgba(255,255,255,.04);border:1px solid var(--border-subtle);border-radius:9999px;padding:2px 10px;cursor:pointer}
+.chip .x{color:var(--text-4)}
+.chip.add{border-style:dashed;color:var(--text-4)}
+.filterbar{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.search{background:var(--recessed);border:1px solid var(--border-subtle);border-radius:6px;color:var(--text-1);
+  font:400 13px var(--ui);padding:6px 10px;width:220px}
+.search::placeholder{color:var(--text-4)}
+.search:focus{outline:none;border-color:var(--border-strong);box-shadow:none}
+
+/* Synced from design/prototypes/console.css lines 188–195. */
+/* Cards */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:none}
+.card .label{font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.15em;color:var(--text-3)}
+.card .value{font-size:26px;font-weight:400;line-height:1.1;margin-top:8px}
+.card .ctx{font-size:12px;color:var(--text-4);margin-top:4px}
+.card .ctx.warn{color:var(--pending)}
+.card .ctx.bad{color:var(--failed)}
+
+/* Synced from design/prototypes/console.css lines 197–213. */
+/* Tables */
+.tablewrap{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;overflow-x:auto;box-shadow:none}
+.tablewrap .scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.15em;color:var(--text-3);
+  text-align:left;padding:0 12px;height:32px;border-bottom:1px solid var(--border-subtle)}
+td{font-size:13px;padding:0 12px;height:36px;border-bottom:1px solid var(--border-subtle)}
+th,td{white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--elevated)}
+tbody tr.selected{background:var(--accent-tint);box-shadow:inset 2px 0 0 var(--fg)}
+.ts{font-size:12px;color:var(--text-4)}
+.table-foot{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-top:1px solid var(--border-subtle)}
+.table-foot span{font-size:12px;color:var(--text-4)}
+.minitable td,.minitable th{height:30px;font-size:12px}
+.empty{padding:40px;text-align:center;color:var(--text-2);font-size:14px}
+.empty .btn{margin-top:12px}
+
+/* Synced from design/prototypes/console.css lines 215–222. */
+/* Sections & two-column layout with drawer */
+.section{margin-bottom:24px}
+.section>h2{font-size:14px;font-weight:500;margin-bottom:12px}
+.section>h2 .muted{font-weight:400;color:var(--text-4)}
+.layout{display:flex;gap:16px;align-items:flex-start}
+.layout .listcol{flex:1;min-width:0}
+.cols{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+@media(max-width:1024px){.cols{grid-template-columns:1fr}}
+
+/* Synced from design/prototypes/console.css lines 329–337. */
+/* Forms */
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:400;text-transform:uppercase;letter-spacing:.15em;color:var(--text-3);margin-bottom:6px}
+.input,textarea.input,select.input{width:100%;background:var(--recessed);border:1px solid var(--border-subtle);border-radius:6px;
+  color:var(--text-1);font:400 13px var(--ui);padding:7px 10px}
+textarea.input{resize:vertical;min-height:72px;line-height:1.5}
+.input:focus{outline:none;border-color:var(--border-strong);box-shadow:none}
+.input.error{border-color:var(--failed)}
+.help{font-size:12px;color:var(--text-4);margin-top:4px}
+.help.error{color:var(--failed)}
+
+/* Synced from design/prototypes/console.css lines 493–503. */
+@media(max-width:900px){
+  .sidebar{width:64px}
+  .logo{justify-content:center;padding-inline:8px}.logo>div,.navlabel,.sidebar nav .count{display:none}
+  .sidebar nav{padding:8px}.sidebar nav a,.navfoot a{justify-content:center;min-height:44px;padding:10px}
+  .sidebar nav a .lbl,.navfoot a .lbl{display:none}
+  .side-foot{padding:8px}.session{display:flex;flex-direction:column;gap:5px;padding:6px}.session .key,.session .pill{display:none}.session .out{width:34px;height:30px;margin:0}
+  main{padding-inline:var(--container-gutter-tablet)}
+  .layout{flex-direction:column}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* Synced from design/prototypes/console.css lines 505–543. */
+@media(max-width:640px){
+  .shell{display:block;min-height:100vh;padding-bottom:72px}
+  .sidebar{position:fixed;inset:auto 0 0;z-index:30;width:100%;height:72px;display:flex;flex-direction:row;background:var(--bg);border-top:1px solid var(--border-subtle);border-right:0;overflow:visible}
+  .logo,.side-foot{display:none}
+  .sidebar nav{display:flex;flex:1;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;padding:6px 4px;scrollbar-width:none}
+  .sidebar nav::-webkit-scrollbar{display:none}.navfoot{display:flex;flex:0 0 auto;padding:6px 4px;border-top:0;border-left:1px solid var(--border-subtle)}
+  .sidebar nav a,.navfoot a{flex:0 0 64px;width:64px;height:58px;min-height:58px;flex-direction:column;justify-content:center;gap:3px;padding:5px 4px}
+  .sidebar nav a .lbl,.navfoot a .lbl{position:static;display:block;width:100%;max-width:none;padding:0;border:0;background:none;box-shadow:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:inherit;font-size:9px;line-height:1.2;text-align:center}
+  .sidebar nav a:hover .lbl,.sidebar nav a:focus-visible .lbl,.navfoot a:hover .lbl,.navfoot a:focus-visible .lbl{display:block}
+  main{width:100%;padding:0 var(--container-gutter-phone) var(--space-6)}
+  .page-head{grid-template-columns:minmax(0,1fr);row-gap:var(--space-2);min-height:72px;padding:var(--space-3) 0}
+  .head-right{justify-content:flex-start;gap:var(--space-2);flex-wrap:wrap}
+  .head-title-row{align-items:flex-start;flex-wrap:wrap;gap:var(--space-2)}
+  .page-head .btn{min-height:44px}
+  .page-head h1{line-height:24px}.head-meta{line-height:18px}
+  .filterbar{overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:4px}.filterbar>*{flex:0 0 auto}
+  .search{width:min(220px,72vw)}.metrics{grid-template-columns:1fr;gap:12px}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .btn{min-height:44px;padding-inline:14px}.btn.sm{min-height:36px}.input,.search{min-height:44px}
+  th,td{height:auto;min-height:40px;padding-block:9px}
+}
+
+/* App-only addition (not in prototype): reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  a, button, input, select, textarea { transition-duration: 0.01ms; }
+  .live .dot { animation: none; }
+}

@@ -12,15 +12,15 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="warp-page-header">
-      <div className="warp-page-header-context">
-        {eyebrow && <span className="warp-page-header-eyebrow">{eyebrow}</span>}
-        <div className="warp-page-header-title-row">
+    <header className="page-head">
+      <div className="head-context">
+        {eyebrow && <span className="crumb">{eyebrow}</span>}
+        <div className="head-title-row">
           <h1>{title}</h1>
-          {meta && <div className="warp-page-header-meta">{meta}</div>}
+          {meta && <div className="head-meta">{meta}</div>}
         </div>
       </div>
-      {actions && <div className="warp-page-header-actions">{actions}</div>}
+      {actions && <div className="head-right">{actions}</div>}
     </header>
   );
 }

@@ -47,12 +47,14 @@ export function PanelStub({ panel }: { panel: string }) {
   return (
     <>
       <PageHeader title={title} eyebrow={PANEL_SECTIONS[panel]} />
-      <div className="warp-block rounded-xl border-dashed p-8 text-center">
-        <h2 className="text-base font-medium">Panel scaffold</h2>
-        <p className="mt-2 text-sm text-[#868584]">
-          Not implemented yet. See <code>docs/PANELS.md#{panel}</code>.
-        </p>
-        {scope && <p className="mt-1 text-xs text-[#666469]">{scope}</p>}
+      <div className="card" style={{ borderStyle: 'dashed' }}>
+        <div className="empty">
+          <h2 className="text-base font-medium">Panel scaffold</h2>
+          <p className="mt-2 text-sm">
+            Not implemented yet. See <code>docs/PANELS.md#{panel}</code>.
+          </p>
+          {scope && <p className="mt-1 text-xs text-(--meta)">{scope}</p>}
+        </div>
       </div>
     </>
   );

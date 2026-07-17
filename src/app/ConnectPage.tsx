@@ -59,45 +59,45 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center text-[#faf9f6]">
-      <form onSubmit={submit} className="warp-block w-full max-w-sm space-y-4 rounded-xl p-6">
+    <div className="flex min-h-screen items-center justify-center">
+      <form onSubmit={submit} className="card w-full max-w-sm space-y-4 p-6">
         <div>
           <div className="flex items-center gap-2.5">
             <Logo size={32} />
             <h1 className="text-lg font-medium">OmniWA Console</h1>
           </div>
-          <p className="mt-2 text-sm text-[#868584]">Connect to an OmniWA Platform API.</p>
+          <p className="mt-2 text-sm text-(--muted)">Connect to an OmniWA Platform API.</p>
         </div>
         <label className="block text-sm">
-          <span className="text-[#afaeac]">API base URL</span>
+          <span className="text-(--fg-2)">API base URL</span>
           <input
             type="url"
             required
             value={baseUrl}
             onChange={(e) => setBaseUrl(e.target.value)}
-            className="warp-input mt-1 w-full rounded-lg px-3 py-2"
+            className="input mt-1"
           />
         </label>
         <label className="block text-sm">
-          <span className="text-[#afaeac]">API key</span>
+          <span className="text-(--fg-2)">API key</span>
           <input
             type="password"
             required
             autoComplete="off"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            className="warp-input mt-1 w-full rounded-lg px-3 py-2"
+            className="input mt-1"
           />
         </label>
-        <label className="flex items-center gap-2 text-sm text-[#868584]">
+        <label className="flex items-center gap-2 text-sm text-(--muted)">
           <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
           Remember on this device (stores the key in this browser)
         </label>
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="help error">{error}</p>}
         <button
           type="submit"
           disabled={pending}
-          className="warp-primary w-full rounded-full px-3 py-2 text-sm font-medium disabled:opacity-50"
+          className="btn primary w-full justify-center"
         >
           {pending ? 'Connecting…' : 'Connect'}
         </button>
