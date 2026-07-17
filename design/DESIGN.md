@@ -248,11 +248,15 @@ this subsection binds to it.
 ## 5. Layout Principles
 
 - **Shell**: fixed 224px sidebar (Panel bg, right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed). Sidebar: logo block, nav items (13px/500, 8px radius, active = accent text + accent-bg tint), footer with masked key fingerprint + disconnect.
-- **Nav hierarchy**: two labeled sections. **Messaging** — Chats (direct
-  conversations only), Groups (all WhatsApp groups + the Named Lists tab),
-  Messages (campaigns). **Operations** — Overview, Instances, Queue & Jobs,
-  Webhooks, Events, Settings. There is no separate directory panel:
-  contact/label lookup lives in the Chats search and filters.
+- **Nav hierarchy**: **Overview** sits alone at the top (the landing page,
+  spanning both concerns). Then two labeled sections — **Operations**:
+  Instances (the foundational resource first), Queue & Jobs, Webhooks,
+  Events (message-pipeline order); **Messaging**: Chats (direct
+  conversations only), Groups (management table + Named Lists modal),
+  Messages (campaigns). **Settings** is pinned at the sidebar bottom above
+  the key/disconnect footer, separated by a border. There is no separate
+  directory panel: contact/label lookup lives in the Chats search and
+  filters.
 - **Content header** per page: title left; live indicator, refresh, and primary action right. 48px tall, bottom border.
 - **Grid**: 8px base unit. Vertical rhythm 16px between related blocks, 24px between sections.
 - **Density**: tables full-width; Overview metric cards in `repeat(auto-fit, minmax(200px, 1fr))` grid; never center-constrain content below 1440px.

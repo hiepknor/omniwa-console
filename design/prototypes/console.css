@@ -19,10 +19,11 @@ body{background:var(--canvas);color:var(--text-1);font:400 14px/1.5 Inter,-apple
 .logo b{font-size:14px;font-weight:600;letter-spacing:-.01em}
 .logo .env{display:block;margin-top:2px;font-family:var(--mono);font-size:11px;color:var(--text-4)}
 nav{flex:1;padding:8px}
-nav a{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;
+.navfoot{padding:8px;border-top:1px solid var(--border-subtle)}
+nav a,.navfoot a{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;
   font-size:13px;font-weight:500;color:var(--text-3);text-decoration:none}
-nav a:hover{background:rgba(255,255,255,.03);color:var(--text-2)}
-nav a.active{background:var(--accent-tint);color:var(--accent)}
+nav a:hover,.navfoot a:hover{background:rgba(255,255,255,.03);color:var(--text-2)}
+nav a.active,.navfoot a.active{background:var(--accent-tint);color:var(--accent)}
 nav .count{font-family:var(--mono);font-size:11px;color:var(--text-3);background:var(--recessed);
   border:1px solid var(--border-subtle);border-radius:4px;padding:0 5px}
 .side-foot{padding:12px;border-top:1px solid var(--border-subtle);font-size:12px;color:var(--text-4)}
