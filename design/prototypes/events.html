@@ -48,71 +48,213 @@
       </div>
     </header>
 
-    <div class="tabs">
-      <a class="active" href="#">Event stream</a><a href="#">Audit records</a>
-    </div>
+    <section class="events-workspace" aria-labelledby="events-workbench-title" data-od-id="events-workbench">
+      <h2 class="sr-only" id="events-workbench-title">Events observability workbench</h2>
 
-    <div class="filterbar">
-      <input class="search" placeholder="Search type or resource…">
-      <span class="chip">instance: inst_2bq81c <span class="x">✕</span></span>
-      <span class="chip">category: message <span class="x">✕</span></span>
-      <span class="chip add">+ filter</span>
-    </div>
-
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>Time</th><th>Type</th><th>Resource</th><th>Instance</th><th>Request</th></tr></thead>
-        <tbody>
-          <tr>
-            <td class="ts" title="2026-07-16T08:53:29Z">08:53:29</td>
-            <td><span class="status"><span class="dot" style="background:var(--ok)"></span><span class="mono">message.delivered</span></span></td>
-            <td><span class="mono">msg_81kq0d</span></td>
-            <td><span class="mono">inst_2bq81c</span></td>
-            <td><span class="mono">req_01j2m9aa</span></td>
-          </tr>
-          <tr>
-            <td class="ts" title="2026-07-16T08:53:20Z">08:53:20</td>
-            <td><span class="status"><span class="dot" style="background:var(--pending)"></span><span class="mono">message.queued</span></span></td>
-            <td><span class="mono">msg_09zzm1</span></td>
-            <td><span class="mono">inst_2bq81c</span></td>
-            <td><span class="mono">req_01j2m99x</span></td>
-          </tr>
-          <tr>
-            <td class="ts" title="2026-07-16T08:52:41Z">08:52:41</td>
-            <td><span class="status"><span class="dot" style="background:var(--pending)"></span><span class="mono">message.accepted</span></span></td>
-            <td><span class="mono">msg_09zzm1</span></td>
-            <td><span class="mono">inst_2bq81c</span></td>
-            <td><span class="mono">req_01j2m99x</span></td>
-          </tr>
-          <tr>
-            <td class="ts" title="2026-07-16T08:46:31Z">08:46:31</td>
-            <td><span class="status"><span class="dot" style="background:var(--failed)"></span><span class="mono">message.failed</span></span></td>
-            <td><span class="mono">msg_74nn2b</span></td>
-            <td><span class="mono">inst_2bq81c</span></td>
-            <td><span class="mono">req_01j2m8jw</span></td>
-          </tr>
-          <tr>
-            <td class="ts" title="2026-07-16T08:44:02Z">08:44:02</td>
-            <td><span class="status"><span class="dot" style="background:var(--pending)"></span><span class="mono">message.accepted</span></span></td>
-            <td><span class="mono">msg_74nn2b</span></td>
-            <td><span class="mono">inst_2bq81c</span></td>
-            <td><span class="mono">req_01j2m8jw</span></td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="table-foot">
-        <span class="num">5 newest · cursor history below</span>
-        <button class="btn">Load older</button>
+      <div class="events-observability" aria-label="Stream posture" data-od-id="events-observability-strip">
+        <div class="events-mode-tabs" role="tablist" aria-label="Event data mode">
+          <button class="events-mode active" id="event-stream-tab" type="button" role="tab" aria-selected="true" aria-controls="event-stream-panel">Event stream</button>
+          <button class="events-mode" id="audit-records-tab" type="button" role="tab" aria-selected="false" aria-controls="audit-records-panel" tabindex="-1">Audit records</button>
+        </div>
+        <div class="stream-facts" aria-label="Current event stream facts">
+          <span class="stream-fact"><span class="dot status-ok"></span><span>Streaming</span></span>
+          <span class="stream-fact">Newest first</span>
+          <span class="stream-fact"><span class="mono num">5 / 200</span> buffered</span>
+          <span class="stream-fact">Fresh through <time class="mono num" datetime="2026-07-16T08:53:29Z">08:53:29Z</time></span>
+          <details class="behavior-note">
+            <summary aria-label="Explain live tail and cursor behavior">How live tail works</summary>
+            <p><span class="mono">streamEvents</span> prepends new events into a bounded 200-row presentation buffer. Pause stops presentation only. Load older pages backward through <span class="mono">listEvents</span> cursors; streamed payloads are not claimed to update server caches.</p>
+          </details>
+        </div>
       </div>
-    </div>
 
-    <p class="help" style="margin-top:12px">
-      Live tail prepends new events from the SSE stream (bounded to 200 rows);
-      "Load older" pages backward through <span class="mono">listEvents</span> cursors.
-      The <b>Audit records</b> tab reuses this table with actor, action, and
-      outcome columns from <span class="mono">listAuditRecords</span>.
-    </p>
+      <div id="event-stream-panel" role="tabpanel" aria-labelledby="event-stream-tab">
+        <div class="events-toolbar" data-od-id="events-table-controls">
+          <div class="events-toolbar-primary">
+            <label class="search-field" for="event-search">
+              <span class="sr-only">Search event type or resource</span>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+              <input class="search" id="event-search" type="search" placeholder="Search type or resource…">
+            </label>
+            <button class="chip active" type="button">instance: <span class="mono">inst_2bq81c</span><span class="x" aria-hidden="true">×</span><span class="sr-only">Remove instance filter</span></button>
+            <button class="chip active" type="button">category: message <span class="x" aria-hidden="true">×</span><span class="sr-only">Remove category filter</span></button>
+            <button class="chip add" type="button">+ filter</button>
+          </div>
+          <div class="events-toolbar-meta" aria-label="Result and cursor metadata">
+            <span><span class="mono num">5</span> results</span>
+            <span>fresh through <time class="mono num" datetime="2026-07-16T08:53:29Z">08:53:29Z</time></span>
+            <span>cursor available</span>
+          </div>
+        </div>
+
+        <div class="tablewrap events-table" tabindex="0" role="region" aria-label="Event history table, horizontally scrollable" data-od-id="event-history-table">
+          <table>
+            <caption>Event history from listEvents, ordered newest first. Five of a maximum 200 buffered rows are shown. The failed event row opens details with Enter or Space.</caption>
+            <thead><tr><th scope="col">Occurrence</th><th scope="col">Event type</th><th scope="col">Resource ID</th><th scope="col">Instance ID</th><th scope="col">Request ID</th></tr></thead>
+            <tbody>
+              <tr tabindex="0" data-event-row="delivered">
+                <td class="ts"><time datetime="2026-07-16T08:53:29Z">2026-07-16 08:53:29Z</time></td>
+                <td><span class="status"><span class="dot status-ok"></span><span class="mono">message.delivered</span></span></td>
+                <td><span class="mono">msg_81kq0d</span></td>
+                <td><span class="mono">inst_2bq81c</span></td>
+                <td><span class="mono">req_01j2m9aa</span></td>
+              </tr>
+              <tr tabindex="0" data-event-row="queued">
+                <td class="ts"><time datetime="2026-07-16T08:53:20Z">2026-07-16 08:53:20Z</time></td>
+                <td><span class="status"><span class="dot status-pending"></span><span class="mono">message.queued</span></span></td>
+                <td><span class="mono">msg_09zzm1</span></td>
+                <td><span class="mono">inst_2bq81c</span></td>
+                <td><span class="mono">req_01j2m99x</span></td>
+              </tr>
+              <tr tabindex="0" data-event-row="accepted-09zzm1">
+                <td class="ts"><time datetime="2026-07-16T08:52:41Z">2026-07-16 08:52:41Z</time></td>
+                <td><span class="status"><span class="dot status-pending"></span><span class="mono">message.accepted</span></span></td>
+                <td><span class="mono">msg_09zzm1</span></td>
+                <td><span class="mono">inst_2bq81c</span></td>
+                <td><span class="mono">req_01j2m99x</span></td>
+              </tr>
+              <tr class="failed-event" tabindex="0" data-event-row="failed" data-od-id="failed-event-row">
+                <td class="ts"><time datetime="2026-07-16T08:46:31Z">2026-07-16 08:46:31Z</time></td>
+                <td><span class="status"><span class="dot status-failed-dot"></span><span class="mono">message.failed</span></span></td>
+                <td><span class="mono">msg_74nn2b</span></td>
+                <td><span class="mono">inst_2bq81c</span></td>
+                <td><span class="mono">req_01j2m8jw</span></td>
+              </tr>
+              <tr tabindex="0" data-event-row="accepted-74nn2b">
+                <td class="ts"><time datetime="2026-07-16T08:44:02Z">2026-07-16 08:44:02Z</time></td>
+                <td><span class="status"><span class="dot status-pending"></span><span class="mono">message.accepted</span></span></td>
+                <td><span class="mono">msg_74nn2b</span></td>
+                <td><span class="mono">inst_2bq81c</span></td>
+                <td><span class="mono">req_01j2m8jw</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="table-foot">
+            <div class="event-table-meta"><span><span class="mono num">5</span> newest</span><span>bounded <span class="mono num">200</span>-row buffer</span></div>
+            <div class="event-cursor"><span>Backward cursor ready</span><button class="btn" type="button">Load older</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="audit-records-panel" role="tabpanel" aria-labelledby="audit-records-tab" hidden>
+        <div class="audit-mode-note">
+          <div><span class="eyebrow">Sibling data mode</span><h3>Audit records</h3></div>
+          <p><span class="mono">listAuditRecords</span> reuses this workbench table with actor, action, and outcome columns. No audit fixture rows are available in this prototype.</p>
+        </div>
+        <div class="tablewrap events-table audit-table" tabindex="0" role="region" aria-label="Audit records table, horizontally scrollable">
+          <table>
+            <caption>Audit records from listAuditRecords. This prototype includes no audit record fixtures.</caption>
+            <thead><tr><th scope="col">Occurrence</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Outcome</th><th scope="col">Request ID</th></tr></thead>
+            <tbody><tr class="audit-empty"><td colspan="5">No audit fixture rows are available.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="event-inspector" id="event-inspector" aria-labelledby="event-inspector-title" hidden data-od-id="event-detail-inspector">
+        <header class="drawer-head">
+          <div class="drawer-identity">
+            <span class="eyebrow">Event fact</span>
+            <div class="drawer-title-row"><span class="dot status-failed-dot"></span><h2 class="mono" id="event-inspector-title">message.failed</h2></div>
+            <time class="event-occurrence mono num" datetime="2026-07-16T08:46:31Z">2026-07-16 08:46:31Z</time>
+          </div>
+          <button class="close" type="button" aria-label="Close event details">×</button>
+        </header>
+        <div class="drawer-scroll">
+          <section aria-labelledby="normalized-facts-title">
+            <h3 id="normalized-facts-title">Normalized facts</h3>
+            <dl class="event-facts">
+              <dt>Resource</dt><dd class="mono">msg_74nn2b</dd>
+              <dt>Instance</dt><dd class="mono">inst_2bq81c</dd>
+              <dt>Request</dt><dd class="mono">req_01j2m8jw</dd>
+            </dl>
+          </section>
+          <section aria-labelledby="correlation-title">
+            <h3 id="correlation-title">Correlation identifiers</h3>
+            <dl class="event-facts"><dt>Request ID</dt><dd class="mono">req_01j2m8jw</dd></dl>
+            <p class="drawer-note">Only the request identifier is present in this prototype.</p>
+          </section>
+          <section aria-labelledby="payload-title">
+            <h3 id="payload-title">Normalized payload</h3>
+            <pre class="event-payload" tabindex="0"><code>{
+  "type": "message.failed",
+  "resourceId": "msg_74nn2b",
+  "instanceId": "inst_2bq81c",
+  "requestId": "req_01j2m8jw",
+  "occurredAt": "2026-07-16T08:46:31Z"
+}</code></pre>
+          </section>
+          <section aria-labelledby="provenance-title">
+            <h3 id="provenance-title">Stream provenance</h3>
+            <dl class="event-facts">
+              <dt>Source</dt><dd class="mono">streamEvents</dd>
+              <dt>Ordering</dt><dd>Newest first</dd>
+              <dt>Freshness</dt><dd>Within current live tail</dd>
+            </dl>
+            <p class="drawer-note">Presentation is bounded to 200 rows. Pausing does not mutate or stop the server stream.</p>
+          </section>
+        </div>
+      </aside>
+    </section>
   </main>
 </div>
+<script>
+(() => {
+  const streamTab = document.querySelector('#event-stream-tab');
+  const auditTab = document.querySelector('#audit-records-tab');
+  const streamPanel = document.querySelector('#event-stream-panel');
+  const auditPanel = document.querySelector('#audit-records-panel');
+  const failedRow = document.querySelector('[data-event-row="failed"]');
+  const inspector = document.querySelector('#event-inspector');
+  const closeButton = inspector.querySelector('.close');
+
+  function setMode(mode) {
+    const showStream = mode === 'stream';
+    streamTab.classList.toggle('active', showStream);
+    auditTab.classList.toggle('active', !showStream);
+    streamTab.setAttribute('aria-selected', String(showStream));
+    auditTab.setAttribute('aria-selected', String(!showStream));
+    streamTab.tabIndex = showStream ? 0 : -1;
+    auditTab.tabIndex = showStream ? -1 : 0;
+    streamPanel.hidden = !showStream;
+    auditPanel.hidden = showStream;
+    if (!showStream) closeInspector(false);
+  }
+
+  function openInspector() {
+    inspector.hidden = false;
+    failedRow.classList.add('selected');
+    failedRow.setAttribute('aria-current', 'true');
+    closeButton.focus();
+  }
+
+  function closeInspector(returnFocus = true) {
+    inspector.hidden = true;
+    failedRow.classList.remove('selected');
+    failedRow.removeAttribute('aria-current');
+    if (returnFocus) failedRow.focus();
+  }
+
+  streamTab.addEventListener('click', () => setMode('stream'));
+  auditTab.addEventListener('click', () => setMode('audit'));
+  document.querySelector('.events-mode-tabs').addEventListener('keydown', event => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    const nextTab = event.key === 'ArrowRight' ? auditTab : streamTab;
+    nextTab.focus();
+    setMode(nextTab === streamTab ? 'stream' : 'audit');
+  });
+  failedRow.addEventListener('click', openInspector);
+  failedRow.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openInspector();
+    }
+  });
+  closeButton.addEventListener('click', () => closeInspector());
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !inspector.hidden) closeInspector();
+  });
+})();
+</script>
 </body>
 </html>

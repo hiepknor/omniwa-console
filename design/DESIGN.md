@@ -191,6 +191,16 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 - Drawer hierarchy is fixed: webhook identity + ID + status → endpoint health → subscribed events → lifecycle actions → recent deliveries → bulk recovery.
 - Suspended endpoints remain structurally prominent without saturated alert surfaces. Single-delivery and bulk redrive actions are recovery controls scoped to the selected webhook; retirement stays separate and only opens a dedicated typed-confirmation dialog.
 
+### Events observability workbench
+
+- Event stream and Audit records are sibling modes of one table-first workbench. The mode switch uses tab semantics and keeps the active dataset, columns, and empty state explicit.
+- A compact observability strip communicates stream state, newest-first ordering, the bounded 200-row presentation buffer, and freshness without competing with the page header.
+- Search, active filters, result count, freshness, and cursor metadata remain attached to the event table. Event and audit tables use captions, scoped headers, visible keyboard focus, and locally bounded horizontal overflow.
+- Selecting an event opens a 400–420px read-only right inspector without a backdrop or reserved table column. Below 900px, it becomes a full-width in-flow panel.
+- Inspector hierarchy is fixed: event identity + occurrence → normalized facts → correlation identifiers → safe normalized payload → stream provenance. Event facts never expose recovery or destructive actions.
+- Live-tail language must remain precise: new events prepend into a bounded presentation buffer, Pause pauses presentation only, and Load older pages backward through `listEvents` cursors. Streamed facts must not imply direct cache mutation.
+- Audit mode reuses the workbench with actor, action, outcome, and request columns from `listAuditRecords`; when no fixtures are available, show an honest empty state rather than fabricated records.
+
 ### Live indicator
 
 - Header-right: 8px dot + 12px label. `live` emerald pulsing dot, `reconnecting` amber, `polling` sky, `offline` red. Clicking opens connection detail popover.
