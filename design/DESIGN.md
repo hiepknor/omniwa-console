@@ -182,6 +182,15 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 - Drawer hierarchy is fixed: job type + ID + terminal status → compact facts → safe payload representation → reverse-chronological attempts → actions.
 - Dead-lettered work is emphasized through identity, status text, and selection structure rather than a saturated alert surface. Redrive remains separate from destructive discard, and discard only opens a dedicated confirmation flow; confirmation is never rendered inline.
 
+### Webhooks delivery operations surface
+
+- Endpoint posture uses four comparable metrics for registered, active, suspended, and failed-delivery counts. The grid wraps from four to two to one column while preserving direct comparison.
+- The endpoint table is the primary surface. Search, status filters, result count, freshness, and cursor metadata stay attached to it; selected rows expose endpoint health and recovery without replacing the operational list.
+- Endpoint rows include semantic captions and scoped headers, bounded horizontal overflow, visible keyboard focus, restrained selection, and right-aligned tabular success rates.
+- Selecting a webhook opens a 400–440px right slide-over without a backdrop or reserved table column. Below 900px, it becomes a full-width in-flow panel.
+- Drawer hierarchy is fixed: webhook identity + ID + status → endpoint health → subscribed events → lifecycle actions → recent deliveries → bulk recovery.
+- Suspended endpoints remain structurally prominent without saturated alert surfaces. Single-delivery and bulk redrive actions are recovery controls scoped to the selected webhook; retirement stays separate and only opens a dedicated typed-confirmation dialog.
+
 ### Live indicator
 
 - Header-right: 8px dot + 12px label. `live` emerald pulsing dot, `reconnecting` amber, `polling` sky, `offline` red. Clicking opens connection detail popover.

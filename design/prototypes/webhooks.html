@@ -48,107 +48,269 @@
       </div>
     </header>
 
-    <div class="layout">
-      <div class="listcol">
-        <div class="tablewrap">
-          <div class="scroll">
-          <table>
-            <thead><tr><th>Name</th><th>Endpoint</th><th>Status</th><th>Success 24h</th><th>Last delivery</th></tr></thead>
-            <tbody>
-              <tr>
-                <td>order-events</td><td><span class="mono">https://api.acme.vn/hooks/wa</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-                <td class="num">99.8%</td><td class="ts" title="2026-07-16T08:53:25Z">5s ago</td>
-              </tr>
-              <tr class="selected">
-                <td>billing-events</td><td><span class="mono">https://billing.acme.vn/wh</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--degraded)"></span>suspended</span></td>
-                <td class="num">61.2%</td><td class="ts" title="2026-07-16T06:02:00Z">2h ago</td>
-              </tr>
-              <tr>
-                <td>legacy-sink</td><td><span class="mono">https://old.acme.vn/callback</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span></td>
-                <td class="num">—</td><td class="ts" title="2026-06-02T00:00:00Z">44d ago</td>
-              </tr>
-            </tbody>
-          </table>
+    <div class="webhooks-workspace" data-od-id="webhooks-workspace">
+      <section class="webhook-metric-section" aria-labelledby="webhook-posture-heading" data-od-id="webhook-posture">
+        <h2 id="webhook-posture-heading">Endpoint posture</h2>
+        <div class="metrics webhook-metrics">
+          <article class="card webhook-metric-card" data-od-id="metric-registered-endpoints">
+            <span class="label">Registered endpoints</span>
+            <strong class="value num">3</strong>
+            <span class="ctx">All configured webhooks</span>
+          </article>
+          <article class="card webhook-metric-card" data-od-id="metric-active-endpoints">
+            <span class="label">Active endpoints</span>
+            <strong class="value num">1</strong>
+            <span class="ctx">Accepting deliveries</span>
+          </article>
+          <article class="card webhook-metric-card webhook-metric-suspended" data-od-id="metric-suspended-endpoints">
+            <span class="label">Suspended endpoints</span>
+            <strong class="value num">1</strong>
+            <span class="ctx">Failure threshold reached</span>
+          </article>
+          <article class="card webhook-metric-card webhook-metric-action" data-od-id="metric-failed-deliveries">
+            <span class="label">Failed deliveries</span>
+            <strong class="value num">84</strong>
+            <span class="ctx">Require operator action</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="webhook-endpoints" aria-labelledby="webhook-endpoints-heading" data-od-id="webhook-endpoint-table-section">
+        <div class="webhook-section-head">
+          <div>
+            <h2 id="webhook-endpoints-heading">Webhook endpoints</h2>
+            <span class="webhook-posture-note">Select an endpoint to inspect health, lifecycle, and delivery recovery.</span>
           </div>
-          <div class="table-foot">
-            <span class="num">3 of 3 webhooks</span>
+          <span class="webhook-result-count num" aria-live="polite">3 results</span>
+        </div>
+
+        <div class="webhook-toolbar" aria-label="Webhook endpoint controls">
+          <label class="search-field" for="webhook-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+            <span class="sr-only">Search webhooks</span>
+            <input id="webhook-search" class="search" type="search" placeholder="Search name, ID, or endpoint" autocomplete="off">
+          </label>
+          <div class="webhook-filters" role="group" aria-label="Filter endpoints by status">
+            <button class="chip active" type="button" data-status-filter="all" aria-pressed="true">All <span class="num">3</span></button>
+            <button class="chip" type="button" data-status-filter="active" aria-pressed="false">Active <span class="num">1</span></button>
+            <button class="chip" type="button" data-status-filter="suspended" aria-pressed="false">Suspended <span class="num">1</span></button>
+            <button class="chip" type="button" data-status-filter="retired" aria-pressed="false">Retired <span class="num">1</span></button>
           </div>
         </div>
-      </div>
 
-      <aside class="drawer">
-        <header>
-          <div class="t"><b>billing-events</b><span class="mono">wh_c41x02</span></div>
-          <button class="close" aria-label="Close">✕</button>
-        </header>
-
-        <section>
-          <div class="kv">
-            <dt>Status</dt><dd><span class="status"><span class="dot" style="background:var(--degraded)"></span>suspended</span></dd>
-            <dt>Endpoint</dt><dd><span class="mono">https://billing.acme.vn/wh</span></dd>
-            <dt>Secret</dt><dd><span class="mono">whsec_••••••••</span></dd>
-            <dt>Suspended</dt><dd class="ts" title="2026-07-16T06:02:00Z">2h ago · failure threshold</dd>
-          </div>
-        </section>
-
-        <section>
-          <h3>Subscribed events</h3>
-          <div class="actions">
-            <span class="chip">message.delivered</span>
-            <span class="chip">message.failed</span>
-            <span class="chip">instance.*</span>
-          </div>
-        </section>
-
-        <section>
-          <h3>Lifecycle</h3>
-          <div class="actions">
-            <button class="btn primary">Activate</button>
-            <button class="btn">Edit…</button>
-            <button class="btn danger">Retire…</button>
-          </div>
-          <p class="help" style="margin-top:8px">Activate resumes delivery; pending failed deliveries stay failed until redriven.</p>
-        </section>
-
-        <section>
-          <h3>Recent deliveries <span style="font-weight:400;font-size:12px;color:var(--text-4)">· 4 of 220</span></h3>
-          <div style="overflow-x:auto">
-          <table class="minitable">
-            <thead><tr><th>Delivery</th><th>Event</th><th>Status</th><th></th></tr></thead>
+        <div class="tablewrap webhooks-table" tabindex="0" role="region" aria-label="Webhook endpoints table with horizontal scrolling" data-od-id="webhook-endpoint-table">
+          <table>
+            <caption>Registered webhook endpoints, delivery status, and recent delivery health.</caption>
+            <thead>
+              <tr><th scope="col">Name / ID</th><th scope="col">Endpoint</th><th scope="col">Status</th><th scope="col" class="percentage-col">Success 24h</th><th scope="col">Last delivery</th></tr>
+            </thead>
             <tbody>
-              <tr>
-                <td><span class="mono">del_88am2k</span></td><td><span class="mono">message.failed</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--failed)"></span>failed · 503</span></td>
-                <td style="text-align:right"><button class="btn sm">Redrive</button></td>
+              <tr tabindex="0" data-webhook-status="active" data-search-value="order-events https://api.acme.vn/hooks/wa active">
+                <td><span class="resource-name">order-events</span></td>
+                <td><span class="mono">https://api.acme.vn/hooks/wa</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td class="percentage num">99.8%</td><td class="ts" title="2026-07-16T08:53:25Z">5s ago</td>
               </tr>
-              <tr>
-                <td><span class="mono">del_87zz1p</span></td><td><span class="mono">message.delivered</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--failed)"></span>failed · timeout</span></td>
-                <td style="text-align:right"><button class="btn sm">Redrive</button></td>
+              <tr class="selected" tabindex="0" aria-current="true" data-webhook-status="suspended" data-search-value="billing-events wh_c41x02 https://billing.acme.vn/wh suspended">
+                <td><span class="resource-name">billing-events</span><span class="row-id mono">wh_c41x02</span></td>
+                <td><span class="mono">https://billing.acme.vn/wh</span></td>
+                <td><span class="status status-suspended"><span class="dot"></span>suspended</span></td>
+                <td class="percentage num">61.2%</td><td class="ts" title="2026-07-16T06:02:00Z">2h ago</td>
               </tr>
-              <tr>
-                <td><span class="mono">del_86kj9w</span></td><td><span class="mono">message.delivered</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--ok)"></span>delivered</span></td>
-                <td style="text-align:right"><button class="btn sm">History</button></td>
-              </tr>
-              <tr>
-                <td><span class="mono">del_85rr4n</span></td><td><span class="mono">instance.connected</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--ok)"></span>delivered</span></td>
-                <td style="text-align:right"><button class="btn sm">History</button></td>
+              <tr tabindex="0" data-webhook-status="retired" data-search-value="legacy-sink https://old.acme.vn/callback retired">
+                <td><span class="resource-name">legacy-sink</span></td>
+                <td><span class="mono">https://old.acme.vn/callback</span></td>
+                <td><span class="status status-retired"><span class="dot"></span>retired</span></td>
+                <td class="percentage num">—</td><td class="ts" title="2026-06-02T00:00:00Z">44d ago</td>
               </tr>
             </tbody>
           </table>
+          <div class="table-foot">
+            <div class="webhook-table-meta"><span class="num">3 of 3 webhooks</span><span class="freshness">Freshness · 5s ago</span></div>
+            <div class="webhook-cursor"><span class="mono">cursor · end</span><button class="btn sm" type="button" disabled>Next</button></div>
           </div>
-          <div class="actions" style="margin-top:10px">
-            <button class="btn">Bulk redrive failed <span class="num" style="color:var(--text-3)">· 84</span></button>
+        </div>
+      </section>
+
+      <aside class="webhook-drawer" aria-labelledby="webhook-drawer-title" data-od-id="webhook-management-drawer">
+        <header class="drawer-head">
+          <div class="drawer-identity">
+            <span class="eyebrow">Selected webhook</span>
+            <div class="drawer-title-row">
+              <h2 id="webhook-drawer-title">billing-events</h2>
+              <span class="status status-suspended"><span class="dot"></span>suspended</span>
+            </div>
+            <span class="mono">wh_c41x02</span>
           </div>
-        </section>
+          <button class="close" type="button" aria-label="Close webhook details">✕</button>
+        </header>
+
+        <div class="drawer-scroll">
+          <section data-od-id="webhook-health-facts">
+            <h3>Endpoint health</h3>
+            <dl class="kv">
+              <dt>Success 24h</dt><dd class="health-rate num">61.2%</dd>
+              <dt>Endpoint</dt><dd><span class="mono">https://billing.acme.vn/wh</span></dd>
+              <dt>Secret</dt><dd><span class="mono">whsec_••••••••</span></dd>
+              <dt>Last delivery</dt><dd class="ts" title="2026-07-16T06:02:00Z">2h ago</dd>
+              <dt>Suspension</dt><dd>failure threshold</dd>
+            </dl>
+          </section>
+
+          <section data-od-id="webhook-subscribed-events">
+            <h3>Subscribed events</h3>
+            <div class="capchips">
+              <span class="chip">message.delivered</span>
+              <span class="chip">message.failed</span>
+              <span class="chip">instance.*</span>
+            </div>
+          </section>
+
+          <section data-od-id="webhook-lifecycle-actions">
+            <h3>Lifecycle actions</h3>
+            <div class="lifecycle-groups">
+              <div class="action-group">
+                <span>Resume delivery. Failed deliveries remain failed until redriven.</span>
+                <button class="btn primary" type="button">Activate</button>
+              </div>
+              <div class="action-group">
+                <span>Change endpoint configuration and subscriptions.</span>
+                <button class="btn" type="button">Edit…</button>
+              </div>
+              <div class="action-group destructive">
+                <span>Permanently retire this endpoint after typed confirmation.</span>
+                <button class="btn danger" id="open-retire-dialog" type="button">Retire…</button>
+              </div>
+            </div>
+          </section>
+
+          <section data-od-id="webhook-recent-deliveries">
+            <div class="drawer-section-head">
+              <h3>Recent deliveries</h3>
+              <span class="delivery-count num">4 of 220</span>
+            </div>
+            <div class="delivery-scroll" tabindex="0" role="region" aria-label="Recent delivery history with horizontal scrolling">
+              <table class="minitable delivery-table">
+                <caption>Four most recent deliveries for billing-events.</caption>
+                <thead><tr><th scope="col">Delivery</th><th scope="col">Event</th><th scope="col">Result</th><th scope="col"><span class="sr-only">Action</span></th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><span class="mono">del_88am2k</span></td><td><span class="mono">message.failed</span></td>
+                    <td><span class="status sm status-failed"><span class="dot"></span>failed · 503</span></td>
+                    <td class="delivery-action"><button class="btn sm" type="button" aria-label="Redrive delivery del_88am2k">Redrive</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="mono">del_87zz1p</span></td><td><span class="mono">message.delivered</span></td>
+                    <td><span class="status sm status-failed"><span class="dot"></span>failed · timeout</span></td>
+                    <td class="delivery-action"><button class="btn sm" type="button" aria-label="Redrive delivery del_87zz1p">Redrive</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="mono">del_86kj9w</span></td><td><span class="mono">message.delivered</span></td>
+                    <td><span class="status sm status-active"><span class="dot"></span>delivered</span></td>
+                    <td class="delivery-action"><button class="btn sm" type="button" aria-label="View history for delivery del_86kj9w">History</button></td>
+                  </tr>
+                  <tr>
+                    <td><span class="mono">del_85rr4n</span></td><td><span class="mono">instance.connected</span></td>
+                    <td><span class="status sm status-active"><span class="dot"></span>delivered</span></td>
+                    <td class="delivery-action"><button class="btn sm" type="button" aria-label="View history for delivery del_85rr4n">History</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="webhook-recovery" data-od-id="webhook-bulk-recovery">
+            <span class="eyebrow">Bulk recovery · billing-events</span>
+            <div class="recovery-action">
+              <span>Redrive all failed deliveries for this selected webhook.</span>
+              <button class="btn" type="button">Bulk redrive failed <span class="num">· 84</span></button>
+            </div>
+          </section>
+        </div>
       </aside>
+    </div>
+
+    <div class="overlay webhook-retire-overlay" id="retire-dialog" role="presentation" hidden>
+      <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="retire-dialog-title" aria-describedby="retire-dialog-description">
+        <header><b id="retire-dialog-title">Retire webhook</b><span class="mono">wh_c41x02</span></header>
+        <div class="body">
+          <p class="retire-warning" id="retire-dialog-description">This permanently retires <b>billing-events</b> and stops future deliveries to its endpoint. This cannot be undone.</p>
+          <div class="field">
+            <label for="retire-confirmation">Type <span class="mono retire-confirm-name">billing-events</span> to confirm</label>
+            <input class="input" id="retire-confirmation" placeholder="billing-events" autocomplete="off">
+          </div>
+        </div>
+        <footer>
+          <button class="btn" id="cancel-retire" type="button">Cancel</button>
+          <button class="btn danger solid" id="confirm-retire" type="button" disabled>Retire webhook</button>
+        </footer>
+      </div>
     </div>
   </main>
 </div>
+<script>
+  (() => {
+    const search = document.querySelector('#webhook-search');
+    const filters = [...document.querySelectorAll('[data-status-filter]')];
+    const rows = [...document.querySelectorAll('.webhooks-table tbody tr')];
+    const resultCount = document.querySelector('.webhook-result-count');
+    let statusFilter = 'all';
+
+    const updateRows = () => {
+      const query = search.value.trim().toLowerCase();
+      let visible = 0;
+      rows.forEach((row) => {
+        const matchesStatus = statusFilter === 'all' || row.dataset.webhookStatus === statusFilter;
+        const matchesQuery = row.dataset.searchValue.includes(query);
+        row.hidden = !(matchesStatus && matchesQuery);
+        if (!row.hidden) visible += 1;
+      });
+      resultCount.textContent = `${visible} ${visible === 1 ? 'result' : 'results'}`;
+    };
+
+    search.addEventListener('input', updateRows);
+    filters.forEach((filter) => filter.addEventListener('click', () => {
+      statusFilter = filter.dataset.statusFilter;
+      filters.forEach((item) => {
+        const active = item === filter;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      updateRows();
+    }));
+
+    const drawer = document.querySelector('.webhook-drawer');
+    document.querySelector('.webhook-drawer .close').addEventListener('click', () => {
+      drawer.hidden = true;
+      document.querySelector('.webhooks-table tr.selected').focus();
+    });
+
+    const overlay = document.querySelector('#retire-dialog');
+    const retireInput = document.querySelector('#retire-confirmation');
+    const confirmRetire = document.querySelector('#confirm-retire');
+    const openRetire = document.querySelector('#open-retire-dialog');
+    const closeRetire = () => {
+      overlay.hidden = true;
+      retireInput.value = '';
+      confirmRetire.disabled = true;
+      openRetire.focus();
+    };
+
+    openRetire.addEventListener('click', () => {
+      overlay.hidden = false;
+      retireInput.focus();
+    });
+    document.querySelector('#cancel-retire').addEventListener('click', closeRetire);
+    retireInput.addEventListener('input', () => {
+      confirmRetire.disabled = retireInput.value !== 'billing-events';
+    });
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) closeRetire();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !overlay.hidden) closeRetire();
+    });
+  })();
+</script>
 </body>
 </html>
