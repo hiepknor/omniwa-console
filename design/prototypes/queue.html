@@ -48,52 +48,71 @@
       </div>
     </header>
 
-    <div class="metrics">
-      <div class="card"><div class="label">Queue depth</div><div class="value num">142</div><div class="ctx warn num">▲ 38 in last 10m</div></div>
-      <div class="card"><div class="label">In flight</div><div class="value num">12</div><div class="ctx num">avg 1.4s</div></div>
-      <div class="card"><div class="label">Retrying</div><div class="value num">5</div><div class="ctx num">next in 02:14</div></div>
-      <div class="card"><div class="label">Dead-lettered</div><div class="value num">3</div><div class="ctx bad">action required</div></div>
-    </div>
+    <section class="queue-metric-section" aria-labelledby="queue-posture-title" data-od-id="queue-posture">
+      <h2 id="queue-posture-title">Queue posture</h2>
+      <div class="metrics queue-metrics">
+        <div class="card queue-metric-card"><div class="label">Queue depth</div><div class="value num">142</div><div class="ctx warn num">▲ 38 in last 10m</div></div>
+        <div class="card queue-metric-card"><div class="label">In flight</div><div class="value num">12</div><div class="ctx num">avg 1.4s</div></div>
+        <div class="card queue-metric-card"><div class="label">Retrying</div><div class="value num">5</div><div class="ctx num">next in 02:14</div></div>
+        <div class="card queue-metric-card queue-metric-action"><div class="label">Dead-lettered</div><div class="value num">3</div><div class="ctx bad">action required</div></div>
+      </div>
+    </section>
 
-    <div class="filterbar">
-      <span class="chip">status: failed <span class="x">✕</span></span>
-      <span class="chip add">+ filter</span>
-    </div>
+    <section class="queue-workbench" aria-labelledby="jobs-title" data-od-id="jobs-workbench">
+      <div class="queue-section-head">
+        <div>
+          <h2 id="jobs-title">Jobs</h2>
+          <span class="queue-posture-note">Status filter active · newest updates first</span>
+        </div>
+        <span class="queue-result-count num">5 visible</span>
+      </div>
+      <div class="queue-toolbar" role="search" aria-label="Filter jobs">
+        <label class="search-field queue-search">
+          <span class="visually-hidden">Search jobs</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input class="search" type="search" placeholder="Search job or instance" aria-label="Search job or instance">
+        </label>
+        <div class="filterbar" aria-label="Active job filters">
+          <button class="chip" type="button" aria-label="Remove failed status filter">status: failed <span class="x" aria-hidden="true">✕</span></button>
+          <button class="chip add" type="button">+ filter</button>
+        </div>
+      </div>
 
-    <div class="layout">
+      <div class="layout queue-layout">
       <div class="listcol">
-        <div class="tablewrap">
+        <div class="tablewrap jobs-table" tabindex="0" role="region" aria-label="Jobs table, horizontally scrollable">
           <div class="scroll">
           <table>
-            <thead><tr><th>Job</th><th>Type</th><th>Status</th><th>Attempts</th><th>Instance</th><th>Updated</th></tr></thead>
+            <caption>Queue jobs filtered to failed status</caption>
+            <thead><tr><th scope="col">Job</th><th scope="col">Type</th><th scope="col">Status</th><th scope="col" class="attempt-col">Attempts</th><th scope="col">Instance</th><th scope="col">Updated</th></tr></thead>
             <tbody>
-              <tr>
+              <tr tabindex="0">
                 <td><span class="mono">job_02mm1x</span></td><td>message-dispatch</td>
-                <td><span class="status"><span class="dot" style="background:var(--info)"></span>running</span></td>
+                <td><span class="status"><span class="dot dot-info"></span>running</span></td>
                 <td class="num">1</td><td><span class="mono">inst_2bq81c</span></td>
                 <td class="ts" title="2026-07-16T08:53:29Z">1s ago</td>
               </tr>
-              <tr>
+              <tr tabindex="0">
                 <td><span class="mono">job_55qa8d</span></td><td>webhook-delivery</td>
-                <td><span class="status"><span class="dot" style="background:var(--pending)"></span>queued</span></td>
+                <td><span class="status"><span class="dot dot-pending"></span>queued</span></td>
                 <td class="num">0</td><td><span class="ts">—</span></td>
                 <td class="ts" title="2026-07-16T08:53:12Z">18s ago</td>
               </tr>
-              <tr>
+              <tr tabindex="0">
                 <td><span class="mono">job_31bn6p</span></td><td>media-transcode</td>
-                <td><span class="status"><span class="dot" style="background:var(--degraded)"></span>retrying</span></td>
+                <td><span class="status"><span class="dot dot-degraded"></span>retrying</span></td>
                 <td class="num">2 / 5</td><td><span class="mono">inst_5rr0zn</span></td>
                 <td class="ts" title="2026-07-16T08:51:44Z">2m ago</td>
               </tr>
-              <tr class="selected">
+              <tr class="selected terminal" tabindex="0" aria-current="true">
                 <td><span class="mono">job_77am1q</span></td><td>media-transcode</td>
-                <td><span class="status"><span class="dot" style="background:var(--failed)"></span>dead-lettered</span></td>
+                <td><span class="status"><span class="dot dot-failed"></span>dead-lettered</span></td>
                 <td class="num">5 / 5</td><td><span class="mono">inst_2bq81c</span></td>
                 <td class="ts" title="2026-07-15T22:17:00Z">10h ago</td>
               </tr>
-              <tr>
+              <tr tabindex="0">
                 <td><span class="mono">job_90kk3e</span></td><td>message-dispatch</td>
-                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>completed</span></td>
+                <td><span class="status"><span class="dot dot-ok"></span>completed</span></td>
                 <td class="num">1</td><td><span class="mono">inst_2bq81c</span></td>
                 <td class="ts" title="2026-07-16T08:50:02Z">3m ago</td>
               </tr>
@@ -101,21 +120,27 @@
           </table>
           </div>
           <div class="table-foot">
-            <span class="num">5 of 142 jobs</span>
-            <button class="btn">Load more</button>
+            <div class="queue-cursor"><span class="num">5 of 142 jobs</span><span class="freshness">live</span><span class="mono">cursor · more available</span></div>
+            <button class="btn" type="button">Load more</button>
           </div>
         </div>
       </div>
 
-      <aside class="drawer">
-        <header>
-          <div class="t"><b>media-transcode</b><span class="mono">job_77am1q</span></div>
-          <button class="close" aria-label="Close">✕</button>
+      <aside class="drawer queue-drawer" aria-labelledby="job-detail-title" data-od-id="job-detail-drawer">
+        <header class="drawer-head">
+          <div class="drawer-identity">
+            <span class="eyebrow">Job detail</span>
+            <div class="drawer-title-row"><h2 id="job-detail-title">media-transcode</h2><span class="status terminal-status"><span class="dot dot-failed"></span>dead-lettered</span></div>
+            <span class="mono">job_77am1q</span>
+          </div>
+          <button class="close" type="button" aria-label="Close job detail">✕</button>
         </header>
 
-        <section>
+        <div class="drawer-scroll">
+        <section aria-labelledby="job-facts-title">
+          <h3 id="job-facts-title">Facts</h3>
           <div class="kv">
-            <dt>Status</dt><dd><span class="status"><span class="dot" style="background:var(--failed)"></span>dead-lettered</span></dd>
+            <dt>Status</dt><dd><span class="status"><span class="dot dot-failed"></span>dead-lettered</span></dd>
             <dt>Attempts</dt><dd class="num">5 of 5</dd>
             <dt>Instance</dt><dd><span class="mono">inst_2bq81c</span></dd>
             <dt>Enqueued</dt><dd class="ts" title="2026-07-15T21:40:12Z">11h ago</dd>
@@ -123,8 +148,8 @@
           </div>
         </section>
 
-        <section>
-          <h3>Payload <span style="font-weight:400;font-size:12px;color:var(--text-4)">· safe representation</span></h3>
+        <section aria-labelledby="payload-title">
+          <div class="drawer-section-head"><h3 id="payload-title">Payload</h3><span class="safe-label">safe representation</span></div>
           <div class="codewell">{
   <span class="k">"mediaId"</span>: <span class="s">"med_40pl2s"</span>,
   <span class="k">"messageId"</span>: <span class="s">"msg_74nn2b"</span>,
@@ -133,27 +158,29 @@
 }</div>
         </section>
 
-        <section>
-          <h3>Attempts</h3>
+        <section aria-labelledby="attempts-title">
+          <h3 id="attempts-title">Attempts <span class="attempt-order">newest first</span></h3>
           <ul class="timeline">
-            <li><span class="dot" style="background:var(--failed)"></span><span class="what">attempt 5 failed
-              <span class="detail">infrastructure · object storage timeout</span></span><span class="ts">22:17:00</span></li>
-            <li><span class="dot" style="background:var(--failed)"></span><span class="what">attempt 4 failed
-              <span class="detail">infrastructure · object storage timeout</span></span><span class="ts">22:01:31</span></li>
-            <li><span class="dot" style="background:var(--degraded)"></span><span class="what">attempts 1–3 failed
-              <span class="detail">collapsed · same category</span></span><span class="ts">21:40–21:52</span></li>
+            <li><span class="attempt-index num">05</span><span class="dot dot-failed"></span><span class="what">attempt 5 failed
+              <span class="detail">infrastructure · object storage timeout</span></span><time class="ts">22:17:00</time></li>
+            <li><span class="attempt-index num">04</span><span class="dot dot-failed"></span><span class="what">attempt 4 failed
+              <span class="detail">infrastructure · object storage timeout</span></span><time class="ts">22:01:31</time></li>
+            <li><span class="attempt-index num">01–03</span><span class="dot dot-degraded"></span><span class="what">attempts 1–3 failed
+              <span class="detail">collapsed · same category</span></span><time class="ts">21:40–21:52</time></li>
           </ul>
         </section>
 
-        <section>
-          <h3>Actions</h3>
-          <div class="actions">
-            <button class="btn">Redrive</button>
-            <button class="btn danger">Discard…</button>
+        <section aria-labelledby="actions-title">
+          <h3 id="actions-title">Actions</h3>
+          <div class="job-actions">
+            <div class="action-group"><span>Return this terminal job to the queue.</span><button class="btn" type="button">Redrive</button></div>
+            <div class="action-group destructive"><span>Permanently remove this job. Confirmation opens separately.</span><button class="btn danger" type="button">Discard…</button></div>
           </div>
         </section>
+        </div>
       </aside>
     </div>
+    </section>
   </main>
 </div>
 </body>

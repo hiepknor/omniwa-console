@@ -173,6 +173,15 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 - Recovery actions are separated from destructive actions. Disconnect and Destroy only launch the typed-confirmation pattern; confirmation is never rendered inline in the drawer.
 - QR remains on a light well with a visible expiry and numbered `waiting for scan → scanned → paired` progression. The UI must not imply that pairing completed before the lifecycle state confirms it.
 
+### Queue and Jobs operational workbench
+
+- Queue posture uses four directly comparable metric cards for depth, in-flight work, retries, and dead-lettered jobs. The grid wraps from four to two to one column without changing metric hierarchy.
+- The jobs table is the primary surface. Search, active filters, result count, freshness, cursor state, and pagination remain attached to the table so operators can scan and refine one continuous work queue.
+- Table semantics are explicit: include a caption and scoped column headers, keep attempt counts right-aligned with tabular numerals, and show selection with both a leading edge and a restrained surface change.
+- Opening a job presents a 400–440px right slide-over without a backdrop or reserved table column. Below 900px, it becomes a full-width in-flow panel while table overflow remains locally bounded.
+- Drawer hierarchy is fixed: job type + ID + terminal status → compact facts → safe payload representation → reverse-chronological attempts → actions.
+- Dead-lettered work is emphasized through identity, status text, and selection structure rather than a saturated alert surface. Redrive remains separate from destructive discard, and discard only opens a dedicated confirmation flow; confirmation is never rendered inline.
+
 ### Live indicator
 
 - Header-right: 8px dot + 12px label. `live` emerald pulsing dot, `reconnecting` amber, `polling` sky, `offline` red. Clicking opens connection detail popover.
