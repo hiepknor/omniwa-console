@@ -3,19 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OmniWA Console — Groups (prototype)</title>
-<!-- Static prototype. Sample data only. Groups default state: metric cards +
-     full-width table; the filter row swaps to selection actions while rows
-     are checked (2 checked here, quick-add dropdown open). Clicking a row —
-     or the Named Lists button — opens an on-demand slide-over panel from the
-     right (see lists.html); nothing reserves space by default. Row detail
-     carries meta, invite link, member management, and one-off Send text. -->
+<title>OmniWA Console - Groups (prototype)</title>
 <link rel="stylesheet" href="console.css">
-<style>
-  .invite{display:flex;gap:8px;align-items:center}
-  .invite .codewell{flex:1;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .inlists{display:flex;gap:4px}
-</style>
 </head>
 <body>
 <div class="shell">
@@ -49,109 +38,512 @@
     </div>
   </aside>
 
-<main data-od-id="groups-screen">
-      <header class="page-head" data-od-id="groups-page-header">
-        <div class="head-context"><div class="head-title-row">
-          <h1>Groups</h1>
+  <main class="groups-screen" data-panel="detail" data-od-id="groups-screen">
+    <header class="page-head" data-od-id="groups-page-header">
+      <div class="head-context">
+        <div class="head-title-row">
+          <h1 data-od-id="groups-page-title">Groups</h1>
           <button class="instpick" type="button" aria-label="Select instance"><span class="dot" style="background:var(--ok)"></span>sales-primary<span class="chev">▾</span></button>
-        </div></div>
-        <div class="head-right">
-          <span class="live"><span class="dot"></span>live</span>
-          <a class="btn" href="lists.html">Named Lists <span class="head-count num">3</span></a>
         </div>
-      </header>
+      </div>
+      <div class="head-right">
+        <span class="live" aria-label="Connection state live"><span class="dot"></span>live</span>
+        <button class="btn primary" type="button" data-od-id="groups-refresh-command">Refresh groups</button>
+      </div>
+    </header>
 
-      <div class="metrics">
-        <div class="card"><div class="label">Groups</div><div class="value num">37</div><div class="ctx">all synced groups</div></div>
-        <div class="card"><div class="label">In Named Lists</div><div class="value num">24</div><div class="ctx num">65% of groups</div></div>
-        <div class="card"><div class="label">Admin role</div><div class="value num">12</div><div class="ctx">can manage members</div></div>
-        <div class="card"><div class="label">Archived</div><div class="value num">1</div><div class="ctx">excluded from active work</div></div>
-        <div class="card"><div class="label">Named Lists</div><div class="value num">3</div><div class="ctx num">2 in use</div></div>
+    <section class="groups-metric-section" aria-labelledby="groups-posture-heading" data-od-id="groups-posture">
+      <h2 id="groups-posture-heading">Group posture</h2>
+      <div class="metrics groups-metrics">
+        <article class="card groups-metric-card" data-od-id="groups-metric-synced">
+          <div class="label">Synced groups</div>
+          <div class="value num">37</div>
+          <div class="ctx">36 reachable now, 1 archived locally.</div>
+        </article>
+        <article class="card groups-metric-card" data-od-id="groups-metric-lists">
+          <div class="label">In named lists</div>
+          <div class="value num">24</div>
+          <div class="ctx">13 groups remain unclassified for operator workflows.</div>
+        </article>
+        <article class="card groups-metric-card" data-od-id="groups-metric-admin">
+          <div class="label">Our role: admin</div>
+          <div class="value num">12</div>
+          <div class="ctx">5 of those changed membership in the last 24h.</div>
+        </article>
+        <article class="card groups-metric-card" data-od-id="groups-metric-stale">
+          <div class="label">Stale activity</div>
+          <div class="value num">6</div>
+          <div class="ctx">No message observed for 7 days or longer.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="groups-workspace" aria-labelledby="groups-table-heading" data-od-id="groups-workspace">
+      <div class="groups-section-head">
+        <div>
+          <h2 id="groups-table-heading">All groups</h2>
+          <span class="groups-posture-note">Selection stays on the table; details and Named Lists open on demand in the right panel.</span>
+        </div>
+        <span class="groups-result-count num">12 shown of 37 groups</span>
       </div>
 
-      <!-- With no selection this row shows: [search] [role: admin ✕] [+ filter].
-           The quick-add dropdown is shown open for the prototype. -->
-      <div class="filterbar">
-        <span class="count num">2 selected</span>
-        <span class="rel">
-          <button class="btn primary sm">Add to Named List ▾</button>
-          <div class="menu">
-            <button class="item">Đại lý toàn quốc <span class="mcount">24 groups</span></button>
-            <button class="item">Miền Bắc <span class="mcount">9 groups</span></button>
-            <button class="item">Khách sỉ VIP <span class="mcount">5 groups</span></button>
-            <div class="divider"></div>
-            <div class="newrow">
-              <input class="input" placeholder="New list from selection…">
-              <button class="btn sm">Create</button>
-            </div>
+      <div class="groups-toolbar" data-od-id="groups-toolbar">
+        <div class="groups-toolbar-primary">
+          <label class="search-field" aria-label="Search groups">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input class="search" type="search" value="dealer" placeholder="Search by group name or ID">
+          </label>
+          <div class="groups-filter-chips" aria-label="Active filters">
+            <button class="chip active" type="button">Role: admin <span class="x" aria-hidden="true">×</span></button>
+            <button class="chip active" type="button">Local state: active <span class="x" aria-hidden="true">×</span></button>
+            <button class="chip" type="button">Named List: West region</button>
           </div>
-        </span>
-        <button class="clear">Clear selection</button>
+        </div>
+        <div class="groups-toolbar-meta">
+          <button class="btn" type="button" aria-controls="groups-lists-drawer" aria-expanded="false" data-od-id="groups-manage-lists">Manage lists</button>
+          <span class="toolbar-separator" aria-hidden="true"></span>
+          <span>Freshness <b>41m ago</b></span>
+          <span class="mono">cursor grp_44he2n</span>
+        </div>
       </div>
 
-      <div class="tablewrap">
+      <div class="groups-bulkbar" role="region" aria-label="Bulk actions" data-od-id="groups-bulk-actions">
+        <div class="groups-bulkbar-count">
+          <span class="num">2 selected</span>
+          <span>Bulk actions apply only to local Named List membership.</span>
+        </div>
+        <div class="groups-bulkbar-actions">
+          <details class="groups-quick-add">
+            <summary class="btn primary" data-od-id="groups-bulk-add-list">Add to Named List</summary>
+            <div class="groups-quick-add-menu">
+              <button class="groups-list-option" type="button">West region <span class="mono">9 groups</span></button>
+              <button class="groups-list-option" type="button">Priority retail <span class="mono">5 groups</span></button>
+              <button class="groups-list-option" type="button">Pause outbound <span class="mono">3 groups</span></button>
+              <div class="groups-quick-add-create">
+                <label class="sr-only" for="groups-new-list">Create a new Named List</label>
+                <input id="groups-new-list" class="search" type="text" value="July reconciliation" placeholder="Create new list from selection">
+                <button class="btn" type="button">Create list</button>
+              </div>
+            </div>
+          </details>
+          <button class="clear" type="button">Clear selection</button>
+        </div>
+      </div>
+
+      <div class="tablewrap groups-table" tabindex="0" aria-labelledby="groups-table-heading" data-od-id="groups-table">
         <div class="scroll">
-        <table>
-          <thead>
-            <tr>
-              <th class="check"><input type="checkbox"></th>
-              <th>Group</th><th>ID</th><th class="r">Members</th><th>Our role</th>
-              <th>Local state</th><th>In lists</th><th class="r">Last activity</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="checked open">
-              <td class="check"><input type="checkbox" checked></td>
-              <td>Khách sỉ miền Nam</td>
-              <td><span class="mono">grp_44he2n</span></td>
-              <td class="r num">86</td>
-              <td><span class="pill">admin</span></td>
-              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-              <td class="inlists"><span class="chip">Đại lý toàn quốc</span></td>
-              <td class="r ts" title="2026-07-16T08:12:44Z">41m ago</td>
-            </tr>
-            <tr class="checked">
-              <td class="check"><input type="checkbox" checked></td>
-              <td>Đại lý Hà Nội</td>
-              <td><span class="mono">grp_90weu2</span></td>
-              <td class="r num">42</td>
-              <td><span class="pill">member</span></td>
-              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-              <td class="inlists"><span class="chip">Đại lý toàn quốc</span> <span class="chip">Miền Bắc</span></td>
-              <td class="r ts" title="2026-07-16T06:55:01Z">2h ago</td>
-            </tr>
-            <tr>
-              <td class="check"><input type="checkbox"></td>
-              <td>Nội bộ vận hành</td>
-              <td><span class="mono">grp_iw02mm</span></td>
-              <td class="r num">12</td>
-              <td><span class="pill">admin</span></td>
-              <td><span class="status"><span class="dot" style="background:var(--ok)"></span>active</span></td>
-              <td class="ts">—</td>
-              <td class="r ts" title="2026-07-15T15:30:00Z">17h ago</td>
-            </tr>
-            <tr>
-              <td class="check"><input type="checkbox"></td>
-              <td>Khuyến mãi 2024 (cũ)</td>
-              <td><span class="mono">grp_pp81xd</span></td>
-              <td class="r num">204</td>
-              <td><span class="pill">member</span></td>
-              <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>archived</span></td>
-              <td class="ts">—</td>
-              <td class="r ts" title="2026-05-02T00:00:00Z">75d ago</td>
-            </tr>
-          </tbody>
-        </table>
+          <table>
+            <caption class="sr-only">WhatsApp groups with selection, role, local state, Named List membership, and last activity.</caption>
+            <thead>
+              <tr>
+                <th class="check" scope="col"><input type="checkbox" aria-label="Select all shown groups"></th>
+                <th scope="col">Group</th>
+                <th class="r" scope="col">Members</th>
+                <th scope="col">Our role</th>
+                <th scope="col">Local state</th>
+                <th scope="col">Named Lists</th>
+                <th class="r" scope="col">Last activity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="selected" tabindex="0" data-od-id="group-row-west-dealers">
+                <td class="check"><input type="checkbox" checked aria-label="Select West dealers planning"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">West dealers planning</span>
+                    <span class="row-state">Selected</span>
+                  </div>
+                  <span class="row-id mono">120363291883441026@g.us</span>
+                </td>
+                <td class="r num">86</td>
+                <td><span class="pill">admin</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td>
+                  <div class="groups-list-membership">
+                    <span class="chip">West region</span>
+                    <span class="chip">Priority retail</span>
+                  </div>
+                </td>
+                <td class="r"><time class="ts" datetime="2026-07-16T08:12:44Z" title="2026-07-16 08:12 UTC">41m ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-north-dealers">
+                <td class="check"><input type="checkbox" checked aria-label="Select North distributors"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">North distributors</span>
+                  </div>
+                  <span class="row-id mono">120363331117490612@g.us</span>
+                </td>
+                <td class="r num">42</td>
+                <td><span class="pill">member</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td>
+                  <div class="groups-list-membership">
+                    <span class="chip">West region</span>
+                    <span class="chip">July reconciliation</span>
+                  </div>
+                </td>
+                <td class="r"><time class="ts" datetime="2026-07-16T06:55:01Z" title="2026-07-16 06:55 UTC">2h ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-ops-core">
+                <td class="check"><input type="checkbox" aria-label="Select Operations core"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">Operations core</span>
+                  </div>
+                  <span class="row-id mono">120363301554880147@g.us</span>
+                </td>
+                <td class="r num">12</td>
+                <td><span class="pill">admin</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td><span class="groups-none">Not in a Named List</span></td>
+                <td class="r"><time class="ts" datetime="2026-07-15T15:30:00Z" title="2026-07-15 15:30 UTC">17h ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-suspended-outbound">
+                <td class="check"><input type="checkbox" aria-label="Select Outlet recovery watch"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">Outlet recovery watch</span>
+                  </div>
+                  <span class="row-id mono">120363307799512114@g.us</span>
+                </td>
+                <td class="r num">58</td>
+                <td><span class="pill">admin</span></td>
+                <td><span class="status status-paused"><span class="dot"></span>paused</span></td>
+                <td><span class="chip">Pause outbound</span></td>
+                <td class="r"><time class="ts" datetime="2026-07-14T20:10:00Z" title="2026-07-14 20:10 UTC">1d ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-vip-wholesale">
+                <td class="check"><input type="checkbox" aria-label="Select VIP wholesale circle"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">VIP wholesale circle</span>
+                  </div>
+                  <span class="row-id mono">120363287315404981@g.us</span>
+                </td>
+                <td class="r num">19</td>
+                <td><span class="pill">member</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td><span class="chip">Priority retail</span></td>
+                <td class="r"><time class="ts" datetime="2026-07-11T04:15:00Z" title="2026-07-11 04:15 UTC">5d ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-promo-legacy">
+                <td class="check"><input type="checkbox" aria-label="Select Promo 2024 legacy"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">Promo 2024 legacy</span>
+                  </div>
+                  <span class="row-id mono">120363244108012553@g.us</span>
+                </td>
+                <td class="r num">204</td>
+                <td><span class="pill">member</span></td>
+                <td><span class="status status-archived"><span class="dot"></span>archived</span></td>
+                <td><span class="groups-none">Not in a Named List</span></td>
+                <td class="r"><time class="ts" datetime="2026-05-02T00:00:00Z" title="2026-05-02 00:00 UTC">75d ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-field-returns">
+                <td class="check"><input type="checkbox" aria-label="Select Field returns triage"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">Field returns triage</span>
+                  </div>
+                  <span class="row-id mono">120363318225504661@g.us</span>
+                </td>
+                <td class="r num">31</td>
+                <td><span class="pill">admin</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td><span class="chip">July reconciliation</span></td>
+                <td class="r"><time class="ts" datetime="2026-07-16T07:48:00Z" title="2026-07-16 07:48 UTC">1h ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-noisy-intake">
+                <td class="check"><input type="checkbox" aria-label="Select Noisy intake staging"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">Noisy intake staging</span>
+                  </div>
+                  <span class="row-id mono">120363337201441002@g.us</span>
+                </td>
+                <td class="r num">11</td>
+                <td><span class="pill">member</span></td>
+                <td><span class="status status-paused"><span class="dot"></span>paused</span></td>
+                <td><span class="groups-none">Not in a Named List</span></td>
+                <td class="r"><time class="ts" datetime="2026-07-08T11:00:00Z" title="2026-07-08 11:00 UTC">8d ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-west-returns">
+                <td class="check"><input type="checkbox" aria-label="Select West returns desk"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">West returns desk</span>
+                  </div>
+                  <span class="row-id mono">120363315991144021@g.us</span>
+                </td>
+                <td class="r num">27</td>
+                <td><span class="pill">admin</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td>
+                  <div class="groups-list-membership">
+                    <span class="chip">West region</span>
+                  </div>
+                </td>
+                <td class="r"><time class="ts" datetime="2026-07-13T08:14:00Z" title="2026-07-13 08:14 UTC">3d ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-regional-buyers">
+                <td class="check"><input type="checkbox" aria-label="Select Regional buyers"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">Regional buyers</span>
+                  </div>
+                  <span class="row-id mono">120363302889511776@g.us</span>
+                </td>
+                <td class="r num">73</td>
+                <td><span class="pill">member</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td><span class="chip">Priority retail</span></td>
+                <td class="r"><time class="ts" datetime="2026-07-10T22:42:00Z" title="2026-07-10 22:42 UTC">6d ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-seasonal-pilot">
+                <td class="check"><input type="checkbox" aria-label="Select Seasonal pilot hold"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">Seasonal pilot hold</span>
+                  </div>
+                  <span class="row-id mono">120363280111746004@g.us</span>
+                </td>
+                <td class="r num">15</td>
+                <td><span class="pill">admin</span></td>
+                <td><span class="status status-paused"><span class="dot"></span>paused</span></td>
+                <td><span class="chip">Pause outbound</span></td>
+                <td class="r"><time class="ts" datetime="2026-07-09T08:28:00Z" title="2026-07-09 08:28 UTC">7d ago</time></td>
+              </tr>
+              <tr tabindex="0" data-od-id="group-row-escalations">
+                <td class="check"><input type="checkbox" aria-label="Select Escalations board"></td>
+                <td>
+                  <div class="groups-namecell">
+                    <span class="resource-name">Escalations board</span>
+                  </div>
+                  <span class="row-id mono">120363321092284599@g.us</span>
+                </td>
+                <td class="r num">9</td>
+                <td><span class="pill">admin</span></td>
+                <td><span class="status status-active"><span class="dot"></span>active</span></td>
+                <td><span class="groups-none">Not in a Named List</span></td>
+                <td class="r"><time class="ts" datetime="2026-07-16T08:41:00Z" title="2026-07-16 08:41 UTC">12m ago</time></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <div class="table-foot">
-          <span class="num">4 of 37 groups · synced 41m ago</span>
-          <span style="display:flex;gap:8px">
-            <button class="btn">Refresh groups</button>
-            <button class="btn">Load more</button>
-          </span>
+          <div class="groups-table-meta">
+            <span>Result set <b>dealer</b></span>
+            <span class="freshness">Last sync completed 41m ago</span>
+          </div>
+          <div class="groups-cursor">
+            <button class="btn" type="button">Load more</button>
+            <span class="mono">next cursor grp_44he2n</span>
+          </div>
         </div>
       </div>
+    </section>
+
+    <aside class="groups-drawer" id="groups-detail-drawer" aria-label="Selected group details" data-od-id="groups-detail-drawer">
+      <header class="drawer-head">
+        <div class="drawer-identity">
+          <span class="eyebrow">Selected group</span>
+          <div class="drawer-title-row">
+            <h2 data-od-id="groups-drawer-title">West dealers planning</h2>
+            <span class="status status-active"><span class="dot"></span>active</span>
+          </div>
+          <div class="mono">120363291883441026@g.us</div>
+        </div>
+        <button class="close" type="button" aria-label="Close group details">×</button>
+      </header>
+      <div class="drawer-scroll">
+        <section data-od-id="groups-drawer-facts">
+          <h3>Compact facts</h3>
+          <dl class="kv">
+            <dt>Members</dt>
+            <dd class="num">86</dd>
+            <dt>Our role</dt>
+            <dd>admin</dd>
+            <dt>Named Lists</dt>
+            <dd>West region, Priority retail</dd>
+            <dt>Last activity</dt>
+            <dd><time datetime="2026-07-16T08:12:44Z">2026-07-16 08:12 UTC</time></dd>
+            <dt>Freshness</dt>
+            <dd>Snapshot from the last successful sync 41m ago.</dd>
+          </dl>
+        </section>
+        <section data-od-id="groups-drawer-invite-link">
+          <div class="drawer-section-head">
+            <h3>Invite link</h3>
+            <span class="drawer-note">Read-only until the next sync confirms a regenerated link.</span>
+          </div>
+          <div class="groups-invite-link">
+            <div class="codewell mono">https://chat.whatsapp.com/H8f6w0Xq2s92A7fQ4vtq1k</div>
+            <button class="btn" type="button">Copy link</button>
+          </div>
+        </section>
+        <section data-od-id="groups-drawer-local-state">
+          <h3>Local state</h3>
+          <div class="groups-state-stack">
+            <div class="action-group">
+              <span>Outbound sends are currently allowed for this group in OmniWA.</span>
+              <button class="btn" type="button">Pause locally</button>
+            </div>
+            <div class="action-group">
+              <span>Archive only when this group should leave the active work queue.</span>
+              <button class="btn" type="button">Archive locally</button>
+            </div>
+          </div>
+        </section>
+        <section data-od-id="groups-drawer-members">
+          <div class="drawer-section-head">
+            <h3>Member management</h3>
+            <span class="drawer-note">Actions submit commands; membership changes remain asynchronous.</span>
+          </div>
+          <div class="groups-member-list">
+            <div class="groups-member-row">
+              <div>
+                <strong>Ana Rios</strong>
+                <div class="mono">+62 812 8852 0041</div>
+              </div>
+              <div class="groups-member-actions">
+                <span class="pill">admin</span>
+                <button class="btn sm" type="button">Demote</button>
+              </div>
+            </div>
+            <div class="groups-member-row">
+              <div>
+                <strong>Marcus Lee</strong>
+                <div class="mono">+84 905 610 143</div>
+              </div>
+              <div class="groups-member-actions">
+                <span class="pill">member</span>
+                <button class="btn sm" type="button">Promote</button>
+              </div>
+            </div>
+            <div class="groups-member-row">
+              <div>
+                <strong>Priya Shah</strong>
+                <div class="mono">+91 98710 44082</div>
+              </div>
+              <div class="groups-member-actions">
+                <span class="pill">member</span>
+                <button class="btn sm danger" type="button">Remove</button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section data-od-id="groups-drawer-send-text">
+          <div class="drawer-section-head">
+            <h3>Send text...</h3>
+            <span class="drawer-note">Submitting accepts the request only; delivery appears later in WhatsApp activity.</span>
+          </div>
+          <label class="sr-only" for="group-send-text">Text message to group</label>
+          <textarea id="group-send-text" class="groups-textarea" rows="4">Reminder: inventory counts for the west region close at 16:00 local time.</textarea>
+          <div class="groups-send-meta">
+            <span>One-off command. No conversation view is maintained here.</span>
+            <button class="btn primary" type="button" data-od-id="groups-send-text-command">Submit send request</button>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <aside class="groups-drawer groups-lists-drawer" id="groups-lists-drawer" aria-label="Named Lists management" hidden data-od-id="groups-lists-drawer">
+      <header class="drawer-head">
+        <div class="drawer-identity">
+          <span class="eyebrow">Named Lists mode</span>
+          <div class="drawer-title-row">
+            <h2>Manage lists</h2>
+          </div>
+          <div class="drawer-note">Named Lists are local operator groupings only; they do not change WhatsApp membership.</div>
+        </div>
+        <button class="close" type="button" aria-label="Close Named Lists management">×</button>
+      </header>
+      <div class="drawer-scroll">
+        <section>
+          <h3>Existing lists</h3>
+          <div class="groups-list-admin">
+            <div class="groups-list-admin-row">
+              <div><strong>West region</strong><div class="drawer-note">9 groups · used for rollout targeting</div></div>
+              <button class="btn sm" type="button">Rename</button>
+            </div>
+            <div class="groups-list-admin-row">
+              <div><strong>Priority retail</strong><div class="drawer-note">5 groups · manually curated</div></div>
+              <button class="btn sm" type="button">Rename</button>
+            </div>
+            <div class="groups-list-admin-row">
+              <div><strong>Pause outbound</strong><div class="drawer-note">3 groups · suppress one-off text commands</div></div>
+              <button class="btn sm danger" type="button">Retire list</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
   </main>
 </div>
+<script>
+(() => {
+  const screen = document.querySelector('.groups-screen');
+  const detailDrawer = document.querySelector('#groups-detail-drawer');
+  const listsDrawer = document.querySelector('#groups-lists-drawer');
+  const manageLists = document.querySelector('[data-od-id="groups-manage-lists"]');
+  const bulkBar = document.querySelector('.groups-bulkbar');
+  const bulkCount = document.querySelector('.groups-bulkbar-count .num');
+  const rowCheckboxes = [...document.querySelectorAll('.groups-table tbody input[type="checkbox"]')];
+  const selectAll = document.querySelector('.groups-table thead input[type="checkbox"]');
+
+  const setPanel = (panel) => {
+    screen.dataset.panel = panel;
+    detailDrawer.hidden = panel !== 'detail';
+    listsDrawer.hidden = panel !== 'lists';
+    manageLists.setAttribute('aria-expanded', String(panel === 'lists'));
+  };
+
+  const syncSelection = () => {
+    const selected = rowCheckboxes.filter((checkbox) => checkbox.checked).length;
+    bulkBar.hidden = selected === 0;
+    bulkCount.textContent = `${selected} selected`;
+    selectAll.checked = selected === rowCheckboxes.length;
+    selectAll.indeterminate = selected > 0 && selected < rowCheckboxes.length;
+  };
+
+  manageLists.addEventListener('click', () => {
+    setPanel('lists');
+    history.replaceState(null, '', '?list=nl_west_region');
+    if (matchMedia('(max-width: 900px)').matches) listsDrawer.scrollIntoView({ block: 'start' });
+  });
+  document.querySelectorAll('.groups-drawer .close').forEach((button) => {
+    button.addEventListener('click', () => {
+      setPanel('');
+      history.replaceState(null, '', location.pathname);
+    });
+  });
+  rowCheckboxes.forEach((checkbox) => checkbox.addEventListener('change', syncSelection));
+  selectAll.addEventListener('change', () => {
+    rowCheckboxes.forEach((checkbox) => { checkbox.checked = selectAll.checked; });
+    syncSelection();
+  });
+  document.querySelector('.groups-bulkbar .clear').addEventListener('click', () => {
+    rowCheckboxes.forEach((checkbox) => { checkbox.checked = false; });
+    syncSelection();
+  });
+  document.querySelector('[data-od-id="group-row-west-dealers"]').addEventListener('click', (event) => {
+    if (event.target.closest('input, button, a, summary')) return;
+    setPanel('detail');
+    history.replaceState(null, '', location.pathname);
+    if (matchMedia('(max-width: 900px)').matches) detailDrawer.scrollIntoView({ block: 'start' });
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && screen.dataset.panel) {
+      setPanel('');
+      history.replaceState(null, '', location.pathname);
+    }
+  });
+
+  setPanel(new URLSearchParams(location.search).has('list') ? 'lists' : 'detail');
+  syncSelection();
+})();
+</script>
 </body>
 </html>

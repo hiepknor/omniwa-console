@@ -243,6 +243,16 @@ this subsection binds to it.
   The workspace serves direct chats only — groups are a management
   table, not a conversation surface.
 
+### Groups operational workbench
+
+- Four directly comparable metric cards summarize synced groups, Named List coverage, administrator access, and stale activity. They follow the same hierarchy and responsive wrapping as Queue & Jobs metrics.
+- The group table is the primary surface. Search, active filters, result count, freshness, bulk selection, and cursor pagination remain attached to one continuous workbench.
+- Every row exposes selection, group identity, member count, operator role, local state, Named List membership, and last activity. Status always uses a semantic dot plus a text label.
+- Bulk selection owns one action only: **Add to Named List**. The quick-add menu may create a proposed local Named List, but must not imply any change to WhatsApp group membership.
+- Selecting a group opens a 440px on-demand right drawer. The table yields space only while the drawer is open; closing it restores the full-width table. Below 900px the drawer becomes a full-width in-flow panel.
+- Drawer hierarchy is fixed: identity and local state → compact facts → invite link → local-state controls → member management → one-off text command. Member and send commands render acceptance, never synchronous completion.
+- Named Lists management reuses the right-panel mode and supports the `?list=nl_*` deep link. It remains explicitly local operator organization, separate from provider-side membership.
+
 ### Management page template (Groups; reuse for Instances, Webhooks, Queue)
 
 - **Layout**: the table is full-width by default — nothing reserves
