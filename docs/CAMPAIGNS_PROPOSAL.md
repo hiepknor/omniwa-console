@@ -27,11 +27,15 @@ the console only orchestrates and observes through the API.
 
 ## Responsible-use guardrails (baked into the contract, not the UI)
 
-1. **Members come from existing contacts/chats only.** `createNamedList`
-   accepts contact/chat resource IDs — there is no raw-phone-number input
-   anywhere in the contract, so cold lists cannot be constructed.
-2. **Pacing is platform-enforced** from the active settings rate limits;
-   the API rejects a requested rate above the configured cap.
+1. **Members are existing groups the account belongs to.** `createNamedList`
+   accepts group resource IDs (`grp_*`) only — there is no raw-phone-number
+   or contact-import input anywhere in the contract, so cold lists cannot
+   be constructed.
+2. **Pacing is platform-enforced** from the active settings rate limits,
+   measured in *group sends per minute*; the API rejects a requested rate
+   above the configured cap. One group send reaches every member of that
+   group, so the effective audience per send is large — the cap should be
+   set accordingly.
 3. **Auto-pause on failure spike** (threshold in settings): a campaign that
    starts failing pauses itself and surfaces an action-required item.
 4. **Honest accounting**: per-recipient outcomes are the standard message
@@ -44,19 +48,19 @@ the console only orchestrates and observes through the API.
 
 ### NamedList
 
-`nl_*` — name, instance scope, member count, created/updated.
+`nl_*` — name, instance scope, **member groups** (group resource IDs), group count, created/updated.
 
 | Operation | Method & path | Notes |
 | --- | --- | --- |
 | `listNamedLists` | `GET /v1/named-lists` | Cursor pagination, filter by instance |
-| `createNamedList` | `POST /v1/named-lists` | Name + instance + member resource IDs |
+| `createNamedList` | `POST /v1/named-lists` | Name + instance + group resource IDs (`grp_*`) |
 | `getNamedList` | `GET /v1/named-lists/{listId}` | Includes member page |
-| `updateNamedList` | `PATCH /v1/named-lists/{listId}` | Rename, add/remove member IDs |
+| `updateNamedList` | `PATCH /v1/named-lists/{listId}` | Rename, add/remove group IDs |
 | `deleteNamedList` | `DELETE /v1/named-lists/{listId}` | Rejected while a scheduled/running campaign references the list; campaigns snapshot recipients at start, so past campaigns are unaffected |
 
 ### Campaign
 
-`cmp_*` — name, instance, Named List (recipients snapshotted at start), message template (text or media ref),
+`cmp_*` — name, instance, Named List (member groups snapshotted at start), message template (text or media ref),
 pacing (msgs/min ≤ platform cap), schedule (now | at), state
 (`draft | scheduled | running | paused | completed | aborted`), counters
 (`total / accepted / delivered / failed / canceled`).
@@ -66,7 +70,7 @@ pacing (msgs/min ≤ platform cap), schedule (now | at), state
 | `listCampaigns` | `GET /v1/campaigns` | Cursor pagination |
 | `createCampaign` | `POST /v1/campaigns` | Draft or scheduled; validates list + pacing |
 | `getCampaign` | `GET /v1/campaigns/{campaignId}` | Counters + state |
-| `listCampaignRecipients` | `GET /v1/campaigns/{campaignId}/recipients` | Per-recipient message ID + lifecycle status |
+| `listCampaignRecipients` | `GET /v1/campaigns/{campaignId}/recipients` | Per-group message ID + lifecycle status |
 | `pauseCampaign` | `POST /v1/campaigns/{campaignId}/pause` | Running → paused |
 | `resumeCampaign` | `POST /v1/campaigns/{campaignId}/resume` | Paused → running |
 | `abortCampaign` | `POST /v1/campaigns/{campaignId}/abort` | Terminal; typed confirmation in UI |
@@ -78,14 +82,16 @@ pacing (msgs/min ≤ platform cap), schedule (now | at), state
 
 ## Console UX summary
 
-- **Named Lists** (`/groups/named-lists`, the Named Lists tab of Groups):
-  table + drawer; members added by picking existing contacts/chats of the
-  instance, never by import. Add/edit/delete with the reference guard above.
-- **New campaign** (`/messages/new`): 3-step wizard — Audience (pick list,
-  see resolved member count) → Message (text/media, preview as workspace
-  bubble) → Review (pacing capped by settings, estimated duration, explicit
-  accepted≠delivered note) → create as draft or schedule.
+- **Named Lists** (modal on Groups, deep link `/groups?list=nl_*`): left
+  pane lists Named Lists, right pane shows member groups; groups are added
+  by row-selection on the Groups table ("Add to Named List"), never by
+  import. Add/edit/delete with the reference guard above.
+- **New campaign** (`/messages/new`): 3-step wizard — Audience (pick a
+  Named List, see resolved group count) → Message (text/media, preview as
+  workspace bubble) → Review (group-send pacing capped by settings,
+  estimated duration, explicit accepted≠delivered note) → create as draft
+  or schedule. Sends execute per group via `sendGroupTextMessage`.
 - **Messages** (`/messages`): table with segmented progress bars
   (delivered/queued/failed always distinguishable) + drawer with counters,
-  per-recipient table (each row links to the workspace conversation),
-  pause/resume, abort with typed confirmation.
+  per-group recipients table with delivery history, pause/resume, abort
+  with typed confirmation.

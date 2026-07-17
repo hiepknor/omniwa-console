@@ -175,8 +175,7 @@ this subsection binds to it.
   status footer (11px). Inbound = Elevated bg, left-aligned. Outbound =
   accent-tint bg with subtle border, right-aligned — the one sanctioned use
   of accent as surface. Failed outbound adds a 3px red left edge and inline
-  Retry/Cancel ghost buttons. Group bubbles show the sender's verified name
-  (12px/500, secondary) above the text. Media bubbles show a Recessed
+  Retry/Cancel ghost buttons. Media bubbles show a Recessed
   placeholder block + caption. Clicking a bubble opens its delivery timeline
   in the context panel.
 - **Bubble status vocabulary** (footer, dot + label): `accepted` /
@@ -191,10 +190,27 @@ this subsection binds to it.
   "Reconnect" ghost action. Microcopy under composer: sends are
   *accepted*, delivery shows on the bubble.
 - **Context panel** (right): contact card (verified name, mono id,
-  read-only label chips) for direct chats; group card (member count, role,
-  invite link, member mini-list with promote/demote/remove) for groups;
-  when a bubble is selected it shows that message's delivery timeline with
-  `requestId` and retry affordance.
+  read-only label chips); when a bubble is selected it shows that
+  message's delivery timeline with `requestId` and retry affordance.
+  The workspace serves direct chats only — groups are a management
+  table, not a conversation surface.
+
+### Management table with selection (Groups)
+
+- Checkbox column: 36px, native checkboxes with `accent-color` emerald;
+  header checkbox = select all (indeterminate when partial).
+- **Bulk bar** above the table, visible only with ≥1 selection: Panel bg,
+  default border, 8px radius — "N selected" (13px/500) + one primary
+  action ("Add to Named List") + a muted "Clear selection" on the right.
+- Row click (outside the checkbox) opens the detail drawer; the checkbox
+  never opens the drawer.
+
+### Modal (Named Lists)
+
+- 640px wide variant of the dialog spec, Elevated bg over the standard
+  `rgba(0,0,0,0.7)` overlay; deep-linkable via `?list=nl_*`.
+- Two-pane body: list picker left (240px, active item = accent tint),
+  member table right; creation input lives in the footer.
 
 ### Campaign components (proposed contract — see docs/CAMPAIGNS_PROPOSAL.md)
 
@@ -208,10 +224,11 @@ this subsection binds to it.
 - **Wizard steps**: numbered dot + label row (Audience → Message → Review),
   current step accent, completed steps emerald, future muted. One primary
   action per step, always bottom-right; Back is ghost.
-- **Named Lists** are built only from existing contacts/chats of an
-  instance — the UI offers no raw-number import surface, by design.
-  Deleting a list is allowed; campaigns snapshot recipients at start, and
-  deletion is blocked while a scheduled or running campaign references it.
+- **Named Lists** contain groups only, added by row-selection on the
+  Groups table — the UI offers no raw-number or contact import surface,
+  by design. Deleting a list is allowed; campaigns snapshot member groups
+  at start, and deletion is blocked while a scheduled or running campaign
+  references it.
 
 ## 5. Layout Principles
 

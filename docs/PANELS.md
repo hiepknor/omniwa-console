@@ -54,22 +54,24 @@ Operations: `listInstanceChats`, `listChats`, `getChat`,
 `getMedia`, `listInstanceContacts`, `listContacts`, `getContact`,
 `listInstanceLabels`, `listLabels`, `getLabel`, `streamEvents`.
 
-## groups — `/groups/:instanceId?/:groupId?`, `/groups/named-lists` (realtime) — PRIMARY
+## groups — `/groups/:instanceId?` (realtime) — PRIMARY
 
-All WhatsApp groups of the instance in the same three-pane workspace:
-group conversations with sender attribution, group management in the
-context panel (members promote/demote/remove, invite link, local state),
-plus the **Named Lists** tab — add/edit/delete named recipient lists used
-by the Messages panel (named-list operations are proposed contract, see
-below).
+Management table of **all** groups with key metadata (name, id, member
+count, our role, local state, Named List membership, last activity) and a
+checkbox on every row. Selecting rows raises a bulk bar whose single
+action is **Add to Named List**. There is no group conversation view: a
+row opens a detail drawer (meta, invite link, member management, one-off
+"Send text…" compose dialog); recurring sends go through Messages
+campaigns. **Named Lists** open as a modal (deep link `?list=nl_*`) for
+add/edit/delete of group lists — named-list operations are proposed
+contract, see below.
 
 Operations: `listInstanceGroups`, `getGroup`, `updateGroup`,
 `updateGroupLocalState`, `refreshInstanceGroups`, `refreshGroupInviteLink`,
 `listGroupMembers`, `addGroupMember`, `removeGroupMember`,
 `promoteGroupMember`, `demoteGroupMember`, `sendGroupTextMessage`,
-`getMessage`, `getMessageDeliveryHistory`, `streamEvents` — plus proposed
-`listNamedLists`, `createNamedList`, `getNamedList`, `updateNamedList`,
-`deleteNamedList`.
+`streamEvents` — plus proposed `listNamedLists`, `createNamedList`,
+`getNamedList`, `updateNamedList`, `deleteNamedList`.
 
 ## messages — `/messages`, `/messages/new` — PROPOSED
 

@@ -58,9 +58,9 @@
       <div class="panelcard">
         <h3>Audience <button class="btn sm">Edit</button></h3>
         <div class="kv">
-          <dt>Named List</dt><dd>Khách VIP tháng 7 <span class="mono">nl_88mm1a</span></dd>
+          <dt>Named List</dt><dd>Đại lý toàn quốc <span class="mono">nl_77aq2k</span></dd>
           <dt>Instance</dt><dd><span class="mono">inst_2bq81c</span> sales-primary <span class="status sm" style="margin-left:6px"><span class="dot" style="background:var(--ok)"></span>connected</span></dd>
-          <dt>Recipients</dt><dd class="num">128 contacts (resolved now; re-resolved at start)</dd>
+          <dt>Recipients</dt><dd class="num">24 groups (resolved now; re-resolved at start)</dd>
         </div>
       </div>
 
@@ -79,16 +79,17 @@
           <dt>Start</dt><dd>Immediately on create</dd>
           <dt>Pacing</dt>
           <dd>
-            <input class="input num" style="width:80px;display:inline-block" value="12"> msgs / min
+            <input class="input num" style="width:80px;display:inline-block" value="12"> group sends / min
             <span class="help" style="display:inline;margin-left:8px">platform cap: 20 / min</span>
           </dd>
-          <dt>Est. duration</dt><dd class="num">~11 minutes</dd>
+          <dt>Est. duration</dt><dd class="num">~2 minutes</dd>
           <dt>Auto-pause</dt><dd class="num">on 10 failures within 5 min (from settings)</dd>
         </div>
         <p class="help">Execution runs platform-side on the queue runtime — closing this browser
-          does not affect the campaign. Each recipient gets a normal message with the standard
-          lifecycle: <b>accepted → queued → delivered / failed</b>. The campaign never reports
-          "sent" as an outcome.</p>
+          does not affect the campaign. Each group gets one <span class="mono">sendGroupTextMessage</span>
+          with the standard lifecycle: <b>accepted → queued → delivered / failed</b> — and one group
+          send reaches every member, so pace responsibly. The campaign never reports "sent" as an
+          outcome.</p>
       </div>
 
       <div class="wfooter">
