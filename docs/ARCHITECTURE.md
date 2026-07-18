@@ -43,6 +43,32 @@ Rules:
 - `src/api/generated/` is machine-written by `pnpm api:generate` and never
   edited by hand.
 
+## Shared table system
+
+All list panels use the WARP table primitives in
+`src/components/data-table/`. Features supply typed columns, data, row
+actions, and URL-backed controls; they do not define table breakpoints,
+sticky offsets, column geometry, loading layouts, or overflow behavior.
+
+The shared contract provides:
+
+- typed column width, alignment, and sticky-role presets instead of
+  arbitrary layout classes;
+- stable loading, unavailable, empty, and envelope-aware error states inside
+  the table geometry;
+- separate checked-row and active-row states so bulk selection is not
+  confused with an open detail drawer;
+- a stationary footer outside the horizontal scroller and automatic edge
+  cues while more columns remain off-screen;
+- one container-aware responsive policy: full tables when their workspace is
+  wider than 560px, compact summaries when a rail or narrow viewport reduces
+  the workspace to 560px or less, sticky identity columns on wider tablets,
+  and 44px controls for coarse pointers.
+
+New panels extend the preset vocabulary in the shared component when needed;
+they must not add panel-specific row heights, sticky offsets, or responsive
+table breakpoints.
+
 ## Contract-driven boundary
 
 The OpenAPI contract is vendored at `contracts/omniwa-v1.openapi.json` and

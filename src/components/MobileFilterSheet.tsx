@@ -20,20 +20,6 @@ export function MobileFilterSheet({
 
   useEffect(() => {
     if (!open) return;
-    const tabletQuery = window.matchMedia('(min-width: 641px)');
-    const closeAtTablet = (event: MediaQueryListEvent) => {
-      if (event.matches) onCloseRef.current();
-    };
-    if (tabletQuery.matches) {
-      onCloseRef.current();
-      return;
-    }
-    tabletQuery.addEventListener('change', closeAtTablet);
-    return () => tabletQuery.removeEventListener('change', closeAtTablet);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
     const previousOverflow = document.body.style.overflow;
     const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
       'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',

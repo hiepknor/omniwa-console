@@ -1682,11 +1682,15 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
 @media(prefers-reduced-motion:reduce){.rail-toggle svg{transition-duration:.01ms!important}}
 
 /* Responsive data table contract — Open Design project omniwa-console-responsive-tables, run 80e8fdb5-d22b-496c-8d21-4621864ee3de. */
-.adaptive-table{overflow:hidden}
+.adaptive-table{--responsive-table-selection-width:52px;overflow:hidden}
+.data-table-workspace{container-type:inline-size}
 .responsive-table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;border-bottom:1px solid var(--border-subtle)}
-.responsive-table{min-width:100%;border-collapse:separate;border-spacing:0}
+.responsive-table{min-width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0}
 .responsive-table thead th{position:sticky;top:0;z-index:2;height:44px;background:color-mix(in oklab,var(--surface),var(--bg) 10%)}
 .responsive-table tbody td{height:42px}
+.responsive-table th,.responsive-table td{overflow:hidden;text-overflow:ellipsis}
+.responsive-table td>.mono,.responsive-table td>.ts{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.responsive-table td>.status{max-width:100%;overflow:hidden}
 .responsive-table-mobile-header,.responsive-table-mobile-cell{display:none}
 .responsive-table-actionable{cursor:pointer}
 .responsive-table-actionable:focus{outline:none}
@@ -1733,12 +1737,30 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
 @media(min-width:641px) and (max-width:1024px){
   .responsive-table-sticky-identity,.responsive-table-sticky-checkbox{position:sticky;left:0;z-index:1;background:var(--surface);box-shadow:1px 0 0 var(--border-subtle)}
   .responsive-table:not(:has(.responsive-table-sticky-identity)) .responsive-table-desktop-cell:first-child{position:sticky;left:0;z-index:1;background:var(--surface);box-shadow:1px 0 0 var(--border-subtle)}
-  .responsive-table-sticky-checkbox{width:36px;min-width:36px}
-  .responsive-table-sticky-after-checkbox{left:36px}
+  .responsive-table-sticky-checkbox{width:var(--responsive-table-selection-width);min-width:var(--responsive-table-selection-width)}
+  .responsive-table-sticky-after-checkbox{left:var(--responsive-table-selection-width)}
   .responsive-table thead .responsive-table-sticky-identity,.responsive-table thead .responsive-table-sticky-checkbox{z-index:3;background:color-mix(in oklab,var(--surface),var(--bg) 10%)}
   .responsive-table:not(:has(.responsive-table-sticky-identity)) thead .responsive-table-desktop-cell:first-child{z-index:3;background:color-mix(in oklab,var(--surface),var(--bg) 10%)}
   .responsive-table tbody tr:hover>.responsive-table-sticky-identity,.responsive-table tbody tr:hover>.responsive-table-sticky-checkbox{background:var(--elevated)}
   .responsive-table tbody tr.selected>.responsive-table-sticky-identity,.responsive-table tbody tr.selected>.responsive-table-sticky-checkbox{background:color-mix(in oklab,var(--fg) 7%,var(--surface))}
+}
+
+@container (max-width:560px){
+  .adaptive-table .responsive-table-scroll{overflow:visible}
+  .adaptive-table .responsive-table{width:100%;min-width:0!important;table-layout:fixed}
+  .responsive-table-desktop-cell{display:none}
+  .responsive-table-mobile-header{display:table-cell;height:0!important;padding:0!important;border:0!important;font-size:0;line-height:0}
+  .responsive-table-mobile-cell{display:table-cell;height:auto!important;padding:0!important;white-space:normal}
+  .responsive-table tbody tr{height:auto}
+  .responsive-table tbody tr:hover{background:color-mix(in oklab,var(--fg) 4%,transparent)}
+  .adaptive-table>.table-foot{align-items:flex-start;flex-direction:column;gap:var(--space-3);min-height:0;padding:var(--space-3)}
+  .adaptive-table>.table-foot .btn{width:100%;min-height:44px}
+  .instances-toolbar-primary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;width:100%}
+  .instances-toolbar-primary .search-field{width:auto;min-width:0;flex:initial}
+  .instances-toolbar-primary .search{height:44px}
+  .instances-toolbar-desktop-filters{display:none}
+  .mobile-filter-trigger{display:flex}
+  .active-filter-row{display:flex}
 }
 
 @media(max-width:640px){

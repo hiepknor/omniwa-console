@@ -5,7 +5,15 @@ import { instanceKeys } from '@/api/keys';
 import { InlineError } from '@/components/InlineError';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
-import { MobileRowSummary, ResponsiveDataTable, type ResponsiveTableColumn } from '@/components/ResponsiveDataTable';
+import {
+  DataTable,
+  DataTableFooter,
+  DataTableToolbar,
+  DataTableWorkspace,
+  MobileRowSummary,
+  type DataTableColumn,
+  type DataTableState,
+} from '@/components/data-table';
 import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import { relativeTime } from '@/lib/format';
 import { CreateInstanceDialog } from './CreateInstanceDialog';
@@ -84,22 +92,33 @@ export function InstancesPage() {
     void queryClient.invalidateQueries({ queryKey: instanceKeys.provider });
   };
   type InstanceRow = (typeof instances)[number];
-  const columns: ResponsiveTableColumn<InstanceRow>[] = [
+  const columns: DataTableColumn<InstanceRow>[] = [
     {
       id: 'name',
       header: 'Name',
-      className: 'responsive-table-sticky-identity',
+      width: 'identity',
+      sticky: 'identity',
       cell: (instance) => <><span className="resource-name">{instance.displayName ?? '—'}</span>{instance.id === instanceId && <span className="row-state">Open</span>}</>,
     },
-    { id: 'id', header: 'ID', cell: (instance) => <span className="mono">{instance.id}</span> },
+    { id: 'id', header: 'ID', width: 'identifier', cell: (instance) => <span className="mono" title={instance.id}>{instance.id}</span> },
     {
       id: 'status',
       header: 'Status',
+      width: 'status',
       cell: (instance) => <span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>,
     },
-    { id: 'messages', header: 'Msgs 24h', className: 'r', cell: () => <span className="num">—</span> },
-    { id: 'updated', header: 'Updated', cell: (instance) => <span className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</span> },
+    { id: 'messages', header: 'Msgs 24h', width: 'numeric', align: 'end', cell: () => <span className="num">—</span> },
+    { id: 'updated', header: 'Updated', width: 'date', cell: (instance) => <span className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</span> },
   ];
+  const tableState: DataTableState<InstanceRow> = unavailable
+    ? { status: 'unavailable', message: 'No instance data yet.' }
+    : list.isError
+      ? { status: 'error', error: list.error, onRetry: list.refetch }
+      : list.isLoading
+        ? { status: 'loading', skeletonRows: 6 }
+        : filteredInstances.length === 0
+          ? { status: 'empty', message: instances.length === 0 ? 'No instances yet.' : 'No instances match these filters.' }
+          : { status: 'ready', rows: filteredInstances };
   const statusOptions: SelectDropdownOption[] = [
     { value: '', label: 'All statuses', description: 'Do not filter the table' },
     ...statuses.map((item) => ({
@@ -123,91 +142,72 @@ export function InstancesPage() {
       />
 
       {acceptance && <div className="overview-error" role="status">{acceptance}</div>}
-      <section className="instances-workspace" aria-labelledby="instances-table-title">
-        <div className="instances-toolbar">
-          <div className="instances-toolbar-primary">
-            <label className="search-field">
-              <span className="visually-hidden">Search instances</span>
-              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
-              <input className="search" type="search" value={search} onChange={(event) => setParam('search', event.target.value)} placeholder="Search name or instance ID" />
-            </label>
-            <span className="instances-toolbar-desktop-filters">
-              <SelectDropdown label="Status" value={status} options={statusOptions} onChange={(nextStatus) => setParam('status', nextStatus)} />
-            </span>
-            <button
-              ref={filterTriggerRef}
-              className="mobile-filter-trigger"
-              type="button"
-              aria-haspopup="dialog"
-              aria-expanded={filterOpen}
-              onClick={() => setFilterOpen(true)}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" /></svg>
-              Filters
-              {(search || status) && <span className="filter-count num">{Number(Boolean(search)) + Number(Boolean(status))}</span>}
-            </button>
-            {status && (
-              <div className="active-filter-row" aria-label="Active filters">
-                <button className="chip" type="button" onClick={() => setParam('status', '')}>Status: {status}<span className="x" aria-hidden="true">×</span></button>
-              </div>
-            )}
-          </div>
-          <div className="instances-toolbar-meta">
-            <span><span className="num">{Number(Boolean(search)) + Number(Boolean(status))}</span> filters active</span>
-            <span className="toolbar-separator" aria-hidden="true"></span>
-            <span>Updated <span className="num">{relativeTime(latestUpdate) || '—'}</span></span>
-          </div>
-        </div>
-
-        <div className="tablewrap adaptive-table instances-table" tabIndex={0} role="region" aria-labelledby="instances-table-title">
-          {unavailable ? (
-            <div className="empty">No instance data yet.</div>
-          ) : list.isError ? (
-            <InlineError error={list.error} onRetry={list.refetch} />
-          ) : list.isLoading ? (
-            <div className="empty">—</div>
-          ) : filteredInstances.length === 0 ? (
-            <div className="empty">{instances.length === 0 ? 'No instances yet.' : 'No instances match these filters.'}</div>
-          ) : (
-            <>
-              <ResponsiveDataTable
-                caption="Instance lifecycle and recent activity"
-                captionId="instances-table-title"
-                columns={columns}
-                rows={filteredInstances}
-                getRowKey={(instance) => instance.id}
-                getRowProps={(instance) => ({
-                  className: instance.id === instanceId ? 'selected open' : undefined,
-                  tabIndex: 0,
-                  'aria-selected': instance.id === instanceId,
-                  onClick: () => openInstance(instance.id),
-                  onKeyDown: (event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      openInstance(instance.id);
-                    }
-                  },
-                })}
-                renderMobileSummary={(instance) => (
-                  <MobileRowSummary
-                    identity={<>{instance.displayName ?? '—'}{instance.id === instanceId && <span className="row-state">Open</span>}</>}
-                    identifier={instance.id}
-                    secondary={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>}
-                    meta={relativeTime(instance.updatedAt) || '—'}
-                    actionLabel={`Open ${instance.displayName ?? instance.id}`}
-                  />
-                )}
-              />
-              <div className="table-foot">
-                <div><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></div>
-                <div className="pagination">
-                  {list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}
-                </div>
-              </div>
-            </>
+      <DataTableWorkspace className="instances-workspace" aria-labelledby="instances-table-title">
+        <DataTableToolbar>
+          <label className="search-field">
+            <span className="visually-hidden">Search instances</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+            <input className="search" type="search" value={search} onChange={(event) => setParam('search', event.target.value)} placeholder="Search name or instance ID" />
+          </label>
+          <span className="data-table-toolbar-desktop-filters">
+            <SelectDropdown label="Status" value={status} options={statusOptions} onChange={(nextStatus) => setParam('status', nextStatus)} />
+          </span>
+          <button
+            ref={filterTriggerRef}
+            className="mobile-filter-trigger"
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded={filterOpen}
+            onClick={() => setFilterOpen(true)}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" /></svg>
+            Filters
+            {status && <span className="filter-count num">1</span>}
+          </button>
+          {status && (
+            <div className="active-filter-row" aria-label="Active filters">
+              <button className="chip" type="button" onClick={() => setParam('status', '')}>Status: {status}<span className="x" aria-hidden="true">×</span></button>
+            </div>
           )}
-        </div>
-      </section>
+        </DataTableToolbar>
+
+        <DataTable
+          caption="Instance lifecycle and recent activity"
+          captionId="instances-table-title"
+          className="instances-table"
+          layout="standard"
+          columns={columns}
+          state={tableState}
+          getRowKey={(instance) => instance.id}
+          getRowState={(instance) => ({ active: instance.id === instanceId })}
+          getRowProps={(instance) => ({
+            className: 'responsive-table-actionable',
+            tabIndex: 0,
+            onClick: () => openInstance(instance.id),
+            onKeyDown: (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openInstance(instance.id);
+              }
+            },
+          })}
+          renderMobileSummary={(instance) => (
+            <MobileRowSummary
+              identity={<>{instance.displayName ?? '—'}{instance.id === instanceId && <span className="row-state">Open</span>}</>}
+              identifier={instance.id}
+              secondary={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>}
+              meta={relativeTime(instance.updatedAt) || '—'}
+              actionLabel={`Open ${instance.displayName ?? instance.id}`}
+            />
+          )}
+          footer={(
+            <DataTableFooter
+              primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>}
+              actions={list.hasNextPage ? <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button> : undefined}
+            />
+          )}
+        />
+      </DataTableWorkspace>
 
       <MobileFilterSheet open={filterOpen} title="Filter instances" onClose={() => setFilterOpen(false)} returnFocusRef={filterTriggerRef}>
         <section className="mobile-filter-section" aria-labelledby="instance-status-filter">

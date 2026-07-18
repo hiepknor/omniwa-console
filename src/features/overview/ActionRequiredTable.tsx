@@ -1,6 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { InlineError } from '@/components/InlineError';
-import { MobileRowSummary, ResponsiveDataTable, type ResponsiveTableColumn } from '@/components/ResponsiveDataTable';
+import {
+  DataTable,
+  DataTableFooter,
+  DataTableWorkspace,
+  MobileRowSummary,
+  type DataTableColumn,
+  type DataTableState,
+} from '@/components/data-table';
 import { relativeTime } from '@/lib/format';
 import { useActionRequiredItems, type ActionRequiredItem } from './hooks';
 
@@ -59,11 +65,12 @@ export function ActionRequiredTable() {
   const query = useActionRequiredItems();
   const items = query.data?.items ?? [];
   const total = query.data?.unavailable ? 0 : paginationTotal(query.data?.pagination, items.length);
-  const columns: ResponsiveTableColumn<ActionRequiredItem>[] = [
+  const columns: DataTableColumn<ActionRequiredItem>[] = [
     {
       id: 'item',
       header: 'Item',
-      className: 'responsive-table-sticky-identity',
+      width: 'identity',
+      sticky: 'identity',
       cell: (item) => {
         const label = item.status ?? item.category ?? 'Unknown';
         return <span className="status"><span className={`dot ${statusDot(item.status)}`}></span>{label}</span>;
@@ -72,6 +79,7 @@ export function ActionRequiredTable() {
     {
       id: 'resource',
       header: 'Resource',
+      width: 'flex',
       cell: (item) => (
         <span className="resource">
           <span className="mono">{item.id ?? '—'}</span>
@@ -82,89 +90,78 @@ export function ActionRequiredTable() {
     {
       id: 'since',
       header: 'Since',
+      width: 'date',
       cell: (item) => <span className="ts" title={item.updatedAt}>{relativeTime(item.updatedAt) || '—'}</span>,
     },
     {
       id: 'action',
       header: <span className="visually-hidden">Action</span>,
-      className: 'actioncol',
+      width: 'action',
+      align: 'end',
       cell: (item) => {
         const action = itemAction(item);
         return action ? <Link className="btn" to={action.to} onClick={(event) => event.stopPropagation()}>{action.label}</Link> : '—';
       },
     },
   ];
+  const tableState: DataTableState<ActionRequiredItem> = query.data?.unavailable
+    ? { status: 'unavailable', message: 'No activity yet. Action items appear once the platform records events.' }
+    : query.isError
+      ? { status: 'error', error: query.error, onRetry: query.refetch }
+      : query.isLoading
+        ? { status: 'loading', skeletonRows: 4 }
+        : items.length === 0
+          ? { status: 'empty', message: 'Nothing needs attention.' }
+          : { status: 'ready', rows: items };
 
   return (
-    <section className="section overview-actions" aria-labelledby="overview-actions-title">
+    <DataTableWorkspace className="section overview-actions" aria-labelledby="overview-actions-title">
       <div className="overview-section-head">
         <h2 id="overview-actions-title">
           Action required <span className="muted num">· {total}</span>
         </h2>
       </div>
-      {query.data?.unavailable ? (
-        <div
-          className="tablewrap adaptive-table overview-action-table"
-          tabIndex={0}
-          role="region"
-          aria-label="Action required work queue"
-        >
-          <div className="empty">No activity yet. Action items appear once the platform records events.</div>
-        </div>
-      ) : query.isError ? (
-        <InlineError error={query.error} onRetry={query.refetch} />
-      ) : (
-        <div
-          className="tablewrap adaptive-table overview-action-table"
-          tabIndex={0}
-          role="region"
-          aria-label="Action required work queue"
-        >
-          {query.isLoading ? (
-            <div className="empty">—</div>
-          ) : items.length === 0 ? (
-            <div className="empty">Nothing needs attention.</div>
-          ) : (
-            <>
-              <ResponsiveDataTable
-                caption="Action required work queue"
-                columns={columns}
-                rows={items}
-                getRowKey={(item, index) => item.id ?? `${item.status ?? item.category ?? 'unknown'}-${index}`}
-                getRowProps={(item) => {
-                  const action = itemAction(item);
-                  return action ? {
-                    className: 'responsive-table-actionable',
-                    tabIndex: 0,
-                    onClick: () => navigate(action.to),
-                    onKeyDown: (event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        navigate(action.to);
-                      }
-                    },
-                  } : {};
-                }}
-                renderMobileSummary={(item) => {
-                  const action = itemAction(item);
-                  const label = item.status ?? item.category ?? 'Unknown';
-                  const subject = safeSubjectRef(item.subjectRef);
-                  return (
-                    <MobileRowSummary
-                      identity={subject ?? item.id ?? 'Unknown item'}
-                      identifier={subject && item.id ? item.id : undefined}
-                      secondary={<span className="status"><span className={`dot ${statusDot(item.status)}`}></span>{label}</span>}
-                      meta={relativeTime(item.updatedAt) || '—'}
-                      actionLabel={action ? `${action.label} ${subject ?? item.id ?? 'item'}` : undefined}
-                    />
-                  );
-                }}
-              />
-              <div className="table-foot"><span className="num">{items.length} of {total} items</span></div>
-            </>
-          )}
-        </div>
-      )}
-    </section>
+      <DataTable
+        caption="Action required work queue"
+        className="overview-action-table"
+        layout="compact"
+        columns={columns}
+        state={tableState}
+        getRowKey={(item, index) => item.id ?? `${item.status ?? item.category ?? 'unknown'}-${index}`}
+        getRowProps={(item) => {
+          const action = itemAction(item);
+          return action ? {
+            className: 'responsive-table-actionable',
+            tabIndex: 0,
+            onClick: () => navigate(action.to),
+            onKeyDown: (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                navigate(action.to);
+              }
+            },
+          } : {};
+        }}
+        renderMobileSummary={(item) => {
+          const action = itemAction(item);
+          const label = item.status ?? item.category ?? 'Unknown';
+          const subject = safeSubjectRef(item.subjectRef);
+          return (
+            <MobileRowSummary
+              identity={subject ?? item.id ?? 'Unknown item'}
+              identifier={subject && item.id ? item.id : undefined}
+              secondary={<span className="status"><span className={`dot ${statusDot(item.status)}`}></span>{label}</span>}
+              meta={relativeTime(item.updatedAt) || '—'}
+              actionLabel={action ? `${action.label} ${subject ?? item.id ?? 'item'}` : undefined}
+            />
+          );
+        }}
+        footer={(
+          <DataTableFooter
+            primary={<span className="num">{tableState.status === 'ready' || tableState.status === 'empty' ? `${items.length} of ${total} items` : 'Results —'}</span>}
+          />
+        )}
+      />
+    </DataTableWorkspace>
   );
 }

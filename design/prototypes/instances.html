@@ -47,7 +47,7 @@
       </div>
     </header>
 
-    <section class="instances-workspace" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-workspace">
+    <section class="instances-workspace data-table-workspace" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-workspace">
       <div class="instances-toolbar" data-od-id="instances-filter-bar">
         <div class="instances-toolbar-primary">
           <label class="search-field">
@@ -55,13 +55,16 @@
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
             <input class="search" type="search" placeholder="Search name or instance ID" aria-label="Search instances">
           </label>
-          <span class="chip">status: pairing <span class="x" aria-hidden="true">✕</span></span>
-          <button class="chip add" type="button">+ filter</button>
-        </div>
-        <div class="instances-toolbar-meta">
-          <span><span class="num">1</span> filter active</span>
-          <span class="toolbar-separator" aria-hidden="true"></span>
-          <span>Updated <span class="num">14s</span> ago</span>
+          <span class="instances-toolbar-desktop-filters">
+            <span class="chip">status: pairing <span class="x" aria-hidden="true">✕</span></span>
+          </span>
+          <button class="mobile-filter-trigger" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg>
+            Filters <span class="filter-count num">1</span>
+          </button>
+          <div class="active-filter-row" aria-label="Active filters">
+            <button class="chip" type="button">Status: pairing <span class="x" aria-hidden="true">×</span></button>
+          </div>
         </div>
       </div>
 
