@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { ApiFailure } from '@/api/envelopes';
-import { formatCount } from '@/lib/format';
+import { formatCount, relativeTime } from '@/lib/format';
 import {
   useDashboardSummary,
   useMediaMetrics,
@@ -9,6 +8,9 @@ import {
   useQueueMetrics,
   useWebhookMetrics,
 } from './hooks';
+import { OverviewDiagnostics } from './OverviewDiagnostics';
+
+type MetricState = 'loading' | 'fresh' | 'stale' | 'unavailable' | 'error' | 'omitted';
 
 type MetricCardModel = {
   label: string;
@@ -16,12 +18,13 @@ type MetricCardModel = {
   context: string;
   contextTitle?: string;
   reporting: boolean;
+  state: MetricState;
   attention?: boolean;
 };
 
 function MetricCard({ metric }: { metric: MetricCardModel }) {
   return (
-    <article className={`overview-metric-card${metric.reporting ? ' overview-metric-card-reported' : ''}`}>
+    <article className={`overview-metric-card${metric.reporting ? ' overview-metric-card-reported' : ''}`} data-state={metric.state}>
       <div className="label">{metric.label}</div>
       <div className={`value${metric.reporting ? ' num' : ' overview-value-unavailable'}`}>{metric.value}</div>
       <div className="ctx" title={metric.contextTitle}>
@@ -48,90 +51,99 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
   const messagesPending = messages.data?.unavailable !== undefined;
   const webhooksPending = webhooks.data?.unavailable !== undefined;
   const mediaPending = media.data?.unavailable !== undefined;
-  const instanceReporting = !dashboard.isError && !dashboardPending && total !== undefined;
-  const activeReporting = !dashboard.isError && !dashboardPending && connected !== undefined;
   const messageCount = messages.data?.resource?.count ?? messages.data?.resource?.value;
   const webhookCount = webhooks.data?.resource?.count ?? webhooks.data?.resource?.value;
   const mediaCount = media.data?.resource?.count ?? media.data?.resource?.value;
-  const queueReporting = !queue.isError && !queuePending && queuedJobCount !== undefined;
+  const metricValue = ({
+    value,
+    query,
+    pending,
+    reasonCode,
+  }: {
+    value: number | undefined;
+    query: { isLoading: boolean; isError: boolean; isFetching: boolean; dataUpdatedAt: number };
+    pending: boolean;
+    reasonCode?: string;
+  }): Pick<MetricCardModel, 'value' | 'context' | 'contextTitle' | 'reporting' | 'state'> => {
+    if (value !== undefined && !pending) {
+      const updated = query.dataUpdatedAt > 0
+        ? relativeTime(new Date(query.dataUpdatedAt).toISOString()) || 'just now'
+        : undefined;
+      if (query.isError) {
+        return { value: formatCount(value), context: `Stale${updated ? ` · ${updated}` : ''}`, reporting: true, state: 'stale' };
+      }
+      return {
+        value: formatCount(value),
+        context: query.isFetching ? 'Refreshing' : updated ? `Updated ${updated}` : 'Reporting',
+        reporting: true,
+        state: 'fresh',
+      };
+    }
+    if (query.isLoading) return { value: 'Checking', context: 'First read in progress', reporting: false, state: 'loading' };
+    if (pending) return { value: 'Not reported', context: 'Data pending', contextTitle: reasonCode, reporting: false, state: 'unavailable' };
+    if (query.isError) return { value: 'Not reported', context: 'Unreachable', reporting: false, state: 'error' };
+    return { value: 'Not reported', context: 'Value omitted', reporting: false, state: 'omitted' };
+  };
 
-  function pendingValue(isError: boolean, pending: boolean, reasonCode?: string) {
-    return {
-      value: 'Not reported',
-      context: isError ? 'Unreachable' : pending ? 'Data pending' : 'Value omitted',
-      contextTitle: reasonCode,
-    };
-  }
+  const queueMetric = metricValue({ value: queuedJobCount, query: queue, pending: queuePending, reasonCode: queue.data?.unavailable?.reasonCode });
+  const instanceMetric = metricValue({ value: total, query: dashboard, pending: dashboardPending, reasonCode: dashboard.data?.unavailable?.reasonCode });
+  const activeMetric = metricValue({ value: connected, query: dashboard, pending: dashboardPending, reasonCode: dashboard.data?.unavailable?.reasonCode });
+  const messageMetric = metricValue({ value: messageCount, query: messages, pending: messagesPending, reasonCode: messages.data?.unavailable?.reasonCode });
+  const webhookMetric = metricValue({ value: webhookCount, query: webhooks, pending: webhooksPending, reasonCode: webhooks.data?.unavailable?.reasonCode });
+  const mediaMetric = metricValue({ value: mediaCount, query: media, pending: mediaPending, reasonCode: media.data?.unavailable?.reasonCode });
 
   const metrics: MetricCardModel[] = [
     {
       label: 'Queue depth',
-      ...(queueReporting
-        ? {
-            value: formatCount(queuedJobCount),
-            context: deadJobCount !== undefined && deadJobCount > 0
-              ? `Reporting · ${formatCount(deadJobCount)} dead-lettered`
-              : 'Reporting',
-          }
-        : pendingValue(queue.isError, queuePending, queue.data?.unavailable?.reasonCode)),
-      reporting: queueReporting,
-      attention: queueReporting && deadJobCount !== undefined && deadJobCount > 0,
+      ...queueMetric,
+      context: queueMetric.reporting && deadJobCount !== undefined && deadJobCount > 0
+        ? `${queueMetric.context} · ${formatCount(deadJobCount)} dead-lettered`
+        : queueMetric.context,
+      attention: queueMetric.reporting && deadJobCount !== undefined && deadJobCount > 0,
     },
     {
       label: 'Instances',
-      ...(instanceReporting
-        ? { value: formatCount(total), context: 'Reporting' }
-        : pendingValue(dashboard.isError, dashboardPending, dashboard.data?.unavailable?.reasonCode)),
-      reporting: instanceReporting,
+      ...instanceMetric,
     },
     {
       label: 'Active instances',
-      ...(activeReporting
-        ? { value: formatCount(connected), context: 'Reporting' }
-        : pendingValue(dashboard.isError, dashboardPending, dashboard.data?.unavailable?.reasonCode)),
-      reporting: activeReporting,
+      ...activeMetric,
     },
     {
       label: 'Messages',
-      ...(!messages.isError && !messagesPending && messageCount !== undefined
-        ? { value: formatCount(messageCount), context: 'Reporting' }
-        : pendingValue(messages.isError, messagesPending, messages.data?.unavailable?.reasonCode)),
-      reporting: !messages.isError && !messagesPending && messageCount !== undefined,
+      ...messageMetric,
     },
     {
       label: 'Webhooks',
-      ...(!webhooks.isError && !webhooksPending && webhookCount !== undefined
-        ? { value: formatCount(webhookCount), context: 'Reporting' }
-        : pendingValue(webhooks.isError, webhooksPending, webhooks.data?.unavailable?.reasonCode)),
-      reporting: !webhooks.isError && !webhooksPending && webhookCount !== undefined,
+      ...webhookMetric,
     },
     {
       label: 'Media',
-      ...(!media.isError && !mediaPending && mediaCount !== undefined
-        ? { value: formatCount(mediaCount), context: 'Reporting' }
-        : pendingValue(media.isError, mediaPending, media.data?.unavailable?.reasonCode)),
-      reporting: !media.isError && !mediaPending && mediaCount !== undefined,
+      ...mediaMetric,
     },
   ];
   const reportingCount = metrics.filter((metric) => metric.reporting).length;
-  const failingQueries = [dashboard, messages, queue, webhooks, media].filter((query) => query.isError);
-  const firstError = failingQueries[0]?.error;
-  const failure = firstError instanceof ApiFailure ? firstError : undefined;
-  const errorMessage = firstError instanceof Error ? firstError.message : 'Request failed';
-  const hasDeadLetters = queueReporting && deadJobCount !== undefined && deadJobCount > 0;
+  const failedReads = [
+    { source: 'Dashboard', query: dashboard },
+    { source: 'Message metrics', query: messages },
+    { source: 'Queue metrics', query: queue },
+    { source: 'Webhook metrics', query: webhooks },
+    { source: 'Media metrics', query: media },
+  ].filter(({ query }) => query.isError);
+  const hasDeadLetters = queueMetric.reporting && deadJobCount !== undefined && deadJobCount > 0;
   const allQueuedJobsDead = hasDeadLetters && queuedJobCount === deadJobCount;
   const coverageTitle = reportingCount === 0
-    ? 'No operational metrics are reporting.'
-    : reportingCount === 1 && queueReporting
-      ? 'Only queue depth is reporting.'
-      : `${reportingCount} of ${metrics.length} operational metrics are reporting.`;
+    ? 'No operational values are available.'
+    : reportingCount === 1 && queueMetric.reporting
+      ? 'Only queue depth is available.'
+      : `${reportingCount} of ${metrics.length} operational values are available.`;
 
   return (
     <>
-      <div className="overview-command-grid">
+      <div className={`overview-command-grid${hasDeadLetters ? ' has-urgent-attention' : ''}`}>
         <section className={`overview-attention${hasDeadLetters ? ' is-urgent' : ''}`} aria-labelledby="overview-attention-title">
           <div className="overview-section-label">
-            <span>Attention</span><span>{hasDeadLetters ? 'Needs review' : queueReporting ? 'No dead letters' : 'Data pending'}</span>
+            <span>{hasDeadLetters ? 'Attention' : 'Queue reporting'}</span><span>{hasDeadLetters ? 'Needs review' : queueMetric.reporting ? queueMetric.state === 'stale' ? 'Stale data' : 'No dead letters' : queueMetric.context}</span>
           </div>
           <div className="overview-attention-body">
             <div>
@@ -141,7 +153,7 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
                   ? allQueuedJobsDead
                     ? `All ${formatCount(queuedJobCount)} queued jobs are dead-lettered and require review.`
                     : `${formatCount(deadJobCount)} queued jobs are dead-lettered and require review.`
-                  : queueReporting
+                  : queueMetric.reporting
                     ? 'No dead-lettered jobs are currently reported.'
                     : queue.isError
                       ? 'Queue metrics cannot be reached.'
@@ -149,12 +161,12 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
               </p>
             </div>
             <div className="overview-attention-count" aria-label={hasDeadLetters ? `${deadJobCount} dead-lettered jobs` : 'No dead-letter count reported'}>
-              <strong className="num">{hasDeadLetters ? formatCount(deadJobCount) : queueReporting ? '0' : '—'}</strong>
-              <span>{hasDeadLetters ? 'dead-lettered' : queueReporting ? 'reported' : 'not reported'}</span>
+              <strong className="num">{hasDeadLetters ? formatCount(deadJobCount) : queueMetric.reporting ? '0' : '—'}</strong>
+              <span>{hasDeadLetters ? 'dead-lettered' : queueMetric.reporting ? 'reported' : 'not reported'}</span>
             </div>
           </div>
           <div className="overview-attention-footer">
-            <span><span className="num">{queueReporting ? formatCount(queuedJobCount) : '—'}</span> total queue depth</span>
+            <span><span className="num">{queueMetric.reporting ? formatCount(queuedJobCount) : '—'}</span> total queue depth</span>
             <Link className="btn" to="/queue">Review queue</Link>
           </div>
         </section>
@@ -162,10 +174,10 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
         {actionRequired}
 
         <section className="overview-coverage" aria-labelledby="overview-coverage-title">
-          <div className="overview-section-label"><span>Reporting coverage</span><span className="num">{reportingCount} of {metrics.length} metrics</span></div>
+          <div className="overview-section-label"><span>Metric coverage</span><span className="num">{reportingCount} of {metrics.length} values</span></div>
           <h2 id="overview-coverage-title">{coverageTitle}</h2>
           <p>Unavailable values stay unreported until their sources respond.</p>
-          <div className="overview-coverage-bar" role="img" aria-label={`${reportingCount} of ${metrics.length} operational metrics are reporting`}>
+          <div className="overview-coverage-bar" role="img" aria-label={`${reportingCount} of ${metrics.length} operational values are available`}>
             <span style={{ width: `${(reportingCount / metrics.length) * 100}%` }}></span>
           </div>
         </section>
@@ -179,20 +191,11 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
         <div className="overview-metrics">
           {metrics.map((metric) => <MetricCard key={metric.label} metric={metric} />)}
         </div>
-        {firstError !== undefined && (
-          <div className="overview-error" role="alert">
-            <span>
-              {failure?.category ?? 'unknown'}: {errorMessage}
-              {failure?.requestId && <span className="mono"> · {failure.requestId}</span>}
-              {failingQueries.length > 1 && ` · ${failingQueries.length} sections affected`}
-            </span>
-            {failure?.retryable && (
-              <button className="btn sm" type="button" onClick={() => { void Promise.all(failingQueries.map((query) => query.refetch())); }}>
-                Retry
-              </button>
-            )}
-          </div>
-        )}
+        <OverviewDiagnostics
+          id="overview-metric-diagnostics"
+          diagnostics={failedReads.map(({ source, query }) => ({ source, error: query.error }))}
+          onRetry={() => { void Promise.all(failedReads.map(({ query }) => query.refetch())); }}
+        />
       </section>
     </>
   );

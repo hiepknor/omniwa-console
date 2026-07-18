@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { overviewKeys } from '@/api/keys';
 import { PageHeader } from '@/components/PageHeader';
-import { ActionRequiredTable } from './ActionRequiredTable';
+import { ActionRequiredList } from './ActionRequiredList';
 import { EventTicker } from './EventTicker';
 import { HealthStrip } from './HealthStrip';
 import { MetricCards } from './MetricCards';
@@ -28,8 +28,8 @@ export function OverviewPage() {
       />
       <div className="overview-content">
         <HealthStrip />
-        <MetricCards actionRequired={<ActionRequiredTable />} />
-        <EventTicker />
+        <MetricCards actionRequired={<ActionRequiredList />} />
+        <EventTicker connectionState="disconnected" />
       </div>
     </>
   );
