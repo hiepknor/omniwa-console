@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { ApiProvider } from '@/api/ApiProvider';
 import { ApiFailure } from '@/api/envelopes';
+import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { OverviewPage } from '@/features/overview/OverviewPage';
 import { InstancesPage } from '@/features/instances/InstancesPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
@@ -58,7 +59,12 @@ function AppRuntime() {
           {
             element: (
               <ApiProvider session={session}>
-                <Shell session={session} onDisconnect={disconnect} />
+                <RealtimeProvider
+                  session={session}
+                  onAuthError={() => disconnectRef.current('session-invalid')}
+                >
+                  <Shell session={session} onDisconnect={disconnect} />
+                </RealtimeProvider>
               </ApiProvider>
             ),
             children: [

@@ -15,47 +15,50 @@ import {
   updateInstance,
 } from '@/api/instances';
 import { instanceKeys, queryKeys } from '@/api/keys';
-
-const INSTANCES_REFETCH_INTERVAL = 15_000;
+import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 
 export function useInstances(initialCursor?: string) {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useInfiniteQuery({
     queryKey: queryKeys.instances({ initialCursor }),
     queryFn: ({ pageParam }) => listInstances(client, { cursor: pageParam, limit: 50 }),
     initialPageParam: initialCursor,
     getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
-    refetchInterval: INSTANCES_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useInstance(instanceId: string | undefined) {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.instance(instanceId ?? ''),
     queryFn: () => getInstance(client, instanceId ?? ''),
     enabled: instanceId !== undefined,
-    refetchInterval: INSTANCES_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useInstanceSessions(instanceId: string | undefined) {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.instanceSessions(instanceId ?? ''),
     queryFn: () => listInstanceSessions(client, instanceId ?? '', { limit: 20 }),
     enabled: instanceId !== undefined,
-    refetchInterval: INSTANCES_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useProviderCapabilities(enabled: boolean) {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.providerCapabilities,
     queryFn: () => getProviderCapabilities(client),
     enabled,
-    refetchInterval: INSTANCES_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 

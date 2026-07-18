@@ -4,6 +4,7 @@ import { useApi } from '@/api/ApiProvider';
 import type { PublicData } from '@/api/envelopes';
 import type { components } from '@/api/generated/schema';
 import { queryKeys } from '@/api/keys';
+import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 import {
   getDashboardSummary,
   getHealth,
@@ -17,8 +18,6 @@ import {
 } from '@/api/overview';
 
 export type { ReadResult };
-
-const OVERVIEW_REFETCH_INTERVAL = 15_000;
 
 export type HealthResource = components['schemas']['HealthResource'];
 export type MetricsResource = components['schemas']['MetricsResource'];
@@ -63,72 +62,80 @@ export function isTransportFailure(error: unknown): boolean {
 
 export function useHealth() {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.health,
     queryFn: () => getHealth(client),
-    refetchInterval: OVERVIEW_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useHealthReadiness() {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.healthReadiness,
     queryFn: () => getHealthReadiness(client),
-    refetchInterval: OVERVIEW_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useDashboardSummary() {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.dashboard,
     queryFn: () => getDashboardSummary(client),
-    refetchInterval: OVERVIEW_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useQueueMetrics() {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.queueMetrics,
     queryFn: () => getQueueMetrics(client),
-    refetchInterval: OVERVIEW_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useMessageMetrics() {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.messageMetrics,
     queryFn: () => getMessageMetrics(client),
-    refetchInterval: OVERVIEW_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useWebhookMetrics() {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.webhookMetrics,
     queryFn: () => getWebhookMetrics(client),
-    refetchInterval: OVERVIEW_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useMediaMetrics() {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.mediaMetrics,
     queryFn: () => getMediaMetrics(client),
-    refetchInterval: OVERVIEW_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
 
 export function useActionRequiredItems() {
   const client = useApi();
+  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.actionRequired,
     queryFn: () => listActionRequiredItems(client),
-    refetchInterval: OVERVIEW_REFETCH_INTERVAL,
+    refetchInterval,
   });
 }
