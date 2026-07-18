@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
+import { MobileRowSummary, ResponsiveDataTable, type ResponsiveTableColumn } from '@/components/ResponsiveDataTable';
 import { relativeTime } from '@/lib/format';
 import { useActionRequiredItems, type ActionRequiredItem } from './hooks';
 
@@ -54,9 +55,45 @@ function safeSubjectRef(subjectRef: string | undefined): string | undefined {
 }
 
 export function ActionRequiredTable() {
+  const navigate = useNavigate();
   const query = useActionRequiredItems();
   const items = query.data?.items ?? [];
   const total = query.data?.unavailable ? 0 : paginationTotal(query.data?.pagination, items.length);
+  const columns: ResponsiveTableColumn<ActionRequiredItem>[] = [
+    {
+      id: 'item',
+      header: 'Item',
+      className: 'responsive-table-sticky-identity',
+      cell: (item) => {
+        const label = item.status ?? item.category ?? 'Unknown';
+        return <span className="status"><span className={`dot ${statusDot(item.status)}`}></span>{label}</span>;
+      },
+    },
+    {
+      id: 'resource',
+      header: 'Resource',
+      cell: (item) => (
+        <span className="resource">
+          <span className="mono">{item.id ?? '—'}</span>
+          {safeSubjectRef(item.subjectRef) && <span>{safeSubjectRef(item.subjectRef)}</span>}
+        </span>
+      ),
+    },
+    {
+      id: 'since',
+      header: 'Since',
+      cell: (item) => <span className="ts" title={item.updatedAt}>{relativeTime(item.updatedAt) || '—'}</span>,
+    },
+    {
+      id: 'action',
+      header: <span className="visually-hidden">Action</span>,
+      className: 'actioncol',
+      cell: (item) => {
+        const action = itemAction(item);
+        return action ? <Link className="btn" to={action.to} onClick={(event) => event.stopPropagation()}>{action.label}</Link> : '—';
+      },
+    },
+  ];
 
   return (
     <section className="section overview-actions" aria-labelledby="overview-actions-title">
@@ -67,7 +104,7 @@ export function ActionRequiredTable() {
       </div>
       {query.data?.unavailable ? (
         <div
-          className="tablewrap overview-action-table"
+          className="tablewrap adaptive-table overview-action-table"
           tabIndex={0}
           role="region"
           aria-label="Action required work queue"
@@ -78,7 +115,7 @@ export function ActionRequiredTable() {
         <InlineError error={query.error} onRetry={query.refetch} />
       ) : (
         <div
-          className="tablewrap overview-action-table"
+          className="tablewrap adaptive-table overview-action-table"
           tabIndex={0}
           role="region"
           aria-label="Action required work queue"
@@ -89,42 +126,40 @@ export function ActionRequiredTable() {
             <div className="empty">Nothing needs attention.</div>
           ) : (
             <>
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Item</th>
-                    <th scope="col">Resource</th>
-                    <th scope="col">Since</th>
-                    <th scope="col"><span className="visually-hidden">Action</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item, index) => {
-                    const action = itemAction(item);
-                    const label = item.status ?? item.category ?? 'Unknown';
-                    return (
-                      <tr key={item.id ?? `${label}-${index}`}>
-                        <td>
-                          <span className="status">
-                            <span className={`dot ${statusDot(item.status)}`}></span>
-                            {label}
-                          </span>
-                        </td>
-                        <td>
-                          <span className="resource">
-                            <span className="mono">{item.id ?? '—'}</span>
-                            {safeSubjectRef(item.subjectRef) && <span>{safeSubjectRef(item.subjectRef)}</span>}
-                          </span>
-                        </td>
-                        <td className="ts" title={item.updatedAt}>{relativeTime(item.updatedAt) || '—'}</td>
-                        <td className="actioncol">
-                          {action ? <Link className="btn" to={action.to}>{action.label}</Link> : '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <ResponsiveDataTable
+                caption="Action required work queue"
+                columns={columns}
+                rows={items}
+                getRowKey={(item, index) => item.id ?? `${item.status ?? item.category ?? 'unknown'}-${index}`}
+                getRowProps={(item) => {
+                  const action = itemAction(item);
+                  return action ? {
+                    className: 'responsive-table-actionable',
+                    tabIndex: 0,
+                    onClick: () => navigate(action.to),
+                    onKeyDown: (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        navigate(action.to);
+                      }
+                    },
+                  } : {};
+                }}
+                renderMobileSummary={(item) => {
+                  const action = itemAction(item);
+                  const label = item.status ?? item.category ?? 'Unknown';
+                  const subject = safeSubjectRef(item.subjectRef);
+                  return (
+                    <MobileRowSummary
+                      identity={subject ?? item.id ?? 'Unknown item'}
+                      identifier={subject && item.id ? item.id : undefined}
+                      secondary={<span className="status"><span className={`dot ${statusDot(item.status)}`}></span>{label}</span>}
+                      meta={relativeTime(item.updatedAt) || '—'}
+                      actionLabel={action ? `${action.label} ${subject ?? item.id ?? 'item'}` : undefined}
+                    />
+                  );
+                }}
+              />
               <div className="table-foot"><span className="num">{items.length} of {total} items</span></div>
             </>
           )}

@@ -37,3 +37,4 @@ contract yet — see [`../../docs/CAMPAIGNS_PROPOSAL.md`](../../docs/CAMPAIGNS_P
 | `settings.html` | Active config, draft validate/activate flow, API key table (admin) |
 | `dialogs.html` | Compose dialog, typed destroy confirmation, show-once secret, error toast |
 | `dropdowns.html` | Shared single-select, instance-picker, and quick-action dropdown patterns |
+| `tables.html` | Shared responsive table, mobile adaptive-row, filter-sheet, footer, mini-table, and read-state patterns |

@@ -170,13 +170,13 @@ export function InstanceDrawer({
             ) : (sessions.data?.resource?.items.length ?? 0) === 0 ? (
               <div className="empty">No sessions recorded.</div>
             ) : (
-              <table className="minitable">
+              <table className="minitable responsive-minitable">
                 <thead><tr><th scope="col">Session</th><th scope="col">State</th><th scope="col">Updated</th></tr></thead>
                 <tbody>{sessions.data?.resource?.items.map((session) => (
                   <tr key={session.id}>
-                    <td><span className="mono">{session.id}</span></td>
-                    <td><span className="status sm"><span className={`dot ${statusDot(session.status)}`}></span>{session.status ?? '—'}</span></td>
-                    <td className="ts" title={session.updatedAt}>{relativeTime(session.updatedAt) || '—'}</td>
+                    <td data-label="Session"><span className="mono">{session.id}</span></td>
+                    <td data-label="State"><span className="status sm"><span className={`dot ${statusDot(session.status)}`}></span>{session.status ?? '—'}</span></td>
+                    <td data-label="Updated" className="ts" title={session.updatedAt}>{relativeTime(session.updatedAt) || '—'}</td>
                   </tr>
                 ))}</tbody>
               </table>

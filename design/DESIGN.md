@@ -123,11 +123,28 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 ### Tables (workhorse)
 
-- Container: Panel bg, default border, 8px radius, no outer padding.
-- Header row: 11px/400 uppercase muted labels with wide tracking, subtle bottom border, sticky.
-- Rows: 36px height, 13px text, subtle border between rows; hover/selection use Frosted Veil opacity changes.
-- Cells: status = dot+label; IDs = mono 12px with copy-on-hover icon; timestamps = relative ("3m ago") with absolute ISO on `title`.
-- Footer: cursor pagination — "Load more" ghost button + shown-count in faint text. Never page numbers.
+- Container: Panel bg, default border, 12px radius, no outer padding.
+- Desktop header: sticky 44px row with 11px/400 uppercase muted labels,
+  wide tracking, and a subtle bottom border. Body rows are 42px with 13px
+  text and restrained Frosted Veil hover, focus, checked, and selected states.
+- Cells: status = dot+label; IDs = mono 12px with copy-on-hover icon;
+  timestamps = relative ("3m ago") with absolute ISO on `title`; numeric and
+  time values use tabular numerals and align right where comparison benefits.
+- At 641–1024px, keep the full semantic table inside a locally bounded
+  horizontal scroller. Checkbox and identity columns stay sticky; the page
+  itself never gains horizontal overflow.
+- At 640px and below, primary tables become continuous adaptive rows, never
+  cards. Each 64px-or-taller row presents identity plus mono ID, status plus
+  the task-critical metric or age, and a disclosure affordance. Secondary
+  fields remain available in the row detail surface.
+- The footer sits outside the horizontal scroller. Cursor pagination uses a
+  "Load more" ghost button plus shown-count and freshness in faint text;
+  never use page numbers.
+- Mobile filtering uses one 44px search field plus a Filters button. The
+  bottom sheet owns less-common controls; active filters remain visible as
+  dismissible chips below the search row.
+- Drawer mini-tables become continuous key/value records below 640px. They
+  retain dividers and table density rather than becoming elevated cards.
 
 ### Badges & pills
 
@@ -443,8 +460,8 @@ viewports without changing its information hierarchy:
 | --- | --- |
 | ≥1280px | Full shell, drawers overlay content |
 | 641–900px | Sidebar collapses to a 64px icon rail; every link retains `title` and `aria-label`, and session status/disconnect remain available |
-| 641–1024px | Metric grid wraps; tables gain horizontal scroll within their container (never page-level) |
-| ≤640px | Navigation becomes a fixed 72px bottom bar with icon + visible label; items scroll horizontally and Settings remains separated at the end |
+| 641–1024px | Metric grid wraps; full tables use local horizontal scroll with sticky identity columns and a stationary footer |
+| ≤640px | Navigation becomes a fixed bottom bar; primary tables become continuous adaptive rows and filters move into a bottom sheet |
 
 Navigation touch targets are at least 44px; mobile controls use 44px where density permits.
 
@@ -462,7 +479,7 @@ Navigation touch targets are at least 44px; mobile controls use 44px where densi
 
 ### Example component prompts
 
-- "Build an instance table on a 4% white veil with a 35%-alpha Mist Border and 12px radius. Sticky header row: 11px/400 uppercase Stone Gray with 2.4px tracking. Rows 36px, 13px Warm Parchment; hover uses a barely visible white veil. Status remains muted semantic dot + label."
+- "Build an instance table on a 4% white veil with a 35%-alpha Mist Border and 12px radius. Sticky 44px header row: 11px/400 uppercase Stone Gray with 2.4px tracking. Desktop rows are 42px with 13px Warm Parchment; mobile rows become continuous 64px-or-taller summaries. Status remains muted semantic dot + label."
 - "Metric block: Frosted Veil surface, Mist Border, 12px radius, 16px padding, no shadow. Label 11px/400 uppercase Stone Gray, value 26px/400 Warm Parchment with tabular numerals, context line 12px Purple-Tint Gray."
 - "QR pairing block: `color-mix(in oklab, var(--bg), black 12%)` recessed container, inside it a 240px white well holding the QR, expiry countdown in Matter Mono 12px turning muted amber under 10s, Earth Gray pill button below."
 

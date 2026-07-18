@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { instanceKeys } from '@/api/keys';
 import { InlineError } from '@/components/InlineError';
+import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
-import { SelectDropdown } from '@/components/SelectDropdown';
+import { MobileRowSummary, ResponsiveDataTable, type ResponsiveTableColumn } from '@/components/ResponsiveDataTable';
+import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import { relativeTime } from '@/lib/format';
 import { CreateInstanceDialog } from './CreateInstanceDialog';
 import { InstanceDrawer } from './InstanceDrawer';
@@ -39,6 +41,8 @@ export function InstancesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const [acceptance, setAcceptance] = useState<string>();
   const search = searchParams.get('search') ?? '';
   const status = searchParams.get('status') ?? '';
@@ -79,6 +83,31 @@ export function InstancesPage() {
     void queryClient.invalidateQueries({ queryKey: instanceKeys.root });
     void queryClient.invalidateQueries({ queryKey: instanceKeys.provider });
   };
+  type InstanceRow = (typeof instances)[number];
+  const columns: ResponsiveTableColumn<InstanceRow>[] = [
+    {
+      id: 'name',
+      header: 'Name',
+      className: 'responsive-table-sticky-identity',
+      cell: (instance) => <><span className="resource-name">{instance.displayName ?? '—'}</span>{instance.id === instanceId && <span className="row-state">Open</span>}</>,
+    },
+    { id: 'id', header: 'ID', cell: (instance) => <span className="mono">{instance.id}</span> },
+    {
+      id: 'status',
+      header: 'Status',
+      cell: (instance) => <span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>,
+    },
+    { id: 'messages', header: 'Msgs 24h', className: 'r', cell: () => <span className="num">—</span> },
+    { id: 'updated', header: 'Updated', cell: (instance) => <span className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</span> },
+  ];
+  const statusOptions: SelectDropdownOption[] = [
+    { value: '', label: 'All statuses', description: 'Do not filter the table' },
+    ...statuses.map((item) => ({
+      value: item,
+      label: item,
+      meta: String(instances.filter((instance) => instance.status === item).length),
+    })),
+  ];
 
   return (
     <>
@@ -102,19 +131,26 @@ export function InstancesPage() {
               <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
               <input className="search" type="search" value={search} onChange={(event) => setParam('search', event.target.value)} placeholder="Search name or instance ID" />
             </label>
-            <SelectDropdown
-              label="Status"
-              value={status}
-              options={[
-                { value: '', label: 'All statuses', description: 'Do not filter the table' },
-                ...statuses.map((item) => ({
-                  value: item,
-                  label: item,
-                  meta: String(instances.filter((instance) => instance.status === item).length),
-                })),
-              ]}
-              onChange={(nextStatus) => setParam('status', nextStatus)}
-            />
+            <span className="instances-toolbar-desktop-filters">
+              <SelectDropdown label="Status" value={status} options={statusOptions} onChange={(nextStatus) => setParam('status', nextStatus)} />
+            </span>
+            <button
+              ref={filterTriggerRef}
+              className="mobile-filter-trigger"
+              type="button"
+              aria-haspopup="dialog"
+              aria-expanded={filterOpen}
+              onClick={() => setFilterOpen(true)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" /></svg>
+              Filters
+              {(search || status) && <span className="filter-count num">{Number(Boolean(search)) + Number(Boolean(status))}</span>}
+            </button>
+            {status && (
+              <div className="active-filter-row" aria-label="Active filters">
+                <button className="chip" type="button" onClick={() => setParam('status', '')}>Status: {status}<span className="x" aria-hidden="true">×</span></button>
+              </div>
+            )}
           </div>
           <div className="instances-toolbar-meta">
             <span><span className="num">{Number(Boolean(search)) + Number(Boolean(status))}</span> filters active</span>
@@ -123,7 +159,7 @@ export function InstancesPage() {
           </div>
         </div>
 
-        <div className="tablewrap instances-table" tabIndex={0} role="region" aria-labelledby="instances-table-title">
+        <div className="tablewrap adaptive-table instances-table" tabIndex={0} role="region" aria-labelledby="instances-table-title">
           {unavailable ? (
             <div className="empty">No instance data yet.</div>
           ) : list.isError ? (
@@ -134,31 +170,34 @@ export function InstancesPage() {
             <div className="empty">{instances.length === 0 ? 'No instances yet.' : 'No instances match these filters.'}</div>
           ) : (
             <>
-              <table>
-                <caption id="instances-table-title" className="visually-hidden">Instance lifecycle and recent activity</caption>
-                <thead><tr><th scope="col">Name</th><th scope="col">ID</th><th scope="col">Status</th><th scope="col" className="r">Msgs 24h</th><th scope="col">Updated</th></tr></thead>
-                <tbody>{filteredInstances.map((instance) => (
-                  <tr
-                    key={instance.id}
-                    className={instance.id === instanceId ? 'selected open' : undefined}
-                    tabIndex={0}
-                    aria-selected={instance.id === instanceId}
-                    onClick={() => openInstance(instance.id)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        openInstance(instance.id);
-                      }
-                    }}
-                  >
-                    <td><span className="resource-name">{instance.displayName ?? '—'}</span>{instance.id === instanceId && <span className="row-state">Open</span>}</td>
-                    <td><span className="mono">{instance.id}</span></td>
-                    <td><span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span></td>
-                    <td className="num r">—</td>
-                    <td className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
+              <ResponsiveDataTable
+                caption="Instance lifecycle and recent activity"
+                captionId="instances-table-title"
+                columns={columns}
+                rows={filteredInstances}
+                getRowKey={(instance) => instance.id}
+                getRowProps={(instance) => ({
+                  className: instance.id === instanceId ? 'selected open' : undefined,
+                  tabIndex: 0,
+                  'aria-selected': instance.id === instanceId,
+                  onClick: () => openInstance(instance.id),
+                  onKeyDown: (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      openInstance(instance.id);
+                    }
+                  },
+                })}
+                renderMobileSummary={(instance) => (
+                  <MobileRowSummary
+                    identity={<>{instance.displayName ?? '—'}{instance.id === instanceId && <span className="row-state">Open</span>}</>}
+                    identifier={instance.id}
+                    secondary={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>}
+                    meta={relativeTime(instance.updatedAt) || '—'}
+                    actionLabel={`Open ${instance.displayName ?? instance.id}`}
+                  />
+                )}
+              />
               <div className="table-foot">
                 <div><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></div>
                 <div className="pagination">
@@ -169,6 +208,28 @@ export function InstancesPage() {
           )}
         </div>
       </section>
+
+      <MobileFilterSheet open={filterOpen} title="Filter instances" onClose={() => setFilterOpen(false)} returnFocusRef={filterTriggerRef}>
+        <section className="mobile-filter-section" aria-labelledby="instance-status-filter">
+          <h3 id="instance-status-filter">Status</h3>
+          <div className="mobile-filter-options">
+            {statusOptions.map((option) => (
+              <button
+                key={option.value}
+                className={option.value === status ? 'is-selected' : undefined}
+                type="button"
+                aria-pressed={option.value === status}
+                onClick={() => setParam('status', option.value)}
+              >
+                <span className="filter-option-check" aria-hidden="true">✓</span>
+                <span>{option.label}</span>
+                {option.meta && <span className="num">{option.meta}</span>}
+              </button>
+            ))}
+          </div>
+        </section>
+        <button className="btn primary mobile-filter-done" type="button" onClick={() => setFilterOpen(false)}>Done</button>
+      </MobileFilterSheet>
 
       {instanceId && (
         detail.data?.resource ? (

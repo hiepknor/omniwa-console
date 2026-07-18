@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OmniWA Console — Responsive table patterns</title>
+<!-- Component sheet generated from Open Design project omniwa-console-responsive-tables, Warp run 80e8fdb5-d22b-496c-8d21-4621864ee3de. Sample data only. -->
+<link rel="stylesheet" href="console.css">
+</head>
+<body>
+<main class="dialog-sheet-screen table-sheet-screen">
+  <header class="page-head">
+    <div class="head-context"><div class="head-title-row"><h1>Responsive table patterns</h1></div><span class="head-meta">Warp table-first contract · sample data</span></div>
+  </header>
+
+  <div class="sheet">
+    <section class="demo table-pattern-demo">
+      <div class="caption">Primary workbench · resize across desktop, tablet, and mobile</div>
+      <div class="instances-toolbar">
+        <div class="instances-toolbar-primary">
+          <label class="search-field"><span class="visually-hidden">Search surfaces</span><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input class="search" type="search" placeholder="Search name or ID"></label>
+          <span class="instances-toolbar-desktop-filters"><button class="dropdown-trigger" type="button"><span class="dropdown-trigger-copy"><span class="dropdown-trigger-label">Status</span><span class="dropdown-trigger-value">All statuses</span></span><svg viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg></button></span>
+          <button class="mobile-filter-trigger" type="button"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg>Filters<span class="filter-count num">1</span></button>
+          <div class="active-filter-row"><button class="chip" type="button">Status: attention<span class="x">×</span></button></div>
+        </div>
+        <div class="instances-toolbar-meta"><span><span class="num">7</span> results</span><span class="toolbar-separator"></span><span>Updated <span class="num">18s</span> ago</span></div>
+      </div>
+
+      <div class="tablewrap adaptive-table instances-table" tabindex="0" role="region" aria-label="Operational surfaces table">
+        <div class="responsive-table-scroll">
+          <table class="responsive-table">
+            <caption class="visually-hidden">Operational surfaces and current states</caption>
+            <thead><tr><th class="responsive-table-desktop-cell" scope="col">Surface</th><th class="responsive-table-desktop-cell" scope="col">ID</th><th class="responsive-table-desktop-cell" scope="col">Status</th><th class="responsive-table-desktop-cell r" scope="col">Queue</th><th class="responsive-table-desktop-cell" scope="col">Updated</th><th class="responsive-table-mobile-header" scope="col">Summary</th></tr></thead>
+            <tbody>
+              <tr tabindex="0">
+                <td class="responsive-table-desktop-cell"><span class="resource-name">Instances</span></td><td class="responsive-table-desktop-cell mono">inst_34af9</td><td class="responsive-table-desktop-cell"><span class="status"><span class="dot dot-ok"></span>healthy</span></td><td class="responsive-table-desktop-cell num r">128</td><td class="responsive-table-desktop-cell ts">18s ago</td>
+                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">Instances</span><span class="mobile-row-id mono">inst_34af9</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot dot-ok"></span>healthy</span><span class="mobile-row-meta">18s ago</span></span><span class="mobile-row-disclosure">›</span></div></td>
+              </tr>
+              <tr class="selected" tabindex="0" aria-selected="true">
+                <td class="responsive-table-desktop-cell"><span class="resource-name">Queue jobs</span><span class="row-state">Open</span></td><td class="responsive-table-desktop-cell mono">job_q_alpha</td><td class="responsive-table-desktop-cell"><span class="status"><span class="dot dot-degraded"></span>attention required</span></td><td class="responsive-table-desktop-cell num r">42</td><td class="responsive-table-desktop-cell ts">11m ago</td>
+                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">Queue jobs <span class="row-state">Open</span></span><span class="mobile-row-id mono">job_q_alpha</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot dot-degraded"></span>attention</span><span class="mobile-row-meta">oldest 11m</span></span><span class="mobile-row-disclosure">›</span></div></td>
+              </tr>
+              <tr tabindex="0">
+                <td class="responsive-table-desktop-cell"><span class="resource-name">Webhooks</span></td><td class="responsive-table-desktop-cell mono">wh_prod_12</td><td class="responsive-table-desktop-cell"><span class="status"><span class="dot dot-failed"></span>retries spiking</span></td><td class="responsive-table-desktop-cell num r">16</td><td class="responsive-table-desktop-cell ts">2m ago</td>
+                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">Webhooks</span><span class="mobile-row-id mono">wh_prod_12</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot dot-failed"></span>retrying</span><span class="mobile-row-meta">16 queued</span></span><span class="mobile-row-disclosure">›</span></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-foot"><div><span class="num">3 of 24 surfaces</span><span class="freshness">Freshness · 18s ago</span></div><button class="btn" type="button">Load more</button></div>
+      </div>
+    </section>
+
+    <section class="demo">
+      <div class="caption">Drawer mini-table · continuous key/value records below 640px</div>
+      <table class="minitable responsive-minitable">
+        <caption class="visually-hidden">Recent delivery attempts</caption>
+        <thead><tr><th scope="col">Attempt</th><th scope="col">Result</th><th scope="col">Updated</th></tr></thead>
+        <tbody>
+          <tr><td data-label="Attempt" class="mono">#381</td><td data-label="Result"><span class="status"><span class="dot dot-failed"></span>5xx retry</span></td><td data-label="Updated" class="ts">09:40:11 UTC</td></tr>
+          <tr><td data-label="Attempt" class="mono">#382</td><td data-label="Result"><span class="status"><span class="dot dot-ok"></span>delivered</span></td><td data-label="Updated" class="ts">09:40:24 UTC</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="demo">
+      <div class="caption">Mobile filter sheet · interaction reference</div>
+      <button id="filter-demo-trigger" class="btn" type="button">Open filter sheet</button>
+    </section>
+
+    <section class="demo">
+      <div class="caption">Operational read states</div>
+      <div class="metrics table-state-grid">
+        <div class="card"><span class="label">Loading</span><div class="ctx">Preserve row geometry while fresh data arrives.</div></div>
+        <div class="card"><span class="label">Empty</span><div class="ctx">No rows match the current filters.</div></div>
+        <div class="card"><span class="label">Unavailable</span><div class="ctx">No data has been recorded for this scope.</div></div>
+        <div class="card"><span class="label">API error</span><div class="ctx bad">forbidden · requestId <span class="mono">req_7zK91L</span></div></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="filter-demo" class="mobile-filter-backdrop" hidden>
+  <div class="mobile-filter-sheet" role="dialog" aria-modal="true" aria-labelledby="filter-demo-title">
+    <header><div><span class="eyebrow">Table controls</span><h2 id="filter-demo-title">Filter surfaces</h2></div><button id="filter-demo-close" class="mobile-filter-close" type="button" aria-label="Close filters">✕</button></header>
+    <div class="mobile-filter-body"><section class="mobile-filter-section"><h3>Status</h3><div class="mobile-filter-options"><button class="is-selected" type="button"><span class="filter-option-check">✓</span><span>All statuses</span></button><button type="button"><span class="filter-option-check">✓</span><span>Attention required</span><span class="num">3</span></button><button type="button"><span class="filter-option-check">✓</span><span>Failed</span><span class="num">1</span></button></div></section><button class="btn primary mobile-filter-done" type="button">Done</button></div>
+  </div>
+</div>
+<script>
+const trigger=document.querySelector('#filter-demo-trigger');
+const backdrop=document.querySelector('#filter-demo');
+const close=document.querySelector('#filter-demo-close');
+const setOpen=(open)=>{backdrop.hidden=!open;trigger.setAttribute('aria-expanded',String(open));if(open)close.focus();else trigger.focus()};
+trigger.addEventListener('click',()=>setOpen(true));
+close.addEventListener('click',()=>setOpen(false));
+backdrop.querySelector('.mobile-filter-done').addEventListener('click',()=>setOpen(false));
+backdrop.addEventListener('mousedown',(event)=>{if(event.target===backdrop)setOpen(false)});
+document.addEventListener('keydown',(event)=>{if(event.key==='Escape'&&!backdrop.hidden)setOpen(false)});
+</script>
+</body>
+</html>

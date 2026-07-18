@@ -73,30 +73,33 @@
           <div class="overview-section-head">
             <h2 id="overview-actions-title">Action required <span class="muted num">· 3</span></h2>
           </div>
-          <div class="tablewrap overview-action-table" tabindex="0" role="region" aria-label="Action required work queue">
-            <table>
-              <thead><tr><th scope="col">Item</th><th scope="col">Resource</th><th scope="col">Since</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
+          <div class="tablewrap adaptive-table overview-action-table" tabindex="0" role="region" aria-label="Action required work queue">
+            <div class="responsive-table-scroll"><table class="responsive-table">
+              <thead><tr><th scope="col" class="responsive-table-desktop-cell">Item</th><th scope="col" class="responsive-table-desktop-cell">Resource</th><th scope="col" class="responsive-table-desktop-cell">Since</th><th scope="col" class="responsive-table-desktop-cell"><span class="visually-hidden">Action</span></th><th scope="col" class="responsive-table-mobile-header">Summary</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><span class="status"><span class="dot dot-pending"></span>Pairing required</span></td>
-                  <td><span class="resource"><span class="mono">inst_9f2ka7</span><span>support-vn</span></span></td>
-                  <td class="ts" title="2026-07-16T08:41:00Z">12m ago</td>
-                  <td class="actioncol"><button class="btn" type="button" aria-label="Show QR for inst_9f2ka7 support-vn">Show QR</button></td>
+                  <td class="responsive-table-desktop-cell"><span class="status"><span class="dot dot-pending"></span>Pairing required</span></td>
+                  <td class="responsive-table-desktop-cell"><span class="resource"><span class="mono">inst_9f2ka7</span><span>support-vn</span></span></td>
+                  <td class="responsive-table-desktop-cell ts" title="2026-07-16T08:41:00Z">12m ago</td>
+                  <td class="responsive-table-desktop-cell actioncol"><button class="btn" type="button" aria-label="Show QR for inst_9f2ka7 support-vn">Show QR</button></td>
+                  <td class="responsive-table-mobile-cell" colspan="5"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">support-vn</span><span class="mobile-row-id mono">inst_9f2ka7</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot dot-pending"></span>Pairing required</span><span class="mobile-row-meta">12m ago</span></span><span class="mobile-row-disclosure" aria-label="Show QR for support-vn">›</span></div></td>
                 </tr>
                 <tr>
-                  <td><span class="status"><span class="dot dot-degraded"></span>Webhook suspended</span></td>
-                  <td><span class="resource"><span class="mono">wh_c41x02</span><span>billing-events</span></span></td>
-                  <td class="ts" title="2026-07-16T06:02:00Z">2h ago</td>
-                  <td class="actioncol"><button class="btn" type="button" aria-label="Review wh_c41x02 billing-events">Review</button></td>
+                  <td class="responsive-table-desktop-cell"><span class="status"><span class="dot dot-degraded"></span>Webhook suspended</span></td>
+                  <td class="responsive-table-desktop-cell"><span class="resource"><span class="mono">wh_c41x02</span><span>billing-events</span></span></td>
+                  <td class="responsive-table-desktop-cell ts" title="2026-07-16T06:02:00Z">2h ago</td>
+                  <td class="responsive-table-desktop-cell actioncol"><button class="btn" type="button" aria-label="Review wh_c41x02 billing-events">Review</button></td>
+                  <td class="responsive-table-mobile-cell" colspan="5"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">billing-events</span><span class="mobile-row-id mono">wh_c41x02</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot dot-degraded"></span>Webhook suspended</span><span class="mobile-row-meta">2h ago</span></span><span class="mobile-row-disclosure" aria-label="Review billing-events">›</span></div></td>
                 </tr>
                 <tr>
-                  <td><span class="status"><span class="dot dot-failed"></span>Job dead-lettered</span></td>
-                  <td><span class="resource"><span class="mono">job_77am1q</span><span>media-transcode</span></span></td>
-                  <td class="ts" title="2026-07-15T22:17:00Z">10h ago</td>
-                  <td class="actioncol"><button class="btn" type="button" aria-label="Inspect job_77am1q media-transcode">Inspect</button></td>
+                  <td class="responsive-table-desktop-cell"><span class="status"><span class="dot dot-failed"></span>Job dead-lettered</span></td>
+                  <td class="responsive-table-desktop-cell"><span class="resource"><span class="mono">job_77am1q</span><span>media-transcode</span></span></td>
+                  <td class="responsive-table-desktop-cell ts" title="2026-07-15T22:17:00Z">10h ago</td>
+                  <td class="responsive-table-desktop-cell actioncol"><button class="btn" type="button" aria-label="Inspect job_77am1q media-transcode">Inspect</button></td>
+                  <td class="responsive-table-mobile-cell" colspan="5"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">media-transcode</span><span class="mobile-row-id mono">job_77am1q</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot dot-failed"></span>Job dead-lettered</span><span class="mobile-row-meta">10h ago</span></span><span class="mobile-row-disclosure" aria-label="Inspect media-transcode">›</span></div></td>
                 </tr>
               </tbody>
-            </table>
+            </table></div>
             <div class="table-foot"><span class="num">3 of 3 items</span></div>
           </div>
         </section>

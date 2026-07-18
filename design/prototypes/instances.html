@@ -65,38 +65,43 @@
         </div>
       </div>
 
-      <div class="tablewrap instances-table" tabindex="0" role="region" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-table">
-          <table>
+      <div class="tablewrap adaptive-table instances-table" tabindex="0" role="region" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-table">
+          <div class="responsive-table-scroll"><table class="responsive-table">
             <caption id="instances-table-title" class="visually-hidden">Instance lifecycle and recent activity</caption>
-            <thead><tr><th scope="col">Name</th><th scope="col">ID</th><th scope="col">Status</th><th scope="col" class="r">Msgs 24h</th><th scope="col">Last activity</th></tr></thead>
+            <thead><tr><th scope="col" class="responsive-table-desktop-cell">Name</th><th scope="col" class="responsive-table-desktop-cell">ID</th><th scope="col" class="responsive-table-desktop-cell">Status</th><th scope="col" class="responsive-table-desktop-cell r">Msgs 24h</th><th scope="col" class="responsive-table-desktop-cell">Last activity</th><th scope="col" class="responsive-table-mobile-header">Summary</th></tr></thead>
             <tbody>
               <tr tabindex="0">
-                <td><span class="resource-name">sales-primary</span></td><td><span class="mono">inst_2bq81c</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
-                <td class="num r">8,204</td><td class="ts" title="2026-07-16T08:52:41Z">14s ago</td>
+                <td class="responsive-table-desktop-cell"><span class="resource-name">sales-primary</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_2bq81c</span></td>
+                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
+                <td class="responsive-table-desktop-cell num r">8,204</td><td class="responsive-table-desktop-cell ts" title="2026-07-16T08:52:41Z">14s ago</td>
+                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">sales-primary</span><span class="mobile-row-id mono">inst_2bq81c</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span><span class="mobile-row-meta">14s ago</span></span><span class="mobile-row-disclosure" aria-label="Open sales-primary">›</span></div></td>
               </tr>
               <tr class="selected open" tabindex="0" aria-selected="true">
-                <td><span class="resource-name">support-vn</span><span class="row-state">Open</span></td><td><span class="mono">inst_9f2ka7</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span></td>
-                <td class="num r">0</td><td class="ts" title="2026-07-16T08:41:00Z">12m ago</td>
+                <td class="responsive-table-desktop-cell"><span class="resource-name">support-vn</span><span class="row-state">Open</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_9f2ka7</span></td>
+                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span></td>
+                <td class="responsive-table-desktop-cell num r">0</td><td class="responsive-table-desktop-cell ts" title="2026-07-16T08:41:00Z">12m ago</td>
+                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">support-vn <span class="row-state">Open</span></span><span class="mobile-row-id mono">inst_9f2ka7</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span><span class="mobile-row-meta">12m ago</span></span><span class="mobile-row-disclosure" aria-label="Open support-vn">›</span></div></td>
               </tr>
               <tr tabindex="0">
-                <td><span class="resource-name">ops-alerts</span></td><td><span class="mono">inst_5rr0zn</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
-                <td class="num r">1,882</td><td class="ts" title="2026-07-16T08:52:20Z">35s ago</td>
+                <td class="responsive-table-desktop-cell"><span class="resource-name">ops-alerts</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_5rr0zn</span></td>
+                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
+                <td class="responsive-table-desktop-cell num r">1,882</td><td class="responsive-table-desktop-cell ts" title="2026-07-16T08:52:20Z">35s ago</td>
+                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">ops-alerts</span><span class="mobile-row-id mono">inst_5rr0zn</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span><span class="mobile-row-meta">35s ago</span></span><span class="mobile-row-disclosure" aria-label="Open ops-alerts">›</span></div></td>
               </tr>
               <tr tabindex="0">
-                <td><span class="resource-name">legacy-bot</span></td><td><span class="mono">inst_0aa41m</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span></td>
-                <td class="num r">0</td><td class="ts" title="2026-07-15T21:03:11Z">12h ago</td>
+                <td class="responsive-table-desktop-cell"><span class="resource-name">legacy-bot</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_0aa41m</span></td>
+                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span></td>
+                <td class="responsive-table-desktop-cell num r">0</td><td class="responsive-table-desktop-cell ts" title="2026-07-15T21:03:11Z">12h ago</td>
+                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">legacy-bot</span><span class="mobile-row-id mono">inst_0aa41m</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span><span class="mobile-row-meta">12h ago</span></span><span class="mobile-row-disclosure" aria-label="Open legacy-bot">›</span></div></td>
               </tr>
               <tr tabindex="0">
-                <td><span class="resource-name">archived-mkt</span></td><td><span class="mono">inst_qq17zz</span></td>
-                <td><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span></td>
-                <td class="num r">—</td><td class="ts" title="2026-06-30T10:00:00Z">16d ago</td>
+                <td class="responsive-table-desktop-cell"><span class="resource-name">archived-mkt</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_qq17zz</span></td>
+                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span></td>
+                <td class="responsive-table-desktop-cell num r">—</td><td class="responsive-table-desktop-cell ts" title="2026-06-30T10:00:00Z">16d ago</td>
+                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">archived-mkt</span><span class="mobile-row-id mono">inst_qq17zz</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span><span class="mobile-row-meta">16d ago</span></span><span class="mobile-row-disclosure" aria-label="Open archived-mkt">›</span></div></td>
               </tr>
             </tbody>
-          </table>
+          </table></div>
           <div class="table-foot">
             <div><span class="num">5 of 8 instances</span><span class="freshness">Updated 14s ago</span></div>
             <div class="pagination"><span>Showing 1–5</span><button class="btn" type="button">Load more</button></div>
@@ -151,15 +156,15 @@
         <section aria-labelledby="sessions-title">
           <span class="eyebrow">Current and recent</span>
           <h3 id="sessions-title">Sessions</h3>
-          <table class="minitable">
+          <table class="minitable responsive-minitable">
             <thead><tr><th scope="col">Session</th><th scope="col">State</th><th scope="col">Since</th></tr></thead>
             <tbody>
-              <tr><td><span class="mono">ses_71bb0e</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--pending)"></span>handshake</span></td>
-                <td class="ts">12m ago</td></tr>
-              <tr><td><span class="mono">ses_09zu4p</span></td>
-                <td><span class="status sm"><span class="dot" style="background:var(--inactive)"></span>expired</span></td>
-                <td class="ts">3h ago</td></tr>
+              <tr><td data-label="Session"><span class="mono">ses_71bb0e</span></td>
+                <td data-label="State"><span class="status sm"><span class="dot" style="background:var(--pending)"></span>handshake</span></td>
+                <td data-label="Updated" class="ts">12m ago</td></tr>
+              <tr><td data-label="Session"><span class="mono">ses_09zu4p</span></td>
+                <td data-label="State"><span class="status sm"><span class="dot" style="background:var(--inactive)"></span>expired</span></td>
+                <td data-label="Updated" class="ts">3h ago</td></tr>
             </tbody>
           </table>
         </section>
