@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
+import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
 import {
   useConnectInstance,
@@ -38,7 +39,7 @@ export function InstanceDrawer({
   const instanceName = instance.displayName ?? instance.id;
   const [displayName, setDisplayName] = useState(instanceName);
   const [confirmation, setConfirmation] = useState<'disconnect' | 'destroy'>();
-  const [acceptance, setAcceptance] = useState<string>();
+  const feedback = useFeedback();
   const sessions = useInstanceSessions(instance.id);
   const provider = useProviderCapabilities(true);
   const update = useUpdateInstance(instance.id);
@@ -59,7 +60,11 @@ export function InstanceDrawer({
   }, [confirmation, onClose]);
 
   const accepted = (action: string) => {
-    setAcceptance(`${action} accepted. Status refreshes automatically.`);
+    feedback.accepted({
+      title: `${action} accepted`,
+      detail: 'Status refreshes automatically.',
+      dedupeKey: `instance:${instance.id}:${action.toLowerCase().replaceAll(' ', '-')}`,
+    });
   };
   const commandError = update.error ?? connect.error ?? reconnect.error ?? refreshQr.error ?? refreshCapabilities.error;
   const commandPending = update.isPending || connect.isPending || reconnect.isPending || refreshQr.isPending || refreshCapabilities.isPending;
@@ -80,10 +85,10 @@ export function InstanceDrawer({
         </header>
 
         <div className="drawer-scroll">
-          {acceptance && <div className="overview-error" role="status">{acceptance}</div>}
           {commandError && (
             <InlineError
               error={commandError}
+              announce
               onRetry={() => {
                 if (update.error) update.mutate(displayName.trim());
                 else if (connect.error) connect.mutate();

@@ -304,7 +304,7 @@ export function Shell({
             </span>
             <button
               type="button"
-              onClick={onDisconnect}
+              onClick={() => onDisconnect()}
               className="out"
               aria-label="Sign out of API session"
               title="Sign out of API session"

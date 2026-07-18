@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { createApiClient } from '@/api/client';
 import { ApiFailure, unwrap } from '@/api/envelopes';
+import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
 
 const DEFAULT_BASE_URL = import.meta.env.DEV ? window.location.origin : 'http://localhost:3000';
@@ -30,7 +31,13 @@ function isValidOrigin(value: string) {
   }
 }
 
-export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSession) => void }) {
+export function ConnectPage({
+  notice,
+  onConnected,
+}: {
+  notice?: 'session-invalid';
+  onConnected: (session: ConsoleSession) => void;
+}) {
   const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
@@ -81,6 +88,8 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
   };
 
   const canSubmit = isValidOrigin(baseUrl) && apiKey.trim().length > 0 && !pending;
+  const baseUrlError = error?.category === 'validation' ? error : undefined;
+  const connectionError = error?.category !== 'validation' ? error : undefined;
 
   return (
     <main className="connect-screen">
@@ -102,6 +111,18 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
           No active session
         </div>
       </header>
+
+      {notice === 'session-invalid' && (
+        <div className="connect-page-notice">
+          <SurfaceNotice
+            kind="warning"
+            label="Session"
+            title="Your API session is no longer valid."
+            detail="Enter a valid API key to reconnect to the OmniWA runtime."
+            announcement="assertive"
+          />
+        </div>
+      )}
 
       <div className="connect-layout">
         <section className="connect-intro" aria-labelledby="connect-title">
@@ -157,13 +178,15 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
                 value={baseUrl}
                 required
                 autoComplete="url"
-                aria-describedby="connect-base-url-help"
+                aria-describedby={`connect-base-url-help${baseUrlError ? ' connect-base-url-error' : ''}`}
+                aria-invalid={baseUrlError ? 'true' : undefined}
                 onChange={(event) => setBaseUrl(event.target.value)}
               />
               <p id="connect-base-url-help">
                 In local development, use the console origin to route requests through the Vite
                 proxy.
               </p>
+              {baseUrlError && <p id="connect-base-url-error" className="help error" role="alert">{baseUrlError.message}</p>}
             </div>
 
             <div className="connect-field">
@@ -211,24 +234,25 @@ export function ConnectPage({ onConnected }: { onConnected: (session: ConsoleSes
             </label>
 
             {remember && (
-              <div className="connect-storage-warning">
-                <span className="status">
-                  <span className="dot" style={{ background: 'var(--pending)' }} />
-                  persistent browser storage
-                </span>
-                <p>This stores the API key in this browser. Use only on a trusted device.</p>
-              </div>
+              <SurfaceNotice
+                kind="warning"
+                label="Storage"
+                title="Persistent browser storage"
+                detail="This stores the API key in this browser. Use only on a trusted device."
+                className="connect-storage-warning"
+              />
             )}
 
-            {error && (
-              <div className="connect-error" role="alert">
-                <span className="status">
-                  <span className="dot" style={{ background: 'var(--failed)' }} />
-                  <strong>{error.category}</strong>
-                </span>
-                <p>{error.message}</p>
-                {error.requestId && <span className="mono">request {error.requestId}</span>}
-              </div>
+            {connectionError && (
+              <SurfaceNotice
+                kind="error"
+                label={connectionError.category}
+                title={connectionError.message}
+                requestId={connectionError.requestId}
+                showMissingRequestId
+                className="connect-error"
+                announcement="assertive"
+              />
             )}
 
             <button

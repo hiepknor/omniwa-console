@@ -48,7 +48,7 @@ export function CreateInstanceDialog({
                 autoComplete="off"
               />
             </div>
-            {error !== undefined && error !== null && <InlineError error={error} onRetry={() => onCreate(displayName.trim())} />}
+            {error !== undefined && error !== null && <InlineError error={error} onRetry={() => onCreate(displayName.trim())} announce />}
           </div>
           <footer>
             <button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button>

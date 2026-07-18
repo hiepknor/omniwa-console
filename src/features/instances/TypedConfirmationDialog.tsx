@@ -60,7 +60,7 @@ export function TypedConfirmationDialog({
               autoComplete="off"
             />
           </div>
-          {error !== undefined && error !== null && <InlineError error={error} onRetry={onConfirm} />}
+          {error !== undefined && error !== null && <InlineError error={error} onRetry={onConfirm} announce />}
         </div>
         <footer>
           <button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button>

@@ -177,6 +177,10 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 ### Toasts
 
 - Bottom-right, Elevated bg, status-colored 3px left edge, title 13px/500 + detail 12px, and **always** the mono `requestId` when the toast reports an API error.
+- Toasts are reserved for transient command feedback or user-triggered errors whose originating surface has closed. Background reads never create toasts.
+- Accepted commands use pending semantics and the word `accepted`; they never claim completion. Accepted toasts dismiss after six seconds, while error toasts remain until dismissed or replaced by `dedupeKey`.
+- Persistent transport, session, permission, and storage conditions use the same feedback anatomy as an in-flow notice or workspace banner. They remain visible until their condition resolves.
+- The complete lifecycle, placement, deduplication, and accessibility policy lives in `docs/FEEDBACK.md`.
 
 ### Connect entry surface
 

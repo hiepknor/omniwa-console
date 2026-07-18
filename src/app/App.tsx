@@ -1,4 +1,4 @@
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { ApiProvider } from '@/api/ApiProvider';
@@ -6,32 +6,48 @@ import { ApiFailure } from '@/api/envelopes';
 import { OverviewPage } from '@/features/overview/OverviewPage';
 import { InstancesPage } from '@/features/instances/InstancesPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
+import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
 import { PanelStub } from './PanelStub';
 import { Shell } from './Shell';
 
-export function App() {
+type ConnectNotice = 'session-invalid' | undefined;
+
+function AppRuntime() {
+  const feedback = useFeedback();
+  const feedbackRef = useRef(feedback);
+  feedbackRef.current = feedback;
   const [session, setSession] = useState<ConsoleSession | null>(() => loadSession());
-  const disconnectRef = useRef<() => void>(() => undefined);
+  const [connectNotice, setConnectNotice] = useState<ConnectNotice>();
+  const disconnectRef = useRef<(notice?: ConnectNotice) => void>(() => undefined);
   const [queryClient] = useState(
-    () =>
-      new QueryClient({
+    () => {
+      const handleSuccess = () => feedbackRef.current.reportTransportSuccess();
+      const handleError = (error: Error) => {
+        if (error instanceof ApiFailure) {
+          feedbackRef.current.reportTransportSuccess();
+          if (error.category === 'authentication') disconnectRef.current('session-invalid');
+          return;
+        }
+        feedbackRef.current.reportTransportFailure(error);
+      };
+      return new QueryClient({
         queryCache: new QueryCache({
-          onError: (error) => {
-            if (error instanceof ApiFailure && error.category === 'authentication') {
-              disconnectRef.current();
-            }
-          },
+          onError: handleError,
+          onSuccess: handleSuccess,
         }),
+        mutationCache: new MutationCache({ onError: handleError, onSuccess: handleSuccess }),
         defaultOptions: {
           queries: { retry: 1, staleTime: 10_000 },
         },
-      }),
+      });
+    },
   );
 
-  const disconnect = () => {
+  const disconnect = (notice?: ConnectNotice) => {
     clearSession();
     queryClient.clear();
+    setConnectNotice(notice);
     setSession(null);
   };
   disconnectRef.current = disconnect;
@@ -69,7 +85,19 @@ export function App() {
           },
         ]
       : [
-          { path: '/connect', element: <ConnectPage onConnected={setSession} /> },
+          {
+            path: '/connect',
+            element: (
+              <ConnectPage
+                notice={connectNotice}
+                onConnected={(nextSession) => {
+                  setConnectNotice(undefined);
+                  feedback.reportTransportSuccess();
+                  setSession(nextSession);
+                }}
+              />
+            ),
+          },
           { path: '*', element: <Navigate to="/connect" replace /> },
         ],
   );
@@ -79,4 +107,8 @@ export function App() {
       <RouterProvider router={router} />
     </QueryClientProvider>
   );
+}
+
+export function App() {
+  return <FeedbackProvider><AppRuntime /></FeedbackProvider>;
 }

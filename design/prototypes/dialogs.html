@@ -121,14 +121,66 @@
 
     <div class="demo">
       <div class="caption">Error toast (bottom-right, always carries requestId)</div>
-      <div class="toast">
-        <b>Failed to connect instance</b>
-        <span>business · instance is already connecting</span>
-        <span class="mono">req_01j2m9xq44</span>
+      <div class="feedback-toast feedback-tone-error">
+        <div class="feedback-content">
+          <span class="dot feedback-dot feedback-dot-error"></span>
+          <div class="feedback-copy">
+            <span class="feedback-label">error</span>
+            <strong>Failed to connect instance</strong>
+            <p>business · instance is already connecting</p>
+            <div class="feedback-request"><span class="mono">req_01j2m9xq44</span><button type="button">Copy</button></div>
+            <button class="btn sm feedback-action" type="button">Retry</button>
+          </div>
+          <button class="feedback-dismiss" type="button" aria-label="Dismiss notification">✕</button>
+        </div>
       </div>
       <p class="help dialog-sheet-note dialog-sheet-note-narrow">Category and message come from the
         error envelope verbatim; the mono requestId links the operator to platform logs. A
         "Retry" action appears only when <span class="mono">details.retryable</span> is true.</p>
+    </div>
+
+    <div class="demo">
+      <div class="caption">Accepted toast (temporary, never claims completion)</div>
+      <div class="feedback-toast feedback-tone-accepted">
+        <div class="feedback-content">
+          <span class="dot feedback-dot feedback-dot-accepted"></span>
+          <div class="feedback-copy">
+            <span class="feedback-label">accepted</span>
+            <strong>Create instance accepted</strong>
+            <p>The instance will appear after the platform records it.</p>
+          </div>
+          <button class="feedback-dismiss" type="button" aria-label="Dismiss notification">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="caption">Workspace condition banner (persistent)</div>
+      <div class="feedback-notice feedback-tone-error">
+        <div class="feedback-content">
+          <span class="dot feedback-dot feedback-dot-error"></span>
+          <div class="feedback-copy">
+            <span class="feedback-label">connection</span>
+            <strong>OmniWA API is unreachable</strong>
+            <p>Existing data remains visible while the connection recovers.</p>
+            <button class="btn sm feedback-action" type="button">Retry active reads</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="caption">Surface API error (dialog, drawer, or table)</div>
+      <div class="feedback-notice feedback-tone-error">
+        <div class="feedback-content">
+          <span class="dot feedback-dot feedback-dot-error"></span>
+          <div class="feedback-copy">
+            <span class="feedback-label">authorization</span>
+            <strong>This API key cannot disconnect the instance.</strong>
+            <div class="feedback-request"><span class="mono">req_7zK91L</span><button type="button">Copy</button></div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

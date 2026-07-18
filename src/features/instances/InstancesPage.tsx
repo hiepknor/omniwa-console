@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { instanceKeys } from '@/api/keys';
 import { InlineError } from '@/components/InlineError';
+import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
 import {
@@ -52,7 +53,7 @@ export function InstancesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
-  const [acceptance, setAcceptance] = useState<string>();
+  const feedback = useFeedback();
   const search = searchParams.get('search') ?? '';
   const status = searchParams.get('status') ?? '';
   const initialCursor = searchParams.get('cursor') ?? undefined;
@@ -157,7 +158,6 @@ export function InstancesPage() {
         }
       />
 
-      {acceptance && <div className="overview-error" role="status">{acceptance}</div>}
       <DataTableWorkspace className="instances-workspace" aria-labelledby="instances-table-title">
         <DataTableToolbar>
           <label className="search-field">
@@ -231,7 +231,10 @@ export function InstancesPage() {
 
       {instanceId && (
         detail.data?.resource ? (
-          <InstanceDrawer instance={detail.data.resource} onClose={() => navigate(listLocation)} onDestroyed={() => { setAcceptance('Destroy accepted. The list refreshes automatically.'); navigate(listLocation); }} />
+          <InstanceDrawer instance={detail.data.resource} onClose={() => navigate(listLocation)} onDestroyed={() => {
+            feedback.accepted({ title: 'Destroy instance accepted', detail: 'The list refreshes automatically.', dedupeKey: `instance:${detail.data.resource?.id}:destroy` });
+            navigate(listLocation);
+          }} />
         ) : detail.data?.unavailable ? (
           <DrawerState onClose={() => navigate(listLocation)}><div className="empty">Instance data is not available yet.</div></DrawerState>
         ) : detail.isError ? (
@@ -246,7 +249,10 @@ export function InstancesPage() {
           error={create.error}
           isPending={create.isPending}
           onCancel={() => setCreateOpen(false)}
-          onCreate={(displayName) => create.mutate(displayName, { onSuccess: () => { setCreateOpen(false); setAcceptance('Create accepted. The new instance will appear after the platform records it.'); } })}
+          onCreate={(displayName) => create.mutate(displayName, { onSuccess: () => {
+            setCreateOpen(false);
+            feedback.accepted({ title: 'Create instance accepted', detail: 'The instance will appear after the platform records it.', dedupeKey: 'instance:create' });
+          } })}
         />
       )}
     </>

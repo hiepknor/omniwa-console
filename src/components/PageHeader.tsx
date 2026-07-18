@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { WorkspaceBanner } from './feedback/WorkspaceBanner';
 
 export function PageHeader({
   title,
@@ -12,15 +13,18 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="page-head">
-      <div className="head-context">
-        {eyebrow && <span className="crumb">{eyebrow}</span>}
-        <div className="head-title-row">
-          <h1>{title}</h1>
-          {meta && <div className="head-meta">{meta}</div>}
+    <>
+      <header className="page-head">
+        <div className="head-context">
+          {eyebrow && <span className="crumb">{eyebrow}</span>}
+          <div className="head-title-row">
+            <h1>{title}</h1>
+            {meta && <div className="head-meta">{meta}</div>}
+          </div>
         </div>
-      </div>
-      {actions && <div className="head-right">{actions}</div>}
-    </header>
+        {actions && <div className="head-right">{actions}</div>}
+      </header>
+      <WorkspaceBanner />
+    </>
   );
 }

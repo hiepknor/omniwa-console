@@ -82,6 +82,7 @@ This repository does not own:
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Layers, module boundaries, dependency rules |
 | [docs/PANELS.md](docs/PANELS.md) | Every console panel and the operation IDs it uses |
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, pagination, error handling |
+| [docs/FEEDBACK.md](docs/FEEDBACK.md) | Toast, surface notice, banner, and feedback lifecycle contract |
 | [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | API key entry, storage, and scope handling |
 | [docs/REALTIME.md](docs/REALTIME.md) | SSE ingestion, reconnect, cache invalidation |
 | [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Milestones and per-panel build order |

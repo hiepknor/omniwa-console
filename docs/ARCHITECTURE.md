@@ -30,7 +30,7 @@ never above.
 | --- | --- | --- | --- |
 | App shell | `src/app/` | Router, layout, providers, navigation, connect screen wiring | features, components, api, lib |
 | Features | `src/features/<panel>/` | One directory per panel: pages, panel-specific components, query hooks | components, api, lib |
-| Components | `src/components/` | Reusable presentational components (tables, badges, empty states, envelope-aware list views) | lib |
+| Components | `src/components/` | Reusable presentational components (tables, feedback, badges, empty states, envelope-aware list views) | api, lib |
 | API boundary | `src/api/` | Generated types, typed client factory, envelope helpers, query-key conventions, SSE client | lib |
 | Lib | `src/lib/` | Session storage, formatting, small utilities | (nothing internal) |
 
@@ -76,6 +76,16 @@ they must not add panel-specific row heights, sticky offsets, or responsive
 table breakpoints. `pnpm design:check` compares critical geometry between the
 production stylesheet and the static prototype stylesheet, and is part of
 the required `pnpm check` gate.
+
+## Shared feedback system
+
+Transient feedback, scoped API failures, and workspace conditions use the
+primitives in `src/components/feedback/`. Features report outcomes through the
+provider and keep scoped errors attached to their dialog, drawer, form, or
+table. They do not implement panel-specific toast queues, timers, or transport
+banners. Query and mutation cache callbacks update browser transport state
+without issuing an extra health operation from the shell. See
+`docs/FEEDBACK.md` for routing and lifecycle policy.
 
 ## Contract-driven boundary
 
