@@ -1776,7 +1776,8 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
 .responsive-table-column-xl{width:187px;min-width:187px}
 .responsive-table-column-flex{min-width:180px}
 .responsive-table-kind-numeric{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
-.responsive-table-mobile-header,.responsive-table-mobile-cell{display:none}
+.responsive-table-mobile-header{display:table-cell;width:0;min-width:0;max-width:0;padding:0!important;visibility:collapse}
+.responsive-table-mobile-cell{display:none}
 .responsive-table-actionable{cursor:pointer}
 .responsive-table-actionable:focus{outline:none}
 .responsive-table-actionable:focus-visible{box-shadow:inset 0 0 0 1px var(--fg-2)}
@@ -1840,7 +1841,7 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
   .adaptive-table .responsive-table-scroll{overflow:visible}
   .adaptive-table .responsive-table{width:100%;min-width:0!important;table-layout:fixed}
   .responsive-table-desktop-cell{display:none}
-  .responsive-table-mobile-header{display:table-cell;height:0!important;padding:0!important;border:0!important;font-size:0;line-height:0}
+  .responsive-table-mobile-header{display:table-cell;width:auto;min-width:0;max-width:none;height:0!important;padding:0!important;border:0!important;font-size:0;line-height:0;visibility:visible}
   .responsive-table-mobile-cell{display:table-cell;height:auto!important;padding:0!important;white-space:normal}
   .responsive-table tbody tr{height:auto}
   .responsive-table tbody tr:hover{background:color-mix(in oklab,var(--fg) 4%,transparent)}
