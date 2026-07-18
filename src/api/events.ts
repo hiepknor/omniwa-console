@@ -1,6 +1,6 @@
 import type { QueryKey } from '@tanstack/react-query';
 
-import { instanceKeys, queryKeys } from './keys';
+import { instanceKeys, messageKeys, queryKeys } from './keys';
 
 export type RealtimeEventEnvelope = {
   id: string;
@@ -362,7 +362,14 @@ export function openEventStream(options: EventStreamOptions): EventStreamHandle 
 const INVALIDATION_KEYS: Readonly<Record<string, readonly QueryKey[]>> = {
   instance: [instanceKeys.root, queryKeys.dashboard, queryKeys.actionRequired],
   session: [instanceKeys.root],
-  message: [queryKeys.messageMetrics, queryKeys.queueMetrics, queryKeys.dashboard],
+  message: [
+    queryKeys.messageMetrics,
+    queryKeys.queueMetrics,
+    queryKeys.dashboard,
+    instanceKeys.root,
+    messageKeys.root,
+    messageKeys.chats,
+  ],
   media: [queryKeys.mediaMetrics, queryKeys.dashboard],
   webhook: [queryKeys.webhookMetrics],
   health: [
