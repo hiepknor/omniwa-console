@@ -1,22 +1,14 @@
 import { ApiFailure } from '@/api/envelopes';
-import { useDashboardSummary, useHealth, useHealthReadiness } from './hooks';
+import { useHealth, useHealthReadiness } from './hooks';
 
-type HealthPosture = {
-  dotClass: string;
-  label: string;
-  degraded?: boolean;
-  title?: string;
-};
-
-function healthPosture(prefix: string, status: string | undefined): HealthPosture {
+function isPositive(status: string | undefined): boolean {
   const normalized = status?.toLowerCase();
-  if (normalized === 'ok' || normalized === 'healthy') {
-    return { dotClass: 'dot-ok', label: `${prefix} ${prefix === 'API' ? 'healthy' : 'ok'}` };
-  }
-  if (normalized === 'degraded') {
-    return { dotClass: 'dot-degraded', label: `${prefix} degraded`, degraded: true };
-  }
-  return { dotClass: 'dot-info', label: `${prefix} ${status ?? '—'}` };
+  return normalized === 'ok' || normalized === 'healthy' || normalized === 'alive' || normalized === 'ready';
+}
+
+function displayStatus(status: string | undefined, fallback: string): string {
+  if (!status) return fallback;
+  return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
 function failureTitle(error: unknown): string | undefined {
@@ -27,42 +19,53 @@ function failureTitle(error: unknown): string | undefined {
 export function HealthStrip() {
   const health = useHealth();
   const readiness = useHealthReadiness();
-  const dashboard = useDashboardSummary();
-
-  const apiPosture: HealthPosture = health.isError
-    ? { dotClass: 'dot-failed', label: 'API unreachable', degraded: false, title: failureTitle(health.error) }
-    : healthPosture('API', health.data?.resource?.status);
-  const readinessPosture: HealthPosture = readiness.isError
-    ? { dotClass: 'dot-failed', label: 'Readiness unreachable', degraded: false, title: failureTitle(readiness.error) }
-    : healthPosture('Readiness', readiness.data?.resource?.status);
-
-  const connected = dashboard.data?.resource?.connectedInstanceCount;
-  const total = dashboard.data?.resource?.instanceCount;
-  const hasInstanceCounts = connected !== undefined && total !== undefined;
-  const instancesPosture: HealthPosture = !hasInstanceCounts
-    ? { dotClass: 'dot-info', label: 'Instances —' }
-    : connected === total
-      ? { dotClass: 'dot-ok', label: `Instances ${connected}/${total} connected` }
-      : {
-          dotClass: 'dot-pending',
-          label: `${connected}/${total} connected`,
-          degraded: true,
-        };
+  const apiHealthy = !health.isError && isPositive(health.data?.resource?.status);
+  const readinessHealthy = !readiness.isError && isPositive(readiness.data?.resource?.status);
+  const readinessPending = readiness.isLoading || (!readiness.isError && !readiness.data?.resource?.status);
+  const apiStatus = health.isError ? 'Unreachable' : displayStatus(health.data?.resource?.status, 'Pending');
+  const readinessStatus = readiness.isError ? 'Unreachable' : displayStatus(readiness.data?.resource?.status, 'Pending');
+  const summary = health.isError
+    ? 'Not observable'
+    : apiHealthy && readinessHealthy
+      ? 'Operational'
+      : apiHealthy && readinessPending
+        ? 'Posture pending'
+      : apiHealthy
+        ? 'Partially observable'
+        : 'Posture pending';
+  const heading = health.isError
+    ? 'The API cannot be reached.'
+    : apiHealthy && readinessHealthy
+      ? 'The API is responding and the platform is ready.'
+      : apiHealthy && readinessPending
+        ? 'The API is responding. Readiness is still pending.'
+      : apiHealthy
+        ? 'The API is responding. Readiness cannot be reached.'
+        : 'Platform posture is still being determined.';
+  const detail = health.isError
+    ? 'The console cannot read platform posture until the API responds.'
+    : apiHealthy && readinessHealthy
+      ? 'The console can reach the API and confirm that the platform is ready to process work.'
+      : apiHealthy && readinessPending
+        ? 'The console is waiting for the readiness probe before reporting platform posture.'
+      : apiHealthy
+        ? 'Commands can reach the API, but the console cannot confirm that the platform is ready to process work.'
+        : 'Health reads have not reported a conclusive platform posture yet.';
 
   return (
-    <section className="overview-health" aria-labelledby="overview-health-title">
-      <h2 id="overview-health-title">Health</h2>
-      <div className="health" aria-label="System health posture">
-        {[apiPosture, readinessPosture, instancesPosture].map((posture) => (
-          <span
-            className={`health-item${posture.degraded ? ' health-item-degraded' : ''}`}
-            key={posture.label}
-            title={posture.title}
-          >
-            <span className={`dot ${posture.dotClass}`}></span>
-            <span>{posture.label}</span>
-          </span>
-        ))}
+    <section className="overview-posture" aria-labelledby="overview-posture-title">
+      <div className="overview-section-label"><span>Platform posture</span><span>{summary}</span></div>
+      <h2 id="overview-posture-title">{heading}</h2>
+      <p>{detail}</p>
+      <div className="overview-posture-reads" aria-label="Platform posture reads">
+        <div className="overview-posture-read" title={failureTitle(health.error)}>
+          <span className={`dot ${health.isError ? 'dot-failed' : apiHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
+          <span><strong>API</strong><small>{apiStatus}</small></span>
+        </div>
+        <div className="overview-posture-read overview-posture-read-unreachable" title={failureTitle(readiness.error)}>
+          <span className={`dot ${readiness.isError ? 'dot-degraded' : readinessHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
+          <span><strong>Readiness</strong><small>{readinessStatus}</small></span>
+        </div>
       </div>
     </section>
   );

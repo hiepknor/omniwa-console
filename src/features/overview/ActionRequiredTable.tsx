@@ -60,11 +60,42 @@ function safeSubjectRef(subjectRef: string | undefined): string | undefined {
   return subjectRef;
 }
 
+function NeutralActionState({ status, title, detail }: { status: string; title: string; detail: string }) {
+  return (
+    <section className="overview-actions" aria-labelledby="overview-actions-title">
+      <div className="overview-section-label"><span>Action required</span><span>{status}</span></div>
+      <div className="overview-neutral-state">
+        <span className="overview-neutral-mark" aria-hidden="true"></span>
+        <div>
+          <h2 id="overview-actions-title">{title}</h2>
+          <p>{detail}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function ActionRequiredTable() {
   const navigate = useNavigate();
   const query = useActionRequiredItems();
   const items = query.data?.items ?? [];
-  const total = query.data?.unavailable ? 0 : paginationTotal(query.data?.pagination, items.length);
+  const hasKnownTotal = !query.data?.unavailable && !query.isError && !query.isLoading;
+  const total = hasKnownTotal ? paginationTotal(query.data?.pagination, items.length) : undefined;
+  if (query.data?.unavailable) {
+    return (
+      <NeutralActionState
+        status="Data pending"
+        title="Action-required items are not available yet."
+        detail="This read is pending. No failure has been reported, and unavailable data is not treated as an empty queue."
+      />
+    );
+  }
+  if (query.isLoading) {
+    return <NeutralActionState status="Checking" title="Checking action-required items." detail="The first action read is still in progress." />;
+  }
+  if (!query.isError && items.length === 0) {
+    return <NeutralActionState status="0 reported" title="Nothing needs attention." detail="The action read completed with no action-required items." />;
+  }
   const columns: DataTableColumn<ActionRequiredItem>[] = [
     {
       id: 'item',
@@ -107,22 +138,15 @@ export function ActionRequiredTable() {
       },
     },
   ];
-  const tableState: DataTableState<ActionRequiredItem> = query.data?.unavailable
-    ? { status: 'unavailable', message: 'No activity yet. Action items appear once the platform records events.' }
-    : query.isError
-      ? { status: 'error', error: query.error, onRetry: query.refetch }
-      : query.isLoading
-        ? { status: 'loading', skeletonRows: 4 }
-        : items.length === 0
-          ? { status: 'empty', message: 'Nothing needs attention.' }
-          : { status: 'ready', rows: items };
+  const tableState: DataTableState<ActionRequiredItem> = query.isError
+    ? { status: 'error', error: query.error, onRetry: query.refetch }
+    : { status: 'ready', rows: items };
 
   return (
-    <DataTableWorkspace className="section overview-actions" aria-labelledby="overview-actions-title">
-      <div className="overview-section-head">
-        <h2 id="overview-actions-title">
-          Action required <span className="muted num">· {total}</span>
-        </h2>
+    <DataTableWorkspace className="overview-actions overview-actions-table" aria-labelledby="overview-actions-title">
+      <div className="overview-section-label">
+        <h2 id="overview-actions-title">Action required</h2>
+        <span className="num">{query.isError ? 'Read failed' : `${total ?? items.length} reported`}</span>
       </div>
       <DataTable
         caption="Action required work queue"
@@ -161,7 +185,15 @@ export function ActionRequiredTable() {
         }}
         footer={(
           <DataTableFooter
-            primary={<span className="num">{tableState.status === 'ready' || tableState.status === 'empty' ? `${items.length} of ${total} items` : 'Results —'}</span>}
+            primary={(
+              <span className="num">
+                {query.data?.unavailable
+                  ? 'Awaiting data'
+                  : total === undefined
+                    ? 'Results —'
+                    : `${items.length} of ${total} items`}
+              </span>
+            )}
           />
         )}
       />

@@ -21,18 +21,15 @@ export function OverviewPage() {
         title="Overview"
         actions={
           <>
-            <span className="live"><span className="dot"></span>polling</span>
+            <span className="overview-refresh-cadence">Refreshes every <span className="num">15s</span></span>
             <button className="btn" type="button" onClick={refresh}>Refresh</button>
           </>
         }
       />
       <div className="overview-content">
         <HealthStrip />
-        <MetricCards />
-        <div className="overview-workspace">
-          <ActionRequiredTable />
-          <EventTicker />
-        </div>
+        <MetricCards actionRequired={<ActionRequiredTable />} />
+        <EventTicker />
       </div>
     </>
   );

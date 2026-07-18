@@ -15,26 +15,29 @@ function eventDot(type: string): string {
 
 export function EventTicker({ events = [] }: { events?: OverviewEvent[] }) {
   return (
-    <section className="section overview-events" aria-labelledby="overview-events-title">
-      <div className="overview-section-head">
-        <h2 id="overview-events-title">Live events</h2>
-        <span className="live"><span className="dot"></span>polling</span>
-      </div>
-      <div className="ticker">
-        <header><span>Stream</span><span className="ticker-label">Event · Resource · Age</span></header>
-        <div className="event-list" tabIndex={0} role="region" aria-label="Live event stream">
-          {events.length === 0 ? (
-            <div className="empty">Live events appear when the realtime stream connects. Data refreshes every 15s meanwhile.</div>
-          ) : events.map((event, index) => (
-            <div className="event" key={`${event.type}-${event.resourceId ?? ''}-${event.updatedAt ?? index}`}>
+    <section className="overview-events" aria-labelledby="overview-events-title">
+      <div className="overview-section-label"><span>Event capability</span><span>{events.length > 0 ? 'Connected' : 'Not connected'}</span></div>
+      {events.length === 0 ? (
+        <div className="overview-event-state">
+          <span className="overview-event-glyph" aria-hidden="true"><i></i><i></i><i></i></span>
+          <div>
+            <h2 id="overview-events-title">Realtime event stream is not connected.</h2>
+            <p>No events are shown. Page-level metrics continue to refresh every <span className="num">15 seconds</span>; this event surface does not populate through polling.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="overview-event-feed" role="region" aria-label="Live event stream">
+          <h2 id="overview-events-title" className="visually-hidden">Realtime event stream</h2>
+          {events.map((event, index) => (
+            <div className="overview-event-row" key={`${event.type}-${event.resourceId ?? ''}-${event.updatedAt ?? index}`}>
               <span className={`dot ${eventDot(event.type)}`}></span>
-              <span className="type">{event.type}</span>
+              <span className="mono">{event.type}</span>
               <span className="mono">{event.resourceId ?? '—'}</span>
               <span className="ts">{relativeTime(event.updatedAt) || '—'}</span>
             </div>
           ))}
         </div>
-      </div>
+      )}
     </section>
   );
 }
