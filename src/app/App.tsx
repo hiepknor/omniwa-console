@@ -6,6 +6,7 @@ import { ApiFailure } from '@/api/envelopes';
 import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { OverviewPage } from '@/features/overview/OverviewPage';
 import { InstancesPage } from '@/features/instances/InstancesPage';
+import { ChatsPage } from '@/features/chats/ChatsPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
@@ -70,9 +71,9 @@ function AppRuntime() {
             children: [
               { path: '/connect', element: <Navigate to="/overview" replace /> },
               { path: '/', element: <Navigate to="/overview" replace /> },
-              { path: '/chats', element: <PanelStub panel="chats" /> },
-              { path: '/chats/:instanceId', element: <PanelStub panel="chats" /> },
-              { path: '/chats/:instanceId/:chatId', element: <PanelStub panel="chats" /> },
+              { path: '/chats', element: <ChatsPage /> },
+              { path: '/chats/:instanceId', element: <ChatsPage /> },
+              { path: '/chats/:instanceId/:chatId', element: <ChatsPage /> },
               { path: '/groups', element: <PanelStub panel="groups" /> },
               { path: '/groups/:instanceId', element: <PanelStub panel="groups" /> },
               { path: '/messages', element: <PanelStub panel="messages" /> },
