@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
 import { relativeTime } from '@/lib/format';
-import { useActionRequiredItems, type ActionRequiredItem } from './hooks';
+import { useActionRequiredItems, useStableReadState, type ActionRequiredItem } from './hooks';
 
 function statusDot(status: string | undefined): string {
   switch (status?.toLowerCase()) {
@@ -95,9 +95,10 @@ function ActionItem({ item }: { item: ActionRequiredItem }) {
 
 export function ActionRequiredList() {
   const query = useActionRequiredItems();
+  const queryState = useStableReadState(query);
   const [showAll, setShowAll] = useState(false);
   const items = query.data?.items ?? [];
-  const hasKnownTotal = !query.data?.unavailable && !query.isLoading;
+  const hasKnownTotal = !query.data?.unavailable && !queryState.isInitialLoading;
   const total = hasKnownTotal ? paginationTotal(query.data?.pagination, items.length) : undefined;
 
   if (query.data?.unavailable) {
@@ -109,14 +110,14 @@ export function ActionRequiredList() {
       />
     );
   }
-  if (query.isLoading) {
+  if (queryState.isInitialLoading) {
     return <NeutralActionState status="Checking" title="Checking action-required items." detail="The first action read is still in progress." />;
   }
-  if (query.isError && items.length === 0) {
+  if (queryState.isError && items.length === 0) {
     return (
       <section className="overview-actions" aria-labelledby="overview-actions-title">
         <div className="overview-section-label"><h2 id="overview-actions-title">Action required</h2><span>Read failed</span></div>
-        <InlineError error={query.error} onRetry={() => { void query.refetch(); }} className="overview-action-error" />
+        <InlineError error={queryState.error} onRetry={() => { void query.refetch(); }} className="overview-action-error" />
       </section>
     );
   }
@@ -131,12 +132,12 @@ export function ActionRequiredList() {
     <section className="overview-actions overview-action-list" aria-labelledby="overview-actions-title">
       <div className="overview-section-label">
         <h2 id="overview-actions-title">Action required</h2>
-        <span className="num">{query.isError ? 'Stale' : `${total ?? items.length} reported`}</span>
+        <span className="num">{queryState.isError ? 'Stale' : `${total ?? items.length} reported`}</span>
       </div>
       <div className="overview-action-items">
         {visibleItems.map((item, index) => <ActionItem item={item} key={item.id ?? `${item.status ?? item.category ?? 'unknown'}-${index}`} />)}
       </div>
-      {query.isError && <InlineError error={query.error} onRetry={() => { void query.refetch(); }} className="overview-action-error" />}
+      {queryState.isError && <InlineError error={queryState.error} onRetry={() => { void query.refetch(); }} className="overview-action-error" />}
       <div className="overview-action-footer">
         <span>Showing {visibleItems.length} of {total ?? items.length}</span>
         {hasMore && (

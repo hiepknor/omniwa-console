@@ -47,9 +47,9 @@ export function OverviewDiagnostics({
         {details.map((detail) => (
           <div className="overview-diagnostic-row" key={detail.source}>
             <strong>{detail.source}</strong>
-            <span className="mono">{detail.category}</span>
-            <span>{detail.message}</span>
-            <span className="mono">{detail.requestId ?? 'Request ID unavailable'}</span>
+            <span className="mono" title={detail.category}>{detail.category}</span>
+            <span title={detail.message}>{detail.message}</span>
+            <span className="mono" title={detail.requestId ?? 'Request ID unavailable'}>{detail.requestId ?? 'Request ID unavailable'}</span>
           </div>
         ))}
       </div>

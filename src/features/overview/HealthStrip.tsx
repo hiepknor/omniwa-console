@@ -1,4 +1,4 @@
-import { useHealth, useHealthReadiness } from './hooks';
+import { isTransportFailure, useHealth, useHealthReadiness, useStableReadState } from './hooks';
 import { OverviewDiagnostics, type OverviewDiagnostic } from './OverviewDiagnostics';
 
 function isPositive(status: string | undefined): boolean {
@@ -14,14 +14,16 @@ function displayStatus(status: string | undefined, fallback: string): string {
 export function HealthStrip() {
   const health = useHealth();
   const readiness = useHealthReadiness();
-  const apiStale = health.isError && health.data?.resource?.status !== undefined;
-  const readinessStale = readiness.isError && readiness.data?.resource?.status !== undefined;
+  const healthState = useStableReadState(health);
+  const readinessState = useStableReadState(readiness);
+  const apiStale = healthState.isError && health.data?.resource?.status !== undefined;
+  const readinessStale = readinessState.isError && readiness.data?.resource?.status !== undefined;
   const apiHealthy = isPositive(health.data?.resource?.status);
   const readinessHealthy = isPositive(readiness.data?.resource?.status);
-  const readinessPending = readiness.isLoading || (!readiness.isError && !readiness.data?.resource?.status);
-  const apiStatus = apiStale ? `${displayStatus(health.data?.resource?.status, 'Unknown')} · Stale` : health.isError ? 'Unreachable' : displayStatus(health.data?.resource?.status, 'Pending');
-  const readinessStatus = readinessStale ? `${displayStatus(readiness.data?.resource?.status, 'Unknown')} · Stale` : readiness.isError ? 'Unreachable' : displayStatus(readiness.data?.resource?.status, 'Pending');
-  const summary = health.isError && !apiStale
+  const readinessPending = readinessState.isInitialLoading || (!readinessState.isError && !readiness.data?.resource?.status);
+  const apiStatus = apiStale ? `${displayStatus(health.data?.resource?.status, 'Unknown')} · Stale` : healthState.isError ? 'Unreachable' : displayStatus(health.data?.resource?.status, 'Pending');
+  const readinessStatus = readinessStale ? `${displayStatus(readiness.data?.resource?.status, 'Unknown')} · Stale` : readinessState.isError ? 'Unreachable' : displayStatus(readiness.data?.resource?.status, 'Pending');
+  const summary = healthState.isError && !apiStale
     ? 'Not observable'
     : apiStale || readinessStale
       ? 'Stale posture'
@@ -32,7 +34,7 @@ export function HealthStrip() {
       : apiHealthy
         ? 'Partially observable'
         : 'Posture pending';
-  const heading = health.isError && !apiStale
+  const heading = healthState.isError && !apiStale
     ? 'The API cannot be reached.'
     : apiStale || readinessStale
       ? 'Last-known platform posture is stale.'
@@ -43,7 +45,7 @@ export function HealthStrip() {
       : apiHealthy
         ? 'The API is responding. Readiness cannot be reached.'
         : 'Platform posture is still being determined.';
-  const detail = health.isError && !apiStale
+  const detail = healthState.isError && !apiStale
     ? 'The console cannot read platform posture until the API responds.'
     : apiStale || readinessStale
       ? 'The console is preserving the last successful health reads because a refresh failed.'
@@ -55,8 +57,9 @@ export function HealthStrip() {
         ? 'Commands can reach the API, but the console cannot confirm that the platform is ready to process work.'
         : 'Health reads have not reported a conclusive platform posture yet.';
   const diagnostics: OverviewDiagnostic[] = [];
-  if (health.isError) diagnostics.push({ source: 'API health', error: health.error });
-  if (readiness.isError) diagnostics.push({ source: 'Readiness', error: readiness.error });
+  const originUnavailable = isTransportFailure(healthState.error) && isTransportFailure(readinessState.error);
+  if (healthState.isError) diagnostics.push({ source: originUnavailable ? 'Platform API' : 'API health', error: healthState.error });
+  if (readinessState.isError && !originUnavailable) diagnostics.push({ source: 'Readiness', error: readinessState.error });
 
   return (
     <section className="overview-posture" aria-labelledby="overview-posture-title">
@@ -65,11 +68,11 @@ export function HealthStrip() {
       <p>{detail}</p>
       <div className="overview-posture-reads" aria-label="Platform posture reads">
         <div className="overview-posture-read">
-          <span className={`dot ${apiStale ? 'dot-pending' : health.isError ? 'dot-failed' : apiHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
+          <span className={`dot ${apiStale ? 'dot-pending' : healthState.isError ? 'dot-failed' : apiHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
           <span><strong>API</strong><small>{apiStatus}</small></span>
         </div>
         <div className="overview-posture-read overview-posture-read-unreachable">
-          <span className={`dot ${readinessStale ? 'dot-pending' : readiness.isError ? 'dot-degraded' : readinessHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
+          <span className={`dot ${readinessStale ? 'dot-pending' : readinessState.isError ? 'dot-failed' : readinessHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
           <span><strong>Readiness</strong><small>{readinessStatus}</small></span>
         </div>
       </div>

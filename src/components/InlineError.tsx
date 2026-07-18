@@ -17,7 +17,7 @@ export function InlineError({
     <div className={className} role="alert">
       <span>
         {category}: {message}
-        {failure?.requestId && <span className="mono"> · {failure.requestId}</span>}
+        <span className="mono"> · {failure?.requestId ?? 'Request ID unavailable'}</span>
       </span>
       {failure?.retryable && (
         <button className="btn sm" type="button" onClick={onRetry}>

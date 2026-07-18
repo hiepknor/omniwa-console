@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useRef } from 'react';
 import { useApi } from '@/api/ApiProvider';
 import type { PublicData } from '@/api/envelopes';
 import type { components } from '@/api/generated/schema';
@@ -23,6 +24,42 @@ export type HealthResource = components['schemas']['HealthResource'];
 export type MetricsResource = components['schemas']['MetricsResource'];
 export type DashboardResource = components['schemas']['DashboardResource'];
 export type ActionRequiredItem = Extract<PublicData, { resourceType: 'health' }>;
+
+type ReadQueryState = {
+  data: unknown;
+  error: unknown;
+  isError: boolean;
+  isFetching: boolean;
+  isLoading: boolean;
+};
+
+/** Keep a settled failure visible while TanStack Query performs a background refetch. */
+export function useStableReadState(query: ReadQueryState) {
+  const lastError = useRef<unknown>();
+
+  if (query.isError) {
+    lastError.current = query.error;
+  } else if (!query.isFetching && query.data !== undefined) {
+    lastError.current = undefined;
+  }
+
+  const error = query.isError
+    ? query.error
+    : query.isFetching
+      ? lastError.current
+      : undefined;
+
+  return {
+    error,
+    isError: error !== undefined,
+    isInitialLoading: query.isLoading && error === undefined,
+  };
+}
+
+export function isTransportFailure(error: unknown): boolean {
+  if (error instanceof TypeError) return true;
+  return error instanceof Error && /failed to fetch|load failed|networkerror/i.test(error.message);
+}
 
 export function useHealth() {
   const client = useApi();
