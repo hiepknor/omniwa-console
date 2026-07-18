@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
+import { Composer } from './Composer';
 import { ConversationList } from './ConversationList';
+import { MessageTimeline } from './MessageTimeline';
 import { useChat, usePickerInstances } from './hooks';
 
 type ChatPane = 'conversations' | 'thread' | 'context';
@@ -32,17 +34,17 @@ export function ChatsPage() {
   const threadTitle = selectedChat?.displayName ?? selectedChat?.id ?? (chatId ? 'Conversation' : 'No conversation selected');
   const threadId = selectedChat?.id ?? chatId;
 
-  let threadBody: React.ReactNode;
-  if (!chatId) {
-    threadBody = <div className="chat-calm-state"><span className="eyebrow">Conversation</span><h2>Select a conversation</h2><p>Choose a direct chat to inspect its message timeline.</p></div>;
+  let timeline: React.ReactNode;
+  if (!instanceId || !chatId) {
+    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Conversation</span><h2>Select a conversation</h2><p>Choose a direct chat to inspect its message timeline.</p></div></div></div>;
   } else if (chat.data?.unavailable) {
-    threadBody = <div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Conversation details are not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div>;
+    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Conversation details are not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div></div></div>;
   } else if (chat.isError) {
-    threadBody = <InlineError error={chat.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" />;
+    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><InlineError error={chat.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" /></div></div>;
   } else if (chat.isLoading) {
-    threadBody = <div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading conversation details.</h2><p>The conversation read is in progress.</p></div>;
+    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading conversation details.</h2><p>The conversation read is in progress.</p></div></div></div>;
   } else {
-    threadBody = <div className="chat-calm-state"><span className="eyebrow">Timeline pending</span><h2>Message history will appear here.</h2><p>This workspace is ready for the conversation timeline when message reads are enabled.</p></div>;
+    timeline = <MessageTimeline instanceId={instanceId} chatId={chatId} />;
   }
 
   return (
@@ -70,9 +72,10 @@ export function ChatsPage() {
           <div className="spacer" />
           {chatId && <button className="btn sm contact-toggle" type="button" aria-controls="chat-context" onClick={() => setActivePane('context')}>Context</button>}
         </header>
-        <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off">
-          <div className="timeline-stack">{threadBody}</div>
-        </div>
+        {timeline}
+        {instanceId && chatId && !chat.isLoading && !chat.isError && !chat.data?.unavailable && (
+          <Composer instanceId={instanceId} chatId={chatId} chatName={threadTitle} />
+        )}
       </section>
 
       <aside className="context" id="chat-context" aria-label="Conversation context">

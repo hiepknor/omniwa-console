@@ -127,7 +127,9 @@ export function ConversationList({ instanceId, chatId, onOpenThread }: {
   const labelsAvailable = labelsQuery.data?.unavailable === undefined && labels.length > 0;
   const remainingLabels = labels.filter((label) => !activeLabelIds.includes(label.id));
 
-  const querySuffix = searchParams.size > 0 ? `?${searchParams.toString()}` : '';
+  const routeSearchParams = new URLSearchParams(searchParams);
+  routeSearchParams.delete('message');
+  const querySuffix = routeSearchParams.size > 0 ? `?${routeSearchParams.toString()}` : '';
   const chooseInstance = (nextInstanceId: string) => navigate(`/chats/${encodeURIComponent(nextInstanceId)}${querySuffix}`);
   const chooseChat = (nextChatId: string) => {
     if (!instanceId) return;

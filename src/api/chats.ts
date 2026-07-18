@@ -76,12 +76,12 @@ export async function getChat(
 export async function listInstanceMessages(
   client: ApiClient,
   instanceId: string,
-  params: { cursor?: string; limit?: number } = {},
+  params: { cursor?: string; limit?: number; sort?: string } = {},
 ): Promise<ReadResult<{ items: MessageResource[]; pagination: ChatPagination }>> {
   const result = await client.GET('/v1/instances/{instanceId}/messages', {
     params: {
       path: { instanceId },
-      query: { cursor: params.cursor, limit: params.limit ?? 100 },
+      query: { cursor: params.cursor, limit: params.limit ?? 100, sort: params.sort },
     },
   });
   if (result.data !== undefined) {
