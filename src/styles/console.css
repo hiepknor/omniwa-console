@@ -974,6 +974,10 @@ main:has(> .workspace--chats){padding:0;display:flex;overflow:hidden}
 .workspace--chats .delivery-timeline .dot{z-index:1;margin-top:5px;box-shadow:0 0 0 3px var(--surface)}
 .workspace--chats .delivery-timeline .ts{font-family:var(--mono);font-size:10px;color:var(--muted)}
 .workspace--chats .message-actions{margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--border-subtle)}
+.workspace--chats .chat-context-error{margin-top:var(--space-3)}
+.workspace--chats .delivery-history-fallback{display:grid;gap:var(--space-1)}
+.workspace--chats .delivery-history-fallback .mono{font-size:10px;color:var(--muted)}
+.workspace--chats .context .label-chip{display:inline-flex;margin:0 4px 4px 0}
 .workspace--chats button:focus-visible,.workspace--chats input:focus-visible,.workspace--chats textarea:focus-visible{outline:none;box-shadow:var(--focus-ring);border-color:var(--border-strong)}
 
 .chat-picker{position:relative;min-width:0}

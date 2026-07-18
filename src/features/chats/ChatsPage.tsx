@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
 import { Composer } from './Composer';
+import { ContextPanel } from './ContextPanel';
 import { ConversationList } from './ConversationList';
 import { MessageTimeline } from './MessageTimeline';
 import { useChat, usePickerInstances } from './hooks';
@@ -70,7 +71,7 @@ export function ChatsPage() {
           <span className="thread-avatar" aria-hidden="true">{avatarInitials(selectedChat?.displayName)}</span>
           <div className="t"><h1 id="chat-title">{threadTitle}</h1>{threadId && <span className="mono">{threadId}</span>}</div>
           <div className="spacer" />
-          {chatId && <button className="btn sm contact-toggle" type="button" aria-controls="chat-context" onClick={() => setActivePane('context')}>Context</button>}
+          {chatId && <button className="btn sm contact-toggle" type="button" data-pane-target="context" aria-controls="chat-context" onClick={() => setActivePane('context')}>Contact</button>}
         </header>
         {timeline}
         {instanceId && chatId && !chat.isLoading && !chat.isError && !chat.data?.unavailable && (
@@ -78,19 +79,7 @@ export function ChatsPage() {
         )}
       </section>
 
-      <aside className="context" id="chat-context" aria-label="Conversation context">
-        <header className="context-head">
-          <div><span className="eyebrow">Context</span><h2>Conversation details</h2></div>
-          <button className="btn sm context-close" type="button" aria-controls="chat-thread" onClick={() => setActivePane('thread')}>Back to thread</button>
-        </header>
-        <section>
-          <div className="chat-calm-state">
-            <span className="eyebrow">Details pending</span>
-            <h3>{chatId ? 'Contact context will appear here.' : 'Select a conversation'}</h3>
-            <p>{chatId ? 'Contact facts, labels, and delivery context will be available in this pane.' : 'Choose a direct chat to inspect its context.'}</p>
-          </div>
-        </section>
-      </aside>
+      <ContextPanel instanceId={instanceId} chat={selectedChat} onBack={() => setActivePane('thread')} />
     </div>
   );
 }
