@@ -28,3 +28,9 @@ export const instanceKeys = {
   root: ['instances'] as const,
   provider: ['provider', 'capabilities'] as const,
 };
+
+export const realtimeGapKeys = [
+  ...overviewKeys,
+  instanceKeys.root,
+  queryKeys.providerCapabilities,
+] as const;
