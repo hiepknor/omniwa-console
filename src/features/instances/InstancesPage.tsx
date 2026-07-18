@@ -7,10 +7,11 @@ import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
 import {
   DataTable,
+  DataTableActiveFilters,
+  DataTableFilterTrigger,
   DataTableFooter,
   DataTableToolbar,
   DataTableWorkspace,
-  MobileRowSummary,
   type DataTableColumn,
   type DataTableState,
 } from '@/components/data-table';
@@ -96,19 +97,31 @@ export function InstancesPage() {
     {
       id: 'name',
       header: 'Name',
-      width: 'identity',
+      size: 'xl',
+      kind: 'identity',
       sticky: 'identity',
-      cell: (instance) => <><span className="resource-name">{instance.displayName ?? '—'}</span>{instance.id === instanceId && <span className="row-state">Open</span>}</>,
+      mobile: 'identity',
+      cell: (instance) => <><span className="resource-name">{instance.displayName ?? 'Unnamed instance'}</span>{instance.id === instanceId && <span className="row-state">Open</span>}</>,
     },
-    { id: 'id', header: 'ID', width: 'identifier', cell: (instance) => <span className="mono" title={instance.id}>{instance.id}</span> },
+    { id: 'id', header: 'ID', size: 'lg', kind: 'identifier', mobile: 'identifier', cell: (instance) => <span className="mono" title={instance.id}>{instance.id}</span> },
     {
       id: 'status',
       header: 'Status',
-      width: 'status',
+      size: 'md',
+      kind: 'status',
+      mobile: 'secondary',
       cell: (instance) => <span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>,
     },
-    { id: 'messages', header: 'Msgs 24h', width: 'numeric', align: 'end', cell: () => <span className="num">—</span> },
-    { id: 'updated', header: 'Updated', width: 'date', cell: (instance) => <span className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</span> },
+    { id: 'messages', header: 'Msgs 24h', size: 'sm', kind: 'numeric', align: 'end', mobile: 'hidden', cell: () => <span className="num">—</span> },
+    {
+      id: 'updated',
+      header: 'Updated',
+      size: 'md',
+      kind: 'date',
+      mobile: 'meta',
+      cell: (instance) => <span className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</span>,
+      mobileCell: (instance) => relativeTime(instance.updatedAt) || undefined,
+    },
   ];
   const tableState: DataTableState<InstanceRow> = unavailable
     ? { status: 'unavailable', message: 'No instance data yet.' }
@@ -127,6 +140,9 @@ export function InstancesPage() {
       meta: String(instances.filter((instance) => instance.status === item).length),
     })),
   ];
+  const activeFilters = status
+    ? [{ id: 'status', label: `Status: ${status}`, onRemove: () => setParam('status', '') }]
+    : [];
 
   return (
     <>
@@ -152,34 +168,25 @@ export function InstancesPage() {
           <span className="data-table-toolbar-desktop-filters">
             <SelectDropdown label="Status" value={status} options={statusOptions} onChange={(nextStatus) => setParam('status', nextStatus)} />
           </span>
-          <button
+          <DataTableFilterTrigger
             ref={filterTriggerRef}
-            className="mobile-filter-trigger"
-            type="button"
-            aria-haspopup="dialog"
+            count={activeFilters.length}
             aria-expanded={filterOpen}
             onClick={() => setFilterOpen(true)}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" /></svg>
-            Filters
-            {status && <span className="filter-count num">1</span>}
-          </button>
-          {status && (
-            <div className="active-filter-row" aria-label="Active filters">
-              <button className="chip" type="button" onClick={() => setParam('status', '')}>Status: {status}<span className="x" aria-hidden="true">×</span></button>
-            </div>
-          )}
+          />
+          <DataTableActiveFilters filters={activeFilters} />
         </DataTableToolbar>
 
         <DataTable
           caption="Instance lifecycle and recent activity"
           captionId="instances-table-title"
-          className="instances-table"
           layout="standard"
+          attached
           columns={columns}
           state={tableState}
           getRowKey={(instance) => instance.id}
           getRowState={(instance) => ({ active: instance.id === instanceId })}
+          getRowActionLabel={(instance) => `Open ${instance.displayName ?? instance.id}`}
           getRowProps={(instance) => ({
             className: 'responsive-table-actionable',
             tabIndex: 0,
@@ -191,15 +198,6 @@ export function InstancesPage() {
               }
             },
           })}
-          renderMobileSummary={(instance) => (
-            <MobileRowSummary
-              identity={<>{instance.displayName ?? '—'}{instance.id === instanceId && <span className="row-state">Open</span>}</>}
-              identifier={instance.id}
-              secondary={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>}
-              meta={relativeTime(instance.updatedAt) || '—'}
-              actionLabel={`Open ${instance.displayName ?? instance.id}`}
-            />
-          )}
           footer={(
             <DataTableFooter
               primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>}

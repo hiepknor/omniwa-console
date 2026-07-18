@@ -69,7 +69,8 @@ export function ActionRequiredTable() {
     {
       id: 'item',
       header: 'Item',
-      width: 'identity',
+      size: 'xl',
+      kind: 'identity',
       sticky: 'identity',
       cell: (item) => {
         const label = item.status ?? item.category ?? 'Unknown';
@@ -79,7 +80,7 @@ export function ActionRequiredTable() {
     {
       id: 'resource',
       header: 'Resource',
-      width: 'flex',
+      size: 'flex',
       cell: (item) => (
         <span className="resource">
           <span className="mono">{item.id ?? '—'}</span>
@@ -90,13 +91,15 @@ export function ActionRequiredTable() {
     {
       id: 'since',
       header: 'Since',
-      width: 'date',
+      size: 'md',
+      kind: 'date',
       cell: (item) => <span className="ts" title={item.updatedAt}>{relativeTime(item.updatedAt) || '—'}</span>,
     },
     {
       id: 'action',
       header: <span className="visually-hidden">Action</span>,
-      width: 'action',
+      size: 'xs',
+      kind: 'action',
       align: 'end',
       cell: (item) => {
         const action = itemAction(item);
@@ -123,8 +126,8 @@ export function ActionRequiredTable() {
       </div>
       <DataTable
         caption="Action required work queue"
-        className="overview-action-table"
         layout="compact"
+        appearance="subtle"
         columns={columns}
         state={tableState}
         getRowKey={(item, index) => item.id ?? `${item.status ?? item.category ?? 'unknown'}-${index}`}
@@ -151,7 +154,7 @@ export function ActionRequiredTable() {
               identity={subject ?? item.id ?? 'Unknown item'}
               identifier={subject && item.id ? item.id : undefined}
               secondary={<span className="status"><span className={`dot ${statusDot(item.status)}`}></span>{label}</span>}
-              meta={relativeTime(item.updatedAt) || '—'}
+              meta={relativeTime(item.updatedAt) || undefined}
               actionLabel={action ? `${action.label} ${subject ?? item.id ?? 'item'}` : undefined}
             />
           );

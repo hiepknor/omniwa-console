@@ -52,8 +52,8 @@ sticky offsets, column geometry, loading layouts, or overflow behavior.
 
 The shared contract provides:
 
-- typed column width, alignment, and sticky-role presets instead of
-  arbitrary layout classes;
+- independent typed column size, content kind, alignment, mobile role, and
+  sticky-role presets instead of arbitrary layout classes;
 - stable loading, unavailable, empty, and envelope-aware error states inside
   the table geometry;
 - separate checked-row and active-row states so bulk selection is not
@@ -61,13 +61,21 @@ The shared contract provides:
 - a stationary footer outside the horizontal scroller and automatic edge
   cues while more columns remain off-screen;
 - one container-aware responsive policy: full tables when their workspace is
-  wider than 560px, compact summaries when a rail or narrow viewport reduces
-  the workspace to 560px or less, sticky identity columns on wider tablets,
+  wider than 620px, compact summaries when a rail or narrow viewport reduces
+  the workspace to 620px or less, sticky identity columns on wider tablets,
   and 44px controls for coarse pointers.
+- schema-driven compact summaries for standard tables, with a custom summary
+  escape hatch only for rows whose mobile hierarchy differs materially;
+- selection controls that remain available in compact summaries and keep
+  checked state separate from the row whose detail drawer is active;
+- shared active-filter chips and filter counts while each feature retains
+  ownership of its URL search parameters.
 
 New panels extend the preset vocabulary in the shared component when needed;
 they must not add panel-specific row heights, sticky offsets, or responsive
-table breakpoints.
+table breakpoints. `pnpm design:check` compares critical geometry between the
+production stylesheet and the static prototype stylesheet, and is part of
+the required `pnpm check` gate.
 
 ## Contract-driven boundary
 

@@ -1,10 +1,18 @@
 export { DataTable } from './DataTable';
-export { DataTableFooter, DataTableToolbar, DataTableWorkspace } from './DataTableChrome';
+export {
+  DataTableActiveFilters,
+  DataTableFilterTrigger,
+  DataTableFooter,
+  DataTableToolbar,
+  DataTableWorkspace,
+} from './DataTableChrome';
+export type { DataTableActiveFilter } from './DataTableChrome';
 export { DataTableSelectionBar, DataTableSelectionControl } from './DataTableSelection';
 export { MobileRowSummary } from './MobileRowSummary';
 export type {
   DataTableColumn,
-  DataTableColumnWidth,
+  DataTableColumnKind,
+  DataTableColumnSize,
   DataTableProps,
   DataTableRowState,
   DataTableState,

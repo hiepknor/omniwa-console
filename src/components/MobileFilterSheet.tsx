@@ -21,11 +21,11 @@ export function MobileFilterSheet({
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
-    const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+    const getFocusable = () => dialogRef.current?.querySelectorAll<HTMLElement>(
       'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
     );
     document.body.style.overflow = 'hidden';
-    focusable?.[0]?.focus();
+    getFocusable()?.[0]?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -33,6 +33,7 @@ export function MobileFilterSheet({
         onCloseRef.current();
         return;
       }
+      const focusable = getFocusable();
       if (event.key !== 'Tab' || !focusable?.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -51,6 +52,17 @@ export function MobileFilterSheet({
       document.body.style.overflow = previousOverflow;
       returnFocusRef?.current?.focus();
     };
+  }, [open, returnFocusRef]);
+
+  useEffect(() => {
+    if (!open || !returnFocusRef?.current) return;
+    const trigger = returnFocusRef.current;
+    const closeWhenTriggerHides = () => {
+      if (trigger.getClientRects().length === 0) onCloseRef.current();
+    };
+    const observer = new ResizeObserver(closeWhenTriggerHides);
+    observer.observe(trigger);
+    return () => observer.disconnect();
   }, [open, returnFocusRef]);
 
   if (!open) return null;

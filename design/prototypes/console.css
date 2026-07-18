@@ -633,14 +633,15 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
 
 /* ===== Instances lifecycle management ===== */
 .instances-workspace{min-width:0}
-.instances-toolbar{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);min-height:52px;padding:var(--space-2) var(--space-3);
+.instances-toolbar{--data-table-control-height:36px;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);min-height:52px;padding:var(--space-2) var(--space-3);
   border:1px solid var(--border-subtle);border-bottom:0;border-radius:var(--radius-md) var(--radius-md) 0 0;background:color-mix(in oklab,var(--fg) 4%,transparent)}
 .instances-toolbar-primary,.instances-toolbar-meta,.pagination{display:flex;align-items:center;gap:var(--space-2)}
 .instances-toolbar-primary{min-width:0;flex:1}.instances-toolbar-meta{flex-shrink:0;font-size:11px;color:var(--muted)}
 .toolbar-separator{width:1px;height:14px;background:var(--border-subtle)}
 .search-field{position:relative;display:flex;align-items:center;min-width:200px;width:min(320px,36vw)}
 .search-field svg{position:absolute;left:10px;width:15px;height:15px;fill:none;stroke:var(--muted);stroke-width:1.7;pointer-events:none}
-.search-field .search{width:100%;height:34px;padding-left:32px;background:var(--surface)}
+.search-field .search{width:100%;height:var(--data-table-control-height,34px);padding-left:32px;background:var(--surface)}
+.instances-toolbar .dropdown-trigger{height:var(--data-table-control-height)}
 .instances-table{border-radius:0 0 var(--radius-md) var(--radius-md);overflow:auto;outline:none}
 .instances-table:focus-visible{border-color:var(--border-strong);box-shadow:inset var(--focus-ring)}
 .instances-table table{min-width:720px;table-layout:fixed}
@@ -1684,19 +1685,41 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
 /* Responsive data table contract — Open Design project omniwa-console-responsive-tables, run 80e8fdb5-d22b-496c-8d21-4621864ee3de. */
 .adaptive-table{--responsive-table-selection-width:52px;overflow:hidden}
 .data-table-workspace{container-type:inline-size}
+.warp-data-table-subtle{background:color-mix(in oklab,var(--fg) 2.5%,transparent);border-color:var(--border-subtle)}
+.warp-data-table-attached{border-radius:0 0 var(--radius-md) var(--radius-md)}
+.warp-data-table-attached>.table-foot{min-height:48px;padding-inline:var(--space-4)}
 .responsive-table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;border-bottom:1px solid var(--border-subtle)}
 .responsive-table{min-width:100%;table-layout:fixed;border-collapse:separate;border-spacing:0}
+.responsive-table-layout-compact .responsive-table{min-width:620px}
+.responsive-table-layout-standard .responsive-table{min-width:720px}
+.responsive-table-layout-wide .responsive-table{min-width:940px}
 .responsive-table thead th{position:sticky;top:0;z-index:2;height:44px;background:color-mix(in oklab,var(--surface),var(--bg) 10%)}
 .responsive-table tbody td{height:42px}
-.responsive-table th,.responsive-table td{overflow:hidden;text-overflow:ellipsis}
+.responsive-table th,.responsive-table td{padding-inline:var(--space-4);overflow:hidden;text-overflow:ellipsis}
+.responsive-table .resource{display:flex;align-items:baseline;gap:var(--space-2);min-width:0;color:var(--muted)}
+.responsive-table .resource .mono{color:var(--fg-2)}
+.responsive-table-kind-action .btn{min-height:36px;padding:5px 12px}
 .responsive-table td>.mono,.responsive-table td>.ts{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 .responsive-table td>.status{max-width:100%;overflow:hidden}
+.responsive-table-column-selection{width:var(--responsive-table-selection-width);min-width:var(--responsive-table-selection-width);max-width:var(--responsive-table-selection-width);padding-inline:0!important}
+.responsive-table-column-xs{width:88px;min-width:88px}
+.responsive-table-column-sm{width:108px;min-width:108px}
+.responsive-table-column-md{width:137px;min-width:137px}
+.responsive-table-column-lg{width:158px;min-width:158px}
+.responsive-table-column-xl{width:187px;min-width:187px}
+.responsive-table-column-flex{min-width:180px}
+.responsive-table-kind-numeric{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 .responsive-table-mobile-header,.responsive-table-mobile-cell{display:none}
 .responsive-table-actionable{cursor:pointer}
 .responsive-table-actionable:focus{outline:none}
 .responsive-table-actionable:focus-visible{box-shadow:inset 0 0 0 1px var(--fg-2)}
 .adaptive-table>.table-foot{position:static;left:auto;min-width:0;background:var(--surface)}
+.data-table-selection-control{display:flex;align-items:center;justify-content:center;width:var(--responsive-table-selection-width);min-height:44px;margin:0;cursor:pointer}
+.data-table-selection-control input{width:16px;height:16px;accent-color:var(--fg)}
 .mobile-row-summary{display:grid;grid-template-columns:minmax(0,1fr) minmax(96px,auto) 28px;align-items:center;gap:var(--space-3);min-height:72px;padding:var(--space-2) var(--space-3)}
+.mobile-row-summary.has-selection{grid-template-columns:44px minmax(0,1fr) minmax(96px,auto) 28px;gap:var(--space-2)}
+.mobile-row-selection{display:flex;align-items:center;justify-content:center;width:44px;height:44px}
+.mobile-row-selection .data-table-selection-control{width:44px;margin:0}
 .mobile-row-identity,.mobile-row-secondary{display:grid;min-width:0;gap:2px}
 .mobile-row-primary{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg)}
 .mobile-row-id{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--muted)}
@@ -1742,10 +1765,11 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
   .responsive-table thead .responsive-table-sticky-identity,.responsive-table thead .responsive-table-sticky-checkbox{z-index:3;background:color-mix(in oklab,var(--surface),var(--bg) 10%)}
   .responsive-table:not(:has(.responsive-table-sticky-identity)) thead .responsive-table-desktop-cell:first-child{z-index:3;background:color-mix(in oklab,var(--surface),var(--bg) 10%)}
   .responsive-table tbody tr:hover>.responsive-table-sticky-identity,.responsive-table tbody tr:hover>.responsive-table-sticky-checkbox{background:var(--elevated)}
-  .responsive-table tbody tr.selected>.responsive-table-sticky-identity,.responsive-table tbody tr.selected>.responsive-table-sticky-checkbox{background:color-mix(in oklab,var(--fg) 7%,var(--surface))}
+  .responsive-table tbody tr.is-checked>.responsive-table-sticky-identity,.responsive-table tbody tr.is-checked>.responsive-table-sticky-checkbox{background:color-mix(in oklab,var(--fg) 4%,var(--surface))}
+  .responsive-table tbody tr.is-active>.responsive-table-sticky-identity,.responsive-table tbody tr.is-active>.responsive-table-sticky-checkbox{background:color-mix(in oklab,var(--fg) 7%,var(--surface))}
 }
 
-@container (max-width:560px){
+@container (max-width:620px){
   .adaptive-table .responsive-table-scroll{overflow:visible}
   .adaptive-table .responsive-table{width:100%;min-width:0!important;table-layout:fixed}
   .responsive-table-desktop-cell{display:none}
@@ -1755,30 +1779,15 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
   .responsive-table tbody tr:hover{background:color-mix(in oklab,var(--fg) 4%,transparent)}
   .adaptive-table>.table-foot{align-items:flex-start;flex-direction:column;gap:var(--space-3);min-height:0;padding:var(--space-3)}
   .adaptive-table>.table-foot .btn{width:100%;min-height:44px}
-  .instances-toolbar-primary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;width:100%}
-  .instances-toolbar-primary .search-field{width:auto;min-width:0;flex:initial}
-  .instances-toolbar-primary .search{height:44px}
-  .instances-toolbar-desktop-filters{display:none}
+  .instances-toolbar-primary,.data-table-toolbar-primary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;width:100%}
+  .instances-toolbar-primary .search-field,.data-table-toolbar-primary .search-field{width:auto;min-width:0;flex:initial}
+  .instances-toolbar-primary .search,.data-table-toolbar-primary .search{height:44px}
+  .instances-toolbar-desktop-filters,.data-table-toolbar-desktop-filters{display:none}
   .mobile-filter-trigger{display:flex}
   .active-filter-row{display:flex}
 }
 
 @media(max-width:640px){
-  .adaptive-table .responsive-table-scroll{overflow:visible}
-  .adaptive-table .responsive-table{width:100%;min-width:0!important;table-layout:fixed}
-  .responsive-table-desktop-cell{display:none}
-  .responsive-table-mobile-header{display:table-cell;height:0!important;padding:0!important;border:0!important;font-size:0;line-height:0}
-  .responsive-table-mobile-cell{display:table-cell;height:auto!important;padding:0!important;white-space:normal}
-  .responsive-table tbody tr{height:auto}
-  .responsive-table tbody tr:hover{background:color-mix(in oklab,var(--fg) 4%,transparent)}
-  .adaptive-table>.table-foot{align-items:flex-start;flex-direction:column;gap:var(--space-3);min-height:0;padding:var(--space-3)}
-  .adaptive-table>.table-foot .btn{width:100%;min-height:44px}
-  .instances-toolbar-primary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;width:100%}
-  .instances-toolbar-primary .search-field{width:auto;min-width:0;flex:initial}
-  .instances-toolbar-primary .search{height:44px}
-  .instances-toolbar-desktop-filters{display:none}
-  .mobile-filter-trigger{display:flex}
-  .active-filter-row{display:flex}
   .responsive-minitable{display:block;border:0!important;border-radius:0!important}
   .responsive-minitable thead{display:none}
   .responsive-minitable tbody,.responsive-minitable tr,.responsive-minitable td{display:block;width:100%}
@@ -1792,6 +1801,9 @@ main.workspace{padding:0;display:flex;height:100vh;overflow:hidden}
   .mobile-row-summary{grid-template-columns:minmax(0,1fr) 28px;gap:var(--space-2)}
   .mobile-row-secondary{grid-column:1;grid-row:2;justify-items:start}
   .mobile-row-disclosure{grid-column:2;grid-row:1/3}
+  .mobile-row-summary.has-selection{grid-template-columns:44px minmax(0,1fr) 28px}
+  .mobile-row-summary.has-selection .mobile-row-secondary{grid-column:2;grid-row:2}
+  .mobile-row-summary.has-selection .mobile-row-disclosure{grid-column:3;grid-row:1/3}
 }
 
 /* Prototype-only responsive table component sheet layout. */

@@ -1,4 +1,10 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from 'react';
+
+export type DataTableActiveFilter = {
+  id: string;
+  label: string;
+  onRemove: () => void;
+};
 
 export function DataTableWorkspace({
   children,
@@ -8,11 +14,36 @@ export function DataTableWorkspace({
   return <section {...props} className={['data-table-workspace', className].filter(Boolean).join(' ')}>{children}</section>;
 }
 
-export function DataTableToolbar({ children, metadata }: { children: ReactNode; metadata?: ReactNode }) {
+export function DataTableToolbar({ children }: { children: ReactNode }) {
   return (
     <div className="data-table-toolbar">
       <div className="data-table-toolbar-primary">{children}</div>
-      {metadata !== undefined && <div className="data-table-toolbar-meta">{metadata}</div>}
+    </div>
+  );
+}
+
+export const DataTableFilterTrigger = forwardRef<
+  HTMLButtonElement,
+  ButtonHTMLAttributes<HTMLButtonElement> & { count: number }
+>(function DataTableFilterTrigger({ count, children = 'Filters', className, ...props }, ref) {
+  return (
+    <button ref={ref} className={['mobile-filter-trigger', className].filter(Boolean).join(' ')} type="button" aria-haspopup="dialog" {...props}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" /></svg>
+      {children}
+      {count > 0 && <span className="filter-count num">{count}</span>}
+    </button>
+  );
+});
+
+export function DataTableActiveFilters({ filters }: { filters: readonly DataTableActiveFilter[] }) {
+  if (filters.length === 0) return null;
+  return (
+    <div className="active-filter-row" aria-label="Active filters">
+      {filters.map((filter) => (
+        <button key={filter.id} className="chip" type="button" onClick={filter.onRemove}>
+          {filter.label}<span className="x" aria-hidden="true">×</span>
+        </button>
+      ))}
     </div>
   );
 }

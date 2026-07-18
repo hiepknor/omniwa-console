@@ -1,17 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { InlineError } from '@/components/InlineError';
+import { MobileRowSummary } from './MobileRowSummary';
 import type { DataTableColumn, DataTableProps } from './types';
 
 function columnClass<Row>(column: DataTableColumn<Row>, afterSelection = false): string {
   return [
     'responsive-table-desktop-cell',
-    `responsive-table-column-${column.width ?? 'flex'}`,
+    `responsive-table-column-${column.size ?? 'flex'}`,
+    column.kind ? `responsive-table-kind-${column.kind}` : '',
     column.align ? `responsive-table-align-${column.align}` : '',
     column.sticky ? `responsive-table-sticky-${column.sticky}` : '',
     column.sticky === 'identity' ? 'responsive-table-sticky-identity' : '',
     column.sticky === 'selection' ? 'responsive-table-sticky-checkbox' : '',
     column.sticky === 'identity' && afterSelection ? 'responsive-table-sticky-after-checkbox' : '',
   ].filter(Boolean).join(' ');
+}
+
+function renderMobileCell<Row>(column: DataTableColumn<Row> | undefined, row: Row) {
+  if (!column) return undefined;
+  return column.mobileCell ? column.mobileCell(row) : column.cell(row);
 }
 
 function TableHeader<Row>({ columns }: { columns: readonly DataTableColumn<Row>[] }) {
@@ -61,21 +68,25 @@ export function DataTable<Row>({
   getRowProps,
   getRowState,
   renderMobileSummary,
+  getRowActionLabel,
   footer,
   layout = 'standard',
-  className,
+  appearance = 'default',
+  attached = false,
 }: DataTableProps<Row>) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState({ left: false, right: false });
+  const rowCount = state.status === 'ready' ? state.rows.length : 0;
 
   const updateOverflow = useCallback(() => {
     const node = scrollRef.current;
     if (!node) return;
     const maxScroll = Math.max(0, node.scrollWidth - node.clientWidth);
-    setOverflow({
+    const next = {
       left: node.scrollLeft > 1,
       right: node.scrollLeft < maxScroll - 1,
-    });
+    };
+    setOverflow((current) => current.left === next.left && current.right === next.right ? current : next);
   }, []);
 
   useEffect(() => {
@@ -91,18 +102,32 @@ export function DataTable<Row>({
       observer.disconnect();
       node.removeEventListener('scroll', updateOverflow);
     };
-  }, [state, updateOverflow]);
+  }, [state.status, rowCount, columns.length, updateOverflow]);
 
   const rows = state.status === 'ready' ? state.rows : [];
   const hasSelectionColumn = columns.some((column) => column.sticky === 'selection');
-  const regionClass = ['tablewrap', 'adaptive-table', 'warp-data-table', `responsive-table-layout-${layout}`, className]
+  const mobileColumns = {
+    selection: columns.find((column) => column.sticky === 'selection'),
+    identity: columns.find((column) => column.mobile === 'identity') ?? columns.find((column) => column.sticky !== 'selection' && column.mobile !== 'hidden'),
+    identifier: columns.find((column) => column.mobile === 'identifier'),
+    secondary: columns.find((column) => column.mobile === 'secondary'),
+    meta: columns.find((column) => column.mobile === 'meta'),
+  };
+  const regionClass = [
+    'tablewrap',
+    'adaptive-table',
+    'warp-data-table',
+    `responsive-table-layout-${layout}`,
+    `warp-data-table-${appearance}`,
+    attached ? 'warp-data-table-attached' : '',
+  ]
     .filter(Boolean)
     .join(' ');
 
   return (
     <div
       className={regionClass}
-      tabIndex={0}
+      tabIndex={overflow.left || overflow.right ? 0 : undefined}
       role="region"
       aria-labelledby={captionId}
       aria-label={captionId ? undefined : caption}
@@ -128,6 +153,7 @@ export function DataTable<Row>({
                 {rows.map((row, index) => {
                   const rowProps = getRowProps?.(row, index) ?? {};
                   const rowState = getRowState?.(row, index);
+                  const actionLabel = getRowActionLabel?.(row, index);
                   const stateClasses = [rowState?.active ? 'is-active' : '', rowState?.checked ? 'is-checked' : ''].filter(Boolean).join(' ');
                   const mergedClassName = [rowProps.className, stateClasses].filter(Boolean).join(' ') || undefined;
                   return (
@@ -137,11 +163,23 @@ export function DataTable<Row>({
                       className={mergedClassName}
                       data-active={rowState?.active || undefined}
                       data-checked={rowState?.checked || undefined}
+                      aria-label={rowProps['aria-label'] ?? actionLabel}
                     >
                       {columns.map((column) => (
                         <td key={column.id} className={columnClass(column, hasSelectionColumn)}>{column.cell(row)}</td>
                       ))}
-                      <td className="responsive-table-mobile-cell" colSpan={columns.length + 1}>{renderMobileSummary(row, index)}</td>
+                      <td className="responsive-table-mobile-cell" colSpan={columns.length + 1}>
+                        {renderMobileSummary ? renderMobileSummary(row, index) : (
+                          <MobileRowSummary
+                            selection={renderMobileCell(mobileColumns.selection, row)}
+                            identity={renderMobileCell(mobileColumns.identity, row) ?? '—'}
+                            identifier={renderMobileCell(mobileColumns.identifier, row)}
+                            secondary={renderMobileCell(mobileColumns.secondary, row)}
+                            meta={renderMobileCell(mobileColumns.meta, row)}
+                            actionLabel={actionLabel}
+                          />
+                        )}
+                      </td>
                     </tr>
                   );
                 })}

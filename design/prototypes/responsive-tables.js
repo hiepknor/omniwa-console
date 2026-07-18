@@ -1,5 +1,5 @@
 /* Prototype adapter generated from the Open Design Warp responsive-table contract.
-   Production React uses src/components/ResponsiveDataTable.tsx instead. */
+   Production React uses src/components/data-table/ instead. */
 const responsiveTableConfigs = [
   ['jobs-table', 1, 0, 2, 5],
   ['webhooks-table', 0, 0, 2, 4],
@@ -45,6 +45,19 @@ responsiveTableConfigs.forEach(([wrapperClass, identityIndex, idIndex, statusInd
       const summary = document.createElement('div');
       summary.className = 'mobile-row-summary';
       summary.innerHTML = `<span class="mobile-row-identity"><span class="mobile-row-primary"></span><span class="mobile-row-id mono"></span></span><span class="mobile-row-secondary"><span class="mobile-row-status"></span><span class="mobile-row-meta"></span></span><span class="mobile-row-disclosure" aria-hidden="true">›</span>`;
+      if (wrapperClass === 'groups-table') {
+        summary.classList.add('has-selection');
+        const selection = document.createElement('span');
+        selection.className = 'mobile-row-selection';
+        const control = document.createElement('label');
+        control.className = 'data-table-selection-control';
+        const checkbox = cells[0]?.querySelector('input[type="checkbox"]')?.cloneNode(true);
+        if (checkbox) control.append(checkbox);
+        selection.append(control);
+        summary.prepend(selection);
+        if (cells[0]?.querySelector('input[type="checkbox"]')?.checked) row.classList.add('is-checked');
+        if (row.classList.contains('selected')) row.classList.add('is-active');
+      }
       summary.querySelector('.mobile-row-primary').textContent = primary;
       summary.querySelector('.mobile-row-id').textContent = identifier;
       const statusTarget = summary.querySelector('.mobile-row-status');

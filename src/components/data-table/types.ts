@@ -1,22 +1,32 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 
-export type DataTableColumnWidth =
+export type DataTableColumnSize =
   | 'selection'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | 'flex';
+
+export type DataTableColumnKind =
   | 'identity'
   | 'identifier'
   | 'status'
   | 'numeric'
   | 'date'
-  | 'action'
-  | 'flex';
+  | 'action';
 
 export type DataTableColumn<Row> = {
   id: string;
   header: ReactNode;
   cell: (row: Row) => ReactNode;
-  width?: DataTableColumnWidth;
+  size?: DataTableColumnSize;
+  kind?: DataTableColumnKind;
   align?: 'start' | 'center' | 'end';
   sticky?: 'selection' | 'identity';
+  mobile?: 'identity' | 'identifier' | 'secondary' | 'meta' | 'hidden';
+  mobileCell?: (row: Row) => ReactNode;
 };
 
 export type DataTableState<Row> =
@@ -39,8 +49,10 @@ export type DataTableProps<Row> = {
   getRowKey: (row: Row, index: number) => string;
   getRowProps?: (row: Row, index: number) => HTMLAttributes<HTMLTableRowElement>;
   getRowState?: (row: Row, index: number) => DataTableRowState;
-  renderMobileSummary: (row: Row, index: number) => ReactNode;
+  renderMobileSummary?: (row: Row, index: number) => ReactNode;
+  getRowActionLabel?: (row: Row, index: number) => string | undefined;
   footer?: ReactNode;
   layout?: 'compact' | 'standard' | 'wide';
-  className?: string;
+  appearance?: 'default' | 'subtle';
+  attached?: boolean;
 };

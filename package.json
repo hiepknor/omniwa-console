@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm typecheck && pnpm build",
+    "design:check": "node scripts/check-table-contract.mjs",
+    "check": "pnpm design:check && pnpm typecheck && pnpm build",
     "contract:sync": "cp ../omniwa/docs/api/openapi/omniwa-v1.openapi.json contracts/omniwa-v1.openapi.json",
     "api:generate": "openapi-typescript contracts/omniwa-v1.openapi.json -o src/api/generated/schema.d.ts"
   },

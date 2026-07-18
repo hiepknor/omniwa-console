@@ -18,7 +18,11 @@ export function DataTableSelectionControl({
   }, [indeterminate]);
 
   return (
-    <label className="data-table-selection-control">
+    <label
+      className="data-table-selection-control"
+      onClick={(event) => event.stopPropagation()}
+      onKeyDown={(event) => event.stopPropagation()}
+    >
       <input ref={inputRef} type="checkbox" checked={checked} onChange={onChange} />
       <span className="visually-hidden">{label}</span>
     </label>
