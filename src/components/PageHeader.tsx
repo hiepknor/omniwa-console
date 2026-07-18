@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { RealtimeIndicator } from './RealtimeIndicator';
 import { WorkspaceBanner } from './feedback/WorkspaceBanner';
 
 export function PageHeader({
@@ -22,7 +23,10 @@ export function PageHeader({
             {meta && <div className="head-meta">{meta}</div>}
           </div>
         </div>
-        {actions && <div className="head-right">{actions}</div>}
+        <div className="head-right">
+          <RealtimeIndicator />
+          {actions}
+        </div>
       </header>
       <WorkspaceBanner />
     </>

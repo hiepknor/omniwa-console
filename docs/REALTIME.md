@@ -45,3 +45,13 @@ events in a bounded ring buffer (last 200) as a live ticker / tail.
 If the stream is unavailable (older platform, proxy stripping SSE), the
 console falls back to polling: realtime panels refetch on a 15s interval
 while visible. The indicator shows "polling" so operators know freshness.
+
+## Verified platform behavior (M4)
+
+The stream endpoint returns a finite replay batch of up to 100 events and
+then closes, so the client runs a cursor-resumed rotate loop approximately
+every four seconds. Requests resume with `?cursor=`. The
+`x-omniwa-cursor-status` response header (`no_cursor | ok | not_found |
+expired`) communicates gap and reset semantics. On `not_found` or `expired`,
+the client drops its cursor, invalidates all realtime keys once, and
+re-backfills. A full 100-event batch triggers an immediate follow-up request.

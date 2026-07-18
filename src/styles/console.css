@@ -78,6 +78,12 @@ main{flex:1;min-width:0;padding:0 24px 24px}
 .status.sm{font-size:12px;color:var(--text-2)}
 .live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);white-space:nowrap}
 .live .dot{background:var(--ok);animation:pulse 2s infinite}
+.live[data-state="reconnecting"] .dot,
+.live[data-state="polling"] .dot,
+.live[data-state="offline"] .dot{animation:none}
+.live[data-state="reconnecting"] .dot{background:var(--pending)}
+.live[data-state="polling"] .dot{background:var(--info)}
+.live[data-state="offline"] .dot{background:var(--failed)}
 @keyframes pulse{50%{opacity:.35}}
 .dot-ok{background:var(--ok)}.dot-pending{background:var(--pending)}.dot-degraded{background:var(--degraded)}
 .dot-failed{background:var(--failed)}.dot-info{background:var(--info)}

@@ -1,6 +1,7 @@
 import { relativeTime } from '@/lib/format';
 
 export type OverviewEvent = {
+  id?: string;
   type: string;
   resourceId?: string;
   updatedAt?: string;
@@ -61,7 +62,7 @@ export function EventTicker({
         <div className="overview-event-feed" role="region" aria-label="Live event stream">
           <h2 id="overview-events-title" className="visually-hidden">Realtime event stream</h2>
           {events.map((event, index) => (
-            <div className="overview-event-row" key={`${event.type}-${event.resourceId ?? ''}-${event.updatedAt ?? index}`}>
+            <div className="overview-event-row" key={event.id ?? `${event.type}-${event.resourceId ?? ''}-${event.updatedAt ?? index}`}>
               <span className={`dot ${eventDot(event.type)}`}></span>
               <span className="mono">{event.type}</span>
               <span className="mono">{event.resourceId ?? '—'}</span>
