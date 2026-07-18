@@ -151,7 +151,6 @@ export function InstancesPage() {
         title="Instances"
         actions={
           <>
-            <span className="live"><span className="dot"></span>polling</span>
             <button className="btn" type="button" onClick={refresh}>Refresh</button>
             <button className="btn primary" type="button" onClick={() => { create.reset(); setCreateOpen(true); }}>New instance</button>
           </>
