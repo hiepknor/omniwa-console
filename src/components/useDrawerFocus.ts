@@ -51,6 +51,9 @@ export function useDrawerFocus(options: {
       : Array.from(drawer.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
 
     const closeOnEscape = (event: KeyboardEvent) => {
+      const nestedModalOpen = drawer !== undefined && drawer !== null
+        && Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]')).some((element) => element !== drawer);
+      if (nestedModalOpen) return;
       if (event.key === 'Escape' && !suppressEscapeRef.current) {
         event.preventDefault();
         if (options.modal) event.stopImmediatePropagation();

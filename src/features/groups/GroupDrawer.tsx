@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GroupLocalStateRequest, GroupMemberResource, GroupResource } from '@/api/groups';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
-import { useDrawerFocus } from '@/components/useDrawerFocus';
+import { DetailDrawer } from '@/components/drawer/DetailDrawer';
 import { useModalDialog } from '@/components/useModalDialog';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
@@ -246,27 +246,15 @@ export function GroupDrawer({ groupId, subject: initialSubject, onClose }: {
   onClose: () => void;
 }) {
   const [sendOpen, setSendOpen] = useState(false);
-  const closeRef = useRef<HTMLButtonElement>(null);
   const groupQuery = useGroup(groupId);
   const readState = useResilientReadState(groupQuery, groupQuery.data?.resource !== undefined);
   const group = groupQuery.data?.resource;
   const title = group?.subject || initialSubject || groupId;
   const headerStatus = group?.status ?? (readState.isInitialError ? 'error' : groupQuery.data?.unavailable ? 'unavailable' : readState.isInitialLoading ? 'loading' : '—');
 
-  useDrawerFocus({ onClose, closeRef, suppressEscape: sendOpen });
-
   return (
     <>
-      <aside className="drawer groups-drawer max-[900px]:!fixed max-[900px]:!inset-y-0 max-[900px]:!right-0 max-[900px]:!left-auto max-[900px]:!m-0 max-[900px]:!h-[100dvh] max-[900px]:!w-[min(440px,100vw)] max-[900px]:!max-w-none max-[900px]:!rounded-none max-[900px]:!border-y-0 max-[900px]:!border-r-0 max-[900px]:!shadow-[var(--elev-raised)]" aria-labelledby="group-detail-title">
-        <header className="drawer-head">
-          <div className="drawer-identity">
-            <span className="eyebrow">Group management</span>
-            <div className="drawer-title-row"><h2 id="group-detail-title" title={title} className={group?.subject || initialSubject ? undefined : 'mono'}>{title}</h2><span className="status"><span className={`dot ${groupStatusDot(headerStatus)}`} />{headerStatus}</span></div>
-            <span className="mono" title={groupId}>{groupId}</span>
-          </div>
-          <button ref={closeRef} className="close" type="button" aria-label="Close group details" title="Close" onClick={onClose}>✕</button>
-        </header>
-        <div className="drawer-scroll max-[900px]:!overflow-y-auto">
+      <DetailDrawer titleId="group-detail-title" eyebrow="Group management" title={title} titleClassName={group?.subject || initialSubject ? undefined : 'mono'} status={<span className="status"><span className={`dot ${groupStatusDot(headerStatus)}`} />{headerStatus}</span>} subtitle={<span className="mono" title={groupId}>{groupId}</span>} className="groups-drawer" closeLabel="Close group details" suppressEscape={sendOpen} onClose={onClose}>
           {readState.isInitialLoading ? (
             <div className="empty groups-drawer-state" aria-live="polite">Loading group details…</div>
           ) : readState.isInitialError ? (
@@ -280,8 +268,7 @@ export function GroupDrawer({ groupId, subject: initialSubject, onClose }: {
               <section aria-labelledby="group-send-command-title"><div className="drawer-section-head"><div><h3 id="group-send-command-title">Send text</h3><span className="drawer-note">One-off command only; recurring sends belong to campaigns.</span></div><button className="btn" type="button" onClick={() => setSendOpen(true)}>Send text…</button></div></section>
             </>
           )}
-        </div>
-      </aside>
+      </DetailDrawer>
       {sendOpen && <SendTextDialog groupId={groupId} onClose={() => setSendOpen(false)} />}
     </>
   );

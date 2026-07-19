@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CommandResult } from '@/api/envelopes';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
+import { DetailDrawer, DetailDrawerState } from '@/components/drawer/DetailDrawer';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
-import { useDrawerFocus } from '@/components/useDrawerFocus';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import {
@@ -42,7 +42,6 @@ export function InstanceDrawer({
   const instanceName = instance.displayName ?? instance.id;
   const [displayName, setDisplayName] = useState(instanceName);
   const [confirmation, setConfirmation] = useState<'disconnect' | 'destroy'>();
-  const closeRef = useRef<HTMLButtonElement>(null);
   const feedback = useFeedback();
   const sessions = useInstanceSessions(instance.id);
   const provider = useProviderCapabilities(true);
@@ -62,7 +61,6 @@ export function InstanceDrawer({
     ?? (provider.data?.resource?.capability ? [provider.data.resource.capability] : []);
 
   useEffect(() => setDisplayName(instanceName), [instanceName]);
-  useDrawerFocus({ onClose, closeRef, suppressEscape: confirmation !== undefined });
 
   const commandFeedback = (result: CommandResult, action: string) => {
     feedback.command(result.disposition, {
@@ -78,20 +76,7 @@ export function InstanceDrawer({
 
   return (
     <>
-      <aside className="drawer instances-drawer" aria-labelledby="instance-detail-title">
-        <header className="drawer-head">
-          <div className="drawer-identity">
-            <span className="eyebrow">Instance management</span>
-            <div className="drawer-title-row">
-              <h2 id="instance-detail-title">{instanceName}</h2>
-              <span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>
-            </div>
-            <span className="mono">{instance.id}</span>
-          </div>
-          <button ref={closeRef} className="close" type="button" aria-label="Close instance details" title="Close" onClick={onClose}>✕</button>
-        </header>
-
-        <div className="drawer-scroll">
+      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>} subtitle={<span className="mono" title={instance.id}>{instance.id}</span>} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
           {commandError && (
             <InlineError
               error={commandError}
@@ -214,8 +199,7 @@ export function InstanceDrawer({
             )}
             {providerReadState.isStaleError && <InlineError error={providerReadState.error} onRetry={provider.refetch} />}
           </section>
-        </div>
-      </aside>
+      </DetailDrawer>
 
       {confirmation === 'disconnect' && (
         <TypedConfirmationDialog
@@ -247,4 +231,8 @@ export function InstanceDrawer({
       )}
     </>
   );
+}
+
+export function InstanceDrawerState({ onClose, children, announce = false }: { onClose: () => void; children: React.ReactNode; announce?: boolean }) {
+  return <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title="Instance details" className="instances-drawer" closeLabel="Close instance details" onClose={onClose}><DetailDrawerState announce={announce}>{children}</DetailDrawerState></DetailDrawer>;
 }

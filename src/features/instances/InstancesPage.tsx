@@ -21,7 +21,7 @@ import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDr
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { CreateInstanceDialog } from './CreateInstanceDialog';
-import { InstanceDrawer } from './InstanceDrawer';
+import { InstanceDrawer, InstanceDrawerState } from './InstanceDrawer';
 import { useCreateInstance, useInstance, useInstances } from './hooks';
 
 function statusDot(status: string | undefined) {
@@ -33,18 +33,6 @@ function statusDot(status: string | undefined) {
     case 'disconnected': return 'dot-failed';
     default: return 'dot-info';
   }
-}
-
-function DrawerState({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
-  return (
-    <aside className="drawer instances-drawer" aria-label="Instance details">
-      <header className="drawer-head">
-        <div className="drawer-identity"><span className="eyebrow">Instance management</span><div className="drawer-title-row"><h2>Instance details</h2></div></div>
-        <button className="close" type="button" aria-label="Close instance details" onClick={onClose}>✕</button>
-      </header>
-      <div className="drawer-scroll">{children}</div>
-    </aside>
-  );
 }
 
 export function InstancesPage() {
@@ -243,11 +231,11 @@ export function InstancesPage() {
             navigate(listLocation);
           }} />
         ) : detail.data?.unavailable ? (
-          <DrawerState onClose={() => navigate(listLocation)}><div className="empty">Instance data is not available yet.</div></DrawerState>
+          <InstanceDrawerState onClose={() => navigate(listLocation)}>Instance data is not available yet.</InstanceDrawerState>
         ) : detail.isError ? (
-          <DrawerState onClose={() => navigate(listLocation)}><InlineError error={detail.error} onRetry={detail.refetch} /></DrawerState>
+          <InstanceDrawerState onClose={() => navigate(listLocation)}><InlineError error={detail.error} onRetry={detail.refetch} /></InstanceDrawerState>
         ) : (
-          <DrawerState onClose={() => navigate(listLocation)}><div className="empty">—</div></DrawerState>
+          <InstanceDrawerState onClose={() => navigate(listLocation)} announce>Loading instance details…</InstanceDrawerState>
         )
       )}
 

@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { CommandResult, PublicData } from '@/api/envelopes';
 import type { WebhookDeliveryResource, WebhookResource } from '@/api/webhooks';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
+import { DetailDrawer, DetailDrawerState } from '@/components/drawer/DetailDrawer';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
-import { useDrawerFocus } from '@/components/useDrawerFocus';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import {
@@ -98,7 +98,6 @@ function DeliveryRow({ delivery, selected, checked, busy, onSelect, onCheck, onR
 export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: WebhookResource; onClose: () => void; onRetired: (result: CommandResult) => void }) {
   const [eventsValue, setEventsValue] = useState((webhook.eventTypes ?? []).join(', '));
   const [retireOpen, setRetireOpen] = useState(false);
-  const closeRef = useRef<HTMLButtonElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedDelivery = searchParams.get('delivery') || undefined;
   const [checked, setChecked] = useState<Set<string>>(new Set());
@@ -120,7 +119,6 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
   const unavailable = deliveryPages.some((page) => page.unavailable !== undefined);
 
   useEffect(() => setEventsValue((webhook.eventTypes ?? []).join(', ')), [webhook.eventTypes]);
-  useDrawerFocus({ onClose, closeRef, suppressEscape: retireOpen });
   const commandFeedback = (result: CommandResult, action: string, key = action.toLowerCase()) => feedback.command(result.disposition, { action, acceptedDetail: 'The platform accepted the command. Webhook data refreshes automatically.', completedDetail: 'The platform completed the command. Webhook data refreshes automatically.', requestId: result.requestId, dedupeKey: `webhook:${webhook.id}:${key}` });
   const parseEvents = () => [...new Set(eventsValue.split(',').map((item) => item.trim()).filter(Boolean))];
   const selectDelivery = (deliveryId: string) => {
@@ -130,9 +128,7 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
   };
 
   return <>
-    <aside className="drawer webhook-drawer" aria-labelledby="webhook-detail-title">
-      <header className="drawer-head"><div className="drawer-identity"><span className="eyebrow">Webhook management</span><div className="drawer-title-row"><h2 id="webhook-detail-title" title={webhook.id}>{webhook.id}</h2><span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span></div></div><button ref={closeRef} className="close" type="button" aria-label="Close webhook details" onClick={onClose}>✕</button></header>
-      <div className="drawer-scroll">
+    <DetailDrawer titleId="webhook-detail-title" eyebrow="Webhook management" title={webhook.id} status={<span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span>} subtitle={<span className="mono" title={webhook.id}>{webhook.id}</span>} className="webhook-drawer" closeLabel="Close webhook details" suppressEscape={retireOpen} onClose={onClose}>
         {commandError && <InlineError error={commandError} onRetry={() => undefined} announce />}
         <section aria-labelledby="webhook-facts-title"><h3 id="webhook-facts-title" className="visually-hidden">Webhook facts</h3><dl className="kv"><dt>ID</dt><dd><span className="mono">{webhook.id}</span></dd><dt>Status</dt><dd><span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span></dd><dt>Events</dt><dd><div className="capchips">{(webhook.eventTypes ?? []).length ? webhook.eventTypes?.map((event) => <span className="chip" key={event}>{event}</span>) : '—'}</div></dd><dt>Created</dt><dd className="ts" title={webhook.createdAt}>{relativeTime(webhook.createdAt) || '—'}</dd><dt>Updated</dt><dd className="ts" title={webhook.updatedAt}>{relativeTime(webhook.updatedAt) || '—'}</dd></dl></section>
         <section aria-labelledby="webhook-lifecycle-title"><span className="eyebrow">Endpoint controls</span><h3 id="webhook-lifecycle-title">Lifecycle</h3><div className="lifecycle-groups"><div className="action-group"><span>Lifecycle commands may complete immediately or continue asynchronously.</span><div className="actions">{webhook.status !== 'active' && webhook.status !== 'retired' && <button className="btn primary" type="button" disabled={pending} onClick={() => activate.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Activate') })}>Activate</button>}{webhook.status === 'active' && <button className="btn" type="button" disabled={pending} onClick={() => suspend.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Suspend') })}>Suspend</button>}</div></div>{webhook.status !== 'retired' && <div className="action-group destructive"><span>Permanently stop future deliveries after typed confirmation.</span><button className="btn danger" type="button" onClick={() => setRetireOpen(true)}>Retire…</button></div>}</div></section>
@@ -144,8 +140,11 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
           {selectedDelivery && <div className="webhook-history"><div className="drawer-section-head"><h4>Delivery history</h4><span className="mono">{selectedDelivery}</span></div><DeliveryHistory deliveryId={selectedDelivery} /></div>}
         </section>
         <section className="webhook-recovery" aria-labelledby="webhook-recovery-title"><span className="eyebrow">Bulk recovery</span><h3 id="webhook-recovery-title">Failed deliveries</h3><div className="recovery-action"><span>{checked.size ? `${checked.size} selected` : `${failed.length} failed in loaded data`}</span><button className="btn" type="button" disabled={!checked.size || pending} onClick={() => bulk.mutate([...checked], { onSuccess: (result) => { commandFeedback(result, 'Bulk redrive', 'bulk-redrive'); setChecked(new Set()); } })}>{bulk.isPending ? 'Submitting…' : 'Redrive selected'}</button></div></section>
-      </div>
-    </aside>
+    </DetailDrawer>
     {retireOpen && <TypedConfirmationDialog title="Retire webhook" description={<p>This permanently retires the webhook and stops future deliveries. This cannot be undone.</p>} resourceId={webhook.id} confirmValue={webhook.id} confirmLabel="Retire webhook" pendingLabel="Submitting…" error={retire.error} isPending={retire.isPending} onCancel={() => { retire.reset(); setRetireOpen(false); }} onConfirm={() => retire.mutate(undefined, { onSuccess: onRetired })} />}
   </>;
+}
+
+export function WebhookDrawerState({ onClose, children, announce = false }: { onClose: () => void; children: React.ReactNode; announce?: boolean }) {
+  return <DetailDrawer titleId="webhook-detail-title" eyebrow="Webhook management" title="Webhook details" className="webhook-drawer" closeLabel="Close webhook details" onClose={onClose}><DetailDrawerState announce={announce}>{children}</DetailDrawerState></DetailDrawer>;
 }
