@@ -1,5 +1,5 @@
 import type { JobResource } from '@/api/queue';
-import { DetailDrawer, DetailDrawerState } from '@/components/drawer/DetailDrawer';
+import { DetailDrawer, DetailDrawerState, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
 import { relativeTime } from '@/lib/format';
 
 export function jobStatusDot(status: string | undefined) {
@@ -22,13 +22,10 @@ function TimeFact({ value }: { value: string | undefined }) {
 
 export function JobDrawer({ job, requestedJobId, onClose }: { job: JobResource; requestedJobId: string; onClose: () => void }) {
   return (
-    <DetailDrawer titleId="job-detail-title" eyebrow="Job detail" title={job.workType ?? 'Job details'} status={<span className="status terminal-status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span>} subtitle={<span className="mono" title={requestedJobId}>{requestedJobId}</span>} className="queue-drawer" closeLabel="Close job details" onClose={onClose}>
+    <DetailDrawer titleId="job-detail-title" eyebrow="Job detail" title={job.workType ?? 'Job details'} status={<span className="status terminal-status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span>} subtitle={<DrawerIdentifier value={requestedJobId} label="Copy job identifier" />} className="queue-drawer" closeLabel="Close job details" onClose={onClose}>
       <section aria-labelledby="job-facts-title">
         <h3 id="job-facts-title">Facts</h3>
         <dl className="kv">
-          <dt>ID</dt><dd><span className="mono">{job.id}</span></dd>
-          <dt>Status</dt><dd><span className="status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span></dd>
-          <dt>Type</dt><dd>{job.workType ?? '—'}</dd>
           <dt>Owner</dt><dd>{job.ownerContext ?? '—'}</dd>
           <dt>Resource</dt><dd><span className="mono">{job.resourceRef ?? '—'}</span></dd>
           <dt>Attempts</dt><dd className="num">{job.attemptCount ?? '—'}</dd>
@@ -44,5 +41,5 @@ export function JobDrawer({ job, requestedJobId, onClose }: { job: JobResource; 
 }
 
 export function JobDrawerState({ jobId, onClose, children, announce = false }: { jobId: string; onClose: () => void; children: React.ReactNode; announce?: boolean }) {
-  return <DetailDrawer titleId="job-detail-title" eyebrow="Job detail" title="Job details" subtitle={<span className="mono" title={jobId}>{jobId}</span>} className="queue-drawer" closeLabel="Close job details" onClose={onClose}><DetailDrawerState announce={announce}>{children}</DetailDrawerState></DetailDrawer>;
+  return <DetailDrawer titleId="job-detail-title" eyebrow="Job detail" title="Job details" subtitle={<DrawerIdentifier value={jobId} label="Copy job identifier" />} className="queue-drawer" closeLabel="Close job details" onClose={onClose}><DetailDrawerState announce={announce}>{children}</DetailDrawerState></DetailDrawer>;
 }

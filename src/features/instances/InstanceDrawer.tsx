@@ -3,7 +3,7 @@ import type { CommandResult } from '@/api/envelopes';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
-import { DetailDrawer, DetailDrawerState } from '@/components/drawer/DetailDrawer';
+import { DetailDrawer, DetailDrawerState, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
@@ -39,8 +39,8 @@ export function InstanceDrawer({
   onClose: () => void;
   onDestroyed: (result: CommandResult) => void;
 }) {
-  const instanceName = instance.displayName ?? instance.id;
-  const [displayName, setDisplayName] = useState(instanceName);
+  const instanceName = instance.displayName || 'Unnamed instance';
+  const [displayName, setDisplayName] = useState(instance.displayName ?? '');
   const [confirmation, setConfirmation] = useState<'disconnect' | 'destroy'>();
   const feedback = useFeedback();
   const sessions = useInstanceSessions(instance.id);
@@ -60,7 +60,7 @@ export function InstanceDrawer({
   const capabilities = provider.data?.resource?.capabilities
     ?? (provider.data?.resource?.capability ? [provider.data.resource.capability] : []);
 
-  useEffect(() => setDisplayName(instanceName), [instanceName]);
+  useEffect(() => setDisplayName(instance.displayName ?? ''), [instance.displayName]);
 
   const commandFeedback = (result: CommandResult, action: string) => {
     feedback.command(result.disposition, {
@@ -76,7 +76,7 @@ export function InstanceDrawer({
 
   return (
     <>
-      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>} subtitle={<span className="mono" title={instance.id}>{instance.id}</span>} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
+      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
           {commandError && (
             <InlineError
               error={commandError}
@@ -94,7 +94,6 @@ export function InstanceDrawer({
           <section aria-labelledby="instance-facts-title">
             <h3 id="instance-facts-title" className="visually-hidden">Instance facts</h3>
             <dl className="kv">
-              <dt>Status</dt><dd><span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span></dd>
               <dt>Provider</dt><dd>{provider.data?.resource?.providerName ?? '—'}</dd>
               <dt>Created</dt><dd className="ts" title={instance.createdAt}>{relativeTime(instance.createdAt) || '—'}</dd>
               <dt>Updated</dt><dd className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</dd>
@@ -112,7 +111,7 @@ export function InstanceDrawer({
                 <label htmlFor="instance-display-name">Name</label>
                 <input id="instance-display-name" className="input" value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
               </div>
-              <button className="btn" type="submit" disabled={!displayName.trim() || displayName.trim() === instanceName || commandPending}>Update name</button>
+              <button className="btn" type="submit" disabled={!displayName.trim() || displayName.trim() === (instance.displayName ?? '') || commandPending}>Update name</button>
             </form>
           </section>
 
@@ -143,13 +142,6 @@ export function InstanceDrawer({
                     <button className="btn" type="button" disabled={commandPending} onClick={() => connect.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Connect') })}>Connect</button>
                   )}
                   <button className="btn" type="button" disabled={commandPending} onClick={() => reconnect.mutate(undefined, { onSuccess: () => feedback.accepted({ title: 'Reconnect accepted', detail: 'Connection state refreshes automatically.', dedupeKey: `instance:${instance.id}:reconnect` }) })}>Reconnect</button>
-                </div>
-              </div>
-              <div className="action-group destructive">
-                <span>Destructive actions require confirmation.</span>
-                <div className="actions">
-                  <button className="btn danger" type="button" onClick={() => setConfirmation('disconnect')}>Disconnect</button>
-                  <button className="btn danger" type="button" onClick={() => setConfirmation('destroy')}>Destroy…</button>
                 </div>
               </div>
             </div>
@@ -198,6 +190,18 @@ export function InstanceDrawer({
               <div className="empty">No capabilities reported.</div>
             )}
             {providerReadState.isStaleError && <InlineError error={providerReadState.error} onRetry={provider.refetch} />}
+          </section>
+
+          <section aria-labelledby="instance-danger-title">
+            <span className="eyebrow">Danger zone</span>
+            <h3 id="instance-danger-title">Destructive actions</h3>
+            <div className="action-group destructive">
+              <span>Disconnecting or destroying this instance requires typed confirmation.</span>
+              <div className="actions">
+                <button className="btn danger" type="button" onClick={() => setConfirmation('disconnect')}>Disconnect</button>
+                <button className="btn danger" type="button" onClick={() => setConfirmation('destroy')}>Destroy…</button>
+              </div>
+            </div>
           </section>
       </DetailDrawer>
 

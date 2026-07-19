@@ -77,6 +77,32 @@ table breakpoints. `pnpm design:check` compares critical geometry between the
 production stylesheet and the static prototype stylesheet, and is part of
 the required `pnpm check` gate.
 
+## Shared detail drawer system
+
+Resource inspectors and management panels use `DetailDrawer` from
+`src/components/drawer/`. Features own their typed content and commands, but
+they do not own drawer positioning, breakpoints, overlays, focus management,
+or close controls.
+
+The shared contract provides:
+
+- a 440px fixed inspector on workspaces at least 1280px wide, with reserved
+  content space so the drawer never covers table columns;
+- a modal side sheet below 1280px and a full-width sheet on narrow phones,
+  including body scroll lock, inert background content, focus trapping,
+  Escape handling, focus restoration, and a 44px close target;
+- a single identifier row with truncation, full-value tooltip, and copy
+  action instead of repeating IDs in the facts list;
+- shared loading, unavailable, and error-state geometry; and
+- one content order: identity and status, summary facts, configuration,
+  activity or history, recovery actions, then destructive actions last.
+
+Nested confirmation dialogs take keyboard priority over their parent drawer.
+Feature drawers may add section content and status-dot semantics, but must not
+reimplement the shell or introduce panel-specific responsive behavior.
+`pnpm design:check` rejects feature drawers that drift back to owned shell
+markup.
+
 ## Automated architecture gates
 
 `pnpm architecture:check` scans the TypeScript source and rejects direct

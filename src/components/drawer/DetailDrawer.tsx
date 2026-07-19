@@ -20,6 +20,27 @@ function CloseIcon() {
   return <svg className="!h-4 !w-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>;
 }
 
+export function DrawerIdentifier({ value, label = 'Copy identifier' }: { value: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <span className="!flex !min-w-0 !items-center !gap-2">
+      <span className="mono !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap" title={value}>{value}</span>
+      <button className="!shrink-0 !border-0 !bg-transparent !p-0 !text-[11px] !text-[var(--fg-2)] hover:!text-[var(--fg)]" type="button" aria-label={`${label}: ${value}`} onClick={() => void copy()}>{copied ? 'Copied' : 'Copy'}</button>
+    </span>
+  );
+}
+
 export function DetailDrawer({
   titleId,
   eyebrow,
@@ -53,7 +74,7 @@ export function DetailDrawer({
   const drawer = (
     <aside
       ref={drawerRef}
-      className={`drawer ${modal ? 'detail-drawer-modal' : 'detail-drawer'} ${className} !fixed !inset-y-0 !right-0 !z-[60] !m-0 !flex !h-[100dvh] !w-[min(440px,100vw)] !max-w-none !flex-col !overflow-hidden !rounded-none !border-0 !border-l !border-[var(--border)] !bg-[var(--surface)] !shadow-[var(--elev-raised)] min-[1280px]:!z-20`}
+      className={`drawer ${modal ? 'detail-drawer-modal' : 'detail-drawer'} ${className} !fixed !inset-y-0 !right-0 !z-[60] !m-0 !flex !h-[100dvh] !w-[min(440px,100vw)] !max-w-none !flex-col !overflow-hidden !rounded-none !border-0 !border-l !border-[var(--border)] !bg-[var(--surface)] !shadow-[var(--elev-raised)] [&_.drawer-note]:!text-[var(--fg-2)] [&_.help]:!text-[var(--fg-2)] min-[1280px]:!z-20`}
       aria-labelledby={titleId}
       {...(modal ? { role: 'dialog', 'aria-modal': true } : {})}
       tabIndex={-1}
@@ -62,10 +83,10 @@ export function DetailDrawer({
         <div className="drawer-identity !min-w-0 !flex-1">
           <span className="eyebrow !mb-2">{eyebrow}</span>
           <div className="drawer-title-row !flex !min-w-0 !items-center !gap-3 !mb-1">
-            <h2 id={titleId} className={`!min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap ${titleClassName ?? ''}`}>{title}</h2>
+            <h2 id={titleId} className={`!w-full !max-w-full !min-w-0 !flex-none !overflow-hidden !text-ellipsis !whitespace-nowrap ${titleClassName ?? ''}`}>{title}</h2>
             {status}
           </div>
-          {subtitle && <div className="drawer-subtitle !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap text-[11px] leading-[17px] text-[var(--muted)]">{subtitle}</div>}
+          {subtitle && <div className="drawer-subtitle !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap text-[11px] leading-[17px] text-[var(--fg-2)]">{subtitle}</div>}
         </div>
         <button ref={closeRef} className="close !flex !h-11 !w-11 !basis-11 !items-center !justify-center !rounded-[var(--radius-sm)] !border !border-[var(--border-subtle)] !bg-[var(--accent)] !p-0 !text-[var(--muted)]" type="button" aria-label={closeLabel} title="Close" onClick={onClose}><CloseIcon /></button>
       </header>

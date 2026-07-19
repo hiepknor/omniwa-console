@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GroupLocalStateRequest, GroupMemberResource, GroupResource } from '@/api/groups';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
-import { DetailDrawer } from '@/components/drawer/DetailDrawer';
+import { DetailDrawer, DetailDrawerState, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
 import { useModalDialog } from '@/components/useModalDialog';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
@@ -164,19 +164,12 @@ function GroupDrawerContent({ group }: { group: GroupResource }) {
       <section aria-labelledby="group-facts-title">
         <h3 id="group-facts-title">Facts</h3>
         <dl className="kv">
-          <dt>ID</dt><dd><span className="mono">{group.id}</span></dd>
           <dt>Instance</dt><dd><span className="mono">{group.instanceId ?? '—'}</span></dd>
           <dt>Members</dt><dd className="num">{group.memberCount ?? '—'}</dd>
           <dt>Admins</dt><dd className="num">{group.adminCount ?? '—'}</dd>
           <dt>Description</dt><dd>{group.description || '—'}</dd>
           <dt>Updated</dt><dd><span className="ts" title={group.updatedAt}>{relativeTime(group.updatedAt) || '—'}</span></dd>
         </dl>
-      </section>
-
-      <section aria-labelledby="group-invite-title">
-        <div className="drawer-section-head"><h3 id="group-invite-title">Invite link</h3><button className="btn" type="button" disabled={invite.isPending} onClick={() => invite.mutate()}>{invite.isPending ? 'Refreshing…' : 'Refresh invite link'}</button></div>
-        <p className="help">The platform reports whether the refresh completed or continues asynchronously; link material is not projected back through the public API.</p>
-        {invite.error && <InlineError error={invite.error} announce onRetry={() => invite.mutate()} />}
       </section>
 
       <section aria-labelledby="group-local-state-title">
@@ -200,6 +193,12 @@ function GroupDrawerContent({ group }: { group: GroupResource }) {
           <button className="btn" type="submit" disabled={update.isPending || !metadataChanged}>{update.isPending ? 'Updating…' : 'Update metadata'}</button>
           {update.error && <InlineError error={update.error} announce onRetry={() => update.mutate({ subject, description })} />}
         </form>
+      </section>
+
+      <section aria-labelledby="group-invite-title">
+        <div className="drawer-section-head"><h3 id="group-invite-title">Invite link</h3><button className="btn" type="button" disabled={invite.isPending} onClick={() => invite.mutate()}>{invite.isPending ? 'Refreshing…' : 'Refresh invite link'}</button></div>
+        <p className="help">The platform reports whether the refresh completed or continues asynchronously; link material is not projected back through the public API.</p>
+        {invite.error && <InlineError error={invite.error} announce onRetry={() => invite.mutate()} />}
       </section>
 
       <section aria-labelledby="group-members-title">
@@ -249,18 +248,18 @@ export function GroupDrawer({ groupId, subject: initialSubject, onClose }: {
   const groupQuery = useGroup(groupId);
   const readState = useResilientReadState(groupQuery, groupQuery.data?.resource !== undefined);
   const group = groupQuery.data?.resource;
-  const title = group?.subject || initialSubject || groupId;
+  const title = group?.subject || initialSubject || 'Unnamed group';
   const headerStatus = group?.status ?? (readState.isInitialError ? 'error' : groupQuery.data?.unavailable ? 'unavailable' : readState.isInitialLoading ? 'loading' : '—');
 
   return (
     <>
-      <DetailDrawer titleId="group-detail-title" eyebrow="Group management" title={title} titleClassName={group?.subject || initialSubject ? undefined : 'mono'} status={<span className="status"><span className={`dot ${groupStatusDot(headerStatus)}`} />{headerStatus}</span>} subtitle={<span className="mono" title={groupId}>{groupId}</span>} className="groups-drawer" closeLabel="Close group details" suppressEscape={sendOpen} onClose={onClose}>
+      <DetailDrawer titleId="group-detail-title" eyebrow="Group management" title={title} status={<span className="status"><span className={`dot ${groupStatusDot(headerStatus)}`} />{headerStatus}</span>} subtitle={<DrawerIdentifier value={groupId} label="Copy group identifier" />} className="groups-drawer" closeLabel="Close group details" suppressEscape={sendOpen} onClose={onClose}>
           {readState.isInitialLoading ? (
-            <div className="empty groups-drawer-state" aria-live="polite">Loading group details…</div>
+            <DetailDrawerState announce>Loading group details…</DetailDrawerState>
           ) : readState.isInitialError ? (
-            <section><InlineError error={readState.error} onRetry={groupQuery.refetch} /></section>
+            <DetailDrawerState><InlineError error={readState.error} onRetry={groupQuery.refetch} /></DetailDrawerState>
           ) : groupQuery.data?.unavailable || !group ? (
-            <div className="empty groups-drawer-state">Group details are not available yet.</div>
+            <DetailDrawerState>Group details are not available yet.</DetailDrawerState>
           ) : (
             <>
               {readState.isStaleError && <section><InlineError error={readState.error} onRetry={groupQuery.refetch} /></section>}
