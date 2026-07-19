@@ -30,7 +30,21 @@ export function useModalDialog<T extends HTMLElement>({
     if (dialog === null) return;
     const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
+    const isolated = new Map<HTMLElement, boolean>();
     document.body.style.overflow = 'hidden';
+
+    // Isolate every sibling outside the dialog branch. This keeps shell
+    // navigation and page controls out of both pointer and accessibility trees
+    // without requiring every dialog to know where it is mounted.
+    let branch: HTMLElement | null = dialog;
+    while (branch.parentElement !== null && branch.parentElement !== document.body) {
+      for (const sibling of branch.parentElement.children) {
+        if (sibling === branch || !(sibling instanceof HTMLElement)) continue;
+        if (!isolated.has(sibling)) isolated.set(sibling, sibling.inert);
+        sibling.inert = true;
+      }
+      branch = branch.parentElement;
+    }
 
     const focusable = () => Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
     (initialFocusRef?.current ?? focusable()[0] ?? dialog).focus();
@@ -64,6 +78,7 @@ export function useModalDialog<T extends HTMLElement>({
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
       document.body.style.overflow = previousOverflow;
+      isolated.forEach((wasInert, element) => { element.inert = wasInert; });
       returnFocus?.focus();
     };
   }, [initialFocusRef]);

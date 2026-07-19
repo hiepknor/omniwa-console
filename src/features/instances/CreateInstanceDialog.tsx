@@ -19,7 +19,7 @@ export function CreateInstanceDialog({
   const dialogRef = useModalDialog<HTMLDivElement>({ onClose: onCancel, canClose: !isPending, initialFocusRef: inputRef });
 
   return (
-    <div className="overlay" role="presentation" onMouseDown={(event) => {
+    <div className="overlay !z-[60]" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !isPending) onCancel();
     }}>
       <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby="create-instance-title" tabIndex={-1}>

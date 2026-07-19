@@ -44,18 +44,23 @@ must parse prefixes such as `instance:` and `worker-job:` to build deep links.
 ## 4. Empty read projections surface as 503
 
 **Evidence:** The platform distinguishes an unavailable read from a real
-failure with a data envelope carrying
-`ResourceReadData.readStatus: "unavailable"` and a `reasonCode` under HTTP 503.
+failure under HTTP 503. Contract-shaped responses carry
+`ResourceReadData.readStatus: "unavailable"` and a `reasonCode` in `data`.
+The July 2026 local runtime also emitted the same fields under `meta.query`
+with an empty `data` array. The console normalizes both public-envelope
+variants at its API boundary so feature panels do not misreport pending
+projections as unknown failures.
 The observed reason code was
 `application_handler_not_implemented` on `/v1/dashboard`,
 `/v1/metrics/messages`, `/v1/metrics/webhooks`, `/v1/metrics/media`, and
 `/v1/action-required`. The console now parses this shape and renders it as an
 empty state rather than an outage.
 
-**Proposed contract change:** Consider returning HTTP 200 for unavailable
-reads, because HTTP 503 causes generic clients and uptime monitors to report
-an outage. Explicitly document the `readStatus` and `reasonCode` semantics in
-the OpenAPI schema descriptions.
+**Proposed contract change:** Align the runtime with one documented envelope
+location, and consider returning HTTP 200 for unavailable reads because HTTP
+503 causes generic clients and uptime monitors to report an outage. Explicitly
+document the `readStatus` and `reasonCode` semantics in the OpenAPI schema
+descriptions.
 
 ## 5. Readiness fails closed permanently in local development
 

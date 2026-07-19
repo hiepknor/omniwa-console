@@ -191,7 +191,7 @@ function ConsoleSessionAside() {
       </dl>
       <div className="settings-session-note"><span className="eyebrow">Credential boundary</span><p>The API key is masked after entry and never appears in URLs or logs.</p></div>
       <div className="settings-session-actions"><p className="help">Use Sign out from workspace navigation to clear this browser session.</p></div>
-      {session.keyKind === 'admin' && <div className="settings-session-link"><Link to="/settings/api-keys">API key inventory <span aria-hidden="true">→</span></Link></div>}
+      {session.keyKind === 'admin' && <div className="settings-session-link"><Link className="flex min-h-11 items-center" to="/settings/api-keys">API key inventory <span aria-hidden="true">→</span></Link></div>}
     </aside>
   );
 }

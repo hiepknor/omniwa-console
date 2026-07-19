@@ -28,7 +28,7 @@ export function SecretDialog({
   };
 
   return (
-    <div className="overlay settings-dialog-overlay" role="presentation">
+    <div className="overlay settings-dialog-overlay !z-[60]" role="presentation">
       <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <header><b id={titleId}>API key secret — shown once</b><span className="mono">{keyId}</span></header>
         <div className="body">

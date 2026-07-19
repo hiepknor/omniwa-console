@@ -151,7 +151,7 @@ export function ConnectPage({
           </div>
 
           <form className="connect-form" onSubmit={submit}>
-            <ol className="connect-sequence max-[640px]:hidden" aria-label="Connection checks">
+            <ol className="connect-sequence max-[640px]:!hidden" aria-label="Connection checks">
               <li>
                 <span className="connect-sequence-index num !text-[var(--fg-2)]">01</span>
                 <strong>Validate origin</strong>

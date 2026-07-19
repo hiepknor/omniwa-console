@@ -42,8 +42,8 @@ export function FeedbackContent({
         {detail && <p>{detail}</p>}
         {requestIdLabel && (
           <div className="feedback-request">
-            <span className="mono" title={requestId}>{requestIdLabel}</span>
-            {requestId && <button type="button" onClick={() => { void copyRequestId(); }}>{copied ? 'Copied' : 'Copy'}</button>}
+            <span className="mono max-[640px]:!truncate" title={requestId}>{requestIdLabel}</span>
+            {requestId && <button className="max-[640px]:!min-h-11 max-[640px]:!px-3" type="button" onClick={() => { void copyRequestId(); }}>{copied ? 'Copied' : 'Copy'}</button>}
           </div>
         )}
         {action && <button className="btn sm feedback-action" type="button" onClick={action.run}>{action.label}</button>}

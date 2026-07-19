@@ -90,7 +90,7 @@ function SendTextDialog({ groupId, onClose }: { groupId: string; onClose: () => 
   const dialogRef = useModalDialog<HTMLDivElement>({ onClose, canClose: !send.isPending, initialFocusRef: textareaRef });
 
   return (
-    <div className="overlay" role="presentation" onMouseDown={(event) => {
+    <div className="overlay !z-[60]" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !send.isPending) onClose();
     }}>
       <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby="group-send-title" tabIndex={-1}>

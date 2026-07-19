@@ -34,7 +34,7 @@ export function TypedConfirmationDialog({
 
   return (
     <div
-      className="overlay"
+      className="overlay !z-[60]"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !isPending) onCancel();

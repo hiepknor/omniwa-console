@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { formatCount, relativeTime } from '@/lib/format';
 import {
   useDashboardSummary,
+  useActionRequiredItems,
   useMediaMetrics,
   useMessageMetrics,
   useQueueMetrics,
@@ -39,6 +40,7 @@ function MetricCard({ metric }: { metric: MetricCardModel }) {
 
 export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
   const dashboard = useDashboardSummary();
+  const actionItems = useActionRequiredItems();
   const messages = useMessageMetrics();
   const queue = useQueueMetrics();
   const webhooks = useWebhookMetrics();
@@ -150,6 +152,16 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
   // HealthStrip owns a whole-origin outage. Keep cached values visible, but do
   // not amplify one transport failure across every downstream dashboard read.
   if (readsBlockedByOrigin && reportingCount === 0) return null;
+
+  if (reportingCount === 0 && !hasDeadLetters && actionItems.data?.unavailable !== undefined) {
+    return (
+      <section className="overview-coverage mb-6" aria-labelledby="overview-reporting-pending-title">
+        <div className="overview-section-label"><span>Operational reporting</span><span>Data pending</span></div>
+        <h2 id="overview-reporting-pending-title">Operational values are not available yet.</h2>
+        <p>The platform has not reported metrics or action-required items. Pending values are not treated as zero.</p>
+      </section>
+    );
+  }
 
   return (
     <>

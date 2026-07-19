@@ -60,7 +60,7 @@ export function ProvisionKeyDialog({
   };
 
   return (
-    <div className="overlay settings-dialog-overlay" role="presentation" onMouseDown={(event) => {
+    <div className="overlay settings-dialog-overlay !z-[60]" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !mutation.isPending) onCancel();
     }}>
       <form ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} onSubmit={submit}>

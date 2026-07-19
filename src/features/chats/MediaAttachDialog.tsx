@@ -27,7 +27,7 @@ export function MediaAttachDialog({
   });
 
   return (
-    <div className="overlay" role="presentation" onMouseDown={(event) => {
+    <div className="overlay !z-[60]" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !isPending) onCancel();
     }}>
       <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby="attach-media-title" tabIndex={-1}>

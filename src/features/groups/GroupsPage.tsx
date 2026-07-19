@@ -73,7 +73,7 @@ function InstancePicker({ instances, selected, selectedId, onSelect }: {
   const pickerLabel = selected?.displayName ?? selected?.id ?? selectedId ?? 'Select instance';
   return (
     <div className="chat-picker groups-instance-picker" ref={rootRef}>
-      <button className="instpick" type="button" title={pickerLabel} aria-label="Select instance" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((current) => !current)}>
+      <button className="instpick !min-h-11" type="button" title={pickerLabel} aria-label="Select instance" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((current) => !current)}>
         <span className={`dot instance-status-dot ${instanceStatusDot(selected?.status)}`} aria-hidden="true" />
         <span className="instpick-name">{pickerLabel}</span>
         <span className="chev" aria-hidden="true">▾</span>

@@ -230,8 +230,8 @@ export function EventsPage() {
     <>
       <PageHeader title="Events" />
       <div className="events-mode-tabs" role="tablist" aria-label="Event data view" onKeyDown={handleTabKey}>
-        <button className={`events-mode${view === 'history' ? ' active' : ''}`} id="event-history-tab" type="button" role="tab" aria-selected={view === 'history'} aria-controls="event-history-panel" tabIndex={view === 'history' ? 0 : -1} onClick={() => setView('history')}>Event history</button>
-        <button className={`events-mode${view === 'audit' ? ' active' : ''}`} id="audit-records-tab" type="button" role="tab" aria-selected={view === 'audit'} aria-controls="audit-records-panel" tabIndex={view === 'audit' ? 0 : -1} onClick={() => setView('audit')}>Audit records</button>
+        <button className={`events-mode !min-h-11${view === 'history' ? ' active' : ''}`} id="event-history-tab" type="button" role="tab" aria-selected={view === 'history'} aria-controls="event-history-panel" tabIndex={view === 'history' ? 0 : -1} onClick={() => setView('history')}>Event history</button>
+        <button className={`events-mode !min-h-11${view === 'audit' ? ' active' : ''}`} id="audit-records-tab" type="button" role="tab" aria-selected={view === 'audit'} aria-controls="audit-records-panel" tabIndex={view === 'history' ? -1 : 0} onClick={() => setView('audit')}>Audit records</button>
       </div>
       {view === 'history' ? <EventHistory /> : <AuditRecords />}
     </>

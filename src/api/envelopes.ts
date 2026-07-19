@@ -38,7 +38,7 @@ export class ApiFailure extends Error {
   }
 }
 
-/** Detect a non-2xx body that is a data envelope reporting an unavailable read. */
+/** Detect a non-2xx data envelope reporting an unavailable projection read. */
 export function parseUnavailableRead(body: unknown): UnavailableRead | undefined {
   if (typeof body !== 'object' || body === null || !('data' in body)) return undefined;
 
@@ -57,10 +57,15 @@ export function parseUnavailableRead(body: unknown): UnavailableRead | undefined
       ? data
       : undefined;
 
-  if (first === undefined) return undefined;
+  const metaQuery = 'meta' in body && typeof body.meta === 'object' && body.meta !== null && 'query' in body.meta
+    ? body.meta.query
+    : undefined;
+  const reported = first ?? (unavailable(metaQuery) ? metaQuery : undefined);
+
+  if (reported === undefined) return undefined;
   return {
     readStatus: 'unavailable',
-    ...(typeof first.reasonCode === 'string' ? { reasonCode: first.reasonCode } : {}),
+    ...(typeof reported.reasonCode === 'string' ? { reasonCode: reported.reasonCode } : {}),
   };
 }
 

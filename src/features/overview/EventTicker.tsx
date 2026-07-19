@@ -62,11 +62,11 @@ export function EventTicker({
         <div className="overview-event-feed" role="region" aria-label="Live event stream">
           <h2 id="overview-events-title" className="visually-hidden">Realtime event stream</h2>
           {events.map((event, index) => (
-            <div className="overview-event-row" key={event.id ?? `${event.type}-${event.resourceId ?? ''}-${event.updatedAt ?? index}`}>
+            <div className="overview-event-row max-[640px]:!grid-cols-[8px_minmax(0,1fr)_auto] max-[640px]:!gap-x-3 max-[640px]:!py-2" key={event.id ?? `${event.type}-${event.resourceId ?? ''}-${event.updatedAt ?? index}`}>
               <span className={`dot ${eventDot(event.type)}`}></span>
-              <span className="mono">{event.type}</span>
-              <span className="mono">{event.resourceId ?? '—'}</span>
-              <span className="ts">{relativeTime(event.updatedAt) || '—'}</span>
+              <span className="mono min-w-0 truncate">{event.type}</span>
+              <span className="mono min-w-0 truncate max-[640px]:!col-start-2 max-[640px]:!row-start-2">{event.resourceId ?? '—'}</span>
+              <span className="ts !text-[var(--fg-2)] max-[640px]:!col-start-3 max-[640px]:!row-start-1 max-[640px]:!row-span-2">{relativeTime(event.updatedAt) || '—'}</span>
             </div>
           ))}
         </div>

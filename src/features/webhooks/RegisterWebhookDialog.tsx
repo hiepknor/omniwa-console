@@ -34,7 +34,7 @@ export function RegisterWebhookDialog({ error, isPending, onCancel, onRegister }
   };
 
   return (
-    <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isPending) onCancel(); }}>
+    <div className="overlay !z-[60]" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isPending) onCancel(); }}>
       <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby="register-webhook-title" tabIndex={-1}>
         <header><b id="register-webhook-title">Register webhook</b><span className="mono">registerWebhook</span></header>
         <form onSubmit={(event) => { event.preventDefault(); submit(); }}>
