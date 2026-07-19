@@ -67,10 +67,11 @@ function historySaysRetryable(data: PublicData | undefined, steps: DeliveryStep[
 function statusDot(status: string | undefined): string {
   switch (status?.toLocaleLowerCase()) {
     case 'delivered':
-    case 'read':
-    case 'accepted': return 'dot-ok';
-    case 'failed':
-    case 'cancelled': return 'dot-failed';
+    case 'read': return 'dot-ok';
+    case 'accepted': return 'dot-pending';
+    case 'failed': return 'dot-failed';
+    case 'canceled':
+    case 'cancelled': return 'dot-muted';
     case 'queued':
     case 'pending':
     case 'processing': return 'dot-pending';
@@ -186,7 +187,7 @@ export function ContextPanel({ instanceId, chat, onBack }: {
       </section>
       {selectedMessage && instanceId
         ? <SelectedMessage message={selectedMessage} instanceId={instanceId} />
-        : <section><p className="help">Select a message in the timeline to inspect delivery.</p></section>}
+        : <section><p className="help">{selectedMessageId ? 'The selected message is not in the loaded history. Load older messages in the timeline.' : 'Select a message in the timeline to inspect delivery.'}</p></section>}
     </aside>
   );
 }

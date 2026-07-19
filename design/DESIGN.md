@@ -156,7 +156,7 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 - Input: Recessed bg, subtle border, 6px radius, 13px text, padding 7px 10px. Focus increases border brightness without a colored ring. Error: muted-red border + 12px error text below.
 - Selects and filters render as ghost buttons with a chevron; active filters become dismissible pills in a filter bar above tables.
 
-### Cards (Overview only)
+### Cards (Overview; metric cards on Queue, Webhooks, and Groups)
 
 - Panel bg, default border, 8px radius, 16px padding.
 - Metric card: 11px uppercase label → 26px tabular value → 12px faint delta/context line.
@@ -243,7 +243,7 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 ### Live indicator
 
-- Header-right: 8px dot + 12px label. `live` emerald pulsing dot, `reconnecting` amber, `polling` sky, `offline` red. Clicking opens connection detail popover.
+- Header-right: 8px dot + 12px label. `live` emerald pulsing dot, `reconnecting` amber, `polling` uses the §2 info/muted hue, `offline` red. Clicking opens connection detail popover.
 
 ### Workspace (primary surface)
 

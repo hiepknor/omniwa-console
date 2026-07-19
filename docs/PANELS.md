@@ -52,7 +52,8 @@ Operations: `listInstanceChats`, `listChats`, `getChat`,
 `sendInstanceTextMessage`, `sendInstanceMediaMessage`,
 `sendInstanceMessage`, `retryMessage`, `cancelMessage`, `registerMedia`,
 `getMedia`, `listInstanceContacts`, `listContacts`, `getContact`,
-`listInstanceLabels`, `listLabels`, `getLabel`, `streamEvents`.
+`listInstanceLabels`, `listLabels`, `getLabel`, `requestInstanceReconnect`,
+`streamEvents`.
 
 ## groups — `/groups/:instanceId?` (realtime) — PRIMARY
 

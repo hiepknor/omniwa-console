@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
-import { useMessagingInstance, useSendMediaMessage, useSendTextMessage } from './hooks';
+import { useMessagingInstance, useRequestInstanceReconnect, useSendMediaMessage, useSendTextMessage } from './hooks';
 import { MediaAttachDialog } from './MediaAttachDialog';
 
 export function Composer({ instanceId, chatId, chatName }: {
@@ -14,6 +14,7 @@ export function Composer({ instanceId, chatId, chatName }: {
   const instance = useMessagingInstance(instanceId);
   const send = useSendTextMessage(instanceId);
   const sendMedia = useSendMediaMessage(instanceId);
+  const reconnect = useRequestInstanceReconnect(instanceId);
   const connected = instance.data?.resource?.status?.toLocaleLowerCase() === 'connected';
 
   if (instance.isError) {
@@ -22,9 +23,15 @@ export function Composer({ instanceId, chatId, chatName }: {
 
   if (!instance.isLoading && !connected) {
     return (
-      <div className="composer-warn" role="status">
-        <span>Sends are unavailable while this instance is disconnected.</span>
-        <Link to={`/instances/${encodeURIComponent(instanceId)}`}>Manage instance</Link>
+      <div className="composer-disconnected">
+        {reconnect.isError && <InlineError error={reconnect.error} onRetry={() => reconnect.mutate()} className="composer-error" announce />}
+        <div className="composer-warn" role="status">
+          <span>Sends are unavailable while this instance is disconnected.</span>
+          <div className="composer-warn-actions">
+            <button className="btn" type="button" disabled={reconnect.isPending} onClick={() => reconnect.mutate()}>{reconnect.isPending ? 'Requesting…' : 'Request reconnect'}</button>
+            <Link to={`/instances/${encodeURIComponent(instanceId)}`}>Manage instance</Link>
+          </div>
+        </div>
       </div>
     );
   }

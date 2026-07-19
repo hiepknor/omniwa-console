@@ -49,7 +49,7 @@ export function EventTicker({
   const connection = connectionCopy[connectionState];
   return (
     <section className="overview-events" aria-labelledby="overview-events-title">
-      <div className="overview-section-label"><span>Event capability</span><span>{connection.label}</span></div>
+      <div className="overview-section-label"><span>Live tail</span><span>{connection.label}</span></div>
       {events.length === 0 ? (
         <div className="overview-event-state">
           <span className="overview-event-glyph" aria-hidden="true"><i></i><i></i><i></i></span>

@@ -36,11 +36,11 @@ function MetricCard({ label, value, context, attention = false }: {
   );
 }
 
-function DrawerState({ children, onClose }: { children: ReactNode; onClose: () => void }) {
+function DrawerState({ children, jobId, onClose }: { children: ReactNode; jobId: string; onClose: () => void }) {
   return (
     <aside className="drawer queue-drawer" aria-label="Job details">
       <header className="drawer-head">
-        <div className="drawer-identity"><span className="eyebrow">Job detail</span><div className="drawer-title-row"><h2>Job details</h2></div></div>
+        <div className="drawer-identity"><span className="eyebrow">Job detail</span><div className="drawer-title-row"><h2>Job details</h2></div><span className="mono">{jobId}</span></div>
         <button className="close" type="button" aria-label="Close job details" onClick={onClose}>✕</button>
       </header>
       <div className="drawer-scroll">{children}</div>
@@ -116,7 +116,7 @@ export function QueuePage() {
 
   return (
     <>
-      <PageHeader title="Queue & Jobs" actions={<button className="btn" type="button" onClick={refresh}>Refresh</button>} />
+      <PageHeader title="Queue & Jobs" />
 
       <section className="queue-metric-section" aria-labelledby="queue-posture-title">
         <div className="queue-metric-head">
@@ -134,7 +134,7 @@ export function QueuePage() {
       </section>
 
       <DataTableWorkspace className="queue-workbench" aria-labelledby="jobs-table-title">
-        <div className="queue-section-head"><div><h2>Jobs</h2><span className="queue-posture-note">Loaded jobs · newest updates first</span></div><span className="queue-result-count num">{filteredJobs.length} visible</span></div>
+        <div className="queue-section-head"><div><h2>Jobs</h2><span className="queue-posture-note">Loaded jobs · newest updates first</span></div>{list.isSuccess && !unavailable && <span className="queue-result-count num">{filteredJobs.length} visible</span>}</div>
         <DataTableToolbar>
           <label className="search-field">
             <span className="visually-hidden">Search jobs</span>
@@ -166,7 +166,7 @@ export function QueuePage() {
               }
             },
           })}
-          footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredJobs.length} loaded jobs</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={list.hasNextPage ? <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button> : undefined} />}
+          footer={<DataTableFooter primary={<><span className="num">{filteredJobs.length} loaded jobs</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></>} actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>} />}
         />
       </DataTableWorkspace>
 
@@ -178,12 +178,12 @@ export function QueuePage() {
       </MobileFilterSheet>
 
       {jobId && (detail.data?.resource
-        ? <JobDrawer job={detail.data.resource} onClose={closeJob} />
+        ? <JobDrawer job={detail.data.resource} requestedJobId={jobId} onClose={closeJob} />
         : detail.data?.unavailable
-          ? <DrawerState onClose={closeJob}><div className="empty">Job data is not available yet.</div></DrawerState>
+          ? <DrawerState jobId={jobId} onClose={closeJob}><div className="empty">Job data is not available yet.</div></DrawerState>
           : detail.isError
-            ? <DrawerState onClose={closeJob}><InlineError error={detail.error} onRetry={detail.refetch} /></DrawerState>
-            : <DrawerState onClose={closeJob}><div className="empty">Loading job details…</div></DrawerState>)}
+            ? <DrawerState jobId={jobId} onClose={closeJob}><InlineError error={detail.error} onRetry={detail.refetch} /></DrawerState>
+            : <DrawerState jobId={jobId} onClose={closeJob}><div className="empty">Loading job details…</div></DrawerState>)}
     </>
   );
 }

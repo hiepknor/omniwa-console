@@ -44,7 +44,15 @@ function EventHistory() {
   const realtimeStatus = useRealtimeStatus();
   const list = useEvents();
   const pages = list.data?.pages ?? [];
-  const events = useMemo(() => pages.flatMap((page) => page.resource?.items ?? []), [pages]);
+  const events = useMemo(() => pages
+    .flatMap((page) => page.resource?.items ?? [])
+    .sort((left, right) => {
+      const leftTime = left.timestamp ? Date.parse(left.timestamp) : Number.NaN;
+      const rightTime = right.timestamp ? Date.parse(right.timestamp) : Number.NaN;
+      if (Number.isNaN(leftTime)) return Number.isNaN(rightTime) ? 0 : 1;
+      if (Number.isNaN(rightTime)) return -1;
+      return rightTime - leftTime;
+    }), [pages]);
   const unavailable = pages.some((page) => page.unavailable !== undefined);
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase();
@@ -100,7 +108,7 @@ function EventHistory() {
         </div>
         <details className="events-behavior-note">
           <summary>How live tail works</summary>
-          <p>Live rows come from the realtime stream's bounded 200-event buffer. The table below is the durable <span className="mono">listEvents</span> history and loads older pages with its cursor.</p>
+          <p>The tail shows the most recent events from a bounded 200-event presentation buffer. The table below is the durable <span className="mono">listEvents</span> history and loads older pages with its cursor.</p>
         </details>
       </section>
 

@@ -52,6 +52,7 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
   const connected = dashboard.data?.resource?.connectedInstanceCount;
   const total = dashboard.data?.resource?.instanceCount;
   const queuedJobCount = queue.data?.resource?.queuedJobCount;
+  const totalJobCount = queue.data?.resource?.totalJobCount;
   const deadJobCount = queue.data?.resource?.deadJobCount;
   const dashboardPending = dashboard.data?.unavailable !== undefined;
   const queuePending = queue.data?.unavailable !== undefined;
@@ -174,7 +175,7 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
             </div>
           </div>
           <div className="overview-attention-footer">
-            <span><span className="num">{queueMetric.reporting ? formatCount(queuedJobCount) : '—'}</span> total queue depth</span>
+            <span><span className="num">{totalJobCount !== undefined ? formatCount(totalJobCount) : queuedJobCount !== undefined ? formatCount(queuedJobCount) : '—'}</span> {totalJobCount !== undefined ? 'total jobs tracked' : 'queued jobs'}</span>
             <Link className="btn" to="/queue">Review queue</Link>
           </div>
         </section>

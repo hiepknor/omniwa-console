@@ -51,8 +51,10 @@ export function webhookStatusDot(status: string | undefined) {
     case 'suspended':
     case 'pending':
     case 'retrying': return 'dot-pending';
-    case 'retired':
-    case 'failed': return 'dot-failed';
+    case 'retired': return 'dot-muted';
+    case 'failed':
+    case 'dead':
+    case 'exhausted': return 'dot-failed';
     default: return 'dot-info';
   }
 }
@@ -71,16 +73,22 @@ function DeliveryRow({ delivery, selected, checked, busy, onSelect, onCheck, onR
   delivery: WebhookDeliveryResource; selected: boolean; checked: boolean; busy: boolean;
   onSelect: () => void; onCheck: (checked: boolean) => void; onRetry: () => void; onRedrive: () => void;
 }) {
-  const failed = delivery.status?.toLowerCase() === 'failed';
-  return <tr className={selected ? 'selected' : undefined} onClick={onSelect}>
-    <td>{failed ? <input type="checkbox" checked={checked} onChange={(event) => onCheck(event.target.checked)} onClick={(event) => event.stopPropagation()} aria-label={`Select failed delivery ${delivery.id}`} /> : null}</td>
-    <td><button className="webhook-delivery-link mono" type="button" onClick={onSelect}>{delivery.id}</button></td>
-    <td><span className="mono">{delivery.eventType ?? '—'}</span></td>
-    <td><span className="status sm"><span className={`dot ${webhookStatusDot(delivery.status)}`} />{delivery.status ?? '—'}</span></td>
-    <td className="num">{delivery.attemptCount ?? '—'}</td>
-    <td className="ts" title={delivery.updatedAt}>{relativeTime(delivery.updatedAt) || '—'}</td>
-    <td><div className="actions webhook-delivery-actions"><button className="btn sm" type="button" disabled={busy} onClick={(event) => { event.stopPropagation(); onRetry(); }}>Retry</button><button className="btn sm" type="button" disabled={busy} onClick={(event) => { event.stopPropagation(); onRedrive(); }}>Redrive</button></div></td>
-  </tr>;
+  const terminalFailure = ['failed', 'dead', 'exhausted'].includes(delivery.status?.toLowerCase() ?? '');
+  const retryTitle = terminalFailure ? undefined : 'Retry is available for failed deliveries.';
+  const redriveTitle = terminalFailure ? undefined : 'Redrive is available for failed deliveries.';
+  return <article className={`delivery-record${selected ? ' selected' : ''}`}>
+    <dl>
+      <dt>Delivery</dt><dd><button className="webhook-delivery-link mono" type="button" title={delivery.id} onClick={onSelect}>{delivery.id}</button></dd>
+      <dt>Event</dt><dd><span className="mono">{delivery.eventType ?? '—'}</span></dd>
+      <dt>Status</dt><dd><span className="status sm"><span className={`dot ${webhookStatusDot(delivery.status)}`} />{delivery.status ?? '—'}</span></dd>
+      <dt>Attempts</dt><dd className="num">{delivery.attemptCount ?? '—'}</dd>
+      <dt>Updated</dt><dd><span className="ts" title={delivery.updatedAt}>{relativeTime(delivery.updatedAt) || '—'}</span></dd>
+    </dl>
+    <div className="delivery-record-actions">
+      {terminalFailure && <label className="delivery-check"><input type="checkbox" checked={checked} onChange={(event) => onCheck(event.target.checked)} aria-label={`Select failed delivery ${delivery.id}`} /><span>Select for bulk recovery</span></label>}
+      <div className="actions webhook-delivery-actions"><button className="btn sm" type="button" disabled={busy || !terminalFailure} title={retryTitle} onClick={onRetry}>Retry</button><button className="btn sm" type="button" disabled={busy || !terminalFailure} title={redriveTitle} onClick={onRedrive}>Redrive</button></div>
+    </div>
+  </article>;
 }
 
 export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: WebhookResource; onClose: () => void; onRetired: () => void }) {
@@ -91,7 +99,7 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
   const feedback = useFeedback();
   const deliveriesQuery = useWebhookDeliveries();
   const deliveries = useMemo(() => (deliveriesQuery.data?.pages ?? []).flatMap((page) => page.resource?.items ?? []).filter((item) => item.webhookId === webhook.id), [deliveriesQuery.data?.pages, webhook.id]);
-  const failed = deliveries.filter((item) => item.status?.toLowerCase() === 'failed');
+  const failed = deliveries.filter((item) => ['failed', 'dead', 'exhausted'].includes(item.status?.toLowerCase() ?? ''));
   const update = useUpdateWebhook(webhook.id);
   const activate = useActivateWebhook(webhook.id);
   const suspend = useSuspendWebhook(webhook.id);
@@ -110,14 +118,14 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
 
   return <>
     <aside className="drawer webhook-drawer" aria-labelledby="webhook-detail-title">
-      <header className="drawer-head"><div className="drawer-identity"><span className="eyebrow">Webhook management</span><div className="drawer-title-row"><h2 id="webhook-detail-title">{webhook.id}</h2><span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span></div></div><button className="close" type="button" aria-label="Close webhook details" onClick={onClose}>✕</button></header>
+      <header className="drawer-head"><div className="drawer-identity"><span className="eyebrow">Webhook management</span><div className="drawer-title-row"><h2 id="webhook-detail-title" title={webhook.id}>{webhook.id}</h2><span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span></div></div><button className="close" type="button" aria-label="Close webhook details" onClick={onClose}>✕</button></header>
       <div className="drawer-scroll">
         {commandError && <InlineError error={commandError} onRetry={() => undefined} announce />}
         <section aria-labelledby="webhook-facts-title"><h3 id="webhook-facts-title" className="visually-hidden">Webhook facts</h3><dl className="kv"><dt>ID</dt><dd><span className="mono">{webhook.id}</span></dd><dt>Status</dt><dd><span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span></dd><dt>Events</dt><dd><div className="capchips">{(webhook.eventTypes ?? []).length ? webhook.eventTypes?.map((event) => <span className="chip" key={event}>{event}</span>) : '—'}</div></dd><dt>Created</dt><dd className="ts" title={webhook.createdAt}>{relativeTime(webhook.createdAt) || '—'}</dd><dt>Updated</dt><dd className="ts" title={webhook.updatedAt}>{relativeTime(webhook.updatedAt) || '—'}</dd></dl></section>
         <section aria-labelledby="webhook-lifecycle-title"><span className="eyebrow">Endpoint controls</span><h3 id="webhook-lifecycle-title">Lifecycle</h3><div className="lifecycle-groups"><div className="action-group"><span>Lifecycle commands are accepted asynchronously.</span><div className="actions">{webhook.status !== 'active' && webhook.status !== 'retired' && <button className="btn primary" type="button" disabled={pending} onClick={() => activate.mutate(undefined, { onSuccess: () => accepted('Activate') })}>Activate</button>}{webhook.status === 'active' && <button className="btn" type="button" disabled={pending} onClick={() => suspend.mutate(undefined, { onSuccess: () => accepted('Suspend') })}>Suspend</button>}</div></div>{webhook.status !== 'retired' && <div className="action-group destructive"><span>Permanently stop future deliveries after typed confirmation.</span><button className="btn danger" type="button" onClick={() => setRetireOpen(true)}>Retire…</button></div>}</div></section>
-        <section aria-labelledby="webhook-events-title"><span className="eyebrow">Configuration</span><h3 id="webhook-events-title">Subscribed events</h3><form onSubmit={(event) => { event.preventDefault(); update.mutate({ eventTypes: parseEvents() }, { onSuccess: () => accepted('Update subscriptions', 'update') }); }}><div className="field"><label htmlFor="webhook-event-types">Event types <span className="muted">comma-separated</span></label><textarea className="input webhook-event-input" id="webhook-event-types" value={eventsValue} onChange={(event) => setEventsValue(event.target.value)} disabled={pending} /></div><button className="btn" type="submit" disabled={pending || eventsValue === (webhook.eventTypes ?? []).join(', ')}>Update events</button></form></section>
+        <section aria-labelledby="webhook-events-title"><span className="eyebrow">Configuration</span><h3 id="webhook-events-title">Subscribed events</h3><form onSubmit={(event) => { event.preventDefault(); update.mutate({ eventTypes: parseEvents() }, { onSuccess: () => accepted('Update subscriptions', 'update') }); }}><div className="field"><label htmlFor="webhook-event-types">Event types <span className="muted">comma-separated</span></label><textarea className="input webhook-event-input" id="webhook-event-types" value={eventsValue} onChange={(event) => setEventsValue(event.target.value)} disabled={pending} /><p className="help">Event types are not projected back by the platform; submitting replaces the subscription.</p></div><button className="btn" type="submit" disabled={pending || parseEvents().length === 0 || eventsValue === (webhook.eventTypes ?? []).join(', ')}>Update events</button></form></section>
         <section aria-labelledby="webhook-deliveries-title"><div className="drawer-section-head"><div><span className="eyebrow">Loaded records</span><h3 id="webhook-deliveries-title">Recent deliveries</h3></div><span className="num delivery-count">{deliveries.length}</span></div>
-          {deliveriesQuery.isLoading ? <div className="empty">Loading deliveries…</div> : deliveriesQuery.isError ? <InlineError error={deliveriesQuery.error} onRetry={deliveriesQuery.refetch} /> : unavailable ? <div className="empty">Delivery data is not available yet.</div> : deliveries.length === 0 ? <div className="empty">No loaded deliveries for this webhook.</div> : <div className="delivery-scroll" tabIndex={0} role="region" aria-label="Recent webhook deliveries"><table className="minitable delivery-table"><thead><tr><th><span className="visually-hidden">Select</span></th><th>Delivery</th><th>Event</th><th>Status</th><th>Attempts</th><th>Updated</th><th>Actions</th></tr></thead><tbody>{deliveries.map((delivery) => <DeliveryRow key={delivery.id} delivery={delivery} selected={selectedDelivery === delivery.id} checked={checked.has(delivery.id)} busy={pending} onSelect={() => setSelectedDelivery(delivery.id)} onCheck={(value) => setChecked((current) => { const next = new Set(current); if (value) next.add(delivery.id); else next.delete(delivery.id); return next; })} onRetry={() => retry.mutate(delivery.id, { onSuccess: () => accepted('Retry delivery', `retry:${delivery.id}`) })} onRedrive={() => redrive.mutate(delivery.id, { onSuccess: () => accepted('Redrive delivery', `redrive:${delivery.id}`) })} />)}</tbody></table></div>}
+          {deliveriesQuery.isLoading ? <div className="empty">Loading deliveries…</div> : deliveriesQuery.isError ? <InlineError error={deliveriesQuery.error} onRetry={deliveriesQuery.refetch} /> : unavailable ? <div className="empty">Delivery data is not available yet.</div> : deliveries.length === 0 ? <div className="empty">No loaded deliveries for this webhook.</div> : <div className="delivery-records" role="region" aria-label="Recent webhook deliveries">{deliveries.map((delivery) => <DeliveryRow key={delivery.id} delivery={delivery} selected={selectedDelivery === delivery.id} checked={checked.has(delivery.id)} busy={pending} onSelect={() => setSelectedDelivery(delivery.id)} onCheck={(value) => setChecked((current) => { const next = new Set(current); if (value) next.add(delivery.id); else next.delete(delivery.id); return next; })} onRetry={() => retry.mutate(delivery.id, { onSuccess: () => accepted('Retry delivery', `retry:${delivery.id}`) })} onRedrive={() => redrive.mutate(delivery.id, { onSuccess: () => accepted('Redrive delivery', `redrive:${delivery.id}`) })} />)}</div>}
           {deliveriesQuery.hasNextPage && <button className="btn webhook-load-more" type="button" disabled={deliveriesQuery.isFetchingNextPage} onClick={() => void deliveriesQuery.fetchNextPage()}>{deliveriesQuery.isFetchingNextPage ? 'Loading…' : 'Load more deliveries'}</button>}
           {selectedDelivery && <div className="webhook-history"><div className="drawer-section-head"><h4>Delivery history</h4><span className="mono">{selectedDelivery}</span></div><DeliveryHistory deliveryId={selectedDelivery} /></div>}
         </section>

@@ -48,8 +48,8 @@ export function OverviewPage() {
             <span className="overview-refresh-cadence" aria-live="polite">
               {fetchingCount > 0
                 ? <>Refreshing <span className="num">{fetchingCount}</span> reads</>
-                : status === 'live'
-                  ? 'Live'
+                : status === 'live' && transport.status !== 'offline'
+                  ? null
                   : <>Refreshes every <span className="num">15s</span></>}
             </span>
             <button className="btn" type="button" onClick={refresh}>Refresh</button>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
+import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { Composer } from './Composer';
 import { ContextPanel } from './ContextPanel';
 import { ConversationList } from './ConversationList';
@@ -69,8 +70,9 @@ export function ChatsPage() {
       <section className="thread" id="chat-thread" aria-labelledby="chat-title">
         <header className="head">
           <span className="thread-avatar" aria-hidden="true">{avatarInitials(selectedChat?.displayName)}</span>
-          <div className="t"><h1 id="chat-title">{threadTitle}</h1>{threadId && <span className="mono">{threadId}</span>}</div>
+          <div className="t"><h1 id="chat-title">{threadTitle}</h1>{threadId && threadId !== threadTitle && <span className="mono">{threadId}</span>}</div>
           <div className="spacer" />
+          <RealtimeIndicator />
           {chatId && <button className="btn sm contact-toggle" type="button" data-pane-target="context" aria-controls="chat-context" onClick={() => setActivePane('context')}>Contact</button>}
         </header>
         {timeline}

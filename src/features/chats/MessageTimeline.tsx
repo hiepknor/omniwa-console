@@ -19,8 +19,9 @@ function statusDot(status: string | undefined): string {
   switch (status?.toLowerCase()) {
     case 'delivered':
     case 'read': return 'dot-ok';
-    case 'failed':
-    case 'cancelled': return 'dot-failed';
+    case 'failed': return 'dot-failed';
+    case 'canceled':
+    case 'cancelled': return 'dot-muted';
     case 'queued':
     case 'accepted':
     case 'pending':
@@ -53,6 +54,7 @@ function MessageBubble({ message, selected, onSelect }: {
   const status = message.status?.toLocaleLowerCase();
   const time = formatClockTime(message.createdAt);
   const type = humanizedType(message.type);
+  const mediaLike = ['image', 'video', 'audio', 'document', 'media'].includes(message.type?.toLowerCase() ?? '');
   const directionLabel = isOutgoing ? 'Outgoing' : knownDirection ? 'Incoming' : 'Message';
   const statusLabel = isOutgoing && status ? `, ${status}` : '';
 
@@ -70,10 +72,12 @@ function MessageBubble({ message, selected, onSelect }: {
         onSelect();
       }}
     >
-      <div className="media" role="img" aria-label={`${type} content unavailable in the message projection`}>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 9h8M8 13h5M8 17h7" /></svg>
-        <span className="media-copy"><span className="media-title">{type}</span><span className="media-meta">{message.id}</span></span>
-      </div>
+      {mediaLike
+        ? <div className="media" role="img" aria-label={`${type} content unavailable in the message projection`}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 9h8M8 13h5M8 17h7" /></svg>
+            <span className="media-copy"><span className="media-title">{type}</span><span className="media-meta">{message.id}</span></span>
+          </div>
+        : <p className="message-placeholder"><span>{type}</span> <span className="mono">{message.id}</span></p>}
       {isOutgoing && (
         <span className="foot"><span className={`dot ${statusDot(status)}`} aria-hidden="true" />{status ?? 'unknown'} · {time}</span>
       )}

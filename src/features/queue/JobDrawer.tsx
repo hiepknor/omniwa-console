@@ -20,7 +20,7 @@ function TimeFact({ value }: { value: string | undefined }) {
   return <span className="ts" title={value}>{relativeTime(value) || '—'}</span>;
 }
 
-export function JobDrawer({ job, onClose }: { job: JobResource; onClose: () => void }) {
+export function JobDrawer({ job, requestedJobId, onClose }: { job: JobResource; requestedJobId: string; onClose: () => void }) {
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -38,7 +38,7 @@ export function JobDrawer({ job, onClose }: { job: JobResource; onClose: () => v
             <h2 id="job-detail-title">{job.workType ?? 'Job details'}</h2>
             <span className="status terminal-status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span>
           </div>
-          <span className="mono">{job.id}</span>
+          <span className="mono">{requestedJobId}</span>
         </div>
         <button className="close" type="button" aria-label="Close job details" title="Close" onClick={onClose}>✕</button>
       </header>

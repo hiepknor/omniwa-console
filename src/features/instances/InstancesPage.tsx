@@ -150,10 +150,7 @@ export function InstancesPage() {
       <PageHeader
         title="Instances"
         actions={
-          <>
-            <button className="btn" type="button" onClick={refresh}>Refresh</button>
-            <button className="btn primary" type="button" onClick={() => { create.reset(); setCreateOpen(true); }}>New instance</button>
-          </>
+          <button className="btn primary" type="button" onClick={() => { create.reset(); setCreateOpen(true); }}>New instance</button>
         }
       />
 
@@ -200,7 +197,7 @@ export function InstancesPage() {
           footer={(
             <DataTableFooter
               primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>}
-              actions={list.hasNextPage ? <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button> : undefined}
+              actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>}
             />
           )}
         />
