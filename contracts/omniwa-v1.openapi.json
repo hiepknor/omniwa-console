@@ -405,6 +405,9 @@
           "$ref": "#/components/requestBodies/InstanceCreate"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -482,6 +485,9 @@
           "$ref": "#/components/requestBodies/Object"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -521,6 +527,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -565,6 +574,9 @@
           "$ref": "#/components/requestBodies/Object"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -609,6 +621,9 @@
           "$ref": "#/components/requestBodies/Object"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -653,6 +668,9 @@
           "$ref": "#/components/requestBodies/Object"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -812,6 +830,9 @@
           "$ref": "#/components/requestBodies/Message"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -859,6 +880,9 @@
           "$ref": "#/components/requestBodies/TextMessage"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -906,6 +930,9 @@
           "$ref": "#/components/requestBodies/MediaMessage"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1020,6 +1047,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1064,6 +1094,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1108,6 +1141,9 @@
           "$ref": "#/components/requestBodies/MediaRegistration"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1301,6 +1337,9 @@
           "$ref": "#/components/requestBodies/Webhook"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1375,6 +1414,9 @@
           "$ref": "#/components/requestBodies/Object"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1417,6 +1459,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1455,6 +1500,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1499,6 +1547,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1622,6 +1673,9 @@
           "$ref": "#/components/requestBodies/BulkWebhookDeliveryRedrive"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1698,6 +1752,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1742,6 +1799,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1874,6 +1934,9 @@
           "$ref": "#/components/requestBodies/Object"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -1918,6 +1981,9 @@
           "$ref": "#/components/requestBodies/Object"
         },
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2166,6 +2232,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2251,6 +2320,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2302,6 +2374,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2396,6 +2471,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2447,6 +2525,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2501,6 +2582,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2555,6 +2639,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2609,6 +2696,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -2660,6 +2750,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "$ref": "#/components/responses/Success"
+          },
           "202": {
             "$ref": "#/components/responses/Accepted"
           },
@@ -4265,6 +4358,9 @@
           "displayName": {
             "type": "string"
           },
+          "activeSessionId": {
+            "type": "string"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -4913,8 +5009,17 @@
           "providerName": {
             "type": "string"
           },
+          "capabilities": {
+            "type": "array",
+            "description": "Product-level provider capability identifiers. Provider-native payloads are excluded.",
+            "items": {
+              "type": "string"
+            }
+          },
           "capability": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "Legacy scalar capability retained for compatibility. New clients must use capabilities."
           },
           "updatedAt": {
             "type": "string",

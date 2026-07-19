@@ -1406,6 +1406,7 @@ export interface components {
             id: string;
             status?: string;
             displayName?: string;
+            activeSessionId?: string;
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
@@ -1647,6 +1648,12 @@ export interface components {
             id?: string;
             status?: string;
             providerName?: string;
+            /** @description Product-level provider capability identifiers. Provider-native payloads are excluded. */
+            capabilities?: string[];
+            /**
+             * @deprecated
+             * @description Legacy scalar capability retained for compatibility. New clients must use capabilities.
+             */
             capability?: string;
             /** Format: date-time */
             updatedAt?: string;
@@ -2254,6 +2261,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["InstanceCreate"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2306,6 +2314,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
@@ -2331,6 +2340,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2358,6 +2368,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2385,6 +2396,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2412,6 +2424,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2521,6 +2534,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Message"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2549,6 +2563,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["TextMessage"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2577,6 +2592,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["MediaMessage"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2653,6 +2669,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -2681,6 +2698,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -2707,6 +2725,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["MediaRegistration"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2837,6 +2856,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Webhook"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2888,6 +2908,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -2912,6 +2933,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -2940,6 +2962,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -2968,6 +2991,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -3031,6 +3055,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["BulkWebhookDeliveryRedrive"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
@@ -3082,6 +3107,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -3110,6 +3136,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
@@ -3198,6 +3225,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3224,6 +3252,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3395,6 +3424,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3448,6 +3478,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["GroupMetadata"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3477,6 +3508,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["GroupLocalState"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3536,6 +3568,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["GroupMember"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3565,6 +3598,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["GroupTextMessage"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3595,6 +3629,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3625,6 +3660,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3655,6 +3691,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
@@ -3684,6 +3721,7 @@ export interface operations {
         };
         requestBody: components["requestBodies"]["Object"];
         responses: {
+            200: components["responses"]["Success"];
             202: components["responses"]["Accepted"];
             400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
