@@ -8,6 +8,7 @@ import { OverviewPage } from '@/features/overview/OverviewPage';
 import { InstancesPage } from '@/features/instances/InstancesPage';
 import { ChatsPage } from '@/features/chats/ChatsPage';
 import { QueuePage } from '@/features/queue/QueuePage';
+import { WebhooksPage } from '@/features/webhooks/WebhooksPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
@@ -83,8 +84,8 @@ function AppRuntime() {
               { path: '/instances', element: <InstancesPage /> },
               { path: '/instances/:instanceId', element: <InstancesPage /> },
               { path: '/queue', element: <QueuePage /> },
-              { path: '/webhooks', element: <PanelStub panel="webhooks" /> },
-              { path: '/webhooks/:webhookId', element: <PanelStub panel="webhooks" /> },
+              { path: '/webhooks', element: <WebhooksPage /> },
+              { path: '/webhooks/:webhookId', element: <WebhooksPage /> },
               { path: '/events', element: <PanelStub panel="events" /> },
               { path: '/settings', element: <PanelStub panel="settings" /> },
               { path: '/settings/api-keys', element: <PanelStub panel="admin-keys" /> },
