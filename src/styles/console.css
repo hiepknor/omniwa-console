@@ -999,6 +999,7 @@ main:has(> .workspace--chats){padding:0;display:flex;overflow:hidden}
 .workspace--chats .instance-status-dot.dot-ok{background:var(--ok)}
 .workspace--chats .instance-status-dot.dot-pending{background:var(--pending)}
 .workspace--chats .instance-status-dot.dot-failed{background:var(--failed)}
+.workspace--chats .instpick-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .workspace--chats .chat-search-label{font-size:10px;line-height:1;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted)}
 .workspace--chats .convos .search{min-height:36px;padding:8px 10px;background:var(--bg)}
 .workspace--chats .filters{align-items:center}

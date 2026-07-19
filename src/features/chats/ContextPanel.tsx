@@ -150,9 +150,9 @@ function SelectedMessage({ message, instanceId }: { message: MessageResource; in
   );
 }
 
-export function ContextPanel({ instanceId, chat, onBack }: {
+function ContextPanelDetails({ instanceId, chat, onBack }: {
   instanceId: string | undefined;
-  chat: ChatResource | undefined;
+  chat: ChatResource;
   onBack: () => void;
 }) {
   const [searchParams] = useSearchParams();
@@ -161,8 +161,8 @@ export function ContextPanel({ instanceId, chat, onBack }: {
   const labels = useInstanceLabels(instanceId);
   const messagesQuery = useInstanceMessages(instanceId);
   const loadedMessages = useMemo(() => (messagesQuery.data?.pages ?? []).flatMap((page) => page.resource?.items ?? []), [messagesQuery.data?.pages]);
-  const selectedMessage = loadedMessages.find((message) => message.id === selectedMessageId && message.chatId === chat?.id);
-  const contact = chat?.displayName
+  const selectedMessage = loadedMessages.find((message) => message.id === selectedMessageId && message.chatId === chat.id);
+  const contact = chat.displayName
     ? contacts.data?.resource?.items.find((item) => item.displayName === chat.displayName)
     : undefined;
   const labelNames = new Map((labels.data?.resource?.items ?? []).map((label) => [label.id, label.name ?? label.id]));
@@ -176,10 +176,10 @@ export function ContextPanel({ instanceId, chat, onBack }: {
       <section aria-labelledby="contact-facts-title">
         <h3 id="contact-facts-title">Contact</h3>
         <dl className="kv">
-          <dt>Name</dt><dd>{chat?.displayName ?? '—'}</dd>
+          <dt>Name</dt><dd>{chat.displayName ?? '—'}</dd>
           <dt>Contact</dt><dd><span className="mono">{contacts.isLoading ? 'Loading…' : contact?.id ?? '—'}</span></dd>
-          <dt>Chat</dt><dd><span className="mono">{chat?.id ?? '—'}</span></dd>
-          <dt>Labels</dt><dd>{chat?.labelIds?.length ? chat.labelIds.map((labelId) => <span className="chip label-chip" key={labelId}>{labelNames.get(labelId) ?? labelId}</span>) : '—'}</dd>
+          <dt>Chat</dt><dd><span className="mono">{chat.id}</span></dd>
+          <dt>Labels</dt><dd>{chat.labelIds?.length ? chat.labelIds.map((labelId) => <span className="chip label-chip" key={labelId}>{labelNames.get(labelId) ?? labelId}</span>) : '—'}</dd>
         </dl>
         <p className="help read-only-note">Labels are synced from WhatsApp — read-only here.</p>
         {contacts.isError && <InlineError error={contacts.error} onRetry={() => { void contacts.refetch(); }} className="chat-context-error" />}
@@ -190,4 +190,28 @@ export function ContextPanel({ instanceId, chat, onBack }: {
         : <section><p className="help">{selectedMessageId ? 'The selected message is not in the loaded history. Load older messages in the timeline.' : 'Select a message in the timeline to inspect delivery.'}</p></section>}
     </aside>
   );
+}
+
+export function ContextPanel({ instanceId, chat, onBack }: {
+  instanceId: string | undefined;
+  chat: ChatResource | undefined;
+  onBack: () => void;
+}) {
+  if (!chat) {
+    return (
+      <aside className="context" id="chat-context" aria-label="Contact and selected message context">
+        <header className="context-head">
+          <div><span className="eyebrow">Context</span><h2>Contact details</h2></div>
+          <button className="btn sm context-close" type="button" data-pane-target="thread" aria-controls="chat-thread" onClick={onBack}>Back to thread</button>
+        </header>
+        <section className="chat-calm-state">
+          <span className="eyebrow">Context</span>
+          <h2>Select a conversation</h2>
+          <p>Choose a direct chat to inspect its contact and delivery context.</p>
+        </section>
+      </aside>
+    );
+  }
+
+  return <ContextPanelDetails instanceId={instanceId} chat={chat} onBack={onBack} />;
 }

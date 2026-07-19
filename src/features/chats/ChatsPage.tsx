@@ -69,7 +69,7 @@ export function ChatsPage() {
 
       <section className="thread" id="chat-thread" aria-labelledby="chat-title">
         <header className="head">
-          <span className="thread-avatar" aria-hidden="true">{avatarInitials(selectedChat?.displayName)}</span>
+          {chatId && <span className="thread-avatar" aria-hidden="true">{avatarInitials(selectedChat?.displayName)}</span>}
           <div className="t"><h1 id="chat-title">{threadTitle}</h1>{threadId && threadId !== threadTitle && <span className="mono">{threadId}</span>}</div>
           <div className="spacer" />
           <RealtimeIndicator />

@@ -71,9 +71,9 @@ function InstancePicker({
     <PickerPopover
       label="Instances"
       trigger={(open) => (
-        <button className="instpick" type="button" aria-label="Select instance" aria-haspopup="menu" aria-expanded={open}>
+        <button className="instpick" type="button" title={selected?.displayName ?? selected?.id ?? 'Select instance'} aria-label="Select instance" aria-haspopup="menu" aria-expanded={open}>
           <span className={`dot instance-status-dot ${statusDot(selected?.status)}`} aria-hidden="true" />
-          <span>{selected?.displayName ?? selected?.id ?? 'Select instance'}</span>
+          <span className="instpick-name">{selected?.displayName ?? selected?.id ?? 'Select instance'}</span>
           <span className="chev" aria-hidden="true">▾</span>
         </button>
       )}
