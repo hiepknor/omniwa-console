@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import { createApiClient } from '@/api/client';
 import { ApiFailure, unwrap } from '@/api/envelopes';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
+import { useDocumentTitle } from '@/components/useDocumentTitle';
 import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
 
 const DEFAULT_BASE_URL = import.meta.env.DEV ? window.location.origin : 'http://localhost:3000';
@@ -38,6 +39,7 @@ export function ConnectPage({
   notice?: 'session-invalid';
   onConnected: (session: ConsoleSession) => void;
 }) {
+  useDocumentTitle('Connect');
   const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
@@ -125,7 +127,7 @@ export function ConnectPage({
       )}
 
       <div className="connect-layout">
-        <section className="connect-intro" aria-labelledby="connect-title">
+        <section className="connect-intro max-[640px]:order-2" aria-labelledby="connect-title">
           <div className="connect-intro-copy">
             <span className="eyebrow">Self-hosted platform access</span>
             <h1 id="connect-title">Connect to your OmniWA runtime.</h1>
@@ -140,26 +142,26 @@ export function ConnectPage({
           </div>
         </section>
 
-        <section className="connect-panel" aria-labelledby="connection-form-title">
+        <section className="connect-panel max-[640px]:order-1" aria-labelledby="connection-form-title">
           <div className="connect-panel-head">
             <div>
-              <span className="eyebrow">Platform session</span>
+              <span className="eyebrow !text-[var(--fg-2)]">Platform session</span>
               <h2 id="connection-form-title">Connection details</h2>
             </div>
           </div>
 
           <form className="connect-form" onSubmit={submit}>
-            <ol className="connect-sequence" aria-label="Connection checks">
+            <ol className="connect-sequence max-[640px]:hidden" aria-label="Connection checks">
               <li>
-                <span className="connect-sequence-index num">01</span>
+                <span className="connect-sequence-index num !text-[var(--fg-2)]">01</span>
                 <strong>Validate origin</strong>
               </li>
               <li>
-                <span className="connect-sequence-index num">02</span>
+                <span className="connect-sequence-index num !text-[var(--fg-2)]">02</span>
                 <strong>Probe health</strong>
               </li>
               <li>
-                <span className="connect-sequence-index num">03</span>
+                <span className="connect-sequence-index num !text-[var(--fg-2)]">03</span>
                 <strong>Detect scope</strong>
               </li>
             </ol>
@@ -167,7 +169,7 @@ export function ConnectPage({
             <div className="connect-field">
               <div className="connect-label-row">
                 <label htmlFor="connect-base-url">API base URL</label>
-                <span>Origin only</span>
+                <span className="!text-[var(--fg-2)]">Origin only</span>
               </div>
               <input
                 ref={baseUrlInput}

@@ -92,6 +92,13 @@ aborted entirely through platform APIs.
 - Deep-link audit (filters and cursors in URL params).
 - Accessibility pass (keyboard navigation, focus management in dialogs).
 - Bundle audit and route-level code splitting.
+- Production navigation exposes only contract-backed surfaces; blocked routes
+  remain available as explicit direct-link explanations.
+- Route-aware document titles, a skip-to-content link, mobile-first connection
+  ordering, and compact transport-outage reporting improve orientation and
+  recovery without duplicating the same failure across dashboard sections.
+- Automated architecture and bundle checks protect API and feature boundaries,
+  the single main landmark, route splitting, and the per-chunk size budget.
 - Propose the extended web dashboard profile back to the platform repo's
   `platform_clients.rs` so the SDK profile matches shipped reality.
 
@@ -100,5 +107,8 @@ aborted entirely through platform APIs.
 - `pnpm check` must pass (typecheck + production build).
 - Manual verify against a locally running OmniWA API (see `docs/api/` in
   the platform repo for runtime setup).
-- No feature imports another feature; no `fetch` outside `src/api/`
-  (enforced by review; lint rule candidate for M7).
+- No feature imports another feature; no `fetch` outside `src/api/`; feature
+  panels do not introduce additional `main` landmarks. These boundaries are
+  enforced by `pnpm architecture:check` as part of `pnpm check`.
+- Route chunks remain below the documented 300 KiB raw-JavaScript budget and
+  route-level splitting is verified by `pnpm bundle:check` after every build.

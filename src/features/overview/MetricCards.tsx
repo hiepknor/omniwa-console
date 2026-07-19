@@ -147,6 +147,10 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
       ? 'Only queue depth is available.'
       : `${reportingCount} of ${metrics.length} operational values are available.`;
 
+  // HealthStrip owns a whole-origin outage. Keep cached values visible, but do
+  // not amplify one transport failure across every downstream dashboard read.
+  if (readsBlockedByOrigin && reportingCount === 0) return null;
+
   return (
     <>
       <div className={`overview-command-grid${hasDeadLetters ? ' has-urgent-attention' : ''}`}>

@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Logo } from '@/components/Logo';
+import { useDocumentTitle } from '@/components/useDocumentTitle';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
 
 type IconName =
@@ -35,7 +36,6 @@ const OPERATION_ITEMS: NavItem[] = [
 const MESSAGING_ITEMS: NavItem[] = [
   { to: '/chats', label: 'Chats', icon: 'chats' },
   { to: '/groups', label: 'Groups', icon: 'groups' },
-  { to: '/messages', label: 'Messages', icon: 'messages' },
 ];
 
 const SYSTEM_ITEMS: NavItem[] = [
@@ -148,7 +148,6 @@ export function Shell({
     OPERATION_ITEMS[2],
     OPERATION_ITEMS[3],
     MESSAGING_ITEMS[1],
-    MESSAGING_ITEMS[2],
     ...systemItems,
   ];
   const fingerprint = keyFingerprint(session.apiKey);
@@ -167,6 +166,26 @@ export function Shell({
     (item) =>
       location.pathname === item.to || location.pathname.startsWith(`${item.to}/`),
   );
+  const pageTitle = location.pathname.startsWith('/settings/api-keys')
+    ? 'API Keys'
+    : location.pathname.startsWith('/settings')
+      ? 'Settings'
+      : location.pathname.startsWith('/instances')
+        ? 'Instances'
+        : location.pathname.startsWith('/queue')
+          ? 'Queue & Jobs'
+          : location.pathname.startsWith('/webhooks')
+            ? 'Webhooks'
+            : location.pathname.startsWith('/events')
+              ? 'Events'
+              : location.pathname.startsWith('/chats')
+                ? 'Chats'
+                : location.pathname.startsWith('/groups')
+                  ? 'Groups'
+                  : location.pathname.startsWith('/messages')
+                    ? 'Messages'
+                    : 'Overview';
+  useDocumentTitle(pageTitle);
 
   useEffect(() => {
     if (!mobileMoreOpen) return;
@@ -223,6 +242,7 @@ export function Shell({
 
   return (
     <div className="shell">
+      <a className="fixed top-2 left-2 z-50 -translate-y-20 rounded-sm bg-[var(--fg)] px-3 py-2 text-sm text-[var(--bg)] transition-transform focus:translate-y-0 focus:outline-none" href="#main-content">Skip to main content</a>
       <aside
         className={`sidebar${tabletExpanded ? ' is-expanded' : ''}`}
         aria-label="OmniWA primary navigation"
@@ -364,7 +384,7 @@ export function Shell({
         </div>
       ) : null}
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Suspense fallback={<div className="route-loading" aria-live="polite">Loading panel…</div>}>
           <Outlet />
         </Suspense>

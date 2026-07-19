@@ -43,7 +43,10 @@ function SkeletonRows<Row>({ columns, count }: { columns: readonly DataTableColu
   return (
     <tbody aria-hidden="true">
       {Array.from({ length: count }, (_, rowIndex) => (
-        <tr key={rowIndex} className="responsive-table-skeleton-row">
+        <tr
+          key={rowIndex}
+          className={`responsive-table-skeleton-row${rowIndex >= 3 ? ' max-[640px]:hidden' : ''}`}
+        >
           {columns.map((column, columnIndex) => (
             <td key={column.id} className={columnClass(column, hasSelectionColumn)}>
               <span className="responsive-table-skeleton" style={{ width: `${Math.max(34, 78 - columnIndex * 9)}%` }} />

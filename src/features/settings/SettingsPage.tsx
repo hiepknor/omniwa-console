@@ -182,7 +182,7 @@ function ConsoleSessionAside() {
   if (session === null) return null;
   return (
     <aside className="settings-session" aria-labelledby="console-session-heading" data-od-id="settings-console-session">
-      <div className="settings-session-head"><div><span className="eyebrow">Local console</span><h2 id="console-session-heading">Console session</h2></div><span className="status status-active"><span className="dot" />connected</span></div>
+      <div className="settings-session-head"><div><span className="eyebrow !text-[var(--fg-2)]">Local console</span><h2 id="console-session-heading">Console session</h2></div><span className="status status-active"><span className="dot" />connected</span></div>
       <dl className="settings-session-facts">
         <div><dt>API base URL</dt><dd className="mono">{session.baseUrl}</dd></div>
         <div><dt>Key fingerprint</dt><dd className="mono">{keyFingerprint(session.apiKey)}</dd></div>

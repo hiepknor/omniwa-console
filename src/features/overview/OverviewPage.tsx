@@ -59,7 +59,7 @@ export function OverviewPage() {
       <div className="overview-content">
         <HealthStrip />
         <MetricCards actionRequired={<ActionRequiredList />} />
-        <EventTicker events={events} connectionState={connectionState} />
+        {(transport.status !== 'offline' || events.length > 0) && <EventTicker events={events} connectionState={connectionState} />}
       </div>
     </>
   );

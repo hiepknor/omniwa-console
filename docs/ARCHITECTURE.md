@@ -77,6 +77,14 @@ table breakpoints. `pnpm design:check` compares critical geometry between the
 production stylesheet and the static prototype stylesheet, and is part of
 the required `pnpm check` gate.
 
+## Automated architecture gates
+
+`pnpm architecture:check` scans the TypeScript source and rejects direct
+network access outside `src/api/`, imports from one feature into another, and
+feature-owned `main` landmarks. `pnpm bundle:check` runs after the production
+build, verifies that route-level page chunks still exist, and rejects any raw
+JavaScript chunk larger than 300 KiB. Both checks are included in `pnpm check`.
+
 ## Shared feedback system
 
 Transient feedback, scoped API failures, and workspace conditions use the

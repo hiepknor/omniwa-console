@@ -67,20 +67,29 @@ export function HealthStrip() {
       <h2 id="overview-posture-title">{heading}</h2>
       <p>{detail}</p>
       <div className="overview-posture-reads" aria-label="Platform posture reads">
-        <div className="overview-posture-read">
-          <span className={`dot ${apiStale ? 'dot-pending' : healthState.isError ? 'dot-failed' : apiHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
-          <span><strong>API</strong><small>{apiStatus}</small></span>
-        </div>
-        <div className="overview-posture-read overview-posture-read-unreachable">
-          <span className={`dot ${readinessStale ? 'dot-pending' : readinessState.isError ? 'dot-failed' : readinessHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
-          <span><strong>Readiness</strong><small>{readinessStatus}</small></span>
-        </div>
+        {originUnavailable ? (
+          <div className="overview-posture-read">
+            <span className="dot dot-failed" aria-hidden="true"></span>
+            <span><strong>Platform API</strong><small>Unreachable</small></span>
+          </div>
+        ) : (
+          <>
+            <div className="overview-posture-read">
+              <span className={`dot ${apiStale ? 'dot-pending' : healthState.isError ? 'dot-failed' : apiHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
+              <span><strong>API</strong><small>{apiStatus}</small></span>
+            </div>
+            <div className="overview-posture-read overview-posture-read-unreachable">
+              <span className={`dot ${readinessStale ? 'dot-pending' : readinessState.isError ? 'dot-failed' : readinessHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
+              <span><strong>Readiness</strong><small>{readinessStatus}</small></span>
+            </div>
+          </>
+        )}
       </div>
-      <OverviewDiagnostics
+      {!originUnavailable && <OverviewDiagnostics
         id="overview-health-diagnostics"
         diagnostics={diagnostics}
         onRetry={() => { void Promise.all([health.refetch(), readiness.refetch()]); }}
-      />
+      />}
     </section>
   );
 }
