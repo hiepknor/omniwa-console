@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
+import { useResilientReadState } from '@/lib/query-state';
 import { useMessagingInstance, useRequestInstanceReconnect, useSendMediaMessage, useSendTextMessage } from './hooks';
 import { MediaAttachDialog } from './MediaAttachDialog';
 
@@ -15,15 +16,17 @@ export function Composer({ instanceId, chatId, chatName }: {
   const send = useSendTextMessage(instanceId);
   const sendMedia = useSendMediaMessage(instanceId);
   const reconnect = useRequestInstanceReconnect(instanceId);
+  const instanceReadState = useResilientReadState(instance, instance.data?.resource !== undefined);
   const connected = instance.data?.resource?.status?.toLocaleLowerCase() === 'connected';
 
-  if (instance.isError) {
-    return <InlineError error={instance.error} onRetry={() => { void instance.refetch(); }} className="composer-error" />;
+  if (instanceReadState.isInitialError) {
+    return <InlineError error={instanceReadState.error} onRetry={() => { void instance.refetch(); }} className="composer-error" />;
   }
 
   if (!instance.isLoading && !connected) {
     return (
       <div className="composer-disconnected">
+        {instanceReadState.isStaleError && <InlineError error={instanceReadState.error} onRetry={() => { void instance.refetch(); }} />}
         {reconnect.isError && <InlineError error={reconnect.error} onRetry={() => reconnect.mutate()} className="composer-error" announce />}
         <div className="composer-warn" role="status">
           <span>Sends are unavailable while this instance is disconnected.</span>
@@ -44,6 +47,7 @@ export function Composer({ instanceId, chatId, chatName }: {
 
   return (
     <>
+      {instanceReadState.isStaleError && <InlineError error={instanceReadState.error} onRetry={() => { void instance.refetch(); }} />}
       {send.isError && <InlineError error={send.error} onRetry={submit} className="composer-error" announce />}
       <form className="composer" aria-label="Send a direct message" onSubmit={(event) => { event.preventDefault(); submit(); }}>
         <button className="btn attach-button" type="button" disabled={!connected || send.isPending || sendMedia.isPending} title="Attach media" aria-label="Attach media" onClick={() => setAttachOpen(true)}>

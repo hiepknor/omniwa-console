@@ -3,6 +3,7 @@ import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import {
   useConnectInstance,
   useDestroyInstance,
@@ -42,6 +43,8 @@ export function InstanceDrawer({
   const feedback = useFeedback();
   const sessions = useInstanceSessions(instance.id);
   const provider = useProviderCapabilities(true);
+  const sessionsReadState = useResilientReadState(sessions, sessions.data?.resource !== undefined);
+  const providerReadState = useResilientReadState(provider, provider.data?.resource !== undefined);
   const update = useUpdateInstance(instance.id);
   const connect = useConnectInstance(instance.id);
   const disconnect = useDisconnectInstance(instance.id);
@@ -166,12 +169,12 @@ export function InstanceDrawer({
           <section aria-labelledby="sessions-title">
             <span className="eyebrow">Current and recent</span>
             <h3 id="sessions-title">Sessions</h3>
-            {sessions.data?.unavailable ? (
-              <div className="empty">No session data yet.</div>
-            ) : sessions.isError ? (
-              <InlineError error={sessions.error} onRetry={sessions.refetch} />
-            ) : sessions.isLoading ? (
+            {sessionsReadState.isInitialError ? (
+              <InlineError error={sessionsReadState.error} onRetry={sessions.refetch} />
+            ) : sessionsReadState.isInitialLoading ? (
               <div className="empty">—</div>
+            ) : sessions.data?.unavailable ? (
+              <div className="empty">No session data yet.</div>
             ) : (sessions.data?.resource?.items.length ?? 0) === 0 ? (
               <div className="empty">No sessions recorded.</div>
             ) : (
@@ -186,6 +189,7 @@ export function InstanceDrawer({
                 ))}</tbody>
               </table>
             )}
+            {sessionsReadState.isStaleError && <InlineError error={sessionsReadState.error} onRetry={sessions.refetch} />}
           </section>
 
           <section aria-labelledby="capabilities-title">
@@ -193,17 +197,18 @@ export function InstanceDrawer({
               <div><span className="eyebrow">Provider surface</span><h3 id="capabilities-title">Provider capabilities</h3></div>
               <button className="btn sm" type="button" disabled={commandPending} onClick={() => refreshCapabilities.mutate(undefined, { onSuccess: () => accepted('Capability refresh') })}>Refresh</button>
             </div>
-            {provider.data?.unavailable ? (
-              <div className="empty">No capability data yet.</div>
-            ) : provider.isError ? (
-              <InlineError error={provider.error} onRetry={provider.refetch} />
-            ) : provider.isLoading ? (
+            {providerReadState.isInitialError ? (
+              <InlineError error={providerReadState.error} onRetry={provider.refetch} />
+            ) : providerReadState.isInitialLoading ? (
               <div className="empty">—</div>
+            ) : provider.data?.unavailable ? (
+              <div className="empty">No capability data yet.</div>
             ) : provider.data?.resource?.capability ? (
               <div className="capchips"><span className="chip">{provider.data.resource.capability}</span></div>
             ) : (
               <div className="empty">No capabilities reported.</div>
             )}
+            {providerReadState.isStaleError && <InlineError error={providerReadState.error} onRetry={provider.refetch} />}
           </section>
         </div>
       </aside>

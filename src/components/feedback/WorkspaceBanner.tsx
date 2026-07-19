@@ -1,13 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import { useFeedback } from './FeedbackProvider';
+import { hasCanonicalWorkspaceBanner } from './feedback-policy';
 import { SurfaceNotice } from './SurfaceNotice';
 
 export function WorkspaceBanner() {
   const queryClient = useQueryClient();
   const location = useLocation();
   const { transport } = useFeedback();
-  if (transport.status === 'online' || location.pathname === '/overview') return null;
+  if (transport.status === 'online' || !hasCanonicalWorkspaceBanner(location.pathname)) return null;
 
   return (
     <div className="workspace-banner">

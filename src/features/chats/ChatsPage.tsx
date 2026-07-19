@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
 import { RealtimeIndicator } from '@/components/RealtimeIndicator';
+import { useResilientReadState } from '@/lib/query-state';
 import { Composer } from './Composer';
 import { ContextPanel } from './ContextPanel';
 import { ConversationList } from './ConversationList';
@@ -22,6 +23,7 @@ export function ChatsPage() {
   const [searchParams] = useSearchParams();
   const picker = usePickerInstances();
   const chat = useChat(chatId);
+  const chatReadState = useResilientReadState(chat, chat.data?.resource !== undefined);
   const [activePane, setActivePane] = useState<ChatPane>(chatId ? 'thread' : 'conversations');
   const selectedChat = chat.data?.resource;
 
@@ -39,14 +41,14 @@ export function ChatsPage() {
   let timeline: React.ReactNode;
   if (!instanceId || !chatId) {
     timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Conversation</span><h2>Select a conversation</h2><p>Choose a direct chat to inspect its message timeline.</p></div></div></div>;
-  } else if (chat.data?.unavailable) {
-    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Conversation details are not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div></div></div>;
-  } else if (chat.isError) {
-    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><InlineError error={chat.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" /></div></div>;
-  } else if (chat.isLoading) {
+  } else if (chatReadState.isInitialError) {
+    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><InlineError error={chatReadState.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" /></div></div>;
+  } else if (chatReadState.isInitialLoading) {
     timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading conversation details.</h2><p>The conversation read is in progress.</p></div></div></div>;
+  } else if (chat.data?.unavailable && selectedChat === undefined) {
+    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Conversation details are not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div></div></div>;
   } else {
-    timeline = <MessageTimeline instanceId={instanceId} chatId={chatId} />;
+    timeline = <>{chatReadState.isStaleError && <InlineError error={chatReadState.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" />}<MessageTimeline instanceId={instanceId} chatId={chatId} /></>;
   }
 
   return (
@@ -76,7 +78,7 @@ export function ChatsPage() {
           {chatId && <button className="btn sm contact-toggle" type="button" data-pane-target="context" aria-controls="chat-context" onClick={() => setActivePane('context')}>Contact</button>}
         </header>
         {timeline}
-        {instanceId && chatId && !chat.isLoading && !chat.isError && !chat.data?.unavailable && (
+        {instanceId && chatId && !chatReadState.isInitialLoading && !chatReadState.isInitialError && !(chat.data?.unavailable && selectedChat === undefined) && (
           <Composer instanceId={instanceId} chatId={chatId} chatName={threadTitle} />
         )}
       </section>

@@ -36,6 +36,14 @@ the same condition and compete for attention.
 
 Background polling failures never create toasts. A new failure may announce
 once, but repeated polling must update existing surface or connection state.
+When the workspace transport banner owns a browser transport failure, scoped
+surface errors for that same failure are suppressed. Data surfaces may retain a
+neutral unavailable state, but must not repeat the connection error.
+After a surface has a usable snapshot, a failed refresh must preserve that
+snapshot, mark the owning surface stale, and provide one scoped retry action.
+Only a failure before the first usable snapshot may replace the surface with a
+full error state. Starting a retry must not temporarily replace stale content
+with a loading state.
 
 ## API errors
 

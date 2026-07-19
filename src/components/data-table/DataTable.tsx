@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
+import { useFeedback } from '@/components/feedback/FeedbackProvider';
+import { deferTransportErrorToWorkspace } from '@/components/feedback/feedback-policy';
 import { MobileRowSummary } from './MobileRowSummary';
 import type { DataTableColumn, DataTableProps } from './types';
 
@@ -70,10 +73,13 @@ export function DataTable<Row>({
   renderMobileSummary,
   getRowActionLabel,
   footer,
+  refreshIssue,
   layout = 'standard',
   appearance = 'default',
   attached = false,
 }: DataTableProps<Row>) {
+  const location = useLocation();
+  const { transport } = useFeedback();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState({ left: false, right: false });
   const rowCount = state.status === 'ready' ? state.rows.length : 0;
@@ -105,6 +111,11 @@ export function DataTable<Row>({
   }, [state.status, rowCount, columns.length, updateOverflow]);
 
   const rows = state.status === 'ready' ? state.rows : [];
+  const workspaceOwnsError = state.status === 'error' && deferTransportErrorToWorkspace({
+    error: state.error,
+    offline: transport.status === 'offline',
+    pathname: location.pathname,
+  });
   const hasSelectionColumn = columns.some((column) => column.sticky === 'selection');
   const mobileColumns = {
     selection: columns.find((column) => column.sticky === 'selection'),
@@ -133,6 +144,13 @@ export function DataTable<Row>({
       aria-label={captionId ? undefined : caption}
       aria-busy={state.status === 'loading'}
     >
+      {refreshIssue && (
+        <InlineError
+          error={refreshIssue.error}
+          onRetry={refreshIssue.onRetry}
+          className="overview-error"
+        />
+      )}
       <div
         className="responsive-table-scroll-shell"
         data-overflow-left={overflow.left}
@@ -145,7 +163,9 @@ export function DataTable<Row>({
             {state.status === 'loading' ? (
               <SkeletonRows columns={columns} count={state.skeletonRows ?? 5} />
             ) : state.status === 'error' ? (
-              <StateRow columnCount={columns.length}><InlineError error={state.error} onRetry={state.onRetry} className="responsive-table-error" /></StateRow>
+              <StateRow columnCount={columns.length}>{workspaceOwnsError
+                ? <div className="empty">Data is unavailable while the API reconnects.</div>
+                : <InlineError error={state.error} onRetry={state.onRetry} className="responsive-table-error" />}</StateRow>
             ) : state.status === 'unavailable' || state.status === 'empty' ? (
               <StateRow columnCount={columns.length}><div className="empty">{state.message}</div></StateRow>
             ) : (

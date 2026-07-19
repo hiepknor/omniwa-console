@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import type { MessageResource } from '@/api/chats';
 import { InlineError } from '@/components/InlineError';
 import { calendarDayKey, calendarDayLabel, formatClockTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import { useInstanceMessages } from './hooks';
 
 function messageDirection(direction: string | undefined): 'in' | 'out' {
@@ -94,6 +95,7 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
   const initialChatRef = useRef<string>();
   const previousLastMessageRef = useRef<string>();
   const pages = query.data?.pages ?? [];
+  const readState = useResilientReadState(query, pages.some((page) => page.resource !== undefined));
   const unavailable = pages.some((page) => page.unavailable !== undefined);
   const messages = useMemo(() => pages
     .flatMap((page) => page.resource?.items ?? [])
@@ -128,12 +130,12 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
   };
 
   let content: React.ReactNode;
-  if (unavailable) {
-    content = <div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Message history is not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div>;
-  } else if (query.isError && messages.length === 0) {
-    content = <InlineError error={query.error} onRetry={() => { void query.refetch(); }} className="chat-thread-error" />;
-  } else if (query.isLoading) {
+  if (readState.isInitialError) {
+    content = <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-thread-error" />;
+  } else if (readState.isInitialLoading) {
     content = <div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading message history.</h2><p>The first instance message page is in progress.</p></div>;
+  } else if (unavailable && messages.length === 0) {
+    content = <div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Message history is not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div>;
   } else if (messages.length === 0) {
     content = <div className="chat-calm-state"><span className="eyebrow">0 messages</span><h2>No messages loaded for this conversation yet.</h2><p>History loads per instance, so older conversation messages may appear as more pages are loaded.</p></div>;
   } else {
@@ -158,6 +160,7 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
       }}
     >
       <div className="timeline-stack">
+        {readState.isStaleError && <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-thread-error" />}
         {query.hasNextPage && !unavailable && (
           <button className="btn sm load-older" type="button" disabled={query.isFetchingNextPage} onClick={() => { void query.fetchNextPage(); }}>
             {query.isFetchingNextPage ? 'Loading older…' : 'Load older'}

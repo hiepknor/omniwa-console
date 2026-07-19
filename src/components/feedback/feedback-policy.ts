@@ -6,6 +6,25 @@ export function isTransportError(error: unknown): boolean {
   return error instanceof Error && /failed to fetch|load failed|networkerror/i.test(error.message);
 }
 
+/** Routes with a PageHeader delegate browser transport failures to WorkspaceBanner. */
+export function hasCanonicalWorkspaceBanner(pathname: string): boolean {
+  return pathname !== '/overview'
+    && pathname !== '/connect'
+    && !pathname.startsWith('/chats');
+}
+
+export function deferTransportErrorToWorkspace({
+  error,
+  offline,
+  pathname,
+}: {
+  error: unknown;
+  offline: boolean;
+  pathname: string;
+}): boolean {
+  return offline && hasCanonicalWorkspaceBanner(pathname) && isTransportError(error);
+}
+
 export function apiErrorFeedback({
   title,
   error,

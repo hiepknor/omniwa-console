@@ -52,6 +52,7 @@ export type DataTableProps<Row> = {
   renderMobileSummary?: (row: Row, index: number) => ReactNode;
   getRowActionLabel?: (row: Row, index: number) => string | undefined;
   footer?: ReactNode;
+  refreshIssue?: { error: unknown; onRetry: () => void };
   layout?: 'compact' | 'standard' | 'wide';
   appearance?: 'default' | 'subtle';
   attached?: boolean;

@@ -4,6 +4,7 @@ import type { ChatResource, MessageResource } from '@/api/chats';
 import type { PublicData } from '@/api/envelopes';
 import { InlineError } from '@/components/InlineError';
 import { formatClockTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import {
   useCancelMessage,
   useInstanceContacts,
@@ -88,11 +89,12 @@ function formatTimestamp(value: string | undefined): string {
 
 function DeliveryHistory({ messageId }: { messageId: string }) {
   const query = useMessageDeliveryHistory(messageId);
+  const readState = useResilientReadState(query, query.data?.resource !== undefined);
   const steps = deliverySteps(query.data?.resource?.data);
 
-  if (query.isLoading) return <p className="help" aria-live="polite">Loading delivery history…</p>;
-  if (query.isError) return <InlineError error={query.error} onRetry={() => { void query.refetch(); }} className="chat-context-error" />;
-  if (query.data?.unavailable) return <p className="help">Delivery history is unavailable for this message.</p>;
+  if (readState.isInitialLoading) return <p className="help" aria-live="polite">Loading delivery history…</p>;
+  if (readState.isInitialError) return <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-context-error" />;
+  if (query.data?.unavailable && query.data.resource === undefined) return <p className="help">Delivery history is unavailable for this message.</p>;
   if (!steps) {
     return (
       <div className="delivery-history-fallback">
@@ -103,7 +105,7 @@ function DeliveryHistory({ messageId }: { messageId: string }) {
   }
 
   return (
-    <ol className="timeline delivery-timeline">
+    <>{readState.isStaleError && <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-context-error" />}<ol className="timeline delivery-timeline">
       {steps.map((step, index) => (
         <li key={`${step.status}-${step.timestamp ?? index}`}>
           <span className={`dot ${statusDot(step.status)}`} aria-hidden="true" />
@@ -111,7 +113,7 @@ function DeliveryHistory({ messageId }: { messageId: string }) {
           <time className="ts" dateTime={step.timestamp}>{step.timestamp ? formatClockTime(step.timestamp) : '—'}</time>
         </li>
       ))}
-    </ol>
+    </ol></>
   );
 }
 
@@ -159,6 +161,8 @@ function ContextPanelDetails({ instanceId, chat, onBack }: {
   const selectedMessageId = searchParams.get('message');
   const contacts = useInstanceContacts(instanceId);
   const labels = useInstanceLabels(instanceId);
+  const contactsReadState = useResilientReadState(contacts, contacts.data?.resource !== undefined);
+  const labelsReadState = useResilientReadState(labels, labels.data?.resource !== undefined);
   const messagesQuery = useInstanceMessages(instanceId);
   const loadedMessages = useMemo(() => (messagesQuery.data?.pages ?? []).flatMap((page) => page.resource?.items ?? []), [messagesQuery.data?.pages]);
   const selectedMessage = loadedMessages.find((message) => message.id === selectedMessageId && message.chatId === chat.id);
@@ -182,8 +186,8 @@ function ContextPanelDetails({ instanceId, chat, onBack }: {
           <dt>Labels</dt><dd>{chat.labelIds?.length ? chat.labelIds.map((labelId) => <span className="chip label-chip" key={labelId}>{labelNames.get(labelId) ?? labelId}</span>) : '—'}</dd>
         </dl>
         <p className="help read-only-note">Labels are synced from WhatsApp — read-only here.</p>
-        {contacts.isError && <InlineError error={contacts.error} onRetry={() => { void contacts.refetch(); }} className="chat-context-error" />}
-        {labels.isError && <InlineError error={labels.error} onRetry={() => { void labels.refetch(); }} className="chat-context-error" />}
+        {contactsReadState.isError && <InlineError error={contactsReadState.error} onRetry={() => { void contacts.refetch(); }} className="chat-context-error" />}
+        {labelsReadState.isError && <InlineError error={labelsReadState.error} onRetry={() => { void labels.refetch(); }} className="chat-context-error" />}
       </section>
       {selectedMessage && instanceId
         ? <SelectedMessage message={selectedMessage} instanceId={instanceId} />

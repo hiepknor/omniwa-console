@@ -4,6 +4,7 @@ import type { WebhookDeliveryResource, WebhookResource } from '@/api/webhooks';
 import { InlineError } from '@/components/InlineError';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import {
   useActivateWebhook,
   useBulkRedrive,
@@ -61,12 +62,13 @@ export function webhookStatusDot(status: string | undefined) {
 
 function DeliveryHistory({ deliveryId }: { deliveryId: string }) {
   const query = useWebhookDeliveryHistory(deliveryId);
+  const readState = useResilientReadState(query, query.data?.resource !== undefined);
   const steps = deliverySteps(query.data?.resource?.data);
-  if (query.isLoading) return <p className="help" aria-live="polite">Loading delivery history…</p>;
-  if (query.isError) return <InlineError error={query.error} onRetry={() => void query.refetch()} />;
-  if (query.data?.unavailable) return <p className="help">Delivery history is unavailable for this delivery.</p>;
+  if (readState.isInitialLoading) return <p className="help" aria-live="polite">Loading delivery history…</p>;
+  if (readState.isInitialError) return <InlineError error={readState.error} onRetry={() => void query.refetch()} />;
+  if (query.data?.unavailable && query.data.resource === undefined) return <p className="help">Delivery history is unavailable for this delivery.</p>;
   if (!steps) return <div className="delivery-history-fallback"><p className="help">Delivery history is recorded but not projected in a renderable shape.</p><span className="mono">{query.data?.resource?.requestId ?? 'Request ID unavailable'}</span></div>;
-  return <ol className="timeline delivery-timeline">{steps.map((step, index) => <li key={`${step.status}-${step.timestamp ?? index}`}><span className={`dot ${webhookStatusDot(step.status)}`} aria-hidden="true" /><span className="what">{step.status}{step.detail && <span className="detail">{step.detail}</span>}</span><time className="ts" dateTime={step.timestamp}>{relativeTime(step.timestamp) || '—'}</time></li>)}</ol>;
+  return <>{readState.isStaleError && <InlineError error={readState.error} onRetry={() => void query.refetch()} />}<ol className="timeline delivery-timeline">{steps.map((step, index) => <li key={`${step.status}-${step.timestamp ?? index}`}><span className={`dot ${webhookStatusDot(step.status)}`} aria-hidden="true" /><span className="what">{step.status}{step.detail && <span className="detail">{step.detail}</span>}</span><time className="ts" dateTime={step.timestamp}>{relativeTime(step.timestamp) || '—'}</time></li>)}</ol></>;
 }
 
 function DeliveryRow({ delivery, selected, checked, busy, onSelect, onCheck, onRetry, onRedrive }: {
@@ -98,7 +100,9 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const feedback = useFeedback();
   const deliveriesQuery = useWebhookDeliveries();
-  const deliveries = useMemo(() => (deliveriesQuery.data?.pages ?? []).flatMap((page) => page.resource?.items ?? []).filter((item) => item.webhookId === webhook.id), [deliveriesQuery.data?.pages, webhook.id]);
+  const deliveryPages = deliveriesQuery.data?.pages ?? [];
+  const deliveriesReadState = useResilientReadState(deliveriesQuery, deliveryPages.some((page) => page.resource !== undefined));
+  const deliveries = useMemo(() => deliveryPages.flatMap((page) => page.resource?.items ?? []).filter((item) => item.webhookId === webhook.id), [deliveryPages, webhook.id]);
   const failed = deliveries.filter((item) => ['failed', 'dead', 'exhausted'].includes(item.status?.toLowerCase() ?? ''));
   const update = useUpdateWebhook(webhook.id);
   const activate = useActivateWebhook(webhook.id);
@@ -109,7 +113,7 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
   const bulk = useBulkRedrive();
   const pending = update.isPending || activate.isPending || suspend.isPending || retry.isPending || redrive.isPending || bulk.isPending;
   const commandError = update.error ?? activate.error ?? suspend.error ?? retry.error ?? redrive.error ?? bulk.error;
-  const unavailable = (deliveriesQuery.data?.pages ?? []).some((page) => page.unavailable !== undefined);
+  const unavailable = deliveryPages.some((page) => page.unavailable !== undefined);
 
   useEffect(() => setEventsValue((webhook.eventTypes ?? []).join(', ')), [webhook.eventTypes]);
   useEffect(() => { const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape' && !retireOpen) onClose(); }; document.addEventListener('keydown', closeOnEscape); return () => document.removeEventListener('keydown', closeOnEscape); }, [onClose, retireOpen]);
@@ -125,7 +129,8 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
         <section aria-labelledby="webhook-lifecycle-title"><span className="eyebrow">Endpoint controls</span><h3 id="webhook-lifecycle-title">Lifecycle</h3><div className="lifecycle-groups"><div className="action-group"><span>Lifecycle commands are accepted asynchronously.</span><div className="actions">{webhook.status !== 'active' && webhook.status !== 'retired' && <button className="btn primary" type="button" disabled={pending} onClick={() => activate.mutate(undefined, { onSuccess: () => accepted('Activate') })}>Activate</button>}{webhook.status === 'active' && <button className="btn" type="button" disabled={pending} onClick={() => suspend.mutate(undefined, { onSuccess: () => accepted('Suspend') })}>Suspend</button>}</div></div>{webhook.status !== 'retired' && <div className="action-group destructive"><span>Permanently stop future deliveries after typed confirmation.</span><button className="btn danger" type="button" onClick={() => setRetireOpen(true)}>Retire…</button></div>}</div></section>
         <section aria-labelledby="webhook-events-title"><span className="eyebrow">Configuration</span><h3 id="webhook-events-title">Subscribed events</h3><form onSubmit={(event) => { event.preventDefault(); update.mutate({ eventTypes: parseEvents() }, { onSuccess: () => accepted('Update subscriptions', 'update') }); }}><div className="field"><label htmlFor="webhook-event-types">Event types <span className="muted">comma-separated</span></label><textarea className="input webhook-event-input" id="webhook-event-types" value={eventsValue} onChange={(event) => setEventsValue(event.target.value)} disabled={pending} /><p className="help">Event types are not projected back by the platform; submitting replaces the subscription.</p></div><button className="btn" type="submit" disabled={pending || parseEvents().length === 0 || eventsValue === (webhook.eventTypes ?? []).join(', ')}>Update events</button></form></section>
         <section aria-labelledby="webhook-deliveries-title"><div className="drawer-section-head"><div><span className="eyebrow">Loaded records</span><h3 id="webhook-deliveries-title">Recent deliveries</h3></div><span className="num delivery-count">{deliveries.length}</span></div>
-          {deliveriesQuery.isLoading ? <div className="empty">Loading deliveries…</div> : deliveriesQuery.isError ? <InlineError error={deliveriesQuery.error} onRetry={deliveriesQuery.refetch} /> : unavailable ? <div className="empty">Delivery data is not available yet.</div> : deliveries.length === 0 ? <div className="empty">No loaded deliveries for this webhook.</div> : <div className="delivery-records" role="region" aria-label="Recent webhook deliveries">{deliveries.map((delivery) => <DeliveryRow key={delivery.id} delivery={delivery} selected={selectedDelivery === delivery.id} checked={checked.has(delivery.id)} busy={pending} onSelect={() => setSelectedDelivery(delivery.id)} onCheck={(value) => setChecked((current) => { const next = new Set(current); if (value) next.add(delivery.id); else next.delete(delivery.id); return next; })} onRetry={() => retry.mutate(delivery.id, { onSuccess: () => accepted('Retry delivery', `retry:${delivery.id}`) })} onRedrive={() => redrive.mutate(delivery.id, { onSuccess: () => accepted('Redrive delivery', `redrive:${delivery.id}`) })} />)}</div>}
+          {deliveriesReadState.isStaleError && <InlineError error={deliveriesReadState.error} onRetry={deliveriesQuery.refetch} />}
+          {deliveriesReadState.isInitialLoading ? <div className="empty">Loading deliveries…</div> : deliveriesReadState.isInitialError ? <InlineError error={deliveriesReadState.error} onRetry={deliveriesQuery.refetch} /> : unavailable && deliveries.length === 0 ? <div className="empty">Delivery data is not available yet.</div> : deliveries.length === 0 ? <div className="empty">No loaded deliveries for this webhook.</div> : <div className="delivery-records" role="region" aria-label="Recent webhook deliveries">{deliveries.map((delivery) => <DeliveryRow key={delivery.id} delivery={delivery} selected={selectedDelivery === delivery.id} checked={checked.has(delivery.id)} busy={pending} onSelect={() => setSelectedDelivery(delivery.id)} onCheck={(value) => setChecked((current) => { const next = new Set(current); if (value) next.add(delivery.id); else next.delete(delivery.id); return next; })} onRetry={() => retry.mutate(delivery.id, { onSuccess: () => accepted('Retry delivery', `retry:${delivery.id}`) })} onRedrive={() => redrive.mutate(delivery.id, { onSuccess: () => accepted('Redrive delivery', `redrive:${delivery.id}`) })} />)}</div>}
           {deliveriesQuery.hasNextPage && <button className="btn webhook-load-more" type="button" disabled={deliveriesQuery.isFetchingNextPage} onClick={() => void deliveriesQuery.fetchNextPage()}>{deliveriesQuery.isFetchingNextPage ? 'Loading…' : 'Load more deliveries'}</button>}
           {selectedDelivery && <div className="webhook-history"><div className="drawer-section-head"><h4>Delivery history</h4><span className="mono">{selectedDelivery}</span></div><DeliveryHistory deliveryId={selectedDelivery} /></div>}
         </section>

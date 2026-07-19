@@ -16,6 +16,7 @@ import {
   type DataTableState,
 } from '@/components/data-table';
 import { relativeTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import { EventInspector } from './EventInspector';
 import { useAuditRecords, useEvents } from './hooks';
 
@@ -44,6 +45,7 @@ function EventHistory() {
   const realtimeStatus = useRealtimeStatus();
   const list = useEvents();
   const pages = list.data?.pages ?? [];
+  const listReadState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
   const events = useMemo(() => pages
     .flatMap((page) => page.resource?.items ?? [])
     .sort((left, right) => {
@@ -77,12 +79,12 @@ function EventHistory() {
     { id: 'resource', header: 'Resource ref', size: 'lg', kind: 'identifier', mobile: 'identifier', cell: (event) => <span className="mono" title={event.resourceRef}>{event.resourceRef ?? '—'}</span> },
     { id: 'correlation', header: 'Correlation ID', size: 'lg', kind: 'identifier', mobile: 'hidden', cell: (event) => <span className="mono event-correlation" title={event.correlationId}>{event.correlationId ?? '—'}</span> },
   ];
-  const tableState: DataTableState<EventResource> = unavailable
-    ? { status: 'unavailable', message: 'Event history is not available yet.' }
-    : list.isError
-      ? { status: 'error', error: list.error, onRetry: list.refetch }
-      : list.isLoading
-        ? { status: 'loading', skeletonRows: 7 }
+  const tableState: DataTableState<EventResource> = listReadState.isInitialError
+    ? { status: 'error', error: listReadState.error, onRetry: list.refetch }
+    : listReadState.isInitialLoading
+      ? { status: 'loading', skeletonRows: 7 }
+      : unavailable && events.length === 0
+        ? { status: 'unavailable', message: 'Event history is not available yet.' }
         : filtered.length === 0
           ? { status: 'empty', message: events.length === 0 ? 'No event history yet.' : 'No events match this search.' }
           : { status: 'ready', rows: filtered };
@@ -128,6 +130,7 @@ function EventHistory() {
           attached
           columns={columns}
           state={tableState}
+          refreshIssue={listReadState.isStaleError ? { error: listReadState.error, onRetry: list.refetch } : undefined}
           getRowKey={(event) => event.id}
           getRowState={(event) => ({ active: event.id === selectedId })}
           getRowActionLabel={(event) => `Inspect event ${event.id}`}
@@ -154,6 +157,7 @@ function EventHistory() {
 function AuditRecords() {
   const list = useAuditRecords();
   const pages = list.data?.pages ?? [];
+  const listReadState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
   const records = useMemo(() => pages.flatMap((page) => page.resource?.items ?? []), [pages]);
   const unavailable = pages.some((page) => page.unavailable !== undefined);
   const latestTimestamp = records.map((record) => record.createdAt).filter((value): value is string => value !== undefined).sort().at(-1);
@@ -166,12 +170,12 @@ function AuditRecords() {
     { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (record) => <span className="status"><span className={`dot ${statusDot(record.status)}`} />{record.status ?? '—'}</span> },
     { id: 'created', header: 'Created', size: 'md', kind: 'date', mobile: 'meta', cell: (record) => <time className="ts" dateTime={record.createdAt} title={record.createdAt}>{relativeTime(record.createdAt) || '—'}</time>, mobileCell: (record) => relativeTime(record.createdAt) || undefined },
   ];
-  const tableState: DataTableState<AuditRecordResource> = unavailable
-    ? { status: 'unavailable', message: 'Audit records are not available yet.' }
-    : list.isError
-      ? { status: 'error', error: list.error, onRetry: list.refetch }
-      : list.isLoading
-        ? { status: 'loading', skeletonRows: 7 }
+  const tableState: DataTableState<AuditRecordResource> = listReadState.isInitialError
+    ? { status: 'error', error: listReadState.error, onRetry: list.refetch }
+    : listReadState.isInitialLoading
+      ? { status: 'loading', skeletonRows: 7 }
+      : unavailable && records.length === 0
+        ? { status: 'unavailable', message: 'Audit records are not available yet.' }
         : records.length === 0
           ? { status: 'empty', message: 'No audit records yet.' }
           : { status: 'ready', rows: records };
@@ -186,6 +190,7 @@ function AuditRecords() {
           layout="wide"
           columns={columns}
           state={tableState}
+          refreshIssue={listReadState.isStaleError ? { error: listReadState.error, onRetry: list.refetch } : undefined}
           getRowKey={(record) => record.id}
           footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{records.length} loaded records</span><span className="freshness">Fresh through {relativeTime(latestTimestamp) || '—'}</span></> : <span className="num">Results —</span>} actions={list.hasNextPage ? <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button> : undefined} />}
         />

@@ -17,6 +17,7 @@ import {
 } from '@/components/data-table';
 import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import { formatCount, relativeTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import { JobDrawer, jobStatusDot } from './JobDrawer';
 import { useJob, useJobs, useQueueStatus } from './hooks';
 
@@ -60,6 +61,7 @@ export function QueuePage() {
   const list = useJobs();
   const detail = useJob(jobId);
   const pages = list.data?.pages ?? [];
+  const listReadState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
   const unavailable = pages.some((page) => page.unavailable !== undefined);
   const jobs = useMemo(() => pages.flatMap((page) => page.resource?.items ?? []), [pages]);
   const filteredJobs = useMemo(() => {
@@ -99,12 +101,12 @@ export function QueuePage() {
     { id: 'resource', header: 'Resource', size: 'lg', kind: 'identifier', mobile: 'hidden', cell: (job) => <span className="mono" title={job.resourceRef}>{job.resourceRef ?? '—'}</span> },
     { id: 'updated', header: 'Updated', size: 'md', kind: 'date', mobile: 'meta', cell: (job) => <span className="ts" title={job.updatedAt}>{relativeTime(job.updatedAt) || '—'}</span>, mobileCell: (job) => relativeTime(job.updatedAt) || undefined },
   ];
-  const tableState: DataTableState<JobRow> = unavailable
-    ? { status: 'unavailable', message: 'Job data is not available yet.' }
-    : list.isError
-      ? { status: 'error', error: list.error, onRetry: list.refetch }
-      : list.isLoading
-        ? { status: 'loading', skeletonRows: 6 }
+  const tableState: DataTableState<JobRow> = listReadState.isInitialError
+    ? { status: 'error', error: listReadState.error, onRetry: list.refetch }
+    : listReadState.isInitialLoading
+      ? { status: 'loading', skeletonRows: 6 }
+      : unavailable && jobs.length === 0
+        ? { status: 'unavailable', message: 'Job data is not available yet.' }
         : filteredJobs.length === 0
           ? { status: 'empty', message: jobs.length === 0 ? 'No jobs yet.' : 'No jobs match these filters.' }
           : { status: 'ready', rows: filteredJobs };
@@ -152,6 +154,7 @@ export function QueuePage() {
           attached
           columns={columns}
           state={tableState}
+          refreshIssue={listReadState.isStaleError ? { error: listReadState.error, onRetry: list.refetch } : undefined}
           getRowKey={(job) => job.id}
           getRowState={(job) => ({ active: job.id === jobId })}
           getRowActionLabel={(job) => `Open job ${job.id}`}
@@ -166,7 +169,7 @@ export function QueuePage() {
               }
             },
           })}
-          footer={<DataTableFooter primary={<><span className="num">{filteredJobs.length} loaded jobs</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></>} actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>} />}
+          footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredJobs.length} loaded jobs</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>} />}
         />
       </DataTableWorkspace>
 

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
 import { relativeTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import { useInstanceChats, useInstanceLabels, usePickerInstances } from './hooks';
 
 function statusDot(status: string | undefined) {
@@ -103,14 +104,17 @@ export function ConversationList({ instanceId, chatId, onOpenThread }: {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const picker = usePickerInstances();
+  const pickerReadState = useResilientReadState(picker, picker.data?.resource !== undefined);
   const chatsQuery = useInstanceChats(instanceId);
   const labelsQuery = useInstanceLabels(instanceId);
+  const labelsReadState = useResilientReadState(labelsQuery, labelsQuery.data?.resource !== undefined);
   const search = searchParams.get('search') ?? '';
   const activeLabelIds = searchParams.getAll('label');
   const instances = picker.data?.resource?.items ?? [];
   const selectedInstance = instances.find((instance) => instance.id === instanceId);
   const pages = chatsQuery.data?.pages ?? [];
   const chats = useMemo(() => pages.flatMap((page) => page.resource?.items ?? []), [pages]);
+  const chatsReadState = useResilientReadState(chatsQuery, pages.some((page) => page.resource !== undefined));
   const labels = labelsQuery.data?.resource?.items ?? [];
   const labelNames = useMemo(() => new Map(labels.map((label) => [label.id, label.name ?? label.id])), [labels]);
   const filteredChats = useMemo(() => {
@@ -155,17 +159,17 @@ export function ConversationList({ instanceId, chatId, onOpenThread }: {
 
   let listContent: React.ReactNode;
   if (!instanceId) {
-    listContent = picker.isError ? (
-      <InlineError error={picker.error} onRetry={() => { void picker.refetch(); }} className="chat-list-error" />
+    listContent = pickerReadState.isInitialError ? (
+      <InlineError error={pickerReadState.error} onRetry={() => { void picker.refetch(); }} className="chat-list-error" />
     ) : (
       <div className="chat-calm-state"><span className="eyebrow">Instance required</span><h2>Select an instance</h2><p>Choose an instance to review its direct conversations.</p></div>
     );
-  } else if (unavailable) {
-    listContent = <div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Conversations are not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div>;
-  } else if (chatsQuery.isError && chats.length === 0) {
-    listContent = <InlineError error={chatsQuery.error} onRetry={() => { void chatsQuery.refetch(); }} className="chat-list-error" />;
-  } else if (chatsQuery.isLoading) {
+  } else if (chatsReadState.isInitialError) {
+    listContent = <InlineError error={chatsReadState.error} onRetry={() => { void chatsQuery.refetch(); }} className="chat-list-error" />;
+  } else if (chatsReadState.isInitialLoading) {
     listContent = <div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading conversations.</h2><p>The first conversation read is in progress.</p></div>;
+  } else if (unavailable && chats.length === 0) {
+    listContent = <div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Conversations are not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div>;
   } else if (filteredChats.length === 0) {
     listContent = (
       <div className="chat-calm-state"><span className="eyebrow">0 chats</span><h2>{chats.length === 0 ? 'No direct conversations yet.' : 'No conversations match these filters.'}</h2><p>{chats.length === 0 ? 'New direct conversations will appear here.' : 'Adjust the search or remove a label filter.'}</p></div>
@@ -216,7 +220,12 @@ export function ConversationList({ instanceId, chatId, onOpenThread }: {
           )}
         </div>
       </header>
-      <nav className="list" aria-label="Direct chat results">{listContent}</nav>
+      {pickerReadState.isStaleError && <InlineError error={pickerReadState.error} onRetry={() => { void picker.refetch(); }} className="chat-list-error" />}
+      {labelsReadState.isError && <InlineError error={labelsReadState.error} onRetry={() => { void labelsQuery.refetch(); }} className="chat-list-error" />}
+      <nav className="list" aria-label="Direct chat results">
+        {chatsReadState.isStaleError && <InlineError error={chatsReadState.error} onRetry={() => { void chatsQuery.refetch(); }} className="chat-list-error" />}
+        {listContent}
+      </nav>
       <footer className="table-foot">
         <span className="num">{chats.length} loaded chats</span>
         {chatsQuery.hasNextPage && <button className="btn sm" type="button" disabled={chatsQuery.isFetchingNextPage} onClick={() => { void chatsQuery.fetchNextPage(); }}>{chatsQuery.isFetchingNextPage ? 'Loading…' : 'More'}</button>}

@@ -18,6 +18,7 @@ import {
 } from '@/components/data-table';
 import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import { relativeTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import { CreateInstanceDialog } from './CreateInstanceDialog';
 import { InstanceDrawer } from './InstanceDrawer';
 import { useCreateInstance, useInstance, useInstances } from './hooks';
@@ -61,6 +62,7 @@ export function InstancesPage() {
   const detail = useInstance(instanceId);
   const create = useCreateInstance();
   const pages = list.data?.pages ?? [];
+  const listReadState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
   const unavailable = pages.some((page) => page.unavailable !== undefined);
   const instances = useMemo(
     () => pages.flatMap((page) => page.resource?.items ?? []),
@@ -124,12 +126,12 @@ export function InstancesPage() {
       mobileCell: (instance) => relativeTime(instance.updatedAt) || undefined,
     },
   ];
-  const tableState: DataTableState<InstanceRow> = unavailable
-    ? { status: 'unavailable', message: 'No instance data yet.' }
-    : list.isError
-      ? { status: 'error', error: list.error, onRetry: list.refetch }
-      : list.isLoading
-        ? { status: 'loading', skeletonRows: 6 }
+  const tableState: DataTableState<InstanceRow> = listReadState.isInitialError
+    ? { status: 'error', error: listReadState.error, onRetry: list.refetch }
+    : listReadState.isInitialLoading
+      ? { status: 'loading', skeletonRows: 6 }
+      : unavailable && instances.length === 0
+        ? { status: 'unavailable', message: 'No instance data yet.' }
         : filteredInstances.length === 0
           ? { status: 'empty', message: instances.length === 0 ? 'No instances yet.' : 'No instances match these filters.' }
           : { status: 'ready', rows: filteredInstances };
@@ -180,6 +182,7 @@ export function InstancesPage() {
           attached
           columns={columns}
           state={tableState}
+          refreshIssue={listReadState.isStaleError ? { error: listReadState.error, onRetry: list.refetch } : undefined}
           getRowKey={(instance) => instance.id}
           getRowState={(instance) => ({ active: instance.id === instanceId })}
           getRowActionLabel={(instance) => `Open ${instance.displayName ?? instance.id}`}
