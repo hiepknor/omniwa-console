@@ -460,6 +460,43 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
   .overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
+/* Queue and Jobs operational workbench. */
+.queue-metric-section{margin-bottom:var(--space-5)}
+.queue-metric-head,.queue-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)}
+.queue-metric-head h2,.queue-section-head h2{font:400 var(--text-xs)/16px var(--font-body);text-transform:uppercase;letter-spacing:2.4px;color:var(--muted)}
+.queue-status-chip,.terminal-status{padding:2px 8px;border:1px solid var(--border-subtle);border-radius:var(--radius-pill);font-size:11px;color:var(--fg-2)}
+.queue-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-2);margin-bottom:0}
+.queue-metric-card{display:flex;min-width:0;min-height:104px;flex-direction:column;justify-content:space-between;padding:var(--space-3) var(--space-4);background:color-mix(in oklab,var(--fg) 4%,transparent);border-color:var(--border-subtle);border-radius:var(--radius-md)}
+.queue-metric-card .label{line-height:15px;letter-spacing:1.4px}
+.queue-metric-card .value{margin-top:var(--space-1);font-family:var(--font-mono);font-size:24px;line-height:28px;letter-spacing:-.03em;color:var(--fg)}
+.queue-metric-card .value.queue-value-unavailable{font-family:var(--font-body);font-size:14px;line-height:20px;letter-spacing:0;color:var(--fg-2)}
+.queue-metric-card .ctx{margin-top:var(--space-1);line-height:16px;color:var(--muted)}
+.queue-metric-card .ctx.bad{color:var(--fg-2)}
+.queue-metric-action{border-color:var(--failed)}
+.queue-metric-error,.queue-metric-pending{margin-top:var(--space-2);border:1px solid var(--border-subtle);border-radius:var(--radius-sm)}
+.queue-workbench{min-width:0}
+.queue-section-head{min-height:40px}
+.queue-posture-note,.queue-result-count{display:block;margin-top:2px;font-size:11px;line-height:16px;color:var(--muted)}
+.queue-result-count{flex-shrink:0;font-family:var(--font-mono)}
+.queue-drawer{position:fixed;top:0;right:0;bottom:0;z-index:8;display:flex;flex-direction:column;width:440px;max-width:calc(100vw - 64px);border:0;border-left:1px solid var(--border);border-radius:0;background:var(--surface);box-shadow:var(--elev-raised);overflow:hidden}
+.queue-drawer .drawer-head{flex:0 0 auto;align-items:flex-start;min-height:112px;padding:var(--space-5) var(--space-6);background:var(--bg)}
+.queue-drawer .close{display:flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;border:1px solid var(--border-subtle)}
+.queue-drawer .close:focus-visible{outline:none;box-shadow:var(--focus-ring);color:var(--fg)}
+.queue-drawer section{padding:var(--space-5) var(--space-6)}
+.queue-drawer h3{margin:0 0 var(--space-3);font-size:14px;font-weight:500}
+.queue-drawer .kv{grid-template-columns:96px minmax(0,1fr);row-gap:var(--space-2)}
+.queue-drawer .kv dd{min-width:0;overflow-wrap:anywhere}
+@media(max-width:900px){
+  .queue-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .queue-drawer{position:relative;inset:auto;width:100%;max-width:none;margin-top:var(--space-4);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:none}
+  .queue-drawer .drawer-scroll{overflow:visible}
+}
+@media(max-width:640px){
+  .queue-metrics{grid-template-columns:minmax(0,1fr);gap:var(--space-2)}
+  .queue-metric-card{min-height:96px}
+  .queue-drawer .drawer-head,.queue-drawer section{padding:var(--space-4)}
+}
+
 /* App-only addition (not in prototype): reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   a, button, input, select, textarea { transition-duration: 0.01ms; }

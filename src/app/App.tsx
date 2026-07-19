@@ -7,6 +7,7 @@ import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { OverviewPage } from '@/features/overview/OverviewPage';
 import { InstancesPage } from '@/features/instances/InstancesPage';
 import { ChatsPage } from '@/features/chats/ChatsPage';
+import { QueuePage } from '@/features/queue/QueuePage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
@@ -81,7 +82,7 @@ function AppRuntime() {
               { path: '/overview', element: <OverviewPage /> },
               { path: '/instances', element: <InstancesPage /> },
               { path: '/instances/:instanceId', element: <InstancesPage /> },
-              { path: '/queue', element: <PanelStub panel="queue" /> },
+              { path: '/queue', element: <QueuePage /> },
               { path: '/webhooks', element: <PanelStub panel="webhooks" /> },
               { path: '/webhooks/:webhookId', element: <PanelStub panel="webhooks" /> },
               { path: '/events', element: <PanelStub panel="events" /> },
