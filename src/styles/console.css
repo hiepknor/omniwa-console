@@ -32,6 +32,7 @@
 .session .out:hover{background:color-mix(in oklab,var(--fg) 4%,transparent);color:var(--fg)}
 .session .out svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 main{flex:1;min-width:0;padding:0 24px 24px}
+.route-loading{display:flex;min-height:160px;align-items:center;justify-content:center;font-size:13px;color:var(--muted);text-align:center}
 
 /* Synced from design/prototypes/console.css lines 124–143. */
 /* Shared page-header contract */

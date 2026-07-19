@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Logo } from '@/components/Logo';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
@@ -365,7 +365,9 @@ export function Shell({
       ) : null}
 
       <main>
-        <Outlet />
+        <Suspense fallback={<div className="route-loading" aria-live="polite">Loading panel…</div>}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );
