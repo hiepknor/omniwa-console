@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useId, useRef, useState, type FormEvent } from 'react';
 import type { ApiKeyResource } from '@/api/api-keys';
 import { InlineError } from '@/components/InlineError';
 import { SelectDropdown } from '@/components/SelectDropdown';
+import { useModalDialog } from '@/components/useModalDialog';
 import { generateApiKeySecret } from '@/lib/secrets';
 import { useRotateApiKey } from './hooks';
 
@@ -37,14 +38,7 @@ export function RotateKeyDialog({
   const refsId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !mutation.isPending) onCancel();
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [mutation.isPending, onCancel]);
+  const dialogRef = useModalDialog<HTMLFormElement>({ onClose: onCancel, canClose: !mutation.isPending, initialFocusRef: inputRef });
 
   const canSubmit = nextKeyId.trim().length > 0 && commaList(scopes).length > 0;
   const rotate = () => {
@@ -71,7 +65,7 @@ export function RotateKeyDialog({
     <div className="overlay settings-dialog-overlay" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !mutation.isPending) onCancel();
     }}>
-      <form className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} onSubmit={submit}>
+      <form ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} onSubmit={submit}>
         <header><b id={titleId}>Rotate API key</b><span className="mono">{apiKey.id}</span></header>
         <div className="body">
           <p className="settings-dialog-copy">Rotation replaces this credential with a new key and secret. Clients using the current credential will stop authenticating.</p>

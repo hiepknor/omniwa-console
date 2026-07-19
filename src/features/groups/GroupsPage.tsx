@@ -5,6 +5,7 @@ import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
+import { isTransportError } from '@/components/feedback/feedback-policy';
 import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import {
   DataTable,
@@ -98,11 +99,11 @@ function InstancePicker({ instances, selected, selectedId, onSelect }: {
   );
 }
 
-function MetricCard({ label, value, context }: { label: string; value: number; context: string }) {
+function MetricCard({ label, value, context }: { label: string; value: number | undefined; context: string }) {
   return (
     <article className="card groups-metric-card">
       <div className="label">{label}</div>
-      <div className="value num">{formatCount(value)}</div>
+      <div className="value num">{value === undefined ? '—' : formatCount(value)}</div>
       <div className="ctx">{context}</div>
     </article>
   );
@@ -144,6 +145,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
   const muted = groups.filter((group) => group.muted).length;
   const staleCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const stale = groups.filter((group) => group.updatedAt !== undefined && new Date(group.updatedAt).getTime() < staleCutoff).length;
+  const metricsAvailable = !readState.isInitialLoading && !readState.isInitialError && !(unavailable && groups.length === 0);
   const selectedGroup = groups.find((group) => group.id === groupId);
 
   const columns: DataTableColumn<GroupResource>[] = [
@@ -186,10 +188,10 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
           <div><h2 id="groups-posture-title">Loaded group posture</h2><span className="groups-posture-note">Counts reflect loaded pages.</span></div>
         </div>
         <div className="metrics groups-metrics">
-          <MetricCard label="Synced groups" value={groups.length} context="Loaded groups" />
-          <MetricCard label="Admins known" value={knownAdmins} context={`${adminCounts.length} of ${groups.length} loaded groups`} />
-          <MetricCard label="Muted" value={muted} context="Muted locally" />
-          <MetricCard label="Stale" value={stale} context="No activity 7d+" />
+          <MetricCard label="Synced groups" value={metricsAvailable ? groups.length : undefined} context={metricsAvailable ? 'Loaded groups' : 'Data unavailable'} />
+          <MetricCard label="Admins known" value={metricsAvailable ? knownAdmins : undefined} context={metricsAvailable ? `${adminCounts.length} of ${groups.length} loaded groups` : 'Data unavailable'} />
+          <MetricCard label="Muted" value={metricsAvailable ? muted : undefined} context={metricsAvailable ? 'Muted locally' : 'Data unavailable'} />
+          <MetricCard label="Projection stale" value={metricsAvailable ? stale : undefined} context={metricsAvailable ? 'Not updated for 7d+' : 'Data unavailable'} />
         </div>
       </section>
 
@@ -199,7 +201,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
           <label className="search-field">
             <span className="visually-hidden">Search groups</span>
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
-            <input className="search" type="search" value={search} onChange={(event) => onSetParam('search', event.target.value)} placeholder="Search by group name or ID" />
+            <input className="search" type="search" value={search} onChange={(event) => onSetParam('search', event.target.value)} placeholder="Search loaded groups" />
           </label>
           <span className="data-table-toolbar-desktop-filters"><SelectDropdown label="Status" value={status} options={statusOptions} onChange={(value) => onSetParam('status', value)} /></span>
           <DataTableFilterTrigger ref={filterTriggerRef} count={activeFilters.length} aria-expanded={filterOpen} onClick={() => setFilterOpen(true)} />
@@ -276,16 +278,18 @@ export function GroupsPage() {
   };
 
   let content: React.ReactNode;
-  if (pickerReadState.isInitialError) {
-    content = <InlineError error={pickerReadState.error} onRetry={picker.refetch} />;
-  } else if (!instanceId) {
+  if (instanceId) {
+    content = <GroupsWorkbench instanceId={instanceId} groupId={groupId} onSetParam={setParam} />;
+  } else if (pickerReadState.isInitialError) {
+    content = isTransportError(pickerReadState.error)
+      ? <div className="empty groups-picker-state">Instances are unavailable while the API reconnects.</div>
+      : <InlineError error={pickerReadState.error} onRetry={picker.refetch} />;
+  } else {
     content = pickerReadState.isInitialLoading
       ? <div className="empty groups-picker-state">Loading instances…</div>
       : picker.data?.unavailable
         ? <div className="empty groups-picker-state">Instances are not available yet.</div>
         : <div className="empty groups-picker-state"><span className="groups-state-copy"><strong>Select an instance</strong><span>Choose an instance to review its synced groups.</span></span></div>;
-  } else {
-    content = <GroupsWorkbench instanceId={instanceId} groupId={groupId} onSetParam={setParam} />;
   }
 
   return (

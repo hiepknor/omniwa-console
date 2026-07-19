@@ -59,19 +59,24 @@ Exit: operational troubleshooting parity with `omniwa-tui`.
 
 ## M6 — Workspace completion + Directory + Settings
 
-- Group conversations in the workspace (sender attribution, group context
-  panel: members, promote/demote/remove, invite link).
-- Directory (contacts + labels, jump-to-conversation).
+- Contract-backed group management workbench (metadata, local state, member
+  commands, invite-link refresh acceptance, and one-off text commands).
+- Contact and label directory reads embedded in the Chats workspace, including
+  jump-to-conversation flows supported by the v1 contract.
 - Settings (get / validate / activate) and admin-keys panel (admin scope
   only, show-once secret dialog).
 
-Exit: full v1-contract surface from `docs/PANELS.md` complete.
+Exit: the currently available v1-contract operations assigned in
+`docs/PANELS.md` are represented. Contract-blocked enhancements remain tracked
+in `docs/M6_CONTRACT_GAPS.md` and are not emulated in browser state.
 
-## M6.5 — Campaigns & send lists (blocked on platform contract)
+## M6.5 — Campaigns, Named Lists, and send lists (blocked on platform contract)
 
-- Blocked until the operations in `docs/CAMPAIGNS_PROPOSAL.md` exist in the
-  platform OpenAPI contract. Then: send lists CRUD, campaign wizard,
-  campaign monitoring with segmented progress and per-recipient drill-down.
+- Blocked until the operations in `docs/CAMPAIGNS_PROPOSAL.md` and the Named
+  Lists operations described in `docs/M6_CONTRACT_GAPS.md` exist in the
+  platform OpenAPI contract. Then: reusable group lists, send-list CRUD,
+  campaign wizard, campaign monitoring with segmented progress, and
+  per-recipient drill-down.
 
 Exit: an opt-in notification campaign can be created, observed, paused, and
 aborted entirely through platform APIs.

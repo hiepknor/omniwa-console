@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GroupLocalStateRequest, GroupMemberResource, GroupResource } from '@/api/groups';
 import { InlineError } from '@/components/InlineError';
+import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
+import { useModalDialog } from '@/components/useModalDialog';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import {
@@ -26,11 +28,6 @@ function groupStatusDot(status: string | undefined) {
     case 'archived': return 'dot-muted';
     default: return 'dot-info';
   }
-}
-
-function isAdminRole(role: string | undefined) {
-  const normalized = role?.toLowerCase() ?? '';
-  return normalized.includes('admin') || normalized.includes('owner') || normalized.includes('creator') || normalized.includes('superuser');
 }
 
 function LocalStateSwitch({ label, checked, pending, disabled, onChange }: {
@@ -66,20 +63,18 @@ function MemberRecord({ member, busy, onPromote, onDemote, onRemove }: {
   onRemove: () => void;
 }) {
   const memberRef = member.memberRef ?? member.id;
-  const admin = isAdminRole(member.role);
   return (
     <article className="groups-member-record">
       <dl>
         <dt>Member</dt><dd>{member.displayName ? member.displayName : <span className="mono">{memberRef}</span>}</dd>
         <dt>Reference</dt><dd><span className="mono" title={memberRef}>{memberRef}</span></dd>
-        <dt>Role</dt><dd><span className={`chip${admin ? ' groups-member-role-admin' : ''}`}>{member.role ?? '—'}</span></dd>
+        <dt>Role</dt><dd><span className="chip">{member.role ?? '—'}</span></dd>
         <dt>Status</dt><dd><span className="status sm"><span className={`dot ${groupStatusDot(member.status)}`} />{member.status ?? '—'}</span></dd>
         <dt>Joined</dt><dd><span className="ts" title={member.joinedAt}>{relativeTime(member.joinedAt) || '—'}</span></dd>
       </dl>
       <div className="groups-member-actions">
-        {admin
-          ? <button className="btn sm" type="button" disabled={busy} onClick={onDemote}>Demote</button>
-          : <button className="btn sm" type="button" disabled={busy} onClick={onPromote}>Promote</button>}
+        <button className="btn sm" type="button" disabled={busy} title="Platform authorization is evaluated on submission." onClick={onPromote}>Promote</button>
+        <button className="btn sm" type="button" disabled={busy} title="Platform authorization is evaluated on submission." onClick={onDemote}>Demote</button>
         <button className="btn sm danger" type="button" disabled={busy} onClick={onRemove}>Remove</button>
       </div>
     </article>
@@ -91,20 +86,13 @@ function SendTextDialog({ groupId, onClose }: { groupId: string; onClose: () => 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const send = useSendGroupText(groupId);
 
-  useEffect(() => {
-    textareaRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !send.isPending) onClose();
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [onClose, send.isPending]);
+  const dialogRef = useModalDialog<HTMLDivElement>({ onClose, canClose: !send.isPending, initialFocusRef: textareaRef });
 
   return (
     <div className="overlay" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !send.isPending) onClose();
     }}>
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="group-send-title">
+      <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby="group-send-title" tabIndex={-1}>
         <header><b id="group-send-title">Send text to group</b><span className="mono">sendGroupTextMessage</span></header>
         <form onSubmit={(event) => {
           event.preventDefault();
@@ -132,6 +120,7 @@ function GroupDrawerContent({ group }: { group: GroupResource }) {
   const [subject, setSubject] = useState(group.subject ?? '');
   const [description, setDescription] = useState(group.description ?? '');
   const [memberJid, setMemberJid] = useState('');
+  const [removeTarget, setRemoveTarget] = useState<GroupMemberResource>();
   const invite = useRefreshGroupInviteLink(group.id);
   const localState = useUpdateGroupLocalState(group.id, group.instanceId);
   const update = useUpdateGroup(group.id, group.instanceId);
@@ -236,12 +225,16 @@ function GroupDrawerContent({ group }: { group: GroupResource }) {
           <div className="groups-member-list" role="region" aria-label="Group members">
             {members.map((member) => {
               const memberRef = member.memberRef ?? member.id;
-              return <MemberRecord key={member.id} member={member} busy={memberBusy} onPromote={() => promote.mutate(memberRef)} onDemote={() => demote.mutate(memberRef)} onRemove={() => remove.mutate(memberRef)} />;
+              return <MemberRecord key={member.id} member={member} busy={memberBusy} onPromote={() => promote.mutate(memberRef)} onDemote={() => demote.mutate(memberRef)} onRemove={() => setRemoveTarget(member)} />;
             })}
           </div>
         )}
         {membersQuery.hasNextPage && <button className="btn groups-members-load-more" type="button" disabled={membersQuery.isFetchingNextPage} onClick={() => void membersQuery.fetchNextPage()}>{membersQuery.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}
       </section>
+      {removeTarget && (() => {
+        const memberRef = removeTarget.memberRef ?? removeTarget.id;
+        return <TypedConfirmationDialog title="Remove group member" description={<p>This submits an asynchronous membership removal command. Platform authorization is evaluated on submission.</p>} resourceId={memberRef} confirmValue={memberRef} confirmLabel="Remove member" pendingLabel="Removing…" error={remove.error} isPending={remove.isPending} onCancel={() => setRemoveTarget(undefined)} onConfirm={() => remove.mutate(memberRef, { onSuccess: () => setRemoveTarget(undefined) })} />;
+      })()}
     </>
   );
 }
@@ -252,6 +245,7 @@ export function GroupDrawer({ groupId, subject: initialSubject, onClose }: {
   onClose: () => void;
 }) {
   const [sendOpen, setSendOpen] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const groupQuery = useGroup(groupId);
   const readState = useResilientReadState(groupQuery, groupQuery.data?.resource !== undefined);
   const group = groupQuery.data?.resource;
@@ -259,6 +253,7 @@ export function GroupDrawer({ groupId, subject: initialSubject, onClose }: {
   const headerStatus = group?.status ?? (readState.isInitialError ? 'error' : groupQuery.data?.unavailable ? 'unavailable' : readState.isInitialLoading ? 'loading' : '—');
 
   useEffect(() => {
+    closeRef.current?.focus();
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !sendOpen) onClose();
     };
@@ -268,16 +263,16 @@ export function GroupDrawer({ groupId, subject: initialSubject, onClose }: {
 
   return (
     <>
-      <aside className="drawer groups-drawer" aria-labelledby="group-detail-title">
+      <aside className="drawer groups-drawer max-[900px]:!fixed max-[900px]:!inset-y-0 max-[900px]:!right-0 max-[900px]:!left-auto max-[900px]:!m-0 max-[900px]:!h-[100dvh] max-[900px]:!w-[min(440px,100vw)] max-[900px]:!max-w-none max-[900px]:!rounded-none max-[900px]:!border-y-0 max-[900px]:!border-r-0 max-[900px]:!shadow-[var(--elev-raised)]" aria-labelledby="group-detail-title">
         <header className="drawer-head">
           <div className="drawer-identity">
             <span className="eyebrow">Group management</span>
             <div className="drawer-title-row"><h2 id="group-detail-title" title={title} className={group?.subject || initialSubject ? undefined : 'mono'}>{title}</h2><span className="status"><span className={`dot ${groupStatusDot(headerStatus)}`} />{headerStatus}</span></div>
             <span className="mono" title={groupId}>{groupId}</span>
           </div>
-          <button className="close" type="button" aria-label="Close group details" title="Close" onClick={onClose}>✕</button>
+          <button ref={closeRef} className="close" type="button" aria-label="Close group details" title="Close" onClick={onClose}>✕</button>
         </header>
-        <div className="drawer-scroll">
+        <div className="drawer-scroll max-[900px]:!overflow-y-auto">
           {readState.isInitialLoading ? (
             <div className="empty groups-drawer-state" aria-live="polite">Loading group details…</div>
           ) : readState.isInitialError ? (

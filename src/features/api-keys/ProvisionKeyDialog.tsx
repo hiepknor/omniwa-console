@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useId, useRef, useState, type FormEvent } from 'react';
 import type { ApiKeyResource } from '@/api/api-keys';
 import { InlineError } from '@/components/InlineError';
 import { SelectDropdown } from '@/components/SelectDropdown';
+import { useModalDialog } from '@/components/useModalDialog';
 import { generateApiKeySecret } from '@/lib/secrets';
 import { useProvisionApiKey } from './hooks';
 
@@ -35,14 +36,7 @@ export function ProvisionKeyDialog({
   const refsInputId = useId();
   const keyIdRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    keyIdRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !mutation.isPending) onCancel();
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [mutation.isPending, onCancel]);
+  const dialogRef = useModalDialog<HTMLFormElement>({ onClose: onCancel, canClose: !mutation.isPending, initialFocusRef: keyIdRef });
 
   const canSubmit = keyId.trim().length > 0 && commaList(scopes).length > 0;
   const provision = () => {
@@ -69,7 +63,7 @@ export function ProvisionKeyDialog({
     <div className="overlay settings-dialog-overlay" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !mutation.isPending) onCancel();
     }}>
-      <form className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} onSubmit={submit}>
+      <form ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} onSubmit={submit}>
         <header><b id={titleId}>Provision API key</b><span className="mono">admin command</span></header>
         <div className="body">
           <div className="field"><label htmlFor={keyIdInputId}>Key ID</label><input ref={keyIdRef} className="input mono" id={keyIdInputId} value={keyId} onChange={(event) => setKeyId(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /></div>

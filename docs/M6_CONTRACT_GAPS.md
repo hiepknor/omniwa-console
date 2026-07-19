@@ -62,9 +62,11 @@ profile, and update time.
 **What the console needs:** The draft editor needs the complete active
 configuration payload to prefill a proposed revision safely.
 
-**How the console degrades today:** The draft starts without the active payload.
-Operators must provide a complete revision themselves, and the console cannot
-present an authoritative field-level comparison with the active revision.
+**How the console degrades today:** The draft starts blank and requires the
+operator to paste a non-empty complete revision, explicitly acknowledge full
+replacement, validate that exact draft, and complete a typed activation
+confirmation. The console cannot present an authoritative field-level
+comparison with the active revision.
 
 **Proposed platform change:** Add an explicitly typed or schema-bounded active
 configuration payload to the settings read projection.
@@ -96,7 +98,8 @@ own role per group and use a stable role vocabulary for management decisions.
 
 **How the console degrades today:** The console cannot state the operator's own
 role from the public projection. Member roles are rendered as supplied without
-inferring permissions from free-form values.
+inferring permissions from free-form values. Management commands state that
+the platform evaluates authorization on submission.
 
 **Proposed platform change:** Add an `ourRole` field with a documented enum to
 `GroupResource`, and constrain `GroupMemberResource.role` to the same stable

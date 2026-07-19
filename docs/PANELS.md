@@ -57,16 +57,19 @@ Operations: `listInstanceChats`, `listChats`, `getChat`,
 
 ## groups — `/groups/:instanceId?` (realtime) — PRIMARY
 
-Management table of **all** groups with key metadata (name, id, member
-count, our role, local state, Named List membership, last activity) and a
-checkbox on every row. Selecting rows raises a bulk bar whose single
-action is **Add to Named List**. There is no group conversation view: a
-row opens a detail drawer (meta, invite link, member management, one-off
-"Send text…" compose dialog); recurring sends go through Messages
-campaigns. Quick-add runs through a dropdown on the bulk action;
-**Named Lists** management opens as a right-panel mode (deep link
-`?list=nl_*`) so the table stays selectable while editing lists —
-named-list operations are proposed contract, see below.
+Management table of groups loaded from the selected instance, with projected
+metadata (name, ID, member/admin counts, local state, lifecycle status, and
+projection update time). Search and status filtering apply only to loaded
+pages because the v1 read has no server-side filters. A row opens a detail
+drawer for metadata, local state, member commands, invite-link refresh
+acceptance, and a one-off "Send text…" command. The console renders member
+roles as supplied and leaves command authorization to the platform; it does
+not infer operator capabilities from free-form role values.
+
+Named List membership, bulk selection, the operator's own role, and true
+group last-activity time remain blocked on public-contract additions tracked
+in `docs/M6_CONTRACT_GAPS.md`. They are not emulated locally. Recurring sends
+belong to the proposed Messages campaigns surface.
 
 Operations: `listInstances`, `listInstanceGroups`, `getGroup`, `updateGroup`,
 `updateGroupLocalState`, `refreshInstanceGroups`, `refreshGroupInviteLink`,

@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useId, useRef, useState, type ReactNode } from 'react';
 import { InlineError } from '@/components/InlineError';
+import { useModalDialog } from '@/components/useModalDialog';
 
 export function TypedConfirmationDialog({
   title,
@@ -29,14 +30,7 @@ export function TypedConfirmationDialog({
   const titleId = useId();
   const inputId = useId();
 
-  useEffect(() => {
-    inputRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isPending) onCancel();
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [isPending, onCancel]);
+  const dialogRef = useModalDialog<HTMLDivElement>({ onClose: onCancel, canClose: !isPending, initialFocusRef: inputRef });
 
   return (
     <div
@@ -46,7 +40,7 @@ export function TypedConfirmationDialog({
         if (event.target === event.currentTarget && !isPending) onCancel();
       }}
     >
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <header>
           <b id={titleId}>{title}</b>
           <span className="mono">{resourceId}</span>

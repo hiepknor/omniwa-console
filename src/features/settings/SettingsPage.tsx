@@ -3,13 +3,17 @@ import { Link } from 'react-router-dom';
 import { ApiFailure } from '@/api/envelopes';
 import type { SettingsResource } from '@/api/settings';
 import { PageHeader } from '@/components/PageHeader';
+import { InlineError } from '@/components/InlineError';
+import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
+import { useResilientReadState } from '@/lib/query-state';
 import { keyFingerprint, loadSession } from '@/lib/session';
+import { isTransportError } from '@/components/feedback/feedback-policy';
 import { useActivateSettings, useSettings, useValidateSettings } from './hooks';
 
-const INITIAL_DRAFT = '{\n  \n}';
+const INITIAL_DRAFT = '';
 
 function absoluteTime(value: string | undefined): string {
   if (value === undefined) return 'Not reported';
@@ -93,12 +97,16 @@ function DraftRevision() {
   const [draft, setDraft] = useState(INITIAL_DRAFT);
   const [parseError, setParseError] = useState<string>();
   const [validatedDraft, setValidatedDraft] = useState<string>();
+  const [fullRevisionConfirmed, setFullRevisionConfirmed] = useState(false);
+  const [activateOpen, setActivateOpen] = useState(false);
   const isCurrentValidation = validate.isSuccess && validatedDraft === draft;
 
   const handleEdit = (value: string) => {
     setDraft(value);
     setParseError(undefined);
     setValidatedDraft(undefined);
+    setFullRevisionConfirmed(false);
+    setActivateOpen(false);
     validate.reset();
     activate.reset();
   };
@@ -111,6 +119,7 @@ function DraftRevision() {
     let body: Record<string, unknown>;
     try {
       body = parseDraft(draft);
+      if (Object.keys(body).length === 0) throw new Error('An empty object cannot replace the active revision. Paste the complete intended configuration.');
     } catch (error) {
       setParseError(error instanceof Error ? error.message : 'The draft is not valid JSON.');
       return;
@@ -123,6 +132,7 @@ function DraftRevision() {
     const body = parseDraft(draft);
     activate.mutate(body, {
       onSuccess: (operation) => {
+        setActivateOpen(false);
         feedback.accepted({
           title: 'Settings activation accepted',
           detail: operation?.resultRef
@@ -143,7 +153,7 @@ function DraftRevision() {
       <div className="settings-draft-body">
         <div className="settings-payload">
           <div className="settings-subhead"><span>Draft payload</span><span className="mono">complete revision</span></div>
-          <textarea className="settings-code-editor" aria-label="Draft settings JSON" spellCheck={false} value={draft} onChange={(event) => handleEdit(event.target.value)} />
+          <textarea className="settings-code-editor" aria-label="Draft settings JSON" spellCheck={false} value={draft} placeholder="Paste the complete settings JSON object" onChange={(event) => handleEdit(event.target.value)} />
         </div>
         <div className="settings-change-summary">
           <div className="settings-subhead"><span>Validation evidence</span><span className="num">current draft</span></div>
@@ -156,12 +166,13 @@ function DraftRevision() {
         </div>
       </div>
       <footer className="settings-panel-actions">
-        <span>Activation replaces the entire active revision atomically.</span>
+        <label className="flex max-w-xl items-start gap-2 text-[12px] leading-5 text-[var(--muted)]"><input className="mt-1" type="checkbox" checked={fullRevisionConfirmed} onChange={(event) => setFullRevisionConfirmed(event.target.checked)} /><span>I confirm this draft contains the complete intended configuration. Activation replaces the entire active revision atomically.</span></label>
         <div>
           <button className="btn" type="button" disabled={validate.isPending || activate.isPending} onClick={handleValidate}>{validate.isPending ? 'Validating…' : 'Validate draft'}</button>
-          <button className="btn primary" type="button" disabled={!isCurrentValidation || activate.isPending} onClick={handleActivate}>{activate.isPending ? 'Submitting…' : 'Activate revision'}</button>
+          <button className="btn primary" type="button" disabled={!isCurrentValidation || !fullRevisionConfirmed || activate.isPending} onClick={() => setActivateOpen(true)}>{activate.isPending ? 'Submitting…' : 'Activate revision…'}</button>
         </div>
       </footer>
+      {activateOpen && <TypedConfirmationDialog title="Activate settings revision" description={<><p>This atomically replaces the entire active platform configuration with the validated draft.</p><p>Validation request: <span className="mono">{validate.data?.requestId ?? 'unavailable'}</span></p></>} resourceId="complete settings revision" confirmValue="ACTIVATE" confirmLabel="Activate revision" pendingLabel="Submitting…" error={activate.error} isPending={activate.isPending} onCancel={() => setActivateOpen(false)} onConfirm={handleActivate} />}
     </section>
   );
 }
@@ -179,7 +190,7 @@ function ConsoleSessionAside() {
         <div><dt>Connected</dt><dd className="ts" title={session.connectedAt}>{relativeTime(session.connectedAt) || absoluteTime(session.connectedAt)}</dd></div>
       </dl>
       <div className="settings-session-note"><span className="eyebrow">Credential boundary</span><p>The API key is masked after entry and never appears in URLs or logs.</p></div>
-      <div className="settings-session-actions"><p className="help">Use the Sign out control in the sidebar to clear this browser session.</p></div>
+      <div className="settings-session-actions"><p className="help">Use Sign out from workspace navigation to clear this browser session.</p></div>
       {session.keyKind === 'admin' && <div className="settings-session-link"><Link to="/settings/api-keys">API key inventory <span aria-hidden="true">→</span></Link></div>}
     </aside>
   );
@@ -189,23 +200,26 @@ export function SettingsPage() {
   const settings = useSettings();
   const resource = settings.data?.resource;
   const unavailable = settings.data?.unavailable;
+  const readState = useResilientReadState(settings, resource !== undefined);
 
   let main: React.ReactNode;
-  if (settings.isPending) {
+  if (readState.isInitialLoading) {
     main = <div className="settings-main-column"><div className="empty">Loading settings…</div></div>;
-  } else if (settings.isError) {
-    main = <div className="settings-main-column"><FailureNotice error={settings.error} title={settings.error instanceof ApiFailure && settings.error.category === 'authorization' ? 'This key is not authorized to read settings' : undefined} /></div>;
+  } else if (readState.isInitialError) {
+    main = <div className="settings-main-column">{isTransportError(readState.error)
+      ? <div className="empty">Settings data is unavailable while the API reconnects.</div>
+      : <InlineError error={readState.error} onRetry={settings.refetch} announce />}</div>;
   } else if (unavailable !== undefined || resource === undefined) {
     main = <div className="settings-main-column"><SurfaceNotice kind="warning" label="unavailable" title="Settings are unavailable" detail={unavailable?.reasonCode ? `Reason: ${unavailable.reasonCode}` : 'The platform did not return an active settings revision.'} /></div>;
   } else {
-    main = <div className="settings-main-column"><ActiveConfiguration settings={resource} /><DraftRevision /></div>;
+    main = <div className="settings-main-column">{readState.isStaleError && <InlineError error={readState.error} onRetry={settings.refetch} />}<ActiveConfiguration settings={resource} /><DraftRevision /></div>;
   }
 
   return (
-    <main className="settings-screen">
+    <div className="settings-screen">
       <PageHeader title="Settings" />
       {resource && <RuntimeStatus settings={resource} />}
       <div className="settings-layout">{main}<ConsoleSessionAside /></div>
-    </main>
+    </div>
   );
 }
