@@ -4,14 +4,14 @@ import { listAuditRecords, listEvents } from '@/api/events-api';
 import { queryKeys } from '@/api/keys';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 
-export function useEvents() {
+export function useEvents(initialCursor?: string) {
   const client = useApi();
   const refetchInterval = useRealtimeRefetchInterval();
 
   return useInfiniteQuery({
-    queryKey: queryKeys.events({}),
+    queryKey: queryKeys.events({ initialCursor }),
     queryFn: ({ pageParam }) => listEvents(client, { cursor: pageParam, limit: 100 }),
-    initialPageParam: undefined as string | undefined,
+    initialPageParam: initialCursor,
     getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
     refetchInterval,
   });

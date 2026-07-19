@@ -57,8 +57,9 @@ export function QueuePage() {
   const search = searchParams.get('search') ?? '';
   const status = searchParams.get('status') ?? '';
   const jobId = searchParams.get('job') || undefined;
+  const initialCursor = searchParams.get('cursor') ?? undefined;
   const queue = useQueueStatus();
-  const list = useJobs();
+  const list = useJobs(initialCursor);
   const detail = useJob(jobId);
   const pages = list.data?.pages ?? [];
   const listReadState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
@@ -84,12 +85,19 @@ export function QueuePage() {
   const setParam = (name: string, value: string) => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(name, value); else next.delete(name);
+    if (name === 'search' || name === 'status') next.delete('cursor');
     setSearchParams(next, { replace: true });
   };
   const closeJob = () => setParam('job', '');
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: opsKeys.queue });
     void queryClient.invalidateQueries({ queryKey: opsKeys.jobs });
+  };
+  const loadMore = async () => {
+    const nextCursor = pages.at(-1)?.resource?.pagination?.nextCursor;
+    if (!nextCursor) return;
+    const result = await list.fetchNextPage();
+    if (!result.isError) setParam('cursor', nextCursor);
   };
 
   type JobRow = (typeof jobs)[number];
@@ -169,7 +177,7 @@ export function QueuePage() {
               }
             },
           })}
-          footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredJobs.length} loaded jobs</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>} />}
+          footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredJobs.length} loaded jobs</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>} />}
         />
       </DataTableWorkspace>
 

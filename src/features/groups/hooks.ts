@@ -31,13 +31,13 @@ export function usePickerInstances() {
   });
 }
 
-export function useInstanceGroups(instanceId: string | undefined) {
+export function useInstanceGroups(instanceId: string | undefined, initialCursor?: string) {
   const client = useApi();
   const refetchInterval = useRealtimeRefetchInterval();
   return useInfiniteQuery({
-    queryKey: queryKeys.instanceGroups(instanceId ?? '', {}),
+    queryKey: queryKeys.instanceGroups(instanceId ?? '', { initialCursor }),
     queryFn: ({ pageParam }) => listInstanceGroups(client, instanceId ?? '', { cursor: pageParam, limit: 50 }),
-    initialPageParam: undefined as string | undefined,
+    initialPageParam: initialCursor,
     getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
     enabled: instanceId !== undefined,
     refetchInterval,

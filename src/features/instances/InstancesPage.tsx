@@ -95,6 +95,12 @@ export function InstancesPage() {
     void queryClient.invalidateQueries({ queryKey: instanceKeys.root });
     void queryClient.invalidateQueries({ queryKey: instanceKeys.provider });
   };
+  const loadMore = async () => {
+    const nextCursor = pages.at(-1)?.resource?.pagination?.nextCursor;
+    if (!nextCursor) return;
+    const result = await list.fetchNextPage();
+    if (!result.isError) setParam('cursor', nextCursor);
+  };
   type InstanceRow = (typeof instances)[number];
   const columns: DataTableColumn<InstanceRow>[] = [
     {
@@ -200,7 +206,7 @@ export function InstancesPage() {
           footer={(
             <DataTableFooter
               primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>}
-              actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>}
+              actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>}
             />
           )}
         />

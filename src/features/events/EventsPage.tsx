@@ -41,9 +41,10 @@ function EventHistory() {
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('search') ?? '';
   const selectedId = searchParams.get('event') || undefined;
+  const initialCursor = searchParams.get('cursor') ?? undefined;
   const liveEvents = useRealtimeEvents();
   const realtimeStatus = useRealtimeStatus();
-  const list = useEvents();
+  const list = useEvents(initialCursor);
   const pages = list.data?.pages ?? [];
   const listReadState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
   const events = useMemo(() => pages
@@ -69,7 +70,14 @@ function EventHistory() {
   const setParam = (name: string, value: string) => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(name, value); else next.delete(name);
+    if (name === 'search') next.delete('cursor');
     setSearchParams(next, { replace: true });
+  };
+  const loadMore = async () => {
+    const nextCursor = pages.at(-1)?.resource?.pagination?.nextCursor;
+    if (!nextCursor) return;
+    const result = await list.fetchNextPage();
+    if (!result.isError) setParam('cursor', nextCursor);
   };
 
   const columns: DataTableColumn<EventResource>[] = [
@@ -145,7 +153,7 @@ function EventHistory() {
               }
             },
           })}
-          footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filtered.length} loaded events</span><span className="freshness">Fresh through {relativeTime(newestTimestamp) || '—'}</span></> : <span className="num">Results —</span>} actions={list.hasNextPage ? <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button> : undefined} />}
+          footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filtered.length} loaded events</span><span className="freshness">Fresh through {relativeTime(newestTimestamp) || '—'}</span></> : <span className="num">Results —</span>} actions={list.hasNextPage ? <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button> : undefined} />}
         />
       </DataTableWorkspace>
 
@@ -207,6 +215,7 @@ export function EventsPage() {
     const next = new URLSearchParams(searchParams);
     if (nextView === 'history') next.delete('view'); else next.set('view', nextView);
     if (nextView === 'audit') next.delete('event');
+    if (nextView !== view) next.delete('cursor');
     setSearchParams(next, { replace: true });
   };
   const handleTabKey = (event: KeyboardEvent<HTMLDivElement>) => {

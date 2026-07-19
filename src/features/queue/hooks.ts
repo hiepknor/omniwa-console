@@ -14,13 +14,13 @@ export function useQueueStatus() {
   });
 }
 
-export function useJobs() {
+export function useJobs(initialCursor?: string) {
   const client = useApi();
   const refetchInterval = useRealtimeRefetchInterval();
   return useInfiniteQuery({
-    queryKey: queryKeys.jobs({}),
+    queryKey: queryKeys.jobs({ initialCursor }),
     queryFn: ({ pageParam }) => listJobs(client, { cursor: pageParam, limit: 50 }),
-    initialPageParam: undefined as string | undefined,
+    initialPageParam: initialCursor,
     getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
     refetchInterval,
   });

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { PublicData } from '@/api/envelopes';
 import type { WebhookDeliveryResource, WebhookResource } from '@/api/webhooks';
 import { InlineError } from '@/components/InlineError';
@@ -98,7 +99,8 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
   const [eventsValue, setEventsValue] = useState((webhook.eventTypes ?? []).join(', '));
   const [retireOpen, setRetireOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const [selectedDelivery, setSelectedDelivery] = useState<string>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedDelivery = searchParams.get('delivery') || undefined;
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const feedback = useFeedback();
   const deliveriesQuery = useWebhookDeliveries();
@@ -121,6 +123,11 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
   useDrawerFocus({ onClose, closeRef, suppressEscape: retireOpen });
   const accepted = (action: string, key = action.toLowerCase()) => feedback.accepted({ title: `${action} accepted`, detail: 'Webhook data refreshes automatically.', dedupeKey: `webhook:${webhook.id}:${key}` });
   const parseEvents = () => [...new Set(eventsValue.split(',').map((item) => item.trim()).filter(Boolean))];
+  const selectDelivery = (deliveryId: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('delivery', deliveryId);
+    setSearchParams(next, { replace: true });
+  };
 
   return <>
     <aside className="drawer webhook-drawer" aria-labelledby="webhook-detail-title">
@@ -132,7 +139,7 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
         <section aria-labelledby="webhook-events-title"><span className="eyebrow">Configuration</span><h3 id="webhook-events-title">Subscribed events</h3><form onSubmit={(event) => { event.preventDefault(); update.mutate({ eventTypes: parseEvents() }, { onSuccess: () => accepted('Update subscriptions', 'update') }); }}><div className="field"><label htmlFor="webhook-event-types">Event types <span className="muted">comma-separated</span></label><textarea className="input webhook-event-input" id="webhook-event-types" value={eventsValue} onChange={(event) => setEventsValue(event.target.value)} disabled={pending} /><p className="help">Event types are not projected back by the platform; submitting replaces the subscription.</p></div><button className="btn" type="submit" disabled={pending || parseEvents().length === 0 || eventsValue === (webhook.eventTypes ?? []).join(', ')}>Update events</button></form></section>
         <section aria-labelledby="webhook-deliveries-title"><div className="drawer-section-head"><div><span className="eyebrow">Loaded records</span><h3 id="webhook-deliveries-title">Recent deliveries</h3></div><span className="num delivery-count">{deliveries.length}</span></div>
           {deliveriesReadState.isStaleError && <InlineError error={deliveriesReadState.error} onRetry={deliveriesQuery.refetch} />}
-          {deliveriesReadState.isInitialLoading ? <div className="empty">Loading deliveries…</div> : deliveriesReadState.isInitialError ? <InlineError error={deliveriesReadState.error} onRetry={deliveriesQuery.refetch} /> : unavailable && deliveries.length === 0 ? <div className="empty">Delivery data is not available yet.</div> : deliveries.length === 0 ? <div className="empty">No loaded deliveries for this webhook.</div> : <div className="delivery-records" role="region" aria-label="Recent webhook deliveries">{deliveries.map((delivery) => <DeliveryRow key={delivery.id} delivery={delivery} selected={selectedDelivery === delivery.id} checked={checked.has(delivery.id)} busy={pending} onSelect={() => setSelectedDelivery(delivery.id)} onCheck={(value) => setChecked((current) => { const next = new Set(current); if (value) next.add(delivery.id); else next.delete(delivery.id); return next; })} onRetry={() => retry.mutate(delivery.id, { onSuccess: () => accepted('Retry delivery', `retry:${delivery.id}`) })} onRedrive={() => redrive.mutate(delivery.id, { onSuccess: () => accepted('Redrive delivery', `redrive:${delivery.id}`) })} />)}</div>}
+          {deliveriesReadState.isInitialLoading ? <div className="empty">Loading deliveries…</div> : deliveriesReadState.isInitialError ? <InlineError error={deliveriesReadState.error} onRetry={deliveriesQuery.refetch} /> : unavailable && deliveries.length === 0 ? <div className="empty">Delivery data is not available yet.</div> : deliveries.length === 0 ? <div className="empty">No loaded deliveries for this webhook.</div> : <div className="delivery-records" role="region" aria-label="Recent webhook deliveries">{deliveries.map((delivery) => <DeliveryRow key={delivery.id} delivery={delivery} selected={selectedDelivery === delivery.id} checked={checked.has(delivery.id)} busy={pending} onSelect={() => selectDelivery(delivery.id)} onCheck={(value) => setChecked((current) => { const next = new Set(current); if (value) next.add(delivery.id); else next.delete(delivery.id); return next; })} onRetry={() => retry.mutate(delivery.id, { onSuccess: () => accepted('Retry delivery', `retry:${delivery.id}`) })} onRedrive={() => redrive.mutate(delivery.id, { onSuccess: () => accepted('Redrive delivery', `redrive:${delivery.id}`) })} />)}</div>}
           {deliveriesQuery.hasNextPage && <button className="btn webhook-load-more" type="button" disabled={deliveriesQuery.isFetchingNextPage} onClick={() => void deliveriesQuery.fetchNextPage()}>{deliveriesQuery.isFetchingNextPage ? 'Loading…' : 'Load more deliveries'}</button>}
           {selectedDelivery && <div className="webhook-history"><div className="drawer-section-head"><h4>Delivery history</h4><span className="mono">{selectedDelivery}</span></div><DeliveryHistory deliveryId={selectedDelivery} /></div>}
         </section>

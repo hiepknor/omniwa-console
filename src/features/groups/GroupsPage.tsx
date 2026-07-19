@@ -123,7 +123,8 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
   const [searchParams] = useSearchParams();
   const [filterOpen, setFilterOpen] = useState(false);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
-  const list = useInstanceGroups(instanceId);
+  const initialCursor = searchParams.get('cursor') ?? undefined;
+  const list = useInstanceGroups(instanceId, initialCursor);
   const refresh = useRefreshGroups(instanceId);
   const pages = list.data?.pages ?? [];
   const readState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
@@ -180,6 +181,12 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
     onSetParam('group', '');
     window.requestAnimationFrame(() => activeRow?.focus());
   };
+  const loadMore = async () => {
+    const nextCursor = pages.at(-1)?.resource?.pagination?.nextCursor;
+    if (!nextCursor) return;
+    const result = await list.fetchNextPage();
+    if (!result.isError) onSetParam('cursor', nextCursor);
+  };
 
   return (
     <>
@@ -230,7 +237,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
                 }
               },
             })}
-            footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={refresh.isPending} title="The platform refreshes group projections asynchronously." onClick={() => refresh.mutate()}>Refresh sync</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
+            footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={refresh.isPending} title="The platform refreshes group projections asynchronously." onClick={() => refresh.mutate()}>Refresh sync</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
           />
         </div>
       </DataTableWorkspace>
@@ -268,12 +275,14 @@ export function GroupsPage() {
   const chooseInstance = (nextInstanceId: string) => {
     const next = new URLSearchParams(searchParams);
     next.delete('group');
+    next.delete('cursor');
     const suffix = next.size > 0 ? `?${next.toString()}` : '';
     navigate(`/groups/${encodeURIComponent(nextInstanceId)}${suffix}`);
   };
   const setParam = (name: string, value: string) => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(name, value); else next.delete(name);
+    if (name === 'search' || name === 'status') next.delete('cursor');
     setSearchParams(next, { replace: true });
   };
 

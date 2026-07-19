@@ -18,13 +18,13 @@ import {
   type WebhookRequest,
 } from '@/api/webhooks';
 
-export function useWebhooks() {
+export function useWebhooks(initialCursor?: string) {
   const client = useApi();
   const refetchInterval = useRealtimeRefetchInterval();
   return useInfiniteQuery({
-    queryKey: queryKeys.webhooks({}),
+    queryKey: queryKeys.webhooks({ initialCursor }),
     queryFn: ({ pageParam }) => listWebhooks(client, { cursor: pageParam, limit: 50 }),
-    initialPageParam: undefined as string | undefined,
+    initialPageParam: initialCursor,
     getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
     refetchInterval,
   });
