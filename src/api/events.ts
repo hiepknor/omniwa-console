@@ -1,6 +1,6 @@
 import type { QueryKey } from '@tanstack/react-query';
 
-import { instanceKeys, messageKeys, queryKeys } from './keys';
+import { instanceKeys, messageKeys, opsKeys, queryKeys } from './keys';
 
 export type RealtimeEventEnvelope = {
   id: string;
@@ -369,9 +369,11 @@ const INVALIDATION_KEYS: Readonly<Record<string, readonly QueryKey[]>> = {
     instanceKeys.root,
     messageKeys.root,
     messageKeys.chats,
+    opsKeys.queue,
+    opsKeys.jobs,
   ],
   media: [queryKeys.mediaMetrics, queryKeys.dashboard],
-  webhook: [queryKeys.webhookMetrics],
+  webhook: [queryKeys.webhookMetrics, opsKeys.webhooks, opsKeys.webhookDeliveries],
   health: [
     queryKeys.health,
     queryKeys.healthReadiness,
@@ -382,6 +384,8 @@ const INVALIDATION_KEYS: Readonly<Record<string, readonly QueryKey[]>> = {
   provider: [queryKeys.providerCapabilities],
 };
 
+export const alwaysInvalidateKeys: readonly QueryKey[] = [opsKeys.events];
+
 /** Deduplicated union of TanStack query keys to invalidate for a batch (empty for unknown resources). */
 export function invalidationKeysFor(events: readonly NormalizedRealtimeEvent[]): QueryKey[] {
   const seen = new Set<string>();
@@ -389,6 +393,15 @@ export function invalidationKeysFor(events: readonly NormalizedRealtimeEvent[]):
 
   for (const event of events) {
     for (const key of INVALIDATION_KEYS[event.resource] ?? []) {
+      const serialized = JSON.stringify(key);
+      if (seen.has(serialized)) continue;
+      seen.add(serialized);
+      keys.push(key);
+    }
+  }
+
+  if (events.length > 0) {
+    for (const key of alwaysInvalidateKeys) {
       const serialized = JSON.stringify(key);
       if (seen.has(serialized)) continue;
       seen.add(serialized);

@@ -24,6 +24,17 @@ export const queryKeys = {
   instanceLabels: (instanceId: string) => ['instances', instanceId, 'labels'] as const,
   media: (mediaId: string) => ['media', mediaId] as const,
   providerCapabilities: ['provider', 'capabilities'] as const,
+  queueStatus: ['queue', 'status'] as const,
+  jobs: (params?: Record<string, unknown>) => ['jobs', params ?? {}] as const,
+  job: (jobId: string) => ['jobs', jobId] as const,
+  webhooks: (params?: Record<string, unknown>) => ['webhooks', params ?? {}] as const,
+  webhook: (webhookId: string) => ['webhooks', webhookId] as const,
+  webhookDeliveries: (params?: Record<string, unknown>) =>
+    ['webhook-deliveries', params ?? {}] as const,
+  webhookDeliveryHistory: (deliveryId: string) =>
+    ['webhook-deliveries', deliveryId, 'history'] as const,
+  events: (params?: Record<string, unknown>) => ['events', params ?? {}] as const,
+  auditRecords: (params?: Record<string, unknown>) => ['audit-records', params ?? {}] as const,
 };
 
 export const overviewKeys = [
@@ -48,8 +59,18 @@ export const messageKeys = {
   contacts: ['contacts'] as const,
 };
 
+export const opsKeys = {
+  queue: ['queue'] as const,
+  jobs: ['jobs'] as const,
+  webhooks: ['webhooks'] as const,
+  webhookDeliveries: ['webhook-deliveries'] as const,
+  events: ['events'] as const,
+  auditRecords: ['audit-records'] as const,
+};
+
 export const realtimeGapKeys = [
   ...overviewKeys,
   instanceKeys.root,
   queryKeys.providerCapabilities,
+  opsKeys.events,
 ] as const;
