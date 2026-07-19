@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
-import type { FeedbackInput, FeedbackToast, TransportCondition } from './feedback-types';
+import type { CommandFeedbackInput, FeedbackInput, FeedbackToast, TransportCondition } from './feedback-types';
 import { isTransportError } from './feedback-policy';
 import { ToastViewport } from './ToastViewport';
 
@@ -13,6 +13,8 @@ type FeedbackContextValue = {
   transport: TransportCondition;
   notify: (input: FeedbackInput) => string;
   accepted: (input: Omit<FeedbackInput, 'kind' | 'durationMs'>) => string;
+  completed: (input: Omit<FeedbackInput, 'kind' | 'durationMs'>) => string;
+  command: (disposition: 'accepted' | 'completed', input: CommandFeedbackInput) => string;
   dismiss: (id: string) => void;
   reportTransportFailure: (error: unknown) => void;
   reportTransportSuccess: () => void;
@@ -71,6 +73,23 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
     notify({ ...input, kind: 'accepted' })
   ), [notify]);
 
+  const completed = useCallback((input: Omit<FeedbackInput, 'kind' | 'durationMs'>) => (
+    notify({ ...input, kind: 'completed' })
+  ), [notify]);
+
+  const command = useCallback((
+    disposition: 'accepted' | 'completed',
+    input: CommandFeedbackInput,
+  ) => notify({
+    kind: disposition,
+    title: `${input.action} ${disposition}`,
+    detail: disposition === 'accepted'
+      ? input.acceptedDetail
+      : input.completedDetail ?? `${input.action} completed by the platform.`,
+    requestId: input.requestId,
+    dedupeKey: input.dedupeKey,
+  }), [notify]);
+
   const reportTransportFailure = useCallback((error: unknown) => {
     if (!isTransportError(error)) return;
     setTransport({
@@ -88,10 +107,12 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
     transport,
     notify,
     accepted,
+    completed,
+    command,
     dismiss,
     reportTransportFailure,
     reportTransportSuccess,
-  }), [accepted, dismiss, notify, reportTransportFailure, reportTransportSuccess, toasts, transport]);
+  }), [accepted, command, completed, dismiss, notify, reportTransportFailure, reportTransportSuccess, toasts, transport]);
 
   return (
     <FeedbackContext.Provider value={value}>

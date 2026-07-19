@@ -83,14 +83,28 @@ Convention: `[resource, scope?, params?]`, mirroring the URL hierarchy.
 Mutations invalidate the narrowest key that covers the affected reads. SSE
 invalidation (see `docs/REALTIME.md`) reuses the same keys.
 
-## Async-accepted semantics
+## Command disposition semantics
 
-Commands like send message, reconnect, media registration, and webhook
-redrive return **accepted**, not completed. The UI must:
+Public write operations may return either `200 Success` or `202 Accepted`.
+The API boundary preserves that distinction as `CommandResult.disposition`:
 
-- Render the accepted/queued state immediately from the response.
-- Follow up via resource status reads or SSE invalidation.
-- Never present acceptance as final WhatsApp delivery.
+- `200` becomes `completed`: the platform completed the command boundary.
+- `202` becomes `accepted`: work continues asynchronously and must be followed
+  through resource reads or SSE invalidation.
+
+Do not infer disposition from `data.accepted` alone. A synchronously completed
+command may still carry `accepted: true`; HTTP status is the authoritative
+transport distinction. Features consume `unwrapCommand` and never inspect the
+raw response.
+
+Command completion is not upstream completion. In particular, a completed
+send command does not mean WhatsApp delivery. Message UI continues to render
+accepted, queued, delivered, failed, and canceled as separate resource states
+and follows delivery history independently.
+
+`pnpm contract:check` verifies generated-schema freshness, operation ownership
+in `docs/PANELS.md`, and disposition preservation for consumed operations that
+declare both `200` and `202`.
 
 ## Auth headers
 

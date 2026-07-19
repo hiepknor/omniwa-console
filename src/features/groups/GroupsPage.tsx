@@ -237,7 +237,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
                 }
               },
             })}
-            footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={refresh.isPending} title="The platform refreshes group projections asynchronously." onClick={() => refresh.mutate()}>Refresh sync</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
+            footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={refresh.isPending} title="The platform reports whether group discovery completed or continues asynchronously." onClick={() => refresh.mutate()}>Refresh sync</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
           />
         </div>
       </DataTableWorkspace>

@@ -15,6 +15,14 @@ export type FeedbackInput = {
   durationMs?: number;
 };
 
+export type CommandFeedbackInput = {
+  action: string;
+  acceptedDetail: string;
+  completedDetail?: string;
+  requestId?: string;
+  dedupeKey?: string;
+};
+
 export type FeedbackToast = FeedbackInput & {
   id: string;
   createdAt: number;

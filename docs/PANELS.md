@@ -39,9 +39,9 @@ typed confirmation dialog.
 Direct conversations with contacts only (groups are excluded from this
 surface). A three-pane messaging workspace: conversation list · bubble
 timeline · context panel (contact card, labels, selected-message delivery
-timeline). Sending is async-accepted: bubbles render accepted/queued and
-follow delivery history — the UI never claims upstream WhatsApp delivery on
-its own.
+timeline). Send commands may complete synchronously or be accepted for
+asynchronous work. Bubbles follow message and delivery history independently —
+command completion never claims upstream WhatsApp delivery.
 
 Contact and label lookup lives here too: the conversation-list search
 matches contacts, and labels (read-only synced projections) act as

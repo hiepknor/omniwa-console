@@ -6,6 +6,7 @@ import {
   pickResource,
   pickResources,
   unwrap,
+  unwrapCommand,
   type CollectionEnvelope,
   type ErrorEnvelope,
   type PublicData,
@@ -17,7 +18,6 @@ export type MessageResource = components['schemas']['MessageResource'];
 export type ContactResource = components['schemas']['ContactResource'];
 export type LabelResource = components['schemas']['LabelResource'];
 export type MediaResource = components['schemas']['MediaResource'];
-export type OperationData = components['schemas']['OperationData'];
 export type MediaMessageRequest = components['schemas']['MediaMessageRequest'];
 export type MediaRegistrationRequest = components['schemas']['MediaRegistrationRequest'];
 export type ChatPagination = CollectionEnvelope['meta']['pagination'];
@@ -27,11 +27,6 @@ function unavailableOrThrow(result: { error?: unknown; response: Response }): Un
   const unavailable = parseUnavailableRead(result.error);
   if (unavailable !== undefined) return unavailable;
   throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
-
-function operationFrom(data: PublicData | undefined): OperationData | undefined {
-  if (data === undefined || !('operationStatus' in data)) return undefined;
-  return data as OperationData;
 }
 
 function idempotencyKey(action: string, resourceId?: string): string {
@@ -204,7 +199,7 @@ export async function sendInstanceTextMessage(
     },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function sendInstanceMediaMessage(
@@ -219,7 +214,7 @@ export async function sendInstanceMediaMessage(
     },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function retryMessage(client: ApiClient, messageId: string) {
@@ -229,7 +224,7 @@ export async function retryMessage(client: ApiClient, messageId: string) {
       header: { 'idempotency-key': idempotencyKey('retry', messageId) },
     },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function cancelMessage(client: ApiClient, messageId: string) {
@@ -239,7 +234,7 @@ export async function cancelMessage(client: ApiClient, messageId: string) {
       header: { 'idempotency-key': idempotencyKey('cancel', messageId) },
     },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function registerMedia(client: ApiClient, body: MediaRegistrationRequest) {
@@ -247,5 +242,5 @@ export async function registerMedia(client: ApiClient, body: MediaRegistrationRe
     params: { header: { 'idempotency-key': idempotencyKey('register-media') } },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }

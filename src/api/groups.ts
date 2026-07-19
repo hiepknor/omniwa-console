@@ -5,10 +5,9 @@ import {
   parseUnavailableRead,
   pickResource,
   pickResources,
-  unwrap,
+  unwrapCommand,
   type CollectionEnvelope,
   type ErrorEnvelope,
-  type PublicData,
   type UnavailableRead,
 } from './envelopes';
 
@@ -18,7 +17,6 @@ export type GroupMetadataRequest = components['schemas']['GroupMetadataRequest']
 export type GroupLocalStateRequest = components['schemas']['GroupLocalStateRequest'];
 export type GroupMemberRequest = components['schemas']['GroupMemberRequest'];
 export type GroupTextMessageRequest = components['schemas']['GroupTextMessageRequest'];
-export type OperationData = components['schemas']['OperationData'];
 export type GroupPagination = CollectionEnvelope['meta']['pagination'];
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
 
@@ -36,11 +34,6 @@ function unavailableOrThrow(result: { error?: unknown; response: Response }): Un
   const unavailable = parseUnavailableRead(result.error);
   if (unavailable !== undefined) return unavailable;
   throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
-
-function operationFrom(data: PublicData | undefined): OperationData | undefined {
-  if (data === undefined || !('operationStatus' in data)) return undefined;
-  return data as OperationData;
 }
 
 function idempotencyKey(action: string, resourceId?: string): string {
@@ -94,7 +87,7 @@ export async function updateGroup(
     },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function updateGroupLocalState(
@@ -109,7 +102,7 @@ export async function updateGroupLocalState(
     },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function refreshInstanceGroups(client: ApiClient, instanceId: string) {
@@ -120,7 +113,7 @@ export async function refreshInstanceGroups(client: ApiClient, instanceId: strin
     },
     body: {},
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function refreshGroupInviteLink(client: ApiClient, groupId: string) {
@@ -131,7 +124,7 @@ export async function refreshGroupInviteLink(client: ApiClient, groupId: string)
     },
     body: {},
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function listGroupMembers(
@@ -168,7 +161,7 @@ export async function addGroupMember(
     },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function removeGroupMember(client: ApiClient, groupId: string, memberJid: string) {
@@ -179,7 +172,7 @@ export async function removeGroupMember(client: ApiClient, groupId: string, memb
     },
     body: {},
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function promoteGroupMember(client: ApiClient, groupId: string, memberJid: string) {
@@ -190,7 +183,7 @@ export async function promoteGroupMember(client: ApiClient, groupId: string, mem
     },
     body: {},
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function demoteGroupMember(client: ApiClient, groupId: string, memberJid: string) {
@@ -201,7 +194,7 @@ export async function demoteGroupMember(client: ApiClient, groupId: string, memb
     },
     body: {},
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function sendGroupTextMessage(
@@ -216,5 +209,5 @@ export async function sendGroupTextMessage(
     },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }

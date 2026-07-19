@@ -103,7 +103,7 @@ function SendTextDialog({ groupId, onClose }: { groupId: string; onClose: () => 
             <div className="field">
               <label htmlFor="group-send-text">Text message</label>
               <textarea ref={textareaRef} id="group-send-text" className="input groups-textarea" rows={5} value={text} disabled={send.isPending} onChange={(event) => setText(event.target.value)} />
-              <p className="help">Accepted immediately; delivery follows the message pipeline.</p>
+              <p className="help">Command outcome appears immediately; delivery remains separate and follows the message pipeline.</p>
             </div>
             {send.error && <InlineError error={send.error} announce onRetry={() => send.mutate(text.trim(), { onSuccess: onClose })} />}
           </div>
@@ -175,7 +175,7 @@ function GroupDrawerContent({ group }: { group: GroupResource }) {
 
       <section aria-labelledby="group-invite-title">
         <div className="drawer-section-head"><h3 id="group-invite-title">Invite link</h3><button className="btn" type="button" disabled={invite.isPending} onClick={() => invite.mutate()}>{invite.isPending ? 'Refreshing…' : 'Refresh invite link'}</button></div>
-        <p className="help">The platform refreshes the invite link asynchronously; link material is not projected back through the public API.</p>
+        <p className="help">The platform reports whether the refresh completed or continues asynchronously; link material is not projected back through the public API.</p>
         {invite.error && <InlineError error={invite.error} announce onRetry={() => invite.mutate()} />}
       </section>
 
@@ -203,7 +203,7 @@ function GroupDrawerContent({ group }: { group: GroupResource }) {
       </section>
 
       <section aria-labelledby="group-members-title">
-        <div className="drawer-section-head"><div><h3 id="group-members-title">Members</h3><span className="drawer-note">Actions submit commands; membership changes remain asynchronous.</span></div><span className="num groups-member-count">{members.length}</span></div>
+        <div className="drawer-section-head"><div><h3 id="group-members-title">Members</h3><span className="drawer-note">Actions submit commands; membership projections refresh independently.</span></div><span className="num groups-member-count">{members.length}</span></div>
         <form className="groups-add-member" onSubmit={(event) => {
           event.preventDefault();
           addMember.mutate(memberJid.trim(), { onSuccess: () => setMemberJid('') });
@@ -234,7 +234,7 @@ function GroupDrawerContent({ group }: { group: GroupResource }) {
       </section>
       {removeTarget && (() => {
         const memberRef = removeTarget.memberRef ?? removeTarget.id;
-        return <TypedConfirmationDialog title="Remove group member" description={<p>This submits an asynchronous membership removal command. Platform authorization is evaluated on submission.</p>} resourceId={memberRef} confirmValue={memberRef} confirmLabel="Remove member" pendingLabel="Removing…" error={remove.error} isPending={remove.isPending} onCancel={() => setRemoveTarget(undefined)} onConfirm={() => remove.mutate(memberRef, { onSuccess: () => setRemoveTarget(undefined) })} />;
+        return <TypedConfirmationDialog title="Remove group member" description={<p>This submits a membership removal command. Platform authorization and command disposition are evaluated on submission.</p>} resourceId={memberRef} confirmValue={memberRef} confirmLabel="Remove member" pendingLabel="Removing…" error={remove.error} isPending={remove.isPending} onCancel={() => setRemoveTarget(undefined)} onConfirm={() => remove.mutate(memberRef, { onSuccess: () => setRemoveTarget(undefined) })} />;
       })()}
     </>
   );

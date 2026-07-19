@@ -4,25 +4,18 @@ import {
   ApiFailure,
   parseUnavailableRead,
   pickResource,
-  unwrap,
+  unwrapCommand,
   type ErrorEnvelope,
-  type PublicData,
   type UnavailableRead,
 } from './envelopes';
 
 export type SettingsResource = components['schemas']['SettingsResource'];
-export type OperationData = components['schemas']['OperationData'];
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
 
 function unavailableOrThrow(result: { error?: unknown; response: Response }): UnavailableRead {
   const unavailable = parseUnavailableRead(result.error);
   if (unavailable !== undefined) return unavailable;
   throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
-
-function operationFrom(data: PublicData | undefined): OperationData | undefined {
-  if (data === undefined || !('operationStatus' in data)) return undefined;
-  return data as OperationData;
 }
 
 function idempotencyKey(action: string): string {
@@ -42,9 +35,8 @@ export async function getSettings(
 export async function validateSettings(
   client: ApiClient,
   body: Record<string, unknown>,
-): Promise<{ data: PublicData; requestId: string }> {
-  const envelope = unwrap(await client.POST('/v1/settings/validate', { body }));
-  return { data: envelope.data, requestId: envelope.meta.requestId };
+) {
+  return unwrapCommand(await client.POST('/v1/settings/validate', { body }));
 }
 
 export async function activateSettings(client: ApiClient, body: Record<string, unknown>) {
@@ -52,5 +44,5 @@ export async function activateSettings(client: ApiClient, body: Record<string, u
     params: { header: { 'idempotency-key': idempotencyKey('activate-settings') } },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }

@@ -99,7 +99,8 @@ function DraftRevision() {
   const [validatedDraft, setValidatedDraft] = useState<string>();
   const [fullRevisionConfirmed, setFullRevisionConfirmed] = useState(false);
   const [activateOpen, setActivateOpen] = useState(false);
-  const isCurrentValidation = validate.isSuccess && validatedDraft === draft;
+  const isCurrentValidation = validate.isSuccess && validate.data.disposition === 'completed' && validatedDraft === draft;
+  const isCurrentValidationPending = validate.isSuccess && validate.data.disposition === 'accepted' && validatedDraft === draft;
 
   const handleEdit = (value: string) => {
     setDraft(value);
@@ -131,13 +132,17 @@ function DraftRevision() {
     if (!isCurrentValidation) return;
     const body = parseDraft(draft);
     activate.mutate(body, {
-      onSuccess: (operation) => {
+      onSuccess: (result) => {
         setActivateOpen(false);
-        feedback.accepted({
-          title: 'Settings activation accepted',
-          detail: operation?.resultRef
-            ? `Atomic revision replacement accepted as ${operation.resultRef}.`
+        feedback.command(result.disposition, {
+          action: 'Settings activation',
+          acceptedDetail: result.operation?.resultRef
+            ? `Atomic revision replacement was accepted as ${result.operation.resultRef}.`
             : 'Atomic revision replacement was accepted. Runtime settings refresh automatically.',
+          completedDetail: result.operation?.resultRef
+            ? `Atomic revision replacement completed as ${result.operation.resultRef}.`
+            : 'Atomic revision replacement completed. Runtime settings refresh automatically.',
+          requestId: result.requestId,
           dedupeKey: 'settings:activate',
         });
       },
@@ -148,7 +153,7 @@ function DraftRevision() {
     <section className="settings-panel settings-draft" aria-labelledby="draft-revision-heading" data-od-id="settings-draft-revision">
       <header className="settings-panel-head">
         <div><h2 id="draft-revision-heading">Draft revision</h2><p>Validate the complete JSON payload before activation.</p></div>
-        <span className={`status${isCurrentValidation ? ' status-active' : ''}`}><span className="dot" />{isCurrentValidation ? 'validated · not active' : 'not validated'}</span>
+        <span className={`status${isCurrentValidation ? ' status-active' : ''}`}><span className="dot" />{isCurrentValidation ? 'validated · not active' : isCurrentValidationPending ? 'validation pending' : 'not validated'}</span>
       </header>
       <div className="settings-draft-body">
         <div className="settings-payload">
@@ -161,7 +166,8 @@ function DraftRevision() {
           {validate.isPending && <div className="settings-validation"><span className="status"><span className="dot" />validating</span><p>Checking schema and policy constraints…</p></div>}
           {validate.isError && <div className="settings-validation settings-validation-error"><FailureNotice error={validate.error} title="Validation failed" /></div>}
           {isCurrentValidation && <div className="settings-validation"><span className="status status-active"><span className="dot" />validation passed</span><span className="mono">{validate.data.requestId}</span><p>The platform accepted this exact draft as valid. This is validation evidence, not activation.</p></div>}
-          {!parseError && !validate.isPending && !validate.isError && !isCurrentValidation && <div className="settings-validation settings-validation-idle"><span className="status"><span className="dot" />awaiting validation</span><p>Edit the complete payload, then validate it against platform policy.</p></div>}
+          {isCurrentValidationPending && <div className="settings-validation"><span className="status"><span className="dot" />validation accepted</span><span className="mono">{validate.data.requestId}</span><p>Validation is still pending. Activation stays disabled until a completed validation is returned.</p></div>}
+          {!parseError && !validate.isPending && !validate.isError && !isCurrentValidation && !isCurrentValidationPending && <div className="settings-validation settings-validation-idle"><span className="status"><span className="dot" />awaiting validation</span><p>Edit the complete payload, then validate it against platform policy.</p></div>}
           {activate.isError && <div className="settings-validation settings-validation-error"><FailureNotice error={activate.error} title={(activate.error instanceof ApiFailure && activate.error.category === 'conflict') ? 'Activation conflict' : 'Activation was not accepted'} /></div>}
         </div>
       </div>

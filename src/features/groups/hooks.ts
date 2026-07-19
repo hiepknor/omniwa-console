@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
+import type { CommandResult } from '@/api/envelopes';
 import {
   addGroupMember,
   demoteGroupMember,
@@ -70,10 +71,18 @@ export function useGroupMembers(groupId: string | undefined) {
 
 function useGroupFeedback(groupId: string) {
   const feedback = useFeedback();
-  return (action: string, key: string, detail = 'Group data refreshes automatically.') => {
-    feedback.accepted({
-      title: `${action} accepted`,
-      detail,
+  return (
+    result: CommandResult,
+    action: string,
+    key: string,
+    acceptedDetail = 'The platform accepted the command. Group data refreshes automatically.',
+    completedDetail = 'The platform completed the command. Group data refreshes automatically.',
+  ) => {
+    feedback.command(result.disposition, {
+      action,
+      acceptedDetail,
+      completedDetail,
+      requestId: result.requestId,
       dedupeKey: `group:${groupId}:${key}`,
     });
   };
@@ -84,7 +93,7 @@ export function useRefreshGroupInviteLink(groupId: string) {
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: () => refreshGroupInviteLink(client, groupId),
-    onSuccess: () => accepted('Invite link refresh', 'refresh-invite-link', 'The platform will refresh the invite link asynchronously.'),
+    onSuccess: (result) => accepted(result, 'Invite link refresh', 'refresh-invite-link', 'The platform accepted the invite-link refresh.', 'The platform completed the invite-link refresh.'),
   });
 }
 
@@ -94,8 +103,8 @@ export function useUpdateGroupLocalState(groupId: string, instanceId: string | u
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (body: GroupLocalStateRequest) => updateGroupLocalState(client, groupId, body),
-    onSuccess: async (_data, body) => {
-      accepted('Local state update', `local-state:${Object.keys(body)[0] ?? 'state'}`);
+    onSuccess: async (result, body) => {
+      accepted(result, 'Local state update', `local-state:${Object.keys(body)[0] ?? 'state'}`);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.group(groupId) }),
         ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) })] : []),
@@ -110,8 +119,8 @@ export function useUpdateGroup(groupId: string, instanceId: string | undefined) 
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (body: GroupMetadataRequest) => updateGroup(client, groupId, body),
-    onSuccess: async () => {
-      accepted('Metadata update', 'update-metadata');
+    onSuccess: async (result) => {
+      accepted(result, 'Metadata update', 'update-metadata');
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.group(groupId) }),
         ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) })] : []),
@@ -131,7 +140,7 @@ export function useAddGroupMember(groupId: string) {
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (jid: string) => addGroupMember(client, groupId, { jid }),
-    onSuccess: async (_data, jid) => { accepted('Add member', `add-member:${jid}`); await invalidate(); },
+    onSuccess: async (result, jid) => { accepted(result, 'Add member', `add-member:${jid}`); await invalidate(); },
   });
 }
 
@@ -141,7 +150,7 @@ export function usePromoteGroupMember(groupId: string) {
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (memberJid: string) => promoteGroupMember(client, groupId, memberJid),
-    onSuccess: async (_data, memberJid) => { accepted('Promote member', `promote:${memberJid}`); await invalidate(); },
+    onSuccess: async (result, memberJid) => { accepted(result, 'Promote member', `promote:${memberJid}`); await invalidate(); },
   });
 }
 
@@ -151,7 +160,7 @@ export function useDemoteGroupMember(groupId: string) {
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (memberJid: string) => demoteGroupMember(client, groupId, memberJid),
-    onSuccess: async (_data, memberJid) => { accepted('Demote member', `demote:${memberJid}`); await invalidate(); },
+    onSuccess: async (result, memberJid) => { accepted(result, 'Demote member', `demote:${memberJid}`); await invalidate(); },
   });
 }
 
@@ -161,7 +170,7 @@ export function useRemoveGroupMember(groupId: string) {
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (memberJid: string) => removeGroupMember(client, groupId, memberJid),
-    onSuccess: async (_data, memberJid) => { accepted('Remove member', `remove:${memberJid}`); await invalidate(); },
+    onSuccess: async (result, memberJid) => { accepted(result, 'Remove member', `remove:${memberJid}`); await invalidate(); },
   });
 }
 
@@ -170,7 +179,7 @@ export function useSendGroupText(groupId: string) {
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (text: string) => sendGroupTextMessage(client, groupId, { text }),
-    onSuccess: () => accepted('Send text', 'send-text', 'Delivery follows the message pipeline.'),
+    onSuccess: (result) => accepted(result, 'Send text', 'send-text', 'The send command was accepted. Delivery follows the message pipeline.', 'The send command completed. Delivery remains a separate message state.'),
   });
 }
 
@@ -180,10 +189,12 @@ export function useRefreshGroups(instanceId: string) {
   const feedback = useFeedback();
   return useMutation({
     mutationFn: () => refreshInstanceGroups(client, instanceId),
-    onSuccess: async () => {
-      feedback.accepted({
-        title: 'Group sync accepted',
-        detail: 'Group projections will refresh asynchronously.',
+    onSuccess: async (result) => {
+      feedback.command(result.disposition, {
+        action: 'Group sync',
+        acceptedDetail: 'Group discovery was accepted. Projections will refresh asynchronously.',
+        completedDetail: 'Group discovery completed. Projections refresh automatically.',
+        requestId: result.requestId,
         dedupeKey: `instance:${instanceId}:refresh-groups`,
       });
       await queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) });

@@ -127,10 +127,12 @@ export function useSendTextMessage(instanceId: string) {
     mutationFn: ({ chatId, text }: { chatId: string; text: string }) => (
       sendInstanceTextMessage(client, instanceId, { to: chatId, text })
     ),
-    onSuccess: async (_operation, variables) => {
-      feedback.accepted({
-        title: 'Message send accepted',
-        detail: 'Delivery status will update in message history.',
+    onSuccess: async (result, variables) => {
+      feedback.command(result.disposition, {
+        action: 'Message send',
+        acceptedDetail: 'The send command was accepted. Delivery status will update in message history.',
+        completedDetail: 'The send command completed. Delivery status remains separate and will update in message history.',
+        requestId: result.requestId,
         dedupeKey: `message:${variables.chatId}:send`,
       });
       await queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, {}) });
@@ -158,10 +160,12 @@ function useMessageAction(instanceId: string, action: 'retry' | 'cancel') {
     mutationFn: (messageId: string) => action === 'retry'
       ? retryMessage(client, messageId)
       : cancelMessage(client, messageId),
-    onSuccess: async (_operation, messageId) => {
-      feedback.accepted({
-        title: `Message ${action} accepted`,
-        detail: 'Delivery status will update in message history.',
+    onSuccess: async (result, messageId) => {
+      feedback.command(result.disposition, {
+        action: `Message ${action}`,
+        acceptedDetail: 'The command was accepted. Message status will update in history.',
+        completedDetail: 'The command completed. Delivery status remains separate and will update in history.',
+        requestId: result.requestId,
         dedupeKey: `message:${messageId}:${action}`,
       });
       await Promise.all([
@@ -196,23 +200,27 @@ export function useSendMediaMessage(instanceId: string) {
         ...(isUrl ? { url: reference } : { mediaRef: reference }),
         ...(contentType ? { contentType } : {}),
       });
-      feedback.accepted({
-        title: 'Media registration accepted',
-        detail: 'The media reference was accepted for processing.',
+      feedback.command(registration.disposition, {
+        action: 'Media registration',
+        acceptedDetail: 'The media reference was accepted for processing.',
+        completedDetail: 'The media reference was registered.',
+        requestId: registration.requestId,
         dedupeKey: `media:${reference}:register`,
       });
-      const registeredReference = registration?.resultRef ?? reference;
+      const registeredReference = registration.operation?.resultRef ?? reference;
       return sendInstanceMediaMessage(client, instanceId, {
         type: 'media',
         to: chatId,
-        ...(registration?.resultRef ? { mediaId: registeredReference } : { mediaRef: registeredReference }),
+        ...(registration.operation?.resultRef ? { mediaId: registeredReference } : { mediaRef: registeredReference }),
         ...(caption ? { caption } : {}),
       });
     },
-    onSuccess: async (_operation, variables) => {
-      feedback.accepted({
-        title: 'Media message send accepted',
-        detail: 'Delivery status will update in message history.',
+    onSuccess: async (result, variables) => {
+      feedback.command(result.disposition, {
+        action: 'Media message send',
+        acceptedDetail: 'The send command was accepted. Delivery status will update in message history.',
+        completedDetail: 'The send command completed. Delivery status remains separate and will update in message history.',
+        requestId: result.requestId,
         dedupeKey: `message:${variables.chatId}:send-media`,
       });
       await queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, {}) });

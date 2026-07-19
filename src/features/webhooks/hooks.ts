@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
+import type { CommandResult } from '@/api/envelopes';
 import { opsKeys, queryKeys } from '@/api/keys';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 import {
@@ -86,7 +87,7 @@ export function useUpdateWebhook(webhookId: string) {
   return useMutation({ mutationFn: (body: Partial<WebhookRequest>) => updateWebhook(client, webhookId, body), onSuccess: invalidate });
 }
 
-function useWebhookCommand(command: (client: ReturnType<typeof useApi>, webhookId: string) => Promise<unknown>, webhookId: string) {
+function useWebhookCommand(command: (client: ReturnType<typeof useApi>, webhookId: string) => Promise<CommandResult>, webhookId: string) {
   const client = useApi();
   const invalidate = useInvalidateWebhooks();
   return useMutation({ mutationFn: () => command(client, webhookId), onSuccess: invalidate });

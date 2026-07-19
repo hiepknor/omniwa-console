@@ -1,6 +1,6 @@
 # Implementation Plan
 
-Status: M0–M7 are complete as of 2026-07-19. M6.5 campaigns and the Groups
+Status: M0–M7.1 are complete as of 2026-07-19. M6.5 campaigns and the Groups
 Named-Lists mode remain blocked pending the platform contract; contract gaps
 are recorded in the five `*_CONTRACT_GAPS.md` documents.
 
@@ -102,9 +102,24 @@ aborted entirely through platform APIs.
 - Propose the extended web dashboard profile back to the platform repo's
   `platform_clients.rs` so the SDK profile matches shipped reality.
 
+## M7.1 — Post-sync contract compatibility (done)
+
+- Preserve `200 Success` versus `202 Accepted` for every consumed dual-response
+  command through a shared `CommandResult` API-boundary type.
+- Render completed and accepted feedback distinctly without conflating command
+  completion with provider delivery.
+- Adopt provider capability arrays with a legacy scalar fallback, and identify
+  the active instance session from `activeSessionId`.
+- Verify generated-schema freshness, panel operation ownership, and dual-status
+  command normalization through `pnpm contract:check`.
+
+Exit: contract resyncs cannot silently discard command disposition, and the
+Instances panel consumes the current non-legacy v1 fields.
+
 ## Verification per milestone
 
-- `pnpm check` must pass (typecheck + production build).
+- `pnpm check` must pass (design, contract, architecture, typecheck, production
+  build, and bundle checks).
 - Manual verify against a locally running OmniWA API (see `docs/api/` in
   the platform repo for runtime setup).
 - No feature imports another feature; no `fetch` outside `src/api/`; feature

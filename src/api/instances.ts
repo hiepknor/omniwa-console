@@ -6,16 +6,15 @@ import {
   pickResource,
   pickResources,
   unwrap,
+  unwrapCommand,
   type CollectionEnvelope,
   type ErrorEnvelope,
-  type PublicData,
   type UnavailableRead,
 } from './envelopes';
 
 export type InstanceResource = components['schemas']['InstanceResource'];
 export type SessionResource = components['schemas']['SessionResource'];
 export type ProviderResource = components['schemas']['ProviderResource'];
-export type OperationData = components['schemas']['OperationData'];
 export type InstanceCreateRequest = components['schemas']['InstanceCreateRequest'];
 export type InstancePagination = CollectionEnvelope['meta']['pagination'];
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
@@ -34,11 +33,6 @@ function unavailableOrThrow(result: { error?: unknown; response: Response }): Un
   const unavailable = parseUnavailableRead(result.error);
   if (unavailable !== undefined) return unavailable;
   throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
-
-function operationFrom(data: PublicData | undefined): OperationData | undefined {
-  if (data === undefined || !('operationStatus' in data)) return undefined;
-  return data as OperationData;
 }
 
 function idempotencyKey(action: string, resourceId?: string): string {
@@ -113,7 +107,7 @@ export async function createInstance(client: ApiClient, body: InstanceCreateRequ
     params: { header: { 'idempotency-key': idempotencyKey('create') } },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function updateInstance(
@@ -125,7 +119,7 @@ export async function updateInstance(
     params: { path: { instanceId } },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function connectInstance(client: ApiClient, instanceId: string) {
@@ -136,7 +130,7 @@ export async function connectInstance(client: ApiClient, instanceId: string) {
     },
     body: {},
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function disconnectInstance(client: ApiClient, instanceId: string) {
@@ -147,7 +141,7 @@ export async function disconnectInstance(client: ApiClient, instanceId: string) 
     },
     body: {},
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function destroyInstance(client: ApiClient, instanceId: string) {
@@ -157,7 +151,7 @@ export async function destroyInstance(client: ApiClient, instanceId: string) {
       header: { 'idempotency-key': idempotencyKey('destroy', instanceId) },
     },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function requestInstanceReconnect(client: ApiClient, instanceId: string) {
@@ -175,7 +169,7 @@ export async function refreshInstanceQr(client: ApiClient, instanceId: string) {
     },
     body: {},
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function refreshProviderCapabilities(client: ApiClient) {

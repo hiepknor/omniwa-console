@@ -96,7 +96,7 @@ pnpm install          # install dependencies
 pnpm contract:sync    # copy the OpenAPI spec from the sibling omniwa repo
 pnpm api:generate     # regenerate src/api/generated/schema.d.ts from the contract
 pnpm dev              # start the dev server (default http://localhost:5173)
-pnpm check            # typecheck + build
+pnpm check            # design + contract + architecture + typecheck + build + bundle gates
 ```
 
 The console talks to a running OmniWA API (default `http://localhost:3000`).

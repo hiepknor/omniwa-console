@@ -236,8 +236,8 @@ export function InstancesPage() {
 
       {instanceId && (
         detail.data?.resource ? (
-          <InstanceDrawer instance={detail.data.resource} onClose={() => navigate(listLocation)} onDestroyed={() => {
-            feedback.accepted({ title: 'Destroy instance accepted', detail: 'The list refreshes automatically.', dedupeKey: `instance:${detail.data.resource?.id}:destroy` });
+          <InstanceDrawer instance={detail.data.resource} onClose={() => navigate(listLocation)} onDestroyed={(result) => {
+            feedback.command(result.disposition, { action: 'Destroy instance', acceptedDetail: 'The platform accepted the command. The list refreshes automatically.', completedDetail: 'The platform destroyed the instance. The list refreshes automatically.', requestId: result.requestId, dedupeKey: `instance:${detail.data.resource?.id}:destroy` });
             navigate(listLocation);
           }} />
         ) : detail.data?.unavailable ? (
@@ -254,9 +254,9 @@ export function InstancesPage() {
           error={create.error}
           isPending={create.isPending}
           onCancel={() => setCreateOpen(false)}
-          onCreate={(displayName) => create.mutate(displayName, { onSuccess: () => {
+          onCreate={(displayName) => create.mutate(displayName, { onSuccess: (result) => {
             setCreateOpen(false);
-            feedback.accepted({ title: 'Create instance accepted', detail: 'The instance will appear after the platform records it.', dedupeKey: 'instance:create' });
+            feedback.command(result.disposition, { action: 'Create instance', acceptedDetail: 'The platform accepted the command. The instance will appear after it is recorded.', completedDetail: 'The platform created the instance.', requestId: result.requestId, dedupeKey: 'instance:create' });
           } })}
         />
       )}

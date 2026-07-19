@@ -6,6 +6,21 @@ export type ErrorEnvelope = components['schemas']['ErrorEnvelope'];
 export type ApiErrorBody = components['schemas']['ApiError'];
 export type ResponseMeta = components['schemas']['ResponseMeta'];
 export type PublicData = components['schemas']['PublicData'];
+export type OperationData = components['schemas']['OperationData'];
+
+export type CommandDisposition = 'accepted' | 'completed';
+
+/**
+ * Normalized command response. HTTP 202 means the platform accepted work for
+ * asynchronous processing; every other successful command response is
+ * complete at the command boundary. This never implies upstream delivery.
+ */
+export type CommandResult = {
+  disposition: CommandDisposition;
+  data: PublicData;
+  operation?: OperationData;
+  requestId: string;
+};
 
 export type UnavailableRead = { readStatus: 'unavailable'; reasonCode?: string };
 
@@ -80,6 +95,25 @@ export function unwrap<T>(result: {
 }): T {
   if (result.data !== undefined) return result.data;
   throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
+}
+
+/** Preserve the success status that distinguishes synchronous and async commands. */
+export function unwrapCommand(result: {
+  data?: SuccessEnvelope;
+  error?: unknown;
+  response: Response;
+}): CommandResult {
+  const envelope = unwrap(result);
+  const operation = 'operationStatus' in envelope.data
+    ? envelope.data as OperationData
+    : undefined;
+
+  return {
+    disposition: result.response.status === 202 ? 'accepted' : 'completed',
+    data: envelope.data,
+    operation,
+    requestId: envelope.meta.requestId,
+  };
 }
 
 /** Narrow a SuccessEnvelope's data to one resourceType; undefined if it doesn't match. */

@@ -72,7 +72,7 @@ export function Composer({ instanceId, chatId, chatName }: {
         </label>
         <button className="btn primary" type="submit" disabled={!canSend}>{send.isPending ? 'Sending…' : 'Send'}</button>
       </form>
-      <p className="composer-note">Accepted immediately; delivery status updates in history.</p>
+      <p className="composer-note">Command outcome appears immediately; delivery status remains separate and updates in history.</p>
       {attachOpen && (
         <MediaAttachDialog
           error={sendMedia.error}

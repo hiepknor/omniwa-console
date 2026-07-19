@@ -6,6 +6,7 @@ import {
   pickResource,
   pickResources,
   unwrap,
+  unwrapCommand,
   type CollectionEnvelope,
   type ErrorEnvelope,
   type PublicData,
@@ -15,7 +16,6 @@ import {
 export type WebhookResource = components['schemas']['WebhookResource'];
 export type WebhookDeliveryResource = components['schemas']['WebhookDeliveryResource'];
 export type WebhookRequest = components['schemas']['WebhookRequest'];
-export type OperationData = components['schemas']['OperationData'];
 export type WebhookPagination = CollectionEnvelope['meta']['pagination'];
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
 
@@ -23,11 +23,6 @@ function unavailableOrThrow(result: { error?: unknown; response: Response }): Un
   const unavailable = parseUnavailableRead(result.error);
   if (unavailable !== undefined) return unavailable;
   throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
-
-function operationFrom(data: PublicData | undefined): OperationData | undefined {
-  if (data === undefined || !('operationStatus' in data)) return undefined;
-  return data as OperationData;
 }
 
 function idempotencyKey(action: string, resourceId?: string): string {
@@ -70,7 +65,7 @@ export async function registerWebhook(client: ApiClient, body: WebhookRequest) {
     params: { header: { 'idempotency-key': idempotencyKey('register-webhook') } },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function updateWebhook(
@@ -83,7 +78,7 @@ export async function updateWebhook(
     headers: { 'idempotency-key': idempotencyKey('update-webhook', webhookId) },
     body,
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function activateWebhook(client: ApiClient, webhookId: string) {
@@ -93,7 +88,7 @@ export async function activateWebhook(client: ApiClient, webhookId: string) {
       header: { 'idempotency-key': idempotencyKey('activate-webhook', webhookId) },
     },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function suspendWebhook(client: ApiClient, webhookId: string) {
@@ -103,7 +98,7 @@ export async function suspendWebhook(client: ApiClient, webhookId: string) {
       header: { 'idempotency-key': idempotencyKey('suspend-webhook', webhookId) },
     },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function retireWebhook(client: ApiClient, webhookId: string) {
@@ -113,7 +108,7 @@ export async function retireWebhook(client: ApiClient, webhookId: string) {
       header: { 'idempotency-key': idempotencyKey('retire-webhook', webhookId) },
     },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function listWebhookDeliveries(
@@ -155,7 +150,7 @@ export async function retryWebhookDelivery(client: ApiClient, deliveryId: string
       header: { 'idempotency-key': idempotencyKey('retry-webhook-delivery', deliveryId) },
     },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function redriveWebhookDelivery(client: ApiClient, deliveryId: string) {
@@ -165,7 +160,7 @@ export async function redriveWebhookDelivery(client: ApiClient, deliveryId: stri
       header: { 'idempotency-key': idempotencyKey('redrive-webhook-delivery', deliveryId) },
     },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }
 
 export async function bulkRedriveWebhookDeliveries(
@@ -176,5 +171,5 @@ export async function bulkRedriveWebhookDeliveries(
     params: { header: { 'idempotency-key': idempotencyKey('bulk-redrive-webhook-deliveries') } },
     body: { deliveryIds },
   });
-  return operationFrom(unwrap(result).data);
+  return unwrapCommand(result);
 }

@@ -39,7 +39,7 @@ export function RegisterWebhookDialog({ error, isPending, onCancel, onRegister }
         <header><b id="register-webhook-title">Register webhook</b><span className="mono">registerWebhook</span></header>
         <form onSubmit={(event) => { event.preventDefault(); submit(); }}>
           <div className="body">
-            <p className="dialog-sheet-copy">Register an endpoint. The platform processes the request asynchronously.</p>
+            <p className="dialog-sheet-copy">Register an endpoint. The platform reports whether the command completed or continues asynchronously.</p>
             <div className="field">
               <label htmlFor="webhook-url">Endpoint URL</label>
               <input ref={inputRef} className="input" id="webhook-url" type="text" inputMode="url" required value={url} onChange={(event) => { setUrl(event.target.value); setValidation(undefined); }} disabled={isPending} placeholder="https://example.com/webhooks" aria-describedby={validation ? 'webhook-url-error' : undefined} aria-invalid={validation !== undefined} />

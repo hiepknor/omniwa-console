@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { CommandResult } from '@/api/envelopes';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
@@ -36,7 +37,7 @@ export function InstanceDrawer({
 }: {
   instance: InstanceResource;
   onClose: () => void;
-  onDestroyed: () => void;
+  onDestroyed: (result: CommandResult) => void;
 }) {
   const instanceName = instance.displayName ?? instance.id;
   const [displayName, setDisplayName] = useState(instanceName);
@@ -54,14 +55,21 @@ export function InstanceDrawer({
   const reconnect = useReconnectInstance(instance.id);
   const refreshQr = useRefreshInstanceQr(instance.id);
   const refreshCapabilities = useRefreshProviderCapabilities();
+  const sessionItems = [...(sessions.data?.resource?.items ?? [])].sort((left, right) => (
+    left.id === instance.activeSessionId ? -1 : right.id === instance.activeSessionId ? 1 : 0
+  ));
+  const capabilities = provider.data?.resource?.capabilities
+    ?? (provider.data?.resource?.capability ? [provider.data.resource.capability] : []);
 
   useEffect(() => setDisplayName(instanceName), [instanceName]);
   useDrawerFocus({ onClose, closeRef, suppressEscape: confirmation !== undefined });
 
-  const accepted = (action: string) => {
-    feedback.accepted({
-      title: `${action} accepted`,
-      detail: 'Status refreshes automatically.',
+  const commandFeedback = (result: CommandResult, action: string) => {
+    feedback.command(result.disposition, {
+      action,
+      acceptedDetail: 'The platform accepted the command. Status refreshes automatically.',
+      completedDetail: 'The platform completed the command. Status refreshes automatically.',
+      requestId: result.requestId,
       dedupeKey: `instance:${instance.id}:${action.toLowerCase().replaceAll(' ', '-')}`,
     });
   };
@@ -113,7 +121,7 @@ export function InstanceDrawer({
             <h3 id="instance-name-title">Display name</h3>
             <form onSubmit={(event) => {
               event.preventDefault();
-              update.mutate(displayName.trim(), { onSuccess: () => accepted('Update') });
+              update.mutate(displayName.trim(), { onSuccess: (result) => commandFeedback(result, 'Update') });
             }}>
               <div className="field">
                 <label htmlFor="instance-display-name">Name</label>
@@ -129,7 +137,7 @@ export function InstanceDrawer({
               <div className="qrwell">
                 <span className="eyebrow">QR unavailable</span>
                 <p>The public API accepts QR refresh requests but does not expose QR material.</p>
-                <button className="btn" type="button" disabled={commandPending} onClick={() => refreshQr.mutate(undefined, { onSuccess: () => accepted('QR refresh') })}>
+                <button className="btn" type="button" disabled={commandPending} onClick={() => refreshQr.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'QR refresh') })}>
                   {refreshQr.isPending ? 'Requesting…' : 'Request new QR'}
                 </button>
                 <div className="steps" aria-label="Pairing progress">
@@ -144,12 +152,12 @@ export function InstanceDrawer({
             <h3 id="lifecycle-title">Lifecycle</h3>
             <div className="lifecycle-groups">
               <div className="action-group">
-                <span>Connection commands are accepted asynchronously.</span>
+                <span>Connection commands may complete immediately or continue asynchronously.</span>
                 <div className="actions">
                   {instance.status !== 'connected' && (
-                    <button className="btn" type="button" disabled={commandPending} onClick={() => connect.mutate(undefined, { onSuccess: () => accepted('Connect') })}>Connect</button>
+                    <button className="btn" type="button" disabled={commandPending} onClick={() => connect.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Connect') })}>Connect</button>
                   )}
-                  <button className="btn" type="button" disabled={commandPending} onClick={() => reconnect.mutate(undefined, { onSuccess: () => accepted('Reconnect') })}>Reconnect</button>
+                  <button className="btn" type="button" disabled={commandPending} onClick={() => reconnect.mutate(undefined, { onSuccess: () => feedback.accepted({ title: 'Reconnect accepted', detail: 'Connection state refreshes automatically.', dedupeKey: `instance:${instance.id}:reconnect` }) })}>Reconnect</button>
                 </div>
               </div>
               <div className="action-group destructive">
@@ -176,9 +184,9 @@ export function InstanceDrawer({
             ) : (
               <table className="minitable responsive-minitable">
                 <thead><tr><th scope="col">Session</th><th scope="col">State</th><th scope="col">Updated</th></tr></thead>
-                <tbody>{sessions.data?.resource?.items.map((session) => (
+                <tbody>{sessionItems.map((session) => (
                   <tr key={session.id}>
-                    <td data-label="Session"><span className="mono">{session.id}</span></td>
+                    <td data-label="Session"><span className="mono">{session.id}</span>{session.id === instance.activeSessionId && <span className="pill ml-2">Active</span>}</td>
                     <td data-label="State"><span className="status sm"><span className={`dot ${statusDot(session.status)}`}></span>{session.status ?? '—'}</span></td>
                     <td data-label="Updated" className="ts" title={session.updatedAt}>{relativeTime(session.updatedAt) || '—'}</td>
                   </tr>
@@ -191,7 +199,7 @@ export function InstanceDrawer({
           <section aria-labelledby="capabilities-title">
             <div className="drawer-section-head">
               <div><span className="eyebrow">Provider surface</span><h3 id="capabilities-title">Provider capabilities</h3></div>
-              <button className="btn sm" type="button" disabled={commandPending} onClick={() => refreshCapabilities.mutate(undefined, { onSuccess: () => accepted('Capability refresh') })}>Refresh</button>
+              <button className="btn sm" type="button" disabled={commandPending} onClick={() => refreshCapabilities.mutate(undefined, { onSuccess: () => feedback.accepted({ title: 'Capability refresh accepted', detail: 'Provider data refreshes automatically.', dedupeKey: `instance:${instance.id}:capability-refresh` }) })}>Refresh</button>
             </div>
             {providerReadState.isInitialError ? (
               <InlineError error={providerReadState.error} onRetry={provider.refetch} />
@@ -199,8 +207,8 @@ export function InstanceDrawer({
               <div className="empty">—</div>
             ) : provider.data?.unavailable ? (
               <div className="empty">No capability data yet.</div>
-            ) : provider.data?.resource?.capability ? (
-              <div className="capchips"><span className="chip">{provider.data.resource.capability}</span></div>
+            ) : capabilities.length > 0 ? (
+              <div className="capchips">{capabilities.map((capability) => <span className="chip" key={capability}>{capability}</span>)}</div>
             ) : (
               <div className="empty">No capabilities reported.</div>
             )}
@@ -212,7 +220,7 @@ export function InstanceDrawer({
       {confirmation === 'disconnect' && (
         <TypedConfirmationDialog
           title="Disconnect instance"
-          description={<p>This requests a disconnect for {instanceName}. The platform will process the command asynchronously.</p>}
+          description={<p>This requests a disconnect for {instanceName}. The platform may complete the command immediately or continue processing it asynchronously.</p>}
           resourceId={instance.id}
           confirmValue={instanceName}
           confirmLabel="Disconnect instance"
@@ -220,7 +228,7 @@ export function InstanceDrawer({
           error={disconnect.error}
           isPending={disconnect.isPending}
           onCancel={() => { disconnect.reset(); setConfirmation(undefined); }}
-          onConfirm={() => disconnect.mutate(undefined, { onSuccess: () => { accepted('Disconnect'); setConfirmation(undefined); } })}
+          onConfirm={() => disconnect.mutate(undefined, { onSuccess: (result) => { commandFeedback(result, 'Disconnect'); setConfirmation(undefined); } })}
         />
       )}
       {confirmation === 'destroy' && (
