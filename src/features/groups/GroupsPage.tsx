@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
@@ -45,11 +45,12 @@ function instanceStatusDot(status: string | undefined) {
   }
 }
 
-function InstancePicker({ instances, selected, selectedId, onSelect }: {
+function InstancePicker({ instances, selected, selectedId, onSelect, triggerRef }: {
   instances: InstanceResource[];
   selected: InstanceResource | undefined;
   selectedId: string | undefined;
   onSelect: (instanceId: string) => void;
+  triggerRef: RefObject<HTMLButtonElement>;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -70,16 +71,21 @@ function InstancePicker({ instances, selected, selectedId, onSelect }: {
     };
   }, [open]);
 
-  const pickerLabel = selected?.displayName ?? selected?.id ?? selectedId ?? 'Select instance';
+  const compactSelectedId = selected && selected.id.length > 13
+    ? `${selected.id.slice(0, 6)}…${selected.id.slice(-5)}`
+    : selected?.id;
+  const pickerLabel = selected
+    ? (selected.displayName ?? `Unnamed · ${compactSelectedId}`)
+    : selectedId ?? 'Select instance';
   return (
-    <div className="chat-picker groups-instance-picker" ref={rootRef}>
-      <button className="instpick !min-h-11" type="button" title={pickerLabel} aria-label="Select instance" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((current) => !current)}>
+    <div className="chat-picker groups-instance-picker max-[640px]:!w-full" ref={rootRef}>
+      <button ref={triggerRef} className="instpick !min-h-11 max-[640px]:!w-full max-[640px]:!max-w-none" type="button" title={pickerLabel} aria-label="Select instance" aria-haspopup="menu" aria-controls="groups-instance-picker-menu" aria-expanded={open} onClick={() => setOpen((current) => !current)}>
         <span className={`dot instance-status-dot ${instanceStatusDot(selected?.status)}`} aria-hidden="true" />
         <span className="instpick-name">{pickerLabel}</span>
         <span className="chev" aria-hidden="true">▾</span>
       </button>
       {open && (
-        <div className="chat-picker-menu" role="menu" aria-label="Instances">
+        <div id="groups-instance-picker-menu" className="chat-picker-menu !w-80 max-w-[calc(100vw-2rem)] max-[640px]:!w-full" role="menu" aria-label="Instances">
           {instances.length > 0 ? instances.map((instance) => (
             <button
               className={instance.id === selectedId ? 'is-selected' : undefined}
@@ -90,7 +96,7 @@ function InstancePicker({ instances, selected, selectedId, onSelect }: {
               onClick={() => { onSelect(instance.id); setOpen(false); }}
             >
               <span className={`dot ${instanceStatusDot(instance.status)}`} aria-hidden="true" />
-              <span><strong>{instance.displayName ?? instance.id}</strong><small className="mono">{instance.id}</small></span>
+              <span><strong className="block overflow-hidden text-ellipsis whitespace-nowrap">{instance.displayName ?? 'Unnamed instance'}</strong><small className="mono">{instance.id}</small></span>
             </button>
           )) : <span className="chat-picker-empty">No instances available</span>}
         </div>
@@ -99,9 +105,27 @@ function InstancePicker({ instances, selected, selectedId, onSelect }: {
   );
 }
 
+function ScopeGate({ label, title, detail, action }: {
+  label: string;
+  title: string;
+  detail: string;
+  action?: ReactNode;
+}) {
+  return (
+    <section className="grid min-h-28 grid-cols-[minmax(0,1fr)_auto] items-center gap-6 rounded-[var(--radius-md)] border border-[var(--border-subtle)] !px-6 !py-5 max-[640px]:grid-cols-1 max-[640px]:gap-4 max-[640px]:!px-4" aria-labelledby="groups-scope-gate-title">
+      <div className="max-w-2xl">
+        <span className="eyebrow">{label}</span>
+        <h2 id="groups-scope-gate-title" className="!mt-1 text-[15px] leading-5 font-normal text-[var(--fg)]">{title}</h2>
+        <p className="!mt-1 text-xs leading-5 text-[var(--muted)]">{detail}</p>
+      </div>
+      {action && <div className="flex items-center max-[640px]:w-full max-[640px]:[&>*]:w-full">{action}</div>}
+    </section>
+  );
+}
+
 function MetricCard({ label, value, context }: { label: string; value: number | undefined; context: string }) {
   return (
-    <article className="card groups-metric-card">
+    <article className="card groups-metric-card max-[640px]:!min-h-[88px] max-[640px]:!p-3">
       <div className="label">{label}</div>
       <div className="value num">{value === undefined ? '—' : formatCount(value)}</div>
       <div className="ctx">{context}</div>
@@ -147,6 +171,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
   const staleCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const stale = groups.filter((group) => group.updatedAt !== undefined && new Date(group.updatedAt).getTime() < staleCutoff).length;
   const metricsAvailable = !readState.isInitialLoading && !readState.isInitialError && !(unavailable && groups.length === 0);
+  const zeroGroups = metricsAvailable && groups.length === 0;
   const selectedGroup = groups.find((group) => group.id === groupId);
 
   const columns: DataTableColumn<GroupResource>[] = [
@@ -168,9 +193,10 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
         ? { status: 'unavailable', message: <span className="groups-state-copy"><strong>Group data is not available yet.</strong><span>No failure has been reported. This read remains pending.</span></span> }
         : filteredGroups.length === 0
           ? { status: 'empty', message: groups.length === 0
-            ? <span className="groups-state-copy"><strong>No groups synced yet.</strong><span>Groups appear after a connected instance syncs its group directory.</span></span>
+            ? <span className="groups-state-copy"><strong>No groups synced yet.</strong><span>Groups appear after this instance syncs its group directory.</span><button className="btn" type="button" disabled={refresh.isPending} onClick={() => refresh.mutate()}>{refresh.isPending ? 'Requesting sync…' : 'Refresh group sync'}</button></span>
             : <span className="groups-state-copy"><strong>No groups match these filters.</strong><span>Adjust the search or status filter.</span></span> }
           : { status: 'ready', rows: filteredGroups };
+  const stateOnlyTable = tableState.status === 'empty' || tableState.status === 'unavailable' || tableState.status === 'error';
   const statusOptions: SelectDropdownOption[] = [
     { value: '', label: 'All statuses', description: 'Do not filter the table' },
     ...statuses.map((item) => ({ value: item, label: item, meta: String(groups.filter((group) => group.status === item).length) })),
@@ -190,21 +216,30 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
 
   return (
     <>
-      <section className="groups-metric-section" aria-labelledby="groups-posture-title">
+      {!zeroGroups && <section className="groups-metric-section max-[640px]:!mb-4" aria-labelledby="groups-posture-title">
         <div className="groups-metric-head">
           <div><h2 id="groups-posture-title">Loaded group posture</h2><span className="groups-posture-note">Counts reflect loaded pages.</span></div>
         </div>
-        <div className="metrics groups-metrics">
+        <div className="metrics groups-metrics max-[640px]:!grid-cols-2">
           <MetricCard label="Synced groups" value={metricsAvailable ? groups.length : undefined} context={metricsAvailable ? 'Loaded groups' : 'Data unavailable'} />
           <MetricCard label="Admins known" value={metricsAvailable ? knownAdmins : undefined} context={metricsAvailable ? `${adminCounts.length} of ${groups.length} loaded groups` : 'Data unavailable'} />
           <MetricCard label="Muted" value={metricsAvailable ? muted : undefined} context={metricsAvailable ? 'Muted locally' : 'Data unavailable'} />
           <MetricCard label="Projection stale" value={metricsAvailable ? stale : undefined} context={metricsAvailable ? 'Not updated for 7d+' : 'Data unavailable'} />
         </div>
-      </section>
+      </section>}
 
       <DataTableWorkspace className="groups-workspace" aria-labelledby="groups-table-title">
-        <div className="groups-section-head"><div><h2>Groups</h2><span className="groups-posture-note">Group directory for this instance</span></div>{list.isSuccess && !unavailable && <span className="groups-result-count num">{filteredGroups.length} visible</span>}</div>
-        <DataTableToolbar>
+        <div className="groups-section-head">
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center justify-between gap-3">
+              <h2>Groups</h2>
+              {list.isSuccess && !unavailable && groups.length > 0 && <span className="groups-result-count num !mt-0 min-[641px]:!hidden">{filteredGroups.length} visible</span>}
+            </div>
+            <span className="groups-posture-note">Group directory for this instance</span>
+          </div>
+          {list.isSuccess && !unavailable && groups.length > 0 && <span className="groups-result-count num max-[640px]:!hidden">{filteredGroups.length} visible</span>}
+        </div>
+        {groups.length > 0 && <DataTableToolbar>
           <label className="search-field">
             <span className="visually-hidden">Search groups</span>
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
@@ -213,8 +248,8 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
           <span className="data-table-toolbar-desktop-filters"><SelectDropdown label="Status" value={status} options={statusOptions} onChange={(value) => onSetParam('status', value)} /></span>
           <DataTableFilterTrigger ref={filterTriggerRef} count={activeFilters.length} aria-expanded={filterOpen} onClick={() => setFilterOpen(true)} />
           <DataTableActiveFilters filters={activeFilters} />
-        </DataTableToolbar>
-        <div className="groups-table">
+        </DataTableToolbar>}
+        <div className={`groups-table max-[640px]:[&_.empty]:!px-4 max-[640px]:[&_.empty]:!py-8 ${stateOnlyTable ? 'max-[1024px]:[&_.responsive-table]:!w-full max-[1024px]:[&_.responsive-table]:!min-w-0 max-[1024px]:[&_thead]:!hidden' : ''} ${zeroGroups ? '[&_.responsive-table]:!w-full [&_.responsive-table]:!min-w-0 [&_thead]:!hidden [&_.responsive-table-scroll]:!border-b-0' : ''}`}>
           <DataTable
             caption="Groups with membership counts, local state, status, and update time"
             captionId="groups-table-title"
@@ -237,7 +272,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
                 }
               },
             })}
-            footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={refresh.isPending} title="The platform reports whether group discovery completed or continues asynchronously." onClick={() => refresh.mutate()}>Refresh sync</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
+            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={refresh.isPending} title="The platform reports whether group discovery completed or continues asynchronously." onClick={() => refresh.mutate()}>Refresh sync</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
           />
         </div>
       </DataTableWorkspace>
@@ -258,6 +293,7 @@ export function GroupsPage() {
   const { instanceId } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const pickerTriggerRef = useRef<HTMLButtonElement>(null);
   const picker = usePickerInstances();
   const pickerReadState = useResilientReadState(picker, picker.data?.resource !== undefined);
   const instances = picker.data?.resource?.items ?? [];
@@ -295,15 +331,20 @@ export function GroupsPage() {
       : <InlineError error={pickerReadState.error} onRetry={picker.refetch} />;
   } else {
     content = pickerReadState.isInitialLoading
-      ? <div className="empty groups-picker-state">Loading instances…</div>
+      ? <ScopeGate label="INSTANCE SCOPE" title="Loading instances…" detail="The console is loading the available instance scopes." />
       : picker.data?.unavailable
-        ? <div className="empty groups-picker-state">Instances are not available yet.</div>
-        : <div className="empty groups-picker-state"><span className="groups-state-copy"><strong>Select an instance</strong><span>Choose an instance to review its synced groups.</span></span></div>;
+        ? <ScopeGate label="INSTANCE SCOPE" title="Instances are not available yet" detail="No failure has been reported. The instance projection is still pending." />
+        : instances.length === 0
+          ? <ScopeGate label="INSTANCE REQUIRED" title="No instances available" detail="Create an instance before loading a group directory." action={<Link className="btn primary" to="/instances?create=1">Create instance</Link>} />
+          : <ScopeGate label="INSTANCE REQUIRED" title="Choose an instance" detail="Select an instance to load its group directory and management controls." action={<button className="btn primary" type="button" onClick={() => { pickerTriggerRef.current?.focus(); pickerTriggerRef.current?.click(); }}>Select instance</button>} />;
   }
 
   return (
     <div className="groups-screen">
-      <PageHeader title="Groups" meta={<InstancePicker instances={instances} selected={selectedInstance} selectedId={instanceId} onSelect={chooseInstance} />} />
+      <PageHeader
+        title="Groups"
+        scope={<InstancePicker instances={instances} selected={selectedInstance} selectedId={instanceId} onSelect={chooseInstance} triggerRef={pickerTriggerRef} />}
+      />
       {pickerReadState.isStaleError && <InlineError error={pickerReadState.error} onRetry={picker.refetch} className="groups-picker-error" />}
       {content}
     </div>

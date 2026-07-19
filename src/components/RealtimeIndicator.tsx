@@ -5,12 +5,12 @@ type IndicatorState = 'live' | 'reconnecting' | 'polling' | 'offline';
 
 const indicatorCopy: Record<IndicatorState, { label: string; title: string; dotClass: string }> = {
   live: {
-    label: 'Stream live',
+    label: 'Event stream live',
     title: 'Realtime event stream is connected.',
     dotClass: 'dot-ok',
   },
   reconnecting: {
-    label: 'Stream reconnecting',
+    label: 'Event stream reconnecting',
     title: 'Realtime stream interrupted; reconnecting.',
     dotClass: 'dot-pending',
   },

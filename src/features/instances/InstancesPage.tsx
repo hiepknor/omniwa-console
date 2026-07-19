@@ -51,7 +51,7 @@ export function InstancesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [createOpen, setCreateOpen] = useState(false);
+  const createOpen = searchParams.get('create') === '1';
   const [filterOpen, setFilterOpen] = useState(false);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const feedback = useFeedback();
@@ -158,7 +158,7 @@ export function InstancesPage() {
       <PageHeader
         title="Instances"
         actions={
-          <button className="btn primary" type="button" onClick={() => { create.reset(); setCreateOpen(true); }}>New instance</button>
+          <button className="btn primary" type="button" onClick={() => { create.reset(); setParam('create', '1'); }}>New instance</button>
         }
       />
 
@@ -253,9 +253,9 @@ export function InstancesPage() {
         <CreateInstanceDialog
           error={create.error}
           isPending={create.isPending}
-          onCancel={() => setCreateOpen(false)}
+          onCancel={() => setParam('create', '')}
           onCreate={(displayName) => create.mutate(displayName, { onSuccess: (result) => {
-            setCreateOpen(false);
+            setParam('create', '');
             feedback.command(result.disposition, { action: 'Create instance', acceptedDetail: 'The platform accepted the command. The instance will appear after it is recorded.', completedDetail: 'The platform created the instance.', requestId: result.requestId, dedupeKey: 'instance:create' });
           } })}
         />
