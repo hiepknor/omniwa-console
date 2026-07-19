@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import type { EventResource } from '@/api/events-api';
+import { useDrawerFocus } from '@/components/useDrawerFocus';
 import { relativeTime } from '@/lib/format';
 
 function Fact({ label, value }: { label: string; value: string | undefined }) {
@@ -6,6 +8,9 @@ function Fact({ label, value }: { label: string; value: string | undefined }) {
 }
 
 export function EventInspector({ event, onClose }: { event: EventResource; onClose: () => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useDrawerFocus({ onClose, closeRef });
+
   return (
     <aside className="drawer event-inspector" aria-labelledby="event-inspector-title">
       <header className="drawer-head">
@@ -14,7 +19,7 @@ export function EventInspector({ event, onClose }: { event: EventResource; onClo
           <div className="drawer-title-row"><h2 className="mono" id="event-inspector-title">{event.type ?? 'Event'}</h2></div>
           <time className="event-inspector-time" dateTime={event.timestamp} title={event.timestamp}>{relativeTime(event.timestamp) || 'Time unavailable'}</time>
         </div>
-        <button className="close" type="button" aria-label="Close event details" onClick={onClose}>✕</button>
+        <button ref={closeRef} className="close" type="button" aria-label="Close event details" onClick={onClose}>✕</button>
       </header>
       <div className="drawer-scroll">
         <section aria-labelledby="event-facts-title">

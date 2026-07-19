@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
+import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
+import { useDrawerFocus } from '@/components/useDrawerFocus';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import {
@@ -15,7 +17,6 @@ import {
   useRefreshProviderCapabilities,
   useUpdateInstance,
 } from './hooks';
-import { TypedConfirmationDialog } from './TypedConfirmationDialog';
 
 function statusDot(status: string | undefined) {
   switch (status?.toLowerCase()) {
@@ -40,6 +41,7 @@ export function InstanceDrawer({
   const instanceName = instance.displayName ?? instance.id;
   const [displayName, setDisplayName] = useState(instanceName);
   const [confirmation, setConfirmation] = useState<'disconnect' | 'destroy'>();
+  const closeRef = useRef<HTMLButtonElement>(null);
   const feedback = useFeedback();
   const sessions = useInstanceSessions(instance.id);
   const provider = useProviderCapabilities(true);
@@ -54,13 +56,7 @@ export function InstanceDrawer({
   const refreshCapabilities = useRefreshProviderCapabilities();
 
   useEffect(() => setDisplayName(instanceName), [instanceName]);
-  useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && confirmation === undefined) onClose();
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [confirmation, onClose]);
+  useDrawerFocus({ onClose, closeRef, suppressEscape: confirmation !== undefined });
 
   const accepted = (action: string) => {
     feedback.accepted({
@@ -84,7 +80,7 @@ export function InstanceDrawer({
             </div>
             <span className="mono">{instance.id}</span>
           </div>
-          <button className="close" type="button" aria-label="Close instance details" title="Close" onClick={onClose}>✕</button>
+          <button ref={closeRef} className="close" type="button" aria-label="Close instance details" title="Close" onClick={onClose}>✕</button>
         </header>
 
         <div className="drawer-scroll">
@@ -215,9 +211,12 @@ export function InstanceDrawer({
 
       {confirmation === 'disconnect' && (
         <TypedConfirmationDialog
-          action="disconnect"
-          instanceId={instance.id}
-          instanceName={instanceName}
+          title="Disconnect instance"
+          description={<p>This requests a disconnect for {instanceName}. The platform will process the command asynchronously.</p>}
+          resourceId={instance.id}
+          confirmValue={instanceName}
+          confirmLabel="Disconnect instance"
+          pendingLabel="Submitting…"
           error={disconnect.error}
           isPending={disconnect.isPending}
           onCancel={() => { disconnect.reset(); setConfirmation(undefined); }}
@@ -226,9 +225,12 @@ export function InstanceDrawer({
       )}
       {confirmation === 'destroy' && (
         <TypedConfirmationDialog
-          action="destroy"
-          instanceId={instance.id}
-          instanceName={instanceName}
+          title="Destroy instance"
+          description={<p>This permanently destroys {instanceName}, its sessions, and pairing state. This cannot be undone.</p>}
+          resourceId={instance.id}
+          confirmValue={instanceName}
+          confirmLabel="Destroy instance"
+          pendingLabel="Submitting…"
           error={destroy.error}
           isPending={destroy.isPending}
           onCancel={() => { destroy.reset(); setConfirmation(undefined); }}

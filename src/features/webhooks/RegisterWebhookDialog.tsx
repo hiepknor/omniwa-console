@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { InlineError } from '@/components/InlineError';
+import { useModalDialog } from '@/components/useModalDialog';
 import type { WebhookRequest } from '@/api/webhooks';
 
 function parseEventTypes(value: string): string[] {
@@ -17,12 +18,7 @@ export function RegisterWebhookDialog({ error, isPending, onCancel, onRegister }
   const [validation, setValidation] = useState<string>();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape' && !isPending) onCancel(); };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [isPending, onCancel]);
+  const dialogRef = useModalDialog<HTMLDivElement>({ onClose: onCancel, canClose: !isPending, initialFocusRef: inputRef });
 
   const submit = () => {
     try {
@@ -39,7 +35,7 @@ export function RegisterWebhookDialog({ error, isPending, onCancel, onRegister }
 
   return (
     <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !isPending) onCancel(); }}>
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="register-webhook-title">
+      <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby="register-webhook-title" tabIndex={-1}>
         <header><b id="register-webhook-title">Register webhook</b><span className="mono">registerWebhook</span></header>
         <form onSubmit={(event) => { event.preventDefault(); submit(); }}>
           <div className="body">

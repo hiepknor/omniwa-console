@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useRef } from 'react';
 import type { JobResource } from '@/api/queue';
+import { useDrawerFocus } from '@/components/useDrawerFocus';
 import { relativeTime } from '@/lib/format';
 
 export function jobStatusDot(status: string | undefined) {
@@ -21,13 +22,8 @@ function TimeFact({ value }: { value: string | undefined }) {
 }
 
 export function JobDrawer({ job, requestedJobId, onClose }: { job: JobResource; requestedJobId: string; onClose: () => void }) {
-  useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [onClose]);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useDrawerFocus({ onClose, closeRef });
 
   return (
     <aside className="drawer queue-drawer" aria-labelledby="job-detail-title">
@@ -40,7 +36,7 @@ export function JobDrawer({ job, requestedJobId, onClose }: { job: JobResource; 
           </div>
           <span className="mono">{requestedJobId}</span>
         </div>
-        <button className="close" type="button" aria-label="Close job details" title="Close" onClick={onClose}>✕</button>
+        <button ref={closeRef} className="close" type="button" aria-label="Close job details" title="Close" onClick={onClose}>✕</button>
       </header>
 
       <div className="drawer-scroll">

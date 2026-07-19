@@ -1,4 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentPropsWithRef,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
@@ -28,33 +40,92 @@ function PickerPopover({
   children,
   label,
 }: {
-  trigger: (open: boolean) => React.ReactNode;
-  children: (close: () => void) => React.ReactNode;
+  trigger: (open: boolean) => ReactElement<ComponentPropsWithRef<'button'>>;
+  children: (close: () => void) => ReactNode;
   label: string;
 }) {
+  const id = useId();
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  const close = (restoreFocus = false) => {
+    setOpen(false);
+    if (restoreFocus) triggerRef.current?.focus();
+  };
+  const childNodes = Children.toArray(children(() => close()));
+  const itemCount = childNodes.filter((child) => isValidElement<ComponentPropsWithRef<'button'>>(child)
+    && (child.props.role === 'menuitem' || child.props.role === 'menuitemradio')).length;
+  const openAt = (index: number) => {
+    setActiveIndex(itemCount > 0 ? (index + itemCount) % itemCount : 0);
+    setOpen(true);
+  };
+  const move = (offset: number) => {
+    if (itemCount > 0) setActiveIndex((current) => (current + offset + itemCount) % itemCount);
+  };
 
   useEffect(() => {
     if (!open) return;
+    itemRefs.current[activeIndex]?.focus();
     const closeOutside = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const closeEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
+      if (!rootRef.current?.contains(event.target as Node)) close();
     };
     document.addEventListener('pointerdown', closeOutside);
-    document.addEventListener('keydown', closeEscape);
-    return () => {
-      document.removeEventListener('pointerdown', closeOutside);
-      document.removeEventListener('keydown', closeEscape);
-    };
-  }, [open]);
+    return () => document.removeEventListener('pointerdown', closeOutside);
+  }, [activeIndex, open]);
+
+  const triggerElement = trigger(open);
+  const augmentedTrigger = cloneElement(triggerElement, {
+    ref: triggerRef,
+    'aria-controls': `${id}-menu`,
+    onClick: (event) => {
+      triggerElement.props.onClick?.(event);
+      if (!event.defaultPrevented) open ? close() : openAt(0);
+    },
+    onKeyDown: (event) => {
+      triggerElement.props.onKeyDown?.(event);
+      if (event.defaultPrevented) return;
+      if (event.key === 'ArrowDown') { event.preventDefault(); openAt(open ? activeIndex + 1 : 0); }
+      if (event.key === 'ArrowUp') { event.preventDefault(); openAt(open ? activeIndex - 1 : itemCount - 1); }
+      if (event.key === 'Home') { event.preventDefault(); openAt(0); }
+      if (event.key === 'End') { event.preventDefault(); openAt(itemCount - 1); }
+      if (event.key === 'Escape' && open) { event.preventDefault(); close(true); }
+    },
+  });
+
+  let itemIndex = 0;
+  const menuChildren = childNodes.map((child) => {
+    if (!isValidElement<ComponentPropsWithRef<'button'>>(child)
+      || (child.props.role !== 'menuitem' && child.props.role !== 'menuitemradio')) return child;
+    const index = itemIndex;
+    itemIndex += 1;
+    return cloneElement(child, {
+      ref: (node) => { itemRefs.current[index] = node; },
+      tabIndex: open && index === activeIndex ? 0 : -1,
+      onMouseEnter: (event) => {
+        child.props.onMouseEnter?.(event);
+        if (!event.defaultPrevented) setActiveIndex(index);
+      },
+      onKeyDown: (event) => {
+        child.props.onKeyDown?.(event);
+        if (event.defaultPrevented) return;
+        if (event.key === 'ArrowDown') { event.preventDefault(); move(1); }
+        if (event.key === 'ArrowUp') { event.preventDefault(); move(-1); }
+        if (event.key === 'Home') { event.preventDefault(); setActiveIndex(0); }
+        if (event.key === 'End') { event.preventDefault(); setActiveIndex(itemCount - 1); }
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.currentTarget.click(); }
+        if (event.key === 'Escape') { event.preventDefault(); close(true); }
+        if (event.key === 'Tab') close();
+      },
+    });
+  });
 
   return (
     <div className="chat-picker" ref={rootRef}>
-      <div onClick={() => setOpen((current) => !current)}>{trigger(open)}</div>
-      {open && <div className="chat-picker-menu" role="menu" aria-label={label}>{children(() => setOpen(false))}</div>}
+      {augmentedTrigger}
+      {open && <div className="chat-picker-menu" id={`${id}-menu`} role="menu" aria-label={label}>{menuChildren}</div>}
     </div>
   );
 }

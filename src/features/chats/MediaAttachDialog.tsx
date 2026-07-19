@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { InlineError } from '@/components/InlineError';
+import { useModalDialog } from '@/components/useModalDialog';
 
 export function MediaAttachDialog({
   error,
@@ -17,14 +18,7 @@ export function MediaAttachDialog({
   const [caption, setCaption] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    inputRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !isPending) onCancel();
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [isPending, onCancel]);
+  const dialogRef = useModalDialog<HTMLDivElement>({ onClose: onCancel, canClose: !isPending, initialFocusRef: inputRef });
 
   const submit = () => onSubmit({
     reference: reference.trim(),
@@ -36,7 +30,7 @@ export function MediaAttachDialog({
     <div className="overlay" role="presentation" onMouseDown={(event) => {
       if (event.target === event.currentTarget && !isPending) onCancel();
     }}>
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="attach-media-title">
+      <div ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby="attach-media-title" tabIndex={-1}>
         <header><b id="attach-media-title">Attach media by reference</b><span className="mono">registerMedia</span></header>
         <form onSubmit={(event) => { event.preventDefault(); submit(); }}>
           <div className="body">

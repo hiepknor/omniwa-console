@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PublicData } from '@/api/envelopes';
 import type { WebhookDeliveryResource, WebhookResource } from '@/api/webhooks';
 import { InlineError } from '@/components/InlineError';
+import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
+import { useDrawerFocus } from '@/components/useDrawerFocus';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import {
@@ -16,7 +18,6 @@ import {
   useWebhookDeliveries,
   useWebhookDeliveryHistory,
 } from './hooks';
-import { RetireWebhookDialog } from './RetireWebhookDialog';
 
 type DeliveryStep = { status: string; timestamp?: string; detail?: string };
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === 'object' && value !== null && !Array.isArray(value); }
@@ -96,6 +97,7 @@ function DeliveryRow({ delivery, selected, checked, busy, onSelect, onCheck, onR
 export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: WebhookResource; onClose: () => void; onRetired: () => void }) {
   const [eventsValue, setEventsValue] = useState((webhook.eventTypes ?? []).join(', '));
   const [retireOpen, setRetireOpen] = useState(false);
+  const closeRef = useRef<HTMLButtonElement>(null);
   const [selectedDelivery, setSelectedDelivery] = useState<string>();
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const feedback = useFeedback();
@@ -116,13 +118,13 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
   const unavailable = deliveryPages.some((page) => page.unavailable !== undefined);
 
   useEffect(() => setEventsValue((webhook.eventTypes ?? []).join(', ')), [webhook.eventTypes]);
-  useEffect(() => { const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape' && !retireOpen) onClose(); }; document.addEventListener('keydown', closeOnEscape); return () => document.removeEventListener('keydown', closeOnEscape); }, [onClose, retireOpen]);
+  useDrawerFocus({ onClose, closeRef, suppressEscape: retireOpen });
   const accepted = (action: string, key = action.toLowerCase()) => feedback.accepted({ title: `${action} accepted`, detail: 'Webhook data refreshes automatically.', dedupeKey: `webhook:${webhook.id}:${key}` });
   const parseEvents = () => [...new Set(eventsValue.split(',').map((item) => item.trim()).filter(Boolean))];
 
   return <>
     <aside className="drawer webhook-drawer" aria-labelledby="webhook-detail-title">
-      <header className="drawer-head"><div className="drawer-identity"><span className="eyebrow">Webhook management</span><div className="drawer-title-row"><h2 id="webhook-detail-title" title={webhook.id}>{webhook.id}</h2><span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span></div></div><button className="close" type="button" aria-label="Close webhook details" onClick={onClose}>✕</button></header>
+      <header className="drawer-head"><div className="drawer-identity"><span className="eyebrow">Webhook management</span><div className="drawer-title-row"><h2 id="webhook-detail-title" title={webhook.id}>{webhook.id}</h2><span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span></div></div><button ref={closeRef} className="close" type="button" aria-label="Close webhook details" onClick={onClose}>✕</button></header>
       <div className="drawer-scroll">
         {commandError && <InlineError error={commandError} onRetry={() => undefined} announce />}
         <section aria-labelledby="webhook-facts-title"><h3 id="webhook-facts-title" className="visually-hidden">Webhook facts</h3><dl className="kv"><dt>ID</dt><dd><span className="mono">{webhook.id}</span></dd><dt>Status</dt><dd><span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span></dd><dt>Events</dt><dd><div className="capchips">{(webhook.eventTypes ?? []).length ? webhook.eventTypes?.map((event) => <span className="chip" key={event}>{event}</span>) : '—'}</div></dd><dt>Created</dt><dd className="ts" title={webhook.createdAt}>{relativeTime(webhook.createdAt) || '—'}</dd><dt>Updated</dt><dd className="ts" title={webhook.updatedAt}>{relativeTime(webhook.updatedAt) || '—'}</dd></dl></section>
@@ -137,6 +139,6 @@ export function WebhookDrawer({ webhook, onClose, onRetired }: { webhook: Webhoo
         <section className="webhook-recovery" aria-labelledby="webhook-recovery-title"><span className="eyebrow">Bulk recovery</span><h3 id="webhook-recovery-title">Failed deliveries</h3><div className="recovery-action"><span>{checked.size ? `${checked.size} selected` : `${failed.length} failed in loaded data`}</span><button className="btn" type="button" disabled={!checked.size || pending} onClick={() => bulk.mutate([...checked], { onSuccess: () => { accepted('Bulk redrive', 'bulk-redrive'); setChecked(new Set()); } })}>{bulk.isPending ? 'Submitting…' : 'Redrive selected'}</button></div></section>
       </div>
     </aside>
-    {retireOpen && <RetireWebhookDialog webhookId={webhook.id} error={retire.error} isPending={retire.isPending} onCancel={() => { retire.reset(); setRetireOpen(false); }} onConfirm={() => retire.mutate(undefined, { onSuccess: onRetired })} />}
+    {retireOpen && <TypedConfirmationDialog title="Retire webhook" description={<p>This permanently retires the webhook and stops future deliveries. This cannot be undone.</p>} resourceId={webhook.id} confirmValue={webhook.id} confirmLabel="Retire webhook" pendingLabel="Submitting…" error={retire.error} isPending={retire.isPending} onCancel={() => { retire.reset(); setRetireOpen(false); }} onConfirm={() => retire.mutate(undefined, { onSuccess: onRetired })} />}
   </>;
 }

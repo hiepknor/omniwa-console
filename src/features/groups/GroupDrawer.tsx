@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GroupLocalStateRequest, GroupMemberResource, GroupResource } from '@/api/groups';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
+import { useDrawerFocus } from '@/components/useDrawerFocus';
 import { useModalDialog } from '@/components/useModalDialog';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
@@ -252,14 +253,7 @@ export function GroupDrawer({ groupId, subject: initialSubject, onClose }: {
   const title = group?.subject || initialSubject || groupId;
   const headerStatus = group?.status ?? (readState.isInitialError ? 'error' : groupQuery.data?.unavailable ? 'unavailable' : readState.isInitialLoading ? 'loading' : '—');
 
-  useEffect(() => {
-    closeRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && !sendOpen) onClose();
-    };
-    document.addEventListener('keydown', closeOnEscape);
-    return () => document.removeEventListener('keydown', closeOnEscape);
-  }, [onClose, sendOpen]);
+  useDrawerFocus({ onClose, closeRef, suppressEscape: sendOpen });
 
   return (
     <>
