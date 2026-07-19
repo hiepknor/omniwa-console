@@ -32,8 +32,8 @@ export type DataTableColumn<Row> = {
 export type DataTableState<Row> =
   | { status: 'loading'; skeletonRows?: number }
   | { status: 'error'; error: unknown; onRetry: () => void }
-  | { status: 'unavailable'; message: string }
-  | { status: 'empty'; message: string }
+  | { status: 'unavailable'; message: ReactNode }
+  | { status: 'empty'; message: ReactNode }
   | { status: 'ready'; rows: readonly Row[] };
 
 export type DataTableRowState = {

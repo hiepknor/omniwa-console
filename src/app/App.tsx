@@ -10,6 +10,7 @@ import { ChatsPage } from '@/features/chats/ChatsPage';
 import { QueuePage } from '@/features/queue/QueuePage';
 import { WebhooksPage } from '@/features/webhooks/WebhooksPage';
 import { EventsPage } from '@/features/events/EventsPage';
+import { GroupsPage } from '@/features/groups/GroupsPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
@@ -77,8 +78,8 @@ function AppRuntime() {
               { path: '/chats', element: <ChatsPage /> },
               { path: '/chats/:instanceId', element: <ChatsPage /> },
               { path: '/chats/:instanceId/:chatId', element: <ChatsPage /> },
-              { path: '/groups', element: <PanelStub panel="groups" /> },
-              { path: '/groups/:instanceId', element: <PanelStub panel="groups" /> },
+              { path: '/groups', element: <GroupsPage /> },
+              { path: '/groups/:instanceId', element: <GroupsPage /> },
               { path: '/messages', element: <PanelStub panel="messages" /> },
               { path: '/messages/new', element: <PanelStub panel="messages" /> },
               { path: '/overview', element: <OverviewPage /> },

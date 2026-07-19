@@ -497,6 +497,54 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
   .queue-drawer .drawer-head,.queue-drawer section{padding:var(--space-4)}
 }
 
+/* Groups operational workbench; deferred controls are intentionally omitted. */
+.groups-screen{position:relative}
+.groups-instance-picker{min-width:0}
+.groups-instance-picker .instpick-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.groups-metric-section{margin-bottom:var(--space-5)}
+.groups-metric-head,.groups-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)}
+.groups-metric-head h2,.groups-section-head h2{font:400 var(--text-xs)/16px var(--font-body);text-transform:uppercase;letter-spacing:2.4px;color:var(--muted)}
+.groups-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-2);margin-bottom:0}
+.groups-metric-card{display:flex;min-width:0;min-height:104px;flex-direction:column;justify-content:space-between;padding:var(--space-3) var(--space-4);background:color-mix(in oklab,var(--fg) 4%,transparent);border-color:var(--border-subtle);border-radius:var(--radius-md)}
+.groups-metric-card .label{line-height:15px;letter-spacing:1.4px}
+.groups-metric-card .value{margin-top:var(--space-1);font-family:var(--font-mono);font-size:24px;line-height:28px;letter-spacing:-.03em;color:var(--fg)}
+.groups-metric-card .ctx{margin-top:var(--space-1);line-height:16px;color:var(--muted)}
+.groups-workspace{min-width:0}
+.groups-section-head{min-height:40px}
+.groups-posture-note,.groups-result-count{display:block;margin-top:2px;font-size:11px;line-height:16px;color:var(--muted)}
+.groups-result-count{flex-shrink:0;font-family:var(--font-mono)}
+.groups-table>.tablewrap{border-color:var(--border-subtle);border-radius:0 0 var(--radius-md) var(--radius-md);outline:none;overscroll-behavior-x:contain}
+.groups-table>.tablewrap:focus-visible{border-color:var(--border-strong);box-shadow:inset var(--focus-ring)}
+.groups-namecell{display:flex;align-items:center;gap:var(--space-2);min-width:0}
+.groups-namecell>span{min-width:0}
+.groups-namecell .resource-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.groups-namecell .row-id{display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;font-size:10px;color:var(--muted);white-space:nowrap}
+.groups-local-state{display:flex;flex-wrap:wrap;gap:6px}
+.groups-local-state .chip{cursor:default}
+.groups-state-copy{display:grid;justify-items:center;gap:var(--space-1)}
+.groups-state-copy strong{font-size:13px;font-weight:400;color:var(--fg-2)}
+.groups-state-copy span{font-size:12px;color:var(--muted)}
+.groups-picker-state{min-height:180px;border:1px solid var(--border-subtle);border-radius:var(--radius-md)}
+.groups-picker-error{margin-bottom:var(--space-4)}
+.groups-drawer{position:fixed;top:0;right:0;bottom:0;z-index:8;display:flex;flex-direction:column;width:440px;max-width:calc(100vw - 64px);border:0;border-left:1px solid var(--border);border-radius:0;background:var(--surface);box-shadow:var(--elev-raised);overflow:hidden}
+.groups-drawer .drawer-head{display:flex;align-items:flex-start;justify-content:space-between;flex:0 0 auto;min-height:112px;padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--border-subtle);background:var(--bg)}
+.groups-drawer .close{display:flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--accent);color:var(--muted);cursor:pointer}
+.groups-drawer .close:hover{background:var(--accent-hover);color:var(--fg)}
+.groups-drawer .close:focus-visible{outline:none;box-shadow:var(--focus-ring);color:var(--fg)}
+.groups-drawer .drawer-scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.groups-drawer-placeholder{min-height:220px}
+@media(max-width:1100px) and (min-width:901px){.groups-drawer{width:400px}}
+@media(max-width:900px){
+  .groups-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .groups-drawer{position:relative;inset:auto;width:100%;max-width:none;margin-top:var(--space-4);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:none}
+  .groups-drawer .drawer-scroll{overflow:visible}
+}
+@media(max-width:640px){
+  .groups-metrics{grid-template-columns:minmax(0,1fr);gap:var(--space-2)}
+  .groups-metric-card{min-height:96px}
+  .groups-drawer .drawer-head{padding:var(--space-4)}
+}
+
 /* Webhook endpoint and delivery recovery workbench. */
 .webhook-metric-section{margin-bottom:var(--space-5)}
 .webhook-metric-head,.webhook-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-4);margin-bottom:var(--space-2)}
