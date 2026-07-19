@@ -1,6 +1,5 @@
-import { useRef } from 'react';
 import type { JobResource } from '@/api/queue';
-import { useDrawerFocus } from '@/components/useDrawerFocus';
+import { DetailDrawer, DetailDrawerState } from '@/components/drawer/DetailDrawer';
 import { relativeTime } from '@/lib/format';
 
 export function jobStatusDot(status: string | undefined) {
@@ -22,41 +21,28 @@ function TimeFact({ value }: { value: string | undefined }) {
 }
 
 export function JobDrawer({ job, requestedJobId, onClose }: { job: JobResource; requestedJobId: string; onClose: () => void }) {
-  const closeRef = useRef<HTMLButtonElement>(null);
-  useDrawerFocus({ onClose, closeRef });
-
   return (
-    <aside className="drawer queue-drawer" aria-labelledby="job-detail-title">
-      <header className="drawer-head">
-        <div className="drawer-identity">
-          <span className="eyebrow">Job detail</span>
-          <div className="drawer-title-row">
-            <h2 id="job-detail-title">{job.workType ?? 'Job details'}</h2>
-            <span className="status terminal-status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span>
-          </div>
-          <span className="mono">{requestedJobId}</span>
-        </div>
-        <button ref={closeRef} className="close" type="button" aria-label="Close job details" title="Close" onClick={onClose}>✕</button>
-      </header>
-
-      <div className="drawer-scroll">
-        <section aria-labelledby="job-facts-title">
-          <h3 id="job-facts-title">Facts</h3>
-          <dl className="kv">
-            <dt>ID</dt><dd><span className="mono">{job.id}</span></dd>
-            <dt>Status</dt><dd><span className="status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span></dd>
-            <dt>Type</dt><dd>{job.workType ?? '—'}</dd>
-            <dt>Owner</dt><dd>{job.ownerContext ?? '—'}</dd>
-            <dt>Resource</dt><dd><span className="mono">{job.resourceRef ?? '—'}</span></dd>
-            <dt>Attempts</dt><dd className="num">{job.attemptCount ?? '—'}</dd>
-            <dt>Failure</dt><dd>{job.failureCategory ?? '—'}</dd>
-            <dt>Reason</dt><dd>{job.reasonCode ?? '—'}</dd>
-            <dt>Created</dt><dd><TimeFact value={job.createdAt} /></dd>
-            <dt>Updated</dt><dd><TimeFact value={job.updatedAt} /></dd>
-            <dt>Next run</dt><dd><TimeFact value={job.nextRunAt} /></dd>
-          </dl>
-        </section>
-      </div>
-    </aside>
+    <DetailDrawer titleId="job-detail-title" eyebrow="Job detail" title={job.workType ?? 'Job details'} status={<span className="status terminal-status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span>} subtitle={<span className="mono" title={requestedJobId}>{requestedJobId}</span>} className="queue-drawer" closeLabel="Close job details" onClose={onClose}>
+      <section aria-labelledby="job-facts-title">
+        <h3 id="job-facts-title">Facts</h3>
+        <dl className="kv">
+          <dt>ID</dt><dd><span className="mono">{job.id}</span></dd>
+          <dt>Status</dt><dd><span className="status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span></dd>
+          <dt>Type</dt><dd>{job.workType ?? '—'}</dd>
+          <dt>Owner</dt><dd>{job.ownerContext ?? '—'}</dd>
+          <dt>Resource</dt><dd><span className="mono">{job.resourceRef ?? '—'}</span></dd>
+          <dt>Attempts</dt><dd className="num">{job.attemptCount ?? '—'}</dd>
+          <dt>Failure</dt><dd>{job.failureCategory ?? '—'}</dd>
+          <dt>Reason</dt><dd>{job.reasonCode ?? '—'}</dd>
+          <dt>Created</dt><dd><TimeFact value={job.createdAt} /></dd>
+          <dt>Updated</dt><dd><TimeFact value={job.updatedAt} /></dd>
+          <dt>Next run</dt><dd><TimeFact value={job.nextRunAt} /></dd>
+        </dl>
+      </section>
+    </DetailDrawer>
   );
+}
+
+export function JobDrawerState({ jobId, onClose, children, announce = false }: { jobId: string; onClose: () => void; children: React.ReactNode; announce?: boolean }) {
+  return <DetailDrawer titleId="job-detail-title" eyebrow="Job detail" title="Job details" subtitle={<span className="mono" title={jobId}>{jobId}</span>} className="queue-drawer" closeLabel="Close job details" onClose={onClose}><DetailDrawerState announce={announce}>{children}</DetailDrawerState></DetailDrawer>;
 }

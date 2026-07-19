@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { opsKeys } from '@/api/keys';
@@ -19,7 +19,7 @@ import {
 import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import { formatCount, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
-import { JobDrawer, jobStatusDot } from './JobDrawer';
+import { JobDrawer, JobDrawerState, jobStatusDot } from './JobDrawer';
 import { useJob, useJobs, useQueueStatus } from './hooks';
 
 function MetricCard({ label, value, context, attention = false }: {
@@ -35,18 +35,6 @@ function MetricCard({ label, value, context, attention = false }: {
       <div className={`value${reported ? ' num' : ' queue-value-unavailable'}`}>{reported ? formatCount(value) : 'Not reported'}</div>
       <div className={`ctx${attention ? ' bad' : ''}`}>{reported ? context : 'Value unavailable'}</div>
     </article>
-  );
-}
-
-function DrawerState({ children, jobId, onClose }: { children: ReactNode; jobId: string; onClose: () => void }) {
-  return (
-    <aside className="drawer queue-drawer" aria-label="Job details">
-      <header className="drawer-head">
-        <div className="drawer-identity"><span className="eyebrow">Job detail</span><div className="drawer-title-row"><h2>Job details</h2></div><span className="mono">{jobId}</span></div>
-        <button className="close" type="button" aria-label="Close job details" onClick={onClose}>✕</button>
-      </header>
-      <div className="drawer-scroll">{children}</div>
-    </aside>
   );
 }
 
@@ -192,10 +180,10 @@ export function QueuePage() {
       {jobId && (detail.data?.resource
         ? <JobDrawer job={detail.data.resource} requestedJobId={jobId} onClose={closeJob} />
         : detail.data?.unavailable
-          ? <DrawerState jobId={jobId} onClose={closeJob}><div className="empty">Job data is not available yet.</div></DrawerState>
+          ? <JobDrawerState jobId={jobId} onClose={closeJob}>Job data is not available yet.</JobDrawerState>
           : detail.isError
-            ? <DrawerState jobId={jobId} onClose={closeJob}><InlineError error={detail.error} onRetry={detail.refetch} /></DrawerState>
-            : <DrawerState jobId={jobId} onClose={closeJob}><div className="empty">Loading job details…</div></DrawerState>)}
+            ? <JobDrawerState jobId={jobId} onClose={closeJob}><InlineError error={detail.error} onRetry={detail.refetch} /></JobDrawerState>
+            : <JobDrawerState jobId={jobId} onClose={closeJob} announce>Loading job details…</JobDrawerState>)}
     </>
   );
 }

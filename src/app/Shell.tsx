@@ -384,7 +384,7 @@ export function Shell({
         </div>
       ) : null}
 
-      <main id="main-content" tabIndex={-1}>
+      <main id="main-content" className="min-[1280px]:has-[.detail-drawer]:!pr-[464px]" tabIndex={-1}>
         <Suspense fallback={<div className="route-loading" aria-live="polite">Loading panel…</div>}>
           <Outlet />
         </Suspense>
