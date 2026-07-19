@@ -1,5 +1,9 @@
 # Implementation Plan
 
+Status: M0–M7 are complete as of 2026-07-19. M6.5 campaigns and the Groups
+Named-Lists mode remain blocked pending the platform contract; contract gaps
+are recorded in the five `*_CONTRACT_GAPS.md` documents.
+
 Milestones are ordered so every milestone ends with a running, verifiable
 console. Each panel milestone includes its query hooks, routes, loading /
 empty / error states, and envelope-correct pagination.
@@ -15,7 +19,7 @@ empty / error states, and envelope-correct pagination.
   sidebar navigation and route stubs for every panel.
 - `pnpm check` (typecheck + build) green.
 
-## M1 — Connect + Overview
+## M1 — Connect + Overview (done)
 
 - Connect screen probes `getHealth`, stores session, redirects.
 - Overview panel: dashboard summary, metric cards, action-required list.
@@ -24,7 +28,7 @@ empty / error states, and envelope-correct pagination.
 
 Exit: operator can connect to a local platform and read real state.
 
-## M2 — Instances
+## M2 — Instances (done)
 
 - Instance list + detail, create/update forms, connect/disconnect/
   reconnect, QR pairing view (poll `refreshInstanceQr` until paired),
@@ -33,7 +37,7 @@ Exit: operator can connect to a local platform and read real state.
 Exit: full instance lifecycle from the browser, including first-time QR
 pairing.
 
-## M3 — Workspace core (primary surface)
+## M3 — Workspace core (primary surface, done)
 
 - Three-pane workspace: conversation list (chats with search/label filters),
   message timeline with bubble statuses, composer (text + media via
@@ -42,14 +46,14 @@ pairing.
 
 Exit: operator can converse and trace any message end to end from one screen.
 
-## M4 — Realtime
+## M4 — Realtime (done)
 
 - SSE client (fetch-based reader), invalidation mapping, live indicator,
   reconnect/backoff, polling fallback, event ticker on Overview.
 
 Exit: instance and queue panels update without manual refresh.
 
-## M5 — Operations panels
+## M5 — Operations panels (done)
 
 - Queue & Jobs (status, job browser, detail drawer).
 - Webhooks (register, lifecycle, deliveries, single + bulk redrive).
@@ -57,7 +61,7 @@ Exit: instance and queue panels update without manual refresh.
 
 Exit: operational troubleshooting parity with `omniwa-tui`.
 
-## M6 — Workspace completion + Directory + Settings
+## M6 — Workspace completion + Directory + Settings (done)
 
 - Contract-backed group management workbench (metadata, local state, member
   commands, invite-link refresh acceptance, and one-off text commands).
@@ -65,6 +69,8 @@ Exit: operational troubleshooting parity with `omniwa-tui`.
   jump-to-conversation flows supported by the v1 contract.
 - Settings (get / validate / activate) and admin-keys panel (admin scope
   only, show-once secret dialog).
+- Named Lists and bulk selection shipped deferred pending the platform
+  contract.
 
 Exit: the currently available v1-contract operations assigned in
 `docs/PANELS.md` are represented. Contract-blocked enhancements remain tracked
@@ -81,7 +87,7 @@ in `docs/M6_CONTRACT_GAPS.md` and are not emulated in browser state.
 Exit: an opt-in notification campaign can be created, observed, paused, and
 aborted entirely through platform APIs.
 
-## M7 — Hardening
+## M7 — Hardening (done)
 
 - Deep-link audit (filters and cursors in URL params).
 - Accessibility pass (keyboard navigation, focus management in dialogs).
