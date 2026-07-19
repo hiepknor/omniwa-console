@@ -12,6 +12,10 @@ export const queryKeys = {
   instanceSessions: (instanceId: string) => ['instances', instanceId, 'sessions'] as const,
   instanceChats: (instanceId: string, params?: Record<string, unknown>) =>
     ['instances', instanceId, 'chats', params ?? {}] as const,
+  instanceGroups: (instanceId: string, params?: Record<string, unknown>) =>
+    ['instances', instanceId, 'groups', params ?? {}] as const,
+  group: (groupId: string) => ['groups', groupId] as const,
+  groupMembers: (groupId: string) => ['groups', groupId, 'members'] as const,
   chat: (chatId: string) => ['chats', chatId] as const,
   instanceMessages: (instanceId: string, params?: Record<string, unknown>) =>
     ['instances', instanceId, 'messages', params ?? {}] as const,
@@ -35,6 +39,8 @@ export const queryKeys = {
     ['webhook-deliveries', deliveryId, 'history'] as const,
   events: (params?: Record<string, unknown>) => ['events', params ?? {}] as const,
   auditRecords: (params?: Record<string, unknown>) => ['audit-records', params ?? {}] as const,
+  settings: ['settings'] as const,
+  apiKeys: (params?: Record<string, unknown>) => ['api-keys', params ?? {}] as const,
 };
 
 export const overviewKeys = [
@@ -60,6 +66,9 @@ export const messageKeys = {
 };
 
 export const opsKeys = {
+  groups: ['groups'] as const,
+  settings: ['settings'] as const,
+  apiKeys: ['api-keys'] as const,
   queue: ['queue'] as const,
   jobs: ['jobs'] as const,
   webhooks: ['webhooks'] as const,

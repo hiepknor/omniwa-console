@@ -362,6 +362,7 @@ export function openEventStream(options: EventStreamOptions): EventStreamHandle 
 const INVALIDATION_KEYS: Readonly<Record<string, readonly QueryKey[]>> = {
   instance: [instanceKeys.root, queryKeys.dashboard, queryKeys.actionRequired],
   session: [instanceKeys.root],
+  group: [instanceKeys.root, opsKeys.groups],
   message: [
     queryKeys.messageMetrics,
     queryKeys.queueMetrics,
@@ -382,6 +383,7 @@ const INVALIDATION_KEYS: Readonly<Record<string, readonly QueryKey[]>> = {
   ],
   guardrail: [queryKeys.actionRequired, queryKeys.dashboard],
   provider: [queryKeys.providerCapabilities],
+  configuration: [queryKeys.settings],
 };
 
 export const alwaysInvalidateKeys: readonly QueryKey[] = [opsKeys.events];
