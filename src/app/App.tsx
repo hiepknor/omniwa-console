@@ -11,6 +11,7 @@ import { QueuePage } from '@/features/queue/QueuePage';
 import { WebhooksPage } from '@/features/webhooks/WebhooksPage';
 import { EventsPage } from '@/features/events/EventsPage';
 import { GroupsPage } from '@/features/groups/GroupsPage';
+import { SettingsPage } from '@/features/settings/SettingsPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
@@ -89,7 +90,7 @@ function AppRuntime() {
               { path: '/webhooks', element: <WebhooksPage /> },
               { path: '/webhooks/:webhookId', element: <WebhooksPage /> },
               { path: '/events', element: <EventsPage /> },
-              { path: '/settings', element: <PanelStub panel="settings" /> },
+              { path: '/settings', element: <SettingsPage /> },
               { path: '/settings/api-keys', element: <PanelStub panel="admin-keys" /> },
               { path: '*', element: <Navigate to="/overview" replace /> },
             ],
