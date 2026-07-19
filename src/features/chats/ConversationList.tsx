@@ -125,7 +125,7 @@ function PickerPopover({
   return (
     <div className="chat-picker" ref={rootRef}>
       {augmentedTrigger}
-      {open && <div className="chat-picker-menu" id={`${id}-menu`} role="menu" aria-label={label}>{menuChildren}</div>}
+      {open && <div className="chat-picker-menu !overflow-x-hidden" id={`${id}-menu`} role="menu" aria-label={label}>{menuChildren}</div>}
     </div>
   );
 }
@@ -139,20 +139,27 @@ function InstancePicker({
   selected: InstanceResource | undefined;
   onSelect: (instanceId: string) => void;
 }) {
+  const pickerLabel = selected
+    ? (selected.displayName ?? `Unnamed · ${selected.id}`)
+    : 'Select instance';
+  const pickerTitle = selected
+    ? `${selected.displayName ?? 'Unnamed instance'} · ${selected.id}`
+    : pickerLabel;
+
   return (
     <PickerPopover
       label="Instances"
       trigger={(open) => (
-        <button className="instpick !min-h-11" type="button" title={selected?.displayName ?? selected?.id ?? 'Select instance'} aria-label="Select instance" aria-haspopup="menu" aria-expanded={open}>
+        <button className="instpick !min-h-11" type="button" title={pickerTitle} aria-label={`Select instance. Current: ${pickerTitle}`} aria-haspopup="menu" aria-expanded={open}>
           <span className={`dot instance-status-dot ${statusDot(selected?.status)}`} aria-hidden="true" />
-          <span className="instpick-name">{selected?.displayName ?? selected?.id ?? 'Select instance'}</span>
+          <span className="instpick-name">{pickerLabel}</span>
           <span className="chev" aria-hidden="true">▾</span>
         </button>
       )}
     >
       {(close) => instances.length > 0 ? instances.map((instance) => (
         <button
-          className={instance.id === selected?.id ? 'is-selected' : undefined}
+          className={`${instance.id === selected?.id ? 'is-selected ' : ''}!min-w-0`}
           key={instance.id}
           type="button"
           role="menuitemradio"
@@ -160,7 +167,7 @@ function InstancePicker({
           onClick={() => { onSelect(instance.id); close(); }}
         >
           <span className={`dot ${statusDot(instance.status)}`} aria-hidden="true" />
-          <span><strong>{instance.displayName ?? instance.id}</strong><small className="mono">{instance.id}</small></span>
+          <span className="!min-w-0 overflow-hidden"><strong className="block overflow-hidden text-ellipsis whitespace-nowrap">{instance.displayName ?? 'Unnamed instance'}</strong><small className="mono block max-w-full overflow-hidden text-ellipsis whitespace-nowrap" title={instance.id}>{instance.id}</small></span>
         </button>
       )) : <span className="chat-picker-empty">No instances available</span>}
     </PickerPopover>

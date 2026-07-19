@@ -5,6 +5,7 @@ import { opsKeys } from '@/api/keys';
 import { InlineError } from '@/components/InlineError';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
+import { PollingIndicator } from '@/components/RealtimeIndicator';
 import {
   DataTable,
   DataTableActiveFilters,
@@ -126,7 +127,7 @@ export function QueuePage() {
 
   return (
     <>
-      <PageHeader title="Queue & Jobs" />
+      <PageHeader title="Queue & Jobs" status={<PollingIndicator />} />
 
       <section className="queue-metric-section" aria-labelledby="queue-posture-title">
         <div className="queue-metric-head">

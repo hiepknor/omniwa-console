@@ -6,6 +6,7 @@ import { InlineError } from '@/components/InlineError';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
+import { PollingIndicator } from '@/components/RealtimeIndicator';
 import {
   DataTable,
   DataTableActiveFilters,
@@ -157,6 +158,7 @@ export function InstancesPage() {
     <>
       <PageHeader
         title="Instances"
+        status={<PollingIndicator />}
         actions={
           <button className="btn primary" type="button" onClick={() => { create.reset(); setParam('create', '1'); }}>New instance</button>
         }

@@ -2,6 +2,7 @@ import { useIsFetching, useQueryClient, type Query } from '@tanstack/react-query
 import { overviewKeys } from '@/api/keys';
 import { useRealtimeEvents, useRealtimeStatus } from '@/api/RealtimeProvider';
 import { PageHeader } from '@/components/PageHeader';
+import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ActionRequiredList } from './ActionRequiredList';
 import { EventTicker } from './EventTicker';
@@ -43,6 +44,7 @@ export function OverviewPage() {
     <>
       <PageHeader
         title="Overview"
+        status={<RealtimeIndicator />}
         actions={
           <>
             <span className="overview-refresh-cadence" aria-live="polite">

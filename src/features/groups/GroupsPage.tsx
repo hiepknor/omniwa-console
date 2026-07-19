@@ -5,6 +5,7 @@ import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
+import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { isTransportError } from '@/components/feedback/feedback-policy';
 import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import {
@@ -71,24 +72,24 @@ function InstancePicker({ instances, selected, selectedId, onSelect, triggerRef 
     };
   }, [open]);
 
-  const compactSelectedId = selected && selected.id.length > 13
-    ? `${selected.id.slice(0, 6)}…${selected.id.slice(-5)}`
-    : selected?.id;
   const pickerLabel = selected
-    ? (selected.displayName ?? `Unnamed · ${compactSelectedId}`)
+    ? (selected.displayName ?? `Unnamed · ${selected.id}`)
     : selectedId ?? 'Select instance';
+  const pickerTitle = selected
+    ? `${selected.displayName ?? 'Unnamed instance'} · ${selected.id}`
+    : pickerLabel;
   return (
     <div className="chat-picker groups-instance-picker max-[640px]:!w-full" ref={rootRef}>
-      <button ref={triggerRef} className="instpick !min-h-11 max-[640px]:!w-full max-[640px]:!max-w-none" type="button" title={pickerLabel} aria-label="Select instance" aria-haspopup="menu" aria-controls="groups-instance-picker-menu" aria-expanded={open} onClick={() => setOpen((current) => !current)}>
+      <button ref={triggerRef} className="instpick !min-h-11 max-[640px]:!w-full max-[640px]:!max-w-none" type="button" title={pickerTitle} aria-label={`Select instance. Current: ${pickerTitle}`} aria-haspopup="menu" aria-controls="groups-instance-picker-menu" aria-expanded={open} onClick={() => setOpen((current) => !current)}>
         <span className={`dot instance-status-dot ${instanceStatusDot(selected?.status)}`} aria-hidden="true" />
         <span className="instpick-name">{pickerLabel}</span>
         <span className="chev" aria-hidden="true">▾</span>
       </button>
       {open && (
-        <div id="groups-instance-picker-menu" className="chat-picker-menu !w-80 max-w-[calc(100vw-2rem)] max-[640px]:!w-full" role="menu" aria-label="Instances">
+        <div id="groups-instance-picker-menu" className="chat-picker-menu !w-80 max-w-[calc(100vw-2rem)] !overflow-x-hidden max-[640px]:!w-full" role="menu" aria-label="Instances">
           {instances.length > 0 ? instances.map((instance) => (
             <button
-              className={instance.id === selectedId ? 'is-selected' : undefined}
+              className={`${instance.id === selectedId ? 'is-selected ' : ''}!min-w-0`}
               key={instance.id}
               type="button"
               role="menuitemradio"
@@ -96,7 +97,7 @@ function InstancePicker({ instances, selected, selectedId, onSelect, triggerRef 
               onClick={() => { onSelect(instance.id); setOpen(false); }}
             >
               <span className={`dot ${instanceStatusDot(instance.status)}`} aria-hidden="true" />
-              <span><strong className="block overflow-hidden text-ellipsis whitespace-nowrap">{instance.displayName ?? 'Unnamed instance'}</strong><small className="mono">{instance.id}</small></span>
+              <span className="!min-w-0 overflow-hidden"><strong className="block overflow-hidden text-ellipsis whitespace-nowrap">{instance.displayName ?? 'Unnamed instance'}</strong><small className="mono block max-w-full overflow-hidden text-ellipsis whitespace-nowrap" title={instance.id}>{instance.id}</small></span>
             </button>
           )) : <span className="chat-picker-empty">No instances available</span>}
         </div>
@@ -344,6 +345,7 @@ export function GroupsPage() {
       <PageHeader
         title="Groups"
         scope={<InstancePicker instances={instances} selected={selectedInstance} selectedId={instanceId} onSelect={chooseInstance} triggerRef={pickerTriggerRef} />}
+        status={<RealtimeIndicator />}
       />
       {pickerReadState.isStaleError && <InlineError error={pickerReadState.error} onRetry={picker.refetch} className="groups-picker-error" />}
       {content}

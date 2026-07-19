@@ -14,19 +14,6 @@ const PANEL_TITLES: Record<string, string> = {
   'admin-keys': 'API Keys',
 };
 
-const PANEL_SECTIONS: Record<string, string> = {
-  overview: 'Console',
-  instances: 'Operations',
-  queue: 'Operations',
-  webhooks: 'Operations',
-  events: 'Operations',
-  chats: 'Messaging',
-  groups: 'Messaging',
-  messages: 'Messaging',
-  settings: 'System',
-  'admin-keys': 'System',
-};
-
 /** A direct-link fallback for a surface blocked on a public platform contract. */
 export function PanelStub({ panel }: { panel: string }) {
   const params = useParams();
@@ -37,7 +24,7 @@ export function PanelStub({ panel }: { panel: string }) {
 
   return (
     <>
-      <PageHeader title={title} eyebrow={PANEL_SECTIONS[panel]} />
+      <PageHeader title={title} />
       <div className="card">
         <div className="empty">
           <h2 className="text-base font-medium">This surface is not available yet.</h2>
