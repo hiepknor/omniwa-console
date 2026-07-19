@@ -68,7 +68,7 @@ campaigns. Quick-add runs through a dropdown on the bulk action;
 `?list=nl_*`) so the table stays selectable while editing lists —
 named-list operations are proposed contract, see below.
 
-Operations: `listInstanceGroups`, `getGroup`, `updateGroup`,
+Operations: `listInstances`, `listInstanceGroups`, `getGroup`, `updateGroup`,
 `updateGroupLocalState`, `refreshInstanceGroups`, `refreshGroupInviteLink`,
 `listGroupMembers`, `addGroupMember`, `removeGroupMember`,
 `promoteGroupMember`, `demoteGroupMember`, `sendGroupTextMessage`,

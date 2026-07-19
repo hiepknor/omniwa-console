@@ -1282,6 +1282,17 @@ main:has(> .workspace--chats){padding:0;display:flex;overflow:hidden}
 .settings-secret-well{display:flex;align-items:center;gap:var(--space-2)}
 .settings-secret-well .codewell{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+/* API-key inventory additions for the shipped safe projection. */
+.api-keys-screen .settings-keys{margin:var(--space-5) 0 0}
+.api-keys-screen .settings-section-head{padding-inline:var(--space-1)}
+.api-keys-screen .adaptive-table table{min-width:1040px}
+.settings-key-scopes{display:flex;min-width:0;align-items:center;gap:var(--space-1);overflow:hidden}
+.settings-key-scopes .chip{display:block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.settings-key-actions{display:inline-flex;align-items:center;justify-content:flex-end;gap:var(--space-1);white-space:nowrap}
+.settings-revoke-reason{margin-top:var(--space-3)}
+.settings-revoke-reason .help{letter-spacing:0;text-transform:none}
+.settings-secret-well .codewell{display:block}
+
 /* App behavior additions for the settings read gap and validation notices. */
 .settings-projection-note{padding:var(--space-3) var(--space-4);border-top:1px solid var(--border-subtle);color:var(--muted)}
 .settings-validation-error,.settings-validation-idle{background:color-mix(in oklab,var(--fg) 3%,transparent)}

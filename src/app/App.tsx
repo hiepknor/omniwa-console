@@ -12,6 +12,7 @@ import { WebhooksPage } from '@/features/webhooks/WebhooksPage';
 import { EventsPage } from '@/features/events/EventsPage';
 import { GroupsPage } from '@/features/groups/GroupsPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
+import { ApiKeysPage } from '@/features/api-keys/ApiKeysPage';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
@@ -91,7 +92,7 @@ function AppRuntime() {
               { path: '/webhooks/:webhookId', element: <WebhooksPage /> },
               { path: '/events', element: <EventsPage /> },
               { path: '/settings', element: <SettingsPage /> },
-              { path: '/settings/api-keys', element: <PanelStub panel="admin-keys" /> },
+              { path: '/settings/api-keys', element: <ApiKeysPage /> },
               { path: '*', element: <Navigate to="/overview" replace /> },
             ],
           },
