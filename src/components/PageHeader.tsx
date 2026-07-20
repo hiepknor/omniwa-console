@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { EnvironmentBadge } from './EnvironmentBadge';
 import { WorkspaceBanner } from './feedback/WorkspaceBanner';
 
 export function PageHeader({
@@ -30,6 +31,7 @@ export function PageHeader({
           {breadcrumb && <div className="crumb">{breadcrumb}</div>}
           <div className="head-title-row">
             <h1>{title}</h1>
+            <EnvironmentBadge placement="page" />
             {meta && <div className="head-meta">{meta}</div>}
           </div>
         </div>

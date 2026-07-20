@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { EnvironmentBadge, useWorkspaceEnvironment } from '@/components/EnvironmentBadge';
 import { IconButton } from '@/components/IconButton';
 import { useDrawerFocus } from '@/components/useDrawerFocus';
 
@@ -87,7 +88,10 @@ export function DetailDrawer({
   const modal = useModalDrawer();
   const drawerRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const { registerDrawer } = useWorkspaceEnvironment();
   useDrawerFocus({ onClose, closeRef, drawerRef, modal, suppressEscape });
+
+  useEffect(() => registerDrawer(), [registerDrawer]);
 
   const drawer = (
     <aside
@@ -99,7 +103,10 @@ export function DetailDrawer({
     >
       <header className="drawer-head !grid !min-h-28 !shrink-0 !grid-cols-[minmax(0,1fr)_auto] !grid-rows-[44px_auto_44px] !items-center !gap-x-4 !gap-y-1 !border-b !border-[var(--border-subtle)] !bg-[var(--bg)] !px-6 !py-3 max-[640px]:!px-4">
         <div className="drawer-identity !contents">
-          <span className="eyebrow !col-start-1 !row-start-1 !m-0 !self-center">{eyebrow}</span>
+          <span className="!col-start-1 !row-start-1 !flex !min-w-0 !items-center !gap-2 !self-center">
+            <span className="eyebrow !m-0 !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap">{eyebrow}</span>
+            <EnvironmentBadge />
+          </span>
           <div className="drawer-title-row !contents">
             <h2 id={titleId} className={`!col-start-1 !row-start-2 !w-auto !max-w-full !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap ${titleClassName ?? ''}`}>{title}</h2>
             {status && <span className="!col-start-2 !row-start-2 !justify-self-end">{status}</span>}

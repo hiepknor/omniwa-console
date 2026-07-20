@@ -2,6 +2,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { IconButton } from '@/components/IconButton';
 import { Logo } from '@/components/Logo';
+import { EnvironmentBadge, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import { useModalDialog } from '@/components/useModalDialog';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
@@ -208,7 +209,8 @@ export function Shell({
   };
 
   return (
-    <div className="shell">
+    <WorkspaceEnvironmentProvider environment={mockSession ? 'mock' : 'platform'}>
+      <div className="shell">
       <a className="fixed top-2 left-2 z-50 -translate-y-20 rounded-sm bg-[var(--fg)] px-3 py-2 text-sm text-[var(--bg)] transition-transform focus:translate-y-0 focus:outline-none" href="#main-content">Skip to main content</a>
       <aside
         className={`sidebar${tabletExpanded ? ' is-expanded' : ''}`}
@@ -277,12 +279,12 @@ export function Shell({
         <div className="side-foot">
           <div
             className="session"
-            aria-label={`Connected session. API key ${fingerprint}.`}
-            title={`Connected · API key ${fingerprint}`}
+            aria-label={mockSession ? 'Mock workspace using local fixture data.' : `Connected session. API key ${fingerprint}.`}
+            title={mockSession ? 'Mock workspace · fixture data' : `Connected · API key ${fingerprint}`}
           >
             <span
               className="dot"
-              style={{ background: 'var(--ok)' }}
+              style={{ background: mockSession ? 'var(--info)' : 'var(--ok)' }}
               aria-hidden="true"
             />
             <span className="session-copy">
@@ -307,12 +309,6 @@ export function Shell({
         </div>
       </aside>
 
-      {mockSession && (
-        <div className="pointer-events-none fixed right-3 bottom-[76px] z-40 flex min-h-7 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--elevated)] px-3 text-[10px] uppercase tracking-[1.3px] text-[var(--fg-2)] shadow-[var(--elev-raised)] min-[641px]:top-3 min-[641px]:bottom-auto" role="status">
-          <span className="dot dot-pending" aria-hidden="true" /> Mock data
-        </div>
-      )}
-
       {mobileMoreOpen ? (
         <div
           className="mobile-more-backdrop"
@@ -330,7 +326,7 @@ export function Shell({
           >
             <header>
               <div>
-                <span className="eyebrow">Navigation</span>
+                <span className="flex items-center gap-2"><span className="eyebrow">Navigation</span><EnvironmentBadge /></span>
                 <h2 id="mobile-more-title">More</h2>
               </div>
               <IconButton
@@ -363,6 +359,7 @@ export function Shell({
           <Outlet />
         </Suspense>
       </main>
-    </div>
+      </div>
+    </WorkspaceEnvironmentProvider>
   );
 }
