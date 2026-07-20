@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { ApiKeyResource } from '@/api/api-keys';
-import { CategoryPill, OverflowCountBadge, StatusIndicator } from '@/components/badges';
+import { CategoryPill, CategorySummary, StatusIndicator } from '@/components/badges';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import {
   DataTable,
@@ -23,14 +23,7 @@ import { useApiKeys, useRevokeApiKey } from './hooks';
 type SecretState = { keyId: string; secret: string };
 
 function Scopes({ scopes }: { scopes: string[] }) {
-  const visible = scopes.slice(0, 2);
-  const remaining = scopes.length - visible.length;
-  return (
-    <span className="settings-key-scopes" aria-label={`Scopes: ${scopes.join(', ')}`}>
-      {visible.map((scope) => <CategoryPill className="max-w-[140px]" title={scope} key={scope}>{scope}</CategoryPill>)}
-      {remaining > 0 && <OverflowCountBadge count={remaining} label={remaining === 1 ? 'scope' : 'scopes'} />}
-    </span>
-  );
+  return <CategorySummary values={scopes} label="scopes" itemClassName="max-w-[140px]" className="settings-key-scopes" />;
 }
 
 function RevokeKeyDialog({ apiKey, onClose }: { apiKey: ApiKeyResource; onClose: () => void }) {

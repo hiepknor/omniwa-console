@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { opsKeys } from '@/api/keys';
-import { CategoryPill, OverflowCountBadge, RowStateBadge, StatusIndicator } from '@/components/badges';
+import { CategorySummary, RowStateBadge, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
@@ -24,9 +24,7 @@ function MetricCard({ label, value, context, attention }: { label: string; value
 }
 
 function EventChips({ events }: { events: string[] | undefined }) {
-  const shown = (events ?? []).slice(0, 2);
-  const remaining = (events?.length ?? 0) - shown.length;
-  return shown.length ? <div className="capchips webhook-event-chips">{shown.map((event) => <CategoryPill className="max-w-[180px]" title={event} key={event}>{event}</CategoryPill>)}{remaining > 0 && <OverflowCountBadge count={remaining} label={remaining === 1 ? 'event type' : 'event types'} />}</div> : <span>—</span>;
+  return <CategorySummary values={events ?? []} label="event types" itemClassName="max-w-[180px]" className="capchips webhook-event-chips" />;
 }
 
 export function WebhooksPage() {

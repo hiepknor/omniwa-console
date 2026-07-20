@@ -33,7 +33,7 @@ export function CategoryPill({
   return (
     <span
       data-badge="category"
-      className={`inline-flex max-w-full cursor-default items-center rounded-full border border-[var(--border-subtle)] bg-[color-mix(in_oklab,var(--fg)_4%,transparent)] font-medium text-[var(--fg-2)] ${compact ? 'min-h-5 text-[11px] leading-[18px]' : 'min-h-6 text-xs leading-[18px]'} ${className}`}
+      className={`inline-flex min-w-0 max-w-full cursor-default items-center rounded-full border border-[var(--border-subtle)] bg-[color-mix(in_oklab,var(--fg)_4%,transparent)] font-medium text-[var(--fg-2)] ${compact ? 'min-h-5 text-[11px] leading-[18px]' : 'min-h-6 text-xs leading-[18px]'} ${className}`}
       title={title}
     >
       <span className={`min-w-0 overflow-hidden text-ellipsis whitespace-nowrap ${compact ? '!px-2' : '!px-2.5'}`}>{children}</span>
@@ -57,9 +57,39 @@ export function OverflowCountBadge({
   label: string;
 }) {
   return (
-    <CategoryPill compact className="num" title={`${count} additional ${label}`}>
+    <CategoryPill compact className="num shrink-0" title={`${count} additional ${label}`}>
       <span aria-hidden="true">+{count}</span>
       <span className="visually-hidden">{count} additional {label}</span>
     </CategoryPill>
+  );
+}
+
+export function CategorySummary({
+  values,
+  label,
+  visibleCount = 1,
+  itemClassName = '',
+  className = '',
+}: {
+  values: readonly string[];
+  label: string;
+  visibleCount?: number;
+  itemClassName?: string;
+  className?: string;
+}) {
+  if (values.length === 0) return <span>—</span>;
+
+  const visible = values.slice(0, Math.max(1, visibleCount));
+  const remaining = values.length - visible.length;
+  return (
+    <span
+      className={`inline-flex min-w-0 max-w-full items-center gap-1 overflow-hidden ${className}`}
+      aria-label={`${label}: ${values.join(', ')}`}
+    >
+      {visible.map((value) => (
+        <CategoryPill className={`flex-1 ${itemClassName}`} title={value} key={value}>{value}</CategoryPill>
+      ))}
+      {remaining > 0 && <OverflowCountBadge count={remaining} label={remaining === 1 ? label.replace(/s$/, '') : label} />}
+    </span>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
-import { relativeTime } from '@/lib/format';
+import { humanizeToken, relativeTime } from '@/lib/format';
 import { useActionRequiredItems, useStableReadState, type ActionRequiredItem } from './hooks';
 
 function statusDot(status: string | undefined): string {
@@ -72,7 +72,7 @@ function NeutralActionState({ status, title, detail }: { status: string; title: 
 function ActionItem({ item }: { item: ActionRequiredItem }) {
   const action = itemAction(item);
   const subject = safeSubjectRef(item.subjectRef) ?? item.id ?? 'Unknown resource';
-  const status = item.status ?? item.category ?? 'Unknown';
+  const status = humanizeToken(item.status ?? item.category);
   const content = (
     <>
       <span className={`dot ${statusDot(item.status)}`} aria-hidden="true"></span>

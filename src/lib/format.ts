@@ -21,6 +21,13 @@ export function formatCount(n: number | undefined): string {
   return n === undefined ? '—' : countFormatter.format(n);
 }
 
+export function humanizeToken(value: string | undefined, fallback = 'Unknown'): string {
+  if (value === undefined) return fallback;
+  const normalized = value.trim().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ');
+  if (!normalized) return fallback;
+  return normalized[0].toUpperCase() + normalized.slice(1);
+}
+
 export function formatClockTime(iso: string | undefined): string {
   if (iso === undefined) return '—';
   const date = new Date(iso);
