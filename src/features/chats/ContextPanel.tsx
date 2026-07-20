@@ -131,7 +131,7 @@ function SelectedMessage({ message, instanceId }: { message: MessageResource; in
     <section className="selected-message-detail" aria-labelledby="selected-message-title">
       <div className="section-title-row">
         <div><span className="eyebrow">Message actions</span><h3 id="selected-message-title">Selected message</h3></div>
-        <span className="mono message-id">{message.id}</span>
+        <span className="mono message-id" title={message.id}>{message.id}</span>
       </div>
       <dl className="kv message-facts">
         <dt>Status</dt><dd><span className="status"><span className={`dot ${statusDot(status)}`} aria-hidden="true" />{status}{retryable ? ' · retryable' : ''}</span></dd>
@@ -181,8 +181,8 @@ function ContextPanelDetails({ instanceId, chat, onBack }: {
         <h3 id="contact-facts-title">Contact</h3>
         <dl className="kv">
           <dt>Name</dt><dd>{chat.displayName ?? '—'}</dd>
-          <dt>Contact</dt><dd><span className="mono">{contacts.isLoading ? 'Loading…' : contact?.id ?? '—'}</span></dd>
-          <dt>Chat</dt><dd><span className="mono">{chat.id}</span></dd>
+          <dt>Contact</dt><dd><span className="mono context-technical-value" title={contact?.id}>{contacts.isLoading ? 'Loading…' : contact?.id ?? '—'}</span></dd>
+          <dt>Chat</dt><dd><span className="mono context-technical-value" title={chat.id}>{chat.id}</span></dd>
           <dt>Labels</dt><dd>{chat.labelIds?.length ? chat.labelIds.map((labelId) => <span className="chip label-chip" key={labelId}>{labelNames.get(labelId) ?? labelId}</span>) : '—'}</dd>
         </dl>
         <p className="help read-only-note">Labels are synced from WhatsApp — read-only here.</p>

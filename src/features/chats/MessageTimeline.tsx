@@ -60,18 +60,12 @@ function MessageBubble({ message, selected, onSelect }: {
   const statusLabel = isOutgoing && status ? `, ${status}` : '';
 
   return (
-    <article
+    <button
+      type="button"
       className={`bubble ${direction}${isOutgoing && status === 'failed' ? ' failed' : ''}${selected ? ' selected' : ''}`}
       aria-label={`${selected ? 'Selected ' : ''}${directionLabel.toLocaleLowerCase()} ${type.toLocaleLowerCase()}${statusLabel} at ${time}`}
-      aria-current={selected ? 'true' : undefined}
-      role="button"
-      tabIndex={0}
+      aria-pressed={selected}
       onClick={onSelect}
-      onKeyDown={(event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
-        onSelect();
-      }}
     >
       {mediaLike
         ? <div className="media" role="img" aria-label={`${type} content unavailable in the message projection`}>
@@ -83,7 +77,7 @@ function MessageBubble({ message, selected, onSelect }: {
         <span className="foot"><span className={`dot ${statusDot(status)}`} aria-hidden="true" />{status ?? 'unknown'} · {time}</span>
       )}
       {!isOutgoing && knownDirection && <span className="foot">{time}</span>}
-    </article>
+    </button>
   );
 }
 
@@ -125,7 +119,12 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
 
   const selectMessage = (messageId: string) => {
     const next = new URLSearchParams(searchParams);
-    if (selectedMessageId === messageId) next.delete('message'); else next.set('message', messageId);
+    if (selectedMessageId === messageId) {
+      next.delete('message');
+    } else {
+      next.set('message', messageId);
+      next.set('pane', 'context');
+    }
     setSearchParams(next);
   };
 
