@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { IconButton } from '@/components/IconButton';
 import { useDrawerFocus } from '@/components/useDrawerFocus';
 
 function useModalDrawer(): boolean {
@@ -17,26 +18,39 @@ function useModalDrawer(): boolean {
 }
 
 function CloseIcon() {
-  return <svg className="!h-4 !w-4" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>;
+  return <svg className="!h-4 !w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>;
+}
+
+function CopyIcon({ copied }: { copied: boolean }) {
+  return copied
+    ? <svg className="!h-4 !w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+    : <svg className="!h-4 !w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>;
 }
 
 export function DrawerIdentifier({ value, label = 'Copy identifier' }: { value: string; label?: string }) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const resetTimerRef = useRef<number | undefined>(undefined);
+  const copied = copyState === 'copied';
+
+  useEffect(() => () => window.clearTimeout(resetTimerRef.current), []);
 
   const copy = async () => {
+    window.clearTimeout(resetTimerRef.current);
     try {
       await navigator.clipboard.writeText(value);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1600);
+      setCopyState('copied');
+      resetTimerRef.current = window.setTimeout(() => setCopyState('idle'), 1600);
     } catch {
-      setCopied(false);
+      setCopyState('failed');
+      resetTimerRef.current = window.setTimeout(() => setCopyState('idle'), 2400);
     }
   };
 
   return (
-    <span className="!flex !min-w-0 !items-center !gap-2">
+    <span className="!grid !min-h-11 !min-w-0 !grid-cols-[minmax(0,1fr)_44px] !items-center">
       <span className="mono !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap" title={value}>{value}</span>
-      <button className="!shrink-0 !border-0 !bg-transparent !p-0 !text-[11px] !text-[var(--fg-2)] hover:!text-[var(--fg)]" type="button" aria-label={`${label}: ${value}`} onClick={() => void copy()}>{copied ? 'Copied' : 'Copy'}</button>
+      <IconButton surfaceClassName="!h-8 !w-8 !border-transparent !bg-transparent group-hover:!bg-[var(--accent-hover)]" label={`${label}: ${value}`} title={copied ? 'Copied' : label} onClick={() => void copy()}><CopyIcon copied={copied} /></IconButton>
+      <span className="visually-hidden" aria-live="polite">{copyState === 'copied' ? 'Identifier copied.' : copyState === 'failed' ? 'Could not copy identifier.' : ''}</span>
     </span>
   );
 }
@@ -79,16 +93,16 @@ export function DetailDrawer({
       {...(modal ? { role: 'dialog', 'aria-modal': true } : {})}
       tabIndex={-1}
     >
-      <header className="drawer-head !flex !min-h-28 !shrink-0 !items-start !justify-between !gap-4 !border-b !border-[var(--border-subtle)] !bg-[var(--bg)] !px-6 !py-5 max-[640px]:!px-4 max-[640px]:!py-4">
+      <header className="drawer-head !grid !min-h-28 !shrink-0 !grid-cols-[minmax(0,1fr)_44px] !items-start !gap-x-4 !border-b !border-[var(--border-subtle)] !bg-[var(--bg)] !px-6 !py-5 max-[640px]:!px-4 max-[640px]:!py-4">
         <div className="drawer-identity !min-w-0 !flex-1">
           <span className="eyebrow !mb-2">{eyebrow}</span>
-          <div className="drawer-title-row !flex !min-w-0 !items-center !gap-3 !mb-1">
-            <h2 id={titleId} className={`!w-full !max-w-full !min-w-0 !flex-none !overflow-hidden !text-ellipsis !whitespace-nowrap ${titleClassName ?? ''}`}>{title}</h2>
+          <div className="drawer-title-row !grid !min-w-0 !grid-cols-[minmax(0,1fr)_auto] !items-center !gap-3 !mb-1">
+            <h2 id={titleId} className={`!w-auto !max-w-full !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap ${titleClassName ?? ''}`}>{title}</h2>
             {status}
           </div>
           {subtitle && <div className="drawer-subtitle !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap text-[11px] leading-[17px] text-[var(--fg-2)]">{subtitle}</div>}
         </div>
-        <button ref={closeRef} className="close !flex !h-11 !w-11 !basis-11 !items-center !justify-center !rounded-[var(--radius-sm)] !border !border-[var(--border-subtle)] !bg-[var(--accent)] !p-0 !text-[var(--muted)]" type="button" aria-label={closeLabel} title="Close" onClick={onClose}><CloseIcon /></button>
+        <IconButton ref={closeRef} className="close" label={closeLabel} title="Close" onClick={onClose}><CloseIcon /></IconButton>
       </header>
       <div className="drawer-scroll !min-h-0 !flex-1 !overflow-y-auto overscroll-contain">{children}</div>
     </aside>
