@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
 import { RealtimeIndicator } from '@/components/RealtimeIndicator';
@@ -20,12 +20,25 @@ function avatarInitials(name: string | undefined) {
 export function ChatsPage() {
   const { instanceId, chatId } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const picker = usePickerInstances();
   const chat = useChat(chatId);
   const chatReadState = useResilientReadState(chat, chat.data?.resource !== undefined);
-  const [activePane, setActivePane] = useState<ChatPane>(chatId ? 'thread' : 'conversations');
   const selectedChat = chat.data?.resource;
+  const requestedPane = searchParams.get('pane');
+  const activePane: ChatPane = !chatId
+    ? 'conversations'
+    : requestedPane === 'conversations' || requestedPane === 'context'
+      ? requestedPane
+      : 'thread';
+
+  const setActivePane = (pane: ChatPane) => {
+    if (!chatId && pane !== 'conversations') return;
+    const next = new URLSearchParams(searchParams);
+    if (pane === (chatId ? 'thread' : 'conversations')) next.delete('pane');
+    else next.set('pane', pane);
+    setSearchParams(next);
+  };
 
   useEffect(() => {
     if (instanceId !== undefined || picker.data?.resource?.items.length !== 1) return;
@@ -53,24 +66,11 @@ export function ChatsPage() {
 
   return (
     <div className="workspace workspace--chats" data-active-pane={activePane}>
-      <nav className="chat-pane-switcher" aria-label="Chat workspace panes">
-        {(['conversations', 'thread', 'context'] as const).map((pane) => (
-          <button
-            key={pane}
-            type="button"
-            aria-controls={`chat-${pane}`}
-            aria-pressed={activePane === pane}
-            onClick={() => setActivePane(pane)}
-          >
-            {pane[0]?.toUpperCase()}{pane.slice(1)}
-          </button>
-        ))}
-      </nav>
-
-      <ConversationList instanceId={instanceId} chatId={chatId} onOpenThread={() => setActivePane('thread')} />
+      <ConversationList instanceId={instanceId} chatId={chatId} />
 
       <section className="thread" id="chat-thread" aria-labelledby="chat-title">
         <header className="head">
+          <button className="btn sm chat-mobile-back" type="button" aria-controls="chat-conversations" onClick={() => setActivePane('conversations')}>← Chats</button>
           {chatId && <span className="thread-avatar" aria-hidden="true">{avatarInitials(selectedChat?.displayName)}</span>}
           <div className="t"><h1 id="chat-title">{threadTitle}</h1>{threadId && threadId !== threadTitle && <span className="mono">{threadId}</span>}</div>
           <div className="spacer" />

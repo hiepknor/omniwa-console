@@ -174,10 +174,9 @@ function InstancePicker({
   );
 }
 
-export function ConversationList({ instanceId, chatId, onOpenThread }: {
+export function ConversationList({ instanceId, chatId }: {
   instanceId: string | undefined;
   chatId: string | undefined;
-  onOpenThread: () => void;
 }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -211,12 +210,16 @@ export function ConversationList({ instanceId, chatId, onOpenThread }: {
 
   const routeSearchParams = new URLSearchParams(searchParams);
   routeSearchParams.delete('message');
-  const querySuffix = routeSearchParams.size > 0 ? `?${routeSearchParams.toString()}` : '';
-  const chooseInstance = (nextInstanceId: string) => navigate(`/chats/${encodeURIComponent(nextInstanceId)}${querySuffix}`);
+  const chooseInstance = (nextInstanceId: string) => {
+    routeSearchParams.delete('pane');
+    const suffix = routeSearchParams.size > 0 ? `?${routeSearchParams.toString()}` : '';
+    navigate(`/chats/${encodeURIComponent(nextInstanceId)}${suffix}`);
+  };
   const chooseChat = (nextChatId: string) => {
     if (!instanceId) return;
-    navigate(`/chats/${encodeURIComponent(instanceId)}/${encodeURIComponent(nextChatId)}${querySuffix}`);
-    onOpenThread();
+    routeSearchParams.delete('pane');
+    const suffix = routeSearchParams.size > 0 ? `?${routeSearchParams.toString()}` : '';
+    navigate(`/chats/${encodeURIComponent(instanceId)}/${encodeURIComponent(nextChatId)}${suffix}`);
   };
   const setSearch = (value: string) => {
     const next = new URLSearchParams(searchParams);

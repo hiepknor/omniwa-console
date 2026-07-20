@@ -1011,7 +1011,7 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
 
 main:has(> .workspace--chats){padding:0;display:flex;overflow:hidden}
 .workspace--chats{position:relative;flex:1;display:flex;min-height:0;min-width:0;height:100vh;overflow:hidden;background:var(--bg)}
-.workspace--chats .chat-pane-switcher{display:none}
+.workspace--chats .chat-mobile-back{display:none}
 .workspace--chats .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .workspace--chats .convos{width:300px;background:var(--surface);border-right-color:var(--border-subtle)}
 .workspace--chats .convos .head{padding:var(--space-3);gap:var(--space-2);background:var(--surface)}
@@ -1111,14 +1111,13 @@ main:has(> .workspace--chats){padding:0;display:flex;overflow:hidden}
 .chat-calm-state p{max-width:360px;margin-top:var(--space-1);font-size:12px;line-height:18px}
 .chat-list-error,.chat-thread-error{margin:var(--space-4)}
 
-@media(max-width:900px){
-  .workspace--chats{height:100vh;min-height:0;padding-top:45px;display:block;overflow:hidden}
-  .workspace--chats .chat-pane-switcher{position:absolute;inset:0 0 auto;z-index:4;height:45px;display:grid;grid-template-columns:repeat(3,1fr);padding:5px;background:var(--bg);border-bottom:1px solid var(--border-subtle)}
-  .workspace--chats .chat-pane-switcher button{min-height:34px;border:1px solid transparent;border-radius:var(--radius-sm);background:transparent;color:var(--muted);font:400 12px var(--font-body);cursor:pointer}
-  .workspace--chats .chat-pane-switcher button[aria-pressed="true"]{border-color:var(--border-subtle);background:var(--surface);color:var(--fg)}
-  .workspace--chats .chat-pane-switcher button:focus-visible{box-shadow:inset var(--focus-ring)}
-  .workspace--chats .convos,.workspace--chats .thread,.workspace--chats .context{display:none;width:100%;height:calc(100vh - 45px);border:0}
-  .workspace--chats[data-active-pane="conversations"] .convos,.workspace--chats[data-active-pane="thread"] .thread,.workspace--chats[data-active-pane="context"] .context{display:flex}
+@media(min-width:641px) and (max-width:900px){
+  .workspace--chats{height:100vh;min-height:0;overflow:hidden}
+  .workspace--chats .convos{display:flex;width:min(300px,40vw);height:100vh}
+  .workspace--chats .thread{display:flex;height:100vh}
+  .workspace--chats .context{display:none;height:100vh;border:0;border-left:1px solid var(--border-subtle)}
+  .workspace--chats[data-active-pane="context"] .thread{display:none}
+  .workspace--chats[data-active-pane="context"] .context{display:flex;flex:1;width:auto}
   .workspace--chats .context{flex-direction:column;overflow-y:auto}
   .workspace--chats .context-close{display:inline-flex}
   .workspace--chats .convos .list{flex:1}
@@ -1126,10 +1125,11 @@ main:has(> .workspace--chats){padding:0;display:flex;overflow:hidden}
 }
 
 @media(max-width:640px){
-  .workspace--chats{height:calc(100dvh - 64px);min-height:0;padding:53px 0 0;overflow:hidden}
-  .workspace--chats .chat-pane-switcher button{min-height:44px}
-  .workspace--chats .chat-pane-switcher{height:53px;padding:4px}
-  .workspace--chats .convos,.workspace--chats .thread,.workspace--chats .context{height:calc(100dvh - 117px);min-height:0;border:0}
+  .workspace--chats{display:block;height:calc(100dvh - 64px);min-height:0;overflow:hidden}
+  .workspace--chats .convos,.workspace--chats .thread,.workspace--chats .context{display:none;width:100%;height:calc(100dvh - 64px);min-height:0;border:0}
+  .workspace--chats[data-active-pane="conversations"] .convos,.workspace--chats[data-active-pane="thread"] .thread,.workspace--chats[data-active-pane="context"] .context{display:flex}
+  .workspace--chats .context{flex-direction:column;overflow-y:auto}
+  .workspace--chats .context-close,.workspace--chats .chat-mobile-back{display:inline-flex}
   .workspace--chats .convo{min-height:64px}
   .workspace--chats .convos .filters .chip{min-height:44px;padding-inline:12px}
   .workspace--chats .thread .head{min-height:64px;padding:8px var(--space-3);gap:var(--space-2)}
