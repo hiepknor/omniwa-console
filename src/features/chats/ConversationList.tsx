@@ -150,7 +150,7 @@ function InstancePicker({
     <PickerPopover
       label="Instances"
       trigger={(open) => (
-        <button className="instpick !min-h-11" type="button" title={pickerTitle} aria-label={`Select instance. Current: ${pickerTitle}`} aria-haspopup="menu" aria-expanded={open}>
+        <button className="instpick !min-h-11" type="button" title={`Select instance. Current: ${pickerTitle}`} aria-haspopup="menu" aria-expanded={open}>
           <span className={`dot instance-status-dot ${statusDot(selected?.status)}`} aria-hidden="true" />
           <span className="instpick-name">{pickerLabel}</span>
           <span className="chev" aria-hidden="true">▾</span>
@@ -286,7 +286,7 @@ export function ConversationList({ instanceId, chatId }: {
         <InstancePicker instances={instances} selected={selectedInstance} onSelect={chooseInstance} />
         <label className="chat-search-label" htmlFor="chat-search">Search direct chats</label>
         <input className="search !min-h-11" id="chat-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search direct chats…" disabled={!instanceId} />
-        <div className="filters" aria-label="Active conversation filters">
+        <div className="filters" role="group" aria-label="Active conversation filters">
           {activeLabelIds.map((labelId) => (
             <button className="chip filter-active" key={labelId} type="button" aria-label={`Remove label filter ${labelNames.get(labelId) ?? labelId}`} onClick={() => removeLabel(labelId)}>
               {labelNames.get(labelId) ?? labelId} <span className="x" aria-hidden="true">✕</span>

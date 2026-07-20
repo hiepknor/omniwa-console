@@ -1036,6 +1036,7 @@ main:has(> .workspace--chats){padding:0;display:flex;overflow:hidden}
 .workspace--chats .label-chip{min-height:20px;padding:0 7px;font-size:11px;font-weight:400;line-height:18px}
 .workspace--chats .chat-id{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
 .workspace--chats .table-foot{min-height:48px;border-top-color:var(--border-subtle);background:var(--surface)}
+.workspace--chats .table-foot .num{color:var(--fg-2)}
 .workspace--chats .thread{background:var(--bg)}
 .workspace--chats .thread .head{min-height:64px;background:var(--bg)}
 .workspace--chats .thread .head .btn{min-width:72px;justify-content:center}
@@ -1137,8 +1138,7 @@ main:has(> .workspace--chats){padding:0;display:flex;overflow:hidden}
   .workspace--chats .thread .head .t{flex:1 1 auto}
   .workspace--chats .thread .head .spacer{display:none}
   .workspace--chats .thread .head .thread-label,.workspace--chats .thread .head .live{display:none}
-  .workspace--chats .thread .head .contact-toggle{min-width:44px;min-height:44px;font-size:0;padding:0}
-  .workspace--chats .thread .head .contact-toggle::after{content:"Info";font-size:12px}
+  .workspace--chats .thread .head .contact-toggle{min-width:44px;min-height:44px;padding:0}
   .workspace--chats .timeline-pane{padding:12px var(--space-3) 18px}
   .workspace--chats .bubble{max-width:88%}
   .workspace--chats .composer{min-height:56px;margin:8px var(--space-3) 0;padding:5px 6px;gap:6px}

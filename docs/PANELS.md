@@ -37,9 +37,11 @@ typed confirmation dialog.
 ## chats — `/chats/:instanceId?/:chatId?` (realtime) — PRIMARY
 
 Direct conversations with contacts only (groups are excluded from this
-surface). A three-pane messaging workspace: conversation list · bubble
-timeline · context panel (contact card, labels, selected-message delivery
-timeline). Send commands may complete synchronously or be accepted for
+surface). An adaptive messaging workspace: desktop shows conversation list ·
+bubble timeline · context panel together, tablet preserves a two-pane
+master-detail layout, and mobile uses one contextual pane. Selecting a message
+opens its contact card, labels, and delivery timeline where space is compact.
+Send commands may complete synchronously or be accepted for
 asynchronous work. Bubbles follow message and delivery history independently —
 command completion never claims upstream WhatsApp delivery.
 

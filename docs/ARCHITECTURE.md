@@ -175,7 +175,8 @@ The messaging workflow is primary; operations panels are secondary:
 
 ```
 /connect
-/chats/:instanceId?/:chatId?         # primary: direct conversations (3-pane)
+/chats/:instanceId?/:chatId?         # primary: adaptive direct-conversation workspace
+                                     #   ?pane=conversations|context selects the compact pane
 /groups/:instanceId?                 # primary: group management table
                                      #   ?list=nl_* opens the Named Lists panel mode
 /messages                            # campaigns (proposed contract)
@@ -191,8 +192,11 @@ The messaging workflow is primary; operations panels are secondary:
 /settings/api-keys
 ```
 
-The workspace remembers the last instance + chat in the URL so every
-conversation is a shareable deep link. Unauthenticated visits to any route
+The workspace remembers the instance, chat, compact-layout pane, filters, and
+selected message in the URL so every operator context is a shareable deep
+link. Desktop renders conversation, timeline, and context panes together;
+tablet preserves the conversation list beside one detail pane; mobile renders
+one pane with contextual back navigation. Unauthenticated visits to any route
 redirect to `/connect`.
 
 ## Error and safety posture

@@ -75,7 +75,7 @@ export function ChatsPage() {
           <div className="t"><h1 id="chat-title">{threadTitle}</h1>{threadId && threadId !== threadTitle && <span className="mono">{threadId}</span>}</div>
           <div className="spacer" />
           <RealtimeIndicator />
-          {chatId && <button className="btn sm contact-toggle" type="button" data-pane-target="context" aria-controls="chat-context" onClick={() => setActivePane('context')}>Contact</button>}
+          {chatId && <button className="btn sm contact-toggle" type="button" data-pane-target="context" aria-controls="chat-context" onClick={() => setActivePane('context')}>Info</button>}
         </header>
         {timeline}
         {instanceId && chatId && !chatReadState.isInitialLoading && !chatReadState.isInitialError && !(chat.data?.unavailable && selectedChat === undefined) && (
