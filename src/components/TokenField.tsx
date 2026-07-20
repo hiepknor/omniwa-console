@@ -88,7 +88,7 @@ export function TokenField({
           </span>
         ))}
         <input
-          className="min-h-7 min-w-28 flex-1 border-0 bg-transparent !px-0 font-mono text-xs text-[var(--fg)] outline-none placeholder:text-[var(--muted)]"
+          className="min-h-7 min-w-28 flex-1 border-0 bg-transparent !px-0 font-mono text-[length:var(--control-font-size)] text-[var(--fg)] outline-none placeholder:text-[var(--muted)]"
           id={id}
           value={value.draft}
           onChange={(event) => updateDraft(event.target.value)}
