@@ -1,6 +1,7 @@
 import type { QueryKey } from '@tanstack/react-query';
 
 import { instanceKeys, messageKeys, opsKeys, queryKeys } from './keys';
+import { isMockApiOrigin } from './mock/config';
 
 export type RealtimeEventEnvelope = {
   id: string;
@@ -190,6 +191,35 @@ function readCursorStatus(response: Response): CursorStatus {
 }
 
 export function openEventStream(options: EventStreamOptions): EventStreamHandle {
+  if (import.meta.env.DEV && isMockApiOrigin(options.baseUrl)) {
+    let closed = false;
+    const timer = setTimeout(() => {
+      if (closed) return;
+      options.onBatch({
+        events: [{
+          id: 'evt_mock_stream_01',
+          cursor: 'mock_cursor_01',
+          type: 'message.delivered',
+          resource: 'message',
+          resourceId: 'msg_mock_out_delivered_02',
+          instanceId: 'inst_mock_sales_primary_01',
+          occurredAt: '2026-07-20T08:30:00.000Z',
+        }],
+        cursorStatus: 'no_cursor',
+        isBackfill: true,
+        isGap: false,
+      });
+      options.onStatus('live');
+    }, 120);
+    options.onStatus('connecting');
+    return {
+      close() {
+        closed = true;
+        clearTimeout(timer);
+      },
+    };
+  }
+
   const streamUrl = `${options.baseUrl.replace(/\/$/, '')}/v1/events/stream`;
   let dead = false;
   let cursor: string | undefined;
