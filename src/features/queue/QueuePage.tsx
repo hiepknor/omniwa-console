@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { opsKeys } from '@/api/keys';
+import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
@@ -93,7 +94,7 @@ export function QueuePage() {
   const columns: DataTableColumn<JobRow>[] = [
     { id: 'job', header: 'Job', size: 'lg', kind: 'identifier', sticky: 'identity', mobile: 'identity', cell: (job) => <span className="mono" title={job.id}>{job.id}</span> },
     { id: 'type', header: 'Type', size: 'xl', mobile: 'identifier', cell: (job) => job.workType ?? '—' },
-    { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (job) => <span className="status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span> },
+    { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (job) => <StatusIndicator dotClass={jobStatusDot(job.status)}>{job.status ?? '—'}</StatusIndicator> },
     { id: 'attempts', header: 'Attempts', size: 'sm', kind: 'numeric', align: 'end', mobile: 'hidden', cell: (job) => <span className="num">{job.attemptCount ?? '—'}</span> },
     { id: 'resource', header: 'Resource', size: 'lg', kind: 'identifier', mobile: 'hidden', cell: (job) => <span className="mono" title={job.resourceRef}>{job.resourceRef ?? '—'}</span> },
     { id: 'updated', header: 'Updated', size: 'md', kind: 'date', mobile: 'meta', cell: (job) => <span className="ts" title={job.updatedAt}>{relativeTime(job.updatedAt) || '—'}</span>, mobileCell: (job) => relativeTime(job.updatedAt) || undefined },
@@ -120,7 +121,7 @@ export function QueuePage() {
       <section className="queue-metric-section" aria-labelledby="queue-posture-title">
         <div className="queue-metric-head">
           <h2 id="queue-posture-title">Queue posture</h2>
-          {queueResource?.status && <span className="status queue-status-chip"><span className={`dot ${jobStatusDot(queueResource.status)}`}></span>{queueResource.status}</span>}
+          {queueResource?.status && <StatusIndicator className="queue-status-chip" dotClass={jobStatusDot(queueResource.status)}>{queueResource.status}</StatusIndicator>}
         </div>
         <div className="metrics queue-metrics">
           <MetricCard label="Queue depth" value={queueResource?.queuedJobCount} context="Queued jobs" />

@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { instanceKeys } from '@/api/keys';
+import { RowStateBadge, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
@@ -99,7 +100,7 @@ export function InstancesPage() {
       kind: 'identity',
       sticky: 'identity',
       mobile: 'identity',
-      cell: (instance) => <><span className="resource-name">{instance.displayName ?? 'Unnamed instance'}</span>{instance.id === instanceId && <span className="row-state">Open</span>}</>,
+      cell: (instance) => <><span className="resource-name">{instance.displayName ?? 'Unnamed instance'}</span>{instance.id === instanceId && <RowStateBadge>Open</RowStateBadge>}</>,
     },
     { id: 'id', header: 'ID', size: 'lg', kind: 'identifier', mobile: 'identifier', cell: (instance) => <span className="mono" title={instance.id}>{instance.id}</span> },
     {
@@ -108,7 +109,7 @@ export function InstancesPage() {
       size: 'md',
       kind: 'status',
       mobile: 'secondary',
-      cell: (instance) => <span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>,
+      cell: (instance) => <StatusIndicator dotClass={statusDot(instance.status)}>{instance.status ?? '—'}</StatusIndicator>,
     },
     { id: 'messages', header: 'Msgs 24h', size: 'sm', kind: 'numeric', align: 'end', mobile: 'hidden', cell: () => <span className="num">—</span> },
     {

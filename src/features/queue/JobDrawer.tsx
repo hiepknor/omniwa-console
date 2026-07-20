@@ -1,4 +1,5 @@
 import type { JobResource } from '@/api/queue';
+import { StatusIndicator } from '@/components/badges';
 import { DetailDrawer, DetailDrawerState, DrawerIdentifier, DrawerTechnicalValue } from '@/components/drawer/DetailDrawer';
 import { relativeTime } from '@/lib/format';
 
@@ -22,7 +23,7 @@ function TimeFact({ value }: { value: string | undefined }) {
 
 export function JobDrawer({ job, requestedJobId, onClose }: { job: JobResource; requestedJobId: string; onClose: () => void }) {
   return (
-    <DetailDrawer titleId="job-detail-title" eyebrow="Job detail" title={job.workType ?? 'Job details'} status={<span className="status terminal-status"><span className={`dot ${jobStatusDot(job.status)}`}></span>{job.status ?? '—'}</span>} subtitle={<DrawerIdentifier value={requestedJobId} label="Copy job identifier" />} className="queue-drawer" closeLabel="Close job details" onClose={onClose}>
+    <DetailDrawer titleId="job-detail-title" eyebrow="Job detail" title={job.workType ?? 'Job details'} status={<StatusIndicator dotClass={jobStatusDot(job.status)}>{job.status ?? '—'}</StatusIndicator>} subtitle={<DrawerIdentifier value={requestedJobId} label="Copy job identifier" />} className="queue-drawer" closeLabel="Close job details" onClose={onClose}>
       <section aria-labelledby="job-facts-title">
         <h3 id="job-facts-title">Facts</h3>
         <dl className="kv">

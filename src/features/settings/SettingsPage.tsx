@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiFailure } from '@/api/envelopes';
 import type { SettingsResource } from '@/api/settings';
+import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { PageHeader } from '@/components/PageHeader';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
@@ -54,9 +55,7 @@ function RuntimeStatus({ settings }: { settings: SettingsResource }) {
         <p>The active revision governs platform-side configuration.</p>
       </div>
       <div className="settings-runtime-state">
-        <span className={`status${settings.status === 'active' ? ' status-active' : ''}`}>
-          <span className="dot" />{settings.status ?? 'unknown'}
-        </span>
+        <StatusIndicator dotClass={settings.status === 'active' ? 'dot-ok' : 'dot-info'}>{settings.status ?? 'unknown'}</StatusIndicator>
         <span className="mono">{settings.id ?? 'Revision not reported'}</span>
         <span>profile {settings.profile ?? 'not reported'}</span>
         <span className="ts" title={settings.updatedAt}>{updated} · {absoluteTime(settings.updatedAt)}</span>
@@ -80,7 +79,7 @@ function ActiveConfiguration({ settings }: { settings: SettingsResource }) {
           <h2 id="active-configuration-heading">Active configuration</h2>
           <p>Read-only values currently projected by the platform.</p>
         </div>
-        <span className="pill">{settings.profile ?? 'profile unavailable'}</span>
+        <CategoryPill title={settings.profile}>{settings.profile ?? 'profile unavailable'}</CategoryPill>
       </header>
       <dl className="settings-config-list">
         {fields.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value ?? 'Not reported'}</dd></div>)}
@@ -153,7 +152,7 @@ function DraftRevision() {
     <section className="settings-panel settings-draft" aria-labelledby="draft-revision-heading" data-od-id="settings-draft-revision">
       <header className="settings-panel-head">
         <div><h2 id="draft-revision-heading">Draft revision</h2><p>Validate the complete JSON payload before activation.</p></div>
-        <span className={`status${isCurrentValidation ? ' status-active' : ''}`}><span className="dot" />{isCurrentValidation ? 'validated · not active' : isCurrentValidationPending ? 'validation pending' : 'not validated'}</span>
+        <StatusIndicator dotClass={isCurrentValidation ? 'dot-ok' : isCurrentValidationPending ? 'dot-pending' : 'dot-muted'}>{isCurrentValidation ? 'validated · not active' : isCurrentValidationPending ? 'validation pending' : 'not validated'}</StatusIndicator>
       </header>
       <div className="settings-draft-body">
         <div className="settings-payload">
@@ -163,11 +162,11 @@ function DraftRevision() {
         <div className="settings-change-summary">
           <div className="settings-subhead"><span>Validation evidence</span><span className="num">current draft</span></div>
           {parseError && <SurfaceNotice kind="error" label="JSON parse error" title={parseError} announcement="polite" />}
-          {validate.isPending && <div className="settings-validation"><span className="status"><span className="dot" />validating</span><p>Checking schema and policy constraints…</p></div>}
+          {validate.isPending && <div className="settings-validation"><StatusIndicator dotClass="dot-pending">validating</StatusIndicator><p>Checking schema and policy constraints…</p></div>}
           {validate.isError && <div className="settings-validation settings-validation-error"><FailureNotice error={validate.error} title="Validation failed" /></div>}
-          {isCurrentValidation && <div className="settings-validation"><span className="status status-active"><span className="dot" />validation passed</span><span className="mono">{validate.data.requestId}</span><p>The platform accepted this exact draft as valid. This is validation evidence, not activation.</p></div>}
-          {isCurrentValidationPending && <div className="settings-validation"><span className="status"><span className="dot" />validation accepted</span><span className="mono">{validate.data.requestId}</span><p>Validation is still pending. Activation stays disabled until a completed validation is returned.</p></div>}
-          {!parseError && !validate.isPending && !validate.isError && !isCurrentValidation && !isCurrentValidationPending && <div className="settings-validation settings-validation-idle"><span className="status"><span className="dot" />awaiting validation</span><p>Edit the complete payload, then validate it against platform policy.</p></div>}
+          {isCurrentValidation && <div className="settings-validation"><StatusIndicator dotClass="dot-ok">validation passed</StatusIndicator><span className="mono">{validate.data.requestId}</span><p>The platform accepted this exact draft as valid. This is validation evidence, not activation.</p></div>}
+          {isCurrentValidationPending && <div className="settings-validation"><StatusIndicator dotClass="dot-pending">validation accepted</StatusIndicator><span className="mono">{validate.data.requestId}</span><p>Validation is still pending. Activation stays disabled until a completed validation is returned.</p></div>}
+          {!parseError && !validate.isPending && !validate.isError && !isCurrentValidation && !isCurrentValidationPending && <div className="settings-validation settings-validation-idle"><StatusIndicator dotClass="dot-muted">awaiting validation</StatusIndicator><p>Edit the complete payload, then validate it against platform policy.</p></div>}
           {activate.isError && <div className="settings-validation settings-validation-error"><FailureNotice error={activate.error} title={(activate.error instanceof ApiFailure && activate.error.category === 'conflict') ? 'Activation conflict' : 'Activation was not accepted'} /></div>}
         </div>
       </div>
@@ -188,11 +187,11 @@ function ConsoleSessionAside() {
   if (session === null) return null;
   return (
     <aside className="settings-session" aria-labelledby="console-session-heading" data-od-id="settings-console-session">
-      <div className="settings-session-head"><div><span className="eyebrow !text-[var(--fg-2)]">Local console</span><h2 id="console-session-heading">Console session</h2></div><span className="status status-active"><span className="dot" />connected</span></div>
+      <div className="settings-session-head"><div><span className="eyebrow !text-[var(--fg-2)]">Local console</span><h2 id="console-session-heading">Console session</h2></div><StatusIndicator dotClass="dot-ok">connected</StatusIndicator></div>
       <dl className="settings-session-facts">
         <div><dt>API base URL</dt><dd className="mono">{session.baseUrl}</dd></div>
         <div><dt>Key fingerprint</dt><dd className="mono">{keyFingerprint(session.apiKey)}</dd></div>
-        <div><dt>Key kind</dt><dd><span className="pill">{session.keyKind}</span></dd></div>
+        <div><dt>Key kind</dt><dd><CategoryPill>{session.keyKind}</CategoryPill></dd></div>
         <div><dt>Connected</dt><dd className="ts" title={session.connectedAt}>{relativeTime(session.connectedAt) || absoluteTime(session.connectedAt)}</dd></div>
       </dl>
       <div className="settings-session-note"><span className="eyebrow">Credential boundary</span><p>The API key is masked after entry and never appears in URLs or logs.</p></div>

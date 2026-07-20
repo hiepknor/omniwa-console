@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } 
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
+import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
@@ -137,7 +138,7 @@ function MetricCard({ label, value, context }: { label: string; value: number | 
 function LocalState({ group }: { group: GroupResource }) {
   const states = [group.muted && 'muted', group.archived && 'archived', group.pinned && 'pinned'].filter((value): value is string => Boolean(value));
   if (states.length === 0) return <>—</>;
-  return <span className="groups-local-state">{states.map((state) => <span className="chip" key={state}>{state}</span>)}</span>;
+  return <span className="groups-local-state">{states.map((state) => <CategoryPill compact key={state}>{state}</CategoryPill>)}</span>;
 }
 
 function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
@@ -183,7 +184,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
     { id: 'members', header: 'Members', size: 'sm', kind: 'numeric', align: 'end', mobile: 'secondary', cell: (group) => <span className="num">{group.memberCount ?? '—'}</span> },
     { id: 'admins', header: 'Admins', size: 'sm', kind: 'numeric', align: 'end', mobile: 'hidden', cell: (group) => <span className="num">{group.adminCount ?? '—'}</span> },
     { id: 'local', header: 'Local state', size: 'lg', mobile: 'hidden', cell: (group) => <LocalState group={group} /> },
-    { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (group) => <span className="status"><span className={`dot ${statusDot(group.status)}`} />{group.status ?? '—'}</span> },
+    { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (group) => <StatusIndicator dotClass={statusDot(group.status)}>{group.status ?? '—'}</StatusIndicator> },
     { id: 'updated', header: 'Updated', size: 'md', kind: 'date', align: 'end', mobile: 'meta', cell: (group) => <span className="ts" title={group.updatedAt}>{relativeTime(group.updatedAt) || '—'}</span>, mobileCell: (group) => relativeTime(group.updatedAt) || undefined },
   ];
   const tableState: DataTableState<GroupResource> = readState.isInitialError

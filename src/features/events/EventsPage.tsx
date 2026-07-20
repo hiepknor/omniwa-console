@@ -1,6 +1,7 @@
 import { useMemo, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { AuditRecordResource, EventResource } from '@/api/events-api';
+import { StatusIndicator } from '@/components/badges';
 import {
   useRealtimeEvents,
   useRealtimeStatus,
@@ -176,7 +177,7 @@ function AuditRecords() {
     { id: 'action', header: 'Action', size: 'lg', mobile: 'identifier', cell: (record) => record.action ?? '—' },
     { id: 'resourceType', header: 'Resource type', size: 'md', mobile: 'hidden', cell: (record) => record.auditedResourceType ?? '—' },
     { id: 'resource', header: 'Resource ref', size: 'lg', kind: 'identifier', mobile: 'hidden', cell: (record) => <span className="mono" title={record.resourceRef}>{record.resourceRef ?? '—'}</span> },
-    { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (record) => <span className="status"><span className={`dot ${statusDot(record.status)}`} />{record.status ?? '—'}</span> },
+    { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (record) => <StatusIndicator dotClass={statusDot(record.status)}>{record.status ?? '—'}</StatusIndicator> },
     { id: 'created', header: 'Created', size: 'md', kind: 'date', mobile: 'meta', cell: (record) => <time className="ts" dateTime={record.createdAt} title={record.createdAt}>{relativeTime(record.createdAt) || '—'}</time>, mobileCell: (record) => relativeTime(record.createdAt) || undefined },
   ];
   const tableState: DataTableState<AuditRecordResource> = listReadState.isInitialError

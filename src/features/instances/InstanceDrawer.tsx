@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CommandResult } from '@/api/envelopes';
 import type { InstanceResource } from '@/api/instances';
+import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import { DetailDrawer, DetailDrawerState, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
@@ -75,7 +76,7 @@ export function InstanceDrawer({
 
   return (
     <>
-      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
+      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<StatusIndicator dotClass={statusDot(instance.status)}>{instance.status ?? '—'}</StatusIndicator>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
           <section aria-labelledby="instance-facts-title">
             <h3 id="instance-facts-title" className="visually-hidden">Instance facts</h3>
             <dl className="kv">
@@ -151,8 +152,8 @@ export function InstanceDrawer({
                 <thead><tr><th scope="col">Session</th><th scope="col">State</th><th scope="col">Updated</th></tr></thead>
                 <tbody>{sessionItems.map((session) => (
                   <tr key={session.id}>
-                    <td data-label="Session"><span className="mono">{session.id}</span>{session.id === instance.activeSessionId && <span className="pill ml-2">Active</span>}</td>
-                    <td data-label="State"><span className="status sm"><span className={`dot ${statusDot(session.status)}`}></span>{session.status ?? '—'}</span></td>
+                    <td data-label="Session"><span className="mono">{session.id}</span>{session.id === instance.activeSessionId && <CategoryPill compact className="ml-2">Active</CategoryPill>}</td>
+                    <td data-label="State"><StatusIndicator size="small" dotClass={statusDot(session.status)}>{session.status ?? '—'}</StatusIndicator></td>
                     <td data-label="Updated" className="ts" title={session.updatedAt}>{relativeTime(session.updatedAt) || '—'}</td>
                   </tr>
                 ))}</tbody>
@@ -173,7 +174,7 @@ export function InstanceDrawer({
             ) : provider.data?.unavailable ? (
               <div className="empty">No capability data yet.</div>
             ) : capabilities.length > 0 ? (
-              <div className="capchips">{capabilities.map((capability) => <span className="chip" key={capability}>{capability}</span>)}</div>
+              <div className="capchips">{capabilities.map((capability) => <CategoryPill title={capability} key={capability}>{capability}</CategoryPill>)}</div>
             ) : (
               <div className="empty">No capabilities reported.</div>
             )}

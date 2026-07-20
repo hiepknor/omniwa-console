@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { ApiKeyResource } from '@/api/api-keys';
+import { CategoryPill, OverflowCountBadge, StatusIndicator } from '@/components/badges';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import {
   DataTable,
@@ -25,9 +26,9 @@ function Scopes({ scopes }: { scopes: string[] }) {
   const visible = scopes.slice(0, 2);
   const remaining = scopes.length - visible.length;
   return (
-    <span className="settings-key-scopes" title={scopes.join(', ')}>
-      {visible.map((scope) => <span className="chip" key={scope}>{scope}</span>)}
-      {remaining > 0 && <span className="chip num">+{remaining}</span>}
+    <span className="settings-key-scopes" aria-label={`Scopes: ${scopes.join(', ')}`}>
+      {visible.map((scope) => <CategoryPill className="max-w-[140px]" title={scope} key={scope}>{scope}</CategoryPill>)}
+      {remaining > 0 && <OverflowCountBadge count={remaining} label={remaining === 1 ? 'scope' : 'scopes'} />}
     </span>
   );
 }
@@ -89,9 +90,9 @@ function AdminApiKeysSurface() {
 
   const columns: DataTableColumn<ApiKeyResource>[] = [
     { id: 'id', header: 'ID', size: 'xl', kind: 'identifier', sticky: 'identity', mobile: 'identity', cell: (apiKey) => <span className="mono" title={apiKey.id}>{apiKey.id}</span> },
-    { id: 'kind', header: 'Kind', size: 'md', mobile: 'secondary', cell: (apiKey) => <span className="pill">{apiKey.kind}</span> },
+    { id: 'kind', header: 'Kind', size: 'md', mobile: 'secondary', cell: (apiKey) => <CategoryPill>{apiKey.kind}</CategoryPill> },
     { id: 'scopes', header: 'Scopes', size: 'xl', mobile: 'identifier', cell: (apiKey) => <Scopes scopes={apiKey.scopes} /> },
-    { id: 'status', header: 'Status', size: 'sm', kind: 'status', mobile: 'meta', cell: (apiKey) => <span className="status"><span className={`dot ${apiKey.status === 'active' ? 'dot-ok' : 'dot-muted'}`} />{apiKey.status}</span> },
+    { id: 'status', header: 'Status', size: 'sm', kind: 'status', mobile: 'secondary', cell: (apiKey) => <StatusIndicator dotClass={apiKey.status === 'active' ? 'dot-ok' : 'dot-muted'}>{apiKey.status}</StatusIndicator> },
     { id: 'created', header: 'Created', size: 'md', kind: 'date', mobile: 'hidden', cell: (apiKey) => <time className="ts" dateTime={apiKey.createdAt} title={apiKey.createdAt}>{relativeTime(apiKey.createdAt) || '—'}</time> },
     { id: 'updated', header: 'Updated', size: 'md', kind: 'date', mobile: 'hidden', cell: (apiKey) => <time className="ts" dateTime={apiKey.updatedAt}>{relativeTime(apiKey.updatedAt) || '—'}</time> },
     { id: 'actions', header: <span className="visually-hidden">Actions</span>, size: 'xl', kind: 'action', align: 'end', mobile: 'hidden', cell: (apiKey) => <span className="settings-key-actions"><button className="btn sm" type="button" disabled={apiKey.status === 'revoked'} onClick={() => setRotating(apiKey)}>Rotate…</button><button className="btn sm danger" type="button" disabled={apiKey.status === 'revoked'} onClick={() => setRevoking(apiKey)}>Revoke…</button></span> },
@@ -102,8 +103,7 @@ function AdminApiKeysSurface() {
       <MobileRowSummary
         identity={<span className="mono" title={apiKey.id}>{apiKey.id}</span>}
         identifier={<Scopes scopes={apiKey.scopes} />}
-        secondary={<span className="pill">{apiKey.kind}</span>}
-        meta={<span className="status"><span className={`dot ${apiKey.status === 'active' ? 'dot-ok' : 'dot-muted'}`} />{apiKey.status}</span>}
+        secondary={<span className="flex items-center justify-end gap-2"><CategoryPill>{apiKey.kind}</CategoryPill><StatusIndicator dotClass={apiKey.status === 'active' ? 'dot-ok' : 'dot-muted'}>{apiKey.status}</StatusIndicator></span>}
       />
       <div className="settings-key-actions border-t border-[var(--border-subtle)] px-3 py-2">
         <button className="btn sm" type="button" disabled={apiKey.status === 'revoked'} onClick={() => setRotating(apiKey)}>Rotate…</button>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GroupLocalStateRequest, GroupMemberResource, GroupResource } from '@/api/groups';
+import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import { ModalDialog } from '@/components/dialog/ModalDialog';
@@ -71,8 +72,8 @@ function MemberRecord({ member, busy, onPromote, onDemote, onRemove }: {
       <dl>
         <dt>Member</dt><dd>{member.displayName ? member.displayName : <span className="mono">{memberRef}</span>}</dd>
         <dt>Reference</dt><dd><span className="mono" title={memberRef}>{memberRef}</span></dd>
-        <dt>Role</dt><dd><span className="chip">{member.role ?? '—'}</span></dd>
-        <dt>Status</dt><dd><span className="status sm"><span className={`dot ${groupStatusDot(member.status)}`} />{member.status ?? '—'}</span></dd>
+        <dt>Role</dt><dd><CategoryPill compact>{member.role ?? '—'}</CategoryPill></dd>
+        <dt>Status</dt><dd><StatusIndicator size="small" dotClass={groupStatusDot(member.status)}>{member.status ?? '—'}</StatusIndicator></dd>
         <dt>Joined</dt><dd><span className="ts" title={member.joinedAt}>{relativeTime(member.joinedAt) || '—'}</span></dd>
       </dl>
       <div className="groups-member-actions">
@@ -237,7 +238,7 @@ export function GroupDrawer({ groupId, subject: initialSubject, onClose }: {
 
   return (
     <>
-      <DetailDrawer titleId="group-detail-title" eyebrow="Group management" title={title} status={<span className="status"><span className={`dot ${groupStatusDot(headerStatus)}`} />{headerStatus}</span>} subtitle={<DrawerIdentifier value={groupId} label="Copy group identifier" />} className="groups-drawer" closeLabel="Close group details" suppressEscape={sendOpen} onClose={onClose}>
+      <DetailDrawer titleId="group-detail-title" eyebrow="Group management" title={title} status={<StatusIndicator dotClass={groupStatusDot(headerStatus)}>{headerStatus}</StatusIndicator>} subtitle={<DrawerIdentifier value={groupId} label="Copy group identifier" />} className="groups-drawer" closeLabel="Close group details" suppressEscape={sendOpen} onClose={onClose}>
           {readState.isInitialLoading ? (
             <DetailDrawerState announce>Loading group details…</DetailDrawerState>
           ) : readState.isInitialError ? (

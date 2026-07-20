@@ -55,11 +55,12 @@ export function EnvironmentBadge({
 
   return (
     <span
-      className={`inline-flex min-h-[22px] shrink-0 items-center rounded-full border border-[var(--border-subtle)] px-2 font-mono text-[10px] font-medium uppercase leading-4 tracking-[1.4px] text-[var(--muted)] ${className}`}
+      data-badge="environment"
+      className={`inline-flex min-h-[22px] shrink-0 items-center rounded-[var(--radius-sm)] border border-[var(--border-subtle)] bg-[color-mix(in_oklab,var(--fg)_3%,transparent)] font-[var(--ui)] text-[10px] font-medium uppercase leading-4 tracking-[0.6px] text-[var(--muted)] ${className}`}
       aria-label="Mock environment. Deterministic local fixture data; no platform requests are sent."
       title="Deterministic local fixture data; no platform requests are sent."
     >
-      Mock
+      <span className="!px-2">Mock data</span>
     </span>
   );
 }

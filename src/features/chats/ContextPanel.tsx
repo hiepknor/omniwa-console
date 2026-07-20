@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { ChatResource, MessageResource } from '@/api/chats';
 import type { PublicData } from '@/api/envelopes';
+import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { formatClockTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
@@ -134,7 +135,7 @@ function SelectedMessage({ message, instanceId }: { message: MessageResource; in
         <span className="mono message-id" title={message.id}>{message.id}</span>
       </div>
       <dl className="kv message-facts">
-        <dt>Status</dt><dd><span className="status"><span className={`dot ${statusDot(status)}`} aria-hidden="true" />{status}{retryable ? ' · retryable' : ''}</span></dd>
+        <dt>Status</dt><dd><StatusIndicator dotClass={statusDot(status)}>{status}{retryable ? ' · retryable' : ''}</StatusIndicator></dd>
         <dt>Type</dt><dd>{message.type ?? '—'}</dd>
         {message.createdAt && <><dt>Created</dt><dd>{formatTimestamp(message.createdAt)}</dd></>}
         {message.deliveredAt && <><dt>Delivered</dt><dd>{formatTimestamp(message.deliveredAt)}</dd></>}
@@ -183,7 +184,7 @@ function ContextPanelDetails({ instanceId, chat, onBack }: {
           <dt>Name</dt><dd>{chat.displayName ?? '—'}</dd>
           <dt>Contact</dt><dd><span className="mono context-technical-value" title={contact?.id}>{contacts.isLoading ? 'Loading…' : contact?.id ?? '—'}</span></dd>
           <dt>Chat</dt><dd><span className="mono context-technical-value" title={chat.id}>{chat.id}</span></dd>
-          <dt>Labels</dt><dd>{chat.labelIds?.length ? chat.labelIds.map((labelId) => <span className="chip label-chip" key={labelId}>{labelNames.get(labelId) ?? labelId}</span>) : '—'}</dd>
+          <dt>Labels</dt><dd>{chat.labelIds?.length ? chat.labelIds.map((labelId) => <CategoryPill compact className="mr-1 mb-1" key={labelId}>{labelNames.get(labelId) ?? labelId}</CategoryPill>) : '—'}</dd>
         </dl>
         <p className="help read-only-note !text-[var(--fg-2)]">Labels are synced from WhatsApp — read-only here.</p>
         {contactsReadState.isError && <InlineError error={contactsReadState.error} onRetry={() => { void contacts.refetch(); }} className="chat-context-error" />}

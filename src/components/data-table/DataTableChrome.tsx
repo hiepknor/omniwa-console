@@ -30,7 +30,7 @@ export const DataTableFilterTrigger = forwardRef<
     <button ref={ref} className={['mobile-filter-trigger', className].filter(Boolean).join(' ')} type="button" aria-haspopup="dialog" {...props}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4" /></svg>
       {children}
-      {count > 0 && <span className="filter-count num">{count}</span>}
+      {count > 0 && <span data-badge="count" className="filter-count num">{count}</span>}
     </button>
   );
 });
@@ -40,7 +40,7 @@ export function DataTableActiveFilters({ filters }: { filters: readonly DataTabl
   return (
     <div className="active-filter-row" aria-label="Active filters">
       {filters.map((filter) => (
-        <button key={filter.id} className="chip" type="button" onClick={filter.onRemove}>
+        <button key={filter.id} data-badge="filter" className="chip" type="button" onClick={filter.onRemove}>
           {filter.label}<span className="x" aria-hidden="true">×</span>
         </button>
       ))}

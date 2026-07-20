@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { opsKeys } from '@/api/keys';
+import { CategoryPill, OverflowCountBadge, RowStateBadge, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
@@ -24,7 +25,8 @@ function MetricCard({ label, value, context, attention }: { label: string; value
 
 function EventChips({ events }: { events: string[] | undefined }) {
   const shown = (events ?? []).slice(0, 2);
-  return shown.length ? <div className="capchips webhook-event-chips">{shown.map((event) => <span className="chip" key={event}>{event}</span>)}{(events?.length ?? 0) > 2 && <span className="chip">+{(events?.length ?? 0) - 2}</span>}</div> : <span>—</span>;
+  const remaining = (events?.length ?? 0) - shown.length;
+  return shown.length ? <div className="capchips webhook-event-chips">{shown.map((event) => <CategoryPill className="max-w-[180px]" title={event} key={event}>{event}</CategoryPill>)}{remaining > 0 && <OverflowCountBadge count={remaining} label={remaining === 1 ? 'event type' : 'event types'} />}</div> : <span>—</span>;
 }
 
 export function WebhooksPage() {
@@ -72,8 +74,8 @@ export function WebhooksPage() {
   const loadMore = async () => { const nextCursor = pages.at(-1)?.resource?.pagination?.nextCursor; if (!nextCursor) return; const result = await list.fetchNextPage(); if (!result.isError) setParam('cursor', nextCursor); };
   type WebhookRow = (typeof webhooks)[number];
   const columns: DataTableColumn<WebhookRow>[] = [
-    { id: 'id', header: 'ID', size: 'lg', kind: 'identifier', sticky: 'identity', mobile: 'identity', cell: (webhook) => <><span className="mono" title={webhook.id}>{webhook.id}</span>{webhook.id === webhookId && <span className="row-state">Open</span>}</> },
-    { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (webhook) => <span className="status"><span className={`dot ${webhookStatusDot(webhook.status)}`} />{webhook.status ?? '—'}</span> },
+    { id: 'id', header: 'ID', size: 'lg', kind: 'identifier', sticky: 'identity', mobile: 'identity', cell: (webhook) => <><span className="mono" title={webhook.id}>{webhook.id}</span>{webhook.id === webhookId && <RowStateBadge>Open</RowStateBadge>}</> },
+    { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (webhook) => <StatusIndicator dotClass={webhookStatusDot(webhook.status)}>{webhook.status ?? '—'}</StatusIndicator> },
     { id: 'events', header: 'Event types', size: 'xl', mobile: 'identifier', cell: (webhook) => <EventChips events={webhook.eventTypes} /> },
     { id: 'created', header: 'Created', size: 'md', kind: 'date', mobile: 'hidden', cell: (webhook) => <span className="ts" title={webhook.createdAt}>{relativeTime(webhook.createdAt) || '—'}</span> },
     { id: 'updated', header: 'Updated', size: 'md', kind: 'date', mobile: 'meta', cell: (webhook) => <span className="ts" title={webhook.updatedAt}>{relativeTime(webhook.updatedAt) || '—'}</span>, mobileCell: (webhook) => relativeTime(webhook.updatedAt) || undefined },

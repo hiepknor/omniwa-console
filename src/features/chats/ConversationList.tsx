@@ -13,6 +13,7 @@ import {
 } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { InstanceResource } from '@/api/instances';
+import { CategoryPill } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
@@ -268,7 +269,7 @@ export function ConversationList({ instanceId, chatId }: {
         <span className="meta">
           <span className="name">{chat.displayName ?? chat.id}</span>
           <span className="sub">
-            {chat.labelIds?.map((labelId) => <span className="chip label-chip" key={labelId}>{labelNames.get(labelId) ?? labelId}</span>)}
+            {chat.labelIds?.map((labelId) => <CategoryPill compact key={labelId}>{labelNames.get(labelId) ?? labelId}</CategoryPill>)}
             <span className="mono chat-id">{chat.id}</span>
           </span>
         </span>
@@ -288,12 +289,12 @@ export function ConversationList({ instanceId, chatId }: {
         <input className="search !min-h-11" id="chat-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search direct chats…" disabled={!instanceId} />
         <div className="filters" role="group" aria-label="Active conversation filters">
           {activeLabelIds.map((labelId) => (
-            <button className="chip filter-active" key={labelId} type="button" aria-label={`Remove label filter ${labelNames.get(labelId) ?? labelId}`} onClick={() => removeLabel(labelId)}>
+            <button data-badge="filter" className="chip filter-active" key={labelId} type="button" aria-label={`Remove label filter ${labelNames.get(labelId) ?? labelId}`} onClick={() => removeLabel(labelId)}>
               {labelNames.get(labelId) ?? labelId} <span className="x" aria-hidden="true">✕</span>
             </button>
           ))}
           {labelsAvailable && remainingLabels.length > 0 && (
-            <PickerPopover label="Labels" trigger={(open) => <button className="chip add" type="button" aria-haspopup="menu" aria-expanded={open}>+ label</button>}>
+            <PickerPopover label="Labels" trigger={(open) => <button data-badge="filter" className="chip add" type="button" aria-haspopup="menu" aria-expanded={open}>+ label</button>}>
               {(close) => remainingLabels.map((label) => (
                 <button key={label.id} type="button" role="menuitem" onClick={() => { addLabel(label.id); close(); }}>{label.name ?? label.id}</button>
               ))}
