@@ -277,13 +277,16 @@ export function ConnectPage({
             >
               {pending ? 'Connecting…' : 'Connect to platform'}
             </button>
-            {import.meta.env.DEV && (
-              <div className="grid gap-2 border-t border-[var(--border-subtle)] pt-4">
-                <button className="btn min-h-11 w-full" type="button" onClick={openMockWorkspace}>Open mock workspace</button>
-                <p className="text-center text-[11px] leading-4 text-[var(--muted)]">Deterministic local fixtures. No platform requests are sent.</p>
-              </div>
-            )}
           </form>
+          {import.meta.env.DEV && (
+            <footer className="flex min-h-[72px] items-center justify-between gap-4 border-t border-[var(--border-subtle)] bg-[var(--recessed)] !px-4 !py-3 max-[640px]:grid max-[640px]:grid-cols-1 max-[640px]:gap-3">
+              <div className="grid min-w-0 gap-0.5">
+                <span className="text-[9px] uppercase leading-[13px] tracking-[1.5px] text-[var(--muted)]">Development preview</span>
+                <p className="text-[11px] leading-4 text-[var(--fg-2)]">Open deterministic fixtures without contacting the platform.</p>
+              </div>
+              <button className="btn min-h-10 shrink-0 max-[640px]:min-h-11 max-[640px]:!w-full" type="button" onClick={openMockWorkspace}>Open mock workspace</button>
+            </footer>
+          )}
         </section>
       </div>
     </main>
