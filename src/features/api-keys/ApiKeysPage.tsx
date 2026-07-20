@@ -91,7 +91,7 @@ function AdminApiKeysSurface() {
 
   return (
     <div className="settings-screen api-keys-screen">
-      <PageHeader title="API keys" actions={<button className="btn primary" type="button" onClick={() => setProvisionOpen(true)}>Provision key…</button>} />
+      <PageHeader title="API keys" actions={<button className="btn primary" type="button" onClick={() => setProvisionOpen(true)}>Provision API key</button>} />
       <DataTableWorkspace className="settings-keys" aria-labelledby="api-keys-table-title">
         <div className="settings-section-head"><div><h2>Admin key inventory</h2><p>Secrets are shown once after provision or rotation.</p></div><span className="settings-result-count num">{tableState.status === 'ready' || tableState.status === 'empty' ? `${apiKeys.length} loaded keys` : 'Loaded keys —'}</span></div>
         <DataTable
