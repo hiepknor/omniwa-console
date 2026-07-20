@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { createApiClient } from '@/api/client';
 import { ApiFailure, unwrap } from '@/api/envelopes';
+import { MOCK_API_KEY, MOCK_API_ORIGIN } from '@/api/mock/config';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
@@ -87,6 +88,17 @@ export function ConnectPage({
     } finally {
       setPending(false);
     }
+  };
+
+  const openMockWorkspace = () => {
+    const session: ConsoleSession = {
+      baseUrl: MOCK_API_ORIGIN,
+      apiKey: MOCK_API_KEY,
+      keyKind: 'admin',
+      connectedAt: new Date().toISOString(),
+    };
+    saveSession(session, false);
+    onConnected(session);
   };
 
   const canSubmit = isValidOrigin(baseUrl) && apiKey.trim().length > 0 && !pending;
@@ -265,6 +277,12 @@ export function ConnectPage({
             >
               {pending ? 'Connecting…' : 'Connect to platform'}
             </button>
+            {import.meta.env.DEV && (
+              <div className="grid gap-2 border-t border-[var(--border-subtle)] pt-4">
+                <button className="btn min-h-11 w-full" type="button" onClick={openMockWorkspace}>Open mock workspace</button>
+                <p className="text-center text-[11px] leading-4 text-[var(--muted)]">Deterministic local fixtures. No platform requests are sent.</p>
+              </div>
+            )}
           </form>
         </section>
       </div>

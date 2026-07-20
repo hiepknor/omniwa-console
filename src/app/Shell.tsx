@@ -5,6 +5,7 @@ import { Logo } from '@/components/Logo';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import { useModalDialog } from '@/components/useModalDialog';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
+import { isMockApiOrigin } from '@/api/mock/config';
 
 type IconName =
   | 'overview'
@@ -153,6 +154,7 @@ export function Shell({
     ...systemItems,
   ];
   const fingerprint = keyFingerprint(session.apiKey);
+  const mockSession = isMockApiOrigin(session.baseUrl);
   const location = useLocation();
   const [tabletExpanded, setTabletExpanded] = useState(() => {
     try {
@@ -284,8 +286,8 @@ export function Shell({
               aria-hidden="true"
             />
             <span className="session-copy">
-              <strong>Connected</strong>
-              <span className="key">API key · {fingerprint}</span>
+              <strong>{mockSession ? 'Mock workspace' : 'Connected'}</strong>
+              <span className="key">{mockSession ? 'Fixture data · local' : `API key · ${fingerprint}`}</span>
             </span>
             <button
               type="button"
@@ -304,6 +306,12 @@ export function Shell({
           </div>
         </div>
       </aside>
+
+      {mockSession && (
+        <div className="pointer-events-none fixed right-3 bottom-[76px] z-40 flex min-h-7 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--elevated)] px-3 text-[10px] uppercase tracking-[1.3px] text-[var(--fg-2)] shadow-[var(--elev-raised)] min-[641px]:top-3 min-[641px]:bottom-auto" role="status">
+          <span className="dot dot-pending" aria-hidden="true" /> Mock data
+        </div>
+      )}
 
       {mobileMoreOpen ? (
         <div

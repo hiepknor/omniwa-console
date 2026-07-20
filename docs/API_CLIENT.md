@@ -32,6 +32,25 @@ src/api/client.ts                     # openapi-fetch client factory
 The client is created once per session in the app shell and provided through
 React context (`useApi()`).
 
+## Development mock workspace
+
+The Connect screen exposes **Open mock workspace** in Vite development only.
+It creates a non-persistent session for `http://mock.omniwa.local`; the client
+factory then lazy-loads `src/api/mock/transport.ts`. Fixtures remain behind the
+same OpenAPI client, envelope parsers, query hooks, and panel operation
+allowlists as the real platform.
+
+- Features never import fixtures or branch on mock mode.
+- The mock origin never performs a network request.
+- Commands return contract-shaped accepted/completed envelopes; completion at
+  the command boundary still does not imply message delivery.
+- Realtime uses a deterministic development stream through the API boundary.
+- Production builds remove the mock transport and Connect entry point. The
+  small origin predicate remains safe, but cannot activate without `DEV`.
+
+The shell displays **Mock data** for the full session so fixture content cannot
+be mistaken for platform state.
+
 ## Envelopes
 
 Every response is one of three envelopes:
