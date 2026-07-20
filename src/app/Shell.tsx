@@ -350,6 +350,33 @@ export function Shell({
                 />
               ))}
             </nav>
+            <footer className="mobile-more-session" aria-label={mockSession ? 'Mock workspace session' : 'Connected API session'}>
+              <span
+                className="dot"
+                style={{ background: mockSession ? 'var(--info)' : 'var(--ok)' }}
+                aria-hidden="true"
+              />
+              <span className="mobile-more-session-copy">
+                <strong>{mockSession ? 'Mock workspace' : 'Connected'}</strong>
+                <span className="mono" title={session.baseUrl}>{session.baseUrl}</span>
+              </span>
+              <button
+                type="button"
+                className="mobile-more-signout"
+                onClick={() => {
+                  setMobileMoreOpen(false);
+                  onDisconnect();
+                }}
+                aria-label={mockSession ? 'Exit mock workspace' : 'Sign out of API session'}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 8l4 4-4 4" />
+                  <path d="M18 12H8" />
+                  <path d="M10 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
+                </svg>
+                <span>{mockSession ? 'Exit mock workspace' : 'Sign out'}</span>
+              </button>
+            </footer>
           </div>
         </div>
       ) : null}
