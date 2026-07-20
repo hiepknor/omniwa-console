@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import type { ApiKeyResource } from '@/api/api-keys';
-import { CategoryPill, CategorySummary, StatusIndicator } from '@/components/badges';
-import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
+import { useSearchParams } from 'react-router-dom';
+import type { ApiKeyCommandResult, ApiKeyResource } from '@/api/api-keys';
+import { CategoryPill, CategorySummary, RowStateBadge, StatusIndicator } from '@/components/badges';
 import {
   DataTable,
   DataTableFooter,
@@ -10,15 +10,17 @@ import {
   type DataTableState,
 } from '@/components/data-table';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
+import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { PageHeader } from '@/components/PageHeader';
 import { MobileRowSummary } from '@/components/data-table/MobileRowSummary';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { loadSession } from '@/lib/session';
 import { ProvisionKeyDialog } from './ProvisionKeyDialog';
-import { RotateKeyDialog } from './RotateKeyDialog';
 import { SecretDialog } from './SecretDialog';
-import { useApiKeys, useRevokeApiKey } from './hooks';
+import { ApiKeyDrawer, ApiKeyDrawerState } from './ApiKeyDrawer';
+import { useApiKeys } from './hooks';
+import { keyKindLabel } from './presentation';
 
 type SecretState = { keyId: string; secret: string };
 
@@ -26,69 +28,43 @@ function Scopes({ scopes }: { scopes: string[] }) {
   return <CategorySummary values={scopes} label="scopes" itemClassName="max-w-[140px]" className="settings-key-scopes" />;
 }
 
-function RevokeKeyDialog({ apiKey, onClose }: { apiKey: ApiKeyResource; onClose: () => void }) {
-  const [reasonCode, setReasonCode] = useState('');
-  const revoke = useRevokeApiKey(apiKey.id);
-  return (
-    <TypedConfirmationDialog
-      title="Revoke API key"
-      resourceId={apiKey.id}
-      confirmValue={apiKey.id}
-      confirmLabel="Revoke key"
-      pendingLabel="Revoking…"
-      error={revoke.error}
-      isPending={revoke.isPending}
-      onCancel={onClose}
-      onConfirm={() => revoke.mutate(
-        reasonCode.trim() ? { reasonCode: reasonCode.trim() } : {},
-        { onSuccess: onClose },
-      )}
-      description={(
-        <>
-          <p>Revocation is permanent. This key will stop authenticating immediately.</p>
-          <div className="field settings-revoke-reason">
-            <label htmlFor="api-key-revocation-reason">Reason code <span className="help">optional</span></label>
-            <input
-              className="input mono"
-              id="api-key-revocation-reason"
-              value={reasonCode}
-              onChange={(event) => setReasonCode(event.target.value)}
-              disabled={revoke.isPending}
-              autoComplete="off"
-            />
-          </div>
-        </>
-      )}
-    />
-  );
-}
-
 function AdminApiKeysSurface() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const list = useApiKeys();
+  const feedback = useFeedback();
   const pages = list.data?.pages ?? [];
   const readState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
   const apiKeys = useMemo(() => pages.flatMap((page) => page.resource?.items ?? []), [pages]);
   const unavailable = pages.some((page) => page.unavailable !== undefined);
   const latestUpdate = apiKeys.map((apiKey) => apiKey.updatedAt).sort().at(-1);
   const [provisionOpen, setProvisionOpen] = useState(false);
-  const [rotating, setRotating] = useState<ApiKeyResource>();
-  const [revoking, setRevoking] = useState<ApiKeyResource>();
   const [secret, setSecret] = useState<SecretState>();
+  const selectedKeyId = searchParams.get('key') || undefined;
+  const selectedKey = apiKeys.find((apiKey) => apiKey.id === selectedKeyId);
 
-  const revealSecret = (keyId: string, value: string) => {
+  const revealSecret = (keyId: string, value: string, result?: ApiKeyCommandResult) => {
     setProvisionOpen(false);
-    setRotating(undefined);
+    if (result) feedback.command(result.disposition, {
+      action: 'Provision API key',
+      acceptedDetail: 'API key provisioning was accepted. Inventory refreshes automatically.',
+      completedDetail: 'The platform provisioned the API key. Store the secret now.',
+      requestId: result.requestId,
+      dedupeKey: `api-key:${keyId}:provision`,
+    });
     setSecret({ keyId, secret: value });
+  };
+  const selectKey = (keyId: string | undefined) => {
+    const next = new URLSearchParams(searchParams);
+    if (keyId) next.set('key', keyId); else next.delete('key');
+    setSearchParams(next, { replace: true });
   };
 
   const columns: DataTableColumn<ApiKeyResource>[] = [
-    { id: 'id', header: 'ID', size: 'xl', kind: 'identifier', sticky: 'identity', mobile: 'identity', cell: (apiKey) => <span className="mono" title={apiKey.id}>{apiKey.id}</span> },
-    { id: 'kind', header: 'Kind', size: 'md', mobile: 'secondary', cell: (apiKey) => <CategoryPill>{apiKey.kind}</CategoryPill> },
+    { id: 'id', header: 'ID', size: 'xl', kind: 'identifier', sticky: 'identity', mobile: 'identity', cell: (apiKey) => <><span className="mono" title={apiKey.id}>{apiKey.id}</span>{apiKey.id === selectedKeyId && <RowStateBadge>Open</RowStateBadge>}</> },
+    { id: 'kind', header: 'Kind', size: 'md', mobile: 'secondary', cell: (apiKey) => <CategoryPill>{keyKindLabel(apiKey.kind)}</CategoryPill> },
     { id: 'scopes', header: 'Scopes', size: 'xl', mobile: 'identifier', cell: (apiKey) => <Scopes scopes={apiKey.scopes} /> },
     { id: 'status', header: 'Status', size: 'sm', kind: 'status', mobile: 'secondary', cell: (apiKey) => <StatusIndicator dotClass={apiKey.status === 'active' ? 'dot-ok' : 'dot-muted'}>{apiKey.status}</StatusIndicator> },
-    { id: 'created', header: 'Created', size: 'md', kind: 'date', mobile: 'hidden', cell: (apiKey) => <time className="ts" dateTime={apiKey.createdAt} title={apiKey.createdAt}>{relativeTime(apiKey.createdAt) || '—'}</time> },
-    { id: 'updated', header: 'Updated', size: 'md', kind: 'date', mobile: 'hidden', cell: (apiKey) => <time className="ts" dateTime={apiKey.updatedAt}>{relativeTime(apiKey.updatedAt) || '—'}</time> },
-    { id: 'actions', header: <span className="visually-hidden">Actions</span>, size: 'xl', kind: 'action', align: 'end', mobile: 'hidden', cell: (apiKey) => <span className="settings-key-actions"><button className="btn sm" type="button" disabled={apiKey.status === 'revoked'} onClick={() => setRotating(apiKey)}>Rotate…</button><button className="btn sm danger" type="button" disabled={apiKey.status === 'revoked'} onClick={() => setRevoking(apiKey)}>Revoke…</button></span> },
+    { id: 'updated', header: 'Updated', size: 'md', kind: 'date', mobile: 'meta', cell: (apiKey) => <time className="ts" dateTime={apiKey.updatedAt}>{relativeTime(apiKey.updatedAt) || '—'}</time>, mobileCell: (apiKey) => relativeTime(apiKey.updatedAt) || undefined },
   ];
 
   const renderMobileKey = (apiKey: ApiKeyResource) => (
@@ -96,12 +72,10 @@ function AdminApiKeysSurface() {
       <MobileRowSummary
         identity={<span className="mono" title={apiKey.id}>{apiKey.id}</span>}
         identifier={<Scopes scopes={apiKey.scopes} />}
-        secondary={<span className="flex items-center justify-end gap-2"><CategoryPill>{apiKey.kind}</CategoryPill><StatusIndicator dotClass={apiKey.status === 'active' ? 'dot-ok' : 'dot-muted'}>{apiKey.status}</StatusIndicator></span>}
+        secondary={<span className="flex items-center justify-end gap-2"><CategoryPill>{keyKindLabel(apiKey.kind)}</CategoryPill><StatusIndicator dotClass={apiKey.status === 'active' ? 'dot-ok' : 'dot-muted'}>{apiKey.status}</StatusIndicator></span>}
+        meta={relativeTime(apiKey.updatedAt) || undefined}
+        actionLabel={`Open API key ${apiKey.id}`}
       />
-      <div className="settings-key-actions border-t border-[var(--border-subtle)] px-3 py-2">
-        <button className="btn sm" type="button" disabled={apiKey.status === 'revoked'} onClick={() => setRotating(apiKey)}>Rotate…</button>
-        <button className="btn sm danger" type="button" disabled={apiKey.status === 'revoked'} onClick={() => setRevoking(apiKey)}>Revoke…</button>
-      </div>
     </div>
   );
 
@@ -123,19 +97,25 @@ function AdminApiKeysSurface() {
         <DataTable
           caption="API key inventory"
           captionId="api-keys-table-title"
-          layout="wide"
+          layout="standard"
           attached
           columns={columns}
           state={tableState}
           renderMobileSummary={renderMobileKey}
           refreshIssue={readState.isStaleError ? { error: readState.error, onRetry: list.refetch } : undefined}
           getRowKey={(apiKey) => apiKey.id}
+          getRowState={(apiKey) => ({ active: apiKey.id === selectedKeyId })}
+          getRowActionLabel={(apiKey) => `Open API key ${apiKey.id}`}
+          getRowProps={(apiKey) => ({ className: 'responsive-table-actionable', tabIndex: 0, onClick: () => selectKey(apiKey.id), onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectKey(apiKey.id); } } })}
           footer={<DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{apiKeys.length} loaded keys</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={list.isFetching} onClick={() => void list.refetch()}>{list.isFetching ? 'Refreshing…' : 'Refresh'}</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
         />
       </DataTableWorkspace>
-      {provisionOpen && <ProvisionKeyDialog onCancel={() => setProvisionOpen(false)} onProvisioned={revealSecret} />}
-      {rotating && <RotateKeyDialog apiKey={rotating} onCancel={() => setRotating(undefined)} onRotated={revealSecret} />}
-      {revoking && <RevokeKeyDialog apiKey={revoking} onClose={() => setRevoking(undefined)} />}
+      {provisionOpen && <ProvisionKeyDialog onCancel={() => setProvisionOpen(false)} onProvisioned={(keyId, value, result) => revealSecret(keyId, value, result)} />}
+      {selectedKeyId && (selectedKey
+        ? <ApiKeyDrawer apiKey={selectedKey} onClose={() => selectKey(undefined)} onSecret={(keyId, value) => { selectKey(undefined); revealSecret(keyId, value); }} />
+        : list.isLoading
+          ? <ApiKeyDrawerState keyId={selectedKeyId} onClose={() => selectKey(undefined)} announce>Loading API key details…</ApiKeyDrawerState>
+          : <ApiKeyDrawerState keyId={selectedKeyId} onClose={() => selectKey(undefined)}>This API key is not present in the loaded inventory pages.</ApiKeyDrawerState>)}
       {secret && <SecretDialog keyId={secret.keyId} secret={secret.secret} onClose={() => setSecret(undefined)} />}
     </div>
   );

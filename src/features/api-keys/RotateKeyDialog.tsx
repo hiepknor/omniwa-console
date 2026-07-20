@@ -1,10 +1,13 @@
 import { useId, useRef, useState, type FormEvent } from 'react';
-import type { ApiKeyResource } from '@/api/api-keys';
+import type { ApiKeyCommandResult, ApiKeyResource } from '@/api/api-keys';
 import { InlineError } from '@/components/InlineError';
 import { SelectDropdown } from '@/components/SelectDropdown';
 import { ModalDialog } from '@/components/dialog/ModalDialog';
+import { TokenField, duplicateTokens, tokenFieldItems, type TokenFieldValue } from '@/components/TokenField';
 import { generateApiKeySecret } from '@/lib/secrets';
+import { ApiKeyPolicySummary } from './ApiKeyPolicySummary';
 import { useRotateApiKey } from './hooks';
+import { sameValues } from './presentation';
 
 type KeyKind = ApiKeyResource['kind'];
 
@@ -14,10 +17,6 @@ const kindOptions = [
   { value: 'monitoring_key', label: 'Monitoring key' },
 ];
 
-function commaList(value: string): string[] {
-  return value.split(',').map((item) => item.trim()).filter(Boolean);
-}
-
 export function RotateKeyDialog({
   apiKey,
   onCancel,
@@ -25,33 +24,38 @@ export function RotateKeyDialog({
 }: {
   apiKey: ApiKeyResource;
   onCancel: () => void;
-  onRotated: (keyId: string, secret: string) => void;
+  onRotated: (keyId: string, secret: string, result: ApiKeyCommandResult) => void;
 }) {
   const [nextKeyId, setNextKeyId] = useState(`${apiKey.id}-next`);
   const [kind, setKind] = useState<KeyKind>(apiKey.kind);
-  const [scopes, setScopes] = useState(apiKey.scopes.join(', '));
-  const [allowedInstanceRefs, setAllowedInstanceRefs] = useState((apiKey.allowedInstanceRefs ?? []).join(', '));
+  const [scopes, setScopes] = useState<TokenFieldValue>({ tokens: apiKey.scopes, draft: '' });
+  const [allowedInstanceRefs, setAllowedInstanceRefs] = useState<TokenFieldValue>({ tokens: apiKey.allowedInstanceRefs ?? [], draft: '' });
+  const [reasonCode, setReasonCode] = useState('');
   const mutation = useRotateApiKey(apiKey.id);
   const titleId = useId();
   const nextId = useId();
   const scopesId = useId();
   const refsId = useId();
+  const reasonId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const canSubmit = nextKeyId.trim().length > 0 && commaList(scopes).length > 0;
+  const scopeItems = tokenFieldItems(scopes);
+  const instanceRefs = tokenFieldItems(allowedInstanceRefs);
+  const policyChangeCount = Number(kind !== apiKey.kind) + Number(!sameValues(scopeItems, apiKey.scopes)) + Number(!sameValues(instanceRefs, apiKey.allowedInstanceRefs ?? []));
+  const canSubmit = nextKeyId.trim().length > 0 && scopeItems.length > 0 && duplicateTokens(scopes).length === 0 && duplicateTokens(allowedInstanceRefs).length === 0;
   const rotate = () => {
     if (!canSubmit) return;
     const secret = generateApiKeySecret();
-    const refs = commaList(allowedInstanceRefs);
     mutation.mutate(
       {
         nextKey: secret,
         nextKeyId: nextKeyId.trim(),
         kind,
-        scopes: commaList(scopes),
-        ...(refs.length > 0 ? { allowedInstanceRefs: refs } : {}),
+        scopes: scopeItems,
+        ...(instanceRefs.length > 0 ? { allowedInstanceRefs: instanceRefs } : {}),
+        ...(reasonCode.trim() ? { reasonCode: reasonCode.trim() } : {}),
       },
-      { onSuccess: () => onRotated(nextKeyId.trim(), secret) },
+      { onSuccess: (result) => onRotated(nextKeyId.trim(), secret, result) },
     );
   };
   const submit = (event: FormEvent) => {
@@ -64,8 +68,10 @@ export function RotateKeyDialog({
       <p className="settings-dialog-copy">Rotation replaces this credential with a new key and secret. Clients using the current credential will stop authenticating.</p>
       <div className="field"><label htmlFor={nextId}>New key ID</label><input ref={inputRef} className="input mono" id={nextId} value={nextKeyId} onChange={(event) => setNextKeyId(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /></div>
       <div className="field"><SelectDropdown label="Key kind" value={kind} options={kindOptions} onChange={(value) => setKind(value as KeyKind)} /></div>
-      <div className="field"><label htmlFor={scopesId}>Scopes</label><input className="input" id={scopesId} value={scopes} onChange={(event) => setScopes(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /><p className="help">Comma-separated; at least one scope is required.</p></div>
-      <div className="field"><label htmlFor={refsId}>Allowed instance refs <span className="help">optional</span></label><input className="input mono" id={refsId} value={allowedInstanceRefs} onChange={(event) => setAllowedInstanceRefs(event.target.value)} autoComplete="off" disabled={mutation.isPending} /></div>
+      <TokenField id={scopesId} label="Scopes" value={scopes} onChange={setScopes} placeholder="messages:read" help="Press Enter or comma after each scope. At least one scope is required." disabled={mutation.isPending} />
+      <TokenField id={refsId} label="Allowed instance refs" value={allowedInstanceRefs} onChange={setAllowedInstanceRefs} placeholder="instance-a" help="No instance restriction is submitted when this field is empty; the platform decides the resulting access semantics." optional disabled={mutation.isPending} />
+      <div className="field"><label htmlFor={reasonId}>Rotation reason <span className="help">optional</span></label><input className="input" id={reasonId} value={reasonCode} onChange={(event) => setReasonCode(event.target.value)} autoComplete="off" disabled={mutation.isPending} /></div>
+      <ApiKeyPolicySummary kind={kind} scopes={scopeItems} instanceRefs={instanceRefs} note={policyChangeCount ? `${policyChangeCount} policy ${policyChangeCount === 1 ? 'field' : 'fields'} changed` : 'Policy unchanged'} />
       {mutation.isError && <InlineError error={mutation.error} onRetry={rotate} announce />}
     </ModalDialog>
   );

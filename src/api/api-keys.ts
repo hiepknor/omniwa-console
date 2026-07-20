@@ -4,7 +4,8 @@ import {
   ApiFailure,
   parseUnavailableRead,
   pickResources,
-  unwrap,
+  unwrapCommand,
+  type CommandResult,
   type CollectionEnvelope,
   type ErrorEnvelope,
   type PublicData,
@@ -19,6 +20,9 @@ export type ApiKeyRotationRequest = components['schemas']['ApiKeyRotationRequest
 export type ApiKeyRevocationRequest = components['schemas']['ApiKeyRevocationRequest'];
 export type ApiKeyPagination = CollectionEnvelope['meta']['pagination'];
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
+export type ApiKeyCommandResult = CommandResult & {
+  lifecycle?: ApiKeyLifecycleOperationData;
+};
 
 export type ApiKeyListPage = {
   items: ApiKeyResource[];
@@ -62,7 +66,8 @@ export async function listApiKeys(
 
 export async function provisionApiKey(client: ApiClient, body: ApiKeyProvisionRequest) {
   const result = await client.POST('/v1/api-keys', { body });
-  return lifecycleOperationFrom(unwrap(result).data);
+  const command = unwrapCommand(result);
+  return { ...command, lifecycle: lifecycleOperationFrom(command.data) } satisfies ApiKeyCommandResult;
 }
 
 export async function rotateApiKey(
@@ -74,7 +79,8 @@ export async function rotateApiKey(
     params: { path: { keyId } },
     body,
   });
-  return lifecycleOperationFrom(unwrap(result).data);
+  const command = unwrapCommand(result);
+  return { ...command, lifecycle: lifecycleOperationFrom(command.data) } satisfies ApiKeyCommandResult;
 }
 
 export async function revokeApiKey(
@@ -86,5 +92,6 @@ export async function revokeApiKey(
     params: { path: { keyId } },
     body,
   });
-  return lifecycleOperationFrom(unwrap(result).data);
+  const command = unwrapCommand(result);
+  return { ...command, lifecycle: lifecycleOperationFrom(command.data) } satisfies ApiKeyCommandResult;
 }

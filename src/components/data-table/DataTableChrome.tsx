@@ -50,7 +50,7 @@ export function DataTableActiveFilters({ filters }: { filters: readonly DataTabl
 
 export function DataTableFooter({ primary, actions }: { primary: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="table-foot">
+    <div className="table-foot pointer-coarse:[&_.btn]:min-h-11 pointer-coarse:[&_.btn]:min-w-11">
       <div className="data-table-footer-primary">{primary}</div>
       {actions !== undefined && <div className="pagination">{actions}</div>}
     </div>
