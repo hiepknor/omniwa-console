@@ -18,7 +18,7 @@ export const IconButton = forwardRef<HTMLButtonElement, Omit<ButtonHTMLAttribute
     <button
       ref={ref}
       {...props}
-      className={`group !inline-flex !h-11 !w-11 !min-h-11 !min-w-11 !shrink-0 !items-center !justify-center !rounded-[var(--radius-sm)] !border-0 !bg-transparent !p-0 !text-[var(--muted)] hover:!text-[var(--fg)] focus-visible:!outline-none focus-visible:!shadow-[var(--focus-ring)] ${className}`}
+      className={`group !inline-flex !h-11 !w-11 !min-h-11 !min-w-11 !shrink-0 !items-center !justify-center !rounded-[var(--radius-sm)] !border-0 !bg-transparent !p-0 !text-[var(--muted)] hover:!text-[var(--fg)] focus-visible:!outline-none focus-visible:!shadow-[var(--focus-ring)] disabled:!cursor-not-allowed disabled:!opacity-50 ${className}`}
       type={props.type ?? 'button'}
       aria-label={label}
     >
