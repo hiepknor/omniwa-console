@@ -1,5 +1,5 @@
 import type { JobResource } from '@/api/queue';
-import { DetailDrawer, DetailDrawerState, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
+import { DetailDrawer, DetailDrawerState, DrawerIdentifier, DrawerTechnicalValue } from '@/components/drawer/DetailDrawer';
 import { relativeTime } from '@/lib/format';
 
 export function jobStatusDot(status: string | undefined) {
@@ -27,7 +27,7 @@ export function JobDrawer({ job, requestedJobId, onClose }: { job: JobResource; 
         <h3 id="job-facts-title">Facts</h3>
         <dl className="kv">
           <dt>Owner</dt><dd>{job.ownerContext ?? '—'}</dd>
-          <dt>Resource</dt><dd><span className="mono">{job.resourceRef ?? '—'}</span></dd>
+          <dt>Resource</dt><dd><DrawerTechnicalValue value={job.resourceRef} /></dd>
           <dt>Attempts</dt><dd className="num">{job.attemptCount ?? '—'}</dd>
           <dt>Failure</dt><dd>{job.failureCategory ?? '—'}</dd>
           <dt>Reason</dt><dd>{job.reasonCode ?? '—'}</dd>

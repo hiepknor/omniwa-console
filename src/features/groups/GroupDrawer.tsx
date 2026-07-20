@@ -42,7 +42,7 @@ function LocalStateSwitch({ label, checked, pending, disabled, onChange }: {
     <div className={`groups-state-row${pending ? ' is-pending' : ''}`}>
       <span><strong>{label}</strong><small>{pending ? 'Update pending…' : checked ? 'On' : 'Off'}</small></span>
       <button
-        className={`btn chip groups-state-switch${checked ? ' is-on' : ''}`}
+        className={`btn chip groups-state-switch !relative !h-11 !w-11 !min-h-11 !min-w-11 !border-0 !bg-transparent${checked ? ' is-on' : ''}`}
         type="button"
         role="switch"
         aria-checked={checked}
@@ -50,7 +50,9 @@ function LocalStateSwitch({ label, checked, pending, disabled, onChange }: {
         disabled={disabled}
         onClick={onChange}
       >
-        <span aria-hidden="true" />
+        <span className={`!absolute !left-1/2 !top-1/2 !h-[22px] !w-[38px] !-translate-x-1/2 !-translate-y-1/2 !rounded-full !border !border-[var(--border-subtle)] ${checked ? '!bg-[var(--accent-hover)]' : '!bg-[var(--accent)]'}`} aria-hidden="true">
+          <span className={`!absolute !left-[3px] !top-[3px] !h-[14px] !w-[14px] !rounded-full !bg-[var(--muted)] !transition-transform ${checked ? '!translate-x-4 !bg-[var(--fg)]' : ''}`} />
+        </span>
       </button>
     </div>
   );

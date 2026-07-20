@@ -71,26 +71,11 @@ export function InstanceDrawer({
       dedupeKey: `instance:${instance.id}:${action.toLowerCase().replaceAll(' ', '-')}`,
     });
   };
-  const commandError = update.error ?? connect.error ?? reconnect.error ?? refreshQr.error ?? refreshCapabilities.error;
   const commandPending = update.isPending || connect.isPending || reconnect.isPending || refreshQr.isPending || refreshCapabilities.isPending;
 
   return (
     <>
       <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<span className="status"><span className={`dot ${statusDot(instance.status)}`}></span>{instance.status ?? '—'}</span>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
-          {commandError && (
-            <InlineError
-              error={commandError}
-              announce
-              onRetry={() => {
-                if (update.error) update.mutate(displayName.trim());
-                else if (connect.error) connect.mutate();
-                else if (reconnect.error) reconnect.mutate();
-                else if (refreshQr.error) refreshQr.mutate();
-                else refreshCapabilities.mutate();
-              }}
-            />
-          )}
-
           <section aria-labelledby="instance-facts-title">
             <h3 id="instance-facts-title" className="visually-hidden">Instance facts</h3>
             <dl className="kv">
@@ -112,6 +97,7 @@ export function InstanceDrawer({
                 <input id="instance-display-name" className="input" value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
               </div>
               <button className="btn" type="submit" disabled={!displayName.trim() || displayName.trim() === (instance.displayName ?? '') || commandPending}>Update name</button>
+              {update.error && <InlineError error={update.error} announce onRetry={() => update.mutate(displayName.trim())} />}
             </form>
           </section>
 
@@ -124,6 +110,7 @@ export function InstanceDrawer({
                 <button className="btn" type="button" disabled={commandPending} onClick={() => refreshQr.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'QR refresh') })}>
                   {refreshQr.isPending ? 'Requesting…' : 'Request new QR'}
                 </button>
+                {refreshQr.error && <InlineError error={refreshQr.error} announce onRetry={() => refreshQr.mutate()} />}
                 <div className="steps" aria-label="Pairing progress">
                   <span className="on"><b>1</b> waiting</span><span><b>2</b> scanned</span><span><b>3</b> paired</span>
                 </div>
@@ -144,6 +131,7 @@ export function InstanceDrawer({
                   <button className="btn" type="button" disabled={commandPending} onClick={() => reconnect.mutate(undefined, { onSuccess: () => feedback.accepted({ title: 'Reconnect accepted', detail: 'Connection state refreshes automatically.', dedupeKey: `instance:${instance.id}:reconnect` }) })}>Reconnect</button>
                 </div>
               </div>
+              {(connect.error ?? reconnect.error) && <InlineError error={connect.error ?? reconnect.error} announce onRetry={() => { if (connect.error) connect.mutate(); else reconnect.mutate(); }} />}
             </div>
           </section>
 
@@ -190,6 +178,7 @@ export function InstanceDrawer({
               <div className="empty">No capabilities reported.</div>
             )}
             {providerReadState.isStaleError && <InlineError error={providerReadState.error} onRetry={provider.refetch} />}
+            {refreshCapabilities.error && <InlineError error={refreshCapabilities.error} announce onRetry={() => refreshCapabilities.mutate()} />}
           </section>
 
           <section aria-labelledby="instance-danger-title">
@@ -237,6 +226,6 @@ export function InstanceDrawer({
   );
 }
 
-export function InstanceDrawerState({ onClose, children, announce = false }: { onClose: () => void; children: React.ReactNode; announce?: boolean }) {
-  return <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title="Instance details" className="instances-drawer" closeLabel="Close instance details" onClose={onClose}><DetailDrawerState announce={announce}>{children}</DetailDrawerState></DetailDrawer>;
+export function InstanceDrawerState({ instanceId, onClose, children, announce = false }: { instanceId: string; onClose: () => void; children: React.ReactNode; announce?: boolean }) {
+  return <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title="Instance details" subtitle={<DrawerIdentifier value={instanceId} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" onClose={onClose}><DetailDrawerState announce={announce}>{children}</DetailDrawerState></DetailDrawer>;
 }

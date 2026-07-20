@@ -3,11 +3,13 @@ import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
 export const IconButton = forwardRef<HTMLButtonElement, Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label' | 'children'> & {
   label: string;
   className?: string;
+  compact?: boolean;
   surfaceClassName?: string;
   children: ReactNode;
 }>(function IconButton({
   label,
   className = '',
+  compact = false,
   surfaceClassName = '',
   children,
   ...props
@@ -20,7 +22,7 @@ export const IconButton = forwardRef<HTMLButtonElement, Omit<ButtonHTMLAttribute
       type={props.type ?? 'button'}
       aria-label={label}
     >
-      <span className={`!inline-flex !h-9 !w-9 !items-center !justify-center !rounded-[var(--radius-sm)] !border !border-[var(--border-subtle)] !bg-[var(--accent)] group-hover:!bg-[var(--accent-hover)] ${surfaceClassName}`}>{children}</span>
+      <span className={`!inline-flex ${compact ? '!h-8 !w-8' : '!h-9 !w-9'} !items-center !justify-center !rounded-[var(--radius-sm)] !border !border-[var(--border-subtle)] !bg-[var(--accent)] group-hover:!bg-[var(--accent-hover)] ${surfaceClassName}`}>{children}</span>
     </button>
   );
 });

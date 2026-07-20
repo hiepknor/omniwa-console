@@ -226,16 +226,16 @@ export function InstancesPage() {
 
       {instanceId && (
         detail.data?.resource ? (
-          <InstanceDrawer instance={detail.data.resource} onClose={() => navigate(listLocation)} onDestroyed={(result) => {
+          <InstanceDrawer key={detail.data.resource.id} instance={detail.data.resource} onClose={() => navigate(listLocation)} onDestroyed={(result) => {
             feedback.command(result.disposition, { action: 'Destroy instance', acceptedDetail: 'The platform accepted the command. The list refreshes automatically.', completedDetail: 'The platform destroyed the instance. The list refreshes automatically.', requestId: result.requestId, dedupeKey: `instance:${detail.data.resource?.id}:destroy` });
             navigate(listLocation);
           }} />
         ) : detail.data?.unavailable ? (
-          <InstanceDrawerState onClose={() => navigate(listLocation)}>Instance data is not available yet.</InstanceDrawerState>
+          <InstanceDrawerState instanceId={instanceId} onClose={() => navigate(listLocation)}>Instance data is not available yet.</InstanceDrawerState>
         ) : detail.isError ? (
-          <InstanceDrawerState onClose={() => navigate(listLocation)}><InlineError error={detail.error} onRetry={detail.refetch} /></InstanceDrawerState>
+          <InstanceDrawerState instanceId={instanceId} onClose={() => navigate(listLocation)}><InlineError error={detail.error} onRetry={detail.refetch} /></InstanceDrawerState>
         ) : (
-          <InstanceDrawerState onClose={() => navigate(listLocation)} announce>Loading instance details…</InstanceDrawerState>
+          <InstanceDrawerState instanceId={instanceId} onClose={() => navigate(listLocation)} announce>Loading instance details…</InstanceDrawerState>
         )
       )}
 

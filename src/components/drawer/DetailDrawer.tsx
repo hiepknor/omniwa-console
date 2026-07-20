@@ -49,10 +49,14 @@ export function DrawerIdentifier({ value, label = 'Copy identifier' }: { value: 
   return (
     <span className="!grid !min-h-11 !min-w-0 !grid-cols-[minmax(0,1fr)_44px] !items-center">
       <span className="mono !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap" title={value}>{value}</span>
-      <IconButton surfaceClassName="!h-8 !w-8 !border-transparent !bg-transparent group-hover:!bg-[var(--accent-hover)]" label={`${label}: ${value}`} title={copied ? 'Copied' : label} onClick={() => void copy()}><CopyIcon copied={copied} /></IconButton>
+      <IconButton compact className="!justify-self-end" surfaceClassName="!border-transparent !bg-transparent group-hover:!bg-[var(--accent-hover)]" label={`${label}: ${value}`} title={copied ? 'Copied' : label} onClick={() => void copy()}><CopyIcon copied={copied} /></IconButton>
       <span className="visually-hidden" aria-live="polite">{copyState === 'copied' ? 'Identifier copied.' : copyState === 'failed' ? 'Could not copy identifier.' : ''}</span>
     </span>
   );
+}
+
+export function DrawerTechnicalValue({ value, fallback = '—' }: { value: string | undefined; fallback?: string }) {
+  return <span className="mono !block !min-w-0 !whitespace-normal [overflow-wrap:anywhere]" title={value}>{value ?? fallback}</span>;
 }
 
 export function DetailDrawer({
@@ -88,7 +92,7 @@ export function DetailDrawer({
   const drawer = (
     <aside
       ref={drawerRef}
-      className={`drawer ${modal ? 'detail-drawer-modal' : 'detail-drawer'} ${className} !fixed !inset-y-0 !right-0 !z-[60] !m-0 !flex !h-[100dvh] !w-[min(440px,100vw)] !max-w-none !flex-col !overflow-hidden !rounded-none !border-0 !border-l !border-[var(--border)] !bg-[var(--surface)] !shadow-[var(--elev-raised)] [&_.drawer-note]:!text-[var(--fg-2)] [&_.help]:!text-[var(--fg-2)] min-[1280px]:!z-20`}
+      className={`drawer ${modal ? 'detail-drawer-modal' : 'detail-drawer'} ${className} !fixed !inset-y-0 !right-0 !z-[60] !m-0 !flex !h-[100dvh] !w-[min(440px,100vw)] !max-w-none !flex-col !overflow-hidden !rounded-none !border-0 !border-l !border-[var(--border)] !bg-[var(--surface)] !shadow-[var(--elev-raised)] [&_.drawer-note]:!text-[var(--fg-2)] [&_.help]:!text-[var(--fg-2)] pointer-coarse:[&_.btn]:!min-h-11 pointer-coarse:[&_.btn]:!min-w-11 pointer-coarse:[&_.webhook-delivery-link]:!min-h-11 min-[1280px]:!z-20`}
       aria-labelledby={titleId}
       {...(modal ? { role: 'dialog', 'aria-modal': true } : {})}
       tabIndex={-1}
@@ -98,11 +102,11 @@ export function DetailDrawer({
           <span className="eyebrow !mb-2">{eyebrow}</span>
           <div className="drawer-title-row !grid !min-w-0 !grid-cols-[minmax(0,1fr)_auto] !items-center !gap-3 !mb-1">
             <h2 id={titleId} className={`!w-auto !max-w-full !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap ${titleClassName ?? ''}`}>{title}</h2>
-            {status}
+            {status && <span className="!justify-self-end">{status}</span>}
           </div>
           {subtitle && <div className="drawer-subtitle !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap text-[11px] leading-[17px] text-[var(--fg-2)]">{subtitle}</div>}
         </div>
-        <IconButton ref={closeRef} className="close" label={closeLabel} title="Close" onClick={onClose}><CloseIcon /></IconButton>
+        <IconButton compact ref={closeRef} className="close !-mt-2" label={closeLabel} title="Close" onClick={onClose}><CloseIcon /></IconButton>
       </header>
       <div className="drawer-scroll !min-h-0 !flex-1 !overflow-y-auto overscroll-contain">{children}</div>
     </aside>

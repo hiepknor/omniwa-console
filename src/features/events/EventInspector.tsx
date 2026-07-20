@@ -1,8 +1,8 @@
 import type { EventResource } from '@/api/events-api';
-import { DetailDrawer, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
+import { DetailDrawer, DrawerIdentifier, DrawerTechnicalValue } from '@/components/drawer/DetailDrawer';
 
 function Fact({ label, value }: { label: string; value: string | undefined }) {
-  return <><dt>{label}</dt><dd className="mono" title={value}>{value ?? '—'}</dd></>;
+  return <><dt>{label}</dt><dd><DrawerTechnicalValue value={value} /></dd></>;
 }
 
 export function EventInspector({ event, onClose }: { event: EventResource; onClose: () => void }) {

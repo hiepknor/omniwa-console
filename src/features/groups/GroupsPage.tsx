@@ -285,7 +285,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
         <button className="btn primary mobile-filter-done" type="button" onClick={() => setFilterOpen(false)}>Done</button>
       </MobileFilterSheet>
 
-      {groupId && <GroupDrawer groupId={groupId} subject={selectedGroup?.subject} onClose={closeGroup} />}
+      {groupId && <GroupDrawer key={groupId} groupId={groupId} subject={selectedGroup?.subject} onClose={closeGroup} />}
     </>
   );
 }
