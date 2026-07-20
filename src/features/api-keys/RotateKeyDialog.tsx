@@ -2,7 +2,7 @@ import { useId, useRef, useState, type FormEvent } from 'react';
 import type { ApiKeyResource } from '@/api/api-keys';
 import { InlineError } from '@/components/InlineError';
 import { SelectDropdown } from '@/components/SelectDropdown';
-import { useModalDialog } from '@/components/useModalDialog';
+import { ModalDialog } from '@/components/dialog/ModalDialog';
 import { generateApiKeySecret } from '@/lib/secrets';
 import { useRotateApiKey } from './hooks';
 
@@ -38,8 +38,6 @@ export function RotateKeyDialog({
   const refsId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const dialogRef = useModalDialog<HTMLFormElement>({ onClose: onCancel, canClose: !mutation.isPending, initialFocusRef: inputRef });
-
   const canSubmit = nextKeyId.trim().length > 0 && commaList(scopes).length > 0;
   const rotate = () => {
     if (!canSubmit) return;
@@ -62,21 +60,13 @@ export function RotateKeyDialog({
   };
 
   return (
-    <div className="overlay settings-dialog-overlay !z-[60]" role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget && !mutation.isPending) onCancel();
-    }}>
-      <form ref={dialogRef} className="dialog" role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} onSubmit={submit}>
-        <header><b id={titleId}>Rotate API key</b><span className="mono">{apiKey.id}</span></header>
-        <div className="body">
-          <p className="settings-dialog-copy">Rotation replaces this credential with a new key and secret. Clients using the current credential will stop authenticating.</p>
-          <div className="field"><label htmlFor={nextId}>New key ID</label><input ref={inputRef} className="input mono" id={nextId} value={nextKeyId} onChange={(event) => setNextKeyId(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /></div>
-          <div className="field"><SelectDropdown label="Key kind" value={kind} options={kindOptions} onChange={(value) => setKind(value as KeyKind)} /></div>
-          <div className="field"><label htmlFor={scopesId}>Scopes</label><input className="input" id={scopesId} value={scopes} onChange={(event) => setScopes(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /><p className="help">Comma-separated; at least one scope is required.</p></div>
-          <div className="field"><label htmlFor={refsId}>Allowed instance refs <span className="help">optional</span></label><input className="input mono" id={refsId} value={allowedInstanceRefs} onChange={(event) => setAllowedInstanceRefs(event.target.value)} autoComplete="off" disabled={mutation.isPending} /></div>
-          {mutation.isError && <InlineError error={mutation.error} onRetry={rotate} announce />}
-        </div>
-        <footer><button className="btn" type="button" onClick={onCancel} disabled={mutation.isPending}>Cancel</button><button className="btn primary" type="submit" disabled={mutation.isPending || !canSubmit}>{mutation.isPending ? 'Rotating…' : 'Rotate key'}</button></footer>
-      </form>
-    </div>
+    <ModalDialog titleId={titleId} eyebrow="Admin command" title="Rotate API key" context={apiKey.id} onClose={onCancel} canClose={!mutation.isPending} initialFocusRef={inputRef} onSubmit={submit} closeLabel="Close rotate API key dialog" footer={<><button className="btn" type="button" onClick={onCancel} disabled={mutation.isPending}>Cancel</button><button className="btn primary" type="submit" disabled={mutation.isPending || !canSubmit}>{mutation.isPending ? 'Rotating…' : 'Rotate key'}</button></>}>
+      <p className="settings-dialog-copy">Rotation replaces this credential with a new key and secret. Clients using the current credential will stop authenticating.</p>
+      <div className="field"><label htmlFor={nextId}>New key ID</label><input ref={inputRef} className="input mono" id={nextId} value={nextKeyId} onChange={(event) => setNextKeyId(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /></div>
+      <div className="field"><SelectDropdown label="Key kind" value={kind} options={kindOptions} onChange={(value) => setKind(value as KeyKind)} /></div>
+      <div className="field"><label htmlFor={scopesId}>Scopes</label><input className="input" id={scopesId} value={scopes} onChange={(event) => setScopes(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /><p className="help">Comma-separated; at least one scope is required.</p></div>
+      <div className="field"><label htmlFor={refsId}>Allowed instance refs <span className="help">optional</span></label><input className="input mono" id={refsId} value={allowedInstanceRefs} onChange={(event) => setAllowedInstanceRefs(event.target.value)} autoComplete="off" disabled={mutation.isPending} /></div>
+      {mutation.isError && <InlineError error={mutation.error} onRetry={rotate} announce />}
+    </ModalDialog>
   );
 }

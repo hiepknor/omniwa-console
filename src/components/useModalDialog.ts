@@ -36,14 +36,17 @@ export function useModalDialog<T extends HTMLElement>({
     // Isolate every sibling outside the dialog branch. This keeps shell
     // navigation and page controls out of both pointer and accessibility trees
     // without requiring every dialog to know where it is mounted.
-    let branch: HTMLElement | null = dialog;
-    while (branch.parentElement !== null && branch.parentElement !== document.body) {
-      for (const sibling of branch.parentElement.children) {
+    let branch: HTMLElement = dialog;
+    while (true) {
+      const parent: HTMLElement | null = branch.parentElement;
+      if (parent === null) break;
+      for (const sibling of parent.children) {
         if (sibling === branch || !(sibling instanceof HTMLElement)) continue;
         if (!isolated.has(sibling)) isolated.set(sibling, sibling.inert);
         sibling.inert = true;
       }
-      branch = branch.parentElement;
+      if (parent === document.body) break;
+      branch = parent;
     }
 
     const focusable = () => Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
