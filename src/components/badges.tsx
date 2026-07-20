@@ -87,7 +87,7 @@ export function CategorySummary({
       aria-label={`${label}: ${values.join(', ')}`}
     >
       {visible.map((value) => (
-        <CategoryPill className={`flex-1 ${itemClassName}`} title={value} key={value}>{value}</CategoryPill>
+        <CategoryPill className={`shrink ${itemClassName}`} title={value} key={value}>{value}</CategoryPill>
       ))}
       {remaining > 0 && <OverflowCountBadge count={remaining} label={remaining === 1 ? label.replace(/s$/, '') : label} />}
     </span>
