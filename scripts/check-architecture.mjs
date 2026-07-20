@@ -38,11 +38,29 @@ for (const path of await sourceFiles(sourceRoot)) {
     if (crossesFeatureBoundary) {
       failures.push(`${file}: features must not import other features`);
     }
+    if (/['"]@\/api\/mock\//.test(source)) {
+      failures.push(`${file}: features must not import development mock modules`);
+    }
   }
 
   if (file.startsWith('src/features/') && /<main(?:\s|>)/.test(source)) {
     failures.push(`${file}: Shell owns the document main landmark`);
   }
+}
+
+const apiClientSource = await readFile(resolve(sourceRoot, 'api/client.ts'), 'utf8');
+const connectPageSource = await readFile(resolve(sourceRoot, 'app/ConnectPage.tsx'), 'utf8');
+if (!apiClientSource.includes("await import('./mock/transport')")) {
+  failures.push('src/api/client.ts: mock transport must remain lazy-loaded');
+}
+if (apiClientSource.includes("from './mock/transport'")) {
+  failures.push('src/api/client.ts: mock transport must not be statically imported into production');
+}
+if (!apiClientSource.includes('import.meta.env.DEV && isMockApiOrigin')) {
+  failures.push('src/api/client.ts: mock transport activation must remain development-only');
+}
+if (!connectPageSource.includes('import.meta.env.DEV && (')) {
+  failures.push('src/app/ConnectPage.tsx: mock workspace entry point must remain development-only');
 }
 
 if (failures.length > 0) {
