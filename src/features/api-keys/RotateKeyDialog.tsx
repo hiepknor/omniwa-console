@@ -33,6 +33,7 @@ export function RotateKeyDialog({
   const [reasonCode, setReasonCode] = useState('');
   const mutation = useRotateApiKey(apiKey.id);
   const titleId = useId();
+  const descriptionId = useId();
   const nextId = useId();
   const scopesId = useId();
   const refsId = useId();
@@ -42,7 +43,8 @@ export function RotateKeyDialog({
   const scopeItems = tokenFieldItems(scopes);
   const instanceRefs = tokenFieldItems(allowedInstanceRefs);
   const policyChangeCount = Number(kind !== apiKey.kind) + Number(!sameValues(scopeItems, apiKey.scopes)) + Number(!sameValues(instanceRefs, apiKey.allowedInstanceRefs ?? []));
-  const canSubmit = nextKeyId.trim().length > 0 && scopeItems.length > 0 && duplicateTokens(scopes).length === 0 && duplicateTokens(allowedInstanceRefs).length === 0;
+  const hasUncommittedTokens = scopes.draft.trim().length > 0 || allowedInstanceRefs.draft.trim().length > 0;
+  const canSubmit = nextKeyId.trim().length > 0 && scopeItems.length > 0 && !hasUncommittedTokens && duplicateTokens(scopes).length === 0 && duplicateTokens(allowedInstanceRefs).length === 0;
   const rotate = () => {
     if (!canSubmit) return;
     const secret = generateApiKeySecret();
@@ -64,11 +66,10 @@ export function RotateKeyDialog({
   };
 
   return (
-    <ModalDialog titleId={titleId} eyebrow="Admin command" title="Rotate API key" context={apiKey.id} onClose={onCancel} canClose={!mutation.isPending} initialFocusRef={inputRef} onSubmit={submit} closeLabel="Close rotate API key dialog" footer={<><button className="btn" type="button" onClick={onCancel} disabled={mutation.isPending}>Cancel</button><button className="btn primary" type="submit" disabled={mutation.isPending || !canSubmit}>{mutation.isPending ? 'Rotating…' : 'Rotate key'}</button></>}>
-      <p className="settings-dialog-copy">Rotation replaces this credential with a new key and secret. Clients using the current credential will stop authenticating.</p>
-      <div className="field"><label htmlFor={nextId}>New key ID</label><input ref={inputRef} className="input mono" id={nextId} value={nextKeyId} onChange={(event) => setNextKeyId(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /></div>
-      <div className="field"><SelectDropdown label="Key kind" value={kind} options={kindOptions} onChange={(value) => setKind(value as KeyKind)} /></div>
-      <TokenField id={scopesId} label="Scopes" value={scopes} onChange={setScopes} placeholder="messages:read" help="Press Enter or comma after each scope. At least one scope is required." disabled={mutation.isPending} />
+    <ModalDialog titleId={titleId} eyebrow="Admin command" title="Rotate API key" context={apiKey.id} size="wide" onClose={onCancel} canClose={!mutation.isPending} busy={mutation.isPending} initialFocusRef={inputRef} onSubmit={submit} closeLabel="Close rotate API key dialog" describedBy={descriptionId} secondaryAction={<button className="btn" type="button" onClick={onCancel} disabled={mutation.isPending}>Cancel</button>} primaryAction={<button className="btn primary" type="submit" disabled={mutation.isPending || !canSubmit}>{mutation.isPending ? 'Submitting…' : 'Rotate key'}</button>}>
+      <p className="settings-dialog-copy" id={descriptionId}>Rotation replaces this credential with a new key and secret. Clients using the current credential will stop authenticating.</p>
+      <div className="grid grid-cols-[minmax(0,2fr)_minmax(180px,1fr)] items-end gap-3 max-[600px]:grid-cols-1 max-[600px]:gap-0"><div className="field"><label htmlFor={nextId}>New key ID</label><input ref={inputRef} className="input mono !min-h-11" id={nextId} value={nextKeyId} onChange={(event) => setNextKeyId(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /></div><div className="field w-full [&_.dropdown-trigger]:!min-h-11 [&_.dropdown-trigger]:w-full [&_.dropdown]:w-full"><SelectDropdown label="Key kind" value={kind} options={kindOptions} onChange={(value) => setKind(value as KeyKind)} disabled={mutation.isPending} /></div></div>
+      <TokenField id={scopesId} label="Scopes" value={scopes} onChange={setScopes} placeholder="e.g. messages:read" help="Add at least one scope." required disabled={mutation.isPending} />
       <TokenField id={refsId} label="Allowed instance refs" value={allowedInstanceRefs} onChange={setAllowedInstanceRefs} placeholder="instance-a" help="No instance restriction is submitted when this field is empty; the platform decides the resulting access semantics." optional disabled={mutation.isPending} />
       <div className="field"><label htmlFor={reasonId}>Rotation reason <span className="help">optional</span></label><input className="input" id={reasonId} value={reasonCode} onChange={(event) => setReasonCode(event.target.value)} autoComplete="off" disabled={mutation.isPending} /></div>
       <ApiKeyPolicySummary kind={kind} scopes={scopeItems} instanceRefs={instanceRefs} note={policyChangeCount ? `${policyChangeCount} policy ${policyChangeCount === 1 ? 'field' : 'fields'} changed` : 'Policy unchanged'} />

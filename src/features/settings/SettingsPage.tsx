@@ -6,7 +6,7 @@ import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { PageHeader } from '@/components/PageHeader';
 import { InlineError } from '@/components/InlineError';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
-import { ModalDialog } from '@/components/dialog/ModalDialog';
+import { ConfirmationDialog } from '@/components/dialog/ConfirmationDialog';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
@@ -89,7 +89,6 @@ function DraftRevision({ settings }: { settings: SettingsResource }) {
   const validate = useValidateSettings();
   const activate = useActivateSettings();
   const payloadInputId = useId();
-  const discardTitleId = useId();
   const [draft, setDraft] = useState(INITIAL_DRAFT);
   const [parseError, setParseError] = useState<string>();
   const [validatedDraft, setValidatedDraft] = useState<string>();
@@ -234,8 +233,8 @@ function DraftRevision({ settings }: { settings: SettingsResource }) {
             : <><button className="btn" type="button" disabled={validate.isPending || activate.isPending} onClick={handleValidate}>{validate.isPending ? 'Validating…' : 'Validate draft'}</button><button className="btn primary" type="button" disabled={!isCurrentValidation || !fullRevisionConfirmed || activate.isPending} onClick={() => setActivateOpen(true)}>{activate.isPending ? 'Submitting…' : 'Activate revision'}</button></>}
         </div>
       </footer>
-      {activateOpen && <TypedConfirmationDialog title="Activate settings revision" description={<><p>This atomically replaces the entire active platform configuration with the validated draft.</p><p>Validation request: <span className="mono">{validate.data?.requestId ?? 'unavailable'}</span></p></>} resourceId="complete settings revision" confirmValue="ACTIVATE" confirmLabel="Activate revision" pendingLabel="Submitting…" error={activate.error} isPending={activate.isPending} onCancel={() => setActivateOpen(false)} onConfirm={handleActivate} />}
-      {blocker.state === 'blocked' && <ModalDialog titleId={discardTitleId} eyebrow="Unsaved draft" title="Discard settings draft?" context="settingsDraftNavigation" onClose={() => blocker.reset()} closeLabel="Keep editing settings draft" footer={<><button className="btn" type="button" onClick={() => blocker.reset()}>Keep editing</button><button className="btn danger" type="button" onClick={() => blocker.proceed()}>Discard and leave</button></>}><p className="settings-dialog-copy">This draft has not been submitted. Leaving this page removes it from the browser without changing the active platform configuration.</p></ModalDialog>}
+      {activateOpen && <TypedConfirmationDialog title="Activate settings revision" description={<><p>This atomically replaces the entire active platform configuration with the validated draft.</p><p>Validation request: <span className="mono">{validate.data?.requestId ?? 'unavailable'}</span></p></>} resourceId={validate.data?.requestId ?? 'Validation request unavailable'} confirmValue="ACTIVATE" confirmLabel="Activate revision" pendingLabel="Submitting…" intent="primary" error={activate.error} isPending={activate.isPending} onCancel={() => setActivateOpen(false)} onConfirm={handleActivate} />}
+      {blocker.state === 'blocked' && <ConfirmationDialog eyebrow="Unsaved draft" title="Discard settings draft?" description={<p>This draft has not been submitted. Leaving this page removes it from the browser without changing the active platform configuration.</p>} confirmLabel="Discard and leave" intent="danger" onCancel={() => blocker.reset()} onConfirm={() => blocker.proceed()} />}
     </section>
   );
 }

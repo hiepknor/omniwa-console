@@ -5,10 +5,12 @@ import { ModalDialog } from '@/components/dialog/ModalDialog';
 export function TypedConfirmationDialog({
   title,
   description,
+  children,
   resourceId,
   confirmValue,
   confirmLabel,
   pendingLabel,
+  intent = 'danger',
   error,
   isPending,
   onCancel,
@@ -16,10 +18,12 @@ export function TypedConfirmationDialog({
 }: {
   title: string;
   description: ReactNode;
+  children?: ReactNode;
   resourceId: string;
   confirmValue: string;
   confirmLabel: string;
   pendingLabel: string;
+  intent?: 'primary' | 'danger';
   error?: unknown;
   isPending: boolean;
   onCancel: () => void;
@@ -28,6 +32,7 @@ export function TypedConfirmationDialog({
   const [confirmation, setConfirmation] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();
+  const descriptionId = useId();
   const inputId = useId();
 
   return (
@@ -38,21 +43,24 @@ export function TypedConfirmationDialog({
       context={resourceId}
       onClose={onCancel}
       canClose={!isPending}
+      busy={isPending}
       initialFocusRef={inputRef}
       closeLabel={`Close ${title.toLowerCase()} dialog`}
-      footer={<>
-        <button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button>
+      describedBy={descriptionId}
+      secondaryAction={<button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button>}
+      primaryAction={
         <button
-          className="btn danger solid"
+          className={`btn ${intent === 'danger' ? 'danger solid' : 'primary'}`}
           type="button"
           onClick={onConfirm}
           disabled={confirmation !== confirmValue || isPending}
         >
           {isPending ? pendingLabel : confirmLabel}
         </button>
-      </>}
+      }
     >
-      <div className="dialog-sheet-copy">{description}</div>
+      <div className="dialog-sheet-copy" id={descriptionId}>{description}</div>
+      {children}
       <div className="field">
         <label htmlFor={inputId}>
           Type <span className="mono dialog-sheet-confirm-name">{confirmValue}</span> to confirm

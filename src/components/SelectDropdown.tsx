@@ -12,11 +12,13 @@ export function SelectDropdown({
   value,
   options,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: string;
   options: SelectDropdownOption[];
   onChange: (value: string) => void;
+  disabled?: boolean;
 }) {
   const id = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -58,14 +60,15 @@ export function SelectDropdown({
   };
 
   return (
-    <div ref={rootRef} className={`dropdown${open ? ' is-open' : ''}`}>
+    <div ref={rootRef} className={`dropdown${open ? ' is-open' : ''}`} data-modal-escape-priority={open || undefined}>
       <button
         ref={triggerRef}
-        className="dropdown-trigger"
+        className="dropdown-trigger disabled:cursor-not-allowed disabled:opacity-50"
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={`${id}-menu`}
+        disabled={disabled}
         onClick={() => open ? close() : openAt(selectedIndex)}
         onKeyDown={(event) => {
           if (event.key === 'ArrowDown') { event.preventDefault(); openAt(open ? (activeIndex + 1) % options.length : selectedIndex); }

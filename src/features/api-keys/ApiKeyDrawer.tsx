@@ -30,16 +30,13 @@ function RevokeKeyDialog({ apiKey, onClose, onRevoked }: {
         reasonCode.trim() ? { reasonCode: reasonCode.trim() } : {},
         { onSuccess: onRevoked },
       )}
-      description={(
-        <>
-          <p>Revocation is permanent. This key will stop authenticating immediately.</p>
-          <div className="field settings-revoke-reason">
-            <label htmlFor="api-key-revocation-reason">Reason code <span className="help">optional</span></label>
-            <input className="input" id="api-key-revocation-reason" value={reasonCode} onChange={(event) => setReasonCode(event.target.value)} disabled={revoke.isPending} autoComplete="off" />
-          </div>
-        </>
-      )}
-    />
+      description={<p>Revocation is permanent. This key will stop authenticating immediately.</p>}
+    >
+      <div className="field settings-revoke-reason">
+        <label htmlFor="api-key-revocation-reason">Reason code <span className="help">optional</span></label>
+        <input className="input" id="api-key-revocation-reason" value={reasonCode} onChange={(event) => setReasonCode(event.target.value)} disabled={revoke.isPending} autoComplete="off" />
+      </div>
+    </TypedConfirmationDialog>
   );
 }
 

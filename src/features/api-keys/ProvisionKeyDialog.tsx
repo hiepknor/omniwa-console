@@ -29,6 +29,7 @@ export function ProvisionKeyDialog({
   const [allowedInstanceRefs, setAllowedInstanceRefs] = useState<TokenFieldValue>({ tokens: [], draft: '' });
   const mutation = useProvisionApiKey();
   const titleId = useId();
+  const descriptionId = useId();
   const keyIdInputId = useId();
   const scopesInputId = useId();
   const refsInputId = useId();
@@ -36,7 +37,8 @@ export function ProvisionKeyDialog({
 
   const scopeItems = tokenFieldItems(scopes);
   const instanceRefs = tokenFieldItems(allowedInstanceRefs);
-  const canSubmit = keyId.trim().length > 0 && scopeItems.length > 0 && duplicateTokens(scopes).length === 0 && duplicateTokens(allowedInstanceRefs).length === 0;
+  const hasUncommittedTokens = scopes.draft.trim().length > 0 || allowedInstanceRefs.draft.trim().length > 0;
+  const canSubmit = keyId.trim().length > 0 && scopeItems.length > 0 && !hasUncommittedTokens && duplicateTokens(scopes).length === 0 && duplicateTokens(allowedInstanceRefs).length === 0;
   const provision = () => {
     if (!canSubmit) return;
     const secret = generateApiKeySecret();
@@ -57,13 +59,12 @@ export function ProvisionKeyDialog({
   };
 
   return (
-    <ModalDialog titleId={titleId} eyebrow="Admin command" title="Provision API key" context="provisionApiKey" onClose={onCancel} canClose={!mutation.isPending} initialFocusRef={keyIdRef} onSubmit={submit} closeLabel="Close provision API key dialog" footer={<><button className="btn" type="button" onClick={onCancel} disabled={mutation.isPending}>Cancel</button><button className="btn primary" type="submit" disabled={mutation.isPending || !canSubmit}>{mutation.isPending ? 'Provisioning…' : 'Provision key'}</button></>}>
-      <div className="field"><label htmlFor={keyIdInputId}>Key ID</label><input ref={keyIdRef} className="input mono" id={keyIdInputId} value={keyId} onChange={(event) => setKeyId(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /></div>
-      <div className="field"><SelectDropdown label="Key kind" value={kind} options={kindOptions} onChange={(value) => setKind(value as KeyKind)} /></div>
-      <TokenField id={scopesInputId} label="Scopes" value={scopes} onChange={setScopes} placeholder="messages:read" help="Press Enter or comma after each scope. At least one scope is required." disabled={mutation.isPending} />
+    <ModalDialog titleId={titleId} eyebrow="Admin command" title="Provision API key" size="wide" onClose={onCancel} canClose={!mutation.isPending} busy={mutation.isPending} initialFocusRef={keyIdRef} onSubmit={submit} closeLabel="Close provision API key dialog" describedBy={descriptionId} secondaryAction={<button className="btn" type="button" onClick={onCancel} disabled={mutation.isPending}>Cancel</button>} primaryAction={<button className="btn primary" type="submit" disabled={mutation.isPending || !canSubmit}>{mutation.isPending ? 'Submitting…' : 'Provision key'}</button>}>
+      <p className="settings-dialog-copy" id={descriptionId}>Create a scoped credential. Its generated secret is available only once after submission.</p>
+      <div className="grid grid-cols-[minmax(0,2fr)_minmax(180px,1fr)] items-end gap-3 max-[600px]:grid-cols-1 max-[600px]:gap-0"><div className="field"><label htmlFor={keyIdInputId}>Key ID</label><input ref={keyIdRef} className="input mono !min-h-11" id={keyIdInputId} value={keyId} onChange={(event) => setKeyId(event.target.value)} required autoComplete="off" disabled={mutation.isPending} /></div><div className="field w-full [&_.dropdown-trigger]:!min-h-11 [&_.dropdown-trigger]:w-full [&_.dropdown]:w-full"><SelectDropdown label="Key kind" value={kind} options={kindOptions} onChange={(value) => setKind(value as KeyKind)} disabled={mutation.isPending} /></div></div>
+      <TokenField id={scopesInputId} label="Scopes" value={scopes} onChange={setScopes} placeholder="e.g. messages:read" help="Add at least one scope." required disabled={mutation.isPending} />
       <TokenField id={refsInputId} label="Allowed instance refs" value={allowedInstanceRefs} onChange={setAllowedInstanceRefs} placeholder="instance-a" help="No instance restriction is submitted when this field is empty; the platform decides the resulting access semantics." optional disabled={mutation.isPending} />
       <ApiKeyPolicySummary kind={kind} scopes={scopeItems} instanceRefs={instanceRefs} note="New credential" />
-      <p className="help">The generated secret is shown once after the provision command succeeds.</p>
       {mutation.isError && <InlineError error={mutation.error} onRetry={provision} announce />}
     </ModalDialog>
   );

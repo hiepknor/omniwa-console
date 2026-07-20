@@ -3,6 +3,7 @@ import { readdir, readFile } from 'node:fs/promises';
 const featuresRoot = new URL('../src/features/', import.meta.url);
 const modalDialogUrl = new URL('../src/components/dialog/ModalDialog.tsx', import.meta.url);
 const typedDialogUrl = new URL('../src/components/TypedConfirmationDialog.tsx', import.meta.url);
+const confirmationDialogUrl = new URL('../src/components/dialog/ConfirmationDialog.tsx', import.meta.url);
 const mobileFilterUrl = new URL('../src/components/MobileFilterSheet.tsx', import.meta.url);
 const shellUrl = new URL('../src/app/Shell.tsx', import.meta.url);
 const modalHookUrl = new URL('../src/components/useModalDialog.ts', import.meta.url);
@@ -29,17 +30,24 @@ for (const path of featureFiles) {
 
 const modalSource = await readFile(modalDialogUrl, 'utf8');
 const typedSource = await readFile(typedDialogUrl, 'utf8');
+const confirmationSource = await readFile(confirmationDialogUrl, 'utf8');
 const mobileFilterSource = await readFile(mobileFilterUrl, 'utf8');
 const shellSource = await readFile(shellUrl, 'utf8');
 const modalHookSource = await readFile(modalHookUrl, 'utf8');
 const consoleCssSource = await readFile(consoleCssUrl, 'utf8');
 
-for (const contract of ['max-h-[calc(100dvh-32px)]', 'dialog-body !min-h-0 !flex-1 !overflow-y-auto', '[&_.btn]:!min-h-11', '<IconButton compact']) {
+for (const contract of ['max-h-[calc(100dvh-32px)]', "size?: 'standard' | 'wide'", '!w-[min(680px,calc(100vw-32px))]', 'dialog-body !min-h-0 !flex-1 !overflow-y-auto', '[&_.btn]:!min-h-11', 'safe-area-inset-bottom', 'secondaryAction', 'primaryAction', 'aria-describedby', 'aria-busy', '<IconButton compact']) {
   if (!modalSource.includes(contract)) failures.push(`src/components/dialog/ModalDialog.tsx: missing shared modal contract ${contract}`);
 }
 
 if (!typedSource.includes("@/components/dialog/ModalDialog") || !typedSource.includes('<ModalDialog')) {
   failures.push('src/components/TypedConfirmationDialog.tsx: must use ModalDialog');
+}
+
+for (const [path, source] of [['src/components/TypedConfirmationDialog.tsx', typedSource], ['src/components/dialog/ConfirmationDialog.tsx', confirmationSource]]) {
+  for (const contract of ['intent', 'describedBy', 'secondaryAction', 'primaryAction']) {
+    if (!source.includes(contract)) failures.push(`${path}: missing semantic confirmation contract ${contract}`);
+  }
 }
 
 for (const [path, source] of [['src/components/MobileFilterSheet.tsx', mobileFilterSource], ['src/app/Shell.tsx', shellSource]]) {
@@ -48,7 +56,7 @@ for (const [path, source] of [['src/components/MobileFilterSheet.tsx', mobileFil
   }
 }
 
-for (const contract of ['active = true', 'returnFocusRef', 'sibling.inert = true', "document.body.style.overflow = 'hidden'"]) {
+for (const contract of ['active = true', 'returnFocusRef', 'sibling.inert = true', "document.body.style.overflow = 'hidden'", 'data-modal-escape-priority']) {
   if (!modalHookSource.includes(contract)) failures.push(`src/components/useModalDialog.ts: missing modal lifecycle contract ${contract}`);
 }
 

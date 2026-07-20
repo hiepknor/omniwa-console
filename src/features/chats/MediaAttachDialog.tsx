@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { InlineError } from '@/components/InlineError';
 import { ModalDialog } from '@/components/dialog/ModalDialog';
 
@@ -17,6 +17,7 @@ export function MediaAttachDialog({
   const [contentType, setContentType] = useState('');
   const [caption, setCaption] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const descriptionId = useId();
 
   const submit = () => onSubmit({
     reference: reference.trim(),
@@ -25,8 +26,8 @@ export function MediaAttachDialog({
   });
 
   return (
-    <ModalDialog titleId="attach-media-title" eyebrow="Message command" title="Attach media by reference" context="registerMedia" onClose={onCancel} canClose={!isPending} initialFocusRef={inputRef} onSubmit={(event) => { event.preventDefault(); submit(); }} closeLabel="Close attach media dialog" footer={<><button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button><button className="btn primary" type="submit" disabled={!reference.trim() || isPending}>{isPending ? 'Submitting…' : 'Attach media'}</button></>}>
-      <p className="dialog-sheet-copy">Register a media reference, then submit it to this conversation.</p>
+    <ModalDialog titleId="attach-media-title" eyebrow="Message command" title="Attach media by reference" onClose={onCancel} canClose={!isPending} busy={isPending} initialFocusRef={inputRef} onSubmit={(event) => { event.preventDefault(); submit(); }} closeLabel="Close attach media dialog" describedBy={descriptionId} secondaryAction={<button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button>} primaryAction={<button className="btn primary" type="submit" disabled={!reference.trim() || isPending}>{isPending ? 'Submitting…' : 'Attach media'}</button>}>
+      <p className="dialog-sheet-copy" id={descriptionId}>Register a media reference, then submit it to this conversation.</p>
       <div className="field"><label htmlFor="media-reference">Media reference or URL</label><input ref={inputRef} className="input" id="media-reference" value={reference} onChange={(event) => setReference(event.target.value)} disabled={isPending} autoComplete="off" /></div>
       <div className="field"><label htmlFor="media-content-type">Content type (optional)</label><input className="input" id="media-content-type" value={contentType} onChange={(event) => setContentType(event.target.value)} disabled={isPending} placeholder="image/jpeg" autoComplete="off" /></div>
       <div className="field"><label htmlFor="media-caption">Caption (optional)</label><textarea className="input" id="media-caption" rows={3} value={caption} onChange={(event) => setCaption(event.target.value)} disabled={isPending} /></div>

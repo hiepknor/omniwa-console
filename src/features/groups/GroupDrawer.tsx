@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { GroupLocalStateRequest, GroupMemberResource, GroupResource } from '@/api/groups';
 import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
@@ -88,14 +88,15 @@ function MemberRecord({ member, busy, onPromote, onDemote, onRemove }: {
 function SendTextDialog({ groupId, onClose }: { groupId: string; onClose: () => void }) {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const descriptionId = useId();
   const send = useSendGroupText(groupId);
 
   return (
-    <ModalDialog titleId="group-send-title" eyebrow="Message command" title="Send text to group" context="sendGroupTextMessage" onClose={onClose} canClose={!send.isPending} initialFocusRef={textareaRef} onSubmit={(event) => { event.preventDefault(); send.mutate(text.trim(), { onSuccess: onClose }); }} closeLabel="Close send group text dialog" footer={<><button className="btn" type="button" disabled={send.isPending} onClick={onClose}>Cancel</button><button className="btn primary" type="submit" disabled={send.isPending || !text.trim()}>{send.isPending ? 'Sending…' : 'Send'}</button></>}>
+    <ModalDialog titleId="group-send-title" eyebrow="Message command" title="Send text to group" context={groupId} onClose={onClose} canClose={!send.isPending} busy={send.isPending} initialFocusRef={textareaRef} onSubmit={(event) => { event.preventDefault(); send.mutate(text.trim(), { onSuccess: onClose }); }} closeLabel="Close send group text dialog" describedBy={descriptionId} secondaryAction={<button className="btn" type="button" disabled={send.isPending} onClick={onClose}>Cancel</button>} primaryAction={<button className="btn primary" type="submit" disabled={send.isPending || !text.trim()}>{send.isPending ? 'Submitting…' : 'Send'}</button>}>
       <div className="field">
         <label htmlFor="group-send-text">Text message</label>
         <textarea ref={textareaRef} id="group-send-text" className="input groups-textarea" rows={5} value={text} disabled={send.isPending} onChange={(event) => setText(event.target.value)} />
-        <p className="help">Command outcome appears immediately; delivery remains separate and follows the message pipeline.</p>
+        <p className="help" id={descriptionId}>Command outcome appears immediately; delivery remains separate and follows the message pipeline.</p>
       </div>
       {send.error && <InlineError error={send.error} announce onRetry={() => send.mutate(text.trim(), { onSuccess: onClose })} />}
     </ModalDialog>

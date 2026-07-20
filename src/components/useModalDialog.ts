@@ -59,6 +59,11 @@ export function useModalDialog<T extends HTMLElement>({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && canCloseRef.current) {
+        const activeElement = document.activeElement;
+        const escapeOwner = activeElement instanceof Element
+          ? activeElement.closest('[data-modal-escape-priority="true"]')
+          : null;
+        if (escapeOwner !== null && dialog.contains(escapeOwner)) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         onCloseRef.current();

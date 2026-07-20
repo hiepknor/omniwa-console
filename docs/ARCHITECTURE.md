@@ -114,7 +114,23 @@ backdrop, maximum viewport height, scrollable body, action footer, compact
 Close control, outside-click policy, and responsive placement. Feature code
 owns fields, validation, command feedback, and button labels only.
 
-Centered command dialogs are 520px wide on desktop and retain a 16px viewport
+Dialog semantics are proportional to operational risk:
+
+- command forms use primary submission and neutral cancellation;
+- reversible confirmations do not require typed input;
+- destructive or high-impact confirmations require an explicit phrase or
+  stable resource identifier, with danger styling reserved for destructive
+  commands;
+- show-once secrets use explicit acknowledgement with no ambient Close,
+  Escape, or backdrop dismissal.
+
+The shared footer accepts one primary action and an optional secondary action;
+features do not own footer grids or mobile spans. Dialog descriptions connect
+through `aria-describedby`, pending commands expose `aria-busy`, and headers
+show operator-relevant resource identity rather than OpenAPI operation IDs.
+
+Centered command dialogs are 520px wide on desktop; complex administrative
+forms may opt into the shared 680px `wide` size. Both retain a 16px viewport
 gutter on phones. Their body scrolls independently while the header and footer
 remain visible; actions keep 44px touch targets. Long operation or resource
 context truncates in the header and exposes its full string through a title.
@@ -123,6 +139,8 @@ Mobile navigation and table-filter sheets keep their purpose-specific bottom
 sheet layouts, but use the same `useModalDialog` lifecycle and `IconButton`
 controls. That lifecycle locks body scroll, makes background branches inert,
 traps focus, handles Escape, and restores focus to the originating control.
+Open composite controls inside a modal receive the first Escape press so they
+close before the owning dialog.
 Feature components must not render their own dialog role, overlay, or shell
 geometry. `pnpm design:check` enforces these boundaries.
 

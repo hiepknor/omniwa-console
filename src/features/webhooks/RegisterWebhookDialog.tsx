@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { InlineError } from '@/components/InlineError';
 import { ModalDialog } from '@/components/dialog/ModalDialog';
 import type { WebhookRequest } from '@/api/webhooks';
@@ -17,6 +17,7 @@ export function RegisterWebhookDialog({ error, isPending, onCancel, onRegister }
   const [eventTypes, setEventTypes] = useState('');
   const [validation, setValidation] = useState<string>();
   const inputRef = useRef<HTMLInputElement>(null);
+  const descriptionId = useId();
 
   const submit = () => {
     try {
@@ -32,8 +33,8 @@ export function RegisterWebhookDialog({ error, isPending, onCancel, onRegister }
   };
 
   return (
-    <ModalDialog titleId="register-webhook-title" eyebrow="Webhook command" title="Register webhook" context="registerWebhook" onClose={onCancel} canClose={!isPending} initialFocusRef={inputRef} onSubmit={(event) => { event.preventDefault(); submit(); }} closeLabel="Close register webhook dialog" footer={<><button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button><button className="btn primary" type="submit" disabled={!url.trim() || isPending}>{isPending ? 'Submitting…' : 'Register webhook'}</button></>}>
-      <p className="dialog-sheet-copy">Register an endpoint. The platform reports whether the command completed or continues asynchronously.</p>
+    <ModalDialog titleId="register-webhook-title" eyebrow="Webhook command" title="Register webhook" onClose={onCancel} canClose={!isPending} busy={isPending} initialFocusRef={inputRef} onSubmit={(event) => { event.preventDefault(); submit(); }} closeLabel="Close register webhook dialog" describedBy={descriptionId} secondaryAction={<button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button>} primaryAction={<button className="btn primary" type="submit" disabled={!url.trim() || isPending}>{isPending ? 'Submitting…' : 'Register webhook'}</button>}>
+      <p className="dialog-sheet-copy" id={descriptionId}>Register an endpoint. The platform reports whether the command completed or continues asynchronously.</p>
       <div className="field">
         <label htmlFor="webhook-url">Endpoint URL</label>
         <input ref={inputRef} className="input" id="webhook-url" type="text" inputMode="url" required value={url} onChange={(event) => { setUrl(event.target.value); setValidation(undefined); }} disabled={isPending} placeholder="https://example.com/webhooks" aria-describedby={validation ? 'webhook-url-error' : undefined} aria-invalid={validation !== undefined} />

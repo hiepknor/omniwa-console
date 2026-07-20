@@ -200,7 +200,7 @@ export function InstanceDrawer({
           title="Disconnect instance"
           description={<p>This requests a disconnect for {instanceName}. The platform may complete the command immediately or continue processing it asynchronously.</p>}
           resourceId={instance.id}
-          confirmValue={instanceName}
+          confirmValue={instance.id}
           confirmLabel="Disconnect instance"
           pendingLabel="Submitting…"
           error={disconnect.error}
@@ -214,7 +214,7 @@ export function InstanceDrawer({
           title="Destroy instance"
           description={<p>This permanently destroys {instanceName}, its sessions, and pairing state. This cannot be undone.</p>}
           resourceId={instance.id}
-          confirmValue={instanceName}
+          confirmValue={instance.id}
           confirmLabel="Destroy instance"
           pendingLabel="Submitting…"
           error={destroy.error}
