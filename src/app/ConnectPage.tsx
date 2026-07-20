@@ -284,7 +284,7 @@ export function ConnectPage({
                 <span className="text-[9px] uppercase leading-[13px] tracking-[1.5px] text-[var(--muted)]">Development preview</span>
                 <p className="text-[11px] leading-4 text-[var(--fg-2)]">Open deterministic fixtures without contacting the platform.</p>
               </div>
-              <button className="btn min-h-10 shrink-0 !justify-center max-[640px]:min-h-11 max-[640px]:!w-full" type="button" onClick={openMockWorkspace}>Open mock workspace</button>
+              <button className="btn min-h-10 shrink-0 max-[640px]:min-h-11 max-[640px]:!w-full" type="button" onClick={openMockWorkspace}>Open mock workspace</button>
             </footer>
           )}
         </section>
