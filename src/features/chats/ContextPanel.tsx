@@ -185,7 +185,7 @@ function ContextPanelDetails({ instanceId, chat, onBack }: {
           <dt>Chat</dt><dd><span className="mono context-technical-value" title={chat.id}>{chat.id}</span></dd>
           <dt>Labels</dt><dd>{chat.labelIds?.length ? chat.labelIds.map((labelId) => <span className="chip label-chip" key={labelId}>{labelNames.get(labelId) ?? labelId}</span>) : '—'}</dd>
         </dl>
-        <p className="help read-only-note">Labels are synced from WhatsApp — read-only here.</p>
+        <p className="help read-only-note !text-[var(--fg-2)]">Labels are synced from WhatsApp — read-only here.</p>
         {contactsReadState.isError && <InlineError error={contactsReadState.error} onRetry={() => { void contacts.refetch(); }} className="chat-context-error" />}
         {labelsReadState.isError && <InlineError error={labelsReadState.error} onRetry={() => { void labels.refetch(); }} className="chat-context-error" />}
       </section>
