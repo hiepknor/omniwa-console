@@ -10,7 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "design:check": "node scripts/check-table-contract.mjs && node scripts/check-drawer-contract.mjs",
+    "design:check": "node scripts/check-table-contract.mjs && node scripts/check-drawer-contract.mjs && node scripts/check-dialog-contract.mjs",
     "contract:check": "node scripts/check-contract-compatibility.mjs",
     "architecture:check": "node scripts/check-architecture.mjs",
     "bundle:check": "node scripts/check-bundle.mjs",

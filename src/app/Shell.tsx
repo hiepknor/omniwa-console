@@ -1,7 +1,9 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { IconButton } from '@/components/IconButton';
 import { Logo } from '@/components/Logo';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
+import { useModalDialog } from '@/components/useModalDialog';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
 
 type IconName =
@@ -161,7 +163,7 @@ export function Shell({
   });
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const moreTriggerRef = useRef<HTMLButtonElement>(null);
-  const moreDialogRef = useRef<HTMLDivElement>(null);
+  const moreDialogRef = useModalDialog<HTMLDivElement>({ onClose: () => setMobileMoreOpen(false), active: mobileMoreOpen, returnFocusRef: moreTriggerRef });
   const moreActive = moreItems.some(
     (item) =>
       location.pathname === item.to || location.pathname.startsWith(`${item.to}/`),
@@ -186,43 +188,6 @@ export function Shell({
                     ? 'Messages'
                     : 'Overview';
   useDocumentTitle(pageTitle);
-
-  useEffect(() => {
-    if (!mobileMoreOpen) return;
-
-    const dialog = moreDialogRef.current;
-    const previousOverflow = document.body.style.overflow;
-    const focusable = dialog?.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled])',
-    );
-    document.body.style.overflow = 'hidden';
-    focusable?.[0]?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setMobileMoreOpen(false);
-        return;
-      }
-      if (event.key !== 'Tab' || !focusable?.length) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-      moreTriggerRef.current?.focus();
-    };
-  }, [mobileMoreOpen]);
 
   useEffect(() => {
     setMobileMoreOpen(false);
@@ -360,16 +325,17 @@ export function Shell({
                 <span className="eyebrow">Navigation</span>
                 <h2 id="mobile-more-title">More</h2>
               </div>
-              <button
-                type="button"
+              <IconButton
+                compact
                 className="mobile-more-close"
                 onClick={() => setMobileMoreOpen(false)}
-                aria-label="Close navigation"
+                label="Close navigation"
+                title="Close"
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M6 6l12 12M18 6 6 18" />
                 </svg>
-              </button>
+              </IconButton>
             </header>
             <nav aria-label="More destinations">
               {moreItems.map((item) => (

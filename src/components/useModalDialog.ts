@@ -14,10 +14,14 @@ export function useModalDialog<T extends HTMLElement>({
   onClose,
   canClose = true,
   initialFocusRef,
+  returnFocusRef,
+  active = true,
 }: {
   onClose: () => void;
   canClose?: boolean;
   initialFocusRef?: RefObject<HTMLElement | null>;
+  returnFocusRef?: RefObject<HTMLElement | null>;
+  active?: boolean;
 }) {
   const dialogRef = useRef<T>(null);
   const onCloseRef = useRef(onClose);
@@ -26,9 +30,10 @@ export function useModalDialog<T extends HTMLElement>({
   canCloseRef.current = canClose;
 
   useEffect(() => {
+    if (!active) return;
     const dialog = dialogRef.current;
     if (dialog === null) return;
-    const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const returnFocus = returnFocusRef?.current ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null);
     const previousOverflow = document.body.style.overflow;
     const isolated = new Map<HTMLElement, boolean>();
     document.body.style.overflow = 'hidden';
@@ -84,7 +89,7 @@ export function useModalDialog<T extends HTMLElement>({
       isolated.forEach((wasInert, element) => { element.inert = wasInert; });
       returnFocus?.focus();
     };
-  }, [initialFocusRef]);
+  }, [active, initialFocusRef, returnFocusRef]);
 
   return dialogRef;
 }

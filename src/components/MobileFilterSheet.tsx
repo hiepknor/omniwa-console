@@ -1,4 +1,10 @@
-import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
+import { useEffect, useId, type ReactNode, type RefObject } from 'react';
+import { IconButton } from '@/components/IconButton';
+import { useModalDialog } from '@/components/useModalDialog';
+
+function CloseIcon() {
+  return <svg className="!h-4 !w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>;
+}
 
 export function MobileFilterSheet({
   open,
@@ -14,51 +20,13 @@ export function MobileFilterSheet({
   returnFocusRef?: RefObject<HTMLElement | null>;
 }) {
   const titleId = useId();
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-
-  useEffect(() => {
-    if (!open) return;
-    const previousOverflow = document.body.style.overflow;
-    const getFocusable = () => dialogRef.current?.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
-    );
-    document.body.style.overflow = 'hidden';
-    getFocusable()?.[0]?.focus();
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onCloseRef.current();
-        return;
-      }
-      const focusable = getFocusable();
-      if (event.key !== 'Tab' || !focusable?.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-      returnFocusRef?.current?.focus();
-    };
-  }, [open, returnFocusRef]);
+  const dialogRef = useModalDialog<HTMLDivElement>({ onClose, active: open, returnFocusRef });
 
   useEffect(() => {
     if (!open || !returnFocusRef?.current) return;
     const trigger = returnFocusRef.current;
     const closeWhenTriggerHides = () => {
-      if (trigger.getClientRects().length === 0) onCloseRef.current();
+      if (trigger.getClientRects().length === 0) onClose();
     };
     const observer = new ResizeObserver(closeWhenTriggerHides);
     observer.observe(trigger);
@@ -83,7 +51,7 @@ export function MobileFilterSheet({
       >
         <header>
           <div><span className="eyebrow">Table controls</span><h2 id={titleId}>{title}</h2></div>
-          <button className="mobile-filter-close" type="button" onClick={onClose} aria-label="Close filters">✕</button>
+          <IconButton compact className="mobile-filter-close" label="Close filters" title="Close" onClick={onClose}><CloseIcon /></IconButton>
         </header>
         <div className="mobile-filter-body">{children}</div>
       </div>

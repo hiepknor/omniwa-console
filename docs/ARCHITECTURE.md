@@ -106,6 +106,26 @@ reimplement the shell or introduce panel-specific responsive behavior.
 `pnpm design:check` rejects feature drawers that drift back to owned shell
 markup.
 
+## Shared modal system
+
+Command forms, typed confirmations, and one-time secret surfaces use
+`ModalDialog` from `src/components/dialog/`. The shared shell owns the
+backdrop, maximum viewport height, scrollable body, action footer, compact
+Close control, outside-click policy, and responsive placement. Feature code
+owns fields, validation, command feedback, and button labels only.
+
+Centered command dialogs are 520px wide on desktop and retain a 16px viewport
+gutter on phones. Their body scrolls independently while the header and footer
+remain visible; actions keep 44px touch targets. Long operation or resource
+context truncates in the header and exposes its full string through a title.
+
+Mobile navigation and table-filter sheets keep their purpose-specific bottom
+sheet layouts, but use the same `useModalDialog` lifecycle and `IconButton`
+controls. That lifecycle locks body scroll, makes background branches inert,
+traps focus, handles Escape, and restores focus to the originating control.
+Feature components must not render their own dialog role, overlay, or shell
+geometry. `pnpm design:check` enforces these boundaries.
+
 ## Automated architecture gates
 
 `pnpm architecture:check` scans the TypeScript source and rejects direct
