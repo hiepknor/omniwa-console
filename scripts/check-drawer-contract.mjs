@@ -1,6 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises';
 
 const featuresRoot = new URL('../src/features/', import.meta.url);
+const detailDrawerUrl = new URL('../src/components/drawer/DetailDrawer.tsx', import.meta.url);
+const iconButtonUrl = new URL('../src/components/IconButton.tsx', import.meta.url);
 const entries = await readdir(featuresRoot, { recursive: true });
 const featureFiles = entries.filter((path) => path.endsWith('.tsx'));
 const drawerFiles = featureFiles.filter((path) => path.endsWith('Drawer.tsx') || path === 'events/EventInspector.tsx');
@@ -21,6 +23,25 @@ for (const path of featureFiles) {
   if (/<aside\b[^>]*className=[^>]*drawer/.test(source)) {
     failures.push(`src/features/${path}: owns drawer shell markup`);
   }
+}
+
+const detailDrawerSource = await readFile(detailDrawerUrl, 'utf8');
+const iconButtonSource = await readFile(iconButtonUrl, 'utf8');
+const sharedHeaderContract = [
+  '!grid-cols-[minmax(0,1fr)_auto]',
+  'close !col-start-2 !row-start-1',
+  '!col-start-2 !row-start-2 !justify-self-end',
+  '!col-start-2 !row-start-3 !justify-self-end',
+];
+
+for (const contract of sharedHeaderContract) {
+  if (!detailDrawerSource.includes(contract)) {
+    failures.push(`src/components/drawer/DetailDrawer.tsx: missing shared header contract ${contract}`);
+  }
+}
+
+if (!iconButtonSource.includes("!h-11 !w-11") || !iconButtonSource.includes("compact ? '!h-8 !w-8'")) {
+  failures.push('src/components/IconButton.tsx: drawer controls must retain a 44px target and 32px compact surface');
 }
 
 if (failures.length > 0) {

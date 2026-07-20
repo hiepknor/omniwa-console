@@ -91,6 +91,9 @@ The shared contract provides:
 - a modal side sheet below 1280px and a full-width sheet on narrow phones,
   including body scroll lock, inert background content, focus trapping,
   Escape handling, focus restoration, and a 44px close target;
+- one shared header action rail: the 32px visual Close control, resource status,
+  and 44px Copy target occupy the same right-hand grid column while retaining
+  44px interaction targets;
 - a single identifier row with truncation, full-value tooltip, and copy
   action instead of repeating IDs in the facts list;
 - shared loading, unavailable, and error-state geometry; and

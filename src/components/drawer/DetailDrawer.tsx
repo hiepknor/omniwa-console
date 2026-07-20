@@ -47,9 +47,9 @@ export function DrawerIdentifier({ value, label = 'Copy identifier' }: { value: 
   };
 
   return (
-    <span className="!grid !min-h-11 !min-w-0 !grid-cols-[minmax(0,1fr)_44px] !items-center">
-      <span className="mono !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap" title={value}>{value}</span>
-      <IconButton compact className="!justify-self-end" surfaceClassName="!border-transparent !bg-transparent group-hover:!bg-[var(--accent-hover)]" label={`${label}: ${value}`} title={copied ? 'Copied' : label} onClick={() => void copy()}><CopyIcon copied={copied} /></IconButton>
+    <span className="!contents">
+      <span className="mono !col-start-1 !row-start-3 !min-w-0 !self-center !overflow-hidden !text-ellipsis !whitespace-nowrap" title={value}>{value}</span>
+      <IconButton compact className="!col-start-2 !row-start-3 !justify-self-end" surfaceClassName="!border-transparent !bg-transparent group-hover:!bg-[var(--accent-hover)]" label={`${label}: ${value}`} title={copied ? 'Copied' : label} onClick={() => void copy()}><CopyIcon copied={copied} /></IconButton>
       <span className="visually-hidden" aria-live="polite">{copyState === 'copied' ? 'Identifier copied.' : copyState === 'failed' ? 'Could not copy identifier.' : ''}</span>
     </span>
   );
@@ -97,16 +97,16 @@ export function DetailDrawer({
       {...(modal ? { role: 'dialog', 'aria-modal': true } : {})}
       tabIndex={-1}
     >
-      <header className="drawer-head !grid !min-h-28 !shrink-0 !grid-cols-[minmax(0,1fr)_44px] !items-start !gap-x-4 !border-b !border-[var(--border-subtle)] !bg-[var(--bg)] !px-6 !py-5 max-[640px]:!px-4 max-[640px]:!py-4">
-        <div className="drawer-identity !min-w-0 !flex-1">
-          <span className="eyebrow !mb-2">{eyebrow}</span>
-          <div className="drawer-title-row !grid !min-w-0 !grid-cols-[minmax(0,1fr)_auto] !items-center !gap-3 !mb-1">
-            <h2 id={titleId} className={`!w-auto !max-w-full !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap ${titleClassName ?? ''}`}>{title}</h2>
-            {status && <span className="!justify-self-end">{status}</span>}
+      <header className="drawer-head !grid !min-h-28 !shrink-0 !grid-cols-[minmax(0,1fr)_auto] !grid-rows-[44px_auto_44px] !items-center !gap-x-4 !gap-y-1 !border-b !border-[var(--border-subtle)] !bg-[var(--bg)] !px-6 !py-3 max-[640px]:!px-4">
+        <div className="drawer-identity !contents">
+          <span className="eyebrow !col-start-1 !row-start-1 !m-0 !self-center">{eyebrow}</span>
+          <div className="drawer-title-row !contents">
+            <h2 id={titleId} className={`!col-start-1 !row-start-2 !w-auto !max-w-full !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap ${titleClassName ?? ''}`}>{title}</h2>
+            {status && <span className="!col-start-2 !row-start-2 !justify-self-end">{status}</span>}
           </div>
-          {subtitle && <div className="drawer-subtitle !min-w-0 !overflow-hidden !text-ellipsis !whitespace-nowrap text-[11px] leading-[17px] text-[var(--fg-2)]">{subtitle}</div>}
+          {subtitle}
         </div>
-        <IconButton compact ref={closeRef} className="close !-mt-2" label={closeLabel} title="Close" onClick={onClose}><CloseIcon /></IconButton>
+        <IconButton compact ref={closeRef} className="close !col-start-2 !row-start-1 !-mt-2 !justify-self-end" label={closeLabel} title="Close" onClick={onClose}><CloseIcon /></IconButton>
       </header>
       <div className="drawer-scroll !min-h-0 !flex-1 !overflow-y-auto overscroll-contain">{children}</div>
     </aside>
