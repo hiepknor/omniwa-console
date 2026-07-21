@@ -89,8 +89,9 @@ export class ApiFailure extends Error {
     this.name = 'ApiFailure';
     this.httpStatus = httpStatus;
     this.category = categoryForStatus(httpStatus);
-    // Transient conditions worth an automatic retry.
-    this.retryable = httpStatus === 429 || httpStatus >= 500;
+    // Transient conditions worth an automatic retry. 501 (not_implemented) is a
+    // permanent condition, so it is excluded despite being 5xx.
+    this.retryable = httpStatus === 429 || (httpStatus >= 500 && httpStatus !== 501);
   }
 }
 

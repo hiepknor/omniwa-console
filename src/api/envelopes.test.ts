@@ -35,9 +35,11 @@ describe('ApiFailure', () => {
     expect(new ApiFailure({ error: 'x' }, status).category).toBe(category);
   });
 
-  it('marks only 429 and 5xx as retryable', () => {
+  it('marks 429 and 5xx as retryable, but not the permanent 501', () => {
     expect(new ApiFailure({}, 429).retryable).toBe(true);
     expect(new ApiFailure({}, 500).retryable).toBe(true);
+    expect(new ApiFailure({}, 503).retryable).toBe(true);
+    expect(new ApiFailure({}, 501).retryable).toBe(false);
     expect(new ApiFailure({}, 400).retryable).toBe(false);
     expect(new ApiFailure({}, 404).retryable).toBe(false);
   });
