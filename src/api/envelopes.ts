@@ -101,8 +101,14 @@ export function notImplemented(resource: string): ApiFailure {
   return failure;
 }
 
-type FetchResult<T> = {
-  data?: T;
+/**
+ * openapi-fetch result. Typed loosely as `unknown` data because several
+ * whatsmeow-derived omniwa-go endpoints are mis-typed by the swaggo spec (their
+ * runtime shape differs from the generated schema); the unwrap helpers narrow by
+ * runtime shape instead of trusting the generated response type.
+ */
+type FetchResult = {
+  data?: unknown;
   error?: unknown;
   response: Response;
 };
@@ -126,7 +132,7 @@ function isEnvelope(body: unknown): body is SuccessEnvelope {
  * Unwrap an openapi-fetch result: return the inner payload or throw ApiFailure.
  * Handles both the `{ message, data }` envelope and raw-payload endpoints.
  */
-export function unwrap<T>(result: FetchResult<SuccessEnvelope<T> | T>): T {
+export function unwrap<T>(result: FetchResult): T {
   if (result.data !== undefined) {
     const body = result.data;
     return isEnvelope(body) ? (body.data as T) : (body as T);
@@ -135,7 +141,7 @@ export function unwrap<T>(result: FetchResult<SuccessEnvelope<T> | T>): T {
 }
 
 /** Command variant: preserves the envelope message alongside the completed disposition. */
-export function unwrapCommand(result: FetchResult<SuccessEnvelope>): CommandResult {
+export function unwrapCommand(result: FetchResult): CommandResult {
   if (result.data !== undefined) {
     const body = result.data;
     return {

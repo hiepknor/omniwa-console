@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } 
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
-import { CategoryPill, StatusIndicator } from '@/components/badges';
+import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
@@ -135,27 +135,20 @@ function MetricCard({ label, value, context }: { label: string; value: number | 
   );
 }
 
-function LocalState({ group }: { group: GroupResource }) {
-  const states = [group.muted && 'muted', group.archived && 'archived', group.pinned && 'pinned'].filter((value): value is string => Boolean(value));
-  if (states.length === 0) return <>—</>;
-  return <span className="groups-local-state">{states.map((state) => <CategoryPill compact key={state}>{state}</CategoryPill>)}</span>;
-}
-
-function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
+function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   instanceId: string;
+  token: string | undefined;
   groupId: string | undefined;
   onSetParam: (name: string, value: string) => void;
 }) {
   const [searchParams] = useSearchParams();
   const [filterOpen, setFilterOpen] = useState(false);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
-  const initialCursor = searchParams.get('cursor') ?? undefined;
-  const list = useInstanceGroups(instanceId, initialCursor);
-  const refresh = useRefreshGroups(instanceId);
-  const pages = list.data?.pages ?? [];
-  const readState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
-  const unavailable = pages.some((page) => page.unavailable !== undefined);
-  const groups = useMemo(() => pages.flatMap((page) => page.resource?.items ?? []), [pages]);
+  const list = useInstanceGroups(instanceId, token);
+  const refresh = useRefreshGroups(instanceId, token);
+  const readState = useResilientReadState(list, list.data?.resource !== undefined);
+  const unavailable = list.data?.unavailable !== undefined;
+  const groups = useMemo(() => list.data?.resource?.items ?? [], [list.data]);
   const search = searchParams.get('search') ?? '';
   const status = searchParams.get('status') ?? '';
   const filteredGroups = useMemo(() => {
@@ -169,9 +162,8 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
   const latestUpdate = groups.map((group) => group.updatedAt).filter((value): value is string => value !== undefined).sort().at(-1);
   const adminCounts = groups.filter((group) => group.adminCount !== undefined);
   const knownAdmins = adminCounts.reduce((total, group) => total + (group.adminCount ?? 0), 0);
-  const muted = groups.filter((group) => group.muted).length;
-  const staleCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const stale = groups.filter((group) => group.updatedAt !== undefined && new Date(group.updatedAt).getTime() < staleCutoff).length;
+  const totalMembers = groups.reduce((total, group) => total + (group.memberCount ?? 0), 0);
+  const announceOnly = groups.filter((group) => group.announce).length;
   const metricsAvailable = !readState.isInitialLoading && !readState.isInitialError && !(unavailable && groups.length === 0);
   const zeroGroups = metricsAvailable && groups.length === 0;
   const selectedGroup = groups.find((group) => group.id === groupId);
@@ -183,9 +175,8 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
     },
     { id: 'members', header: 'Members', size: 'sm', kind: 'numeric', align: 'end', mobile: 'secondary', cell: (group) => <span className="num">{group.memberCount ?? '—'}</span> },
     { id: 'admins', header: 'Admins', size: 'sm', kind: 'numeric', align: 'end', mobile: 'hidden', cell: (group) => <span className="num">{group.adminCount ?? '—'}</span> },
-    { id: 'local', header: 'Local state', size: 'lg', mobile: 'hidden', cell: (group) => <LocalState group={group} /> },
     { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (group) => <StatusIndicator dotClass={statusDot(group.status)}>{group.status ?? '—'}</StatusIndicator> },
-    { id: 'updated', header: 'Updated', size: 'md', kind: 'date', align: 'end', mobile: 'meta', cell: (group) => <span className="ts" title={group.updatedAt}>{relativeTime(group.updatedAt) || '—'}</span>, mobileCell: (group) => relativeTime(group.updatedAt) || undefined },
+    { id: 'created', header: 'Created', size: 'md', kind: 'date', align: 'end', mobile: 'meta', cell: (group) => <span className="ts" title={group.updatedAt}>{relativeTime(group.updatedAt) || '—'}</span>, mobileCell: (group) => relativeTime(group.updatedAt) || undefined },
   ];
   const tableState: DataTableState<GroupResource> = readState.isInitialError
     ? { status: 'error', error: readState.error, onRetry: list.refetch }
@@ -209,13 +200,6 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
     onSetParam('group', '');
     window.requestAnimationFrame(() => activeRow?.focus());
   };
-  const loadMore = async () => {
-    const nextCursor = pages.at(-1)?.resource?.pagination?.nextCursor;
-    if (!nextCursor) return;
-    const result = await list.fetchNextPage();
-    if (!result.isError) onSetParam('cursor', nextCursor);
-  };
-
   return (
     <>
       {!zeroGroups && <section className="groups-metric-section max-[640px]:!mb-4" aria-labelledby="groups-posture-title">
@@ -223,10 +207,10 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
           <div><h2 id="groups-posture-title">Loaded group posture</h2><span className="groups-posture-note">Counts reflect loaded pages.</span></div>
         </div>
         <div className="metrics groups-metrics max-[640px]:!grid-cols-2">
-          <MetricCard label="Synced groups" value={metricsAvailable ? groups.length : undefined} context={metricsAvailable ? 'Loaded groups' : 'Data unavailable'} />
+          <MetricCard label="Groups" value={metricsAvailable ? groups.length : undefined} context={metricsAvailable ? 'Loaded groups' : 'Data unavailable'} />
+          <MetricCard label="Members" value={metricsAvailable ? totalMembers : undefined} context={metricsAvailable ? 'Across loaded groups' : 'Data unavailable'} />
           <MetricCard label="Admins known" value={metricsAvailable ? knownAdmins : undefined} context={metricsAvailable ? `${adminCounts.length} of ${groups.length} loaded groups` : 'Data unavailable'} />
-          <MetricCard label="Muted" value={metricsAvailable ? muted : undefined} context={metricsAvailable ? 'Muted locally' : 'Data unavailable'} />
-          <MetricCard label="Projection stale" value={metricsAvailable ? stale : undefined} context={metricsAvailable ? 'Not updated for 7d+' : 'Data unavailable'} />
+          <MetricCard label="Announce-only" value={metricsAvailable ? announceOnly : undefined} context={metricsAvailable ? 'Admins post only' : 'Data unavailable'} />
         </div>
       </section>}
 
@@ -274,7 +258,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
                 }
               },
             })}
-            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={refresh.isPending} title="The platform reports whether group discovery completed or continues asynchronously." onClick={() => refresh.mutate()}>Refresh sync</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
+            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<button className="btn" type="button" disabled={refresh.isPending} onClick={() => refresh.mutate()}>Refresh</button>} />}
           />
         </div>
       </DataTableWorkspace>
@@ -286,7 +270,7 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
         <button className="btn primary mobile-filter-done" type="button" onClick={() => setFilterOpen(false)}>Done</button>
       </MobileFilterSheet>
 
-      {groupId && <GroupDrawer key={groupId} groupId={groupId} subject={selectedGroup?.subject} onClose={closeGroup} />}
+      {groupId && <GroupDrawer key={groupId} groupId={groupId} subject={selectedGroup?.subject} instanceId={instanceId} token={token} onClose={closeGroup} />}
     </>
   );
 }
@@ -326,7 +310,7 @@ export function GroupsPage() {
 
   let content: React.ReactNode;
   if (instanceId) {
-    content = <GroupsWorkbench instanceId={instanceId} groupId={groupId} onSetParam={setParam} />;
+    content = <GroupsWorkbench instanceId={instanceId} token={selectedInstance?.token} groupId={groupId} onSetParam={setParam} />;
   } else if (pickerReadState.isInitialError) {
     content = isTransportError(pickerReadState.error)
       ? <div className="empty groups-picker-state">Instances are unavailable while the API reconnects.</div>
