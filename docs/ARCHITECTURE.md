@@ -23,8 +23,13 @@ Platform design and are kept for historical context):
   message actions have an omniwa-go backend. Overview, queue, webhooks, api-keys,
   settings, events, and chats have no backing and their `src/api/` modules throw
   `notImplemented` (category `not_implemented`), which the panels render as an
-  unavailable state. The instances and groups feature verticals are stubbed
-  pending wiring to live `/instance/*` and `/group/*` endpoints.
+  unavailable state. The **instances** vertical is wired to live `/instance/*`
+  endpoints; **groups** is stubbed pending wiring to `/group/*`.
+- **Two client scopes:** admin routes (`/instance/all·info·create·delete`) use
+  the session's global key; token-scoped routes
+  (`/instance/connect·qr·status·disconnect·reconnect`) act on the instance whose
+  token is in the header, so the console builds a per-instance client from each
+  instance's `token` (see `useApiSession` and `src/features/instances/hooks.ts`).
 
 Full migration context: `docs/HANDOFF_FROM_OMNIWA_GO.md`.
 

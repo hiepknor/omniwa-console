@@ -11,7 +11,7 @@ Backing status per panel:
 
 | Panel | omniwa-go backing | Status |
 | --- | --- | --- |
-| instances | `/instance/*` | backed; feature wiring pending (stubbed) |
+| instances | `/instance/*` | **backed & wired** (list/create/info/delete + token-scoped connect/qr/status/disconnect/reconnect) |
 | groups | `/group/*` | backed; feature wiring pending (stubbed) |
 | chats | none (no list/history REST; realtime off) | `not_implemented` |
 | overview | none (only `GET /server/ok`) | `not_implemented` |

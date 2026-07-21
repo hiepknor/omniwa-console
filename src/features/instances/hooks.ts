@@ -1,30 +1,40 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '@/api/ApiProvider';
+import { useMemo } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useApi, useApiSession } from '@/api/ApiProvider';
+import { createApiClient, type ApiClient } from '@/api/client';
 import {
   connectInstance,
   createInstance,
   destroyInstance,
   disconnectInstance,
   getInstance,
-  getProviderCapabilities,
+  getInstanceQr,
+  getInstanceStatus,
   listInstances,
-  listInstanceSessions,
-  refreshInstanceQr,
-  refreshProviderCapabilities,
-  requestInstanceReconnect,
-  updateInstance,
+  reconnectInstance,
+  type InstanceCreateRequest,
 } from '@/api/instances';
 import { instanceKeys, queryKeys } from '@/api/keys';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 
-export function useInstances(initialCursor?: string) {
+/**
+ * Build a client authenticated with a specific instance's token, for omniwa-go's
+ * token-scoped routes. Returns undefined until a token is known.
+ */
+function useInstanceClient(token: string | undefined): ApiClient | undefined {
+  const session = useApiSession();
+  return useMemo(
+    () => (token ? createApiClient({ baseUrl: session.baseUrl, apiKey: token }) : undefined),
+    [session.baseUrl, token],
+  );
+}
+
+export function useInstances() {
   const client = useApi();
   const refetchInterval = useRealtimeRefetchInterval();
-  return useInfiniteQuery({
-    queryKey: queryKeys.instances({ initialCursor }),
-    queryFn: ({ pageParam }) => listInstances(client, { cursor: pageParam, limit: 50 }),
-    initialPageParam: initialCursor,
-    getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
+  return useQuery({
+    queryKey: queryKeys.instances(),
+    queryFn: () => listInstances(client),
     refetchInterval,
   });
 }
@@ -40,25 +50,25 @@ export function useInstance(instanceId: string | undefined) {
   });
 }
 
-export function useInstanceSessions(instanceId: string | undefined) {
-  const client = useApi();
+export function useInstanceStatus(instanceId: string, token: string | undefined) {
+  const tokenClient = useInstanceClient(token);
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: queryKeys.instanceSessions(instanceId ?? ''),
-    queryFn: () => listInstanceSessions(client, instanceId ?? '', { limit: 20 }),
-    enabled: instanceId !== undefined,
+    queryKey: [...queryKeys.instance(instanceId), 'status'],
+    queryFn: () => getInstanceStatus(tokenClient as ApiClient),
+    enabled: tokenClient !== undefined,
     refetchInterval,
   });
 }
 
-export function useProviderCapabilities(enabled: boolean) {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
+export function useInstanceQr(instanceId: string, token: string | undefined, enabled: boolean) {
+  const tokenClient = useInstanceClient(token);
   return useQuery({
-    queryKey: queryKeys.providerCapabilities,
-    queryFn: () => getProviderCapabilities(client),
-    enabled,
-    refetchInterval,
+    queryKey: [...queryKeys.instance(instanceId), 'qr'],
+    queryFn: () => getInstanceQr(tokenClient as ApiClient),
+    enabled: enabled && tokenClient !== undefined,
+    // QR rotates frequently while pairing; poll faster than the shared interval.
+    refetchInterval: enabled ? 8_000 : false,
   });
 }
 
@@ -68,7 +78,6 @@ function useInvalidateInstance() {
     await queryClient.invalidateQueries({ queryKey: instanceKeys.root });
     if (instanceId !== undefined) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.instance(instanceId) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.instanceSessions(instanceId) });
     }
   };
 }
@@ -77,35 +86,8 @@ export function useCreateInstance() {
   const client = useApi();
   const invalidate = useInvalidateInstance();
   return useMutation({
-    mutationFn: (displayName: string) => createInstance(client, { displayName }),
+    mutationFn: (body: InstanceCreateRequest) => createInstance(client, body),
     onSuccess: () => invalidate(),
-  });
-}
-
-export function useUpdateInstance(instanceId: string) {
-  const client = useApi();
-  const invalidate = useInvalidateInstance();
-  return useMutation({
-    mutationFn: (displayName: string) => updateInstance(client, instanceId, { displayName }),
-    onSuccess: () => invalidate(instanceId),
-  });
-}
-
-export function useConnectInstance(instanceId: string) {
-  const client = useApi();
-  const invalidate = useInvalidateInstance();
-  return useMutation({
-    mutationFn: () => connectInstance(client, instanceId),
-    onSuccess: () => invalidate(instanceId),
-  });
-}
-
-export function useDisconnectInstance(instanceId: string) {
-  const client = useApi();
-  const invalidate = useInvalidateInstance();
-  return useMutation({
-    mutationFn: () => disconnectInstance(client, instanceId),
-    onSuccess: () => invalidate(instanceId),
   });
 }
 
@@ -118,29 +100,29 @@ export function useDestroyInstance(instanceId: string) {
   });
 }
 
-export function useReconnectInstance(instanceId: string) {
-  const client = useApi();
+export function useConnectInstance(instanceId: string, token: string | undefined) {
+  const tokenClient = useInstanceClient(token);
   const invalidate = useInvalidateInstance();
   return useMutation({
-    mutationFn: () => requestInstanceReconnect(client, instanceId),
+    mutationFn: () => connectInstance(tokenClient as ApiClient),
     onSuccess: () => invalidate(instanceId),
   });
 }
 
-export function useRefreshInstanceQr(instanceId: string) {
-  const client = useApi();
+export function useDisconnectInstance(instanceId: string, token: string | undefined) {
+  const tokenClient = useInstanceClient(token);
   const invalidate = useInvalidateInstance();
   return useMutation({
-    mutationFn: () => refreshInstanceQr(client, instanceId),
+    mutationFn: () => disconnectInstance(tokenClient as ApiClient),
     onSuccess: () => invalidate(instanceId),
   });
 }
 
-export function useRefreshProviderCapabilities() {
-  const client = useApi();
-  const queryClient = useQueryClient();
+export function useReconnectInstance(instanceId: string, token: string | undefined) {
+  const tokenClient = useInstanceClient(token);
+  const invalidate = useInvalidateInstance();
   return useMutation({
-    mutationFn: () => refreshProviderCapabilities(client),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: instanceKeys.provider }),
+    mutationFn: () => reconnectInstance(tokenClient as ApiClient),
+    onSuccess: () => invalidate(instanceId),
   });
 }

@@ -13,7 +13,8 @@ import {
   sendInstanceMediaMessage,
   sendInstanceTextMessage,
 } from '@/api/chats';
-import { getInstance, listInstances, requestInstanceReconnect } from '@/api/instances';
+import { getInstance, listInstances } from '@/api/instances';
+import { notImplemented } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
@@ -103,11 +104,10 @@ export function useMessagingInstance(instanceId: string | undefined) {
 }
 
 export function useRequestInstanceReconnect(instanceId: string) {
-  const client = useApi();
   const queryClient = useQueryClient();
   const feedback = useFeedback();
   return useMutation({
-    mutationFn: () => requestInstanceReconnect(client, instanceId),
+    mutationFn: () => Promise.reject(notImplemented('Instance reconnect')),
     onSuccess: async () => {
       feedback.accepted({
         title: 'Instance reconnect accepted',

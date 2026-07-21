@@ -1,82 +1,106 @@
 import type { ApiClient } from './client';
-import type { components } from './generated/platform-schema';
-import { notImplemented, type CollectionEnvelope, type CommandResult, type UnavailableRead } from './envelopes';
+import type { components } from './generated/schema';
+import { unwrap, unwrapCommand, type CommandResult, type UnavailableRead } from './envelopes';
 
-// omniwa-go backs instances via `/instance/*` (flat routes, no cursor, no
-// sessions/provider-capabilities). Wiring the instances feature to those
-// endpoints is a follow-up; the module is stubbed for now.
-export type InstanceResource = components['schemas']['InstanceResource'];
-export type SessionResource = components['schemas']['SessionResource'];
-export type ProviderResource = components['schemas']['ProviderResource'];
-export type InstanceCreateRequest = components['schemas']['InstanceCreateRequest'];
-export type InstancePagination = CollectionEnvelope['meta']['pagination'];
+type GoInstance = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance'];
+type GoStatus = components['schemas']['apidocs.StatusData'];
+type GoQr = components['schemas']['apidocs.QRCodeData'];
+
+export type InstanceStatus = 'connected' | 'disconnected';
+
+/**
+ * Console-facing instance shape, adapted from omniwa-go's whatsmeow-shaped
+ * `Instance`. `token` is the per-instance apikey used to build a client for the
+ * token-scoped routes (`/instance/connect·qr·status·disconnect·reconnect`).
+ */
+export type InstanceResource = {
+  id: string;
+  displayName?: string;
+  status: InstanceStatus;
+  connected: boolean;
+  jid?: string;
+  token?: string;
+  webhook?: string;
+  createdAt?: string;
+  /** omniwa-go has no update timestamp; kept optional for shared table compatibility. */
+  updatedAt?: string;
+};
+
+export type InstanceStatusResource = { connected: boolean; loggedIn: boolean; name?: string };
+export type InstanceQr = { qrcode?: string; code?: string };
+export type InstanceCreateRequest = { instanceId: string; name?: string };
+
+export type InstancePagination = { nextCursor?: string | null; hasMore?: boolean };
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
+export type InstanceListPage = { items: InstanceResource[]; pagination: InstancePagination };
 
-export type InstanceListPage = {
-  items: InstanceResource[];
-  pagination: InstancePagination;
-};
+const NO_PAGINATION: InstancePagination = { nextCursor: null, hasMore: false };
 
-export type SessionListPage = {
-  items: SessionResource[];
-  pagination: InstancePagination;
-};
+function toInstance(raw: GoInstance): InstanceResource {
+  const connected = raw.connected ?? false;
+  return {
+    id: raw.id ?? '',
+    displayName: raw.name || undefined,
+    connected,
+    status: connected ? 'connected' : 'disconnected',
+    jid: raw.jid || undefined,
+    token: raw.token || undefined,
+    webhook: raw.webhook || undefined,
+    createdAt: raw.createdAt || undefined,
+  };
+}
+
+// --- Global-key (admin) operations: the session client -----------------------
 
 export async function listInstances(
-  _client: ApiClient,
+  client: ApiClient,
   _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<InstanceListPage>> {
-  throw notImplemented('Instances');
+  const data = unwrap<GoInstance[]>(await client.GET('/instance/all'));
+  return { resource: { items: (data ?? []).map(toInstance), pagination: NO_PAGINATION } };
 }
 
-export async function getInstance(_client: ApiClient, _instanceId: string): Promise<ReadResult<InstanceResource>> {
-  throw notImplemented('Instance detail');
+export async function getInstance(client: ApiClient, instanceId: string): Promise<ReadResult<InstanceResource>> {
+  const data = unwrap<GoInstance>(
+    await client.GET('/instance/info/{instanceId}', { params: { path: { instanceId } } }),
+  );
+  return { resource: data ? toInstance(data) : undefined };
 }
 
-export async function listInstanceSessions(
-  _client: ApiClient,
-  _instanceId: string,
-  _params: { cursor?: string; limit?: number } = {},
-): Promise<ReadResult<SessionListPage>> {
-  throw notImplemented('Instance sessions');
+export async function createInstance(client: ApiClient, body: InstanceCreateRequest): Promise<CommandResult> {
+  return unwrapCommand(
+    await client.POST('/instance/create', { body: { instanceId: body.instanceId, name: body.name || body.instanceId } }),
+  );
 }
 
-export async function getProviderCapabilities(_client: ApiClient): Promise<ReadResult<ProviderResource>> {
-  throw notImplemented('Provider capabilities');
+export async function destroyInstance(client: ApiClient, instanceId: string): Promise<CommandResult> {
+  return unwrapCommand(await client.DELETE('/instance/delete/{instanceId}', { params: { path: { instanceId } } }));
 }
 
-export async function createInstance(_client: ApiClient, _body: InstanceCreateRequest): Promise<CommandResult> {
-  throw notImplemented('Create instance');
+// --- Token-scoped operations: a per-instance client (built from `token`) ------
+
+export async function getInstanceStatus(client: ApiClient): Promise<InstanceStatusResource> {
+  const data = unwrap<GoStatus>(await client.GET('/instance/status'));
+  return { connected: data?.Connected ?? false, loggedIn: data?.LoggedIn ?? false, name: data?.Name || undefined };
 }
 
-export async function updateInstance(
-  _client: ApiClient,
-  _instanceId: string,
-  _body: { displayName: string },
-): Promise<CommandResult> {
-  throw notImplemented('Update instance');
+export async function getInstanceQr(client: ApiClient): Promise<InstanceQr> {
+  const data = unwrap<GoQr>(await client.GET('/instance/qr'));
+  return { qrcode: data?.qrcode || undefined, code: data?.code || undefined };
 }
 
-export async function connectInstance(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
-  throw notImplemented('Connect instance');
+export async function connectInstance(client: ApiClient, opts: { immediate?: boolean } = {}): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/instance/connect', { body: { immediate: opts.immediate ?? true } }));
 }
 
-export async function disconnectInstance(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
-  throw notImplemented('Disconnect instance');
+export async function disconnectInstance(client: ApiClient): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/instance/disconnect'));
 }
 
-export async function destroyInstance(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
-  throw notImplemented('Destroy instance');
+export async function reconnectInstance(client: ApiClient): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/instance/reconnect'));
 }
 
-export async function requestInstanceReconnect(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
-  throw notImplemented('Reconnect instance');
-}
-
-export async function refreshInstanceQr(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
-  throw notImplemented('Refresh QR');
-}
-
-export async function refreshProviderCapabilities(_client: ApiClient): Promise<CommandResult> {
-  throw notImplemented('Refresh provider capabilities');
+export async function logoutInstance(client: ApiClient): Promise<CommandResult> {
+  return unwrapCommand(await client.DELETE('/instance/logout'));
 }

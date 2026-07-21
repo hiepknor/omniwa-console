@@ -47,16 +47,14 @@ export function InstancesPage() {
   const feedback = useFeedback();
   const search = searchParams.get('search') ?? '';
   const status = searchParams.get('status') ?? '';
-  const initialCursor = searchParams.get('cursor') ?? undefined;
-  const list = useInstances(initialCursor);
+  const list = useInstances();
   const detail = useInstance(instanceId);
   const create = useCreateInstance();
-  const pages = list.data?.pages ?? [];
-  const listReadState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
-  const unavailable = pages.some((page) => page.unavailable !== undefined);
+  const listReadState = useResilientReadState(list, list.data?.resource !== undefined);
+  const unavailable = list.data?.unavailable !== undefined;
   const instances = useMemo(
-    () => pages.flatMap((page) => page.resource?.items ?? []),
-    [pages],
+    () => list.data?.resource?.items ?? [],
+    [list.data],
   );
   const filteredInstances = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -66,7 +64,7 @@ export function InstancesPage() {
       return matchesSearch && matchesStatus;
     });
   }, [instances, search, status]);
-  const statuses = [...new Set(instances.map((instance) => instance.status).filter((value): value is string => Boolean(value)))].sort();
+  const statuses = [...new Set(instances.map((instance) => instance.status))].sort();
   const latestUpdate = instances
     .map((instance) => instance.updatedAt)
     .filter((value): value is string => value !== undefined)
@@ -76,20 +74,12 @@ export function InstancesPage() {
   const setParam = (name: string, value: string) => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(name, value); else next.delete(name);
-    if (name !== 'cursor') next.delete('cursor');
     setSearchParams(next, { replace: true });
   };
   const listLocation = `/instances${searchParams.size ? `?${searchParams.toString()}` : ''}`;
   const openInstance = (id: string) => navigate(`/instances/${encodeURIComponent(id)}${searchParams.size ? `?${searchParams.toString()}` : ''}`);
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: instanceKeys.root });
-    void queryClient.invalidateQueries({ queryKey: instanceKeys.provider });
-  };
-  const loadMore = async () => {
-    const nextCursor = pages.at(-1)?.resource?.pagination?.nextCursor;
-    if (!nextCursor) return;
-    const result = await list.fetchNextPage();
-    if (!result.isError) setParam('cursor', nextCursor);
   };
   type InstanceRow = (typeof instances)[number];
   const columns: DataTableColumn<InstanceRow>[] = [
@@ -197,7 +187,7 @@ export function InstancesPage() {
           footer={(
             <DataTableFooter
               primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>}
-              actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</div>}
+              actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button></div>}
             />
           )}
         />
@@ -245,9 +235,9 @@ export function InstancesPage() {
           error={create.error}
           isPending={create.isPending}
           onCancel={() => setParam('create', '')}
-          onCreate={(displayName) => create.mutate(displayName, { onSuccess: (result) => {
+          onCreate={(body) => create.mutate(body, { onSuccess: (result) => {
             setParam('create', '');
-            feedback.command(result.disposition, { action: 'Create instance', acceptedDetail: 'The platform accepted the command. The instance will appear after it is recorded.', completedDetail: 'The platform created the instance.', requestId: result.requestId, dedupeKey: 'instance:create' });
+            feedback.command(result.disposition, { action: 'Create instance', acceptedDetail: 'omniwa-go accepted the command. The instance will appear after it is recorded.', completedDetail: 'omniwa-go created the instance.', requestId: result.requestId, dedupeKey: 'instance:create' });
           } })}
         />
       )}
