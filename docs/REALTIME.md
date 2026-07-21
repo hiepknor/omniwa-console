@@ -1,57 +1,37 @@
-# Realtime (SSE)
+# Realtime
 
-## Source
+## Status: disabled (REST polling only)
 
-`streamEvents` — `GET /v1/events/stream`, `text/event-stream`. This is the
-only realtime channel; there are no WebSockets.
+The console does **not** open a realtime connection against omniwa-go.
 
-## Design: one connection, invalidation only
+omniwa-go's only realtime channel is a WebSocket `/ws` that emits
+`{ queue, payload }` frames (`../omniwa-go/docs/wiki-en/websocket-events.md`).
+Critically, `/ws` authenticates with the **global admin key** — even when
+filtered by `instanceId` — and the omniwa-go wiki explicitly forbids opening it
+from a browser SPA, because that would expose the admin secret in front-end code
+and in every network request. Safely bridging `/ws` would require a BFF/proxy
+that terminates the browser socket and holds the key server-side, which this
+client-only console does not have.
 
-The console opens **one** SSE connection per session, owned by
-`src/api/events.ts`, regardless of how many realtime panels are mounted.
+## What the console does instead
 
-Events are treated as *facts that something changed*, not as data payloads
-to merge into caches:
+Panels fall back to **REST polling**. `src/api/RealtimeProvider.tsx` keeps the
+previous hook surface (`useRealtimeStatus`, `useRealtimeStatusOrNull`,
+`useRealtimeEvents`, `useRealtimeRefetchInterval`) so feature code and shared
+components compile unchanged, but:
 
-1. An event arrives and is normalized to `{ type, resource, resourceId,
-   instanceId?, occurredAt }`.
-2. A mapping table translates it to TanStack Query keys to invalidate
-   (for example an instance lifecycle event invalidates `['instances']` and
-   `['instances', instanceId]`; a queue event invalidates
-   `['queue', 'status']` and `['jobs']`).
-3. TanStack Query refetches whatever is currently mounted.
+- `useRealtimeStatus()` / `useRealtimeStatusOrNull()` report a steady `polling`.
+- `useRealtimeEvents()` returns an empty list (no live ticker/tail).
+- `useRealtimeRefetchInterval()` returns `REALTIME_REFETCH_INTERVAL` (15s), so
+  mounted queries refetch on that interval while visible.
 
-This keeps the SSE handler free of merge logic and immune to event-shape
-drift: unknown event types fall back to no-op plus the live ticker.
+The shell indicator therefore shows "polling" and operators know freshness is
+bounded by the interval, not live.
 
-The Overview and Events panels additionally render the raw normalized
-events in a bounded ring buffer (last 200) as a live ticker / tail.
+## Re-enabling realtime later
 
-## Connection lifecycle
-
-- Native `EventSource` cannot set headers. The platform accepts the API key
-  via query parameter for the stream endpoint if supported; otherwise use a
-  `fetch`-based SSE reader (ReadableStream parsing) so `x-api-key` rides in
-  the header. **The fetch-based reader is the default** — verify against
-  the running platform before enabling `EventSource`.
-- Reconnect with exponential backoff (1s → 30s cap, jittered). Show a
-  "live / reconnecting / offline" indicator in the shell header.
-- On reconnect, invalidate all realtime panel keys once, since events were
-  missed during the gap.
-- Close the connection on disconnect/session clear.
-
-## Degradation
-
-If the stream is unavailable (older platform, proxy stripping SSE), the
-console falls back to polling: realtime panels refetch on a 15s interval
-while visible. The indicator shows "polling" so operators know freshness.
-
-## Verified platform behavior (M4)
-
-The stream endpoint returns a finite replay batch of up to 100 events and
-then closes, so the client runs a cursor-resumed rotate loop approximately
-every four seconds. Requests resume with `?cursor=`. The
-`x-omniwa-cursor-status` response header (`no_cursor | ok | not_found |
-expired`) communicates gap and reset semantics. On `not_found` or `expired`,
-the client drops its cursor, invalidates all realtime keys once, and
-re-backfills. A full 100-event batch triggers an immediate follow-up request.
+If omniwa-go realtime is wanted, add a BFF that proxies `/ws` (browser ↔ BFF
+session, BFF ↔ omniwa-go with the global key) and reintroduce a stream client in
+`src/api/` that maps `queue` event types to the TanStack Query keys in
+`src/api/keys.ts` for targeted invalidation — the same invalidation-only design
+the console used for the Platform SSE stream.

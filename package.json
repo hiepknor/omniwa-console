@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Standalone web operations console for OmniWA Platform.",
+  "description": "Standalone web operations console for the OmniWA GO API.",
   "license": "UNLICENSED",
   "scripts": {
     "dev": "vite",
@@ -17,8 +17,8 @@
     "architecture:check": "node scripts/check-architecture.mjs",
     "bundle:check": "node scripts/check-bundle.mjs",
     "check": "pnpm design:check && pnpm contract:check && pnpm architecture:check && pnpm typecheck && pnpm build && pnpm bundle:check",
-    "contract:sync": "cp ../omniwa/docs/api/openapi/omniwa-v1.openapi.json contracts/omniwa-v1.openapi.json",
-    "api:generate": "openapi-typescript contracts/omniwa-v1.openapi.json -o src/api/generated/schema.d.ts"
+    "contract:sync": "node scripts/sync-omniwa-go-contract.mjs",
+    "api:generate": "openapi-typescript contracts/omniwa-go.openapi.json -o src/api/generated/schema.d.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.0",
@@ -33,6 +33,7 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "openapi-typescript": "^7.4.4",
+    "swagger2openapi": "^7.0.8",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.3",

@@ -1,8 +1,35 @@
 # Panel Contracts
 
+## OmniWA GO backing (current)
+
+The console now targets the **OmniWA GO** API. omniwa-go has no `operationId`s,
+so panels are contracted by `METHOD /path`. `pnpm contract:check` verifies that
+every typed `client.<METHOD>('/path')` call in `src/features/` is both present in
+`contracts/omniwa-go.openapi.json` and listed for its panel here.
+
+Backing status per panel:
+
+| Panel | omniwa-go backing | Status |
+| --- | --- | --- |
+| instances | `/instance/*` | backed; feature wiring pending (stubbed) |
+| groups | `/group/*` | backed; feature wiring pending (stubbed) |
+| chats | none (no list/history REST; realtime off) | `not_implemented` |
+| overview | none (only `GET /server/ok`) | `not_implemented` |
+| queue | none | `not_implemented` |
+| webhooks | none (per-instance webhook URL only) | `not_implemented` |
+| settings | none (only per-instance advanced-settings) | `not_implemented` |
+| admin-keys | none (static env + instance tokens) | `not_implemented` |
+| events | none (realtime is WS-only, disabled) | `not_implemented` |
+
+Stubbed `src/api/` modules throw `notImplemented`, which panels render as an
+unavailable state. The per-panel operation lists below are the **historical
+omniwa Platform v1 contract** and are retained for reference until each panel is
+re-mapped to omniwa-go `METHOD /path` operations.
+
+---
+
 Each panel is one feature directory under `src/features/` and one primary
-route. A panel may only call the operation IDs listed for it; the IDs come
-verbatim from the public OpenAPI contract (`contracts/omniwa-v1.openapi.json`).
+route. (Historical Platform contract follows.)
 
 This is the "full resource console" surface: a superset of the frozen
 `omniwa-web-dashboard` SDK profile (overview / instances / operations),

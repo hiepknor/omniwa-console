@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
 import type { PublicData } from '@/api/envelopes';
-import type { components } from '@/api/generated/schema';
+import type { components } from '@/api/generated/platform-schema';
 import { queryKeys } from '@/api/keys';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 export { useResilientReadState as useStableReadState } from '@/lib/query-state';

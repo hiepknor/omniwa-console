@@ -1,17 +1,10 @@
 import type { ApiClient } from './client';
-import type { components } from './generated/schema';
-import {
-  ApiFailure,
-  parseUnavailableRead,
-  pickResource,
-  pickResources,
-  unwrap,
-  unwrapCommand,
-  type CollectionEnvelope,
-  type ErrorEnvelope,
-  type UnavailableRead,
-} from './envelopes';
+import type { components } from './generated/platform-schema';
+import { notImplemented, type CollectionEnvelope, type CommandResult, type UnavailableRead } from './envelopes';
 
+// omniwa-go backs instances via `/instance/*` (flat routes, no cursor, no
+// sessions/provider-capabilities). Wiring the instances feature to those
+// endpoints is a follow-up; the module is stubbed for now.
 export type InstanceResource = components['schemas']['InstanceResource'];
 export type SessionResource = components['schemas']['SessionResource'];
 export type ProviderResource = components['schemas']['ProviderResource'];
@@ -29,150 +22,61 @@ export type SessionListPage = {
   pagination: InstancePagination;
 };
 
-function unavailableOrThrow(result: { error?: unknown; response: Response }): UnavailableRead {
-  const unavailable = parseUnavailableRead(result.error);
-  if (unavailable !== undefined) return unavailable;
-  throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
-
-function idempotencyKey(action: string, resourceId?: string): string {
-  return `console-${action}-${resourceId ?? 'new'}-${crypto.randomUUID()}`;
-}
-
 export async function listInstances(
-  client: ApiClient,
-  params: { cursor?: string; limit?: number } = {},
+  _client: ApiClient,
+  _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<InstanceListPage>> {
-  const result = await client.GET('/v1/instances', {
-    params: { query: { cursor: params.cursor, limit: params.limit ?? 50 } },
-  });
-  if (result.data !== undefined) {
-    return {
-      resource: {
-        items: pickResources(result.data.data, 'instance'),
-        pagination: result.data.meta.pagination,
-      },
-    };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+  throw notImplemented('Instances');
 }
 
-export async function getInstance(
-  client: ApiClient,
-  instanceId: string,
-): Promise<ReadResult<InstanceResource>> {
-  const result = await client.GET('/v1/instances/{instanceId}', {
-    params: { path: { instanceId } },
-  });
-  if (result.data !== undefined) {
-    return { resource: pickResource(result.data.data, 'instance') };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+export async function getInstance(_client: ApiClient, _instanceId: string): Promise<ReadResult<InstanceResource>> {
+  throw notImplemented('Instance detail');
 }
 
 export async function listInstanceSessions(
-  client: ApiClient,
-  instanceId: string,
-  params: { cursor?: string; limit?: number } = {},
+  _client: ApiClient,
+  _instanceId: string,
+  _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<SessionListPage>> {
-  const result = await client.GET('/v1/instances/{instanceId}/sessions', {
-    params: {
-      path: { instanceId },
-      query: { cursor: params.cursor, limit: params.limit ?? 20 },
-    },
-  });
-  if (result.data !== undefined) {
-    return {
-      resource: {
-        items: pickResources(result.data.data, 'session'),
-        pagination: result.data.meta.pagination,
-      },
-    };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+  throw notImplemented('Instance sessions');
 }
 
-export async function getProviderCapabilities(
-  client: ApiClient,
-): Promise<ReadResult<ProviderResource>> {
-  const result = await client.GET('/v1/provider/capabilities');
-  if (result.data !== undefined) {
-    return { resource: pickResource(result.data.data, 'provider') };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+export async function getProviderCapabilities(_client: ApiClient): Promise<ReadResult<ProviderResource>> {
+  throw notImplemented('Provider capabilities');
 }
 
-export async function createInstance(client: ApiClient, body: InstanceCreateRequest) {
-  const result = await client.POST('/v1/instances', {
-    params: { header: { 'idempotency-key': idempotencyKey('create') } },
-    body,
-  });
-  return unwrapCommand(result);
+export async function createInstance(_client: ApiClient, _body: InstanceCreateRequest): Promise<CommandResult> {
+  throw notImplemented('Create instance');
 }
 
 export async function updateInstance(
-  client: ApiClient,
-  instanceId: string,
-  body: { displayName: string },
-) {
-  const result = await client.PATCH('/v1/instances/{instanceId}', {
-    params: { path: { instanceId } },
-    body,
-  });
-  return unwrapCommand(result);
+  _client: ApiClient,
+  _instanceId: string,
+  _body: { displayName: string },
+): Promise<CommandResult> {
+  throw notImplemented('Update instance');
 }
 
-export async function connectInstance(client: ApiClient, instanceId: string) {
-  const result = await client.POST('/v1/instances/{instanceId}/connect', {
-    params: {
-      path: { instanceId },
-      header: { 'idempotency-key': idempotencyKey('connect', instanceId) },
-    },
-    body: {},
-  });
-  return unwrapCommand(result);
+export async function connectInstance(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
+  throw notImplemented('Connect instance');
 }
 
-export async function disconnectInstance(client: ApiClient, instanceId: string) {
-  const result = await client.POST('/v1/instances/{instanceId}/disconnect', {
-    params: {
-      path: { instanceId },
-      header: { 'idempotency-key': idempotencyKey('disconnect', instanceId) },
-    },
-    body: {},
-  });
-  return unwrapCommand(result);
+export async function disconnectInstance(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
+  throw notImplemented('Disconnect instance');
 }
 
-export async function destroyInstance(client: ApiClient, instanceId: string) {
-  const result = await client.DELETE('/v1/instances/{instanceId}', {
-    params: {
-      path: { instanceId },
-      header: { 'idempotency-key': idempotencyKey('destroy', instanceId) },
-    },
-  });
-  return unwrapCommand(result);
+export async function destroyInstance(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
+  throw notImplemented('Destroy instance');
 }
 
-export async function requestInstanceReconnect(client: ApiClient, instanceId: string) {
-  const result = await client.POST('/v1/instances/{instanceId}/reconnect', {
-    params: { path: { instanceId } },
-  });
-  return unwrap(result);
+export async function requestInstanceReconnect(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
+  throw notImplemented('Reconnect instance');
 }
 
-export async function refreshInstanceQr(client: ApiClient, instanceId: string) {
-  const result = await client.POST('/v1/instances/{instanceId}/qr/refresh', {
-    params: {
-      path: { instanceId },
-      header: { 'idempotency-key': idempotencyKey('qr', instanceId) },
-    },
-    body: {},
-  });
-  return unwrapCommand(result);
+export async function refreshInstanceQr(_client: ApiClient, _instanceId: string): Promise<CommandResult> {
+  throw notImplemented('Refresh QR');
 }
 
-export async function refreshProviderCapabilities(client: ApiClient) {
-  const result = await client.POST('/v1/provider/capabilities/refresh');
-  return unwrap(result);
+export async function refreshProviderCapabilities(_client: ApiClient): Promise<CommandResult> {
+  throw notImplemented('Refresh provider capabilities');
 }

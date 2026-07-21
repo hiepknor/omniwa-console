@@ -1,137 +1,147 @@
 import type { components } from './generated/schema';
-
-export type SuccessEnvelope = components['schemas']['SuccessEnvelope'];
-export type CollectionEnvelope = components['schemas']['CollectionEnvelope'];
-export type ErrorEnvelope = components['schemas']['ErrorEnvelope'];
-export type ApiErrorBody = components['schemas']['ApiError'];
-export type ResponseMeta = components['schemas']['ResponseMeta'];
-export type PublicData = components['schemas']['PublicData'];
-export type OperationData = components['schemas']['OperationData'];
-
-export type CommandDisposition = 'accepted' | 'completed';
+import type { components as platformComponents } from './generated/platform-schema';
 
 /**
- * Normalized command response. HTTP 202 means the platform accepted work for
- * asynchronous processing; every other successful command response is
- * complete at the command boundary. This never implies upstream delivery.
+ * Frozen omniwa Platform types, kept only so the panels that omniwa-go has no
+ * backend for (webhooks, queue, settings, overview, events, chats) keep
+ * type-checking while their data calls throw `notImplemented`. Do not use these
+ * for new omniwa-go code.
  */
-export type CommandResult = {
-  disposition: CommandDisposition;
-  data: PublicData;
-  operation?: OperationData;
-  requestId: string;
-};
-
+export type PublicData = platformComponents['schemas']['PublicData'];
+export type OperationData = platformComponents['schemas']['OperationData'];
+export type CollectionEnvelope = platformComponents['schemas']['CollectionEnvelope'];
 export type UnavailableRead = { readStatus: 'unavailable'; reasonCode?: string };
 
+/**
+ * omniwa-go wraps successful payloads in `{ message, data }`. A handful of
+ * endpoints (`/group/list`, `/instance/logs`, `/label/list`, `/polls/{id}/results`)
+ * return the payload directly with no wrapper.
+ */
+export type SuccessEnvelope<T = unknown> = { message?: string; data?: T };
+
+/** omniwa-go error body: a single opaque string. */
+export type ApiErrorBody = components['schemas']['apidocs.ErrorResponse'];
+
+/**
+ * Product-safe failure categories. omniwa-go does not send a category, so it is
+ * inferred from the HTTP status. `not_implemented` is synthesized locally for
+ * console panels that omniwa-go has no backend for.
+ */
 export type ErrorCategory =
   | 'authentication'
   | 'authorization'
-  | 'business'
-  | 'conflict'
-  | 'infrastructure'
   | 'validation'
   | 'not_found'
-  | 'not_implemented'
-  | 'internal';
+  | 'conflict'
+  | 'rate_limited'
+  | 'internal'
+  | 'not_implemented';
 
-/** Normalized failure surfaced to features; never expose raw responses. */
-export class ApiFailure extends Error {
-  readonly code: string;
-  readonly category: ErrorCategory | 'unknown';
-  readonly retryable: boolean;
-  readonly requestId: string | undefined;
+/**
+ * Command results are always synchronous on omniwa-go (no async 202 / operation
+ * ids). `requestId` and `operation` stay on the type as always-undefined
+ * compatibility fields so feature code that referenced them keeps compiling.
+ */
+export type CommandResult = {
+  disposition: 'completed';
+  data: unknown;
+  message?: string;
+  requestId?: string;
+  operation?: OperationData;
+};
 
-  constructor(envelope: ErrorEnvelope | undefined, httpStatus: number) {
-    const error = envelope?.error;
-    super(error?.message ?? `Request failed with status ${httpStatus}`);
-    this.name = 'ApiFailure';
-    this.code = error?.code ?? `http_${httpStatus}`;
-    this.category = (error?.details?.category as ErrorCategory | undefined) ?? 'unknown';
-    this.retryable = error?.details?.retryable === true;
-    this.requestId = envelope?.meta?.requestId;
+function categoryForStatus(status: number): ErrorCategory {
+  switch (status) {
+    case 401:
+      return 'authentication';
+    case 403:
+      return 'authorization';
+    case 404:
+      return 'not_found';
+    case 409:
+      return 'conflict';
+    case 429:
+      return 'rate_limited';
+    case 400:
+    case 422:
+      return 'validation';
+    case 501:
+      return 'not_implemented';
+    default:
+      return status >= 500 ? 'internal' : 'validation';
   }
 }
 
-/** Detect a non-2xx data envelope reporting an unavailable projection read. */
-export function parseUnavailableRead(body: unknown): UnavailableRead | undefined {
-  if (typeof body !== 'object' || body === null || !('data' in body)) return undefined;
+/** Normalized failure surfaced to features; never expose raw responses. */
+export class ApiFailure extends Error {
+  readonly category: ErrorCategory;
+  readonly httpStatus: number;
+  readonly retryable: boolean;
+  /** omniwa-go never returns a request id; kept for surface compatibility. */
+  readonly requestId: string | undefined = undefined;
 
-  const { data } = body;
-  const unavailable = (value: unknown): value is Record<string, unknown> =>
-    typeof value === 'object' &&
-    value !== null &&
-    'readStatus' in value &&
-    value.readStatus === 'unavailable';
-
-  const first = Array.isArray(data)
-    ? data.length > 0 && data.every(unavailable)
-      ? data[0]
-      : undefined
-    : unavailable(data)
-      ? data
-      : undefined;
-
-  const metaQuery = 'meta' in body && typeof body.meta === 'object' && body.meta !== null && 'query' in body.meta
-    ? body.meta.query
-    : undefined;
-  const reported = first ?? (unavailable(metaQuery) ? metaQuery : undefined);
-
-  if (reported === undefined) return undefined;
-  return {
-    readStatus: 'unavailable',
-    ...(typeof reported.reasonCode === 'string' ? { reasonCode: reported.reasonCode } : {}),
-  };
+  constructor(errorBody: unknown, httpStatus: number) {
+    const message =
+      errorBody && typeof errorBody === 'object' && 'error' in errorBody && typeof errorBody.error === 'string'
+        ? errorBody.error
+        : `Request failed with status ${httpStatus}`;
+    super(message);
+    this.name = 'ApiFailure';
+    this.httpStatus = httpStatus;
+    this.category = categoryForStatus(httpStatus);
+    // Transient conditions worth an automatic retry.
+    this.retryable = httpStatus === 429 || httpStatus >= 500;
+  }
 }
 
-/**
- * Unwrap an openapi-fetch result: return `data` or throw ApiFailure.
- * Features consume this via query/mutation hooks, never raw responses.
- */
-export function unwrap<T>(result: {
+/** A failure for console panels that omniwa-go provides no backend for. */
+export function notImplemented(resource: string): ApiFailure {
+  const failure = new ApiFailure({ error: `${resource} is not available on the OmniWA GO API.` }, 501);
+  return failure;
+}
+
+type FetchResult<T> = {
   data?: T;
   error?: unknown;
   response: Response;
-}): T {
-  if (result.data !== undefined) return result.data;
-  throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
+};
 
-/** Preserve the success status that distinguishes synchronous and async commands. */
-export function unwrapCommand(result: {
-  data?: SuccessEnvelope;
-  error?: unknown;
-  response: Response;
-}): CommandResult {
-  const envelope = unwrap(result);
-  const operation = 'operationStatus' in envelope.data
-    ? envelope.data as OperationData
-    : undefined;
-
-  return {
-    disposition: result.response.status === 202 ? 'accepted' : 'completed',
-    data: envelope.data,
-    operation,
-    requestId: envelope.meta.requestId,
-  };
-}
-
-/** Narrow a SuccessEnvelope's data to one resourceType; undefined if it doesn't match. */
-export function pickResource<T extends PublicData['resourceType']>(
-  data: PublicData | undefined,
-  resourceType: T,
-): Extract<PublicData, { resourceType: T }> | undefined {
-  if (data?.resourceType !== resourceType) return undefined;
-  return data as Extract<PublicData, { resourceType: T }>;
-}
-
-/** Narrow a CollectionEnvelope's data array, keeping only the given resourceType. */
-export function pickResources<T extends PublicData['resourceType']>(
-  data: PublicData[] | undefined,
-  resourceType: T,
-): Extract<PublicData, { resourceType: T }>[] {
-  return (data ?? []).filter(
-    (item): item is Extract<PublicData, { resourceType: T }> =>
-      item?.resourceType === resourceType,
+/**
+ * omniwa-go wraps most payloads as `{ message, data }`. A few endpoints return
+ * the payload raw (an array or object with no `message` key). Detect an envelope
+ * by the presence of a string `message` field.
+ */
+function isEnvelope(body: unknown): body is SuccessEnvelope {
+  return (
+    body !== null &&
+    typeof body === 'object' &&
+    !Array.isArray(body) &&
+    'message' in body &&
+    typeof (body as { message?: unknown }).message === 'string'
   );
+}
+
+/**
+ * Unwrap an openapi-fetch result: return the inner payload or throw ApiFailure.
+ * Handles both the `{ message, data }` envelope and raw-payload endpoints.
+ */
+export function unwrap<T>(result: FetchResult<SuccessEnvelope<T> | T>): T {
+  if (result.data !== undefined) {
+    const body = result.data;
+    return isEnvelope(body) ? (body.data as T) : (body as T);
+  }
+  throw new ApiFailure(result.error, result.response.status);
+}
+
+/** Command variant: preserves the envelope message alongside the completed disposition. */
+export function unwrapCommand(result: FetchResult<SuccessEnvelope>): CommandResult {
+  if (result.data !== undefined) {
+    const body = result.data;
+    return {
+      disposition: 'completed',
+      data: isEnvelope(body) ? body.data : body,
+      message: isEnvelope(body) ? body.message : undefined,
+    };
+  }
+  throw new ApiFailure(result.error, result.response.status);
 }

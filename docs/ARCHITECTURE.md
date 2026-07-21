@@ -1,5 +1,33 @@
 # Architecture
 
+## OmniWA GO backend (current)
+
+This console now targets the **OmniWA GO** API, not the omniwa Platform v1
+contract. Key deltas from the sections below (which describe the original
+Platform design and are kept for historical context):
+
+- **Contract:** `contracts/omniwa-go.openapi.json`, converted from omniwa-go's
+  Swagger 2.0 (`../omniwa-go/docs/swagger.json`) via `pnpm contract:sync`
+  (`scripts/sync-omniwa-go-contract.mjs` → `swagger2openapi`). Types regenerate
+  with `pnpm api:generate`.
+- **Auth:** `apikey` header (global admin key or per-instance token), not
+  `x-api-key`. See `docs/AUTH_AND_SESSION.md`.
+- **Envelopes:** success is `{ message, data }` (some endpoints return the
+  payload raw); errors are `{ error: string }` with category inferred from the
+  HTTP status. Commands are always synchronous (no `202`/operation ids). See
+  `src/api/envelopes.ts`.
+- **Realtime:** disabled — `/ws` needs the global key and is unsafe from a
+  browser. Panels poll instead. See `docs/REALTIME.md`.
+- **Pagination:** none (flat list endpoints).
+- **Panel coverage:** only instances, groups, send, contacts, labels, and
+  message actions have an omniwa-go backend. Overview, queue, webhooks, api-keys,
+  settings, events, and chats have no backing and their `src/api/` modules throw
+  `notImplemented` (category `not_implemented`), which the panels render as an
+  unavailable state. The instances and groups feature verticals are stubbed
+  pending wiring to live `/instance/*` and `/group/*` endpoints.
+
+Full migration context: `docs/HANDOFF_FROM_OMNIWA_GO.md`.
+
 ## Style
 
 `omniwa-console` is a client-only single-page application. There is no

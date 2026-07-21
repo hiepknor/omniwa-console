@@ -1,13 +1,14 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { basename, join, resolve } from 'node:path';
+import { basename, join, relative, resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
-const contractPath = join(root, 'contracts/omniwa-v1.openapi.json');
+const contractPath = join(root, 'contracts/omniwa-go.openapi.json');
 const generatedPath = join(root, 'src/api/generated/schema.d.ts');
 const panelsPath = join(root, 'docs/PANELS.md');
-const apiDirectory = join(root, 'src/api');
+const sourceRoot = join(root, 'src');
 
 function fail(message) {
   process.stderr.write(`contract compatibility check failed: ${message}\n`);
@@ -15,45 +16,50 @@ function fail(message) {
 }
 
 const contract = JSON.parse(readFileSync(contractPath, 'utf8'));
+const specPaths = contract.paths ?? {};
 const panels = readFileSync(panelsPath, 'utf8');
-const operations = [];
 
-for (const [path, pathItem] of Object.entries(contract.paths ?? {})) {
-  for (const [method, operation] of Object.entries(pathItem ?? {})) {
-    if (!operation || typeof operation !== 'object' || typeof operation.operationId !== 'string') continue;
-    operations.push({
-      operationId: operation.operationId,
-      method: method.toUpperCase(),
-      path,
-      responses: Object.keys(operation.responses ?? {}),
-    });
+async function sourceFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(
+    entries.map(async (entry) => {
+      const path = join(directory, entry.name);
+      if (entry.isDirectory()) return sourceFiles(path);
+      return /\.tsx?$/.test(entry.name) && !entry.name.endsWith('.test.ts') ? [path] : [];
+    }),
+  );
+  return nested.flat();
+}
+
+// Match typed openapi-fetch calls: client.GET('/instance/all'), client.POST('/send/text'), …
+const callPattern = /\.(GET|POST|PUT|PATCH|DELETE)\(\s*['"](\/[^'"]*)['"]/g;
+const files = await sourceFiles(sourceRoot);
+const calls = [];
+
+for (const file of files) {
+  const source = readFileSync(file, 'utf8');
+  for (const match of source.matchAll(callPattern)) {
+    calls.push({ file: relative(root, file), method: match[1], path: match[2] });
   }
 }
 
-for (const { operationId } of operations) {
-  if (!panels.includes(`\`${operationId}\``)) {
-    fail(`docs/PANELS.md does not assign ${operationId}`);
+for (const { file, method, path } of calls) {
+  const item = specPaths[path];
+  if (!item) {
+    fail(`${file} calls ${method} ${path} which is not in the omniwa-go contract`);
+    continue;
+  }
+  if (!item[method.toLowerCase()]) {
+    fail(`${file} calls ${method} ${path} but the contract has no ${method} for that path`);
+    continue;
+  }
+  // Panel code (features) must document the operations it uses; infra (app/, api/) need not.
+  if (file.startsWith('src/features/') && !panels.includes(`${method} ${path}`)) {
+    fail(`docs/PANELS.md does not list ${method} ${path} used by ${file}`);
   }
 }
 
-const apiSources = readdirSync(apiDirectory, { withFileTypes: true })
-  .filter((entry) => entry.isFile() && entry.name.endsWith('.ts'))
-  .map((entry) => ({ name: entry.name, source: readFileSync(join(apiDirectory, entry.name), 'utf8') }));
-
-for (const operation of operations.filter(({ responses }) => responses.includes('200') && responses.includes('202'))) {
-  const call = `client.${operation.method}('${operation.path}'`;
-  const owner = apiSources.find(({ source }) => source.includes(call));
-  if (!owner) continue;
-
-  const callStart = owner.source.indexOf(call);
-  const start = owner.source.lastIndexOf('export async function ', callStart);
-  const nextFunction = owner.source.indexOf('\nexport async function ', callStart + call.length);
-  const functionBody = owner.source.slice(start, nextFunction === -1 ? undefined : nextFunction);
-  if (!functionBody.includes('unwrapCommand(')) {
-    fail(`${operation.operationId} in src/api/${owner.name} drops its 200/202 command disposition`);
-  }
-}
-
+// Freshness: the committed types must match a fresh generation from the contract.
 const temporaryDirectory = mkdtempSync(join(tmpdir(), 'omniwa-console-contract-'));
 const temporaryGenerated = join(temporaryDirectory, basename(generatedPath));
 try {
@@ -68,6 +74,8 @@ try {
   rmSync(temporaryDirectory, { recursive: true, force: true });
 }
 
-if (process.exitCode === undefined) {
-  process.stdout.write(`Contract compatibility check passed (${operations.length} operations).\n`);
+if (process.exitCode === undefined || process.exitCode === 0) {
+  process.stdout.write(
+    `Contract compatibility check passed (${Object.keys(specPaths).length} paths, ${calls.length} typed calls).\n`,
+  );
 }

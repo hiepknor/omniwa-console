@@ -4,248 +4,7 @@
  */
 
 export interface paths {
-    "/v1/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get health status */
-        get: operations["getHealth"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/health/readiness": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get readiness status */
-        get: operations["getHealthReadiness"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/action-required": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List action-required items */
-        get: operations["listActionRequiredItems"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/metrics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get operational metrics snapshot */
-        get: operations["getMetrics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/metrics/queue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get queue metrics snapshot */
-        get: operations["getQueueMetrics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/metrics/messages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get message metrics snapshot */
-        get: operations["getMessageMetrics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/metrics/webhooks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get webhook metrics snapshot */
-        get: operations["getWebhookMetrics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/metrics/media": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get media metrics snapshot */
-        get: operations["getMediaMetrics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/queue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get queue status */
-        get: operations["getQueueStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List instances */
-        get: operations["listInstances"];
-        put?: never;
-        /** Create an instance */
-        post: operations["createInstance"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get instance status */
-        get: operations["getInstance"];
-        put?: never;
-        post?: never;
-        /** Destroy an instance */
-        delete: operations["destroyInstance"];
-        options?: never;
-        head?: never;
-        /** Update instance metadata */
-        patch: operations["updateInstance"];
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/connect": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Connect an instance */
-        post: operations["connectInstance"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/disconnect": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Disconnect an instance */
-        post: operations["disconnectInstance"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/qr/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Refresh QR pairing */
-        post: operations["refreshInstanceQr"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/reconnect": {
+    "/call/reject": {
         parameters: {
             query?: never;
             header?: never;
@@ -255,325 +14,50 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Request reconnect for an instance
-         * @description Partial route. Reconnect is scheduler-owned in the current Application catalog and is not exposed through the public API boundary.
+         * Reject call
+         * @description Reject call
          */
-        post: operations["requestInstanceReconnect"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Call data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_call_service.RejectCallStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/instances/{instanceId}/sessions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List instance sessions
-         * @description List session projection rows for one instance.
-         */
-        get: operations["listInstanceSessions"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/messages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List messages for an instance
-         * @description List message timeline projection rows for one instance.
-         */
-        get: operations["listInstanceMessages"];
-        put?: never;
-        /** Send a message */
-        post: operations["sendInstanceMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/messages/text": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Send a text message */
-        post: operations["sendInstanceTextMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/messages/media": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Send a media message */
-        post: operations["sendInstanceMediaMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/messages/{messageId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get message status */
-        get: operations["getMessage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/messages/{messageId}/delivery-history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get message delivery history */
-        get: operations["getMessageDeliveryHistory"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/messages/{messageId}/retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Retry a message */
-        post: operations["retryMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/messages/{messageId}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Cancel a message */
-        post: operations["cancelMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register media */
-        post: operations["registerMedia"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/media/{mediaId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get media status */
-        get: operations["getMedia"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/jobs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List jobs
-         * @description List worker job projection rows.
-         */
-        get: operations["listJobs"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/jobs/{jobId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get job status */
-        get: operations["getJob"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/webhooks": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List webhooks
-         * @description List webhook subscription projection rows.
-         */
-        get: operations["listWebhooks"];
-        put?: never;
-        /** Register webhook subscription */
-        post: operations["registerWebhook"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/webhooks/{webhookId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get webhook status */
-        get: operations["getWebhook"];
-        put?: never;
-        post?: never;
-        /** Retire webhook subscription */
-        delete: operations["retireWebhook"];
-        options?: never;
-        head?: never;
-        /** Update webhook subscription */
-        patch: operations["updateWebhook"];
-        trace?: never;
-    };
-    "/v1/webhooks/{webhookId}/activate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Activate webhook subscription */
-        post: operations["activateWebhook"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/webhooks/{webhookId}/suspend": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Suspend webhook subscription */
-        post: operations["suspendWebhook"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/webhook-deliveries": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List webhook deliveries
-         * @description List webhook delivery projection rows.
-         */
-        get: operations["listWebhookDeliveries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/webhook-deliveries/redrive": {
+    "/chat/archive": {
         parameters: {
             query?: never;
             header?: never;
@@ -583,85 +67,56 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Bulk redrive dead-lettered webhook deliveries
-         * @description Queue controlled redrive operations for explicitly selected dead-lettered webhook deliveries. Requires an elevated key and idempotency-key.
+         * Archive a chat
+         * @description Archive a chat
          */
-        post: operations["bulkRedriveWebhookDeliveries"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/webhook-deliveries/{deliveryId}/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
         };
-        /** Get webhook delivery history */
-        get: operations["getWebhookDeliveryHistory"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/webhook-deliveries/{deliveryId}/retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Retry webhook delivery */
-        post: operations["retryWebhookDelivery"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/webhook-deliveries/{deliveryId}/redrive": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Redrive dead-lettered webhook delivery */
-        post: operations["redriveWebhookDelivery"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/provider/capabilities": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get provider capabilities */
-        get: operations["getProviderCapabilities"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/provider/capabilities/refresh": {
+    "/chat/history-sync": {
         parameters: {
             query?: never;
             header?: never;
@@ -671,162 +126,59 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Refresh provider capabilities
-         * @description Partial route. Provider capability refresh is scheduler-owned in the current Application catalog and is not exposed through the public API boundary.
+         * HistorySyncRequest a chat
+         * @description HistorySyncRequest a chat
          */
-        post: operations["refreshProviderCapabilities"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Chat */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.HistorySyncRequestStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
         };
-        /** Get configuration status */
-        get: operations["getSettings"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/settings/validate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Validate configuration snapshot */
-        post: operations["validateSettings"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/settings/activate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Activate configuration snapshot */
-        post: operations["activateSettings"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/audit-records": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List audit records */
-        get: operations["listAuditRecords"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/dashboard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get dashboard summary */
-        get: operations["getDashboardSummary"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/events": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List retained event log entries
-         * @description Polling fallback for clients that cannot use the SSE event stream.
-         */
-        get: operations["listEvents"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/events/stream": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Stream safe product events
-         * @description Read-only Server-Sent Events stream. Emits safe redacted event envelopes only; WebSocket remains deferred.
-         */
-        get: operations["streamEvents"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/groups": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List groups for an instance
-         * @description List group projection rows for one instance.
-         */
-        get: operations["listInstanceGroups"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/groups/refresh": {
+    "/chat/mute": {
         parameters: {
             query?: never;
             header?: never;
@@ -836,85 +188,56 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Refresh group list for an instance
-         * @description Request provider-backed group discovery behind capability checks.
+         * Mute a chat
+         * @description Mute a chat
          */
-        post: operations["refreshInstanceGroups"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/groups/{groupId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get group status
-         * @description Read one group status projection.
-         */
-        get: operations["getGroup"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update group metadata
-         * @description Request subject or description update behind provider capability checks.
-         */
-        patch: operations["updateGroup"];
-        trace?: never;
-    };
-    "/v1/groups/{groupId}/local-state": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update group local state
-         * @description Request mute/archive/pin local state update.
-         */
-        patch: operations["updateGroupLocalState"];
-        trace?: never;
-    };
-    "/v1/groups/{groupId}/members": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List group members
-         * @description List group member projection rows.
-         */
-        get: operations["listGroupMembers"];
-        put?: never;
-        /**
-         * Add group member
-         * @description Request member addition behind provider capability checks.
-         */
-        post: operations["addGroupMember"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/groups/{groupId}/messages/text": {
+    "/chat/pin": {
         parameters: {
             query?: never;
             header?: never;
@@ -924,17 +247,1309 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Send text message to group
-         * @description Send text into a group without exposing internal command names.
+         * Pin a chat
+         * @description Pin a chat
          */
-        post: operations["sendGroupTextMessage"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/groups/{groupId}/members/{memberJid}": {
+    "/chat/unarchive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unarchive a chat
+         * @description Unarchive a chat
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/unmute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unmute a chat
+         * @description Unmute a chat
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/unpin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unpin a chat
+         * @description Unpin a chat
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/community/add": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add participant to community
+         * @description Add participant to community
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_community_service.AddParticipantStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/community/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create community
+         * @description Create community
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Community data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_community_service.CreateCommunityStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.GroupInfo"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/community/remove": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remove participant from community
+         * @description Remove participant from community
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_community_service.AddParticipantStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create group
+         * @description Create group
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.CreateGroupStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/description": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set group description
+         * @description Set group description
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupDescriptionStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get group info
+         * @description Get group info
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GetGroupInfoStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.GroupInfo"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/invitelink": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get group invite link
+         * @description Get group invite link
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GetGroupInviteLinkStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: string;
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Join group link
+         * @description Join group link
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.JoinGroupStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/leave": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Leave group
+         * @description Leave group
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.LeaveGroupStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List groups
+         * @description List groups
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.GroupInfo"][];
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/myall": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get my groups
+         * @description Get my groups
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.GroupInfo"][];
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/name": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set group name
+         * @description Set group name
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupNameStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/participant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Update participant
+         * @description Update participant
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.AddParticipantStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set group photo
+         * @description Set group photo
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: string;
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Update group settings
+         * @description Update group settings (announcement, not_announcement, locked, unlocked, approval_on, approval_off, admin_add, all_member_add)
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.UpdateGroupSettingsStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all instances
+         * @description Get all instances
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description All instances */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.InstanceListResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/connect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Connect to instance
+         * @description Connect to instance with the provided data
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Instance data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_service.ConnectStruct"];
+                };
+            };
+            responses: {
+                /** @description Instance connected successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ConnectResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a new instance
+         * @description Creates a new instance with the provided data including optional advanced settings
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Instance data with optional advanced settings */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_service.CreateStruct"];
+                };
+            };
+            responses: {
+                /** @description Instance created successfully; data.token is the apikey for this instance */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CreateInstanceResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/delete/{instanceId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -945,16 +1560,56 @@ export interface paths {
         put?: never;
         post?: never;
         /**
-         * Remove group member
-         * @description Request member removal behind provider capability checks.
+         * Delete instance
+         * @description Delete instance
          */
-        delete: operations["removeGroupMember"];
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance Id */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instance deleted successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/groups/{groupId}/members/{memberJid}/promote": {
+    "/instance/disconnect": {
         parameters: {
             query?: never;
             header?: never;
@@ -964,17 +1619,45 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Promote group member
-         * @description Request member promotion behind provider capability checks.
+         * Disconnect from instance
+         * @description Disconnect from instance
          */
-        post: operations["promoteGroupMember"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instance disconnected successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/groups/{groupId}/members/{memberJid}/demote": {
+    "/instance/forcereconnect/{instanceId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -984,17 +1667,239 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Demote group member
-         * @description Request member demotion behind provider capability checks.
+         * Force reconnect
+         * @description Force reconnect
          */
-        post: operations["demoteGroupMember"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance Id */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Instance data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_service.ForceReconnectStruct"];
+                };
+            };
+            responses: {
+                /** @description Instance force reconnected successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/groups/{groupId}/invite-link/refresh": {
+    "/instance/info/{instanceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get instance
+         * @description Get instance
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance Id */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instance */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.InstanceResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Logout from instance
+         * @description Logout from instance
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instance logged out successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/logs/{instanceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get instance logs
+         * @description Returns log entries for an instance, filterable by date range, level and limit
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Start date (YYYY-MM-DD, defaults to 7 days ago) */
+                    start_date?: string;
+                    /** @description End date (YYYY-MM-DD, defaults to now) */
+                    end_date?: string;
+                    /** @description Log level filter */
+                    level?: string;
+                    /** @description Max number of entries */
+                    limit?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description Instance Id */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Logs */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.LogEntry"][];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/pair": {
         parameters: {
             query?: never;
             header?: never;
@@ -1004,238 +1909,59 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Refresh group invite link
-         * @description Request invite link refresh behind provider capability checks.
+         * Request pairing code
+         * @description Request pairing code
          */
-        post: operations["refreshGroupInviteLink"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/chats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Instance data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_service.PairStruct"];
+                };
+            };
+            responses: {
+                /** @description Pairing code */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.PairResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
         };
-        /**
-         * List chats
-         * @description List chat navigation projection rows.
-         */
-        get: operations["listChats"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/instances/{instanceId}/chats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List chats for an instance
-         * @description List chat navigation projection rows scoped to one instance.
-         */
-        get: operations["listInstanceChats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/chats/{chatId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get chat status
-         * @description Read one chat status projection.
-         */
-        get: operations["getChat"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List contacts
-         * @description List redaction-safe contact projection rows.
-         */
-        get: operations["listContacts"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List contacts for an instance
-         * @description List redaction-safe contact projection rows scoped to one instance.
-         */
-        get: operations["listInstanceContacts"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/contacts/{contactId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get contact status
-         * @description Read one redaction-safe contact projection.
-         */
-        get: operations["getContact"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/labels": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List labels
-         * @description List label organization projection rows.
-         */
-        get: operations["listLabels"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/instances/{instanceId}/labels": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List labels for an instance
-         * @description List label organization projection rows scoped to one instance.
-         */
-        get: operations["listInstanceLabels"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/labels/{labelId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get label status
-         * @description Read one label organization projection.
-         */
-        get: operations["getLabel"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/api-keys": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List API key lifecycle records
-         * @description Lists safe API key lifecycle records. Plaintext keys and keyHash values are never returned.
-         */
-        get: operations["listApiKeys"];
-        put?: never;
-        /**
-         * Provision an API key
-         * @description Creates a hashed API key lifecycle record. The provided key is write-only and is not returned.
-         */
-        post: operations["provisionApiKey"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/api-keys/{keyId}/revoke": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Revoke an API key */
-        post: operations["revokeApiKey"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/api-keys/{keyId}/rotate": {
+    "/instance/proxy/{instanceId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1245,10 +1971,3341 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Rotate an API key
-         * @description Revokes the current key and creates a safe replacement record. Plaintext key material is write-only.
+         * Set proxy configuration
+         * @description Set proxy configuration for an instance
          */
-        post: operations["rotateApiKey"];
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance id */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Proxy configuration */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_service.SetProxyStruct"];
+                };
+            };
+            responses: {
+                /** @description Proxy set successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.SetProxyData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        /**
+         * Delete proxy
+         * @description Delete proxy
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance id */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Proxy deleted successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/qr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get instance QR code
+         * @description Get instance QR code
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instance QR code / pairing payload */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.QRCodeResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/reconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reconnect to instance
+         * @description Reconnect to instance
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instance reconnected successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get instance status
+         * @description Get instance status
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instance status */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.StatusResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/{instanceId}/advanced-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get advanced settings
+         * @description Get advanced settings for a specific instance
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance ID */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Advanced settings retrieved successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.AdvancedSettings"];
+                    };
+                };
+                /** @description Invalid instance ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Instance not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        /**
+         * Update advanced settings
+         * @description Update advanced settings for a specific instance
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance ID */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Advanced settings data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.AdvancedSettings"];
+                };
+            };
+            responses: {
+                /** @description Advanced settings updated successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Invalid request data */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Instance not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/label/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add label to chat
+         * @description Add label to chat
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_label_service.ChatLabelStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/label/edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Edit label
+         * @description Edit label
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Label data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_label_service.EditLabelStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/label/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get all labels
+         * @description Get all labels
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.LabelItem"][];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/label/message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add label to message
+         * @description Add label to message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_label_service.MessageLabelStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Delete a message for everyone
+         * @description Delete a message for everyone
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Delete a message for everyone */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_message_service.MessageStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.MessageIdData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/downloadmedia": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Download media
+         * @description Download the media content of a message (image, video, audio or document)
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Download media */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_message_service.DownloadMediaStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.DownloadMediaData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/edit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Edit a message
+         * @description Edit a message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Edit a message */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_message_service.EditMessageStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.MessageIdData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/markplayed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark an audio message as played
+         * @description Mark an audio message as played
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Mark an audio message as played */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_message_service.MarkPlayedStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/markread": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a message as read
+         * @description Mark a message as read
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Mark a message as read */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_message_service.MarkReadStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set chat presence
+         * @description Set chat presence
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Set chat presence */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_message_service.ChatPresenceStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.TimestampData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/react": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * React a message
+         * @description React to a message with support for fromMe field and participant field for group messages
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description React to a message with fromMe and participant fields */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_message_service.ReactStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get message status
+         * @description Get message status
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Get message status */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_message_service.MessageStatusStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.MessageStatusData"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/newsletter/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create newsletter
+         * @description Create newsletter
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Newsletter data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.CreateNewsletterStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.NewsletterMetadata"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/newsletter/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get newsletter
+         * @description Get newsletter
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.NewsletterMetadata"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/newsletter/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get newsletter invite
+         * @description Get newsletter invite
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Newsletter data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterInviteStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.NewsletterMetadata"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/newsletter/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List newsletters
+         * @description List newsletters
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.NewsletterMetadata"][];
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/newsletter/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get newsletter messages
+         * @description Get newsletter messages
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Newsletter data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterMessagesStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.NewsletterMessage"][];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/newsletter/subscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Subscribe newsletter
+         * @description Subscribe newsletter
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/passkey-ceremony/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get passkey ceremony state
+         * @description Returns the current WebAuthn passkey-pairing ceremony state for a token. PUBLIC endpoint (no apikey) — access is gated by the opaque short-lived ceremony token. Polled by the Evolution Passkey Helper browser extension.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ceremony token */
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ceremony state ({stage, skipHandoffUX, publicKey?, code?, error?}) */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description token is required */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description ceremony not found or expired */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description passkey ceremony unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/passkey-ceremony/{token}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm passkey pairing
+         * @description Finishes the passkey pairing after the user verified the confirmation code. PUBLIC endpoint (no apikey) — gated by the ceremony token.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ceremony token */
+                    token: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description ok */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description token is required */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description ceremony not found or expired */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description passkey ceremony unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/passkey-ceremony/{token}/response": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit passkey WebAuthn response
+         * @description Receives the WebAuthn assertion produced by the browser extension and forwards it to WhatsApp. PUBLIC endpoint (no apikey) — gated by the ceremony token. Body is the WebAuthnResponse shape (id, rawId, type, response{clientDataJSON, authenticatorData, signature, userHandle?}), base64url-unpadded.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Ceremony token */
+                    token: string;
+                };
+                cookie?: never;
+            };
+            /** @description WebAuthn assertion */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["types.WebAuthnResponse"];
+                };
+            };
+            responses: {
+                /** @description ok */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description token is required / invalid body */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description ceremony not found or expired */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+                /** @description passkey ceremony unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["gin.H"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/polls/{pollMessageId}/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get poll results
+         * @description Retorna todos os votos de uma enquete específica
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description ID da mensagem da enquete */
+                    pollMessageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.PollResultsData"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/button": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a button message
+         * @description Send an interactive message with buttons. Each button has a `type`: `reply`, `copy`, `url`, `call` or `pix`.
+         *
+         *     Combination rules enforced by the server:
+         *     - Up to 3 `reply` buttons per message.
+         *     - `reply` buttons cannot be mixed with any other type.
+         *     - `pix` button must be sent ALONE (no other button in the same message).
+         *
+         *     WhatsApp client rendering quirks (NOT enforced by the server, but verified in the field):
+         *     - WhatsApp Web: only `reply`-only messages (up to 3) OR CTAs grouped together (`copy` + `url` + `call`) render correctly.
+         *     - Do NOT mix `reply` with CTA buttons (`copy`/`url`/`call`) — the message will not appear on WhatsApp Web.
+         *
+         *     Required body fields: `number`, `title`, `description`, `footer`, `buttons`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.ButtonStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/carousel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a carousel message
+         * @description Send an interactive carousel (multiple swipeable cards). Each card carries its own image or video, body and optional buttons.
+         *
+         *     Card button `type` accepted values (case-insensitive, uppercased internally): `REPLY` (default), `URL`, `CALL`, `COPY`.
+         *     The `PIX` button type is NOT supported in carousel cards — use `/send/button` for PIX.
+         *
+         *     IMPORTANT — `CarouselButtonStruct` is different from the flat button used in `/send/button`:
+         *     - URL button: put the link in the `id` field (NOT in a `url` field).
+         *     - CALL button: put the phone number in the `id` field (NOT in a `phoneNumber` field).
+         *     - COPY button: put the code to be copied in `copyCode`.
+         *     - REPLY button: put the payload/callback ID in `id`.
+         *
+         *     Per-card combination rules (NOT enforced by the server, but verified in the field):
+         *     - Same WhatsApp Web quirk as `/send/button`: avoid mixing REPLY with CTA buttons (URL/CALL/COPY) in the same card — mixed sets do not render on Web.
+         *     - Stick to either "only REPLY" or "only CTAs grouped together" per card.
+         *
+         *     Required body fields: `number`, `cards` (at least one). Each card requires `header` + `body`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a contact message
+         * @description Send a contact message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.ContactStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a link message
+         * @description Send a link message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.LinkStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a list message
+         * @description Send an interactive list message (single-select) rendered as a tappable menu.
+         *
+         *     Required body fields: `number`, `title`, `description`, `footerText`, `buttonText`, `sections`.
+         *     Each section must contain one or more `rows`. When `rowId` is omitted, the server generates a fallback ID.
+         *     When `buttonText` is empty, the server falls back to "Ver Menu".
+         *
+         *     Uses legacy `ListMessage` format (no ViewOnceMessage wrapper) so it renders on iOS, Android and WhatsApp Web.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.ListStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/location": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a location message
+         * @description Send a location message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.LocationStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a media message
+         * @description Send a media message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.MediaStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/poll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a poll message
+         * @description Send a poll message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.PollStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/status/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a WhatsApp media status (image/video)
+         * @description Send an image or video status to status@broadcast. Supports JSON (URL) or multipart/form-data (file upload)
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/x-www-form-urlencoded": {
+                        /** @description Media type: image or video */
+                        type: string;
+                        /**
+                         * Format: binary
+                         * @description Media file (for multipart upload)
+                         */
+                        file?: string;
+                        /** @description Media URL (for JSON upload) */
+                        url?: string;
+                        /** @description Caption for the media */
+                        caption?: string;
+                        /** @description Custom message ID */
+                        id?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/status/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a WhatsApp text status
+         * @description Send a WhatsApp text status to status@broadcast
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Status text data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.StatusTextStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/sticker": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a sticker message
+         * @description Send a sticker message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.StickerStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/send/text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a text message
+         * @description Send a text message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Message data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.TextStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SendMessageResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/unlabel/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remove label from chat
+         * @description Remove label from chat
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_label_service.ChatLabelStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/unlabel/message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remove label from message
+         * @description Remove label from message
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_label_service.MessageLabelStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get a user's avatar
+         * @description Get a user's avatar
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Avatar data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.GetAvatarStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.ProfilePictureInfo"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/block": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Block a contact
+         * @description Block a contact
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_user_service.BlockStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.Blocklist"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/blocklist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a user's block list
+         * @description Get a user's block list
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.Blocklist"];
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Check a user
+         * @description Check a user
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_user_service.CheckUserStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.CheckUserCollection"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a user's contacts
+         * @description Get a user's contacts
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo"][];
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get a user
+         * @description Get a user
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_user_service.CheckUserStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.UserCollection"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/privacy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a user's privacy settings
+         * @description Get a user's privacy settings
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.PrivacySettings"];
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Set a user's privacy settings
+         * @description Set a user's privacy settings
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Privacy data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.PrivacyStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.PrivacySettings"];
+                        };
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/profileName": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set a user's profile name
+         * @description Set a user's profile name
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Profile name data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.SetProfilePictureStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/profilePicture": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set a user's profile picture
+         * @description Set a user's profile picture
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Profile picture data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.SetProfilePictureStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/profileStatus": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set a user's profile status
+         * @description Set a user's profile status
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Profile status data */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.SetProfilePictureStruct"];
+                };
+            };
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/unblock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unblock a contact
+         * @description Unblock a contact
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_user_service.BlockStruct"];
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.Blocklist"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -1259,756 +5316,3466 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        SafeResourceId: string;
-        ObjectRequest: {
-            [key: string]: unknown;
+        "apidocs.ConnectData": {
+            /** @example MESSAGE,CONNECTION,QRCODE */
+            eventString?: string;
+            /** @example 5511999999999:12@s.whatsapp.net */
+            jid?: string;
+            /** @example https://example.com/webhook */
+            webhookUrl?: string;
         };
-        InstanceCreateRequest: {
-            displayName?: string;
-        } & {
-            [key: string]: unknown;
+        "apidocs.ConnectResponse": {
+            data?: components["schemas"]["apidocs.ConnectData"];
+            /** @example success */
+            message?: string;
         };
-        TextMessageRequest: {
-            /** @constant */
-            type?: "text";
-            /** @description Opaque recipient reference. It must not expose raw phone numbers or provider-native payloads. */
-            to: string;
-            text: string;
-        } & {
-            [key: string]: unknown;
+        "apidocs.CreateInstanceResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"];
+            /** @example success */
+            message?: string;
         };
-        GenericTextMessageRequest: components["schemas"]["TextMessageRequest"] & {
-            /** @constant */
-            type: "text";
-        };
-        MediaMessageRequest: ({
-            /** @enum {string} */
-            type?: "media" | "image" | "video" | "document" | "audio";
-            /** @description Opaque recipient reference. It must not expose raw phone numbers or provider-native payloads. */
-            to: string;
-            mediaId?: string;
-            mediaRef?: string;
-            caption?: string;
-        } & {
-            [key: string]: unknown;
-        }) | unknown | unknown;
-        GenericMediaMessageRequest: components["schemas"]["MediaMessageRequest"] & {
-            /** @enum {string} */
-            type: "media" | "image" | "video" | "document" | "audio";
-        };
-        MediaRegistrationRequest: ({
-            mediaRef?: string;
-            /** Format: uri */
-            url?: string;
-            fileRef?: string;
-            contentType?: string;
-        } & {
-            [key: string]: unknown;
-        }) | unknown | unknown | unknown;
-        WebhookRequest: {
-            /** Format: uri */
-            url: string;
-            eventTypes?: string[];
-        } & {
-            [key: string]: unknown;
-        };
-        BulkWebhookDeliveryRedriveRequest: {
-            deliveryIds: string[];
-        };
-        SuccessEnvelope: {
-            data: components["schemas"]["PublicData"];
-            meta: components["schemas"]["ResponseMeta"];
-        };
-        CollectionEnvelope: {
-            data: components["schemas"]["PublicData"][];
-            meta: components["schemas"]["ResponseMeta"] & components["schemas"]["PaginationMeta"];
-        };
-        ErrorEnvelope: {
-            error: components["schemas"]["ApiError"];
-            meta: components["schemas"]["ResponseMeta"];
-        };
-        ApiError: {
-            code: string;
-            message: string;
-            details: {
-                /** @enum {string} */
-                category?: "authentication" | "authorization" | "business" | "conflict" | "infrastructure" | "validation" | "not_found" | "not_implemented" | "internal";
-                retryable?: boolean;
-            } & {
-                [key: string]: unknown;
-            };
-        };
-        ResponseMeta: {
-            requestId: string;
-            correlationId: string;
-            /** Format: date-time */
-            timestamp: string;
-        } & {
-            [key: string]: unknown;
-        };
-        PaginationMeta: {
-            pagination?: {
-                nextCursor?: string | null;
-                previousCursor?: string | null;
-                hasMore?: boolean;
-                /** @description Effective runtime page size after server-side capping. */
-                limit?: number;
-                /** @description Accepted whitelisted sort expression for this resource. */
-                sort?: string;
-                /** @description Accepted safe search term for this resource. */
-                search?: string;
-                /** @description Accepted whitelisted filter fields for this resource. */
-                filters?: {
-                    [key: string]: string;
-                };
-            };
-        } & {
-            [key: string]: unknown;
-        };
-        /** @description Public resource data returned by the Application boundary. It must not include secrets, raw provider payloads, raw phone numbers, raw JIDs, or session material. */
-        PublicData: components["schemas"]["OperationData"] | components["schemas"]["ResourceReadData"] | components["schemas"]["InstanceResource"] | components["schemas"]["MessageResource"] | components["schemas"]["GroupResource"] | components["schemas"]["GroupMemberResource"] | components["schemas"]["JobResource"] | components["schemas"]["WebhookResource"] | components["schemas"]["WebhookDeliveryResource"] | components["schemas"]["ChatResource"] | components["schemas"]["ContactResource"] | components["schemas"]["LabelResource"] | components["schemas"]["MediaResource"] | components["schemas"]["SessionResource"] | components["schemas"]["EventResource"] | components["schemas"]["AuditRecordResource"] | components["schemas"]["HealthResource"] | components["schemas"]["MetricsResource"] | components["schemas"]["DashboardResource"] | components["schemas"]["SettingsResource"] | components["schemas"]["ProviderResource"] | components["schemas"]["ApiKeyResource"] | components["schemas"]["ApiKeyLifecycleOperationData"];
-        OperationData: {
-            resourceType: string;
-            resourceId?: string;
-            operationStatus: string;
-            accepted: boolean;
-            retryable: boolean;
-            async?: boolean;
-            resultRef?: string;
-            reasonCode?: string;
-        };
-        ResourceReadData: {
-            resourceType: string;
-            id?: string;
-            resourceId?: string;
-            readStatus: string;
-            consistency?: string;
-            freshness?: {
-                [key: string]: unknown;
-            };
-            resultRef?: string;
-            reasonCode?: string;
-        };
-        PublicResourceData: {
-            resourceType: string;
-            id?: string;
-            status?: string;
-            displayName?: string;
-            name?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        InstanceResource: {
-            /** @enum {string} */
-            resourceType: "instance";
-            id: string;
-            status?: string;
-            displayName?: string;
-            activeSessionId?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        MessageResource: {
-            /** @enum {string} */
-            resourceType: "message";
-            id: string;
-            instanceId?: string;
-            chatId?: string;
-            groupId?: string;
-            status?: string;
-            type?: string;
-            direction?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: date-time */
-            deliveredAt?: string;
-            /** Format: date-time */
-            readAt?: string;
-        };
-        GroupResource: {
-            /** @enum {string} */
-            resourceType: "group";
-            id: string;
-            instanceId?: string;
-            status?: string;
-            subject?: string;
-            description?: string;
-            memberCount?: number;
-            adminCount?: number;
-            muted?: boolean;
-            archived?: boolean;
-            pinned?: boolean;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        GroupMemberResource: {
-            /** @enum {string} */
-            resourceType: "groupMember";
-            id: string;
-            groupId?: string;
-            memberRef?: string;
-            role?: string;
-            status?: string;
-            displayName?: string;
-            /** Format: date-time */
-            joinedAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        JobResource: {
-            /** @enum {string} */
-            resourceType: "job";
-            id: string;
-            status?: string;
-            workType?: string;
-            ownerContext?: string;
-            resourceRef?: string;
-            attemptCount?: number;
-            failureCategory?: string;
-            reasonCode?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: date-time */
-            nextRunAt?: string;
-        };
-        WebhookResource: {
-            /** @enum {string} */
-            resourceType: "webhook";
-            id: string;
-            status?: string;
-            eventTypes?: string[];
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        WebhookDeliveryResource: {
-            /** @enum {string} */
-            resourceType: "webhookDelivery";
-            id: string;
-            webhookId?: string;
-            status?: string;
-            eventType?: string;
-            attemptCount?: number;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: date-time */
-            nextRetryAt?: string;
-        };
-        ChatResource: {
-            /** @enum {string} */
-            resourceType: "chat";
-            id: string;
-            instanceId?: string;
-            status?: string;
-            displayName?: string;
-            type?: string;
-            unreadCount?: number;
-            labelIds?: string[];
-            /** Format: date-time */
-            lastMessageAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        ContactResource: {
-            /** @enum {string} */
-            resourceType: "contact";
-            id: string;
-            instanceId?: string;
-            status?: string;
-            displayName?: string;
-            labelIds?: string[];
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        LabelResource: {
-            /** @enum {string} */
-            resourceType: "label";
-            id: string;
-            instanceId?: string;
-            status?: string;
-            name?: string;
-            color?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-        };
-        MediaResource: {
-            /** @enum {string} */
-            resourceType: "media";
-            id: string;
-            instanceId?: string;
-            status?: string;
-            mediaType?: string;
-            contentType?: string;
-            sizeBytes?: number;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            expiresAt?: string;
-        };
-        SessionResource: {
-            /** @enum {string} */
-            resourceType: "session";
-            id: string;
-            instanceId?: string;
-            status?: string;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
-            /** Format: date-time */
-            expiresAt?: string;
-        };
-        EventResource: {
-            /** @enum {string} */
-            resourceType: "event";
-            id: string;
-            type?: string;
-            source?: string;
-            resourceRef?: string;
-            correlationId?: string;
-            /** Format: date-time */
+        "apidocs.DownloadMediaData": {
+            /** @example data:image/jpeg;base64,/9j/4AAQ... */
+            base64?: string;
+            /** @example 2026-07-21T10:30:00Z */
             timestamp?: string;
         };
-        AuditRecordResource: {
-            /** @enum {string} */
-            resourceType: "auditRecord";
-            id: string;
-            category?: string;
-            status?: string;
-            action?: string;
-            auditedResourceType?: string;
-            resourceRef?: string;
-            /** Format: date-time */
-            createdAt?: string;
+        "apidocs.ErrorResponse": {
+            /** @example phone number is required */
+            error?: string;
         };
-        HealthResource: {
-            /** @enum {string} */
-            resourceType: "health";
-            id?: string;
-            status?: string;
-            category?: string;
-            subjectRef?: string;
-            /** Format: date-time */
-            checkedAt?: string;
-            /** Format: date-time */
-            updatedAt?: string;
+        "apidocs.InstanceListResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"][];
+            /** @example success */
+            message?: string;
         };
-        MetricsResource: {
-            /** @enum {string} */
-            resourceType: "metrics";
+        "apidocs.InstanceResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"];
+            /** @example success */
+            message?: string;
+        };
+        "apidocs.LabelItem": {
             id?: string;
-            value?: number;
+            instance_id?: string;
+            label_color?: string;
+            label_id?: string;
+            label_name?: string;
+            predefined_id?: string;
+        };
+        "apidocs.LogEntry": {
+            instance_id?: string;
+            /** @example INFO */
+            level?: string;
+            message?: string;
+            metadata?: unknown;
+            /** @example 2026-07-21T10:30:00Z */
+            timestamp?: string;
+        };
+        "apidocs.MessageIdData": {
+            /** @example 3EB0C767D26A8D4E2A1B */
+            messageId?: string;
+            /** @example 2026-07-21T10:30:00Z */
+            timestamp?: string;
+        };
+        "apidocs.MessageStatusData": {
+            result?: unknown;
+            /** @example 2026-07-21T10:30:00Z */
+            timestamp?: string;
+        };
+        "apidocs.PairData": {
+            /** @example ABCD-EFGH */
+            PairingCode?: string;
+        };
+        "apidocs.PairResponse": {
+            data?: components["schemas"]["apidocs.PairData"];
+            /** @example success */
+            message?: string;
+        };
+        "apidocs.PollResultsData": {
+            optionCounts?: {
+                [key: string]: number;
+            };
+            pollChatJid?: string;
+            pollMessageId?: string;
+            /** @example 42 */
+            totalVotes?: number;
+            voters?: components["schemas"]["apidocs.VoterItem"][];
+            votes?: components["schemas"]["apidocs.PollVoteItem"][];
+        };
+        "apidocs.PollVoteItem": {
+            id?: string;
+            instanceId?: string;
+            pollChatJid?: string;
+            pollMessageId?: string;
+            /** @example 2026-07-21T10:30:00Z */
+            receivedAt?: string;
+            selectedOptions?: string[];
+            voteMessageId?: string;
+            /** @example 2026-07-21T10:30:00Z */
+            votedAt?: string;
+            voterJid?: string;
+            voterName?: string;
+            voterPhone?: string;
+        };
+        "apidocs.QRCodeData": {
+            /** @example 2@abc123... */
+            code?: string;
+            passkeyCode?: string;
+            passkeyOpenUrl?: string;
+            passkeyStage?: string;
+            /** @example data:image/png;base64,iVBORw0KGgo... */
+            qrcode?: string;
+        };
+        "apidocs.QRCodeResponse": {
+            data?: components["schemas"]["apidocs.QRCodeData"];
+            /** @example success */
+            message?: string;
+        };
+        "apidocs.SendMessageData": {
+            /** @example 3EB0C767D26A8D4E2A1B */
+            ID?: string;
+            /** @example 2026-07-21T10:30:00Z */
+            Timestamp?: string;
+        };
+        "apidocs.SendMessageResponse": {
+            data?: components["schemas"]["apidocs.SendMessageData"];
+            /** @example success */
+            message?: string;
+        };
+        "apidocs.SetProxyData": {
+            /** @example true */
+            hasAuth?: boolean;
+            /** @example proxy.example.com */
+            host?: string;
+            /** @example 8080 */
+            port?: string;
+            /** @example http */
+            protocol?: string;
+        };
+        "apidocs.StatusData": {
+            /** @example true */
+            Connected?: boolean;
+            /** @example true */
+            LoggedIn?: boolean;
+            /** @example My WhatsApp */
+            Name?: string;
+        };
+        "apidocs.StatusResponse": {
+            data?: components["schemas"]["apidocs.StatusData"];
+            /** @example success */
+            message?: string;
+        };
+        "apidocs.SuccessResponse": {
+            data?: unknown;
+            /** @example success */
+            message?: string;
+        };
+        "apidocs.TimestampData": {
+            /** @example 2026-07-21T10:30:00Z */
+            timestamp?: string;
+        };
+        "apidocs.VoterItem": {
+            jid?: string;
+            name?: string;
+            phone?: string;
+            selectedOptions?: string[];
+            /** @example 2026-07-21T10:30:00Z */
+            votedAt?: string;
+        };
+        "gin.H": {
+            [key: string]: unknown;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_call_service.RejectCallStruct": {
+            callCreator?: components["schemas"]["types.JID"];
+            callId?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
+            chat?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_chat_service.HistorySyncRequestStruct": {
             count?: number;
-            totalJobCount?: number;
-            queuedJobCount?: number;
-            reservedJobCount?: number;
-            runningJobCount?: number;
-            retryingJobCount?: number;
-            completedJobCount?: number;
-            deadJobCount?: number;
-            activeJobCount?: number;
-            status?: string;
-            /** Format: date-time */
-            updatedAt?: string;
+            messageInfo?: components["schemas"]["types.MessageInfo"];
         };
-        DashboardResource: {
-            /** @enum {string} */
-            resourceType: "dashboard";
-            id?: string;
-            instanceCount?: number;
-            connectedInstanceCount?: number;
-            queuedJobCount?: number;
-            failedWebhookCount?: number;
-            /** Format: date-time */
-            updatedAt?: string;
+        "github_com_evolution-foundation_evolution-go_pkg_community_service.AddParticipantStruct": {
+            communityJid?: string;
+            groupJid?: string[];
         };
-        SettingsResource: {
-            /** @enum {string} */
-            resourceType: "settings";
-            id?: string;
-            status?: string;
-            profile?: string;
-            /** Format: date-time */
-            updatedAt?: string;
+        "github_com_evolution-foundation_evolution-go_pkg_community_service.CreateCommunityStruct": {
+            communityName?: string;
         };
-        ProviderResource: {
-            /** @enum {string} */
-            resourceType: "provider";
-            id?: string;
-            status?: string;
-            providerName?: string;
-            /** @description Product-level provider capability identifiers. Provider-native payloads are excluded. */
-            capabilities?: string[];
-            /**
-             * @deprecated
-             * @description Legacy scalar capability retained for compatibility. New clients must use capabilities.
-             */
-            capability?: string;
-            /** Format: date-time */
-            updatedAt?: string;
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.AddParticipantStruct": {
+            action?: components["schemas"]["whatsmeow.ParticipantChange"];
+            groupJid?: components["schemas"]["types.JID"];
+            participants?: string[];
         };
-        GroupTextMessageRequest: {
-            text: string;
-        } & {
-            [key: string]: unknown;
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.CreateGroupStruct": {
+            groupName?: string;
+            participants?: string[];
         };
-        GroupMemberRequest: {
-            jid: string;
-        } & {
-            [key: string]: unknown;
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GetGroupInfoStruct": {
+            groupJid?: string;
         };
-        GroupMetadataRequest: {
-            subject?: string;
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GetGroupInviteLinkStruct": {
+            groupJid?: string;
+            reset?: boolean;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.JoinGroupStruct": {
+            code?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.LeaveGroupStruct": {
+            groupJid?: components["schemas"]["types.JID"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupDescriptionStruct": {
             description?: string;
-        } & {
-            [key: string]: unknown;
+            groupJid?: string;
         };
-        GroupLocalStateRequest: {
-            muted?: boolean;
-            archived?: boolean;
-            pinned?: boolean;
-        } & {
-            [key: string]: unknown;
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupNameStruct": {
+            groupJid?: string;
+            name?: string;
         };
-        /** @description Safe API key lifecycle resource. It never exposes plaintext key material or keyHash values. */
-        ApiKeyResource: {
-            /** @enum {string} */
-            resourceType: "apiKey";
-            id: string;
-            /** @enum {string} */
-            kind: "api_key" | "admin_key" | "monitoring_key";
-            scopes: string[];
-            allowedInstanceRefs?: string[];
-            /** @enum {string} */
-            status: "active" | "revoked";
-            rotatedFromKeyId?: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            /** Format: date-time */
-            revokedAt?: string;
-            revocationReasonCode?: string;
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoStruct": {
+            groupJid?: string;
+            image?: string;
         };
-        ApiKeyLifecycleOperationData: {
-            /** @enum {string} */
-            resourceType: "apiKey";
-            resourceId?: string;
-            operationStatus: string;
-            accepted: boolean;
-            async: boolean;
-            apiKey?: components["schemas"]["ApiKeyResource"];
-            revoked?: components["schemas"]["ApiKeyResource"];
-            replacement?: components["schemas"]["ApiKeyResource"];
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.UpdateGroupSettingsStruct": {
+            /** @description announcement, not_announcement, locked, unlocked */
+            action?: string;
+            groupJid?: string;
         };
-        ApiKeyProvisionRequest: {
-            key: string;
-            keyId: string;
-            /** @enum {string} */
-            kind?: "api_key" | "admin_key" | "monitoring_key";
-            scopes: string[];
-            allowedInstanceRefs?: string[];
+        "github_com_evolution-foundation_evolution-go_pkg_instance_model.AdvancedSettings": {
+            alwaysOnline?: boolean;
+            ignoreGroups?: boolean;
+            ignoreStatus?: boolean;
+            msgRejectCall?: string;
+            readMessages?: boolean;
+            rejectCall?: boolean;
         };
-        ApiKeyRotationRequest: {
-            nextKey: string;
-            nextKeyId: string;
-            /** @enum {string} */
-            kind?: "api_key" | "admin_key" | "monitoring_key";
-            scopes: string[];
-            allowedInstanceRefs?: string[];
-            reasonCode?: string;
+        "github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance": {
+            /** @description Advanced Settings */
+            alwaysOnline?: boolean;
+            client_name?: string;
+            connected?: boolean;
+            createdAt?: string;
+            disconnect_reason?: string;
+            events?: string;
+            expiration?: number;
+            id?: string;
+            ignoreGroups?: boolean;
+            ignoreStatus?: boolean;
+            jid?: string;
+            msgRejectCall?: string;
+            name?: string;
+            natsEnable?: string;
+            os_name?: string;
+            proxy?: string;
+            qrcode?: string;
+            rabbitmqEnable?: string;
+            readMessages?: boolean;
+            rejectCall?: boolean;
+            token?: string;
+            webhook?: string;
+            websocketEnable?: string;
         };
-        ApiKeyRevocationRequest: {
-            reasonCode?: string;
+        "github_com_evolution-foundation_evolution-go_pkg_instance_service.ConnectStruct": {
+            immediate?: boolean;
+            natsEnable?: string;
+            phone?: string;
+            rabbitmqEnable?: string;
+            subscribe?: string[];
+            webhookUrl?: string;
+            websocketEnable?: string;
         };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_service.CreateStruct": {
+            advancedSettings?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.AdvancedSettings"];
+            instanceId?: string;
+            name?: string;
+            proxy?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_service.ProxyConfig"];
+            token?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_service.ForceReconnectStruct": {
+            number?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_service.PairStruct": {
+            phone?: string;
+            subscribe?: string[];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_service.ProxyConfig": {
+            host?: string;
+            password?: string;
+            port?: string;
+            protocol?: string;
+            username?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_service.SetProxyStruct": {
+            host: string;
+            password?: string;
+            port: string;
+            protocol?: string;
+            username?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_label_service.ChatLabelStruct": {
+            jid?: string;
+            labelId?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_label_service.EditLabelStruct": {
+            color?: number;
+            deleted?: boolean;
+            labelId?: string;
+            name?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_label_service.MessageLabelStruct": {
+            jid?: string;
+            labelId?: string;
+            messageId?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_message_service.ChatPresenceStruct": {
+            /**
+             * @description Delay, in milliseconds, keeps the "composing"/"recording" indicator alive
+             *     for the given duration (re-sending it periodically) and then sends "paused".
+             *     Only applies when State is "composing". 0 = single fire (legacy behaviour).
+             */
+            delay?: number;
+            isAudio?: boolean;
+            number?: string;
+            state?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_message_service.DownloadMediaStruct": {
+            message?: components["schemas"]["waE2E.Message"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_message_service.EditMessageStruct": {
+            chat?: string;
+            message?: string;
+            messageId?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_message_service.MarkPlayedStruct": {
+            id?: string[];
+            number?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_message_service.MarkReadStruct": {
+            id?: string[];
+            number?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_message_service.MessageStatusStruct": {
+            id?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_message_service.MessageStruct": {
+            chat?: string;
+            messageId?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_message_service.ReactStruct": {
+            fromMe?: boolean;
+            id?: string;
+            number?: string;
+            participant?: string;
+            reaction?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_newsletter_service.CreateNewsletterStruct": {
+            description?: string;
+            name?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterInviteStruct": {
+            key?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterMessagesStruct": {
+            before_id?: number;
+            count?: number;
+            jid?: components["schemas"]["types.JID"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct": {
+            jid?: components["schemas"]["types.JID"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.Button": {
+            /**
+             * @description Code placed in the clipboard when type=copy.
+             * @example PROMO2026
+             */
+            copyCode?: string;
+            /**
+             * @description ISO currency code for type=pix (e.g. BRL).
+             * @example BRL
+             */
+            currency?: string;
+            /**
+             * @description Label rendered inside the button (reply / copy / url / call). Ignored for pix.
+             * @example Quero saber mais
+             */
+            displayText?: string;
+            /**
+             * @description Callback payload for `reply` or code-to-copy internal id for `copy`.
+             * @example btn_info
+             */
+            id?: string;
+            /**
+             * @description Pix key value matching the keyType.
+             * @example 12345678900
+             */
+            key?: string;
+            /**
+             * @description Pix key type. One of: phone, email, cpf, cnpj, random.
+             * @example cpf
+             * @enum {string}
+             */
+            keyType?: "phone" | "email" | "cpf" | "cnpj" | "random";
+            /**
+             * @description Merchant display name shown on the Pix sheet.
+             * @example Minha Loja
+             */
+            name?: string;
+            /**
+             * @description Destination phone number (E.164) when type=call.
+             * @example +5582988898565
+             */
+            phoneNumber?: string;
+            /**
+             * @description Button kind. One of: reply, copy, url, call, pix.
+             * @example reply
+             * @enum {string}
+             */
+            type?: "reply" | "copy" | "url" | "call" | "pix";
+            /**
+             * @description Target URL when type=url.
+             * @example https://evolutionapi.com
+             */
+            url?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.ButtonStruct": {
+            /** @description Buttons array. See combination rules on the parent type description. */
+            buttons?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.Button"][];
+            /**
+             * @description Typing delay (milliseconds) applied before sending the message.
+             * @example 1200
+             */
+            delay?: number;
+            /**
+             * @description Body description text (required).
+             * @example Confira as condicoes abaixo
+             */
+            description?: string;
+            /**
+             * @description Footer text (required).
+             * @example OmniWA GO
+             */
+            footer?: string;
+            /** @description If false, skips automatic formatting/validation of `number` into a JID. */
+            formatJid?: boolean;
+            /** @description Optional image URL used as header for reply-only buttons. */
+            imageUrl?: string;
+            /** @description Mention every participant (groups only). */
+            mentionAll?: boolean;
+            /** @description JIDs to mention inside the body text. */
+            mentionedJid?: string[];
+            /**
+             * @description Destination phone number.
+             * @example 5582988898565
+             */
+            number?: string;
+            /** @description Quoted (reply-to) context. */
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+            /**
+             * @description Header title (required).
+             * @example Oferta especial
+             */
+            title?: string;
+            /** @description Optional video URL used as header for reply-only buttons. */
+            videoUrl?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselButtonStruct": {
+            /**
+             * @description Code placed in the clipboard when type=COPY.
+             * @example PROMO2026
+             */
+            copyCode?: string;
+            /**
+             * @description Label rendered inside the button.
+             * @example Quero saber mais
+             */
+            displayText?: string;
+            /**
+             * @description Context-dependent: REPLY payload, URL target (type=URL) or phone number (type=CALL).
+             * @example card1_info
+             */
+            id?: string;
+            /**
+             * @description Button kind (case-insensitive). One of: REPLY (default), URL, CALL, COPY.
+             * @example REPLY
+             * @enum {string}
+             */
+            type?: "REPLY" | "URL" | "CALL" | "COPY" | "reply" | "url" | "call" | "copy";
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselCardBodyStruct": {
+            /**
+             * @description Main text of the card.
+             * @example Card 1 - Oferta especial
+             */
+            text?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselCardHeaderStruct": {
+            /**
+             * @description Public URL to an image. Downloaded, uploaded to WhatsApp servers and used as card media.
+             * @example https://picsum.photos/seed/card1/600/400
+             */
+            imageUrl?: string;
+            /**
+             * @description Optional subtitle rendered below the title.
+             * @example Somente hoje
+             */
+            subtitle?: string;
+            /**
+             * @description Optional visible title above the media.
+             * @example Oferta do dia
+             */
+            title?: string;
+            /** @description Public URL to a video. Used only when `imageUrl` is empty. */
+            videoUrl?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselCardStruct": {
+            /** @description Card body text (required). */
+            body?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselCardBodyStruct"];
+            /** @description Buttons shown on the card. See CarouselButtonStruct for combination rules. */
+            buttons?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselButtonStruct"][];
+            /**
+             * @description Optional footer rendered under the body.
+             * @example Por tempo limitado
+             */
+            footer?: string;
+            /** @description Card header (media + title/subtitle). */
+            header?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselCardHeaderStruct"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselStruct": {
+            /**
+             * @description Optional message body shown above the cards.
+             * @example Confira nossas novidades!
+             */
+            body?: string;
+            /** @description Cards displayed in order. At least one card is required. */
+            cards?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.CarouselCardStruct"][];
+            /**
+             * @description Typing delay (milliseconds) applied before sending the message.
+             * @example 1200
+             */
+            delay?: number;
+            /**
+             * @description Optional message footer shown below the cards.
+             * @example OmniWA GO
+             */
+            footer?: string;
+            /** @description If false, skips automatic formatting/validation of `number` into a JID. */
+            formatJid?: boolean;
+            /**
+             * @description Destination phone number.
+             * @example 5582988898565
+             */
+            number?: string;
+            /** @description Quoted (reply-to) context. */
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.ContactStruct": {
+            delay?: number;
+            formatJid?: boolean;
+            id?: string;
+            mentionAll?: boolean;
+            mentionedJid?: string[];
+            number?: string;
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+            vcard?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_utils.VCardStruct"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.LinkStruct": {
+            delay?: number;
+            description?: string;
+            formatJid?: boolean;
+            id?: string;
+            imgUrl?: string;
+            mentionAll?: boolean;
+            mentionedJid?: string[];
+            number?: string;
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+            text?: string;
+            title?: string;
+            url?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.ListStruct": {
+            /**
+             * @description Label of the button that opens the list. Defaults to "Ver Menu" when empty.
+             * @example Abrir cardapio
+             */
+            buttonText?: string;
+            /**
+             * @description Typing delay (milliseconds) applied before sending the message.
+             * @example 1200
+             */
+            delay?: number;
+            /**
+             * @description Body description text (required).
+             * @example Escolha o plano ideal para voce
+             */
+            description?: string;
+            /**
+             * @description Footer text (required).
+             * @example OmniWA GO
+             */
+            footerText?: string;
+            /** @description If false, skips automatic formatting/validation of `number` into a JID. */
+            formatJid?: boolean;
+            /** @description Mention every participant (groups only). */
+            mentionAll?: boolean;
+            /** @description JIDs to mention inside the body text. */
+            mentionedJid?: string[];
+            /**
+             * @description Destination phone number.
+             * @example 5582988898565
+             */
+            number?: string;
+            /** @description Quoted (reply-to) context. */
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+            /** @description Sections with rows. At least one section with one row is required. */
+            sections?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.Section"][];
+            /**
+             * @description Header title (required).
+             * @example Nossos planos
+             */
+            title?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.LocationStruct": {
+            address?: string;
+            delay?: number;
+            formatJid?: boolean;
+            id?: string;
+            latitude?: number;
+            longitude?: number;
+            mentionAll?: boolean;
+            mentionedJid?: string[];
+            name?: string;
+            number?: string;
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.MediaStruct": {
+            caption?: string;
+            delay?: number;
+            filename?: string;
+            formatJid?: boolean;
+            forwardingScore?: number;
+            id?: string;
+            mentionAll?: boolean;
+            mentionedJid?: string[];
+            number?: string;
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+            type?: string;
+            url?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.PollStruct": {
+            delay?: number;
+            formatJid?: boolean;
+            id?: string;
+            maxAnswer?: number;
+            mentionAll?: boolean;
+            mentionedJid?: string[];
+            number?: string;
+            options?: string[];
+            question?: string;
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct": {
+            messageId?: string;
+            participant?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.Row": {
+            /**
+             * @description Optional secondary line below the title.
+             * @example R$ 29,90/mes
+             */
+            description?: string;
+            /**
+             * @description Callback payload returned when the user taps the row. Auto-generated if empty.
+             * @example plan_basic
+             */
+            rowId?: string;
+            /**
+             * @description Row main label.
+             * @example Plano Basico
+             */
+            title?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.Section": {
+            /** @description Rows inside this section. */
+            rows?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.Row"][];
+            /**
+             * @description Section heading (optional; rendered as a group separator).
+             * @example Planos
+             */
+            title?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.StatusTextStruct": {
+            id?: string;
+            text?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.StickerStruct": {
+            delay?: number;
+            formatJid?: boolean;
+            id?: string;
+            mentionAll?: boolean;
+            mentionedJid?: string[];
+            number?: string;
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+            sticker?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.TextStruct": {
+            delay?: number;
+            formatJid?: boolean;
+            forwardingScore?: number;
+            id?: string;
+            mentionAll?: boolean;
+            mentionedJid?: string[];
+            number?: string;
+            quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
+            text?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.BlockStruct": {
+            number?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.CheckUserCollection": {
+            users?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.User"][];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.CheckUserStruct": {
+            formatJid?: boolean;
+            number?: string[];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo": {
+            BusinessName?: string;
+            FirstName?: string;
+            Found?: boolean;
+            FullName?: string;
+            Jid?: string;
+            PushName?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.GetAvatarStruct": {
+            number?: string;
+            preview?: boolean;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.PrivacyStruct": {
+            callAdd?: components["schemas"]["types.PrivacySetting"];
+            groupAdd?: components["schemas"]["types.PrivacySetting"];
+            lastSeen?: components["schemas"]["types.PrivacySetting"];
+            online?: components["schemas"]["types.PrivacySetting"];
+            profile?: components["schemas"]["types.PrivacySetting"];
+            readReceipts?: components["schemas"]["types.PrivacySetting"];
+            status?: components["schemas"]["types.PrivacySetting"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.SetProfilePictureStruct": {
+            image?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.User": {
+            isInWhatsapp?: boolean;
+            jid?: string;
+            lid?: string;
+            query?: string;
+            remoteJID?: string;
+            verifiedName?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.UserCollection": {
+            users?: {
+                [key: string]: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.UserInfo"];
+            };
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.UserInfo": {
+            devices?: components["schemas"]["types.JID"][];
+            /** @description The local ID (if available) */
+            lid?: string;
+            pictureID?: string;
+            status?: string;
+            verifiedName?: components["schemas"]["types.VerifiedName"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_utils.VCardStruct": {
+            fullName?: string;
+            organization?: string;
+            phone?: string;
+        };
+        "jsontime.UnixMicroString": {
+            "time.Time"?: string;
+        };
+        "jsontime.UnixString": {
+            "time.Time"?: string;
+        };
+        /** @enum {string} */
+        "types.AddressingMode": "pn" | "lid";
+        "types.Blocklist": {
+            /** @description TODO is this just a timestamp? */
+            dhash?: string;
+            jids?: components["schemas"]["types.JID"][];
+        };
+        /** @enum {string} */
+        "types.BotEditType": "first" | "inner" | "last";
+        "types.BroadcastRecipient": {
+            lid?: components["schemas"]["types.JID"];
+            pn?: components["schemas"]["types.JID"];
+        };
+        "types.DeviceSentMeta": {
+            /** @description The destination user. This should match the MessageInfo.Recipient field. */
+            destinationJID?: string;
+            phash?: string;
+        };
+        /** @enum {string} */
+        "types.EditAttribute": "" | "1" | "2" | "3" | "7" | "8";
+        "types.GroupInfo": {
+            addressingMode?: components["schemas"]["types.AddressingMode"];
+            announceVersionID?: string;
+            creatorCountryCode?: string;
+            /** @description request_required */
+            defaultMembershipApprovalMode?: string;
+            disappearingTimer?: number;
+            groupCreated?: string;
+            isAnnounce?: boolean;
+            isDefaultSubGroup?: boolean;
+            isEphemeral?: boolean;
+            isIncognito?: boolean;
+            isJoinApprovalRequired?: boolean;
+            isLocked?: boolean;
+            isParent?: boolean;
+            jid?: components["schemas"]["types.JID"];
+            linkedParentJID?: components["schemas"]["types.JID"];
+            memberAddMode?: components["schemas"]["types.GroupMemberAddMode"];
+            name?: string;
+            nameSetAt?: string;
+            nameSetBy?: components["schemas"]["types.JID"];
+            nameSetByPN?: components["schemas"]["types.JID"];
+            ownerJID?: components["schemas"]["types.JID"];
+            ownerPN?: components["schemas"]["types.JID"];
+            participantCount?: number;
+            participantVersionID?: string;
+            participants?: components["schemas"]["types.GroupParticipant"][];
+            /** @description Suspended indicates whether the group is currently paused/suspended. */
+            suspended?: boolean;
+            topic?: string;
+            topicDeleted?: boolean;
+            topicID?: string;
+            topicSetAt?: string;
+            topicSetBy?: components["schemas"]["types.JID"];
+            topicSetByPN?: components["schemas"]["types.JID"];
+        };
+        /** @enum {string} */
+        "types.GroupMemberAddMode": "admin_add" | "all_member_add";
+        "types.GroupParticipant": {
+            addRequest?: components["schemas"]["types.GroupParticipantAddRequest"];
+            /** @description This is only present for anonymous users in announcement groups, it's an obfuscated phone number */
+            displayName?: string;
+            /**
+             * @description When creating groups, adding some participants may fail.
+             *     In such cases, the error code will be here.
+             */
+            error?: number;
+            isAdmin?: boolean;
+            isSuperAdmin?: boolean;
+            /**
+             * @description The primary JID that should be used to send messages to this participant.
+             *     Always equals either the LID or phone number.
+             */
+            jid?: components["schemas"]["types.JID"];
+            lid?: components["schemas"]["types.JID"];
+            phoneNumber?: components["schemas"]["types.JID"];
+        };
+        "types.GroupParticipantAddRequest": {
+            code?: string;
+            expiration?: string;
+        };
+        "types.JID": {
+            device?: number;
+            integrator?: number;
+            rawAgent?: number;
+            server?: string;
+            user?: string;
+        };
+        "types.MessageInfo": {
+            /** @description The addressing mode of the message (phone number or LID) */
+            addressingMode?: components["schemas"]["types.AddressingMode"];
+            /**
+             * @description When sending a read receipt to a broadcast list message, the Chat is the broadcast list
+             *     and Sender is you, so this field contains the recipient of the read receipt.
+             */
+            broadcastListOwner?: components["schemas"]["types.JID"];
+            broadcastRecipients?: components["schemas"]["types.BroadcastRecipient"][];
+            category?: string;
+            /** @description The chat where the message was sent. */
+            chat?: components["schemas"]["types.JID"];
+            /** @description Metadata for direct messages sent from another one of the user's own devices. */
+            deviceSentMeta?: components["schemas"]["types.DeviceSentMeta"];
+            edit?: components["schemas"]["types.EditAttribute"];
+            id?: string;
+            /** @description Whether the message was sent by the current user instead of someone else. */
+            isFromMe?: boolean;
+            /** @description Whether the chat is a group chat or broadcast list. */
+            isGroup?: boolean;
+            mediaType?: string;
+            msgBotInfo?: components["schemas"]["types.MsgBotInfo"];
+            msgMetaInfo?: components["schemas"]["types.MsgMetaInfo"];
+            multicast?: boolean;
+            pushName?: string;
+            /** @description The alternative address of the recipient of the message for DMs. */
+            recipientAlt?: components["schemas"]["types.JID"];
+            /** @description The user who sent the message. */
+            sender?: components["schemas"]["types.JID"];
+            /** @description The alternative address of the user who sent the message */
+            senderAlt?: components["schemas"]["types.JID"];
+            serverID?: number;
+            timestamp?: string;
+            type?: string;
+            verifiedName?: components["schemas"]["types.VerifiedName"];
+        };
+        "types.MsgBotInfo": {
+            editSenderTimestampMS?: string;
+            editTargetID?: string;
+            editType?: components["schemas"]["types.BotEditType"];
+        };
+        "types.MsgMetaInfo": {
+            deprecatedLIDSession?: boolean;
+            targetChat?: components["schemas"]["types.JID"];
+            /** @description Bot things */
+            targetID?: string;
+            targetSender?: components["schemas"]["types.JID"];
+            threadMessageID?: string;
+            threadMessageSenderJID?: components["schemas"]["types.JID"];
+        };
+        "types.NewsletterMessage": {
+            /** @description This is only present when fetching messages, not in live updates */
+            message?: components["schemas"]["waE2E.Message"];
+            messageID?: string;
+            messageServerID?: number;
+            reactionCounts?: {
+                [key: string]: number;
+            };
+            timestamp?: string;
+            type?: string;
+            viewsCount?: number;
+        };
+        "types.NewsletterMetadata": {
+            id?: components["schemas"]["types.JID"];
+            state?: components["schemas"]["types.WrappedNewsletterState"];
+            thread_metadata?: components["schemas"]["types.NewsletterThreadMetadata"];
+            viewer_metadata?: components["schemas"]["types.NewsletterViewerMetadata"];
+        };
+        /** @enum {string} */
+        "types.NewsletterMuteState": "on" | "off";
+        "types.NewsletterReactionSettings": {
+            value?: components["schemas"]["types.NewsletterReactionsMode"];
+        };
+        /** @enum {string} */
+        "types.NewsletterReactionsMode": "all" | "basic" | "none" | "blocklist";
+        /** @enum {string} */
+        "types.NewsletterRole": "subscriber" | "guest" | "admin" | "owner";
+        "types.NewsletterSettings": {
+            reaction_codes?: components["schemas"]["types.NewsletterReactionSettings"];
+        };
+        /** @enum {string} */
+        "types.NewsletterState": "active" | "suspended" | "geosuspended";
+        "types.NewsletterText": {
+            id?: string;
+            text?: string;
+            update_time?: components["schemas"]["jsontime.UnixMicroString"];
+        };
+        "types.NewsletterThreadMetadata": {
+            creation_time?: components["schemas"]["jsontime.UnixString"];
+            description?: components["schemas"]["types.NewsletterText"];
+            invite?: string;
+            name?: components["schemas"]["types.NewsletterText"];
+            picture?: components["schemas"]["types.ProfilePictureInfo"];
+            preview?: components["schemas"]["types.ProfilePictureInfo"];
+            settings?: components["schemas"]["types.NewsletterSettings"];
+            /** @example 0 */
+            subscribers_count?: string;
+            verification?: components["schemas"]["types.NewsletterVerificationState"];
+        };
+        /** @enum {string} */
+        "types.NewsletterVerificationState": "verified" | "unverified";
+        "types.NewsletterViewerMetadata": {
+            mute?: components["schemas"]["types.NewsletterMuteState"];
+            role?: components["schemas"]["types.NewsletterRole"];
+        };
+        /** @enum {string} */
+        "types.PrivacySetting": "" | "all" | "contacts" | "contact_allowlist" | "contact_blacklist" | "match_last_seen" | "known" | "none" | "on_standard" | "off";
+        "types.PrivacySettings": {
+            /** @description Valid values: PrivacySettingAll, PrivacySettingKnown */
+            callAdd?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingOnStandard, PrivacySettingOff */
+            defense?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingAll, PrivacySettingContacts, PrivacySettingContactBlacklist, PrivacySettingNone */
+            groupAdd?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingAll, PrivacySettingContacts, PrivacySettingContactBlacklist, PrivacySettingNone */
+            lastSeen?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingAll, PrivacySettingContacts */
+            messages?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingAll, PrivacySettingMatchLastSeen */
+            online?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingAll, PrivacySettingContacts, PrivacySettingContactBlacklist, PrivacySettingNone */
+            profile?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingAll, PrivacySettingNone */
+            readReceipts?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingAll, PrivacySettingContacts, PrivacySettingContactBlacklist, PrivacySettingNone */
+            status?: components["schemas"]["types.PrivacySetting"];
+            /** @description Valid values: PrivacySettingContacts, PrivacySettingContactAllowlist, PrivacySettingNone */
+            stickers?: components["schemas"]["types.PrivacySetting"];
+        };
+        "types.ProfilePictureInfo": {
+            /** @description The path to the image, probably not very useful */
+            direct_path?: string;
+            /** @description Some kind of hash (format is unknown) */
+            hash?: number[];
+            /** @description The ID of the image. This is the same as UserInfo.PictureID. */
+            id?: string;
+            /** @description The type of image. Known types include "image" (full res) and "preview" (thumbnail). */
+            type?: string;
+            /** @description The full URL for the image, can be downloaded with a simple HTTP request. */
+            url?: string;
+        };
+        "types.VerifiedName": {
+            certificate?: components["schemas"]["waVnameCert.VerifiedNameCertificate"];
+            details?: components["schemas"]["waVnameCert.VerifiedNameCertificate_Details"];
+        };
+        "types.WebAuthnResponse": {
+            id?: string;
+            rawId?: number[];
+            response?: components["schemas"]["types.WebAuthnResponseData"];
+            type?: string;
+        };
+        "types.WebAuthnResponseData": {
+            authenticatorData?: number[];
+            clientDataJSON?: number[];
+            signature?: number[];
+            userHandle?: number[];
+        };
+        "types.WrappedNewsletterState": {
+            type?: components["schemas"]["types.NewsletterState"];
+        };
+        "waAICommon.AIMediaCollectionMessage": {
+            collectionID?: string;
+            expectedMediaCount?: number;
+            hasGlobalCaption?: boolean;
+        };
+        "waAICommon.AIMediaCollectionMetadata": {
+            collectionID?: string;
+            uploadOrderIndex?: number;
+        };
+        "waAICommon.AIMetadataOperation": {
+            hatchMetadataSync?: components["schemas"]["waAICommon.HatchMetadataSync"];
+        };
+        "waAICommon.AIRegenerateMetadata": {
+            messageKey?: components["schemas"]["waCommon.MessageKey"];
+            responseTimestampMS?: number;
+        };
+        "waAICommon.AIRichResponseUnifiedResponse": {
+            data?: number[];
+        };
+        /** @enum {integer} */
+        "waAICommon.AISubscriptionRequestType": 0 | 1 | 2 | 3;
+        "waAICommon.AISubscriptionUpsellMetadata": {
+            requestType?: components["schemas"]["waAICommon.AISubscriptionRequestType"];
+        };
+        "waAICommon.AIThreadInfo": {
+            clientInfo?: components["schemas"]["waAICommon.AIThreadInfo_AIThreadClientInfo"];
+            serverInfo?: components["schemas"]["waAICommon.AIThreadInfo_AIThreadServerInfo"];
+        };
+        "waAICommon.AIThreadInfo_AIThreadClientInfo": {
+            sourceChatJID?: string;
+            type?: components["schemas"]["waAICommon.AIThreadInfo_AIThreadClientInfo_AIThreadType"];
+        };
+        /** @enum {integer} */
+        "waAICommon.AIThreadInfo_AIThreadClientInfo_AIThreadType": 0 | 1 | 2 | 3;
+        "waAICommon.AIThreadInfo_AIThreadServerInfo": {
+            title?: string;
+        };
+        "waAICommon.BotAgeCollectionMetadata": {
+            ageCollectionEligible?: boolean;
+            ageCollectionType?: components["schemas"]["waAICommon.BotAgeCollectionMetadata_AgeCollectionType"];
+            shouldTriggerAgeCollectionOnClient?: boolean;
+        };
+        /** @enum {integer} */
+        "waAICommon.BotAgeCollectionMetadata_AgeCollectionType": 0 | 1;
+        "waAICommon.BotAgentDeepLinkMetadata": {
+            token?: string;
+        };
+        "waAICommon.BotAgentMetadata": {
+            deepLinkMetadata?: components["schemas"]["waAICommon.BotAgentDeepLinkMetadata"];
+        };
+        "waAICommon.BotCapabilityMetadata": {
+            capabilities?: components["schemas"]["waAICommon.BotCapabilityMetadata_BotCapabilityType"][];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotCapabilityMetadata_BotCapabilityType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64 | 65;
+        "waAICommon.BotCommandMetadata": {
+            commandDescription?: string;
+            commandName?: string;
+            commandPrompt?: string;
+        };
+        "waAICommon.BotDocumentMessageMetadata": {
+            pluginType?: components["schemas"]["waAICommon.BotDocumentMessageMetadata_DocumentPluginType"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotDocumentMessageMetadata_DocumentPluginType": 0 | 1;
+        "waAICommon.BotFeedbackMessage": {
+            kind?: components["schemas"]["waAICommon.BotFeedbackMessage_BotFeedbackKind"];
+            kindNegative?: number;
+            kindPositive?: number;
+            kindReport?: components["schemas"]["waAICommon.BotFeedbackMessage_ReportKind"];
+            messageKey?: components["schemas"]["waCommon.MessageKey"];
+            sideBySideSurveyMetadata?: components["schemas"]["waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata"];
+            text?: string;
+        };
+        /** @enum {integer} */
+        "waAICommon.BotFeedbackMessage_BotFeedbackKind": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
+        /** @enum {integer} */
+        "waAICommon.BotFeedbackMessage_ReportKind": 0 | 1;
+        "waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata": {
+            analyticsData?: components["schemas"]["waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SideBySideSurveyAnalyticsData"];
+            isSelectedResponsePrimary?: boolean;
+            messageIDToEdit?: string;
+            metaAiAnalyticsData?: components["schemas"]["waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData"];
+            responseOtid?: string;
+            responseTimestampMSString?: string;
+            selectedRequestID?: string;
+            simonSessionFbid?: string;
+            surveyID?: number;
+        };
+        "waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SideBySideSurveyAnalyticsData": {
+            simonSessionFbid?: string;
+            tessaEvent?: string;
+            tessaSessionFbid?: string;
+        };
+        "waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData": {
+            abandonEvent?: components["schemas"]["waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyAbandonEventData"];
+            cardImpressionEvent?: components["schemas"]["waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyCardImpressionEventData"];
+            ctaClickEvent?: components["schemas"]["waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyCTAClickEventData"];
+            ctaImpressionEvent?: components["schemas"]["waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyCTAImpressionEventData"];
+            primaryResponseID?: string;
+            responseEvent?: components["schemas"]["waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyResponseEventData"];
+            surveyID?: number;
+            testArmName?: string;
+            timestampMSString?: string;
+        };
+        "waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyAbandonEventData": {
+            abandonDwellTimeMSString?: string;
+        };
+        "waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyCTAClickEventData": {
+            clickDwellTimeMSString?: string;
+            isSurveyExpired?: boolean;
+        };
+        "waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyCTAImpressionEventData": {
+            isSurveyExpired?: boolean;
+        };
+        "waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyCardImpressionEventData": Record<string, never>;
+        "waAICommon.BotFeedbackMessage_SideBySideSurveyMetadata_SidebySideSurveyMetaAiAnalyticsData_SideBySideSurveyResponseEventData": {
+            responseDwellTimeMSString?: string;
+            selectedResponseID?: string;
+        };
+        "waAICommon.BotGroupMetadata": {
+            participantsMetadata?: components["schemas"]["waAICommon.BotGroupParticipantMetadata"][];
+        };
+        "waAICommon.BotGroupParticipantMetadata": {
+            botFbid?: string;
+        };
+        "waAICommon.BotImagineMetadata": {
+            imagineType?: components["schemas"]["waAICommon.BotImagineMetadata_ImagineType"];
+            shortPrompt?: string;
+        };
+        /** @enum {integer} */
+        "waAICommon.BotImagineMetadata_ImagineType": 0 | 1 | 2 | 3 | 4;
+        "waAICommon.BotInfrastructureDiagnostics": {
+            botBackend?: components["schemas"]["waAICommon.BotInfrastructureDiagnostics_BotBackend"];
+            isThinking?: boolean;
+            toolsUsed?: string[];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotInfrastructureDiagnostics_BotBackend": 0 | 1;
+        "waAICommon.BotLinkedAccount": {
+            type?: components["schemas"]["waAICommon.BotLinkedAccount_BotLinkedAccountType"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotLinkedAccount_BotLinkedAccountType": 0;
+        "waAICommon.BotLinkedAccountsMetadata": {
+            acAuthTokens?: number[];
+            acErrorCode?: number;
+            accounts?: components["schemas"]["waAICommon.BotLinkedAccount"][];
+        };
+        "waAICommon.BotMediaMetadata": {
+            directPath?: string;
+            fileEncSHA256?: string;
+            fileSHA256?: string;
+            mediaKey?: string;
+            mediaKeyTimestamp?: number;
+            mimetype?: string;
+            orientationType?: components["schemas"]["waAICommon.BotMediaMetadata_OrientationType"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotMediaMetadata_OrientationType": 1 | 2 | 3;
+        "waAICommon.BotMemoryFact": {
+            fact?: string;
+            factID?: string;
+        };
+        "waAICommon.BotMemoryMetadata": {
+            addedFacts?: components["schemas"]["waAICommon.BotMemoryFact"][];
+            disclaimer?: string;
+            removedFacts?: components["schemas"]["waAICommon.BotMemoryFact"][];
+        };
+        "waAICommon.BotMemuMetadata": {
+            faceImages?: components["schemas"]["waAICommon.BotMediaMetadata"][];
+        };
+        "waAICommon.BotMessageOrigin": {
+            type?: components["schemas"]["waAICommon.BotMessageOrigin_BotMessageOriginType"];
+        };
+        "waAICommon.BotMessageOriginMetadata": {
+            origins?: components["schemas"]["waAICommon.BotMessageOrigin"][];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotMessageOrigin_BotMessageOriginType": 0;
+        "waAICommon.BotMessageSharingInfo": {
+            botEntryPointOrigin?: components["schemas"]["waAICommon.BotMetricsEntryPoint"];
+            forwardScore?: number;
+        };
+        "waAICommon.BotMetadata": {
+            aiConversationContext?: number[];
+            aiMediaCollectionMetadata?: components["schemas"]["waAICommon.AIMediaCollectionMetadata"];
+            botAgeCollectionMetadata?: components["schemas"]["waAICommon.BotAgeCollectionMetadata"];
+            botDocumentMessageMetadata?: components["schemas"]["waAICommon.BotDocumentMessageMetadata"];
+            botGroupMetadata?: components["schemas"]["waAICommon.BotGroupMetadata"];
+            botInfrastructureDiagnostics?: components["schemas"]["waAICommon.BotInfrastructureDiagnostics"];
+            botLinkedAccountsMetadata?: components["schemas"]["waAICommon.BotLinkedAccountsMetadata"];
+            botMessageOriginMetadata?: components["schemas"]["waAICommon.BotMessageOriginMetadata"];
+            botMetricsMetadata?: components["schemas"]["waAICommon.BotMetricsMetadata"];
+            botModeSelectionMetadata?: components["schemas"]["waAICommon.BotModeSelectionMetadata"];
+            botPromotionMessageMetadata?: components["schemas"]["waAICommon.BotPromotionMessageMetadata"];
+            botQuotaMetadata?: components["schemas"]["waAICommon.BotQuotaMetadata"];
+            botRenderingConfigMetadata?: components["schemas"]["waAICommon.BotRenderingConfigMetadata"];
+            botResponseID?: string;
+            botThreadInfo?: components["schemas"]["waAICommon.AIThreadInfo"];
+            capabilityMetadata?: components["schemas"]["waAICommon.BotCapabilityMetadata"];
+            commandMetadata?: components["schemas"]["waAICommon.BotCommandMetadata"];
+            conversationStarterPromptID?: string;
+            imagineMetadata?: components["schemas"]["waAICommon.BotImagineMetadata"];
+            inThreadSurveyMetadata?: components["schemas"]["waAICommon.InThreadSurveyMetadata"];
+            internalMetadata?: number[];
+            invokerJID?: string;
+            memoryMetadata?: components["schemas"]["waAICommon.BotMemoryMetadata"];
+            memuMetadata?: components["schemas"]["waAICommon.BotMemuMetadata"];
+            messageDisclaimerText?: string;
+            modelMetadata?: components["schemas"]["waAICommon.BotModelMetadata"];
+            personaID?: string;
+            pluginMetadata?: components["schemas"]["waAICommon.BotPluginMetadata"];
+            progressIndicatorMetadata?: components["schemas"]["waAICommon.BotProgressIndicatorMetadata"];
+            pttPromptMetadata?: components["schemas"]["waAICommon.BotPttPromptMetadata"];
+            regenerateMetadata?: components["schemas"]["waAICommon.AIRegenerateMetadata"];
+            reminderMetadata?: components["schemas"]["waAICommon.BotReminderMetadata"];
+            renderingMetadata?: components["schemas"]["waAICommon.BotRenderingMetadata"];
+            resolvedToolCallMetadata?: components["schemas"]["waAICommon.BotResolvedToolCallMetadata"];
+            richResponseSourcesMetadata?: components["schemas"]["waAICommon.BotSourcesMetadata"];
+            sessionMetadata?: components["schemas"]["waAICommon.BotSessionMetadata"];
+            sessionTransparencyMetadata?: components["schemas"]["waAICommon.SessionTransparencyMetadata"];
+            subscriptionUpsellMetadata?: components["schemas"]["waAICommon.AISubscriptionUpsellMetadata"];
+            suggestedPromptMetadata?: components["schemas"]["waAICommon.BotSuggestedPromptMetadata"];
+            timezone?: string;
+            unifiedResponseMutation?: components["schemas"]["waAICommon.BotUnifiedResponseMutation"];
+            verificationMetadata?: components["schemas"]["waAICommon.BotSignatureVerificationMetadata"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotMetricsEntryPoint": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 45 | 46 | 47 | 54 | 55 | 56;
+        "waAICommon.BotMetricsMetadata": {
+            destinationEntryPoint?: components["schemas"]["waAICommon.BotMetricsEntryPoint"];
+            destinationID?: string;
+            threadOrigin?: components["schemas"]["waAICommon.BotMetricsThreadEntryPoint"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotMetricsThreadEntryPoint": 1 | 2 | 3 | 4 | 5;
+        "waAICommon.BotModeSelectionMetadata": {
+            mode?: components["schemas"]["waAICommon.BotModeSelectionMetadata_BotUserSelectionMode"][];
+            overrideMode?: number[];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotModeSelectionMetadata_BotUserSelectionMode": 0 | 1;
+        "waAICommon.BotModelMetadata": {
+            modelNameOverride?: string;
+            modelType?: components["schemas"]["waAICommon.BotModelMetadata_ModelType"];
+            premiumModelStatus?: components["schemas"]["waAICommon.BotModelMetadata_PremiumModelStatus"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotModelMetadata_ModelType": 0 | 1 | 2;
+        /** @enum {integer} */
+        "waAICommon.BotModelMetadata_PremiumModelStatus": 0 | 1 | 2;
+        "waAICommon.BotPluginMetadata": {
+            deprecatedField?: components["schemas"]["waAICommon.BotPluginMetadata_PluginType"];
+            expectedLinksCount?: number;
+            faviconCDNURL?: string;
+            parentPluginMessageKey?: components["schemas"]["waCommon.MessageKey"];
+            parentPluginType?: components["schemas"]["waAICommon.BotPluginMetadata_PluginType"];
+            pluginType?: components["schemas"]["waAICommon.BotPluginMetadata_PluginType"];
+            profilePhotoCDNURL?: string;
+            provider?: components["schemas"]["waAICommon.BotPluginMetadata_SearchProvider"];
+            referenceIndex?: number;
+            searchProviderURL?: string;
+            searchQuery?: string;
+            thumbnailCDNURL?: string;
+        };
+        /** @enum {integer} */
+        "waAICommon.BotPluginMetadata_PluginType": 0 | 1 | 2;
+        /** @enum {integer} */
+        "waAICommon.BotPluginMetadata_SearchProvider": 0 | 1 | 2 | 3;
+        "waAICommon.BotProgressIndicatorMetadata": {
+            estimatedCompletionTime?: number;
+            progressDescription?: string;
+            stepsMetadata?: components["schemas"]["waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata"][];
+        };
+        "waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata": {
+            isEnhancedSearch?: boolean;
+            isReasoning?: boolean;
+            sections?: components["schemas"]["waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotPlanningStepSectionMetadata"][];
+            sourcesMetadata?: components["schemas"]["waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotPlanningSearchSourcesMetadata"][];
+            status?: components["schemas"]["waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_PlanningStepStatus"];
+            statusBody?: string;
+            statusTitle?: string;
+        };
+        "waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotPlanningSearchSourceMetadata": {
+            favIconURL?: string;
+            provider?: components["schemas"]["waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotSearchSourceProvider"];
+            sourceURL?: string;
+            title?: string;
+        };
+        "waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotPlanningSearchSourcesMetadata": {
+            provider?: components["schemas"]["waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotPlanningSearchSourcesMetadata_BotPlanningSearchSourceProvider"];
+            sourceTitle?: string;
+            sourceURL?: string;
+        };
+        /** @enum {integer} */
+        "waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotPlanningSearchSourcesMetadata_BotPlanningSearchSourceProvider": 0 | 1 | 2 | 3;
+        "waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotPlanningStepSectionMetadata": {
+            sectionBody?: string;
+            sectionTitle?: string;
+            sourcesMetadata?: components["schemas"]["waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotPlanningSearchSourceMetadata"][];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_BotSearchSourceProvider": 0 | 1 | 2 | 3;
+        /** @enum {integer} */
+        "waAICommon.BotProgressIndicatorMetadata_BotPlanningStepMetadata_PlanningStepStatus": 0 | 1 | 2 | 3;
+        "waAICommon.BotPromotionMessageMetadata": {
+            buttonTitle?: string;
+            promotionType?: components["schemas"]["waAICommon.BotPromotionMessageMetadata_BotPromotionType"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotPromotionMessageMetadata_BotPromotionType": 0 | 1 | 2;
+        "waAICommon.BotPromptSuggestion": {
+            prompt?: string;
+            promptID?: string;
+        };
+        "waAICommon.BotPromptSuggestions": {
+            suggestions?: components["schemas"]["waAICommon.BotPromptSuggestion"][];
+        };
+        "waAICommon.BotPttPromptMetadata": {
+            transcript?: string;
+        };
+        "waAICommon.BotQuotaMetadata": {
+            botFeatureQuotaMetadata?: components["schemas"]["waAICommon.BotQuotaMetadata_BotFeatureQuotaMetadata"][];
+        };
+        "waAICommon.BotQuotaMetadata_BotFeatureQuotaMetadata": {
+            expirationTimestamp?: number;
+            featureType?: components["schemas"]["waAICommon.BotQuotaMetadata_BotFeatureQuotaMetadata_BotFeatureType"];
+            remainingQuota?: number;
+        };
+        /** @enum {integer} */
+        "waAICommon.BotQuotaMetadata_BotFeatureQuotaMetadata_BotFeatureType": 0 | 1;
+        "waAICommon.BotReminderMetadata": {
+            action?: components["schemas"]["waAICommon.BotReminderMetadata_ReminderAction"];
+            frequency?: components["schemas"]["waAICommon.BotReminderMetadata_ReminderFrequency"];
+            name?: string;
+            nextTriggerTimestamp?: number;
+            requestMessageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotReminderMetadata_ReminderAction": 1 | 2 | 3 | 4;
+        /** @enum {integer} */
+        "waAICommon.BotReminderMetadata_ReminderFrequency": 1 | 2 | 3 | 4 | 5;
+        "waAICommon.BotRenderingConfigMetadata": {
+            bloksVersioningID?: string;
+            pixelDensity?: number;
+        };
+        "waAICommon.BotRenderingMetadata": {
+            keywords?: components["schemas"]["waAICommon.BotRenderingMetadata_Keyword"][];
+        };
+        "waAICommon.BotRenderingMetadata_Keyword": {
+            associatedPrompts?: string[];
+            value?: string;
+        };
+        "waAICommon.BotResolvedToolCallMetadata": {
+            resolutionDataSerialized?: string;
+            toolCallID?: string;
+        };
+        "waAICommon.BotSessionMetadata": {
+            sessionID?: string;
+            sessionSource?: components["schemas"]["waAICommon.BotSessionSource"];
+        };
+        /** @enum {integer} */
+        "waAICommon.BotSessionSource": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+        "waAICommon.BotSignatureVerificationMetadata": {
+            proofs?: components["schemas"]["waAICommon.BotSignatureVerificationUseCaseProof"][];
+        };
+        "waAICommon.BotSignatureVerificationUseCaseProof": {
+            certificateChain?: number[][];
+            signature?: number[];
+            useCase?: components["schemas"]["waAICommon.BotSignatureVerificationUseCaseProof_BotSignatureUseCase"];
+            version?: number;
+        };
+        /** @enum {integer} */
+        "waAICommon.BotSignatureVerificationUseCaseProof_BotSignatureUseCase": 0 | 1 | 2 | 3;
+        "waAICommon.BotSourcesMetadata": {
+            sources?: components["schemas"]["waAICommon.BotSourcesMetadata_BotSourceItem"][];
+        };
+        "waAICommon.BotSourcesMetadata_BotSourceItem": {
+            citationNumber?: number;
+            faviconCDNURL?: string;
+            provider?: components["schemas"]["waAICommon.BotSourcesMetadata_BotSourceItem_SourceProvider"];
+            sourceProviderURL?: string;
+            sourceQuery?: string;
+            sourceTitle?: string;
+            thumbnailCDNURL?: string;
+        };
+        /** @enum {integer} */
+        "waAICommon.BotSourcesMetadata_BotSourceItem_SourceProvider": 0 | 1 | 2 | 3 | 4;
+        "waAICommon.BotSuggestedPromptMetadata": {
+            promptSuggestions?: components["schemas"]["waAICommon.BotPromptSuggestions"];
+            selectedPromptID?: string;
+            selectedPromptIndex?: number;
+            suggestedPrompts?: string[];
+        };
+        "waAICommon.BotUnifiedResponseMutation": {
+            mediaDetailsMetadataList?: components["schemas"]["waAICommon.BotUnifiedResponseMutation_MediaDetailsMetadata"][];
+            sbsMetadata?: components["schemas"]["waAICommon.BotUnifiedResponseMutation_SideBySideMetadata"];
+        };
+        "waAICommon.BotUnifiedResponseMutation_MediaDetailsMetadata": {
+            ID?: string;
+            highResMedia?: components["schemas"]["waAICommon.BotMediaMetadata"];
+            previewMedia?: components["schemas"]["waAICommon.BotMediaMetadata"];
+        };
+        "waAICommon.BotUnifiedResponseMutation_SideBySideMetadata": {
+            primaryResponseID?: string;
+            surveyCtaHasRendered?: boolean;
+        };
+        "waAICommon.ForwardedAIBotMessageInfo": {
+            botJID?: string;
+            botName?: string;
+            creatorName?: string;
+        };
+        "waAICommon.HatchMetadataSync": {
+            data?: number[];
+            requestID?: string;
+            timestampMS?: number;
+        };
+        "waAICommon.InThreadSurveyMetadata": {
+            feedbackToastText?: string;
+            invitationBodyText?: string;
+            invitationCtaText?: string;
+            invitationCtaURL?: string;
+            invitationHeaderText?: string;
+            privacyStatementFull?: string;
+            privacyStatementParts?: components["schemas"]["waAICommon.InThreadSurveyMetadata_InThreadSurveyPrivacyStatementPart"][];
+            questions?: components["schemas"]["waAICommon.InThreadSurveyMetadata_InThreadSurveyQuestion"][];
+            requestID?: string;
+            simonSessionID?: string;
+            simonSurveyID?: string;
+            startQuestionIndex?: number;
+            surveyContinueButtonText?: string;
+            surveySubmitButtonText?: string;
+            surveyTitle?: string;
+            tessaEvent?: string;
+            tessaRootID?: string;
+            tessaSessionID?: string;
+        };
+        "waAICommon.InThreadSurveyMetadata_InThreadSurveyOption": {
+            numericValue?: number;
+            stringValue?: string;
+            textTranslated?: string;
+        };
+        "waAICommon.InThreadSurveyMetadata_InThreadSurveyPrivacyStatementPart": {
+            URL?: string;
+            text?: string;
+        };
+        "waAICommon.InThreadSurveyMetadata_InThreadSurveyQuestion": {
+            questionID?: string;
+            questionOptions?: components["schemas"]["waAICommon.InThreadSurveyMetadata_InThreadSurveyOption"][];
+            questionText?: string;
+        };
+        "waAICommon.SessionTransparencyMetadata": {
+            disclaimerText?: string;
+            hcaID?: string;
+            sessionTransparencyType?: components["schemas"]["waAICommon.SessionTransparencyType"];
+        };
+        /** @enum {integer} */
+        "waAICommon.SessionTransparencyType": 0 | 1;
+        "waAICommonDeprecated.AIRichResponseCodeMetadata": {
+            codeBlocks?: components["schemas"]["waAICommonDeprecated.AIRichResponseCodeMetadata_AIRichResponseCodeBlock"][];
+            codeLanguage?: string;
+        };
+        "waAICommonDeprecated.AIRichResponseCodeMetadata_AIRichResponseCodeBlock": {
+            codeContent?: string;
+            highlightType?: components["schemas"]["waAICommonDeprecated.AIRichResponseCodeMetadata_AIRichResponseCodeHighlightType"];
+        };
+        /** @enum {integer} */
+        "waAICommonDeprecated.AIRichResponseCodeMetadata_AIRichResponseCodeHighlightType": 0 | 1 | 2 | 3 | 4 | 5;
+        "waAICommonDeprecated.AIRichResponseContentItemsMetadata": {
+            contentType?: components["schemas"]["waAICommonDeprecated.AIRichResponseContentItemsMetadata_ContentType"];
+            itemsMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseContentItemsMetadata_AIRichResponseContentItemMetadata"][];
+        };
+        "waAICommonDeprecated.AIRichResponseContentItemsMetadata_AIRichResponseContentItemMetadata": {
+            /**
+             * @description Types that are valid to be assigned to AIRichResponseContentItem:
+             *
+             *     	*AIRichResponseContentItemsMetadata_AIRichResponseContentItemMetadata_ReelItem
+             */
+            airichResponseContentItem?: unknown;
+        };
+        /** @enum {integer} */
+        "waAICommonDeprecated.AIRichResponseContentItemsMetadata_ContentType": 0 | 1;
+        "waAICommonDeprecated.AIRichResponseDynamicMetadata": {
+            URL?: string;
+            loopCount?: number;
+            type?: components["schemas"]["waAICommonDeprecated.AIRichResponseDynamicMetadata_AIRichResponseDynamicMetadataType"];
+            version?: number;
+        };
+        /** @enum {integer} */
+        "waAICommonDeprecated.AIRichResponseDynamicMetadata_AIRichResponseDynamicMetadataType": 0 | 1 | 2;
+        "waAICommonDeprecated.AIRichResponseGridImageMetadata": {
+            gridImageURL?: components["schemas"]["waAICommonDeprecated.AIRichResponseImageURL"];
+            imageURLs?: components["schemas"]["waAICommonDeprecated.AIRichResponseImageURL"][];
+        };
+        "waAICommonDeprecated.AIRichResponseImageURL": {
+            imageHighResURL?: string;
+            imagePreviewURL?: string;
+            sourceURL?: string;
+        };
+        "waAICommonDeprecated.AIRichResponseInlineImageMetadata": {
+            alignment?: components["schemas"]["waAICommonDeprecated.AIRichResponseInlineImageMetadata_AIRichResponseImageAlignment"];
+            imageText?: string;
+            imageURL?: components["schemas"]["waAICommonDeprecated.AIRichResponseImageURL"];
+            tapLinkURL?: string;
+        };
+        /** @enum {integer} */
+        "waAICommonDeprecated.AIRichResponseInlineImageMetadata_AIRichResponseImageAlignment": 0 | 1 | 2;
+        "waAICommonDeprecated.AIRichResponseLatexMetadata": {
+            expressions?: components["schemas"]["waAICommonDeprecated.AIRichResponseLatexMetadata_AIRichResponseLatexExpression"][];
+            text?: string;
+        };
+        "waAICommonDeprecated.AIRichResponseLatexMetadata_AIRichResponseLatexExpression": {
+            URL?: string;
+            fontHeight?: number;
+            height?: number;
+            imageBottomPadding?: number;
+            imageLeadingPadding?: number;
+            imageTopPadding?: number;
+            imageTrailingPadding?: number;
+            latexExpression?: string;
+            width?: number;
+        };
+        "waAICommonDeprecated.AIRichResponseMapMetadata": {
+            annotations?: components["schemas"]["waAICommonDeprecated.AIRichResponseMapMetadata_AIRichResponseMapAnnotation"][];
+            centerLatitude?: number;
+            centerLongitude?: number;
+            latitudeDelta?: number;
+            longitudeDelta?: number;
+            showInfoList?: boolean;
+        };
+        "waAICommonDeprecated.AIRichResponseMapMetadata_AIRichResponseMapAnnotation": {
+            annotationNumber?: number;
+            body?: string;
+            latitude?: number;
+            longitude?: number;
+            title?: string;
+        };
+        /** @enum {integer} */
+        "waAICommonDeprecated.AIRichResponseMessageType": 0 | 1;
+        "waAICommonDeprecated.AIRichResponseSubMessage": {
+            codeMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseCodeMetadata"];
+            contentItemsMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseContentItemsMetadata"];
+            dynamicMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseDynamicMetadata"];
+            gridImageMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseGridImageMetadata"];
+            imageMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseInlineImageMetadata"];
+            latexMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseLatexMetadata"];
+            mapMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseMapMetadata"];
+            messageText?: string;
+            messageType?: components["schemas"]["waAICommonDeprecated.AIRichResponseSubMessageType"];
+            tableMetadata?: components["schemas"]["waAICommonDeprecated.AIRichResponseTableMetadata"];
+        };
+        /** @enum {integer} */
+        "waAICommonDeprecated.AIRichResponseSubMessageType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+        "waAICommonDeprecated.AIRichResponseTableMetadata": {
+            rows?: components["schemas"]["waAICommonDeprecated.AIRichResponseTableMetadata_AIRichResponseTableRow"][];
+            title?: string;
+        };
+        "waAICommonDeprecated.AIRichResponseTableMetadata_AIRichResponseTableRow": {
+            isHeading?: boolean;
+            items?: string[];
+        };
+        /** @enum {integer} */
+        "waAdv.ADVEncryptionType": 0 | 1;
+        "waCommon.LimitSharing": {
+            initiatedByMe?: boolean;
+            limitSharingSettingTimestamp?: number;
+            sharingLimited?: boolean;
+            trigger?: components["schemas"]["waCommon.LimitSharing_Trigger"];
+        };
+        /** @enum {integer} */
+        "waCommon.LimitSharing_Trigger": 0 | 1 | 2 | 3;
+        "waCommon.MessageKey": {
+            ID?: string;
+            fromMe?: boolean;
+            participant?: string;
+            remoteJID?: string;
+        };
+        "waCompanionReg.DeviceProps_HistorySyncConfig": {
+            completeOnDemandReady?: boolean;
+            fullSyncDaysLimit?: number;
+            fullSyncSizeMbLimit?: number;
+            initialSyncMaxMessagesPerChat?: number;
+            inlineInitialPayloadInE2EeMsg?: boolean;
+            onDemandReady?: boolean;
+            recentSyncDaysLimit?: number;
+            storageQuotaMb?: number;
+            supportAddOnHistorySyncMigration?: boolean;
+            supportBizHostedMsg?: boolean;
+            supportBotUserAgentChatHistory?: boolean;
+            supportCagReactionsAndPolls?: boolean;
+            supportCallLogHistory?: boolean;
+            supportFbidBotChatHistory?: boolean;
+            supportGroupHistory?: boolean;
+            supportGuestChat?: boolean;
+            supportHatchHistory?: boolean;
+            supportHostedGroupMsg?: boolean;
+            supportInlineContacts?: boolean;
+            supportManusHistory?: boolean;
+            supportMessageAssociation?: boolean;
+            supportRecentSyncChunkMessageCountTuning?: boolean;
+            supportedBotChannelFbids?: string[];
+            thumbnailSyncDaysLimit?: number;
+        };
+        "waE2E.AIQueryFanout": {
+            message?: components["schemas"]["waE2E.Message"];
+            messageKey?: components["schemas"]["waCommon.MessageKey"];
+            timestamp?: number;
+        };
+        "waE2E.AIRichResponseMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            messageType?: components["schemas"]["waAICommonDeprecated.AIRichResponseMessageType"];
+            submessages?: components["schemas"]["waAICommonDeprecated.AIRichResponseSubMessage"][];
+            unifiedResponse?: components["schemas"]["waAICommon.AIRichResponseUnifiedResponse"];
+        };
+        "waE2E.ActionLink": {
+            URL?: string;
+            buttonTitle?: string;
+        };
+        "waE2E.AlbumMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            expectedImageCount?: number;
+            expectedVideoCount?: number;
+        };
+        "waE2E.AppStateFatalExceptionNotification": {
+            collectionNames?: string[];
+            timestamp?: number;
+        };
+        "waE2E.AppStateSyncKey": {
+            keyData?: components["schemas"]["waE2E.AppStateSyncKeyData"];
+            keyID?: components["schemas"]["waE2E.AppStateSyncKeyId"];
+        };
+        "waE2E.AppStateSyncKeyData": {
+            fingerprint?: components["schemas"]["waE2E.AppStateSyncKeyFingerprint"];
+            keyData?: number[];
+            timestamp?: number;
+        };
+        "waE2E.AppStateSyncKeyFingerprint": {
+            currentIndex?: number;
+            deviceIndexes?: number[];
+            rawID?: number;
+        };
+        "waE2E.AppStateSyncKeyId": {
+            keyID?: number[];
+        };
+        "waE2E.AppStateSyncKeyRequest": {
+            keyIDs?: components["schemas"]["waE2E.AppStateSyncKeyId"][];
+        };
+        "waE2E.AppStateSyncKeyShare": {
+            keys?: components["schemas"]["waE2E.AppStateSyncKey"][];
+        };
+        "waE2E.AudioMessage": {
+            PTT?: boolean;
+            URL?: string;
+            accessibilityLabel?: string;
+            backgroundArgb?: number;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            directPath?: string;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+            fileSHA256?: number[];
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            mimetype?: string;
+            seconds?: number;
+            streamingSidecar?: number[];
+            viewOnce?: boolean;
+            waveform?: number[];
+        };
+        "waE2E.BCallMessage": {
+            caption?: string;
+            masterKey?: number[];
+            mediaType?: components["schemas"]["waE2E.BCallMessage_MediaType"];
+            sessionID?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.BCallMessage_MediaType": 0 | 1 | 2;
+        "waE2E.ButtonsMessage": {
+            buttons?: components["schemas"]["waE2E.ButtonsMessage_Button"][];
+            contentText?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            footerText?: string;
+            /**
+             * @description Types that are valid to be assigned to Header:
+             *
+             *     	*ButtonsMessage_Text
+             *     	*ButtonsMessage_DocumentMessage
+             *     	*ButtonsMessage_ImageMessage
+             *     	*ButtonsMessage_VideoMessage
+             *     	*ButtonsMessage_LocationMessage
+             */
+            header?: unknown;
+            headerType?: components["schemas"]["waE2E.ButtonsMessage_HeaderType"];
+        };
+        "waE2E.ButtonsMessage_Button": {
+            buttonID?: string;
+            buttonText?: components["schemas"]["waE2E.ButtonsMessage_Button_ButtonText"];
+            nativeFlowInfo?: components["schemas"]["waE2E.ButtonsMessage_Button_NativeFlowInfo"];
+            type?: components["schemas"]["waE2E.ButtonsMessage_Button_Type"];
+        };
+        "waE2E.ButtonsMessage_Button_ButtonText": {
+            displayText?: string;
+        };
+        "waE2E.ButtonsMessage_Button_NativeFlowInfo": {
+            name?: string;
+            paramsJSON?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.ButtonsMessage_Button_Type": 0 | 1 | 2;
+        /** @enum {integer} */
+        "waE2E.ButtonsMessage_HeaderType": 0 | 1 | 2 | 3 | 4 | 5 | 6;
+        "waE2E.ButtonsResponseMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            /**
+             * @description Types that are valid to be assigned to Response:
+             *
+             *     	*ButtonsResponseMessage_SelectedDisplayText
+             */
+            response?: unknown;
+            selectedButtonID?: string;
+            type?: components["schemas"]["waE2E.ButtonsResponseMessage_Type"];
+        };
+        /** @enum {integer} */
+        "waE2E.ButtonsResponseMessage_Type": 0 | 1;
+        "waE2E.Call": {
+            callEntryPoint?: number;
+            callKey?: number[];
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            conversionData?: number[];
+            conversionDelaySeconds?: number;
+            conversionSource?: string;
+            ctwaPayload?: number[];
+            ctwaSignals?: string;
+            deeplinkPayload?: string;
+            messageContextInfo?: components["schemas"]["waE2E.MessageContextInfo"];
+            nativeFlowCallButtonPayload?: string;
+        };
+        "waE2E.CallLogMessage": {
+            callOutcome?: components["schemas"]["waE2E.CallLogMessage_CallOutcome"];
+            callType?: components["schemas"]["waE2E.CallLogMessage_CallType"];
+            durationSecs?: number;
+            isVideo?: boolean;
+            participants?: components["schemas"]["waE2E.CallLogMessage_CallParticipant"][];
+        };
+        /** @enum {integer} */
+        "waE2E.CallLogMessage_CallOutcome": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+        "waE2E.CallLogMessage_CallParticipant": {
+            JID?: string;
+            callOutcome?: components["schemas"]["waE2E.CallLogMessage_CallOutcome"];
+        };
+        /** @enum {integer} */
+        "waE2E.CallLogMessage_CallType": 0 | 1 | 2;
+        "waE2E.CancelPaymentRequestMessage": {
+            key?: components["schemas"]["waCommon.MessageKey"];
+        };
+        "waE2E.Chat": {
+            ID?: string;
+            displayName?: string;
+        };
+        "waE2E.ChatThemeSetting": {
+            clearTheme?: boolean;
+            colorSchemeID?: string;
+            settingTimestampMS?: number;
+            /**
+             * @description Types that are valid to be assigned to Wallpaper:
+             *
+             *     	*ChatThemeSetting_DefaultWallpaper
+             *     	*ChatThemeSetting_SolidColor
+             *     	*ChatThemeSetting_StockImage
+             *     	*ChatThemeSetting_CustomImage
+             */
+            wallpaper?: unknown;
+        };
+        "waE2E.CloudAPIThreadControlNotification": {
+            consumerLid?: string;
+            consumerPhoneNumber?: string;
+            notificationContent?: components["schemas"]["waE2E.CloudAPIThreadControlNotification_CloudAPIThreadControlNotificationContent"];
+            senderNotificationTimestampMS?: number;
+            shouldSuppressNotification?: boolean;
+            status?: components["schemas"]["waE2E.CloudAPIThreadControlNotification_CloudAPIThreadControl"];
+        };
+        /** @enum {integer} */
+        "waE2E.CloudAPIThreadControlNotification_CloudAPIThreadControl": 0 | 1 | 2 | 3;
+        "waE2E.CloudAPIThreadControlNotification_CloudAPIThreadControlNotificationContent": {
+            extraJSON?: string;
+            handoffNotificationText?: string;
+        };
+        "waE2E.CommentMessage": {
+            message?: components["schemas"]["waE2E.Message"];
+            targetMessageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        "waE2E.ConditionalRevealMessage": {
+            conditionalRevealMessageType?: components["schemas"]["waE2E.ConditionalRevealMessage_ConditionalRevealMessageType"];
+            encIV?: number[];
+            encPayload?: number[];
+            revealKeyID?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.ConditionalRevealMessage_ConditionalRevealMessageType": 0 | 1;
+        "waE2E.ContactMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            displayName?: string;
+            isSelfContact?: boolean;
+            vcard?: string;
+        };
+        "waE2E.ContactsArrayMessage": {
+            contacts?: components["schemas"]["waE2E.ContactMessage"][];
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            displayName?: string;
+        };
+        "waE2E.ContextInfo": {
+            actionLink?: components["schemas"]["waE2E.ActionLink"];
+            afterReadDuration?: number;
+            alwaysShowAdAttribution?: boolean;
+            botMessageSharingInfo?: components["schemas"]["waAICommon.BotMessageSharingInfo"];
+            businessInteractionPills?: components["schemas"]["waE2E.ContextInfo_BusinessInteractionPills"];
+            businessMessageForwardInfo?: components["schemas"]["waE2E.ContextInfo_BusinessMessageForwardInfo"];
+            conversionData?: number[];
+            conversionDelaySeconds?: number;
+            conversionSource?: string;
+            crossAppSource?: components["schemas"]["waE2E.ContextInfo_CrossAppSource"];
+            ctwaPayload?: number[];
+            ctwaSignals?: string;
+            dataSharingContext?: components["schemas"]["waE2E.ContextInfo_DataSharingContext"];
+            disappearingMode?: components["schemas"]["waE2E.DisappearingMode"];
+            entryPointConversionApp?: string;
+            entryPointConversionDelaySeconds?: number;
+            entryPointConversionExternalMedium?: string;
+            entryPointConversionExternalSource?: string;
+            entryPointConversionSource?: string;
+            ephemeralSettingTimestamp?: number;
+            ephemeralSharedSecret?: number[];
+            expiration?: number;
+            externalAdReply?: components["schemas"]["waE2E.ContextInfo_ExternalAdReplyInfo"];
+            featureEligibilities?: components["schemas"]["waE2E.ContextInfo_FeatureEligibilities"];
+            forwardOrigin?: components["schemas"]["waE2E.ContextInfo_ForwardOrigin"];
+            forwardedAiBotMessageInfo?: components["schemas"]["waAICommon.ForwardedAIBotMessageInfo"];
+            forwardedNewsletterMessageInfo?: components["schemas"]["waE2E.ContextInfo_ForwardedNewsletterMessageInfo"];
+            forwardingScore?: number;
+            groupMentions?: components["schemas"]["waE2E.GroupMention"][];
+            groupSubject?: string;
+            isForwarded?: boolean;
+            isGroupStatus?: boolean;
+            isQuestion?: boolean;
+            isSampled?: boolean;
+            isSpoiler?: boolean;
+            mediaDomainInfo?: components["schemas"]["waE2E.MediaDomainInfo"];
+            memberLabel?: components["schemas"]["waE2E.MemberLabel"];
+            mentionedJID?: string[];
+            nonJIDMentions?: number;
+            pairedMediaType?: components["schemas"]["waE2E.ContextInfo_PairedMediaType"];
+            parentGroupJID?: string;
+            partiallySelectedContent?: components["schemas"]["waE2E.ContextInfo_PartiallySelectedContent"];
+            participant?: string;
+            placeholderKey?: components["schemas"]["waCommon.MessageKey"];
+            posterStatusID?: string;
+            questionReplyQuotedMessage?: components["schemas"]["waE2E.ContextInfo_QuestionReplyQuotedMessage"];
+            quotedAd?: components["schemas"]["waE2E.ContextInfo_AdReplyInfo"];
+            quotedMessage?: components["schemas"]["waE2E.Message"];
+            quotedType?: components["schemas"]["waE2E.ContextInfo_QuotedType"];
+            rankingVersion?: number;
+            remoteJID?: string;
+            smbClientCampaignID?: string;
+            smbServerCampaignID?: string;
+            stanzaID?: string;
+            statusAttributionType?: components["schemas"]["waE2E.ContextInfo_StatusAttributionType"];
+            statusAttributions?: components["schemas"]["waStatusAttributions.StatusAttribution"][];
+            statusAudienceMetadata?: components["schemas"]["waE2E.ContextInfo_StatusAudienceMetadata"];
+            statusSourceType?: components["schemas"]["waE2E.ContextInfo_StatusSourceType"];
+            trustBannerAction?: number;
+            trustBannerType?: string;
+            urlTrackingMap?: components["schemas"]["waE2E.UrlTrackingMap"];
+            utm?: components["schemas"]["waE2E.ContextInfo_UTMInfo"];
+        };
+        "waE2E.ContextInfo_AdReplyInfo": {
+            JPEGThumbnail?: number[];
+            advertiserName?: string;
+            caption?: string;
+            mediaType?: components["schemas"]["waE2E.ContextInfo_AdReplyInfo_MediaType"];
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_AdReplyInfo_MediaType": 0 | 1 | 2;
+        "waE2E.ContextInfo_BusinessInteractionPills": {
+            businessJID?: string;
+            entryPoint?: components["schemas"]["waE2E.ContextInfo_BusinessInteractionPills_EntryPoint"];
+            pills?: components["schemas"]["waE2E.ContextInfo_BusinessInteractionPills_Pill"][];
+            signatureEnvelope?: components["schemas"]["waAICommon.BotSignatureVerificationMetadata"];
+            signedPayload?: number[];
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_BusinessInteractionPills_EntryPoint": 0 | 1 | 2 | 3 | 4 | 5;
+        "waE2E.ContextInfo_BusinessInteractionPills_Pill": {
+            actionURL?: string;
+            pillType?: components["schemas"]["waE2E.ContextInfo_BusinessInteractionPills_PillType"];
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_BusinessInteractionPills_PillType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+        "waE2E.ContextInfo_BusinessMessageForwardInfo": {
+            businessOwnerJID?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_CrossAppSource": 0 | 1 | 2;
+        "waE2E.ContextInfo_DataSharingContext": {
+            dataSharingFlags?: number;
+            encryptedSignalTokenConsented?: string;
+            parameters?: components["schemas"]["waE2E.ContextInfo_DataSharingContext_Parameters"][];
+            showMmDisclosure?: boolean;
+        };
+        "waE2E.ContextInfo_DataSharingContext_Parameters": {
+            contents?: components["schemas"]["waE2E.ContextInfo_DataSharingContext_Parameters"];
+            floatData?: number;
+            intData?: number;
+            key?: string;
+            stringData?: string;
+        };
+        "waE2E.ContextInfo_ExternalAdReplyInfo": {
+            adContextPreviewDismissed?: boolean;
+            adPreviewURL?: string;
+            adType?: components["schemas"]["waE2E.ContextInfo_ExternalAdReplyInfo_AdType"];
+            agmHeaderInteractionStrategy?: number;
+            agmSubtitleStrategy?: number;
+            agmThumbnailStrategy?: number;
+            agmTitleStrategy?: number;
+            automatedGreetingMessageCtaType?: string;
+            automatedGreetingMessageShown?: boolean;
+            body?: string;
+            clickToWhatsappCall?: boolean;
+            containsAutoReply?: boolean;
+            containsCtwaFlowsAutoReply?: boolean;
+            ctaPayload?: string;
+            ctwaClid?: string;
+            disableNudge?: boolean;
+            greetingMessageBody?: string;
+            mediaType?: components["schemas"]["waE2E.ContextInfo_ExternalAdReplyInfo_MediaType"];
+            mediaURL?: string;
+            originalImageURL?: string;
+            ref?: string;
+            renderLargerThumbnail?: boolean;
+            showAdAttribution?: boolean;
+            sourceApp?: string;
+            sourceID?: string;
+            sourceType?: string;
+            sourceURL?: string;
+            thumbnail?: number[];
+            thumbnailURL?: string;
+            title?: string;
+            wtwaAdFormat?: boolean;
+            wtwaWebsiteURL?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_ExternalAdReplyInfo_AdType": 0 | 1;
+        /** @enum {integer} */
+        "waE2E.ContextInfo_ExternalAdReplyInfo_MediaType": 0 | 1 | 2;
+        "waE2E.ContextInfo_FeatureEligibilities": {
+            canBeReshared?: boolean;
+            canReceiveMultiReact?: boolean;
+            canRequestFeedback?: boolean;
+            cannotBeRanked?: boolean;
+            cannotBeReactedTo?: boolean;
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_ForwardOrigin": 0 | 1 | 2 | 3 | 4 | 5;
+        "waE2E.ContextInfo_ForwardedNewsletterMessageInfo": {
+            accessibilityText?: string;
+            contentType?: components["schemas"]["waE2E.ContextInfo_ForwardedNewsletterMessageInfo_ContentType"];
+            newsletterJID?: string;
+            newsletterName?: string;
+            profileName?: string;
+            serverMessageID?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_ForwardedNewsletterMessageInfo_ContentType": 1 | 2 | 3;
+        /** @enum {integer} */
+        "waE2E.ContextInfo_PairedMediaType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+        "waE2E.ContextInfo_PartiallySelectedContent": {
+            text?: string;
+        };
+        "waE2E.ContextInfo_QuestionReplyQuotedMessage": {
+            quotedQuestion?: components["schemas"]["waE2E.Message"];
+            quotedResponse?: components["schemas"]["waE2E.Message"];
+            serverQuestionID?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_QuotedType": 0 | 1;
+        /** @enum {integer} */
+        "waE2E.ContextInfo_StatusAttributionType": 0 | 1 | 2 | 3 | 4;
+        "waE2E.ContextInfo_StatusAudienceMetadata": {
+            audienceType?: components["schemas"]["waE2E.ContextInfo_StatusAudienceMetadata_AudienceType"];
+            listEmoji?: string;
+            listName?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.ContextInfo_StatusAudienceMetadata_AudienceType": 0 | 1;
+        /** @enum {integer} */
+        "waE2E.ContextInfo_StatusSourceType": 0 | 1 | 2 | 3 | 4 | 5;
+        "waE2E.ContextInfo_UTMInfo": {
+            utmCampaign?: string;
+            utmSource?: string;
+        };
+        "waE2E.DeclinePaymentRequestMessage": {
+            key?: components["schemas"]["waCommon.MessageKey"];
+        };
+        "waE2E.DeviceListMetadata": {
+            receiverAccountType?: components["schemas"]["waAdv.ADVEncryptionType"];
+            recipientKeyHash?: number[];
+            recipientKeyIndexes?: number[];
+            recipientTimestamp?: number;
+            senderAccountType?: components["schemas"]["waAdv.ADVEncryptionType"];
+            senderKeyHash?: number[];
+            senderKeyIndexes?: number[];
+            senderTimestamp?: number;
+        };
+        "waE2E.DeviceSentMessage": {
+            destinationJID?: string;
+            message?: components["schemas"]["waE2E.Message"];
+            phash?: string;
+        };
+        "waE2E.DisappearingMode": {
+            initiatedByMe?: boolean;
+            initiator?: components["schemas"]["waE2E.DisappearingMode_Initiator"];
+            initiatorDeviceJID?: string;
+            trigger?: components["schemas"]["waE2E.DisappearingMode_Trigger"];
+        };
+        /** @enum {integer} */
+        "waE2E.DisappearingMode_Initiator": 0 | 1 | 2 | 3;
+        /** @enum {integer} */
+        "waE2E.DisappearingMode_Trigger": 0 | 1 | 2 | 3 | 4 | 5;
+        "waE2E.DocumentMessage": {
+            JPEGThumbnail?: number[];
+            URL?: string;
+            accessibilityLabel?: string;
+            caption?: string;
+            contactVcard?: boolean;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            directPath?: string;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+            fileName?: string;
+            fileSHA256?: number[];
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            mimetype?: string;
+            pageCount?: number;
+            thumbnailDirectPath?: string;
+            thumbnailEncSHA256?: number[];
+            thumbnailHeight?: number;
+            thumbnailSHA256?: number[];
+            thumbnailWidth?: number;
+            title?: string;
+        };
+        "waE2E.EmbeddedContent": {
+            /**
+             * @description Types that are valid to be assigned to Content:
+             *
+             *     	*EmbeddedContent_EmbeddedMessage
+             *     	*EmbeddedContent_EmbeddedMusic
+             */
+            content?: unknown;
+        };
+        "waE2E.EmbeddedMusic": {
+            artistAttribution?: string;
+            artworkDirectPath?: string;
+            artworkEncSHA256?: number[];
+            artworkMediaKey?: number[];
+            artworkSHA256?: number[];
+            author?: string;
+            countryBlocklist?: number[];
+            derivedContentStartTimeInMS?: number;
+            isExplicit?: boolean;
+            musicContentMediaID?: string;
+            musicSongStartTimeInMS?: number;
+            overlapDurationInMS?: number;
+            songID?: string;
+            title?: string;
+        };
+        "waE2E.EncCommentMessage": {
+            encIV?: number[];
+            encPayload?: number[];
+            targetMessageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        "waE2E.EncEventResponseMessage": {
+            encIV?: number[];
+            encPayload?: number[];
+            eventCreationMessageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        "waE2E.EncReactionMessage": {
+            encIV?: number[];
+            encPayload?: number[];
+            targetMessageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        "waE2E.EventInviteMessage": {
+            JPEGThumbnail?: number[];
+            callLink?: string;
+            caption?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            endTime?: number;
+            eventID?: string;
+            eventTitle?: string;
+            isCanceled?: boolean;
+            startTime?: number;
+        };
+        "waE2E.EventMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            description?: string;
+            endTime?: number;
+            extraGuestsAllowed?: boolean;
+            hasReminder?: boolean;
+            isCanceled?: boolean;
+            isScheduleCall?: boolean;
+            joinLink?: string;
+            location?: components["schemas"]["waE2E.LocationMessage"];
+            name?: string;
+            reminderOffsetSec?: number;
+            startTime?: number;
+        };
+        "waE2E.ExtendedTextMessage": {
+            JPEGThumbnail?: number[];
+            backgroundArgb?: number;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            description?: string;
+            doNotPlayInline?: boolean;
+            endCardTiles?: components["schemas"]["waE2E.VideoEndCard"][];
+            faviconMMSMetadata?: components["schemas"]["waE2E.MMSThumbnailMetadata"];
+            font?: components["schemas"]["waE2E.ExtendedTextMessage_FontType"];
+            inviteLinkGroupType?: components["schemas"]["waE2E.ExtendedTextMessage_InviteLinkGroupType"];
+            inviteLinkGroupTypeV2?: components["schemas"]["waE2E.ExtendedTextMessage_InviteLinkGroupType"];
+            inviteLinkParentGroupSubjectV2?: string;
+            inviteLinkParentGroupThumbnailV2?: number[];
+            linkPreviewMetadata?: components["schemas"]["waE2E.LinkPreviewMetadata"];
+            matchedText?: string;
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            musicMetadata?: components["schemas"]["waE2E.EmbeddedMusic"];
+            paymentExtendedMetadata?: components["schemas"]["waE2E.PaymentExtendedMetadata"];
+            paymentLinkMetadata?: components["schemas"]["waE2E.PaymentLinkMetadata"];
+            previewType?: components["schemas"]["waE2E.ExtendedTextMessage_PreviewType"];
+            text?: string;
+            textArgb?: number;
+            thumbnailDirectPath?: string;
+            thumbnailEncSHA256?: number[];
+            thumbnailHeight?: number;
+            thumbnailSHA256?: number[];
+            thumbnailWidth?: number;
+            title?: string;
+            videoContentURL?: string;
+            videoHeight?: number;
+            videoWidth?: number;
+            viewOnce?: boolean;
+        };
+        /** @enum {integer} */
+        "waE2E.ExtendedTextMessage_FontType": 0 | 1 | 2 | 6 | 7 | 8 | 9 | 10;
+        /** @enum {integer} */
+        "waE2E.ExtendedTextMessage_InviteLinkGroupType": 0 | 1 | 2 | 3;
+        /** @enum {integer} */
+        "waE2E.ExtendedTextMessage_PreviewType": 0 | 1 | 4 | 5 | 6 | 7;
+        "waE2E.FullHistorySyncOnDemandConfig": {
+            historyDurationDays?: number;
+            historyFromTimestamp?: number;
+        };
+        "waE2E.FullHistorySyncOnDemandRequestMetadata": {
+            businessProduct?: string;
+            opaqueClientData?: number[];
+            requestID?: string;
+        };
+        "waE2E.FutureProofMessage": {
+            message?: components["schemas"]["waE2E.Message"];
+        };
+        "waE2E.GroupInviteMessage": {
+            JPEGThumbnail?: number[];
+            caption?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            groupJID?: string;
+            groupName?: string;
+            groupType?: components["schemas"]["waE2E.GroupInviteMessage_GroupType"];
+            inviteCode?: string;
+            inviteExpiration?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.GroupInviteMessage_GroupType": 0 | 1;
+        "waE2E.GroupMention": {
+            groupJID?: string;
+            groupSubject?: string;
+        };
+        "waE2E.GroupRootKeyShare": {
+            keys?: components["schemas"]["waE2E.GroupRootKeyShareEntry"][];
+        };
+        "waE2E.GroupRootKeyShareEntry": {
+            createdTimestampMS?: number;
+            expiryTimestampMS?: number;
+            groupRootKey?: number[];
+            keyID?: string;
+        };
+        "waE2E.HighlyStructuredMessage": {
+            deterministicLc?: string;
+            deterministicLg?: string;
+            elementName?: string;
+            fallbackLc?: string;
+            fallbackLg?: string;
+            hydratedHsm?: components["schemas"]["waE2E.TemplateMessage"];
+            localizableParams?: components["schemas"]["waE2E.HighlyStructuredMessage_HSMLocalizableParameter"][];
+            namespace?: string;
+            params?: string[];
+        };
+        "waE2E.HighlyStructuredMessage_HSMLocalizableParameter": {
+            default?: string;
+            /**
+             * @description Types that are valid to be assigned to ParamOneof:
+             *
+             *     	*HighlyStructuredMessage_HSMLocalizableParameter_Currency
+             *     	*HighlyStructuredMessage_HSMLocalizableParameter_DateTime
+             */
+            paramOneof?: unknown;
+        };
+        "waE2E.HistorySyncMessageAccessStatus": {
+            completeAccessGranted?: boolean;
+        };
+        "waE2E.HistorySyncNotification": {
+            chunkOrder?: number;
+            directPath?: string;
+            encHandle?: string;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+            fileSHA256?: number[];
+            fullHistorySyncOnDemandRequestMetadata?: components["schemas"]["waE2E.FullHistorySyncOnDemandRequestMetadata"];
+            initialHistBootstrapInlinePayload?: number[];
+            mediaKey?: number[];
+            messageAccessStatus?: components["schemas"]["waE2E.HistorySyncMessageAccessStatus"];
+            oldestMsgInChunkTimestampSec?: number;
+            originalMessageID?: string;
+            peerDataRequestSessionID?: string;
+            progress?: number;
+            syncType?: components["schemas"]["waE2E.HistorySyncType"];
+        };
+        /** @enum {integer} */
+        "waE2E.HistorySyncType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+        "waE2E.HydratedTemplateButton": {
+            /**
+             * @description Types that are valid to be assigned to HydratedButton:
+             *
+             *     	*HydratedTemplateButton_QuickReplyButton
+             *     	*HydratedTemplateButton_UrlButton
+             *     	*HydratedTemplateButton_CallButton
+             */
+            hydratedButton?: unknown;
+            index?: number;
+        };
+        "waE2E.ImageMessage": {
+            JPEGThumbnail?: number[];
+            URL?: string;
+            accessibilityLabel?: string;
+            annotations?: components["schemas"]["waE2E.InteractiveAnnotation"][];
+            caption?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            directPath?: string;
+            experimentGroupID?: number;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+            fileSHA256?: number[];
+            firstScanLength?: number;
+            firstScanSidecar?: number[];
+            height?: number;
+            imageSourceType?: components["schemas"]["waE2E.ImageMessage_ImageSourceType"];
+            interactiveAnnotations?: components["schemas"]["waE2E.InteractiveAnnotation"][];
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            midQualityFileEncSHA256?: number[];
+            midQualityFileSHA256?: number[];
+            mimetype?: string;
+            qrURL?: string;
+            scanLengths?: number[];
+            scansSidecar?: number[];
+            staticURL?: string;
+            thumbnailDirectPath?: string;
+            thumbnailEncSHA256?: number[];
+            thumbnailSHA256?: number[];
+            viewOnce?: boolean;
+            width?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.ImageMessage_ImageSourceType": 0 | 1 | 2 | 3;
+        "waE2E.InitialSecurityNotificationSettingSync": {
+            securityNotificationEnabled?: boolean;
+        };
+        /** @enum {integer} */
+        "waE2E.InsightDeliveryState": 0 | 1 | 2 | 3 | 4;
+        "waE2E.InteractiveAnnotation": {
+            /**
+             * @description Types that are valid to be assigned to Action:
+             *
+             *     	*InteractiveAnnotation_Location
+             *     	*InteractiveAnnotation_Newsletter
+             *     	*InteractiveAnnotation_EmbeddedAction
+             *     	*InteractiveAnnotation_TapAction
+             */
+            action?: unknown;
+            embeddedContent?: components["schemas"]["waE2E.EmbeddedContent"];
+            polygonVertices?: components["schemas"]["waE2E.Point"][];
+            shouldSkipConfirmation?: boolean;
+            statusLinkType?: components["schemas"]["waE2E.InteractiveAnnotation_StatusLinkType"];
+        };
+        /** @enum {integer} */
+        "waE2E.InteractiveAnnotation_StatusLinkType": 1 | 2 | 3;
+        "waE2E.InteractiveMessage": {
+            bloksWidget?: components["schemas"]["waE2E.InteractiveMessage_BloksWidget"];
+            body?: components["schemas"]["waE2E.InteractiveMessage_Body"];
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            footer?: components["schemas"]["waE2E.InteractiveMessage_Footer"];
+            header?: components["schemas"]["waE2E.InteractiveMessage_Header"];
+            /**
+             * @description Types that are valid to be assigned to InteractiveMessage:
+             *
+             *     	*InteractiveMessage_ShopStorefrontMessage
+             *     	*InteractiveMessage_CollectionMessage_
+             *     	*InteractiveMessage_NativeFlowMessage_
+             *     	*InteractiveMessage_CarouselMessage_
+             */
+            interactiveMessage?: unknown;
+            urlTrackingMap?: components["schemas"]["waE2E.UrlTrackingMap"];
+        };
+        "waE2E.InteractiveMessage_BloksWidget": {
+            data?: string;
+            fallback?: string;
+            type?: string;
+            uuid?: string;
+        };
+        "waE2E.InteractiveMessage_Body": {
+            text?: string;
+        };
+        "waE2E.InteractiveMessage_Footer": {
+            hasMediaAttachment?: boolean;
+            /**
+             * @description Types that are valid to be assigned to Media:
+             *
+             *     	*InteractiveMessage_Footer_AudioMessage
+             */
+            media?: unknown;
+            text?: string;
+        };
+        "waE2E.InteractiveMessage_Header": {
+            bloksWidget?: components["schemas"]["waE2E.InteractiveMessage_BloksWidget"];
+            hasMediaAttachment?: boolean;
+            /**
+             * @description Types that are valid to be assigned to Media:
+             *
+             *     	*InteractiveMessage_Header_DocumentMessage
+             *     	*InteractiveMessage_Header_ImageMessage
+             *     	*InteractiveMessage_Header_JPEGThumbnail
+             *     	*InteractiveMessage_Header_VideoMessage
+             *     	*InteractiveMessage_Header_LocationMessage
+             *     	*InteractiveMessage_Header_ProductMessage
+             */
+            media?: unknown;
+            subtitle?: string;
+            title?: string;
+        };
+        "waE2E.InteractiveResponseMessage": {
+            body?: components["schemas"]["waE2E.InteractiveResponseMessage_Body"];
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            /**
+             * @description Types that are valid to be assigned to InteractiveResponseMessage:
+             *
+             *     	*InteractiveResponseMessage_NativeFlowResponseMessage_
+             */
+            interactiveResponseMessage?: unknown;
+        };
+        "waE2E.InteractiveResponseMessage_Body": {
+            format?: components["schemas"]["waE2E.InteractiveResponseMessage_Body_Format"];
+            text?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.InteractiveResponseMessage_Body_Format": 0 | 1;
+        "waE2E.InvoiceMessage": {
+            attachmentDirectPath?: string;
+            attachmentFileEncSHA256?: number[];
+            attachmentFileSHA256?: number[];
+            attachmentJPEGThumbnail?: number[];
+            attachmentMediaKey?: number[];
+            attachmentMediaKeyTimestamp?: number;
+            attachmentMimetype?: string;
+            attachmentType?: components["schemas"]["waE2E.InvoiceMessage_AttachmentType"];
+            note?: string;
+            token?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.InvoiceMessage_AttachmentType": 0 | 1;
+        "waE2E.KeepInChatMessage": {
+            keepType?: components["schemas"]["waE2E.KeepType"];
+            key?: components["schemas"]["waCommon.MessageKey"];
+            timestampMS?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.KeepType": 0 | 1 | 2;
+        "waE2E.LIDMigrationMappingSyncMessage": {
+            encodedMappingPayload?: number[];
+        };
+        "waE2E.LinkPreviewMetadata": {
+            fbExperimentID?: number;
+            linkInlineVideoMuted?: boolean;
+            linkMediaDuration?: number;
+            musicMetadata?: components["schemas"]["waE2E.EmbeddedMusic"];
+            paymentLinkMetadata?: components["schemas"]["waE2E.PaymentLinkMetadata"];
+            socialMediaPostType?: components["schemas"]["waE2E.LinkPreviewMetadata_SocialMediaPostType"];
+            urlMetadata?: components["schemas"]["waE2E.URLMetadata"];
+            videoContentCaption?: string;
+            videoContentURL?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.LinkPreviewMetadata_SocialMediaPostType": 0 | 1 | 2 | 3 | 4 | 5;
+        "waE2E.ListMessage": {
+            buttonText?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            description?: string;
+            footerText?: string;
+            listType?: components["schemas"]["waE2E.ListMessage_ListType"];
+            productListInfo?: components["schemas"]["waE2E.ListMessage_ProductListInfo"];
+            sections?: components["schemas"]["waE2E.ListMessage_Section"][];
+            title?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.ListMessage_ListType": 0 | 1 | 2;
+        "waE2E.ListMessage_Product": {
+            productID?: string;
+        };
+        "waE2E.ListMessage_ProductListHeaderImage": {
+            JPEGThumbnail?: number[];
+            productID?: string;
+        };
+        "waE2E.ListMessage_ProductListInfo": {
+            businessOwnerJID?: string;
+            headerImage?: components["schemas"]["waE2E.ListMessage_ProductListHeaderImage"];
+            productSections?: components["schemas"]["waE2E.ListMessage_ProductSection"][];
+        };
+        "waE2E.ListMessage_ProductSection": {
+            products?: components["schemas"]["waE2E.ListMessage_Product"][];
+            title?: string;
+        };
+        "waE2E.ListMessage_Row": {
+            description?: string;
+            rowID?: string;
+            title?: string;
+        };
+        "waE2E.ListMessage_Section": {
+            rows?: components["schemas"]["waE2E.ListMessage_Row"][];
+            title?: string;
+        };
+        "waE2E.ListResponseMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            description?: string;
+            listType?: components["schemas"]["waE2E.ListResponseMessage_ListType"];
+            singleSelectReply?: components["schemas"]["waE2E.ListResponseMessage_SingleSelectReply"];
+            title?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.ListResponseMessage_ListType": 0 | 1;
+        "waE2E.ListResponseMessage_SingleSelectReply": {
+            selectedRowID?: string;
+        };
+        "waE2E.LiveLocationMessage": {
+            JPEGThumbnail?: number[];
+            accuracyInMeters?: number;
+            caption?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            degreesClockwiseFromMagneticNorth?: number;
+            degreesLatitude?: number;
+            degreesLongitude?: number;
+            sequenceNumber?: number;
+            speedInMps?: number;
+            timeOffset?: number;
+        };
+        "waE2E.LocationMessage": {
+            JPEGThumbnail?: number[];
+            URL?: string;
+            accuracyInMeters?: number;
+            address?: string;
+            comment?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            degreesClockwiseFromMagneticNorth?: number;
+            degreesLatitude?: number;
+            degreesLongitude?: number;
+            isLive?: boolean;
+            name?: string;
+            speedInMps?: number;
+        };
+        "waE2E.MMSThumbnailMetadata": {
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            thumbnailDirectPath?: string;
+            thumbnailEncSHA256?: number[];
+            thumbnailHeight?: number;
+            thumbnailSHA256?: number[];
+            thumbnailWidth?: number;
+        };
+        "waE2E.MediaDomainInfo": {
+            e2EeMediaKey?: number[];
+            mediaKeyDomain?: components["schemas"]["waE2E.MediaKeyDomain"];
+        };
+        /** @enum {integer} */
+        "waE2E.MediaKeyDomain": 0 | 1 | 2;
+        "waE2E.MediaNotifyMessage": {
+            expressPathURL?: string;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+        };
+        "waE2E.MemberLabel": {
+            label?: string;
+            labelTimestamp?: number;
+        };
+        "waE2E.Message": {
+            albumMessage?: components["schemas"]["waE2E.AlbumMessage"];
+            associatedChildMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            audioMessage?: components["schemas"]["waE2E.AudioMessage"];
+            bcallMessage?: components["schemas"]["waE2E.BCallMessage"];
+            botForwardedMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            botInvokeMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            botTaskMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            buttonsMessage?: components["schemas"]["waE2E.ButtonsMessage"];
+            buttonsResponseMessage?: components["schemas"]["waE2E.ButtonsResponseMessage"];
+            call?: components["schemas"]["waE2E.Call"];
+            callLogMesssage?: components["schemas"]["waE2E.CallLogMessage"];
+            cancelPaymentRequestMessage?: components["schemas"]["waE2E.CancelPaymentRequestMessage"];
+            chat?: components["schemas"]["waE2E.Chat"];
+            commentMessage?: components["schemas"]["waE2E.CommentMessage"];
+            conditionalRevealMessage?: components["schemas"]["waE2E.ConditionalRevealMessage"];
+            contactMessage?: components["schemas"]["waE2E.ContactMessage"];
+            contactsArrayMessage?: components["schemas"]["waE2E.ContactsArrayMessage"];
+            conversation?: string;
+            declinePaymentRequestMessage?: components["schemas"]["waE2E.DeclinePaymentRequestMessage"];
+            deviceSentMessage?: components["schemas"]["waE2E.DeviceSentMessage"];
+            documentMessage?: components["schemas"]["waE2E.DocumentMessage"];
+            documentWithCaptionMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            editedMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            encCommentMessage?: components["schemas"]["waE2E.EncCommentMessage"];
+            encEventResponseMessage?: components["schemas"]["waE2E.EncEventResponseMessage"];
+            encReactionMessage?: components["schemas"]["waE2E.EncReactionMessage"];
+            ephemeralMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            eventCoverImage?: components["schemas"]["waE2E.FutureProofMessage"];
+            eventInviteMessage?: components["schemas"]["waE2E.EventInviteMessage"];
+            eventMessage?: components["schemas"]["waE2E.EventMessage"];
+            extendedTextMessage?: components["schemas"]["waE2E.ExtendedTextMessage"];
+            fastRatchetKeySenderKeyDistributionMessage?: components["schemas"]["waE2E.SenderKeyDistributionMessage"];
+            groupInviteMessage?: components["schemas"]["waE2E.GroupInviteMessage"];
+            groupMentionedMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            groupRootKeyShare?: components["schemas"]["waE2E.GroupRootKeyShare"];
+            groupStatusMentionMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            groupStatusMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            groupStatusMessageV2?: components["schemas"]["waE2E.FutureProofMessage"];
+            highlyStructuredMessage?: components["schemas"]["waE2E.HighlyStructuredMessage"];
+            imageMessage?: components["schemas"]["waE2E.ImageMessage"];
+            interactiveMessage?: components["schemas"]["waE2E.InteractiveMessage"];
+            interactiveResponseMessage?: components["schemas"]["waE2E.InteractiveResponseMessage"];
+            invoiceMessage?: components["schemas"]["waE2E.InvoiceMessage"];
+            keepInChatMessage?: components["schemas"]["waE2E.KeepInChatMessage"];
+            limitSharingMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            listMessage?: components["schemas"]["waE2E.ListMessage"];
+            listResponseMessage?: components["schemas"]["waE2E.ListResponseMessage"];
+            liveLocationMessage?: components["schemas"]["waE2E.LiveLocationMessage"];
+            locationMessage?: components["schemas"]["waE2E.LocationMessage"];
+            lottieStickerMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            messageContextInfo?: components["schemas"]["waE2E.MessageContextInfo"];
+            messageHistoryBundle?: components["schemas"]["waE2E.MessageHistoryBundle"];
+            messageHistoryNotice?: components["schemas"]["waE2E.MessageHistoryNotice"];
+            newsletterAdminInviteMessage?: components["schemas"]["waE2E.NewsletterAdminInviteMessage"];
+            newsletterAdminProfileMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            newsletterAdminProfileMessageV2?: components["schemas"]["waE2E.FutureProofMessage"];
+            newsletterAdminProfileStatusMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            newsletterFollowerInviteMessageV2?: components["schemas"]["waE2E.NewsletterFollowerInviteMessage"];
+            orderMessage?: components["schemas"]["waE2E.OrderMessage"];
+            paymentInviteMessage?: components["schemas"]["waE2E.PaymentInviteMessage"];
+            paymentReminderMessage?: components["schemas"]["waE2E.PaymentReminderMessage"];
+            pinInChatMessage?: components["schemas"]["waE2E.PinInChatMessage"];
+            placeholderMessage?: components["schemas"]["waE2E.PlaceholderMessage"];
+            pollAddOptionMessage?: components["schemas"]["waE2E.PollAddOptionMessage"];
+            pollCreationMessage?: components["schemas"]["waE2E.PollCreationMessage"];
+            pollCreationMessageV2?: components["schemas"]["waE2E.PollCreationMessage"];
+            pollCreationMessageV3?: components["schemas"]["waE2E.PollCreationMessage"];
+            pollCreationMessageV4?: components["schemas"]["waE2E.FutureProofMessage"];
+            pollCreationMessageV5?: components["schemas"]["waE2E.PollCreationMessage"];
+            pollCreationMessageV6?: components["schemas"]["waE2E.PollCreationMessage"];
+            pollCreationOptionImageMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            pollResultSnapshotMessage?: components["schemas"]["waE2E.PollResultSnapshotMessage"];
+            pollResultSnapshotMessageV3?: components["schemas"]["waE2E.PollResultSnapshotMessage"];
+            pollUpdateMessage?: components["schemas"]["waE2E.PollUpdateMessage"];
+            productMessage?: components["schemas"]["waE2E.ProductMessage"];
+            protocolMessage?: components["schemas"]["waE2E.ProtocolMessage"];
+            ptvMessage?: components["schemas"]["waE2E.VideoMessage"];
+            questionMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            questionReplyMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            questionResponseMessage?: components["schemas"]["waE2E.QuestionResponseMessage"];
+            reactionMessage?: components["schemas"]["waE2E.ReactionMessage"];
+            requestPaymentMessage?: components["schemas"]["waE2E.RequestPaymentMessage"];
+            requestPhoneNumberMessage?: components["schemas"]["waE2E.RequestPhoneNumberMessage"];
+            richResponseMessage?: components["schemas"]["waE2E.AIRichResponseMessage"];
+            rootSecretDistributeMessage?: components["schemas"]["waE2E.RootSecretDistributeMessage"];
+            scheduledCallCreationMessage?: components["schemas"]["waE2E.ScheduledCallCreationMessage"];
+            scheduledCallEditMessage?: components["schemas"]["waE2E.ScheduledCallEditMessage"];
+            secretEncryptedMessage?: components["schemas"]["waE2E.SecretEncryptedMessage"];
+            sendPaymentMessage?: components["schemas"]["waE2E.SendPaymentMessage"];
+            senderKeyDistributionMessage?: components["schemas"]["waE2E.SenderKeyDistributionMessage"];
+            splitPaymentMessage?: components["schemas"]["waE2E.SplitPaymentMessage"];
+            spoilerMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            statusAddYours?: components["schemas"]["waE2E.FutureProofMessage"];
+            statusMentionMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            statusNotificationMessage?: components["schemas"]["waE2E.StatusNotificationMessage"];
+            statusQuestionAnswerMessage?: components["schemas"]["waE2E.StatusQuestionAnswerMessage"];
+            statusQuotedMessage?: components["schemas"]["waE2E.StatusQuotedMessage"];
+            statusStickerInteractionMessage?: components["schemas"]["waE2E.StatusStickerInteractionMessage"];
+            stickerMessage?: components["schemas"]["waE2E.StickerMessage"];
+            stickerPackMessage?: components["schemas"]["waE2E.StickerPackMessage"];
+            stickerSyncRmrMessage?: components["schemas"]["waE2E.StickerSyncRMRMessage"];
+            templateButtonReplyMessage?: components["schemas"]["waE2E.TemplateButtonReplyMessage"];
+            templateMessage?: components["schemas"]["waE2E.TemplateMessage"];
+            videoMessage?: components["schemas"]["waE2E.VideoMessage"];
+            viewOnceMessage?: components["schemas"]["waE2E.FutureProofMessage"];
+            viewOnceMessageV2?: components["schemas"]["waE2E.FutureProofMessage"];
+            viewOnceMessageV2Extension?: components["schemas"]["waE2E.FutureProofMessage"];
+        };
+        "waE2E.MessageAssociation": {
+            associationType?: components["schemas"]["waE2E.MessageAssociation_AssociationType"];
+            messageIndex?: number;
+            parentMessageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        /** @enum {integer} */
+        "waE2E.MessageAssociation_AssociationType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20;
+        "waE2E.MessageContextInfo": {
+            botMessageSecret?: number[];
+            botMetadata?: components["schemas"]["waAICommon.BotMetadata"];
+            capiCreatedGroup?: boolean;
+            deviceListMetadata?: components["schemas"]["waE2E.DeviceListMetadata"];
+            deviceListMetadataVersion?: number;
+            limitSharing?: components["schemas"]["waCommon.LimitSharing"];
+            limitSharingV2?: components["schemas"]["waCommon.LimitSharing"];
+            messageAddOnDurationInSecs?: number;
+            messageAddOnExpiryType?: components["schemas"]["waE2E.MessageContextInfo_MessageAddonExpiryType"];
+            messageAssociation?: components["schemas"]["waE2E.MessageAssociation"];
+            messageSecret?: number[];
+            paddingBytes?: number[];
+            reportingTokenVersion?: number;
+            supportPayload?: string;
+            teeBotMetadata?: number[];
+            threadID?: components["schemas"]["waE2E.ThreadID"][];
+            weblinkRenderConfig?: components["schemas"]["waE2E.WebLinkRenderConfig"];
+        };
+        /** @enum {integer} */
+        "waE2E.MessageContextInfo_MessageAddonExpiryType": 1 | 2;
+        "waE2E.MessageHistoryBundle": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            directPath?: string;
+            fileEncSHA256?: number[];
+            fileSHA256?: number[];
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            messageHistoryMetadata?: components["schemas"]["waE2E.MessageHistoryMetadata"];
+            mimetype?: string;
+        };
+        "waE2E.MessageHistoryMetadata": {
+            historyReceivers?: string[];
+            messageCount?: number;
+            nonHistoryReceivers?: string[];
+            oldestMessageTimestampInBundle?: number;
+            oldestMessageTimestampInWindow?: number;
+        };
+        "waE2E.MessageHistoryNotice": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            messageHistoryMetadata?: components["schemas"]["waE2E.MessageHistoryMetadata"];
+        };
+        "waE2E.Money": {
+            currencyCode?: string;
+            offset?: number;
+            value?: number;
+        };
+        "waE2E.NewsletterAdminInviteMessage": {
+            JPEGThumbnail?: number[];
+            caption?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            inviteExpiration?: number;
+            newsletterJID?: string;
+            newsletterName?: string;
+        };
+        "waE2E.NewsletterFollowerInviteMessage": {
+            JPEGThumbnail?: number[];
+            caption?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            newsletterJID?: string;
+            newsletterName?: string;
+        };
+        "waE2E.OrderMessage": {
+            catalogType?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            itemCount?: number;
+            message?: string;
+            messageVersion?: number;
+            orderID?: string;
+            orderRequestMessageID?: components["schemas"]["waCommon.MessageKey"];
+            orderTitle?: string;
+            sellerJID?: string;
+            status?: components["schemas"]["waE2E.OrderMessage_OrderStatus"];
+            surface?: components["schemas"]["waE2E.OrderMessage_OrderSurface"];
+            thumbnail?: number[];
+            token?: string;
+            totalAmount1000?: number;
+            totalCurrencyCode?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.OrderMessage_OrderStatus": 1 | 2 | 3;
+        /** @enum {integer} */
+        "waE2E.OrderMessage_OrderSurface": 1;
+        "waE2E.PaymentBackground": {
+            ID?: string;
+            fileLength?: number;
+            height?: number;
+            mediaData?: components["schemas"]["waE2E.PaymentBackground_MediaData"];
+            mimetype?: string;
+            placeholderArgb?: number;
+            subtextArgb?: number;
+            textArgb?: number;
+            type?: components["schemas"]["waE2E.PaymentBackground_Type"];
+            width?: number;
+        };
+        "waE2E.PaymentBackground_MediaData": {
+            directPath?: string;
+            fileEncSHA256?: number[];
+            fileSHA256?: number[];
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.PaymentBackground_Type": 0 | 1;
+        "waE2E.PaymentExtendedMetadata": {
+            platform?: string;
+            type?: number;
+        };
+        "waE2E.PaymentInviteMessage": {
+            expiryTimestamp?: number;
+            incentiveEligible?: boolean;
+            inviteType?: components["schemas"]["waE2E.PaymentInviteMessage_InviteType"];
+            referralID?: string;
+            serviceType?: components["schemas"]["waE2E.PaymentInviteMessage_ServiceType"];
+        };
+        /** @enum {integer} */
+        "waE2E.PaymentInviteMessage_InviteType": 0 | 1;
+        /** @enum {integer} */
+        "waE2E.PaymentInviteMessage_ServiceType": 0 | 1 | 2 | 3;
+        "waE2E.PaymentLinkMetadata": {
+            button?: components["schemas"]["waE2E.PaymentLinkMetadata_PaymentLinkButton"];
+            header?: components["schemas"]["waE2E.PaymentLinkMetadata_PaymentLinkHeader"];
+            provider?: components["schemas"]["waE2E.PaymentLinkMetadata_PaymentLinkProvider"];
+        };
+        "waE2E.PaymentLinkMetadata_PaymentLinkButton": {
+            displayText?: string;
+        };
+        "waE2E.PaymentLinkMetadata_PaymentLinkHeader": {
+            headerType?: components["schemas"]["waE2E.PaymentLinkMetadata_PaymentLinkHeader_PaymentLinkHeaderType"];
+        };
+        /** @enum {integer} */
+        "waE2E.PaymentLinkMetadata_PaymentLinkHeader_PaymentLinkHeaderType": 0 | 1;
+        "waE2E.PaymentLinkMetadata_PaymentLinkProvider": {
+            paramsJSON?: string;
+        };
+        "waE2E.PaymentReminderMessage": {
+            amount?: components["schemas"]["waE2E.Money"];
+            description?: string;
+            frequency?: components["schemas"]["waE2E.PaymentReminderMessage_ReminderFrequency"];
+            instanceID?: string;
+            payeeJID?: string;
+            payeeVpa?: string;
+            payerJID?: string;
+            reminderID?: string;
+            status?: components["schemas"]["waE2E.PaymentReminderMessage_ReminderStatus"];
+        };
+        /** @enum {integer} */
+        "waE2E.PaymentReminderMessage_ReminderFrequency": 0 | 1 | 2 | 3 | 4;
+        /** @enum {integer} */
+        "waE2E.PaymentReminderMessage_ReminderStatus": 0 | 1 | 2 | 3 | 4 | 5;
+        "waE2E.PeerDataOperationRequestMessage": {
+            bizBroadcastInsightsContactListRequest?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_BizBroadcastInsightsContactListRequest"];
+            bizBroadcastInsightsRefreshRequest?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_BizBroadcastInsightsRefreshRequest"];
+            companionCanonicalUserNonceFetchRequest?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_CompanionCanonicalUserNonceFetchRequest"];
+            fullHistorySyncOnDemandRequest?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_FullHistorySyncOnDemandRequest"];
+            galaxyFlowAction?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_GalaxyFlowAction"];
+            historySyncChunkRetryRequest?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_HistorySyncChunkRetryRequest"];
+            historySyncOnDemandRequest?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_HistorySyncOnDemandRequest"];
+            peerDataOperationRequestType?: components["schemas"]["waE2E.PeerDataOperationRequestType"];
+            placeholderMessageResendRequest?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_PlaceholderMessageResendRequest"][];
+            requestStickerReupload?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_RequestStickerReupload"][];
+            requestURLPreview?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_RequestUrlPreview"][];
+            syncdCollectionFatalRecoveryRequest?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_SyncDCollectionFatalRecoveryRequest"];
+        };
+        "waE2E.PeerDataOperationRequestMessage_BizBroadcastInsightsContactListRequest": {
+            campaignID?: string;
+        };
+        "waE2E.PeerDataOperationRequestMessage_BizBroadcastInsightsRefreshRequest": {
+            campaignID?: string;
+        };
+        "waE2E.PeerDataOperationRequestMessage_CompanionCanonicalUserNonceFetchRequest": {
+            registrationTraceID?: string;
+        };
+        "waE2E.PeerDataOperationRequestMessage_FullHistorySyncOnDemandRequest": {
+            fullHistorySyncOnDemandConfig?: components["schemas"]["waE2E.FullHistorySyncOnDemandConfig"];
+            historySyncConfig?: components["schemas"]["waCompanionReg.DeviceProps_HistorySyncConfig"];
+            requestMetadata?: components["schemas"]["waE2E.FullHistorySyncOnDemandRequestMetadata"];
+        };
+        "waE2E.PeerDataOperationRequestMessage_GalaxyFlowAction": {
+            agmID?: string;
+            flowID?: string;
+            galaxyFlowDownloadRequestID?: string;
+            stanzaID?: string;
+            type?: components["schemas"]["waE2E.PeerDataOperationRequestMessage_GalaxyFlowAction_GalaxyFlowActionType"];
+        };
+        /** @enum {integer} */
+        "waE2E.PeerDataOperationRequestMessage_GalaxyFlowAction_GalaxyFlowActionType": 1 | 2;
+        "waE2E.PeerDataOperationRequestMessage_HistorySyncChunkRetryRequest": {
+            chunkNotificationID?: string;
+            chunkOrder?: number;
+            regenerateChunk?: boolean;
+            syncType?: components["schemas"]["waE2E.HistorySyncType"];
+        };
+        "waE2E.PeerDataOperationRequestMessage_HistorySyncOnDemandRequest": {
+            accountLid?: string;
+            chatJID?: string;
+            oldestMsgFromMe?: boolean;
+            oldestMsgID?: string;
+            oldestMsgTimestampMS?: number;
+            onDemandMsgCount?: number;
+            supportInlineResponse?: boolean;
+        };
+        "waE2E.PeerDataOperationRequestMessage_PlaceholderMessageResendRequest": {
+            messageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        "waE2E.PeerDataOperationRequestMessage_RequestStickerReupload": {
+            fileSHA256?: string;
+        };
+        "waE2E.PeerDataOperationRequestMessage_RequestUrlPreview": {
+            URL?: string;
+            includeHqThumbnail?: boolean;
+        };
+        "waE2E.PeerDataOperationRequestMessage_SyncDCollectionFatalRecoveryRequest": {
+            collectionName?: string;
+            timestamp?: number;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage": {
+            peerDataOperationRequestType?: components["schemas"]["waE2E.PeerDataOperationRequestType"];
+            peerDataOperationResult?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult"][];
+            stanzaID?: string;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult": {
+            bizBroadcastInsightsContactListResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_BizBroadcastInsightsContactListResponse"];
+            companionCanonicalUserNonceFetchRequestResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_CompanionCanonicalUserNonceFetchResponse"];
+            companionMetaNonceFetchRequestResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_CompanionMetaNonceFetchResponse"];
+            flowResponsesCsvBundle?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FlowResponsesCsvBundle"];
+            fullHistorySyncOnDemandRequestResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FullHistorySyncOnDemandRequestResponse"];
+            historySyncChunkRetryResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_HistorySyncChunkRetryResponse"];
+            linkPreviewResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_LinkPreviewResponse"];
+            mediaUploadResult?: components["schemas"]["waMmsRetry.MediaRetryNotification_ResultType"];
+            placeholderMessageResendResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_PlaceholderMessageResendResponse"];
+            stickerMessage?: components["schemas"]["waE2E.StickerMessage"];
+            syncdSnapshotFatalRecoveryResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_SyncDSnapshotFatalRecoveryResponse"];
+            waffleNonceFetchRequestResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_WaffleNonceFetchResponse"];
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_BizBroadcastInsightsContactListResponse": {
+            campaignID?: string;
+            contacts?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_BizBroadcastInsightsContactState"][];
+            timestampMS?: number;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_BizBroadcastInsightsContactState": {
+            contactJID?: string;
+            state?: components["schemas"]["waE2E.InsightDeliveryState"];
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_CompanionCanonicalUserNonceFetchResponse": {
+            forceRefresh?: boolean;
+            nonce?: string;
+            waFbid?: string;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_CompanionMetaNonceFetchResponse": {
+            nonce?: string;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FlowResponsesCsvBundle": {
+            directPath?: string;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+            fileName?: string;
+            fileSHA256?: number[];
+            flowID?: string;
+            galaxyFlowDownloadRequestID?: string;
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            mimetype?: string;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FullHistorySyncOnDemandRequestResponse": {
+            requestMetadata?: components["schemas"]["waE2E.FullHistorySyncOnDemandRequestMetadata"];
+            responseCode?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FullHistorySyncOnDemandResponseCode"];
+        };
+        /** @enum {integer} */
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FullHistorySyncOnDemandResponseCode": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_HistorySyncChunkRetryResponse": {
+            canRecover?: boolean;
+            chunkOrder?: number;
+            requestID?: string;
+            responseCode?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_HistorySyncChunkRetryResponseCode"];
+            syncType?: components["schemas"]["waE2E.HistorySyncType"];
+        };
+        /** @enum {integer} */
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_HistorySyncChunkRetryResponseCode": 1 | 2 | 3 | 4 | 5 | 6;
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_LinkPreviewResponse": {
+            URL?: string;
+            description?: string;
+            hqThumbnail?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_LinkPreviewResponse_LinkPreviewHighQualityThumbnail"];
+            matchText?: string;
+            previewMetadata?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_LinkPreviewResponse_PaymentLinkPreviewMetadata"];
+            previewType?: string;
+            thumbData?: number[];
+            title?: string;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_LinkPreviewResponse_LinkPreviewHighQualityThumbnail": {
+            directPath?: string;
+            encThumbHash?: string;
+            mediaKey?: number[];
+            mediaKeyTimestampMS?: number;
+            thumbHash?: string;
+            thumbHeight?: number;
+            thumbWidth?: number;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_LinkPreviewResponse_PaymentLinkPreviewMetadata": {
+            amount?: string;
+            currency?: string;
+            isBusinessVerified?: boolean;
+            offset?: string;
+            providerName?: string;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_PlaceholderMessageResendResponse": {
+            webMessageInfoBytes?: number[];
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_SyncDSnapshotFatalRecoveryResponse": {
+            collectionSnapshot?: number[];
+            isCompressed?: boolean;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_WaffleNonceFetchResponse": {
+            nonce?: string;
+            waEntFbid?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.PeerDataOperationRequestType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
+        "waE2E.PinInChatMessage": {
+            key?: components["schemas"]["waCommon.MessageKey"];
+            senderTimestampMS?: number;
+            type?: components["schemas"]["waE2E.PinInChatMessage_Type"];
+        };
+        /** @enum {integer} */
+        "waE2E.PinInChatMessage_Type": 0 | 1 | 2;
+        "waE2E.PlaceholderMessage": {
+            type?: components["schemas"]["waE2E.PlaceholderMessage_PlaceholderType"];
+        };
+        /** @enum {integer} */
+        "waE2E.PlaceholderMessage_PlaceholderType": 0;
+        "waE2E.Point": {
+            x?: number;
+            xDeprecated?: number;
+            y?: number;
+            yDeprecated?: number;
+        };
+        "waE2E.PollAddOptionMessage": {
+            addOption?: components["schemas"]["waE2E.PollCreationMessage_Option"];
+            metadata?: components["schemas"]["waE2E.PollUpdateMessageMetadata"];
+            pollCreationMessageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        /** @enum {integer} */
+        "waE2E.PollContentType": 0 | 1 | 2;
+        "waE2E.PollCreationMessage": {
+            allowAddOption?: boolean;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            correctAnswer?: components["schemas"]["waE2E.PollCreationMessage_Option"];
+            encKey?: number[];
+            endTime?: number;
+            hideParticipantName?: boolean;
+            name?: string;
+            options?: components["schemas"]["waE2E.PollCreationMessage_Option"][];
+            pollContentType?: components["schemas"]["waE2E.PollContentType"];
+            pollType?: components["schemas"]["waE2E.PollType"];
+            selectableOptionsCount?: number;
+        };
+        "waE2E.PollCreationMessage_Option": {
+            optionHash?: string;
+            optionName?: string;
+        };
+        "waE2E.PollEncValue": {
+            encIV?: number[];
+            encPayload?: number[];
+        };
+        "waE2E.PollResultSnapshotMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            name?: string;
+            pollType?: components["schemas"]["waE2E.PollType"];
+            pollVotes?: components["schemas"]["waE2E.PollResultSnapshotMessage_PollVote"][];
+        };
+        "waE2E.PollResultSnapshotMessage_PollVote": {
+            optionName?: string;
+            optionVoteCount?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.PollType": 0 | 1;
+        "waE2E.PollUpdateMessage": {
+            metadata?: components["schemas"]["waE2E.PollUpdateMessageMetadata"];
+            pollCreationMessageKey?: components["schemas"]["waCommon.MessageKey"];
+            senderTimestampMS?: number;
+            vote?: components["schemas"]["waE2E.PollEncValue"];
+        };
+        "waE2E.PollUpdateMessageMetadata": {
+            lastEditStanzaID?: string;
+            pollNameHash?: number[];
+        };
+        "waE2E.ProcessedVideo": {
+            bitrate?: number;
+            capabilities?: string[];
+            directPath?: string;
+            fileLength?: number;
+            fileSHA256?: number[];
+            height?: number;
+            quality?: components["schemas"]["waE2E.ProcessedVideo_VideoQuality"];
+            width?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.ProcessedVideo_VideoQuality": 0 | 1 | 2 | 3;
+        "waE2E.ProductMessage": {
+            body?: string;
+            businessOwnerJID?: string;
+            catalog?: components["schemas"]["waE2E.ProductMessage_CatalogSnapshot"];
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            footer?: string;
+            product?: components["schemas"]["waE2E.ProductMessage_ProductSnapshot"];
+        };
+        "waE2E.ProductMessage_CatalogSnapshot": {
+            catalogImage?: components["schemas"]["waE2E.ImageMessage"];
+            description?: string;
+            title?: string;
+        };
+        "waE2E.ProductMessage_ProductSnapshot": {
+            URL?: string;
+            currencyCode?: string;
+            description?: string;
+            firstImageID?: string;
+            priceAmount1000?: number;
+            productID?: string;
+            productImage?: components["schemas"]["waE2E.ImageMessage"];
+            productImageCount?: number;
+            retailerID?: string;
+            salePriceAmount1000?: number;
+            signedURL?: string;
+            title?: string;
+        };
+        "waE2E.ProtocolMessage": {
+            afterReadDuration?: number;
+            aiMediaCollectionMessage?: components["schemas"]["waAICommon.AIMediaCollectionMessage"];
+            aiMetadataOperation?: components["schemas"]["waAICommon.AIMetadataOperation"];
+            aiPsiMetadata?: number[];
+            aiQueryFanout?: components["schemas"]["waE2E.AIQueryFanout"];
+            appStateFatalExceptionNotification?: components["schemas"]["waE2E.AppStateFatalExceptionNotification"];
+            appStateSyncKeyRequest?: components["schemas"]["waE2E.AppStateSyncKeyRequest"];
+            appStateSyncKeyShare?: components["schemas"]["waE2E.AppStateSyncKeyShare"];
+            botFeedbackMessage?: components["schemas"]["waAICommon.BotFeedbackMessage"];
+            chatThemeSetting?: components["schemas"]["waE2E.ChatThemeSetting"];
+            cloudApiThreadControlNotification?: components["schemas"]["waE2E.CloudAPIThreadControlNotification"];
+            disappearingMode?: components["schemas"]["waE2E.DisappearingMode"];
+            editedMessage?: components["schemas"]["waE2E.Message"];
+            ephemeralExpiration?: number;
+            ephemeralSettingTimestamp?: number;
+            historySyncNotification?: components["schemas"]["waE2E.HistorySyncNotification"];
+            initialSecurityNotificationSettingSync?: components["schemas"]["waE2E.InitialSecurityNotificationSettingSync"];
+            invokerJID?: string;
+            key?: components["schemas"]["waCommon.MessageKey"];
+            lidMigrationMappingSyncMessage?: components["schemas"]["waE2E.LIDMigrationMappingSyncMessage"];
+            limitSharing?: components["schemas"]["waCommon.LimitSharing"];
+            mediaNotifyMessage?: components["schemas"]["waE2E.MediaNotifyMessage"];
+            memberLabel?: components["schemas"]["waE2E.MemberLabel"];
+            peerDataOperationRequestMessage?: components["schemas"]["waE2E.PeerDataOperationRequestMessage"];
+            peerDataOperationRequestResponseMessage?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage"];
+            requestWelcomeMessageMetadata?: components["schemas"]["waE2E.RequestWelcomeMessageMetadata"];
+            timestampMS?: number;
+            type?: components["schemas"]["waE2E.ProtocolMessage_Type"];
+        };
+        /** @enum {integer} */
+        "waE2E.ProtocolMessage_Type": 0 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 14 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 34 | 35;
+        "waE2E.QuestionResponseMessage": {
+            key?: components["schemas"]["waCommon.MessageKey"];
+            text?: string;
+        };
+        "waE2E.ReactionMessage": {
+            groupingKey?: string;
+            key?: components["schemas"]["waCommon.MessageKey"];
+            senderTimestampMS?: number;
+            text?: string;
+        };
+        "waE2E.RequestPaymentMessage": {
+            amount?: components["schemas"]["waE2E.Money"];
+            amount1000?: number;
+            background?: components["schemas"]["waE2E.PaymentBackground"];
+            currencyCodeIso4217?: string;
+            expiryTimestamp?: number;
+            noteMessage?: components["schemas"]["waE2E.Message"];
+            requestFrom?: string;
+        };
+        "waE2E.RequestPhoneNumberMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+        };
+        "waE2E.RequestWelcomeMessageMetadata": {
+            botAgentMetadata?: components["schemas"]["waAICommon.BotAgentMetadata"];
+            localChatState?: components["schemas"]["waE2E.RequestWelcomeMessageMetadata_LocalChatState"];
+            welcomeTrigger?: components["schemas"]["waE2E.RequestWelcomeMessageMetadata_WelcomeTrigger"];
+        };
+        /** @enum {integer} */
+        "waE2E.RequestWelcomeMessageMetadata_LocalChatState": 0 | 1;
+        /** @enum {integer} */
+        "waE2E.RequestWelcomeMessageMetadata_WelcomeTrigger": 0 | 1;
+        "waE2E.RootSecretDistributeMessage": {
+            chatJID?: string;
+        };
+        "waE2E.ScheduledCallCreationMessage": {
+            callType?: components["schemas"]["waE2E.ScheduledCallCreationMessage_CallType"];
+            scheduledTimestampMS?: number;
+            title?: string;
+        };
+        /** @enum {integer} */
+        "waE2E.ScheduledCallCreationMessage_CallType": 0 | 1 | 2;
+        "waE2E.ScheduledCallEditMessage": {
+            editType?: components["schemas"]["waE2E.ScheduledCallEditMessage_EditType"];
+            key?: components["schemas"]["waCommon.MessageKey"];
+        };
+        /** @enum {integer} */
+        "waE2E.ScheduledCallEditMessage_EditType": 0 | 1;
+        "waE2E.SecretEncryptedMessage": {
+            encIV?: number[];
+            encPayload?: number[];
+            remoteKeyID?: string;
+            secretEncType?: components["schemas"]["waE2E.SecretEncryptedMessage_SecretEncType"];
+            targetMessageKey?: components["schemas"]["waCommon.MessageKey"];
+        };
+        /** @enum {integer} */
+        "waE2E.SecretEncryptedMessage_SecretEncType": 0 | 1 | 2 | 3 | 4 | 5;
+        "waE2E.SendPaymentMessage": {
+            background?: components["schemas"]["waE2E.PaymentBackground"];
+            noteMessage?: components["schemas"]["waE2E.Message"];
+            requestMessageKey?: components["schemas"]["waCommon.MessageKey"];
+            transactionData?: string;
+        };
+        "waE2E.SenderKeyDistributionMessage": {
+            axolotlSenderKeyDistributionMessage?: number[];
+            groupID?: string;
+        };
+        "waE2E.SplitPaymentMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            createdAtMS?: number;
+            description?: string;
+            participants?: components["schemas"]["waE2E.SplitPaymentParticipant"][];
+            requesterJID?: string;
+            splitID?: string;
+            totalAmount?: components["schemas"]["waE2E.Money"];
+        };
+        "waE2E.SplitPaymentParticipant": {
+            JID?: string;
+            amount?: components["schemas"]["waE2E.Money"];
+            status?: components["schemas"]["waE2E.SplitPaymentParticipant_SplitPaymentStatus"];
+        };
+        /** @enum {integer} */
+        "waE2E.SplitPaymentParticipant_SplitPaymentStatus": 0 | 1;
+        "waE2E.StatusNotificationMessage": {
+            originalMessageKey?: components["schemas"]["waCommon.MessageKey"];
+            responseMessageKey?: components["schemas"]["waCommon.MessageKey"];
+            type?: components["schemas"]["waE2E.StatusNotificationMessage_StatusNotificationType"];
+        };
+        /** @enum {integer} */
+        "waE2E.StatusNotificationMessage_StatusNotificationType": 0 | 1 | 2 | 3;
+        "waE2E.StatusQuestionAnswerMessage": {
+            key?: components["schemas"]["waCommon.MessageKey"];
+            text?: string;
+        };
+        "waE2E.StatusQuotedMessage": {
+            originalStatusID?: components["schemas"]["waCommon.MessageKey"];
+            text?: string;
+            thumbnail?: number[];
+            type?: components["schemas"]["waE2E.StatusQuotedMessage_StatusQuotedMessageType"];
+        };
+        /** @enum {integer} */
+        "waE2E.StatusQuotedMessage_StatusQuotedMessageType": 1;
+        "waE2E.StatusStickerInteractionMessage": {
+            key?: components["schemas"]["waCommon.MessageKey"];
+            stickerKey?: string;
+            type?: components["schemas"]["waE2E.StatusStickerInteractionMessage_StatusStickerType"];
+        };
+        /** @enum {integer} */
+        "waE2E.StatusStickerInteractionMessage_StatusStickerType": 0 | 1;
+        "waE2E.StickerMessage": {
+            URL?: string;
+            accessibilityLabel?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            directPath?: string;
+            emojis?: string;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+            fileSHA256?: number[];
+            firstFrameLength?: number;
+            firstFrameSidecar?: number[];
+            height?: number;
+            isAiSticker?: boolean;
+            isAnimated?: boolean;
+            isAvatar?: boolean;
+            isLottie?: boolean;
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            mimetype?: string;
+            pngThumbnail?: number[];
+            premium?: number;
+            stickerSentTS?: number;
+            width?: number;
+        };
+        "waE2E.StickerPackMessage": {
+            caption?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            directPath?: string;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+            fileSHA256?: number[];
+            imageDataHash?: string;
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            name?: string;
+            packDescription?: string;
+            publisher?: string;
+            stickerPackID?: string;
+            stickerPackOrigin?: components["schemas"]["waE2E.StickerPackMessage_StickerPackOrigin"];
+            stickerPackSize?: number;
+            stickers?: components["schemas"]["waE2E.StickerPackMessage_Sticker"][];
+            thumbnailDirectPath?: string;
+            thumbnailEncSHA256?: number[];
+            thumbnailHeight?: number;
+            thumbnailSHA256?: number[];
+            thumbnailWidth?: number;
+            trayIconFileName?: string;
+        };
+        "waE2E.StickerPackMessage_Sticker": {
+            accessibilityLabel?: string;
+            emojis?: string[];
+            fileName?: string;
+            isAnimated?: boolean;
+            isLottie?: boolean;
+            mimetype?: string;
+            premium?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.StickerPackMessage_StickerPackOrigin": 0 | 1 | 2;
+        "waE2E.StickerSyncRMRMessage": {
+            filehash?: string[];
+            requestTimestamp?: number;
+            rmrSource?: string;
+        };
+        "waE2E.TemplateButtonReplyMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            selectedCarouselCardIndex?: number;
+            selectedDisplayText?: string;
+            selectedID?: string;
+            selectedIndex?: number;
+        };
+        "waE2E.TemplateMessage": {
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            /**
+             * @description Types that are valid to be assigned to Format:
+             *
+             *     	*TemplateMessage_FourRowTemplate_
+             *     	*TemplateMessage_HydratedFourRowTemplate_
+             *     	*TemplateMessage_InteractiveMessageTemplate
+             */
+            format?: unknown;
+            hydratedTemplate?: components["schemas"]["waE2E.TemplateMessage_HydratedFourRowTemplate"];
+            templateID?: string;
+        };
+        "waE2E.TemplateMessage_HydratedFourRowTemplate": {
+            hydratedButtons?: components["schemas"]["waE2E.HydratedTemplateButton"][];
+            hydratedContentText?: string;
+            hydratedFooterText?: string;
+            maskLinkedDevices?: boolean;
+            templateID?: string;
+            /**
+             * @description Types that are valid to be assigned to Title:
+             *
+             *     	*TemplateMessage_HydratedFourRowTemplate_DocumentMessage
+             *     	*TemplateMessage_HydratedFourRowTemplate_HydratedTitleText
+             *     	*TemplateMessage_HydratedFourRowTemplate_ImageMessage
+             *     	*TemplateMessage_HydratedFourRowTemplate_VideoMessage
+             *     	*TemplateMessage_HydratedFourRowTemplate_LocationMessage
+             */
+            title?: unknown;
+        };
+        "waE2E.ThreadID": {
+            threadKey?: components["schemas"]["waCommon.MessageKey"];
+            threadType?: components["schemas"]["waE2E.ThreadID_ThreadType"];
+        };
+        /** @enum {integer} */
+        "waE2E.ThreadID_ThreadType": 0 | 1 | 2;
+        "waE2E.URLMetadata": {
+            fbExperimentID?: number;
+        };
+        "waE2E.UrlTrackingMap": {
+            urlTrackingMapElements?: components["schemas"]["waE2E.UrlTrackingMap_UrlTrackingMapElement"][];
+        };
+        "waE2E.UrlTrackingMap_UrlTrackingMapElement": {
+            cardIndex?: number;
+            consentedUsersURL?: string;
+            originalURL?: string;
+            unconsentedUsersURL?: string;
+        };
+        "waE2E.VideoEndCard": {
+            caption?: string;
+            profilePictureURL?: string;
+            thumbnailImageURL?: string;
+            username?: string;
+        };
+        "waE2E.VideoMessage": {
+            JPEGThumbnail?: number[];
+            URL?: string;
+            accessibilityLabel?: string;
+            annotations?: components["schemas"]["waE2E.InteractiveAnnotation"][];
+            caption?: string;
+            contextInfo?: components["schemas"]["waE2E.ContextInfo"];
+            directPath?: string;
+            externalShareFullVideoDurationInSeconds?: number;
+            fileEncSHA256?: number[];
+            fileLength?: number;
+            fileSHA256?: number[];
+            gifAttribution?: components["schemas"]["waE2E.VideoMessage_Attribution"];
+            gifPlayback?: boolean;
+            height?: number;
+            interactiveAnnotations?: components["schemas"]["waE2E.InteractiveAnnotation"][];
+            mediaKey?: number[];
+            mediaKeyTimestamp?: number;
+            metadataURL?: string;
+            mimetype?: string;
+            motionPhotoPresentationOffsetMS?: number;
+            processedVideos?: components["schemas"]["waE2E.ProcessedVideo"][];
+            seconds?: number;
+            staticURL?: string;
+            streamingSidecar?: number[];
+            thumbnailDirectPath?: string;
+            thumbnailEncSHA256?: number[];
+            thumbnailSHA256?: number[];
+            videoSourceType?: components["schemas"]["waE2E.VideoMessage_VideoSourceType"];
+            viewOnce?: boolean;
+            width?: number;
+        };
+        /** @enum {integer} */
+        "waE2E.VideoMessage_Attribution": 0 | 1 | 2 | 3;
+        /** @enum {integer} */
+        "waE2E.VideoMessage_VideoSourceType": 0 | 1;
+        /** @enum {integer} */
+        "waE2E.WebLinkRenderConfig": 0 | 1;
+        /** @enum {integer} */
+        "waMmsRetry.MediaRetryNotification_ResultType": 0 | 1 | 2 | 3;
+        "waStatusAttributions.StatusAttribution": {
+            actionURL?: string;
+            /**
+             * @description Types that are valid to be assigned to AttributionData:
+             *
+             *     	*StatusAttribution_StatusReshare_
+             *     	*StatusAttribution_ExternalShare_
+             *     	*StatusAttribution_Music_
+             *     	*StatusAttribution_GroupStatus_
+             *     	*StatusAttribution_RlAttribution
+             *     	*StatusAttribution_AiCreatedAttribution_
+             */
+            attributionData?: unknown;
+            type?: components["schemas"]["waStatusAttributions.StatusAttribution_Type"];
+        };
+        /** @enum {integer} */
+        "waStatusAttributions.StatusAttribution_Type": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+        "waVnameCert.LocalizedName": {
+            lc?: string;
+            lg?: string;
+            verifiedName?: string;
+        };
+        "waVnameCert.VerifiedNameCertificate": {
+            details?: number[];
+            serverSignature?: number[];
+            signature?: number[];
+        };
+        "waVnameCert.VerifiedNameCertificate_Details": {
+            issueTime?: number;
+            issuer?: string;
+            localizedNames?: components["schemas"]["waVnameCert.LocalizedName"][];
+            serial?: number;
+            verifiedName?: string;
+        };
+        /** @enum {string} */
+        "whatsmeow.ParticipantChange": "add" | "remove" | "promote" | "demote";
     };
-    responses: {
-        /** @description Successful resource response. */
-        Success: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["SuccessEnvelope"];
-            };
-        };
-        /** @description Successful collection response. */
-        CollectionSuccess: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["CollectionEnvelope"];
-            };
-        };
-        /** @description Asynchronous operation accepted or queued. */
-        Accepted: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["SuccessEnvelope"];
-            };
-        };
-        /** @description Request validation failed. */
-        BadRequest: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-        /** @description Missing or invalid API key. */
-        Unauthorized: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-        /** @description Authenticated identity is not allowed to access this boundary. */
-        Forbidden: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-        /** @description Route or resource was not found. */
-        NotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-        /** @description Request conflicts with current resource state. */
-        Conflict: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-        /** @description Business or policy rule rejected the request. */
-        Unprocessable: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-        /** @description Route is reserved but not currently implemented by a safe read model or public boundary. */
-        NotImplemented: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                /**
-                 * @example {
-                 *       "error": {
-                 *         "code": "projection_not_available",
-                 *         "message": "The requested resource requires a read projection that is not available yet.",
-                 *         "details": {
-                 *           "category": "not_implemented"
-                 *         }
-                 *       },
-                 *       "meta": {
-                 *         "requestId": "req_demo",
-                 *         "correlationId": "corr_demo",
-                 *         "timestamp": "2026-06-30T00:00:00.000Z"
-                 *       }
-                 *     }
-                 */
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-        /** @description Runtime dependency or dispatcher is unavailable. */
-        ServiceUnavailable: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-        /** @description Unexpected internal error. Response must not expose sensitive implementation details. */
-        InternalError: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ErrorEnvelope"];
-            };
-        };
-    };
-    parameters: {
-        /** @description Optional request identifier supplied by the client. */
-        XRequestIdHeader: string;
-        /** @description Optional correlation identifier for distributed tracing. */
-        XCorrelationIdHeader: string;
-        /** @description Optional trace identifier propagated through observability boundaries. */
-        XTraceIdHeader: string;
-        /** @description Stable client key for retry-safe command requests. */
-        IdempotencyKeyHeader: string;
-        /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-        Cursor: string;
-        /** @description Requested page size. Runtime may cap the effective limit. */
-        Limit: number;
-        /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-        Sort: string;
-        InstanceId: components["schemas"]["SafeResourceId"];
-        MessageId: components["schemas"]["SafeResourceId"];
-        MediaId: components["schemas"]["SafeResourceId"];
-        JobId: components["schemas"]["SafeResourceId"];
-        WebhookId: components["schemas"]["SafeResourceId"];
-        DeliveryId: components["schemas"]["SafeResourceId"];
-        /** @description Optional SSE resume cursor from the last received event id. */
-        LastEventIdHeader: string;
-        GroupId: components["schemas"]["SafeResourceId"];
-        MemberJid: string;
-        ChatId: components["schemas"]["SafeResourceId"];
-        ContactId: components["schemas"]["SafeResourceId"];
-        LabelId: components["schemas"]["SafeResourceId"];
-        /** @description Safe API key identifier. This is not the API key secret or hash. */
-        ApiKeyId: string;
-    };
+    responses: never;
+    parameters: never;
     requestBodies: {
-        Object: {
+        /** @description Label data */
+        "github_com_evolution-foundation_evolution-go_pkg_label_service.ChatLabelStruct": {
             content: {
-                "application/json": components["schemas"]["ObjectRequest"];
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_label_service.ChatLabelStruct"];
             };
         };
-        InstanceCreate: {
+        /** @description User data */
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.CheckUserStruct": {
             content: {
-                /**
-                 * @example {
-                 *       "displayName": "Demo instance"
-                 *     }
-                 */
-                "application/json": components["schemas"]["InstanceCreateRequest"];
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.CheckUserStruct"];
             };
         };
-        Message: {
+        /** @description Newsletter data */
+        "github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct": {
             content: {
-                "application/json": components["schemas"]["GenericTextMessageRequest"] | components["schemas"]["GenericMediaMessageRequest"];
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct"];
             };
         };
-        TextMessage: {
+        /** @description Chat */
+        "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
             content: {
-                /**
-                 * @example {
-                 *       "to": "contact_ref_demo",
-                 *       "text": "Hello from OmniWA"
-                 *     }
-                 */
-                "application/json": components["schemas"]["TextMessageRequest"];
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
             };
         };
-        MediaMessage: {
+        /** @description Participant data */
+        "github_com_evolution-foundation_evolution-go_pkg_community_service.AddParticipantStruct": {
             content: {
-                /**
-                 * @example {
-                 *       "to": "contact_ref_demo",
-                 *       "mediaId": "media_demo",
-                 *       "caption": "Media message"
-                 *     }
-                 */
-                "application/json": components["schemas"]["MediaMessageRequest"];
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_community_service.AddParticipantStruct"];
             };
         };
-        MediaRegistration: {
+        /** @description Label data */
+        "github_com_evolution-foundation_evolution-go_pkg_label_service.MessageLabelStruct": {
             content: {
-                /**
-                 * @example {
-                 *       "mediaRef": "media_input_demo",
-                 *       "contentType": "image/png"
-                 *     }
-                 */
-                "application/json": components["schemas"]["MediaRegistrationRequest"];
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_label_service.MessageLabelStruct"];
             };
         };
-        Webhook: {
+        /** @description Block data */
+        "github_com_evolution-foundation_evolution-go_pkg_user_service.BlockStruct": {
             content: {
-                /**
-                 * @example {
-                 *       "url": "https://example.invalid/omniwa/webhook",
-                 *       "eventTypes": [
-                 *         "message.delivered"
-                 *       ]
-                 *     }
-                 */
-                "application/json": components["schemas"]["WebhookRequest"];
-            };
-        };
-        BulkWebhookDeliveryRedrive: {
-            content: {
-                /**
-                 * @example {
-                 *       "deliveryIds": [
-                 *         "webhook-delivery:dead-one",
-                 *         "webhook-delivery:dead-two"
-                 *       ]
-                 *     }
-                 */
-                "application/json": components["schemas"]["BulkWebhookDeliveryRedriveRequest"];
-            };
-        };
-        GroupTextMessage: {
-            content: {
-                /**
-                 * @example {
-                 *       "text": "Hello group from OmniWA"
-                 *     }
-                 */
-                "application/json": components["schemas"]["GroupTextMessageRequest"];
-            };
-        };
-        GroupMember: {
-            content: {
-                /**
-                 * @example {
-                 *       "jid": "12025550123@s.whatsapp.net"
-                 *     }
-                 */
-                "application/json": components["schemas"]["GroupMemberRequest"];
-            };
-        };
-        GroupMetadata: {
-            content: {
-                /**
-                 * @example {
-                 *       "subject": "New group subject"
-                 *     }
-                 */
-                "application/json": components["schemas"]["GroupMetadataRequest"];
-            };
-        };
-        GroupLocalState: {
-            content: {
-                /**
-                 * @example {
-                 *       "archived": true
-                 *     }
-                 */
-                "application/json": components["schemas"]["GroupLocalStateRequest"];
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.BlockStruct"];
             };
         };
     };
@@ -2016,2094 +8783,4 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export interface operations {
-    getHealth: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getHealthReadiness: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listActionRequiredItems: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getMetrics: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getQueueMetrics: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getMessageMetrics: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getWebhookMetrics: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getMediaMetrics: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getQueueStatus: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listInstances: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    createInstance: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["InstanceCreate"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getInstance: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    destroyInstance: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    updateInstance: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    connectInstance: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    disconnectInstance: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    refreshInstanceQr: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    requestInstanceReconnect: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: components["responses"]["Unauthorized"];
-            501: components["responses"]["NotImplemented"];
-        };
-    };
-    listInstanceSessions: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listInstanceMessages: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    sendInstanceMessage: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Message"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    sendInstanceTextMessage: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["TextMessage"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    sendInstanceMediaMessage: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["MediaMessage"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getMessage: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                messageId: components["parameters"]["MessageId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getMessageDeliveryHistory: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                messageId: components["parameters"]["MessageId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    retryMessage: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                messageId: components["parameters"]["MessageId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    cancelMessage: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                messageId: components["parameters"]["MessageId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    registerMedia: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["MediaRegistration"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getMedia: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                mediaId: components["parameters"]["MediaId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listJobs: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getJob: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                jobId: components["parameters"]["JobId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listWebhooks: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    registerWebhook: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Webhook"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getWebhook: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                webhookId: components["parameters"]["WebhookId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    retireWebhook: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                webhookId: components["parameters"]["WebhookId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    updateWebhook: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                webhookId: components["parameters"]["WebhookId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    activateWebhook: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                webhookId: components["parameters"]["WebhookId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    suspendWebhook: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                webhookId: components["parameters"]["WebhookId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listWebhookDeliveries: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-                /** @description Optional webhook delivery status filter, for example dead_letter. */
-                status?: string;
-                /** @description Optional safe webhook subscription identifier filter. */
-                webhookId?: string;
-                /** @description Optional safe failure category filter for operator remediation views. */
-                failureCategory?: string;
-                /** @description Optional safe dead-letter reason code filter for operator remediation views. */
-                reasonCode?: string;
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    bulkRedriveWebhookDeliveries: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["BulkWebhookDeliveryRedrive"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getWebhookDeliveryHistory: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                deliveryId: components["parameters"]["DeliveryId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    retryWebhookDelivery: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                deliveryId: components["parameters"]["DeliveryId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    redriveWebhookDelivery: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                deliveryId: components["parameters"]["DeliveryId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            401: components["responses"]["Unauthorized"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getProviderCapabilities: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    refreshProviderCapabilities: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: components["responses"]["Unauthorized"];
-            501: components["responses"]["NotImplemented"];
-        };
-    };
-    getSettings: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    validateSettings: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    activateSettings: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listAuditRecords: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getDashboardSummary: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listEvents: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    streamEvents: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Optional SSE resume cursor from the last received event id. */
-                "Last-Event-ID"?: components["parameters"]["LastEventIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description SSE stream of safe event envelopes. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/event-stream": string;
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listInstanceGroups: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    refreshInstanceGroups: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getGroup: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    updateGroup: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["GroupMetadata"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    updateGroupLocalState: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["GroupLocalState"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listGroupMembers: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    addGroupMember: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["GroupMember"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    sendGroupTextMessage: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["GroupTextMessage"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    removeGroupMember: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-                memberJid: components["parameters"]["MemberJid"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    promoteGroupMember: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-                memberJid: components["parameters"]["MemberJid"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    demoteGroupMember: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-                memberJid: components["parameters"]["MemberJid"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    refreshGroupInviteLink: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-                /** @description Stable client key for retry-safe command requests. */
-                "idempotency-key"?: components["parameters"]["IdempotencyKeyHeader"];
-            };
-            path: {
-                groupId: components["parameters"]["GroupId"];
-            };
-            cookie?: never;
-        };
-        requestBody: components["requestBodies"]["Object"];
-        responses: {
-            200: components["responses"]["Success"];
-            202: components["responses"]["Accepted"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            422: components["responses"]["Unprocessable"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listChats: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listInstanceChats: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getChat: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                chatId: components["parameters"]["ChatId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listContacts: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listInstanceContacts: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getContact: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                contactId: components["parameters"]["ContactId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listLabels: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listInstanceLabels: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                instanceId: components["parameters"]["InstanceId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    getLabel: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                labelId: components["parameters"]["LabelId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["Success"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            503: components["responses"]["ServiceUnavailable"];
-        };
-    };
-    listApiKeys: {
-        parameters: {
-            query?: {
-                /** @description Opaque pagination cursor. Clients must not parse cursor contents. */
-                cursor?: components["parameters"]["Cursor"];
-                /** @description Requested page size. Runtime may cap the effective limit. */
-                limit?: components["parameters"]["Limit"];
-                /** @description Resource-specific sort expression. Unsupported fields must be rejected safely. */
-                sort?: components["parameters"]["Sort"];
-            };
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: components["responses"]["CollectionSuccess"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            501: components["responses"]["NotImplemented"];
-        };
-    };
-    provisionApiKey: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ApiKeyProvisionRequest"];
-            };
-        };
-        responses: {
-            201: components["responses"]["Success"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
-            501: components["responses"]["NotImplemented"];
-        };
-    };
-    revokeApiKey: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                /** @description Safe API key identifier. This is not the API key secret or hash. */
-                keyId: components["parameters"]["ApiKeyId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["ApiKeyRevocationRequest"];
-            };
-        };
-        responses: {
-            200: components["responses"]["Success"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            501: components["responses"]["NotImplemented"];
-        };
-    };
-    rotateApiKey: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description Optional request identifier supplied by the client. */
-                "x-request-id"?: components["parameters"]["XRequestIdHeader"];
-                /** @description Optional correlation identifier for distributed tracing. */
-                "x-correlation-id"?: components["parameters"]["XCorrelationIdHeader"];
-                /** @description Optional trace identifier propagated through observability boundaries. */
-                "x-trace-id"?: components["parameters"]["XTraceIdHeader"];
-            };
-            path: {
-                /** @description Safe API key identifier. This is not the API key secret or hash. */
-                keyId: components["parameters"]["ApiKeyId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ApiKeyRotationRequest"];
-            };
-        };
-        responses: {
-            200: components["responses"]["Success"];
-            400: components["responses"]["BadRequest"];
-            401: components["responses"]["Unauthorized"];
-            403: components["responses"]["Forbidden"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-            501: components["responses"]["NotImplemented"];
-        };
-    };
-}
+export type operations = Record<string, never>;

@@ -2,33 +2,34 @@
 
 ## Model
 
-OmniWA authenticates public API clients with an API key sent as the
-`x-api-key` header. Keys are provisioned outside this console (or via the
-admin-only `admin-keys` panel) and come in kinds: API, admin, monitoring.
+The console talks to the **OmniWA GO** API, which authenticates every request
+with an `apikey` HTTP header (see `../omniwa-go/docs/wiki-en/authentication.md`).
+There is no login, cookie, or JWT flow. There are two key tiers:
+
+| Tier | Header value | Grants | `keyKind` |
+| --- | --- | --- | --- |
+| **Global admin key** | value of `GLOBAL_API_KEY` | Instance lifecycle (`/instance/create·all·info·delete·…`) and the `/ws` socket | `admin` |
+| **Instance token** | `token` returned by `POST /instance/create` | Everything scoped to one WhatsApp account (`/send/*`, `/message/*`, `/group/*`, `/user/*`, `/label/*`, …) | `api` |
 
 `omniwa-console` follows the self-hosted operator-tool pattern (Portainer /
-Grafana style): the operator pastes an endpoint URL and key at runtime.
-Nothing is baked into the build; there is no backend-for-frontend in v1.
+Grafana style): the operator pastes an endpoint URL and key at runtime. Nothing
+is baked into the build; there is no backend-for-frontend.
 
 ## Connect screen (`/connect`)
 
 Inputs:
 
-- **API base URL** — in Vite development, defaults to the console origin so
-  `/v1` requests use the local proxy to `http://localhost:3000` and avoid
-  browser CORS preflight requirements. Production builds retain
-  `http://localhost:3000` as the initial value. The submitted value is
-  validated as an origin.
+- **API base URL** — defaults to the omniwa-go dev origin
+  `http://localhost:8080` (`DEFAULT_BASE_URL` in `src/api/client.ts`). The
+  submitted value is validated as an origin.
 - **API key** — password-style input, never echoed after submit.
 
-On submit the console probes `getHealth` with the provided credentials. On
-success it stores the session and redirects to `/overview`; on failure it
-shows the error envelope's category and message.
-
-Key kind detection: the console attempts `listApiKeys` once after connect;
-success marks the session as admin-scoped and reveals the `admin-keys`
-panel. An authorization failure is expected for non-admin keys, marks the
-session as api-scoped, and is not shown to the operator.
+On submit the console **probes and classifies** the key (`probeKey` in
+`ConnectPage.tsx`): it calls `GET /instance/all`; success means the global admin
+key (`admin`). A `401/403` there falls back to `GET /instance/status`; success
+means a per-instance token (`api`). A `401` on both means the key is invalid and
+the error category/message is shown. On success the session is stored and the
+console redirects to `/overview`.
 
 ## Storage
 
@@ -43,11 +44,11 @@ interface ConsoleSession {
 }
 ```
 
-- Stored in `sessionStorage` only — cleared when the tab closes. A
-  "remember on this device" checkbox opts into `localStorage`, with copy
-  warning it stores the key on the device.
-- The key is never logged, never placed in URLs, never shown in the UI
-  after entry (a masked fingerprint like `omni…a1b2` may be displayed).
+- Stored in `sessionStorage` only — cleared when the tab closes. A "remember on
+  this device" checkbox opts into `localStorage`, with copy warning it stores
+  the key on the device.
+- The key is never logged, never placed in URLs, never shown in the UI after
+  entry (a masked fingerprint like `dev-…-me` may be displayed).
 - "Disconnect" clears both storages and returns to `/connect`.
 
 ## Failure handling
@@ -60,8 +61,12 @@ interface ConsoleSession {
 
 ## Accepted risk
 
-The API key is present in browser memory and (opt-in) local storage. This
-is acceptable for an internal operator console on trusted machines. If the
-console is ever exposed to untrusted networks or shared machines, add the
-BFF variant (thin proxy holding the key server-side) as a deployment option
-rather than changing this SPA contract.
+The apikey is present in browser memory and (opt-in) local storage. A
+per-instance token exposed this way can send as that one account — comparable to
+the previous `x-api-key` posture. The **global admin key is far more powerful**
+(it can create/delete every instance); pasting it into the console grants full
+admin to whoever uses that browser, so only do so on a trusted machine.
+
+The omniwa-go realtime socket `/ws` requires the global key and therefore is
+**not** opened from the browser (see `docs/REALTIME.md`); a BFF/proxy would be
+required to add live streaming safely.

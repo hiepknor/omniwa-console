@@ -183,15 +183,29 @@ for just `instances` + `send` + a `/ws` ticker is the smallest spike.
 
 ---
 
-## 7. Open decisions (please resolve before coding)
+## 7. Decisions (resolved 2026-07-21)
 
-1. **Which option (A/B/C)?** Adapter/BFF, native fork, or extend omniwa-go.
-2. **Scope:** which panels must work against omniwa-go? (Realistic core:
-   instances, groups, compose/send, contacts/labels, realtime ticker.)
-3. **Two backends or one?** Should the console keep supporting the omniwa
-   Platform and *also* omniwa-go (runtime-selectable), or fully switch?
-4. **Chats:** accept a `/ws`-accumulated, no-history chat surface, or defer the
-   chats panel until omniwa-go grows list/history endpoints?
+1. **Option B — native fork.** The console's `src/api/` speaks omniwa-go
+   directly; the omniwa Platform contract is dropped entirely.
+2. **Scope:** all panels are kept in the shell; only instances, groups, send,
+   contacts, labels, and message actions have an omniwa-go backend. Panels with
+   no backing render `not_implemented`.
+3. **One backend.** Platform support is removed (no runtime selection).
+4. **Chats: deferred.** With realtime disabled and no list/history REST, chats
+   is stubbed until omniwa-go grows those endpoints (or a `/ws` BFF is added).
+5. **Realtime: off.** `/ws` needs the global admin key and is unsafe from the
+   browser; panels poll instead (`docs/REALTIME.md`).
+
+### Migration progress
+
+- **Done:** spec sync + type generation (`contracts/omniwa-go.openapi.json`),
+  `apikey` client, `{message,data}` envelopes + status-derived error categories,
+  all `src/api/` modules converted (unsupported → `notImplemented` stubs),
+  realtime replaced with a polling stub, `contract:check`/`architecture:check`
+  repointed, mock workspace removed, docs + tests updated. All gates green.
+- **Next:** wire the instances and groups feature verticals to live
+  `/instance/*` and `/group/*` endpoints (adapting the UI to omniwa-go's
+  whatsmeow-shaped fields), and add a `send` module for `/send/*`.
 
 ---
 
