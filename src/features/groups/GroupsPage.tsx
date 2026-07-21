@@ -284,7 +284,10 @@ export function GroupsPage() {
   };
 
   let content: React.ReactNode;
-  if (instanceId) {
+  if (instanceId && selectedInstance && !selectedInstance.connected) {
+    // Groups load from the instance's live WhatsApp connection; gate on it.
+    content = <ScopeGate label="INSTANCE OFFLINE" title="This instance isn't connected" detail="Groups load from the instance's live WhatsApp connection. Connect and pair this instance first." action={<Link className="btn primary" to={`/instances/${encodeURIComponent(instanceId)}`}>Open instance</Link>} />;
+  } else if (instanceId) {
     content = <GroupsWorkbench instanceId={instanceId} token={selectedInstance?.token} groupId={groupId} onSetParam={setParam} />;
   } else if (pickerReadState.isInitialError) {
     content = isTransportError(pickerReadState.error)

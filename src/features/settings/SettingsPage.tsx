@@ -41,7 +41,6 @@ function FailureNotice({ error, title }: { error: unknown; title?: string }) {
       title={title ?? (error instanceof Error ? error.message : 'Request failed')}
       detail={title && error instanceof Error ? error.message : undefined}
       requestId={failure?.requestId}
-      showMissingRequestId={failure !== undefined}
       announcement="polite"
     />
   );
@@ -286,7 +285,7 @@ export function SettingsPage() {
       ? <div className="empty">Settings data is unavailable while the API reconnects.</div>
       : <InlineError error={readState.error} onRetry={settings.refetch} announce />}</div>;
   } else if (unavailable !== undefined || resource === undefined) {
-    main = <div className="settings-main-column"><SurfaceNotice kind="warning" label="unavailable" title="Settings are unavailable" detail={unavailable?.reasonCode ? `Reason: ${unavailable.reasonCode}` : 'The platform did not return an active settings revision.'} /></div>;
+    main = <div className="settings-main-column"><SurfaceNotice kind="warning" label="unavailable" title="Settings are not available on OmniWA GO" detail="OmniWA GO exposes only per-instance advanced settings, not a global settings surface." /></div>;
   } else {
     main = <div className="settings-main-column">{readState.isStaleError && <InlineError error={readState.error} onRetry={settings.refetch} />}<ActiveConfiguration settings={resource} /><DraftRevision settings={resource} /></div>;
   }

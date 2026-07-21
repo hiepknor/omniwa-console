@@ -95,11 +95,18 @@ export class ApiFailure extends Error {
   }
 }
 
-/** A failure for console panels that omniwa-go provides no backend for. */
+/** A failure for console command paths that omniwa-go provides no backend for. */
 export function notImplemented(resource: string): ApiFailure {
   const failure = new ApiFailure({ error: `${resource} is not available on the OmniWA GO API.` }, 501);
   return failure;
 }
+
+/**
+ * Neutral "unavailable" marker for reads that omniwa-go has no backend for.
+ * Read stubs return this (rather than throwing) so panels render their calm
+ * unavailable state instead of a red error surface.
+ */
+export const NOT_IMPLEMENTED_READ: UnavailableRead = { readStatus: 'unavailable', reasonCode: 'not_implemented' };
 
 /**
  * openapi-fetch result. Typed loosely as `unknown` data because several

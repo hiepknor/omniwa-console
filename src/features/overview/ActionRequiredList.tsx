@@ -105,8 +105,8 @@ export function ActionRequiredList() {
     return (
       <NeutralActionState
         status="Data pending"
-        title="Action-required items are not available yet."
-        detail="This read is pending. No failure has been reported, and unavailable data is not treated as an empty queue."
+        title="Action-required items are not available on OmniWA GO."
+        detail="OmniWA GO has no dashboard or metrics API."
       />
     );
   }

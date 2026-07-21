@@ -8,9 +8,8 @@ export function isTransportError(error: unknown): boolean {
 
 /** Routes with a PageHeader delegate browser transport failures to WorkspaceBanner. */
 export function hasCanonicalWorkspaceBanner(pathname: string): boolean {
-  return pathname !== '/overview'
-    && pathname !== '/connect'
-    && !pathname.startsWith('/chats');
+  // /connect has its own inline error; /chats owns its adaptive workspace state.
+  return pathname !== '/connect' && !pathname.startsWith('/chats');
 }
 
 export function deferTransportErrorToWorkspace({

@@ -29,10 +29,11 @@ surface state. They are not notifications and must not create toasts.
 | Authorization failure | Persistent surface notice; keep the session |
 | Browser transport failure | One deduplicated workspace banner |
 | `readStatus: unavailable` | Neutral unavailable state, never an error notification |
+| Panel with no omniwa-go backend | Read stubs return `unavailable` (reason `not_implemented`); render the panel's neutral unavailable state, never a red error |
 
-Overview suppresses the transport banner because Platform posture is the
-canonical workspace-status surface on that route. Showing both would duplicate
-the same condition and compete for attention.
+The transport banner shows on every route with a page header except `/connect`
+(which has its own inline connection error) and `/chats` (which owns its
+adaptive workspace state).
 
 Background polling failures never create toasts. A new failure may announce
 once, but repeated polling must update existing surface or connection state.
@@ -48,12 +49,14 @@ with a loading state.
 ## API errors
 
 API feedback renders the product-safe category and message from `ApiFailure`.
-It always reserves a request-ID row, using `Request ID unavailable` when the
-client has no envelope. Retry is shown only when `retryable` is true.
+Retry is shown only when `retryable` is true. omniwa-go does not return request
+IDs, so the request-ID row renders only when an id is actually present (it is
+never fabricated or shown as "unavailable").
 
-Request IDs are monospaced, truncate locally on dense layouts, wrap on phone
-layouts, and include a copy affordance. Feedback content must never log or
-render credentials, raw provider payloads, or reconstructed identifiers.
+When a request ID is present it is monospaced, truncates locally on dense
+layouts, wraps on phone layouts, and includes a copy affordance. Feedback
+content must never log or render credentials, raw provider payloads, or
+reconstructed identifiers.
 
 ## Toast behavior
 

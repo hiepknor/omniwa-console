@@ -1,6 +1,6 @@
 import type { ApiClient } from './client';
 import type { components } from './generated/platform-schema';
-import { notImplemented, type CollectionEnvelope, type CommandResult, type UnavailableRead } from './envelopes';
+import { notImplemented, NOT_IMPLEMENTED_READ, type CollectionEnvelope, type CommandResult, type UnavailableRead } from './envelopes';
 
 // omniwa-go keys are static env (global key) plus per-instance tokens returned by
 // `POST /instance/create`; there is no key provisioning/rotation API. Stubbed.
@@ -24,7 +24,7 @@ export async function listApiKeys(
   _client: ApiClient,
   _params: { cursor?: string; limit?: number; sort?: string } = {},
 ): Promise<ReadResult<ApiKeyListPage>> {
-  throw notImplemented('API keys');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function provisionApiKey(_client: ApiClient, _body: ApiKeyProvisionRequest): Promise<ApiKeyCommandResult> {

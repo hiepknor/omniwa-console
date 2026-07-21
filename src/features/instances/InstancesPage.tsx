@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ApiFailure } from '@/api/envelopes';
 import { instanceKeys } from '@/api/keys';
 import { RowStateBadge, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
@@ -111,7 +112,13 @@ export function InstancesPage() {
       mobileCell: (instance) => relativeTime(instance.createdAt) || undefined,
     },
   ];
-  const tableState: DataTableState<InstanceRow> = listReadState.isInitialError
+  // A per-instance token cannot list instances; guide the operator to the admin key.
+  const needsAdminKey = listReadState.isInitialError
+    && listReadState.error instanceof ApiFailure
+    && listReadState.error.category === 'authorization';
+  const tableState: DataTableState<InstanceRow> = needsAdminKey
+    ? { status: 'unavailable', message: 'Managing instances needs the global admin key. Sign out and reconnect with the admin key.' }
+    : listReadState.isInitialError
     ? { status: 'error', error: listReadState.error, onRetry: list.refetch }
     : listReadState.isInitialLoading
       ? { status: 'loading', skeletonRows: 6 }
