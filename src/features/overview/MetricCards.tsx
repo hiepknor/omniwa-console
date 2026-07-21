@@ -155,10 +155,10 @@ export function MetricCards({ actionRequired }: { actionRequired: ReactNode }) {
 
   if (reportingCount === 0 && !hasDeadLetters && actionItems.data?.unavailable !== undefined) {
     return (
-      <section className="overview-coverage mb-6" aria-labelledby="overview-reporting-pending-title">
-        <div className="overview-section-label"><span>Operational reporting</span><span>Data pending</span></div>
-        <h2 id="overview-reporting-pending-title">Operational values are not available yet.</h2>
-        <p>The platform has not reported metrics or action-required items. Pending values are not treated as zero.</p>
+      <section className="overview-coverage" aria-labelledby="overview-reporting-pending-title">
+        <div className="overview-section-label"><span>Operational reporting</span><span>Unavailable</span></div>
+        <h2 id="overview-reporting-pending-title">Operational metrics are not available on OmniWA GO.</h2>
+        <p>OmniWA GO does not expose dashboard metrics or action-required items.</p>
       </section>
     );
   }
