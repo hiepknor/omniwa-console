@@ -14,16 +14,12 @@ export function CreateInstanceDialog({
   onCancel: () => void;
   onCreate: (body: InstanceCreateRequest) => void;
 }) {
-  const [instanceId, setInstanceId] = useState('');
   const [name, setName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const descriptionId = useId();
-  const trimmedId = instanceId.trim();
+  const trimmedName = name.trim();
 
-  const submit = () => {
-    if (!trimmedId) return;
-    onCreate({ instanceId: trimmedId, name: name.trim() || undefined });
-  };
+  const submit = () => onCreate({ name: trimmedName || undefined });
 
   return (
     <ModalDialog
@@ -38,16 +34,12 @@ export function CreateInstanceDialog({
       closeLabel="Close new instance dialog"
       describedBy={descriptionId}
       secondaryAction={<button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button>}
-      primaryAction={<button className="btn primary" type="submit" disabled={!trimmedId || isPending}>{isPending ? 'Submitting…' : 'Create instance'}</button>}
+      primaryAction={<button className="btn primary" type="submit" disabled={isPending}>{isPending ? 'Submitting…' : 'Create instance'}</button>}
     >
-      <p className="dialog-sheet-copy" id={descriptionId}>Choose a stable instance ID, then open the instance to begin QR pairing.</p>
-      <div className="field">
-        <label htmlFor="new-instance-id">Instance ID</label>
-        <input ref={inputRef} className="input" id="new-instance-id" value={instanceId} onChange={(event) => setInstanceId(event.target.value)} disabled={isPending} autoComplete="off" placeholder="e.g. sales-bot" />
-      </div>
+      <p className="dialog-sheet-copy" id={descriptionId}>omniwa-go assigns the instance ID and access token automatically. Give it a display name, then open it to begin QR pairing.</p>
       <div className="field">
         <label htmlFor="new-instance-name">Display name (optional)</label>
-        <input className="input" id="new-instance-name" value={name} onChange={(event) => setName(event.target.value)} disabled={isPending} autoComplete="off" />
+        <input ref={inputRef} className="input" id="new-instance-name" value={name} onChange={(event) => setName(event.target.value)} disabled={isPending} autoComplete="off" placeholder="e.g. Sales bot" />
       </div>
       {error !== undefined && error !== null && <InlineError error={error} onRetry={submit} announce />}
     </ModalDialog>

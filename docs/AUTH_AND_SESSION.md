@@ -20,8 +20,8 @@ is baked into the build; there is no backend-for-frontend.
 Inputs:
 
 - **API base URL** — defaults to the omniwa-go dev origin
-  `http://localhost:8080` (`DEFAULT_BASE_URL` in `src/api/client.ts`). The
-  submitted value is validated as an origin.
+  `http://localhost:4000` (`DEFAULT_BASE_URL` in `src/api/client.ts`, matching
+  `docker/docker-compose.dev.yml`). The submitted value is validated as an origin.
 - **API key** — password-style input, never echoed after submit.
 
 On submit the console **probes and classifies** the key (`probeKey` in

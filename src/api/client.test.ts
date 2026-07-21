@@ -31,6 +31,6 @@ describe('createApiClient', () => {
   });
 
   it('defaults to the omniwa-go dev origin', () => {
-    expect(DEFAULT_BASE_URL).toBe('http://localhost:8080');
+    expect(DEFAULT_BASE_URL).toBe('http://localhost:4000');
   });
 });

@@ -28,7 +28,7 @@ export type InstanceResource = {
 
 export type InstanceStatusResource = { connected: boolean; loggedIn: boolean; name?: string };
 export type InstanceQr = { qrcode?: string; code?: string };
-export type InstanceCreateRequest = { instanceId: string; name?: string };
+export type InstanceCreateRequest = { name?: string };
 
 export type InstancePagination = { nextCursor?: string | null; hasMore?: boolean };
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
@@ -68,8 +68,12 @@ export async function getInstance(client: ApiClient, instanceId: string): Promis
 }
 
 export async function createInstance(client: ApiClient, body: InstanceCreateRequest): Promise<CommandResult> {
+  // omniwa-go requires a UUID `instanceId` (the primary key) and a `token` (the
+  // per-instance apikey); both are generated here rather than entered by hand.
+  const instanceId = crypto.randomUUID();
+  const token = crypto.randomUUID();
   return unwrapCommand(
-    await client.POST('/instance/create', { body: { instanceId: body.instanceId, name: body.name || body.instanceId } }),
+    await client.POST('/instance/create', { body: { instanceId, token, name: body.name || instanceId } }),
   );
 }
 
