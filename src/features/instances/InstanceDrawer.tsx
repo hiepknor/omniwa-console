@@ -17,8 +17,13 @@ import {
   useReconnectInstance,
 } from './hooks';
 
-function statusDot(connected: boolean) {
-  return connected ? 'dot-ok' : 'dot-failed';
+// omniwa-go distinguishes `connected` (websocket to WhatsApp is up) from
+// `loggedIn` (a phone has scanned the QR and the account is paired). Pairing is
+// only complete once loggedIn is true.
+function pairStatus(connected: boolean, loggedIn: boolean): { dot: string; label: string } {
+  if (loggedIn) return { dot: 'dot-ok', label: 'connected' };
+  if (connected) return { dot: 'dot-pending', label: 'pairing' };
+  return { dot: 'dot-failed', label: 'disconnected' };
 }
 
 export function InstanceDrawer({
@@ -38,8 +43,10 @@ export function InstanceDrawer({
   const status = useInstanceStatus(instance.id, instance.token);
   const connected = status.data?.connected ?? instance.connected;
   const loggedIn = status.data?.loggedIn ?? false;
+  const pair = pairStatus(connected, loggedIn);
+  const needsPairing = tokenAvailable && !loggedIn;
 
-  const qr = useInstanceQr(instance.id, instance.token, tokenAvailable && !connected);
+  const qr = useInstanceQr(instance.id, instance.token, needsPairing);
   const connect = useConnectInstance(instance.id, instance.token);
   const reconnect = useReconnectInstance(instance.id, instance.token);
   const disconnect = useDisconnectInstance(instance.id, instance.token);
@@ -58,12 +65,13 @@ export function InstanceDrawer({
 
   return (
     <>
-      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<StatusIndicator dotClass={statusDot(connected)}>{connected ? 'connected' : 'disconnected'}</StatusIndicator>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
+      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<StatusIndicator dotClass={pair.dot}>{pair.label}</StatusIndicator>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
           <section aria-labelledby="instance-facts-title">
             <h3 id="instance-facts-title" className="visually-hidden">Instance facts</h3>
             <dl className="kv">
-              <dt>Connection</dt><dd><StatusIndicator size="small" dotClass={statusDot(connected)}>{connected ? 'connected' : 'disconnected'}</StatusIndicator></dd>
-              <dt>Logged in</dt><dd>{loggedIn ? 'yes' : 'no'}</dd>
+              <dt>Status</dt><dd><StatusIndicator size="small" dotClass={pair.dot}>{pair.label}</StatusIndicator></dd>
+              <dt>Websocket</dt><dd>{connected ? 'connected' : 'disconnected'}</dd>
+              <dt>Paired</dt><dd>{loggedIn ? 'yes' : 'no'}</dd>
               <dt>WhatsApp ID</dt><dd className="mono" title={instance.jid}>{instance.jid ?? '—'}</dd>
               <dt>Created</dt><dd className="ts" title={instance.createdAt}>{relativeTime(instance.createdAt) || '—'}</dd>
             </dl>
@@ -78,48 +86,51 @@ export function InstanceDrawer({
             />
           )}
 
-          {tokenAvailable && !connected && (
+          {needsPairing && (
             <section aria-labelledby="pair-device-title">
               <div className="drawer-section-head"><div><span className="eyebrow">Pairing workflow</span><h3 id="pair-device-title">Pair device</h3></div></div>
               <div className="qrwell">
                 {qr.data?.qrcode ? (
                   <>
                     <img src={qr.data.qrcode} alt="Scan this QR code with WhatsApp to pair the device" className="max-w-[220px]" />
-                    <p>Scan with WhatsApp on the phone that owns this account. The code refreshes automatically.</p>
+                    <p>On the phone that owns this account: WhatsApp → Linked Devices → Link a Device, then scan. The code refreshes automatically.</p>
                   </>
                 ) : qr.isError ? (
                   <InlineError error={qr.error} onRetry={qr.refetch} />
+                ) : connected ? (
+                  <>
+                    <span className="eyebrow">Generating QR…</span>
+                    <p>The connection is up; waiting for a pairing code.</p>
+                  </>
                 ) : (
                   <>
-                    <span className="eyebrow">QR not ready</span>
+                    <span className="eyebrow">Not connected</span>
                     <p>Start a connection to generate a pairing QR code.</p>
                   </>
                 )}
-                <button className="btn primary" type="button" disabled={commandPending} onClick={() => connect.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Connect') })}>
-                  {connect.isPending ? 'Connecting…' : 'Connect'}
+                <button className="btn primary" type="button" disabled={commandPending} onClick={() => (connected ? reconnect : connect).mutate(undefined, { onSuccess: (result) => commandFeedback(result, connected ? 'Restart pairing' : 'Connect') })}>
+                  {commandPending ? 'Working…' : connected ? 'Restart pairing' : 'Connect'}
                 </button>
-                {connect.error && <InlineError error={connect.error} announce onRetry={() => connect.mutate()} />}
+                {(connect.error ?? reconnect.error) && <InlineError error={connect.error ?? reconnect.error} announce onRetry={() => (connected ? reconnect : connect).mutate()} />}
               </div>
             </section>
           )}
 
-          <section aria-labelledby="lifecycle-title">
-            <span className="eyebrow">Instance controls</span>
-            <h3 id="lifecycle-title">Lifecycle</h3>
-            <div className="lifecycle-groups">
-              <div className="action-group">
-                <span>Manage the live connection for this instance.</span>
-                <div className="actions">
-                  {connected ? (
-                    <button className="btn" type="button" disabled={!tokenAvailable || commandPending} onClick={() => reconnect.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Reconnect') })}>Reconnect</button>
-                  ) : (
-                    <button className="btn" type="button" disabled={!tokenAvailable || commandPending} onClick={() => connect.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Connect') })}>Connect</button>
-                  )}
+          {tokenAvailable && loggedIn && (
+            <section aria-labelledby="lifecycle-title">
+              <span className="eyebrow">Instance controls</span>
+              <h3 id="lifecycle-title">Lifecycle</h3>
+              <div className="lifecycle-groups">
+                <div className="action-group">
+                  <span>Bounce the live connection for this instance.</span>
+                  <div className="actions">
+                    <button className="btn" type="button" disabled={commandPending} onClick={() => reconnect.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Reconnect') })}>Reconnect</button>
+                  </div>
                 </div>
+                {reconnect.error && <InlineError error={reconnect.error} announce onRetry={() => reconnect.mutate()} />}
               </div>
-              {reconnect.error && <InlineError error={reconnect.error} announce onRetry={() => reconnect.mutate()} />}
-            </div>
-          </section>
+            </section>
+          )}
 
           <section aria-labelledby="instance-danger-title">
             <span className="eyebrow">Danger zone</span>
