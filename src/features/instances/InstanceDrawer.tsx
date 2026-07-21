@@ -46,7 +46,8 @@ export function InstanceDrawer({
   const pair = pairStatus(connected, loggedIn);
   const needsPairing = tokenAvailable && !loggedIn;
 
-  const qr = useInstanceQr(instance.id, instance.token, needsPairing);
+  // A pairing QR only exists once the websocket is connected, so only poll then.
+  const qr = useInstanceQr(instance.id, instance.token, tokenAvailable && connected && !loggedIn);
   const connect = useConnectInstance(instance.id, instance.token);
   const reconnect = useReconnectInstance(instance.id, instance.token);
   const disconnect = useDisconnectInstance(instance.id, instance.token);

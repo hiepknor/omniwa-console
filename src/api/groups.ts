@@ -140,11 +140,6 @@ export async function updateGroupLocalState(
   throw notImplemented('Group local state');
 }
 
-export async function refreshInstanceGroups(_client: ApiClient, _instanceId?: string): Promise<CommandResult> {
-  // omniwa-go serves groups live from /group/list; "sync" is just a client refetch.
-  return { disposition: 'completed', data: null };
-}
-
 export async function refreshGroupInviteLink(client: ApiClient, groupJid: string): Promise<CommandResult> {
   return unwrapCommand(await client.POST('/group/invitelink', { body: { groupJid, reset: true } }));
 }

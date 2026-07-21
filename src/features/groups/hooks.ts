@@ -11,7 +11,6 @@ import {
   listInstanceGroups,
   promoteGroupMember,
   refreshGroupInviteLink,
-  refreshInstanceGroups,
   removeGroupMember,
   sendGroupTextMessage,
   updateGroup,
@@ -194,21 +193,10 @@ export function useSendGroupText(groupId: string, token: string | undefined) {
   });
 }
 
-export function useRefreshGroups(instanceId: string, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+/** Refetch the group directory from omniwa-go's live connection. */
+export function useRefreshGroups(instanceId: string) {
   const queryClient = useQueryClient();
-  const feedback = useFeedback();
   return useMutation({
-    mutationFn: () => refreshInstanceGroups(tokenClient as ApiClient, instanceId),
-    onSuccess: async (result) => {
-      feedback.command(result.disposition, {
-        action: 'Group sync',
-        acceptedDetail: 'Refreshing groups from the live connection.',
-        completedDetail: 'Groups refreshed from the live connection.',
-        requestId: result.requestId,
-        dedupeKey: `instance:${instanceId}:refresh-groups`,
-      });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) });
-    },
+    mutationFn: () => queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) }),
   });
 }

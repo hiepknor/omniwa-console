@@ -65,8 +65,8 @@ export function InstancesPage() {
     });
   }, [instances, search, status]);
   const statuses = [...new Set(instances.map((instance) => instance.status))].sort();
-  const latestUpdate = instances
-    .map((instance) => instance.updatedAt)
+  const latestCreated = instances
+    .map((instance) => instance.createdAt)
     .filter((value): value is string => value !== undefined)
     .sort()
     .at(-1);
@@ -101,15 +101,14 @@ export function InstancesPage() {
       mobile: 'secondary',
       cell: (instance) => <StatusIndicator dotClass={statusDot(instance.status)}>{instance.status ?? '—'}</StatusIndicator>,
     },
-    { id: 'messages', header: 'Msgs 24h', size: 'sm', kind: 'numeric', align: 'end', mobile: 'hidden', cell: () => <span className="num">—</span> },
     {
-      id: 'updated',
-      header: 'Updated',
+      id: 'created',
+      header: 'Created',
       size: 'md',
       kind: 'date',
       mobile: 'meta',
-      cell: (instance) => <span className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</span>,
-      mobileCell: (instance) => relativeTime(instance.updatedAt) || undefined,
+      cell: (instance) => <span className="ts" title={instance.createdAt}>{relativeTime(instance.createdAt) || '—'}</span>,
+      mobileCell: (instance) => relativeTime(instance.createdAt) || undefined,
     },
   ];
   const tableState: DataTableState<InstanceRow> = listReadState.isInitialError
@@ -186,7 +185,7 @@ export function InstancesPage() {
           })}
           footer={(
             <DataTableFooter
-              primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>}
+              primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{filteredInstances.length} loaded instances</span><span className="freshness">Newest {relativeTime(latestCreated) || '—'}</span></> : <span className="num">Results —</span>}
               actions={<div className="pagination"><button className="btn" type="button" onClick={refresh}>Refresh</button></div>}
             />
           )}

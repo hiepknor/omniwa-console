@@ -4,15 +4,11 @@ import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
 import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
-import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
 import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { isTransportError } from '@/components/feedback/feedback-policy';
-import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import {
   DataTable,
-  DataTableActiveFilters,
-  DataTableFilterTrigger,
   DataTableFooter,
   DataTableToolbar,
   DataTableWorkspace,
@@ -142,23 +138,17 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   onSetParam: (name: string, value: string) => void;
 }) {
   const [searchParams] = useSearchParams();
-  const [filterOpen, setFilterOpen] = useState(false);
-  const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const list = useInstanceGroups(instanceId, token);
-  const refresh = useRefreshGroups(instanceId, token);
+  const refresh = useRefreshGroups(instanceId);
   const readState = useResilientReadState(list, list.data?.resource !== undefined);
   const unavailable = list.data?.unavailable !== undefined;
   const groups = useMemo(() => list.data?.resource?.items ?? [], [list.data]);
   const search = searchParams.get('search') ?? '';
-  const status = searchParams.get('status') ?? '';
   const filteredGroups = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    return groups.filter((group) => {
-      const matchesSearch = !needle || group.id.toLowerCase().includes(needle) || group.subject?.toLowerCase().includes(needle);
-      return matchesSearch && (!status || group.status === status);
-    });
-  }, [groups, search, status]);
-  const statuses = [...new Set(groups.map((group) => group.status).filter((value): value is string => Boolean(value)))].sort();
+    if (!needle) return groups;
+    return groups.filter((group) => group.id.toLowerCase().includes(needle) || group.subject?.toLowerCase().includes(needle));
+  }, [groups, search]);
   const latestUpdate = groups.map((group) => group.updatedAt).filter((value): value is string => value !== undefined).sort().at(-1);
   const adminCounts = groups.filter((group) => group.adminCount !== undefined);
   const knownAdmins = adminCounts.reduce((total, group) => total + (group.adminCount ?? 0), 0);
@@ -187,14 +177,9 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
         : filteredGroups.length === 0
           ? { status: 'empty', message: groups.length === 0
             ? <span className="groups-state-copy"><strong>No groups synced yet.</strong><span>Groups appear after this instance syncs its group directory.</span><button className="btn" type="button" disabled={refresh.isPending} onClick={() => refresh.mutate()}>{refresh.isPending ? 'Requesting sync…' : 'Refresh group sync'}</button></span>
-            : <span className="groups-state-copy"><strong>No groups match these filters.</strong><span>Adjust the search or status filter.</span></span> }
+            : <span className="groups-state-copy"><strong>No groups match this search.</strong><span>Adjust or clear the search.</span></span> }
           : { status: 'ready', rows: filteredGroups };
   const stateOnlyTable = tableState.status === 'empty' || tableState.status === 'unavailable' || tableState.status === 'error';
-  const statusOptions: SelectDropdownOption[] = [
-    { value: '', label: 'All statuses', description: 'Do not filter the table' },
-    ...statuses.map((item) => ({ value: item, label: item, meta: String(groups.filter((group) => group.status === item).length) })),
-  ];
-  const activeFilters = status ? [{ id: 'status', label: `Status: ${status}`, onRemove: () => onSetParam('status', '') }] : [];
   const closeGroup = () => {
     const activeRow = document.querySelector<HTMLElement>('.groups-table tr[data-active="true"]');
     onSetParam('group', '');
@@ -231,9 +216,6 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
             <input className="search" type="search" value={search} onChange={(event) => onSetParam('search', event.target.value)} placeholder="Search loaded groups" />
           </label>
-          <span className="data-table-toolbar-desktop-filters"><SelectDropdown label="Status" value={status} options={statusOptions} onChange={(value) => onSetParam('status', value)} /></span>
-          <DataTableFilterTrigger ref={filterTriggerRef} count={activeFilters.length} aria-expanded={filterOpen} onClick={() => setFilterOpen(true)} />
-          <DataTableActiveFilters filters={activeFilters} />
         </DataTableToolbar>}
         <div className={`groups-table max-[640px]:[&_.empty]:!px-4 max-[640px]:[&_.empty]:!py-8 ${stateOnlyTable ? 'max-[1024px]:[&_.responsive-table]:!w-full max-[1024px]:[&_.responsive-table]:!min-w-0 max-[1024px]:[&_thead]:!hidden' : ''} ${zeroGroups ? '[&_.responsive-table]:!w-full [&_.responsive-table]:!min-w-0 [&_thead]:!hidden [&_.responsive-table-scroll]:!border-b-0' : ''}`}>
           <DataTable
@@ -262,13 +244,6 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
           />
         </div>
       </DataTableWorkspace>
-
-      <MobileFilterSheet open={filterOpen} title="Filter groups" onClose={() => setFilterOpen(false)} returnFocusRef={filterTriggerRef}>
-        <section className="mobile-filter-section" aria-labelledby="group-status-filter"><h3 id="group-status-filter">Status</h3><div className="mobile-filter-options">
-          {statusOptions.map((option) => <button key={option.value} className={option.value === status ? 'is-selected' : undefined} type="button" aria-pressed={option.value === status} onClick={() => onSetParam('status', option.value)}><span className="filter-option-check" aria-hidden="true">✓</span><span>{option.label}</span>{option.meta && <span className="num">{option.meta}</span>}</button>)}
-        </div></section>
-        <button className="btn primary mobile-filter-done" type="button" onClick={() => setFilterOpen(false)}>Done</button>
-      </MobileFilterSheet>
 
       {groupId && <GroupDrawer key={groupId} groupId={groupId} subject={selectedGroup?.subject} instanceId={instanceId} token={token} onClose={closeGroup} />}
     </>
@@ -304,7 +279,7 @@ export function GroupsPage() {
   const setParam = (name: string, value: string) => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(name, value); else next.delete(name);
-    if (name === 'search' || name === 'status') next.delete('cursor');
+    if (name === 'search') next.delete('cursor');
     setSearchParams(next, { replace: true });
   };
 

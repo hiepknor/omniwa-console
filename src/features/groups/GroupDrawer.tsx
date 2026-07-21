@@ -103,6 +103,14 @@ function GroupDrawerContent({ group, instanceId, token }: { group: GroupResource
     else if (demote.error && demote.variables) demote.mutate(demote.variables);
     else if (remove.error && remove.variables) remove.mutate(remove.variables);
   };
+  // Only send fields that actually changed, so a rename never overwrites the
+  // group's description (and vice versa).
+  const submitMetadata = () => {
+    const changed: { subject?: string; description?: string } = {};
+    if (subject !== (group.subject ?? '')) changed.subject = subject;
+    if (description !== (group.description ?? '')) changed.description = description;
+    update.mutate(changed);
+  };
 
   return (
     <>
@@ -119,14 +127,11 @@ function GroupDrawerContent({ group, instanceId, token }: { group: GroupResource
 
       <section aria-labelledby="group-metadata-title">
         <h3 id="group-metadata-title">Metadata</h3>
-        <form className="groups-metadata-form" onSubmit={(event) => {
-          event.preventDefault();
-          update.mutate({ subject, description });
-        }}>
+        <form className="groups-metadata-form" onSubmit={(event) => { event.preventDefault(); submitMetadata(); }}>
           <div className="field"><label htmlFor="group-subject">Subject</label><input id="group-subject" className="input" value={subject} disabled={update.isPending} onChange={(event) => setSubject(event.target.value)} /></div>
           <div className="field"><label htmlFor="group-description">Description</label><textarea id="group-description" className="input groups-description" rows={3} value={description} disabled={update.isPending} onChange={(event) => setDescription(event.target.value)} /></div>
           <button className="btn" type="submit" disabled={update.isPending || !metadataChanged}>{update.isPending ? 'Updating…' : 'Update metadata'}</button>
-          {update.error && <InlineError error={update.error} announce onRetry={() => update.mutate({ subject, description })} />}
+          {update.error && <InlineError error={update.error} announce onRetry={submitMetadata} />}
         </form>
       </section>
 

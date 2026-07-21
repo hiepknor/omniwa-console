@@ -19,7 +19,7 @@ export function CreateInstanceDialog({
   const descriptionId = useId();
   const trimmedName = name.trim();
 
-  const submit = () => onCreate({ name: trimmedName || undefined });
+  const submit = () => { if (trimmedName) onCreate({ name: trimmedName }); };
 
   return (
     <ModalDialog
@@ -34,11 +34,11 @@ export function CreateInstanceDialog({
       closeLabel="Close new instance dialog"
       describedBy={descriptionId}
       secondaryAction={<button className="btn" type="button" onClick={onCancel} disabled={isPending}>Cancel</button>}
-      primaryAction={<button className="btn primary" type="submit" disabled={isPending}>{isPending ? 'Submitting…' : 'Create instance'}</button>}
+      primaryAction={<button className="btn primary" type="submit" disabled={!trimmedName || isPending}>{isPending ? 'Submitting…' : 'Create instance'}</button>}
     >
       <p className="dialog-sheet-copy" id={descriptionId}>omniwa-go assigns the instance ID and access token automatically. Give it a display name, then open it to begin QR pairing.</p>
       <div className="field">
-        <label htmlFor="new-instance-name">Display name (optional)</label>
+        <label htmlFor="new-instance-name">Display name</label>
         <input ref={inputRef} className="input" id="new-instance-name" value={name} onChange={(event) => setName(event.target.value)} disabled={isPending} autoComplete="off" placeholder="e.g. Sales bot" />
       </div>
       {error !== undefined && error !== null && <InlineError error={error} onRetry={submit} announce />}
