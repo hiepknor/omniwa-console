@@ -1,9 +1,10 @@
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { MessageResource } from '@/api/chats';
 import { InlineError } from '@/components/InlineError';
 import { calendarDayKey, calendarDayLabel, formatClockTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
+import { dismissVirtualKeyboard } from '@/lib/useVisualViewport';
 import { useInstanceMessages } from './hooks';
 
 function messageDirection(direction: string | undefined): 'in' | 'out' {
@@ -88,6 +89,7 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
   const nearBottomRef = useRef(true);
   const initialChatRef = useRef<string>();
   const previousLastMessageRef = useRef<string>();
+  const [newMessagesWaiting, setNewMessagesWaiting] = useState(false);
   const pages = query.data?.pages ?? [];
   const readState = useResilientReadState(query, pages.some((page) => page.resource !== undefined));
   const unavailable = pages.some((page) => page.unavailable !== undefined);
@@ -112,12 +114,60 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
     if (!pane || messages.length === 0) return;
     const firstLoadForChat = initialChatRef.current !== chatId;
     const appended = previousLastMessageRef.current !== undefined && previousLastMessageRef.current !== lastMessageId;
-    if (firstLoadForChat || (appended && nearBottomRef.current)) pane.scrollTop = pane.scrollHeight;
+    if (firstLoadForChat || (appended && nearBottomRef.current)) {
+      pane.scrollTop = pane.scrollHeight;
+      setNewMessagesWaiting(false);
+    } else if (appended) {
+      setNewMessagesWaiting(true);
+    }
     initialChatRef.current = chatId;
     previousLastMessageRef.current = lastMessageId;
   }, [chatId, lastMessageId, messages.length]);
 
+  useEffect(() => {
+    const pane = paneRef.current;
+    if (pane === null || typeof ResizeObserver === 'undefined') return;
+
+    let frame = 0;
+    let previousHeight = pane.clientHeight;
+    const observer = new ResizeObserver(() => {
+      const nextHeight = pane.clientHeight;
+      if (nextHeight === previousHeight) return;
+      previousHeight = nextHeight;
+      if (!nearBottomRef.current) return;
+
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => { pane.scrollTop = pane.scrollHeight; });
+    });
+
+    observer.observe(pane);
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  const loadOlder = async () => {
+    const pane = paneRef.current;
+    const previousHeight = pane?.scrollHeight ?? 0;
+    const previousTop = pane?.scrollTop ?? 0;
+    await query.fetchNextPage();
+    requestAnimationFrame(() => {
+      if (!pane) return;
+      pane.scrollTop = previousTop + pane.scrollHeight - previousHeight;
+    });
+  };
+
+  const scrollToLatest = () => {
+    const pane = paneRef.current;
+    if (!pane) return;
+    pane.scrollTo({ top: pane.scrollHeight, behavior: 'smooth' });
+    nearBottomRef.current = true;
+    setNewMessagesWaiting(false);
+  };
+
   const selectMessage = (messageId: string) => {
+    dismissVirtualKeyboard();
     const next = new URLSearchParams(searchParams);
     if (selectedMessageId === messageId) {
       next.delete('message');
@@ -147,26 +197,30 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
   }
 
   return (
-    <div
-      className="timeline-pane"
-      role="log"
-      aria-label="Message timeline"
-      aria-live="off"
-      ref={paneRef}
-      onScroll={(event) => {
-        const pane = event.currentTarget;
-        nearBottomRef.current = pane.scrollHeight - pane.scrollTop - pane.clientHeight < 80;
-      }}
-    >
-      <div className="timeline-stack">
-        {readState.isStaleError && <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-thread-error" />}
-        {query.hasNextPage && !unavailable && (
-          <button className="btn sm load-older" type="button" disabled={query.isFetchingNextPage} onClick={() => { void query.fetchNextPage(); }}>
-            {query.isFetchingNextPage ? 'Loading older…' : 'Load older'}
-          </button>
-        )}
-        {content}
+    <div className="chat-timeline-shell">
+      <div
+        className="timeline-pane"
+        role="log"
+        aria-label="Message timeline"
+        aria-live="off"
+        ref={paneRef}
+        onScroll={(event) => {
+          const pane = event.currentTarget;
+          nearBottomRef.current = pane.scrollHeight - pane.scrollTop - pane.clientHeight < 80;
+          if (nearBottomRef.current) setNewMessagesWaiting(false);
+        }}
+      >
+        <div className="timeline-stack">
+          {readState.isStaleError && <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-thread-error" />}
+          {query.hasNextPage && !unavailable && (
+            <button className="btn sm load-older" type="button" disabled={query.isFetchingNextPage} onClick={() => { void loadOlder(); }}>
+              {query.isFetchingNextPage ? 'Loading older…' : 'Load older'}
+            </button>
+          )}
+          {content}
+        </div>
       </div>
+      {newMessagesWaiting && <button className="btn sm chat-new-messages" type="button" onClick={scrollToLatest}>New messages ↓</button>}
     </div>
   );
 }

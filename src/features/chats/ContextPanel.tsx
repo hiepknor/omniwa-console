@@ -173,10 +173,12 @@ function ContextPanelDetails({ instanceId, chat, onBack }: {
   const labelNames = new Map((labels.data?.resource?.items ?? []).map((label) => [label.id, label.name ?? label.id]));
 
   return (
-    <aside className="context" id="chat-context" aria-label="Contact and selected message context">
+    <aside className={`context${selectedMessageId ? ' context--message' : ' context--contact'}`} id="chat-context" aria-label="Contact and selected message context">
       <header className="context-head">
-        <div><span className="eyebrow">Context</span><h2>Contact details</h2></div>
-        <button className="btn sm context-close" type="button" data-pane-target="thread" aria-controls="chat-thread" onClick={onBack}>Back to thread</button>
+        <div><span className="eyebrow">{selectedMessageId ? 'Message' : 'Context'}</span><h2>{selectedMessageId ? 'Message details' : 'Contact details'}</h2></div>
+        <button className="btn sm context-close chat-icon-action" type="button" data-pane-target="thread" aria-label={selectedMessageId ? 'Close message details' : 'Back to conversation'} aria-controls="chat-thread" onClick={onBack}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">{selectedMessageId ? <path d="m7 7 10 10M17 7 7 17" /> : <path d="m15 18-6-6 6-6" />}</svg>
+        </button>
       </header>
       <section aria-labelledby="contact-facts-title">
         <h3 id="contact-facts-title">Contact</h3>
@@ -204,10 +206,10 @@ export function ContextPanel({ instanceId, chat, onBack }: {
 }) {
   if (!chat) {
     return (
-      <aside className="context" id="chat-context" aria-label="Contact and selected message context">
+      <aside className="context context--contact" id="chat-context" aria-label="Contact and selected message context">
         <header className="context-head">
           <div><span className="eyebrow">Context</span><h2>Contact details</h2></div>
-          <button className="btn sm context-close" type="button" data-pane-target="thread" aria-controls="chat-thread" onClick={onBack}>Back to thread</button>
+          <button className="btn sm context-close chat-icon-action" type="button" data-pane-target="thread" aria-label="Back to conversation" aria-controls="chat-thread" onClick={onBack}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg></button>
         </header>
         <section className="chat-calm-state">
           <span className="eyebrow">Context</span>

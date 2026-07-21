@@ -15,6 +15,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { InstanceResource } from '@/api/instances';
 import { CategoryPill } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
+import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { useInstanceChats, useInstanceLabels, usePickerInstances } from './hooks';
@@ -257,7 +258,10 @@ export function ConversationList({ instanceId, chatId }: {
       <div className="chat-calm-state"><span className="eyebrow">0 chats</span><h2>{chats.length === 0 ? 'No direct conversations yet.' : 'No conversations match these filters.'}</h2><p>{chats.length === 0 ? 'New direct conversations will appear here.' : 'Adjust the search or remove a label filter.'}</p></div>
     );
   } else {
-    listContent = filteredChats.map((chat) => (
+    listContent = filteredChats.map((chat) => {
+      const firstLabelId = chat.labelIds?.[0];
+      const remainingLabelCount = Math.max(0, (chat.labelIds?.length ?? 0) - 1);
+      return (
       <button
         className={`convo${chat.id === chatId ? ' selected' : ''}`}
         key={chat.id}
@@ -269,8 +273,9 @@ export function ConversationList({ instanceId, chatId }: {
         <span className="meta">
           <span className="name">{chat.displayName ?? chat.id}</span>
           <span className="sub">
-            {chat.labelIds?.map((labelId) => <CategoryPill compact key={labelId}>{labelNames.get(labelId) ?? labelId}</CategoryPill>)}
-            <span className="mono chat-id">{chat.id}</span>
+            {firstLabelId
+              ? <><CategoryPill compact>{labelNames.get(firstLabelId) ?? firstLabelId}</CategoryPill>{remainingLabelCount > 0 && <span className="chat-label-count">+{remainingLabelCount}</span>}</>
+              : <span className="chat-row-summary">{chat.type ?? 'Direct conversation'}</span>}
           </span>
         </span>
         <span className="right">
@@ -278,12 +283,14 @@ export function ConversationList({ instanceId, chatId }: {
           {(chat.unreadCount ?? 0) > 0 && <span className="unread" aria-label={`${chat.unreadCount} unread ${chat.unreadCount === 1 ? 'message' : 'messages'}`}>{chat.unreadCount}</span>}
         </span>
       </button>
-    ));
+      );
+    });
   }
 
   return (
     <aside className="convos" id="chat-conversations" aria-label="Direct conversations">
       <header className="head">
+        <div className="chat-inbox-title-row"><h1>Chats</h1><RealtimeIndicator /></div>
         <InstancePicker instances={instances} selected={selectedInstance} onSelect={chooseInstance} />
         <label className="chat-search-label" htmlFor="chat-search">Search direct chats</label>
         <input className="search !min-h-11" id="chat-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search direct chats…" disabled={!instanceId} />

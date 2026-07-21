@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
 import { useResilientReadState } from '@/lib/query-state';
+import { dismissVirtualKeyboard } from '@/lib/useVisualViewport';
 import { useMessagingInstance, useRequestInstanceReconnect, useSendMediaMessage, useSendTextMessage } from './hooks';
 import { MediaAttachDialog } from './MediaAttachDialog';
 
@@ -50,7 +51,7 @@ export function Composer({ instanceId, chatId, chatName }: {
       {instanceReadState.isStaleError && <InlineError error={instanceReadState.error} onRetry={() => { void instance.refetch(); }} />}
       {send.isError && <InlineError error={send.error} onRetry={submit} className="composer-error" announce />}
       <form className="composer" aria-label="Send a direct message" onSubmit={(event) => { event.preventDefault(); submit(); }}>
-        <button className="btn attach-button" type="button" disabled={!connected || send.isPending || sendMedia.isPending} title="Attach media" aria-label="Attach media" onClick={() => setAttachOpen(true)}>
+        <button className="btn attach-button" type="button" disabled={!connected || send.isPending || sendMedia.isPending} title="Attach media" aria-label="Attach media" onClick={(event) => { dismissVirtualKeyboard(); event.currentTarget.focus(); setAttachOpen(true); }}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.5 11.5-8.8 8.8a6 6 0 0 1-8.5-8.5l9.4-9.4a4 4 0 0 1 5.7 5.7l-9.4 9.4a2 2 0 0 1-2.8-2.8l8.8-8.8" /></svg>
         </button>
         <label className="composer-field" htmlFor="message-compose">
@@ -64,13 +65,16 @@ export function Composer({ instanceId, chatId, chatName }: {
             disabled={!connected || send.isPending}
             onChange={(event) => setText(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key !== 'Enter' || event.shiftKey) return;
+              if (event.key !== 'Enter' || event.shiftKey || window.matchMedia('(hover: none) and (pointer: coarse)').matches) return;
               event.preventDefault();
               submit();
             }}
           />
         </label>
-        <button className="btn primary" type="submit" disabled={!canSend}>{send.isPending ? 'Sending…' : 'Send'}</button>
+        <button className="btn primary composer-send" type="submit" disabled={!canSend} aria-label={send.isPending ? 'Sending message' : 'Send message'}>
+          <span className="composer-send-label">{send.isPending ? 'Sending…' : 'Send'}</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8-3-8Z" /><path d="M7 12h14" /></svg>
+        </button>
       </form>
       <p className="composer-note">Command outcome appears immediately; delivery status remains separate and updates in history.</p>
       {attachOpen && (
