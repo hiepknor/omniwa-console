@@ -219,7 +219,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
         </DataTableToolbar>}
         <div className={`groups-table max-[640px]:[&_.empty]:!px-4 max-[640px]:[&_.empty]:!py-8 ${stateOnlyTable ? 'max-[1024px]:[&_.responsive-table]:!w-full max-[1024px]:[&_.responsive-table]:!min-w-0 max-[1024px]:[&_thead]:!hidden' : ''} ${zeroGroups ? '[&_.responsive-table]:!w-full [&_.responsive-table]:!min-w-0 [&_thead]:!hidden [&_.responsive-table-scroll]:!border-b-0' : ''}`}>
           <DataTable
-            caption="Groups with membership counts, local state, status, and update time"
+            caption="Groups with membership counts, admin counts, status, and creation time"
             captionId="groups-table-title"
             layout="wide"
             attached

@@ -184,7 +184,7 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
   } else if (readState.isInitialLoading) {
     content = <div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading message history.</h2><p>The first instance message page is in progress.</p></div>;
   } else if (unavailable && messages.length === 0) {
-    content = <div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Message history is not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div>;
+    content = <div className="chat-calm-state"><span className="eyebrow">Unavailable</span><h2>Message history is not available on OmniWA GO.</h2><p>OmniWA GO has no message-history API.</p></div>;
   } else if (messages.length === 0) {
     content = <div className="chat-calm-state"><span className="eyebrow">0 messages</span><h2>No messages loaded for this conversation yet.</h2><p>History loads per instance, so older conversation messages may appear as more pages are loaded.</p></div>;
   } else {
