@@ -1,12 +1,9 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { createApiClient } from '@/api/client';
-import { ApiFailure, unwrap } from '@/api/envelopes';
-import { MOCK_API_KEY, MOCK_API_ORIGIN } from '@/api/mock/config';
+import { createApiClient, DEFAULT_BASE_URL } from '@/api/client';
+import { ApiFailure } from '@/api/envelopes';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
-
-const DEFAULT_BASE_URL = import.meta.env.DEV ? window.location.origin : 'http://localhost:3000';
 
 type ConnectError = {
   category: string;
@@ -14,14 +11,22 @@ type ConnectError = {
   requestId?: string;
 };
 
-async function detectKeyKind(client: ReturnType<typeof createApiClient>): Promise<KeyKind> {
-  try {
-    unwrap(await client.GET('/v1/api-keys'));
-    return 'admin';
-  } catch (error) {
-    if (error instanceof ApiFailure && error.category === 'authorization') return 'api';
-    return 'unknown';
+/**
+ * Validate the pasted apikey against omniwa-go and classify it. The global admin
+ * key can list every instance (`GET /instance/all`); a per-instance token cannot,
+ * but can read its own status (`GET /instance/status`). A 401 on both means the
+ * key is invalid.
+ */
+async function probeKey(client: ReturnType<typeof createApiClient>): Promise<KeyKind> {
+  const admin = await client.GET('/instance/all');
+  if (admin.data !== undefined) return 'admin';
+  if (admin.response.status !== 401 && admin.response.status !== 403) {
+    throw new ApiFailure(admin.error, admin.response.status);
   }
+
+  const scoped = await client.GET('/instance/status');
+  if (scoped.data !== undefined) return 'api';
+  throw new ApiFailure(scoped.error, scoped.response.status);
 }
 
 function isValidOrigin(value: string) {
@@ -67,11 +72,10 @@ export function ConnectPage({
     setPending(true);
     try {
       const client = createApiClient({ baseUrl: origin, apiKey });
-      unwrap(await client.GET('/v1/health'));
       const session: ConsoleSession = {
         baseUrl: origin,
         apiKey,
-        keyKind: await detectKeyKind(client),
+        keyKind: await probeKey(client),
         connectedAt: new Date().toISOString(),
       };
       saveSession(session, remember);
@@ -88,17 +92,6 @@ export function ConnectPage({
     } finally {
       setPending(false);
     }
-  };
-
-  const openMockWorkspace = () => {
-    const session: ConsoleSession = {
-      baseUrl: MOCK_API_ORIGIN,
-      apiKey: MOCK_API_KEY,
-      keyKind: 'admin',
-      connectedAt: new Date().toISOString(),
-    };
-    saveSession(session, false);
-    onConnected(session);
   };
 
   const canSubmit = isValidOrigin(baseUrl) && apiKey.trim().length > 0 && !pending;
@@ -275,18 +268,9 @@ export function ConnectPage({
               disabled={!canSubmit}
               aria-busy={pending ? 'true' : undefined}
             >
-              {pending ? 'Connecting…' : 'Connect to platform'}
+              {pending ? 'Connecting…' : 'Connect to OmniWA GO'}
             </button>
           </form>
-          {import.meta.env.DEV && (
-            <footer className="flex min-h-[72px] items-center justify-between gap-4 border-t border-[var(--border-subtle)] bg-[var(--recessed)] !px-4 !py-3 max-[640px]:grid max-[640px]:grid-cols-1 max-[640px]:gap-3">
-              <div className="grid min-w-0 gap-0.5">
-                <span className="text-[9px] uppercase leading-[13px] tracking-[1.5px] text-[var(--muted)]">Development preview</span>
-                <p className="text-[11px] leading-4 text-[var(--fg-2)]">Open deterministic fixtures without contacting the platform.</p>
-              </div>
-              <button className="btn min-h-10 shrink-0 max-[640px]:min-h-11 max-[640px]:!w-full" type="button" onClick={openMockWorkspace}>Open mock workspace</button>
-            </footer>
-          )}
         </section>
       </div>
     </main>

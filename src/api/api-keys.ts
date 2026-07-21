@@ -1,20 +1,11 @@
 import type { ApiClient } from './client';
-import type { components } from './generated/schema';
-import {
-  ApiFailure,
-  parseUnavailableRead,
-  pickResources,
-  unwrapCommand,
-  type CommandResult,
-  type CollectionEnvelope,
-  type ErrorEnvelope,
-  type PublicData,
-  type UnavailableRead,
-} from './envelopes';
+import type { components } from './generated/platform-schema';
+import { notImplemented, type CollectionEnvelope, type CommandResult, type UnavailableRead } from './envelopes';
 
+// omniwa-go keys are static env (global key) plus per-instance tokens returned by
+// `POST /instance/create`; there is no key provisioning/rotation API. Stubbed.
 export type ApiKeyResource = components['schemas']['ApiKeyResource'];
-export type ApiKeyLifecycleOperationData =
-  components['schemas']['ApiKeyLifecycleOperationData'];
+export type ApiKeyLifecycleOperationData = components['schemas']['ApiKeyLifecycleOperationData'];
 export type ApiKeyProvisionRequest = components['schemas']['ApiKeyProvisionRequest'];
 export type ApiKeyRotationRequest = components['schemas']['ApiKeyRotationRequest'];
 export type ApiKeyRevocationRequest = components['schemas']['ApiKeyRevocationRequest'];
@@ -29,69 +20,29 @@ export type ApiKeyListPage = {
   pagination: ApiKeyPagination;
 };
 
-function unavailableOrThrow(result: { error?: unknown; response: Response }): UnavailableRead {
-  const unavailable = parseUnavailableRead(result.error);
-  if (unavailable !== undefined) return unavailable;
-  throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
-
-function lifecycleOperationFrom(
-  data: PublicData | undefined,
-): ApiKeyLifecycleOperationData | undefined {
-  if (data?.resourceType !== 'apiKey' || !('operationStatus' in data)) return undefined;
-  return data as ApiKeyLifecycleOperationData;
-}
-
 export async function listApiKeys(
-  client: ApiClient,
-  params: { cursor?: string; limit?: number; sort?: string } = {},
+  _client: ApiClient,
+  _params: { cursor?: string; limit?: number; sort?: string } = {},
 ): Promise<ReadResult<ApiKeyListPage>> {
-  const result = await client.GET('/v1/api-keys', {
-    params: {
-      query: { cursor: params.cursor, limit: params.limit ?? 50, sort: params.sort },
-    },
-  });
-  if (result.data !== undefined) {
-    return {
-      resource: {
-        items: pickResources(result.data.data, 'apiKey').filter(
-          (item): item is ApiKeyResource => 'id' in item,
-        ),
-        pagination: result.data.meta.pagination,
-      },
-    };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+  throw notImplemented('API keys');
 }
 
-export async function provisionApiKey(client: ApiClient, body: ApiKeyProvisionRequest) {
-  const result = await client.POST('/v1/api-keys', { body });
-  const command = unwrapCommand(result);
-  return { ...command, lifecycle: lifecycleOperationFrom(command.data) } satisfies ApiKeyCommandResult;
+export async function provisionApiKey(_client: ApiClient, _body: ApiKeyProvisionRequest): Promise<ApiKeyCommandResult> {
+  throw notImplemented('API key provisioning');
 }
 
 export async function rotateApiKey(
-  client: ApiClient,
-  keyId: string,
-  body: ApiKeyRotationRequest,
-) {
-  const result = await client.POST('/v1/api-keys/{keyId}/rotate', {
-    params: { path: { keyId } },
-    body,
-  });
-  const command = unwrapCommand(result);
-  return { ...command, lifecycle: lifecycleOperationFrom(command.data) } satisfies ApiKeyCommandResult;
+  _client: ApiClient,
+  _keyId: string,
+  _body: ApiKeyRotationRequest,
+): Promise<ApiKeyCommandResult> {
+  throw notImplemented('API key rotation');
 }
 
 export async function revokeApiKey(
-  client: ApiClient,
-  keyId: string,
-  body: ApiKeyRevocationRequest = {},
-) {
-  const result = await client.POST('/v1/api-keys/{keyId}/revoke', {
-    params: { path: { keyId } },
-    body,
-  });
-  const command = unwrapCommand(result);
-  return { ...command, lifecycle: lifecycleOperationFrom(command.data) } satisfies ApiKeyCommandResult;
+  _client: ApiClient,
+  _keyId: string,
+  _body: ApiKeyRevocationRequest = {},
+): Promise<ApiKeyCommandResult> {
+  throw notImplemented('API key revocation');
 }

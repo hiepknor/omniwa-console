@@ -1,207 +1,109 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  ApiFailure,
-  parseUnavailableRead,
-  pickResource,
-  pickResources,
-  unwrap,
-  unwrapCommand,
-  type ErrorEnvelope,
-  type PublicData,
-  type SuccessEnvelope,
-} from './envelopes';
-
-function errorEnvelope(overrides: {
-  code?: string;
-  message?: string;
-  category?: string;
-  retryable?: boolean;
-  requestId?: string;
-}): ErrorEnvelope {
-  return {
-    error: {
-      code: overrides.code ?? 'some_error',
-      message: overrides.message ?? 'Something went wrong.',
-      details: {
-        ...(overrides.category ? { category: overrides.category } : {}),
-        ...(overrides.retryable !== undefined ? { retryable: overrides.retryable } : {}),
-      },
-    },
-    meta: {
-      requestId: overrides.requestId ?? 'req_1',
-      correlationId: 'corr_1',
-      timestamp: '2026-07-20T00:00:00.000Z',
-    },
-  } as unknown as ErrorEnvelope;
-}
+import { ApiFailure, notImplemented, unwrap, unwrapCommand } from './envelopes';
 
 function response(status: number): Response {
   return new Response(null, { status });
 }
 
 describe('ApiFailure', () => {
-  it('extracts code, category, retryable, requestId, and message from the envelope', () => {
-    const failure = new ApiFailure(
-      errorEnvelope({
-        code: 'instance_not_ready',
-        message: 'Instance is not ready.',
-        category: 'business',
-        retryable: true,
-        requestId: 'req_abc',
-      }),
-      409,
-    );
-
+  it('uses the omniwa-go error string as the message', () => {
+    const failure = new ApiFailure({ error: 'phone number is required' }, 400);
     expect(failure.name).toBe('ApiFailure');
-    expect(failure.message).toBe('Instance is not ready.');
-    expect(failure.code).toBe('instance_not_ready');
-    expect(failure.category).toBe('business');
-    expect(failure.retryable).toBe(true);
-    expect(failure.requestId).toBe('req_abc');
+    expect(failure.message).toBe('phone number is required');
+    expect(failure.httpStatus).toBe(400);
     expect(failure).toBeInstanceOf(Error);
   });
 
-  it('falls back to http-derived defaults when the envelope is undefined', () => {
-    const failure = new ApiFailure(undefined, 503);
-
-    expect(failure.message).toBe('Request failed with status 503');
-    expect(failure.code).toBe('http_503');
-    expect(failure.category).toBe('unknown');
-    expect(failure.retryable).toBe(false);
-    expect(failure.requestId).toBeUndefined();
+  it('falls back to a status message when there is no error string', () => {
+    expect(new ApiFailure(undefined, 503).message).toBe('Request failed with status 503');
+    expect(new ApiFailure({}, 500).message).toBe('Request failed with status 500');
   });
 
-  it('treats a missing retryable flag as non-retryable and unknown category', () => {
-    const failure = new ApiFailure(errorEnvelope({ code: 'boom' }), 500);
+  it.each([
+    [401, 'authentication'],
+    [403, 'authorization'],
+    [404, 'not_found'],
+    [409, 'conflict'],
+    [429, 'rate_limited'],
+    [400, 'validation'],
+    [422, 'validation'],
+    [500, 'internal'],
+    [503, 'internal'],
+    [501, 'not_implemented'],
+  ] as const)('maps HTTP %i to category %s', (status, category) => {
+    expect(new ApiFailure({ error: 'x' }, status).category).toBe(category);
+  });
 
-    expect(failure.category).toBe('unknown');
-    expect(failure.retryable).toBe(false);
+  it('marks 429 and 5xx as retryable, but not the permanent 501', () => {
+    expect(new ApiFailure({}, 429).retryable).toBe(true);
+    expect(new ApiFailure({}, 500).retryable).toBe(true);
+    expect(new ApiFailure({}, 503).retryable).toBe(true);
+    expect(new ApiFailure({}, 501).retryable).toBe(false);
+    expect(new ApiFailure({}, 400).retryable).toBe(false);
+    expect(new ApiFailure({}, 404).retryable).toBe(false);
+  });
+
+  it('never carries a request id', () => {
+    expect(new ApiFailure({ error: 'x' }, 400).requestId).toBeUndefined();
   });
 });
 
-describe('parseUnavailableRead', () => {
-  it('detects a single unavailable data object and keeps the reason code', () => {
-    const result = parseUnavailableRead({
-      data: { readStatus: 'unavailable', reasonCode: 'projection_rebuilding' },
-    });
-
-    expect(result).toEqual({ readStatus: 'unavailable', reasonCode: 'projection_rebuilding' });
-  });
-
-  it('detects an array where every item is unavailable', () => {
-    const result = parseUnavailableRead({
-      data: [
-        { readStatus: 'unavailable', reasonCode: 'cold_start' },
-        { readStatus: 'unavailable', reasonCode: 'cold_start' },
-      ],
-    });
-
-    expect(result).toEqual({ readStatus: 'unavailable', reasonCode: 'cold_start' });
-  });
-
-  it('returns undefined when only some array items are unavailable', () => {
-    const result = parseUnavailableRead({
-      data: [{ readStatus: 'unavailable' }, { readStatus: 'ok' }],
-    });
-
-    expect(result).toBeUndefined();
-  });
-
-  it('falls back to meta.query when data is not itself unavailable', () => {
-    const result = parseUnavailableRead({
-      data: [],
-      meta: { query: { readStatus: 'unavailable', reasonCode: 'index_lag' } },
-    });
-
-    expect(result).toEqual({ readStatus: 'unavailable', reasonCode: 'index_lag' });
-  });
-
-  it('omits reasonCode when it is not a string', () => {
-    const result = parseUnavailableRead({ data: { readStatus: 'unavailable', reasonCode: 42 } });
-
-    expect(result).toEqual({ readStatus: 'unavailable' });
-  });
-
-  it('returns undefined for shapes that do not report an unavailable read', () => {
-    expect(parseUnavailableRead(undefined)).toBeUndefined();
-    expect(parseUnavailableRead(null)).toBeUndefined();
-    expect(parseUnavailableRead('nope')).toBeUndefined();
-    expect(parseUnavailableRead({ error: { code: 'x' } })).toBeUndefined();
-    expect(parseUnavailableRead({ data: { readStatus: 'ok' } })).toBeUndefined();
+describe('notImplemented', () => {
+  it('is a 501 not_implemented ApiFailure naming the resource', () => {
+    const failure = notImplemented('Webhooks');
+    expect(failure).toBeInstanceOf(ApiFailure);
+    expect(failure.httpStatus).toBe(501);
+    expect(failure.category).toBe('not_implemented');
+    expect(failure.message).toContain('Webhooks');
   });
 });
 
 describe('unwrap', () => {
-  it('returns data when present', () => {
-    expect(unwrap({ data: { value: 1 }, response: response(200) })).toEqual({ value: 1 });
+  it('returns the inner data from a { message, data } envelope', () => {
+    expect(unwrap({ data: { message: 'success', data: { id: 'inst_1' } }, response: response(200) })).toEqual({
+      id: 'inst_1',
+    });
+  });
+
+  it('returns raw payloads that are not wrapped in an envelope', () => {
+    expect(unwrap({ data: [{ id: 'g1' }, { id: 'g2' }], response: response(200) })).toEqual([
+      { id: 'g1' },
+      { id: 'g2' },
+    ]);
   });
 
   it('throws an ApiFailure carrying the response status when data is absent', () => {
-    expect(() =>
-      unwrap({ error: errorEnvelope({ code: 'bad' }), response: response(422) }),
-    ).toThrowError(ApiFailure);
-
     try {
-      unwrap({ error: errorEnvelope({ code: 'bad', category: 'validation' }), response: response(422) });
+      unwrap({ error: { error: 'not found' }, response: response(404) });
+      throw new Error('expected throw');
     } catch (error) {
       expect(error).toBeInstanceOf(ApiFailure);
-      expect((error as ApiFailure).code).toBe('bad');
-      expect((error as ApiFailure).category).toBe('validation');
+      expect((error as ApiFailure).category).toBe('not_found');
+      expect((error as ApiFailure).message).toBe('not found');
     }
   });
 });
 
 describe('unwrapCommand', () => {
-  function successEnvelope(data: Record<string, unknown>): SuccessEnvelope {
-    return {
-      data,
-      meta: { requestId: 'req_cmd', correlationId: 'corr', timestamp: '2026-07-20T00:00:00.000Z' },
-    } as unknown as SuccessEnvelope;
-  }
-
-  it('marks a 202 response as accepted (asynchronous)', () => {
+  it('always reports a completed disposition and keeps the message', () => {
     const result = unwrapCommand({
-      data: successEnvelope({ resourceType: 'operation', operationStatus: 'pending' }),
-      response: response(202),
-    });
-
-    expect(result.disposition).toBe('accepted');
-    expect(result.operation).toEqual({ resourceType: 'operation', operationStatus: 'pending' });
-    expect(result.requestId).toBe('req_cmd');
-  });
-
-  it('marks a 200 response as completed and omits operation data when absent', () => {
-    const result = unwrapCommand({
-      data: successEnvelope({ resourceType: 'instance', id: 'inst_1' }),
+      data: { message: 'success', data: { token: 'abc' } },
       response: response(200),
     });
-
     expect(result.disposition).toBe('completed');
-    expect(result.operation).toBeUndefined();
-    expect(result.data).toEqual({ resourceType: 'instance', id: 'inst_1' });
+    expect(result.data).toEqual({ token: 'abc' });
+    expect(result.message).toBe('success');
   });
 
-  it('throws when the command response carries an error instead of data', () => {
-    expect(() =>
-      unwrapCommand({ error: errorEnvelope({ code: 'denied' }), response: response(403) }),
-    ).toThrowError(ApiFailure);
-  });
-});
-
-describe('pickResource / pickResources', () => {
-  const instance = { resourceType: 'instance', id: 'inst_1' } as unknown as PublicData;
-  const session = { resourceType: 'session', id: 'sess_1' } as unknown as PublicData;
-
-  it('returns the resource when the type matches and undefined otherwise', () => {
-    expect(pickResource(instance, 'instance')).toBe(instance);
-    expect(pickResource(instance, 'session')).toBeUndefined();
-    expect(pickResource(undefined, 'instance')).toBeUndefined();
+  it('handles a bare success envelope with no data payload', () => {
+    const result = unwrapCommand({ data: { message: 'success' }, response: response(200) });
+    expect(result.disposition).toBe('completed');
+    expect(result.data).toBeUndefined();
+    expect(result.message).toBe('success');
   });
 
-  it('filters a collection down to the requested resource type', () => {
-    expect(pickResources([instance, session, instance], 'instance')).toEqual([instance, instance]);
-    expect(pickResources([session], 'instance')).toEqual([]);
-    expect(pickResources(undefined, 'instance')).toEqual([]);
+  it('throws an ApiFailure when the command returns an error', () => {
+    expect(() => unwrapCommand({ error: { error: 'denied' }, response: response(403) })).toThrowError(ApiFailure);
   });
 });

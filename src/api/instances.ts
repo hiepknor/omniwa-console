@@ -1,178 +1,110 @@
 import type { ApiClient } from './client';
 import type { components } from './generated/schema';
-import {
-  ApiFailure,
-  parseUnavailableRead,
-  pickResource,
-  pickResources,
-  unwrap,
-  unwrapCommand,
-  type CollectionEnvelope,
-  type ErrorEnvelope,
-  type UnavailableRead,
-} from './envelopes';
+import { unwrap, unwrapCommand, type CommandResult, type UnavailableRead } from './envelopes';
 
-export type InstanceResource = components['schemas']['InstanceResource'];
-export type SessionResource = components['schemas']['SessionResource'];
-export type ProviderResource = components['schemas']['ProviderResource'];
-export type InstanceCreateRequest = components['schemas']['InstanceCreateRequest'];
-export type InstancePagination = CollectionEnvelope['meta']['pagination'];
+type GoInstance = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance'];
+type GoStatus = components['schemas']['apidocs.StatusData'];
+type GoQr = components['schemas']['apidocs.QRCodeData'];
+
+export type InstanceStatus = 'connected' | 'disconnected';
+
+/**
+ * Console-facing instance shape, adapted from omniwa-go's whatsmeow-shaped
+ * `Instance`. `token` is the per-instance apikey used to build a client for the
+ * token-scoped routes (`/instance/connect·qr·status·disconnect·reconnect`).
+ */
+export type InstanceResource = {
+  id: string;
+  displayName?: string;
+  status: InstanceStatus;
+  connected: boolean;
+  jid?: string;
+  token?: string;
+  webhook?: string;
+  createdAt?: string;
+  /** omniwa-go has no update timestamp; kept optional for shared table compatibility. */
+  updatedAt?: string;
+};
+
+export type InstanceStatusResource = { connected: boolean; loggedIn: boolean; name?: string };
+export type InstanceQr = { qrcode?: string; code?: string };
+export type InstanceCreateRequest = { name?: string };
+
+export type InstancePagination = { nextCursor?: string | null; hasMore?: boolean };
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
+export type InstanceListPage = { items: InstanceResource[]; pagination: InstancePagination };
 
-export type InstanceListPage = {
-  items: InstanceResource[];
-  pagination: InstancePagination;
-};
+const NO_PAGINATION: InstancePagination = { nextCursor: null, hasMore: false };
 
-export type SessionListPage = {
-  items: SessionResource[];
-  pagination: InstancePagination;
-};
-
-function unavailableOrThrow(result: { error?: unknown; response: Response }): UnavailableRead {
-  const unavailable = parseUnavailableRead(result.error);
-  if (unavailable !== undefined) return unavailable;
-  throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
+function toInstance(raw: GoInstance): InstanceResource {
+  const connected = raw.connected ?? false;
+  return {
+    id: raw.id ?? '',
+    displayName: raw.name || undefined,
+    connected,
+    status: connected ? 'connected' : 'disconnected',
+    jid: raw.jid || undefined,
+    token: raw.token || undefined,
+    webhook: raw.webhook || undefined,
+    createdAt: raw.createdAt || undefined,
+  };
 }
 
-function idempotencyKey(action: string, resourceId?: string): string {
-  return `console-${action}-${resourceId ?? 'new'}-${crypto.randomUUID()}`;
-}
+// --- Global-key (admin) operations: the session client -----------------------
 
 export async function listInstances(
   client: ApiClient,
-  params: { cursor?: string; limit?: number } = {},
+  _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<InstanceListPage>> {
-  const result = await client.GET('/v1/instances', {
-    params: { query: { cursor: params.cursor, limit: params.limit ?? 50 } },
-  });
-  if (result.data !== undefined) {
-    return {
-      resource: {
-        items: pickResources(result.data.data, 'instance'),
-        pagination: result.data.meta.pagination,
-      },
-    };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+  const data = unwrap<GoInstance[]>(await client.GET('/instance/all'));
+  return { resource: { items: (data ?? []).map(toInstance), pagination: NO_PAGINATION } };
 }
 
-export async function getInstance(
-  client: ApiClient,
-  instanceId: string,
-): Promise<ReadResult<InstanceResource>> {
-  const result = await client.GET('/v1/instances/{instanceId}', {
-    params: { path: { instanceId } },
-  });
-  if (result.data !== undefined) {
-    return { resource: pickResource(result.data.data, 'instance') };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+export async function getInstance(client: ApiClient, instanceId: string): Promise<ReadResult<InstanceResource>> {
+  const data = unwrap<GoInstance>(
+    await client.GET('/instance/info/{instanceId}', { params: { path: { instanceId } } }),
+  );
+  return { resource: data ? toInstance(data) : undefined };
 }
 
-export async function listInstanceSessions(
-  client: ApiClient,
-  instanceId: string,
-  params: { cursor?: string; limit?: number } = {},
-): Promise<ReadResult<SessionListPage>> {
-  const result = await client.GET('/v1/instances/{instanceId}/sessions', {
-    params: {
-      path: { instanceId },
-      query: { cursor: params.cursor, limit: params.limit ?? 20 },
-    },
-  });
-  if (result.data !== undefined) {
-    return {
-      resource: {
-        items: pickResources(result.data.data, 'session'),
-        pagination: result.data.meta.pagination,
-      },
-    };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+export async function createInstance(client: ApiClient, body: InstanceCreateRequest): Promise<CommandResult> {
+  // omniwa-go requires a UUID `instanceId` (the primary key) and a `token` (the
+  // per-instance apikey); both are generated here rather than entered by hand.
+  const instanceId = crypto.randomUUID();
+  const token = crypto.randomUUID();
+  return unwrapCommand(
+    await client.POST('/instance/create', { body: { instanceId, token, name: body.name || instanceId } }),
+  );
 }
 
-export async function getProviderCapabilities(
-  client: ApiClient,
-): Promise<ReadResult<ProviderResource>> {
-  const result = await client.GET('/v1/provider/capabilities');
-  if (result.data !== undefined) {
-    return { resource: pickResource(result.data.data, 'provider') };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+export async function destroyInstance(client: ApiClient, instanceId: string): Promise<CommandResult> {
+  return unwrapCommand(await client.DELETE('/instance/delete/{instanceId}', { params: { path: { instanceId } } }));
 }
 
-export async function createInstance(client: ApiClient, body: InstanceCreateRequest) {
-  const result = await client.POST('/v1/instances', {
-    params: { header: { 'idempotency-key': idempotencyKey('create') } },
-    body,
-  });
-  return unwrapCommand(result);
+// --- Token-scoped operations: a per-instance client (built from `token`) ------
+
+export async function getInstanceStatus(client: ApiClient): Promise<InstanceStatusResource> {
+  const data = unwrap<GoStatus>(await client.GET('/instance/status'));
+  return { connected: data?.Connected ?? false, loggedIn: data?.LoggedIn ?? false, name: data?.Name || undefined };
 }
 
-export async function updateInstance(
-  client: ApiClient,
-  instanceId: string,
-  body: { displayName: string },
-) {
-  const result = await client.PATCH('/v1/instances/{instanceId}', {
-    params: { path: { instanceId } },
-    body,
-  });
-  return unwrapCommand(result);
+export async function getInstanceQr(client: ApiClient): Promise<InstanceQr> {
+  const data = unwrap<GoQr>(await client.GET('/instance/qr'));
+  return { qrcode: data?.qrcode || undefined, code: data?.code || undefined };
 }
 
-export async function connectInstance(client: ApiClient, instanceId: string) {
-  const result = await client.POST('/v1/instances/{instanceId}/connect', {
-    params: {
-      path: { instanceId },
-      header: { 'idempotency-key': idempotencyKey('connect', instanceId) },
-    },
-    body: {},
-  });
-  return unwrapCommand(result);
+export async function connectInstance(client: ApiClient, opts: { immediate?: boolean } = {}): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/instance/connect', { body: { immediate: opts.immediate ?? true } }));
 }
 
-export async function disconnectInstance(client: ApiClient, instanceId: string) {
-  const result = await client.POST('/v1/instances/{instanceId}/disconnect', {
-    params: {
-      path: { instanceId },
-      header: { 'idempotency-key': idempotencyKey('disconnect', instanceId) },
-    },
-    body: {},
-  });
-  return unwrapCommand(result);
+export async function disconnectInstance(client: ApiClient): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/instance/disconnect'));
 }
 
-export async function destroyInstance(client: ApiClient, instanceId: string) {
-  const result = await client.DELETE('/v1/instances/{instanceId}', {
-    params: {
-      path: { instanceId },
-      header: { 'idempotency-key': idempotencyKey('destroy', instanceId) },
-    },
-  });
-  return unwrapCommand(result);
+export async function reconnectInstance(client: ApiClient): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/instance/reconnect'));
 }
 
-export async function requestInstanceReconnect(client: ApiClient, instanceId: string) {
-  const result = await client.POST('/v1/instances/{instanceId}/reconnect', {
-    params: { path: { instanceId } },
-  });
-  return unwrap(result);
-}
-
-export async function refreshInstanceQr(client: ApiClient, instanceId: string) {
-  const result = await client.POST('/v1/instances/{instanceId}/qr/refresh', {
-    params: {
-      path: { instanceId },
-      header: { 'idempotency-key': idempotencyKey('qr', instanceId) },
-    },
-    body: {},
-  });
-  return unwrapCommand(result);
-}
-
-export async function refreshProviderCapabilities(client: ApiClient) {
-  const result = await client.POST('/v1/provider/capabilities/refresh');
-  return unwrap(result);
+export async function logoutInstance(client: ApiClient): Promise<CommandResult> {
+  return unwrapCommand(await client.DELETE('/instance/logout'));
 }

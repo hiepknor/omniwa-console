@@ -2,17 +2,13 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } 
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
-import { CategoryPill, StatusIndicator } from '@/components/badges';
+import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
-import { MobileFilterSheet } from '@/components/MobileFilterSheet';
 import { PageHeader } from '@/components/PageHeader';
 import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { isTransportError } from '@/components/feedback/feedback-policy';
-import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import {
   DataTable,
-  DataTableActiveFilters,
-  DataTableFilterTrigger,
   DataTableFooter,
   DataTableToolbar,
   DataTableWorkspace,
@@ -135,43 +131,29 @@ function MetricCard({ label, value, context }: { label: string; value: number | 
   );
 }
 
-function LocalState({ group }: { group: GroupResource }) {
-  const states = [group.muted && 'muted', group.archived && 'archived', group.pinned && 'pinned'].filter((value): value is string => Boolean(value));
-  if (states.length === 0) return <>—</>;
-  return <span className="groups-local-state">{states.map((state) => <CategoryPill compact key={state}>{state}</CategoryPill>)}</span>;
-}
-
-function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
+function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   instanceId: string;
+  token: string | undefined;
   groupId: string | undefined;
   onSetParam: (name: string, value: string) => void;
 }) {
   const [searchParams] = useSearchParams();
-  const [filterOpen, setFilterOpen] = useState(false);
-  const filterTriggerRef = useRef<HTMLButtonElement>(null);
-  const initialCursor = searchParams.get('cursor') ?? undefined;
-  const list = useInstanceGroups(instanceId, initialCursor);
+  const list = useInstanceGroups(instanceId, token);
   const refresh = useRefreshGroups(instanceId);
-  const pages = list.data?.pages ?? [];
-  const readState = useResilientReadState(list, pages.some((page) => page.resource !== undefined));
-  const unavailable = pages.some((page) => page.unavailable !== undefined);
-  const groups = useMemo(() => pages.flatMap((page) => page.resource?.items ?? []), [pages]);
+  const readState = useResilientReadState(list, list.data?.resource !== undefined);
+  const unavailable = list.data?.unavailable !== undefined;
+  const groups = useMemo(() => list.data?.resource?.items ?? [], [list.data]);
   const search = searchParams.get('search') ?? '';
-  const status = searchParams.get('status') ?? '';
   const filteredGroups = useMemo(() => {
     const needle = search.trim().toLowerCase();
-    return groups.filter((group) => {
-      const matchesSearch = !needle || group.id.toLowerCase().includes(needle) || group.subject?.toLowerCase().includes(needle);
-      return matchesSearch && (!status || group.status === status);
-    });
-  }, [groups, search, status]);
-  const statuses = [...new Set(groups.map((group) => group.status).filter((value): value is string => Boolean(value)))].sort();
+    if (!needle) return groups;
+    return groups.filter((group) => group.id.toLowerCase().includes(needle) || group.subject?.toLowerCase().includes(needle));
+  }, [groups, search]);
   const latestUpdate = groups.map((group) => group.updatedAt).filter((value): value is string => value !== undefined).sort().at(-1);
   const adminCounts = groups.filter((group) => group.adminCount !== undefined);
   const knownAdmins = adminCounts.reduce((total, group) => total + (group.adminCount ?? 0), 0);
-  const muted = groups.filter((group) => group.muted).length;
-  const staleCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const stale = groups.filter((group) => group.updatedAt !== undefined && new Date(group.updatedAt).getTime() < staleCutoff).length;
+  const totalMembers = groups.reduce((total, group) => total + (group.memberCount ?? 0), 0);
+  const announceOnly = groups.filter((group) => group.announce).length;
   const metricsAvailable = !readState.isInitialLoading && !readState.isInitialError && !(unavailable && groups.length === 0);
   const zeroGroups = metricsAvailable && groups.length === 0;
   const selectedGroup = groups.find((group) => group.id === groupId);
@@ -183,9 +165,8 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
     },
     { id: 'members', header: 'Members', size: 'sm', kind: 'numeric', align: 'end', mobile: 'secondary', cell: (group) => <span className="num">{group.memberCount ?? '—'}</span> },
     { id: 'admins', header: 'Admins', size: 'sm', kind: 'numeric', align: 'end', mobile: 'hidden', cell: (group) => <span className="num">{group.adminCount ?? '—'}</span> },
-    { id: 'local', header: 'Local state', size: 'lg', mobile: 'hidden', cell: (group) => <LocalState group={group} /> },
     { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (group) => <StatusIndicator dotClass={statusDot(group.status)}>{group.status ?? '—'}</StatusIndicator> },
-    { id: 'updated', header: 'Updated', size: 'md', kind: 'date', align: 'end', mobile: 'meta', cell: (group) => <span className="ts" title={group.updatedAt}>{relativeTime(group.updatedAt) || '—'}</span>, mobileCell: (group) => relativeTime(group.updatedAt) || undefined },
+    { id: 'created', header: 'Created', size: 'md', kind: 'date', align: 'end', mobile: 'meta', cell: (group) => <span className="ts" title={group.updatedAt}>{relativeTime(group.updatedAt) || '—'}</span>, mobileCell: (group) => relativeTime(group.updatedAt) || undefined },
   ];
   const tableState: DataTableState<GroupResource> = readState.isInitialError
     ? { status: 'error', error: readState.error, onRetry: list.refetch }
@@ -196,26 +177,14 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
         : filteredGroups.length === 0
           ? { status: 'empty', message: groups.length === 0
             ? <span className="groups-state-copy"><strong>No groups synced yet.</strong><span>Groups appear after this instance syncs its group directory.</span><button className="btn" type="button" disabled={refresh.isPending} onClick={() => refresh.mutate()}>{refresh.isPending ? 'Requesting sync…' : 'Refresh group sync'}</button></span>
-            : <span className="groups-state-copy"><strong>No groups match these filters.</strong><span>Adjust the search or status filter.</span></span> }
+            : <span className="groups-state-copy"><strong>No groups match this search.</strong><span>Adjust or clear the search.</span></span> }
           : { status: 'ready', rows: filteredGroups };
   const stateOnlyTable = tableState.status === 'empty' || tableState.status === 'unavailable' || tableState.status === 'error';
-  const statusOptions: SelectDropdownOption[] = [
-    { value: '', label: 'All statuses', description: 'Do not filter the table' },
-    ...statuses.map((item) => ({ value: item, label: item, meta: String(groups.filter((group) => group.status === item).length) })),
-  ];
-  const activeFilters = status ? [{ id: 'status', label: `Status: ${status}`, onRemove: () => onSetParam('status', '') }] : [];
   const closeGroup = () => {
     const activeRow = document.querySelector<HTMLElement>('.groups-table tr[data-active="true"]');
     onSetParam('group', '');
     window.requestAnimationFrame(() => activeRow?.focus());
   };
-  const loadMore = async () => {
-    const nextCursor = pages.at(-1)?.resource?.pagination?.nextCursor;
-    if (!nextCursor) return;
-    const result = await list.fetchNextPage();
-    if (!result.isError) onSetParam('cursor', nextCursor);
-  };
-
   return (
     <>
       {!zeroGroups && <section className="groups-metric-section max-[640px]:!mb-4" aria-labelledby="groups-posture-title">
@@ -223,10 +192,10 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
           <div><h2 id="groups-posture-title">Loaded group posture</h2><span className="groups-posture-note">Counts reflect loaded pages.</span></div>
         </div>
         <div className="metrics groups-metrics max-[640px]:!grid-cols-2">
-          <MetricCard label="Synced groups" value={metricsAvailable ? groups.length : undefined} context={metricsAvailable ? 'Loaded groups' : 'Data unavailable'} />
+          <MetricCard label="Groups" value={metricsAvailable ? groups.length : undefined} context={metricsAvailable ? 'Loaded groups' : 'Data unavailable'} />
+          <MetricCard label="Members" value={metricsAvailable ? totalMembers : undefined} context={metricsAvailable ? 'Across loaded groups' : 'Data unavailable'} />
           <MetricCard label="Admins known" value={metricsAvailable ? knownAdmins : undefined} context={metricsAvailable ? `${adminCounts.length} of ${groups.length} loaded groups` : 'Data unavailable'} />
-          <MetricCard label="Muted" value={metricsAvailable ? muted : undefined} context={metricsAvailable ? 'Muted locally' : 'Data unavailable'} />
-          <MetricCard label="Projection stale" value={metricsAvailable ? stale : undefined} context={metricsAvailable ? 'Not updated for 7d+' : 'Data unavailable'} />
+          <MetricCard label="Announce-only" value={metricsAvailable ? announceOnly : undefined} context={metricsAvailable ? 'Admins post only' : 'Data unavailable'} />
         </div>
       </section>}
 
@@ -247,9 +216,6 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
             <input className="search" type="search" value={search} onChange={(event) => onSetParam('search', event.target.value)} placeholder="Search loaded groups" />
           </label>
-          <span className="data-table-toolbar-desktop-filters"><SelectDropdown label="Status" value={status} options={statusOptions} onChange={(value) => onSetParam('status', value)} /></span>
-          <DataTableFilterTrigger ref={filterTriggerRef} count={activeFilters.length} aria-expanded={filterOpen} onClick={() => setFilterOpen(true)} />
-          <DataTableActiveFilters filters={activeFilters} />
         </DataTableToolbar>}
         <div className={`groups-table max-[640px]:[&_.empty]:!px-4 max-[640px]:[&_.empty]:!py-8 ${stateOnlyTable ? 'max-[1024px]:[&_.responsive-table]:!w-full max-[1024px]:[&_.responsive-table]:!min-w-0 max-[1024px]:[&_thead]:!hidden' : ''} ${zeroGroups ? '[&_.responsive-table]:!w-full [&_.responsive-table]:!min-w-0 [&_thead]:!hidden [&_.responsive-table-scroll]:!border-b-0' : ''}`}>
           <DataTable
@@ -274,19 +240,12 @@ function GroupsWorkbench({ instanceId, groupId, onSetParam }: {
                 }
               },
             })}
-            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={refresh.isPending} title="The platform reports whether group discovery completed or continues asynchronously." onClick={() => refresh.mutate()}>Refresh sync</button>{list.hasNextPage && <button className="btn" type="button" disabled={list.isFetchingNextPage} onClick={() => void loadMore()}>{list.isFetchingNextPage ? 'Loading…' : 'Load more'}</button>}</>} />}
+            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<button className="btn" type="button" disabled={refresh.isPending} onClick={() => refresh.mutate()}>Refresh</button>} />}
           />
         </div>
       </DataTableWorkspace>
 
-      <MobileFilterSheet open={filterOpen} title="Filter groups" onClose={() => setFilterOpen(false)} returnFocusRef={filterTriggerRef}>
-        <section className="mobile-filter-section" aria-labelledby="group-status-filter"><h3 id="group-status-filter">Status</h3><div className="mobile-filter-options">
-          {statusOptions.map((option) => <button key={option.value} className={option.value === status ? 'is-selected' : undefined} type="button" aria-pressed={option.value === status} onClick={() => onSetParam('status', option.value)}><span className="filter-option-check" aria-hidden="true">✓</span><span>{option.label}</span>{option.meta && <span className="num">{option.meta}</span>}</button>)}
-        </div></section>
-        <button className="btn primary mobile-filter-done" type="button" onClick={() => setFilterOpen(false)}>Done</button>
-      </MobileFilterSheet>
-
-      {groupId && <GroupDrawer key={groupId} groupId={groupId} subject={selectedGroup?.subject} onClose={closeGroup} />}
+      {groupId && <GroupDrawer key={groupId} groupId={groupId} subject={selectedGroup?.subject} instanceId={instanceId} token={token} onClose={closeGroup} />}
     </>
   );
 }
@@ -320,13 +279,13 @@ export function GroupsPage() {
   const setParam = (name: string, value: string) => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(name, value); else next.delete(name);
-    if (name === 'search' || name === 'status') next.delete('cursor');
+    if (name === 'search') next.delete('cursor');
     setSearchParams(next, { replace: true });
   };
 
   let content: React.ReactNode;
   if (instanceId) {
-    content = <GroupsWorkbench instanceId={instanceId} groupId={groupId} onSetParam={setParam} />;
+    content = <GroupsWorkbench instanceId={instanceId} token={selectedInstance?.token} groupId={groupId} onSetParam={setParam} />;
   } else if (pickerReadState.isInitialError) {
     content = isTransportError(pickerReadState.error)
       ? <div className="empty groups-picker-state">Instances are unavailable while the API reconnects.</div>

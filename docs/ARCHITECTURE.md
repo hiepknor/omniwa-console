@@ -1,5 +1,38 @@
 # Architecture
 
+## OmniWA GO backend (current)
+
+This console now targets the **OmniWA GO** API, not the omniwa Platform v1
+contract. Key deltas from the sections below (which describe the original
+Platform design and are kept for historical context):
+
+- **Contract:** `contracts/omniwa-go.openapi.json`, converted from omniwa-go's
+  Swagger 2.0 (`../omniwa-go/docs/swagger.json`) via `pnpm contract:sync`
+  (`scripts/sync-omniwa-go-contract.mjs` → `swagger2openapi`). Types regenerate
+  with `pnpm api:generate`.
+- **Auth:** `apikey` header (global admin key or per-instance token), not
+  `x-api-key`. See `docs/AUTH_AND_SESSION.md`.
+- **Envelopes:** success is `{ message, data }` (some endpoints return the
+  payload raw); errors are `{ error: string }` with category inferred from the
+  HTTP status. Commands are always synchronous (no `202`/operation ids). See
+  `src/api/envelopes.ts`.
+- **Realtime:** disabled — `/ws` needs the global key and is unsafe from a
+  browser. Panels poll instead. See `docs/REALTIME.md`.
+- **Pagination:** none (flat list endpoints).
+- **Panel coverage:** only instances, groups, send, contacts, labels, and
+  message actions have an omniwa-go backend. Overview, queue, webhooks, api-keys,
+  settings, events, and chats have no backing and their `src/api/` modules throw
+  `notImplemented` (category `not_implemented`), which the panels render as an
+  unavailable state. The **instances** vertical is wired to live `/instance/*`
+  endpoints; **groups** is stubbed pending wiring to `/group/*`.
+- **Two client scopes:** admin routes (`/instance/all·info·create·delete`) use
+  the session's global key; token-scoped routes
+  (`/instance/connect·qr·status·disconnect·reconnect`) act on the instance whose
+  token is in the header, so the console builds a per-instance client from each
+  instance's `token` (see `useApiSession` and `src/features/instances/hooks.ts`).
+
+Full migration context: `docs/HANDOFF_FROM_OMNIWA_GO.md`.
+
 ## Style
 
 `omniwa-console` is a client-only single-page application. There is no

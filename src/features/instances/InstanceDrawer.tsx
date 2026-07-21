@@ -1,34 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { CommandResult } from '@/api/envelopes';
 import type { InstanceResource } from '@/api/instances';
-import { CategoryPill, StatusIndicator } from '@/components/badges';
+import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
+import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import { DetailDrawer, DetailDrawerState, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
-import { useResilientReadState } from '@/lib/query-state';
 import {
   useConnectInstance,
   useDestroyInstance,
   useDisconnectInstance,
-  useInstanceSessions,
-  useProviderCapabilities,
+  useInstanceQr,
+  useInstanceStatus,
   useReconnectInstance,
-  useRefreshInstanceQr,
-  useRefreshProviderCapabilities,
-  useUpdateInstance,
 } from './hooks';
 
-function statusDot(status: string | undefined) {
-  switch (status?.toLowerCase()) {
-    case 'connected': return 'dot-ok';
-    case 'pairing':
-    case 'connecting': return 'dot-pending';
-    case 'failed':
-    case 'disconnected': return 'dot-failed';
-    default: return 'dot-info';
-  }
+// omniwa-go distinguishes `connected` (websocket to WhatsApp is up) from
+// `loggedIn` (a phone has scanned the QR and the account is paired). Pairing is
+// only complete once loggedIn is true.
+function pairStatus(connected: boolean, loggedIn: boolean): { dot: string; label: string } {
+  if (loggedIn) return { dot: 'dot-ok', label: 'connected' };
+  if (connected) return { dot: 'dot-pending', label: 'pairing' };
+  return { dot: 'dot-failed', label: 'disconnected' };
 }
 
 export function InstanceDrawer({
@@ -41,154 +36,110 @@ export function InstanceDrawer({
   onDestroyed: (result: CommandResult) => void;
 }) {
   const instanceName = instance.displayName || 'Unnamed instance';
-  const [displayName, setDisplayName] = useState(instance.displayName ?? '');
   const [confirmation, setConfirmation] = useState<'disconnect' | 'destroy'>();
   const feedback = useFeedback();
-  const sessions = useInstanceSessions(instance.id);
-  const provider = useProviderCapabilities(true);
-  const sessionsReadState = useResilientReadState(sessions, sessions.data?.resource !== undefined);
-  const providerReadState = useResilientReadState(provider, provider.data?.resource !== undefined);
-  const update = useUpdateInstance(instance.id);
-  const connect = useConnectInstance(instance.id);
-  const disconnect = useDisconnectInstance(instance.id);
-  const destroy = useDestroyInstance(instance.id);
-  const reconnect = useReconnectInstance(instance.id);
-  const refreshQr = useRefreshInstanceQr(instance.id);
-  const refreshCapabilities = useRefreshProviderCapabilities();
-  const sessionItems = [...(sessions.data?.resource?.items ?? [])].sort((left, right) => (
-    left.id === instance.activeSessionId ? -1 : right.id === instance.activeSessionId ? 1 : 0
-  ));
-  const capabilities = provider.data?.resource?.capabilities
-    ?? (provider.data?.resource?.capability ? [provider.data.resource.capability] : []);
+  const tokenAvailable = Boolean(instance.token);
 
-  useEffect(() => setDisplayName(instance.displayName ?? ''), [instance.displayName]);
+  const status = useInstanceStatus(instance.id, instance.token);
+  const connected = status.data?.connected ?? instance.connected;
+  const loggedIn = status.data?.loggedIn ?? false;
+  const pair = pairStatus(connected, loggedIn);
+  const needsPairing = tokenAvailable && !loggedIn;
+
+  // A pairing QR only exists once the websocket is connected, so only poll then.
+  const qr = useInstanceQr(instance.id, instance.token, tokenAvailable && connected && !loggedIn);
+  const connect = useConnectInstance(instance.id, instance.token);
+  const reconnect = useReconnectInstance(instance.id, instance.token);
+  const disconnect = useDisconnectInstance(instance.id, instance.token);
+  const destroy = useDestroyInstance(instance.id);
 
   const commandFeedback = (result: CommandResult, action: string) => {
     feedback.command(result.disposition, {
       action,
-      acceptedDetail: 'The platform accepted the command. Status refreshes automatically.',
-      completedDetail: 'The platform completed the command. Status refreshes automatically.',
+      acceptedDetail: 'omniwa-go accepted the command. Status refreshes automatically.',
+      completedDetail: 'omniwa-go completed the command. Status refreshes automatically.',
       requestId: result.requestId,
       dedupeKey: `instance:${instance.id}:${action.toLowerCase().replaceAll(' ', '-')}`,
     });
   };
-  const commandPending = update.isPending || connect.isPending || reconnect.isPending || refreshQr.isPending || refreshCapabilities.isPending;
+  const commandPending = connect.isPending || reconnect.isPending || disconnect.isPending;
 
   return (
     <>
-      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<StatusIndicator dotClass={statusDot(instance.status)}>{instance.status ?? '—'}</StatusIndicator>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
+      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<StatusIndicator dotClass={pair.dot}>{pair.label}</StatusIndicator>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
           <section aria-labelledby="instance-facts-title">
             <h3 id="instance-facts-title" className="visually-hidden">Instance facts</h3>
             <dl className="kv">
-              <dt>Provider</dt><dd>{provider.data?.resource?.providerName ?? '—'}</dd>
+              <dt>Status</dt><dd><StatusIndicator size="small" dotClass={pair.dot}>{pair.label}</StatusIndicator></dd>
+              <dt>Websocket</dt><dd>{connected ? 'connected' : 'disconnected'}</dd>
+              <dt>Paired</dt><dd>{loggedIn ? 'yes' : 'no'}</dd>
+              <dt>WhatsApp ID</dt><dd className="mono" title={instance.jid}>{instance.jid ?? '—'}</dd>
               <dt>Created</dt><dd className="ts" title={instance.createdAt}>{relativeTime(instance.createdAt) || '—'}</dd>
-              <dt>Updated</dt><dd className="ts" title={instance.updatedAt}>{relativeTime(instance.updatedAt) || '—'}</dd>
             </dl>
           </section>
 
-          <section aria-labelledby="instance-name-title">
-            <span className="eyebrow">Instance metadata</span>
-            <h3 id="instance-name-title">Display name</h3>
-            <form onSubmit={(event) => {
-              event.preventDefault();
-              update.mutate(displayName.trim(), { onSuccess: (result) => commandFeedback(result, 'Update') });
-            }}>
-              <div className="field">
-                <label htmlFor="instance-display-name">Name</label>
-                <input id="instance-display-name" className="input" value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
-              </div>
-              <button className="btn" type="submit" disabled={!displayName.trim() || displayName.trim() === (instance.displayName ?? '') || commandPending}>Update name</button>
-              {update.error && <InlineError error={update.error} announce onRetry={() => update.mutate(displayName.trim())} />}
-            </form>
-          </section>
+          {!tokenAvailable && (
+            <SurfaceNotice
+              kind="warning"
+              label="Scope"
+              title="Per-instance token unavailable"
+              detail="This session cannot read this instance's token, so connect, pairing, and disconnect are disabled. Connect using the instance's own key to manage it."
+            />
+          )}
 
-          {(instance.status === 'pairing' || instance.status === 'connecting') && (
+          {needsPairing && (
             <section aria-labelledby="pair-device-title">
               <div className="drawer-section-head"><div><span className="eyebrow">Pairing workflow</span><h3 id="pair-device-title">Pair device</h3></div></div>
               <div className="qrwell">
-                <span className="eyebrow">QR unavailable</span>
-                <p>The public API accepts QR refresh requests but does not expose QR material.</p>
-                <button className="btn" type="button" disabled={commandPending} onClick={() => refreshQr.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'QR refresh') })}>
-                  {refreshQr.isPending ? 'Requesting…' : 'Request new QR'}
+                {qr.data?.qrcode ? (
+                  <>
+                    <img src={qr.data.qrcode} alt="Scan this QR code with WhatsApp to pair the device" className="max-w-[220px]" />
+                    <p>On the phone that owns this account: WhatsApp → Linked Devices → Link a Device, then scan. The code refreshes automatically.</p>
+                  </>
+                ) : qr.isError ? (
+                  <InlineError error={qr.error} onRetry={qr.refetch} />
+                ) : connected ? (
+                  <>
+                    <span className="eyebrow">Generating QR…</span>
+                    <p>The connection is up; waiting for a pairing code.</p>
+                  </>
+                ) : (
+                  <>
+                    <span className="eyebrow">Not connected</span>
+                    <p>Start a connection to generate a pairing QR code.</p>
+                  </>
+                )}
+                <button className="btn primary" type="button" disabled={commandPending} onClick={() => (connected ? reconnect : connect).mutate(undefined, { onSuccess: (result) => commandFeedback(result, connected ? 'Restart pairing' : 'Connect') })}>
+                  {commandPending ? 'Working…' : connected ? 'Restart pairing' : 'Connect'}
                 </button>
-                {refreshQr.error && <InlineError error={refreshQr.error} announce onRetry={() => refreshQr.mutate()} />}
-                <div className="steps" aria-label="Pairing progress">
-                  <span className="on"><b>1</b> waiting</span><span><b>2</b> scanned</span><span><b>3</b> paired</span>
-                </div>
+                {(connect.error ?? reconnect.error) && <InlineError error={connect.error ?? reconnect.error} announce onRetry={() => (connected ? reconnect : connect).mutate()} />}
               </div>
             </section>
           )}
 
-          <section aria-labelledby="lifecycle-title">
-            <span className="eyebrow">Instance controls</span>
-            <h3 id="lifecycle-title">Lifecycle</h3>
-            <div className="lifecycle-groups">
-              <div className="action-group">
-                <span>Connection commands may complete immediately or continue asynchronously.</span>
-                <div className="actions">
-                  {instance.status !== 'connected' && (
-                    <button className="btn" type="button" disabled={commandPending} onClick={() => connect.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Connect') })}>Connect</button>
-                  )}
-                  <button className="btn" type="button" disabled={commandPending} onClick={() => reconnect.mutate(undefined, { onSuccess: () => feedback.accepted({ title: 'Reconnect accepted', detail: 'Connection state refreshes automatically.', dedupeKey: `instance:${instance.id}:reconnect` }) })}>Reconnect</button>
+          {tokenAvailable && loggedIn && (
+            <section aria-labelledby="lifecycle-title">
+              <span className="eyebrow">Instance controls</span>
+              <h3 id="lifecycle-title">Lifecycle</h3>
+              <div className="lifecycle-groups">
+                <div className="action-group">
+                  <span>Bounce the live connection for this instance.</span>
+                  <div className="actions">
+                    <button className="btn" type="button" disabled={commandPending} onClick={() => reconnect.mutate(undefined, { onSuccess: (result) => commandFeedback(result, 'Reconnect') })}>Reconnect</button>
+                  </div>
                 </div>
+                {reconnect.error && <InlineError error={reconnect.error} announce onRetry={() => reconnect.mutate()} />}
               </div>
-              {(connect.error ?? reconnect.error) && <InlineError error={connect.error ?? reconnect.error} announce onRetry={() => { if (connect.error) connect.mutate(); else reconnect.mutate(); }} />}
-            </div>
-          </section>
-
-          <section aria-labelledby="sessions-title">
-            <span className="eyebrow">Current and recent</span>
-            <h3 id="sessions-title">Sessions</h3>
-            {sessionsReadState.isInitialError ? (
-              <InlineError error={sessionsReadState.error} onRetry={sessions.refetch} />
-            ) : sessionsReadState.isInitialLoading ? (
-              <div className="empty">—</div>
-            ) : sessions.data?.unavailable ? (
-              <div className="empty">No session data yet.</div>
-            ) : (sessions.data?.resource?.items.length ?? 0) === 0 ? (
-              <div className="empty">No sessions recorded.</div>
-            ) : (
-              <table className="minitable responsive-minitable">
-                <thead><tr><th scope="col">Session</th><th scope="col">State</th><th scope="col">Updated</th></tr></thead>
-                <tbody>{sessionItems.map((session) => (
-                  <tr key={session.id}>
-                    <td data-label="Session"><span className="mono">{session.id}</span>{session.id === instance.activeSessionId && <CategoryPill compact className="ml-2">Active</CategoryPill>}</td>
-                    <td data-label="State"><StatusIndicator size="small" dotClass={statusDot(session.status)}>{session.status ?? '—'}</StatusIndicator></td>
-                    <td data-label="Updated" className="ts" title={session.updatedAt}>{relativeTime(session.updatedAt) || '—'}</td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            )}
-            {sessionsReadState.isStaleError && <InlineError error={sessionsReadState.error} onRetry={sessions.refetch} />}
-          </section>
-
-          <section aria-labelledby="capabilities-title">
-            <div className="drawer-section-head">
-              <div><span className="eyebrow">Provider surface</span><h3 id="capabilities-title">Provider capabilities</h3></div>
-              <button className="btn sm" type="button" disabled={commandPending} onClick={() => refreshCapabilities.mutate(undefined, { onSuccess: () => feedback.accepted({ title: 'Capability refresh accepted', detail: 'Provider data refreshes automatically.', dedupeKey: `instance:${instance.id}:capability-refresh` }) })}>Refresh</button>
-            </div>
-            {providerReadState.isInitialError ? (
-              <InlineError error={providerReadState.error} onRetry={provider.refetch} />
-            ) : providerReadState.isInitialLoading ? (
-              <div className="empty">—</div>
-            ) : provider.data?.unavailable ? (
-              <div className="empty">No capability data yet.</div>
-            ) : capabilities.length > 0 ? (
-              <div className="capchips">{capabilities.map((capability) => <CategoryPill title={capability} key={capability}>{capability}</CategoryPill>)}</div>
-            ) : (
-              <div className="empty">No capabilities reported.</div>
-            )}
-            {providerReadState.isStaleError && <InlineError error={providerReadState.error} onRetry={provider.refetch} />}
-            {refreshCapabilities.error && <InlineError error={refreshCapabilities.error} announce onRetry={() => refreshCapabilities.mutate()} />}
-          </section>
+            </section>
+          )}
 
           <section aria-labelledby="instance-danger-title">
             <span className="eyebrow">Danger zone</span>
             <h3 id="instance-danger-title">Destructive actions</h3>
             <div className="action-group destructive">
-              <span>Disconnecting or destroying this instance requires typed confirmation.</span>
+              <span>Disconnecting logs the device out; destroying removes the instance entirely. Both require typed confirmation.</span>
               <div className="actions">
-                <button className="btn danger" type="button" onClick={() => setConfirmation('disconnect')}>Disconnect</button>
+                <button className="btn danger" type="button" disabled={!tokenAvailable} onClick={() => setConfirmation('disconnect')}>Disconnect</button>
                 <button className="btn danger" type="button" onClick={() => setConfirmation('destroy')}>Destroy…</button>
               </div>
             </div>
@@ -198,7 +149,7 @@ export function InstanceDrawer({
       {confirmation === 'disconnect' && (
         <TypedConfirmationDialog
           title="Disconnect instance"
-          description={<p>This requests a disconnect for {instanceName}. The platform may complete the command immediately or continue processing it asynchronously.</p>}
+          description={<p>This disconnects {instanceName} from WhatsApp. You can reconnect and re-pair afterwards.</p>}
           resourceId={instance.id}
           confirmValue={instance.id}
           confirmLabel="Disconnect instance"
@@ -212,7 +163,7 @@ export function InstanceDrawer({
       {confirmation === 'destroy' && (
         <TypedConfirmationDialog
           title="Destroy instance"
-          description={<p>This permanently destroys {instanceName}, its sessions, and pairing state. This cannot be undone.</p>}
+          description={<p>This permanently destroys {instanceName} and its pairing state. This cannot be undone.</p>}
           resourceId={instance.id}
           confirmValue={instance.id}
           confirmLabel="Destroy instance"

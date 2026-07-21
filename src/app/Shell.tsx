@@ -6,7 +6,6 @@ import { EnvironmentBadge, WorkspaceEnvironmentProvider } from '@/components/Env
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import { useModalDialog } from '@/components/useModalDialog';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
-import { isMockApiOrigin } from '@/api/mock/config';
 
 type IconName =
   | 'overview'
@@ -155,7 +154,8 @@ export function Shell({
     ...systemItems,
   ];
   const fingerprint = keyFingerprint(session.apiKey);
-  const mockSession = isMockApiOrigin(session.baseUrl);
+  // omniwa-go has no local mock workspace; the console always talks to a live API.
+  const mockSession = false;
   const location = useLocation();
   const [tabletExpanded, setTabletExpanded] = useState(() => {
     try {

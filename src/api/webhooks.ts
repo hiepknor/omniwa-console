@@ -1,175 +1,72 @@
 import type { ApiClient } from './client';
-import type { components } from './generated/schema';
-import {
-  ApiFailure,
-  parseUnavailableRead,
-  pickResource,
-  pickResources,
-  unwrap,
-  unwrapCommand,
-  type CollectionEnvelope,
-  type ErrorEnvelope,
-  type PublicData,
-  type UnavailableRead,
-} from './envelopes';
+import type { components } from './generated/platform-schema';
+import { notImplemented, type CollectionEnvelope, type CommandResult, type PublicData, type UnavailableRead } from './envelopes';
 
+// omniwa-go configures a webhook URL per instance (on create/connect) but has no
+// webhook management/delivery REST surface. This panel is stubbed.
 export type WebhookResource = components['schemas']['WebhookResource'];
 export type WebhookDeliveryResource = components['schemas']['WebhookDeliveryResource'];
 export type WebhookRequest = components['schemas']['WebhookRequest'];
 export type WebhookPagination = CollectionEnvelope['meta']['pagination'];
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
 
-function unavailableOrThrow(result: { error?: unknown; response: Response }): UnavailableRead {
-  const unavailable = parseUnavailableRead(result.error);
-  if (unavailable !== undefined) return unavailable;
-  throw new ApiFailure(result.error as ErrorEnvelope | undefined, result.response.status);
-}
-
-function idempotencyKey(action: string, resourceId?: string): string {
-  return `console-${action}-${resourceId ?? 'new'}-${crypto.randomUUID()}`;
-}
-
 export async function listWebhooks(
-  client: ApiClient,
-  params: { cursor?: string; limit?: number } = {},
+  _client: ApiClient,
+  _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<{ items: WebhookResource[]; pagination: WebhookPagination }>> {
-  const result = await client.GET('/v1/webhooks', {
-    params: { query: { cursor: params.cursor, limit: params.limit ?? 50 } },
-  });
-  if (result.data !== undefined) {
-    return {
-      resource: {
-        items: pickResources(result.data.data, 'webhook'),
-        pagination: result.data.meta.pagination,
-      },
-    };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+  throw notImplemented('Webhooks');
 }
 
-export async function getWebhook(
-  client: ApiClient,
-  webhookId: string,
-): Promise<ReadResult<WebhookResource>> {
-  const result = await client.GET('/v1/webhooks/{webhookId}', {
-    params: { path: { webhookId } },
-  });
-  if (result.data !== undefined) {
-    return { resource: pickResource(result.data.data, 'webhook') };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+export async function getWebhook(_client: ApiClient, _webhookId: string): Promise<ReadResult<WebhookResource>> {
+  throw notImplemented('Webhook detail');
 }
 
-export async function registerWebhook(client: ApiClient, body: WebhookRequest) {
-  const result = await client.POST('/v1/webhooks', {
-    params: { header: { 'idempotency-key': idempotencyKey('register-webhook') } },
-    body,
-  });
-  return unwrapCommand(result);
+export async function registerWebhook(_client: ApiClient, _body: WebhookRequest): Promise<CommandResult> {
+  throw notImplemented('Webhook registration');
 }
 
 export async function updateWebhook(
-  client: ApiClient,
-  webhookId: string,
-  body: Partial<WebhookRequest>,
-) {
-  const result = await client.PATCH('/v1/webhooks/{webhookId}', {
-    params: { path: { webhookId } },
-    headers: { 'idempotency-key': idempotencyKey('update-webhook', webhookId) },
-    body,
-  });
-  return unwrapCommand(result);
+  _client: ApiClient,
+  _webhookId: string,
+  _body: Partial<WebhookRequest>,
+): Promise<CommandResult> {
+  throw notImplemented('Webhook update');
 }
 
-export async function activateWebhook(client: ApiClient, webhookId: string) {
-  const result = await client.POST('/v1/webhooks/{webhookId}/activate', {
-    params: {
-      path: { webhookId },
-      header: { 'idempotency-key': idempotencyKey('activate-webhook', webhookId) },
-    },
-  });
-  return unwrapCommand(result);
+export async function activateWebhook(_client: ApiClient, _webhookId: string): Promise<CommandResult> {
+  throw notImplemented('Webhook activation');
 }
 
-export async function suspendWebhook(client: ApiClient, webhookId: string) {
-  const result = await client.POST('/v1/webhooks/{webhookId}/suspend', {
-    params: {
-      path: { webhookId },
-      header: { 'idempotency-key': idempotencyKey('suspend-webhook', webhookId) },
-    },
-  });
-  return unwrapCommand(result);
+export async function suspendWebhook(_client: ApiClient, _webhookId: string): Promise<CommandResult> {
+  throw notImplemented('Webhook suspension');
 }
 
-export async function retireWebhook(client: ApiClient, webhookId: string) {
-  const result = await client.DELETE('/v1/webhooks/{webhookId}', {
-    params: {
-      path: { webhookId },
-      header: { 'idempotency-key': idempotencyKey('retire-webhook', webhookId) },
-    },
-  });
-  return unwrapCommand(result);
+export async function retireWebhook(_client: ApiClient, _webhookId: string): Promise<CommandResult> {
+  throw notImplemented('Webhook retirement');
 }
 
 export async function listWebhookDeliveries(
-  client: ApiClient,
-  params: { cursor?: string; limit?: number } = {},
+  _client: ApiClient,
+  _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<{ items: WebhookDeliveryResource[]; pagination: WebhookPagination }>> {
-  const result = await client.GET('/v1/webhook-deliveries', {
-    params: { query: { cursor: params.cursor, limit: params.limit ?? 50 } },
-  });
-  if (result.data !== undefined) {
-    return {
-      resource: {
-        items: pickResources(result.data.data, 'webhookDelivery'),
-        pagination: result.data.meta.pagination,
-      },
-    };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+  throw notImplemented('Webhook deliveries');
 }
 
 export async function getWebhookDeliveryHistory(
-  client: ApiClient,
-  deliveryId: string,
+  _client: ApiClient,
+  _deliveryId: string,
 ): Promise<ReadResult<{ data: PublicData; requestId: string }>> {
-  const result = await client.GET('/v1/webhook-deliveries/{deliveryId}/history', {
-    params: { path: { deliveryId } },
-  });
-  if (result.data !== undefined) {
-    const envelope = unwrap(result);
-    return { resource: { data: envelope.data, requestId: envelope.meta.requestId } };
-  }
-  return { unavailable: unavailableOrThrow(result) };
+  throw notImplemented('Webhook delivery history');
 }
 
-export async function retryWebhookDelivery(client: ApiClient, deliveryId: string) {
-  const result = await client.POST('/v1/webhook-deliveries/{deliveryId}/retry', {
-    params: {
-      path: { deliveryId },
-      header: { 'idempotency-key': idempotencyKey('retry-webhook-delivery', deliveryId) },
-    },
-  });
-  return unwrapCommand(result);
+export async function retryWebhookDelivery(_client: ApiClient, _deliveryId: string): Promise<CommandResult> {
+  throw notImplemented('Webhook delivery retry');
 }
 
-export async function redriveWebhookDelivery(client: ApiClient, deliveryId: string) {
-  const result = await client.POST('/v1/webhook-deliveries/{deliveryId}/redrive', {
-    params: {
-      path: { deliveryId },
-      header: { 'idempotency-key': idempotencyKey('redrive-webhook-delivery', deliveryId) },
-    },
-  });
-  return unwrapCommand(result);
+export async function redriveWebhookDelivery(_client: ApiClient, _deliveryId: string): Promise<CommandResult> {
+  throw notImplemented('Webhook delivery redrive');
 }
 
-export async function bulkRedriveWebhookDeliveries(
-  client: ApiClient,
-  deliveryIds: string[],
-) {
-  const result = await client.POST('/v1/webhook-deliveries/redrive', {
-    params: { header: { 'idempotency-key': idempotencyKey('bulk-redrive-webhook-deliveries') } },
-    body: { deliveryIds },
-  });
-  return unwrapCommand(result);
+export async function bulkRedriveWebhookDeliveries(_client: ApiClient, _deliveryIds: string[]): Promise<CommandResult> {
+  throw notImplemented('Webhook bulk redrive');
 }

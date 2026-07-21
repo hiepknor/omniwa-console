@@ -96,7 +96,8 @@ function DraftRevision({ settings }: { settings: SettingsResource }) {
   const [activateOpen, setActivateOpen] = useState(false);
   const [submission, setSubmission] = useState<AcceptedActivation>();
   const isCurrentValidation = validate.isSuccess && validate.data.disposition === 'completed' && validatedDraft === draft;
-  const isCurrentValidationPending = validate.isSuccess && validate.data.disposition === 'accepted' && validatedDraft === draft;
+  // omniwa-go commands are always synchronous; there is no accepted/pending disposition.
+  const isCurrentValidationPending = false;
   const hasUnsavedDraft = draft.trim().length > 0 && submission === undefined;
   const blocker = useBlocker(hasUnsavedDraft);
 
@@ -218,7 +219,6 @@ function DraftRevision({ settings }: { settings: SettingsResource }) {
           {validate.isPending && <div className="settings-validation"><StatusIndicator dotClass="dot-pending">validating</StatusIndicator><p>Checking schema and policy constraints…</p></div>}
           {validate.isError && <div className="settings-validation settings-validation-error"><FailureNotice error={validate.error} title="Validation failed" /></div>}
           {submission === undefined && isCurrentValidation && <div className="settings-validation"><StatusIndicator dotClass="dot-ok">validation passed</StatusIndicator><span className="mono">{validate.data.requestId ?? 'Request ID unavailable'}</span><p>The platform accepted this exact draft as valid. This is validation evidence, not activation.</p></div>}
-          {submission === undefined && isCurrentValidationPending && <div className="settings-validation"><StatusIndicator dotClass="dot-pending">validation accepted</StatusIndicator><span className="mono">{validate.data.requestId ?? 'Request ID unavailable'}</span><p>Validation is still pending. Activation stays disabled until a completed validation is returned.</p></div>}
           {submission === undefined && !parseError && !validate.isPending && !validate.isError && !isCurrentValidation && !isCurrentValidationPending && <div className="settings-validation settings-validation-idle"><StatusIndicator dotClass="dot-muted">awaiting validation</StatusIndicator><p>Edit the complete payload, then validate it against platform policy.</p></div>}
           {activate.isError && <div className="settings-validation settings-validation-error"><FailureNotice error={activate.error} title={(activate.error instanceof ApiFailure && activate.error.category === 'conflict') ? 'Activation conflict' : 'Activation was not accepted'} /></div>}
         </div>
