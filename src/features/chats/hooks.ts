@@ -6,7 +6,6 @@ import {
   getChat,
   getMessageDeliveryHistory,
   listInstanceChats,
-  listInstanceLabels,
   listInstanceMessages,
   registerMedia,
   retryMessage,
@@ -16,6 +15,7 @@ import {
 import { getInstance, listInstances } from '@/api/instances';
 import { notImplemented } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
+import { getLabel, listLabels } from '@/api/labels';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 import { useInstanceClient } from '@/api/useInstanceClient';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
@@ -162,14 +162,25 @@ export function useSendTextMessage(instanceId: string) {
   });
 }
 
-export function useInstanceLabels(instanceId: string | undefined, enabled = true) {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
+export function useInstanceLabels(instanceId: string | undefined, token: string | undefined, enabled = true) {
+  const client = useInstanceClient(token);
   return useQuery({
     queryKey: queryKeys.instanceLabels(instanceId ?? ''),
-    queryFn: () => listInstanceLabels(client, instanceId ?? '', { limit: 100 }),
-    enabled: enabled && instanceId !== undefined,
-    refetchInterval,
+    queryFn: () => listLabels(client!),
+    enabled: enabled && instanceId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useLabel(instanceId: string | undefined, labelId: string | undefined, token: string | undefined, enabled = true) {
+  const client = useInstanceClient(token);
+  return useQuery({
+    queryKey: queryKeys.label(instanceId ?? '', labelId ?? ''),
+    queryFn: () => getLabel(client!, labelId ?? ''),
+    enabled: enabled && instanceId !== undefined && labelId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 

@@ -12,6 +12,7 @@ import { useResilientReadState } from '@/lib/query-state';
 import {
   useCancelMessage,
   useContact,
+  useLabel,
   useInstanceLabels,
   useInstanceMessages,
   useMessageDeliveryHistory,
@@ -156,24 +157,25 @@ function SelectedMessage({ message, instanceId }: { message: MessageResource; in
   );
 }
 
-function ContextPanelDetails({ instanceId, token, contactsEnabled, chat, onBack }: {
+function ContextPanelDetails({ instanceId, token, contactsEnabled, labelsEnabled, chat, onBack }: {
   instanceId: string | undefined;
   token: string | undefined;
   contactsEnabled: boolean;
+  labelsEnabled: boolean;
   chat: ChatResource;
   onBack: () => void;
 }) {
   const [searchParams] = useSearchParams();
   const selectedMessageId = searchParams.get('message');
   const contactQuery = useContact(instanceId, chat.id, token, contactsEnabled);
-  const labels = useInstanceLabels(instanceId);
+  const labels = useInstanceLabels(instanceId, token, labelsEnabled);
   const contactReadState = useResilientReadState(contactQuery, contactQuery.data?.resource !== undefined);
   const labelsReadState = useResilientReadState(labels, labels.data?.resource !== undefined);
   const messagesQuery = useInstanceMessages(instanceId);
   const loadedMessages = useMemo(() => (messagesQuery.data?.pages ?? []).flatMap((page) => page.resource?.items ?? []), [messagesQuery.data?.pages]);
   const selectedMessage = loadedMessages.find((message) => message.id === selectedMessageId && message.chatId === chat.id);
   const contact = contactQuery.data?.resource;
-  const labelNames = new Map((labels.data?.resource?.items ?? []).map((label) => [label.id, label.name ?? label.id]));
+  const labelNames = new Map((labels.data?.resource ?? []).map((label) => [label.id, label.name ?? label.id]));
 
   return (
     <aside className={`context${selectedMessageId ? ' context--message' : ' context--contact'}`} id="chat-context" aria-label="Contact and selected message context">
@@ -203,18 +205,24 @@ function ContextPanelDetails({ instanceId, token, contactsEnabled, chat, onBack 
   );
 }
 
-export function ContextPanel({ instanceId, token, contactId, chat, onBack }: {
+export function ContextPanel({ instanceId, token, contactId, labelId, chat, onBack }: {
   instanceId: string | undefined;
   token: string | undefined;
   contactId: string | undefined;
+  labelId: string | undefined;
   chat: ChatResource | undefined;
   onBack: () => void;
 }) {
   const capabilities = useInstanceCapabilities(instanceId, token);
   const contactsEnabled = hasCapability(capabilities.data, 'contacts_projection');
+  const labelsEnabled = hasCapability(capabilities.data, 'labels_projection');
   const contactQuery = useContact(instanceId, contactId, token, contactsEnabled);
   const contactReadState = useResilientReadState(contactQuery, contactQuery.data?.resource !== undefined);
   const contact = contactQuery.data?.resource;
+
+  const labelQuery = useLabel(instanceId, labelId, token, labelsEnabled);
+  const labelReadState = useResilientReadState(labelQuery, labelQuery.data?.resource !== undefined);
+  const label = labelQuery.data?.resource;
 
   if (contactId) {
     return (
@@ -246,6 +254,33 @@ export function ContextPanel({ instanceId, token, contactId, chat, onBack }: {
     );
   }
 
+  if (labelId) {
+    return (
+      <aside className="context context--contact" id="chat-context" aria-label="Label details">
+        <header className="context-head">
+          <div><span className="eyebrow">Directory</span><h2>Label details</h2></div>
+          <button className="btn sm context-close chat-icon-action" type="button" data-pane-target="conversations" aria-label="Back to labels" aria-controls="chat-conversations" onClick={onBack}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg></button>
+        </header>
+        {labelReadState.isInitialLoading ? <section className="chat-calm-state" aria-live="polite"><h2>Loading label.</h2></section>
+          : labelReadState.isInitialError ? <section><InlineError error={labelReadState.error} onRetry={() => { void labelQuery.refetch(); }} className="chat-context-error" /></section>
+          : label ? <>
+            <ProjectionNotice meta={labelQuery.data?.meta} />
+            {labelReadState.isStaleError && <InlineError error={labelReadState.error} onRetry={() => { void labelQuery.refetch(); }} className="chat-context-error" />}
+            <section aria-labelledby="projected-label-facts-title">
+              <h3 id="projected-label-facts-title">Projected definition</h3>
+              <dl className="kv">
+                <dt>Name</dt><dd>{label.name ?? '—'}</dd>
+                <dt>Label ID</dt><dd><span className="mono context-technical-value" title={label.id}>{label.id}</span></dd>
+                <dt>Color</dt><dd>{label.color ?? '—'}</dd>
+                <dt>Predefined ID</dt><dd>{label.predefinedId ?? '—'}</dd>
+              </dl>
+              <p className="help read-only-note !text-[var(--fg-2)]">Label definitions are persisted and read-only here. Chat and message assignments appear with their projections.</p>
+            </section>
+          </> : <section className="chat-calm-state"><h2>Label details are unavailable.</h2></section>}
+      </aside>
+    );
+  }
+
   if (!chat) {
     return (
       <aside className="context context--contact" id="chat-context" aria-label="Contact and selected message context">
@@ -262,5 +297,5 @@ export function ContextPanel({ instanceId, token, contactId, chat, onBack }: {
     );
   }
 
-  return <ContextPanelDetails instanceId={instanceId} token={token} contactsEnabled={contactsEnabled} chat={chat} onBack={onBack} />;
+  return <ContextPanelDetails instanceId={instanceId} token={token} contactsEnabled={contactsEnabled} labelsEnabled={labelsEnabled} chat={chat} onBack={onBack} />;
 }

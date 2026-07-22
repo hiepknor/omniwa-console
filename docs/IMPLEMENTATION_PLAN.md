@@ -17,6 +17,8 @@ Completed:
 - Groups projection list/info/search, freshness, opaque cursor, and mutation UI.
 - Contacts projection directory with server prefix search, opaque cursor, and
   normalized detail views.
+- Labels projection directory with legacy bare-list compatibility and
+  freshness-aware detail views.
 - Global capability provider and reusable instance capability hook.
 - Projection envelope metadata adapter and shared projection notice.
 - Machine-readable error adapter, `Retry-After` countdown, jittered manual retry,
@@ -24,7 +26,7 @@ Completed:
 
 Not yet integrated:
 
-- Labels, Chats, Messages, and delivery projections;
+- Chats, Messages, and delivery projections;
 - durable Events;
 - Overview, split Health, and Projection Health;
 - Campaign UI;
@@ -55,10 +57,10 @@ contract boundary.
 
 Goal: supply directory context for the Chats workspace.
 
-Contacts slice implemented: the Chats workspace now uses instance-scoped
-projection list/search/detail reads, keeps query and cursor scope in the URL,
-and exposes only an explicit normalized/redacted contact model. Labels remain
-the next independently reviewable slice before this phase reaches its exit.
+Contacts and Labels slices implemented: the Chats workspace now uses
+instance-scoped projection list/search/detail reads, keeps directory scope in
+the URL, and exposes explicit normalized models. The Labels adapter preserves
+the documented bare-array list while detail reads retain freshness metadata.
 
 - Gate contacts and labels independently.
 - Implement contacts list, prefix search, detail, and opaque cursor behavior.
@@ -68,8 +70,10 @@ the next independently reviewable slice before this phase reaches its exit.
 - Keep `/label/list` on its documented legacy bare-array adapter.
 - Integrate label detail and projected associations needed by Chats.
 
-Exit: contact and label reads are authoritative and deep-linkable; no browser
-identity cache or reconstruction exists.
+Exit achieved: contact and label reads are capability-gated, authoritative, and
+deep-linkable; no browser identity cache or provider-payload reconstruction
+exists. Label associations remain owned by the upcoming Chat/Message resources
+rather than a Console-invented endpoint.
 
 ## Phase 3 — Chats, Messages, and delivery
 

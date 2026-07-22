@@ -21,7 +21,7 @@ Rules:
 | Groups | Projection available | Projection list/detail/search integrated |
 | Chats and Messages | Projection available | Pending migration |
 | Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
-| Labels | Projection available | Pending migration |
+| Labels | Projection available | Directory list/detail integrated in Chats workspace |
 | Events | Durable history available | Pending migration |
 | Overview and Health | Persisted/split APIs available | Pending migration |
 | Campaigns (`/messages`) | Orchestration available | Pending implementation |
@@ -100,8 +100,9 @@ to a live WhatsApp read.
 
 ## Chats workspace — `/chats/:instanceId?/:chatId?`
 
-Status: Contacts list/search/detail is integrated as the directory fallback and
-context surface. Chats, Messages, delivery history, and Labels remain pending.
+Status: Contacts list/search/detail and Labels list/detail are integrated as
+directory/context surfaces. Chats, Messages, and delivery history remain
+pending.
 
 Core projection ownership:
 
@@ -118,6 +119,12 @@ GET /user/contact/{contactId}
 GET /label/list
 GET /label/info/{labelId}
 ```
+
+Contacts use server prefix search and opaque cursors. Labels intentionally keep
+the backend's legacy bare-array list; capability readiness distinguishes a valid
+empty label projection from an unavailable one. Label assignments are consumed
+from future Chat/Message projection fields rather than reconstructed in the
+browser.
 
 Core commands used by the workspace when implemented:
 

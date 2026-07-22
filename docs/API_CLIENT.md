@@ -86,9 +86,11 @@ Use:
 - `unwrapCommand` for server-acknowledged mutations.
 
 Known bare-response endpoints must remain explicit. In particular,
-`GET /label/list` returns a legacy bare array. The Groups adapters continue to
-accept the historical raw list during compatibility rollout, but current
-projection responses preserve their success envelope and metadata.
+`GET /label/list` returns a legacy bare array, so readiness comes from the
+instance `labels_projection` capability and not from response metadata. The
+Groups adapters continue to accept the historical raw list during compatibility
+rollout, but current projection responses preserve their success envelope and
+metadata.
 
 ## Projection state
 
@@ -149,6 +151,8 @@ Keys mirror resource and credential scope:
 ['instances', instanceId, 'group', groupId]
 ['instances', instanceId, 'contacts', { search, cursor, limit }]
 ['instances', instanceId, 'contact', contactId]
+['instances', instanceId, 'labels']
+['instances', instanceId, 'label', labelId]
 ['instances', instanceId, 'messages', { cursor }]
 ['events', { type, cursor, limit }]
 ```

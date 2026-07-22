@@ -30,6 +30,7 @@ export const queryKeys = {
       : ['instances', instanceId, 'contacts', params] as const,
   contact: (instanceId: string, contactId: string) => ['instances', instanceId, 'contact', contactId] as const,
   instanceLabels: (instanceId: string) => ['instances', instanceId, 'labels'] as const,
+  label: (instanceId: string, labelId: string) => ['instances', instanceId, 'label', labelId] as const,
   media: (mediaId: string) => ['media', mediaId] as const,
   providerCapabilities: ['provider', 'capabilities'] as const,
   queueStatus: ['queue', 'status'] as const,
