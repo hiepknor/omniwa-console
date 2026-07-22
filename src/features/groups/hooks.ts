@@ -48,36 +48,38 @@ export function usePickerInstances() {
   });
 }
 
+// /group/list and /group/info are live WhatsApp queries that WhatsApp rate-limits.
+// They must NOT poll — fetch on demand, cache long, refetch only on Refresh or
+// after a mutation invalidates.
+const WHATSAPP_LIVE = { refetchInterval: false as const, staleTime: 5 * 60_000 };
+
 export function useInstanceGroups(instanceId: string | undefined, token: string | undefined) {
   const tokenClient = useGroupClient(token);
-  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.instanceGroups(instanceId ?? '', {}),
     queryFn: () => listInstanceGroups(tokenClient as ApiClient, instanceId ?? ''),
     enabled: instanceId !== undefined && tokenClient !== undefined,
-    refetchInterval,
+    ...WHATSAPP_LIVE,
   });
 }
 
 export function useGroup(groupId: string | undefined, token: string | undefined) {
   const tokenClient = useGroupClient(token);
-  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.group(groupId ?? ''),
     queryFn: () => getGroup(tokenClient as ApiClient, groupId ?? ''),
     enabled: groupId !== undefined && tokenClient !== undefined,
-    refetchInterval,
+    ...WHATSAPP_LIVE,
   });
 }
 
 export function useGroupMembers(groupId: string | undefined, token: string | undefined) {
   const tokenClient = useGroupClient(token);
-  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.groupMembers(groupId ?? ''),
     queryFn: () => listGroupMembers(tokenClient as ApiClient, groupId ?? ''),
     enabled: groupId !== undefined && tokenClient !== undefined,
-    refetchInterval,
+    ...WHATSAPP_LIVE,
   });
 }
 
@@ -213,6 +215,7 @@ export function useGroupInviteLink(groupId: string | undefined, token: string | 
     queryKey: [...queryKeys.group(groupId ?? ''), 'invite-link'],
     queryFn: () => getGroupInviteLink(tokenClient as ApiClient, groupId ?? ''),
     enabled: groupId !== undefined && tokenClient !== undefined,
+    ...WHATSAPP_LIVE,
   });
 }
 

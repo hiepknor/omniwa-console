@@ -71,8 +71,9 @@ export function useInstanceQr(instanceId: string, token: string | undefined, ena
     queryKey: [...queryKeys.instance(instanceId), 'qr'],
     queryFn: () => getInstanceQr(tokenClient as ApiClient),
     enabled: enabled && tokenClient !== undefined,
-    // QR rotates frequently while pairing; poll faster than the shared interval.
-    refetchInterval: enabled ? 8_000 : false,
+    // QR rotates while pairing; poll only during that short window (and only when
+    // connected, per the drawer gate) to stay well under WhatsApp's limits.
+    refetchInterval: enabled ? 20_000 : false,
   });
 }
 
