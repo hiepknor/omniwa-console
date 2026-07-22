@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ApiFailure, notImplemented, unwrap, unwrapCommand } from './envelopes';
+import { ApiFailure, notImplemented, unwrap, unwrapCommand, unwrapProjection } from './envelopes';
 
 function response(status: number): Response {
   return new Response(null, { status });
@@ -48,6 +48,37 @@ describe('ApiFailure', () => {
     const failure = new ApiFailure({ error: 'info query returned status 429: rate-overlimit' }, 500);
     expect(failure.category).toBe('rate_limited');
     expect(failure.retryable).toBe(false);
+  });
+
+  it('prefers Retry-After over the body and preserves the machine-readable code', () => {
+    const failure = new ApiFailure(
+      { error: 'rate_limited', code: 'rate_limited', retryAfter: 90 },
+      429,
+      new Headers({ 'Retry-After': '45' }),
+    );
+    expect(failure.code).toBe('rate_limited');
+    expect(failure.retryAfterSeconds).toBe(45);
+    expect(failure.retryAt).toBeTypeOf('number');
+  });
+
+  it.each([
+    ['projection_not_ready', 'unavailable'],
+    ['invalid_cursor', 'validation'],
+    ['invalid_pagination', 'validation'],
+    ['invalid_filter', 'validation'],
+    ['invalid_window', 'validation'],
+    ['not_found', 'not_found'],
+    ['outbound_rate_limited', 'rate_limited'],
+  ] as const)('maps error code %s to category %s', (code, category) => {
+    const failure = new ApiFailure({ error: code, code }, code === 'projection_not_ready' ? 503 : 400);
+    expect(failure.category).toBe(category);
+  });
+
+  it('does not retry a projection that is not ready', () => {
+    expect(new ApiFailure(
+      { error: 'projection_not_ready', code: 'projection_not_ready' },
+      503,
+    ).retryable).toBe(false);
   });
 
   it('never carries a request id', () => {
@@ -111,5 +142,32 @@ describe('unwrapCommand', () => {
 
   it('throws an ApiFailure when the command returns an error', () => {
     expect(() => unwrapCommand({ error: { error: 'denied' }, response: response(403) })).toThrowError(ApiFailure);
+  });
+});
+
+describe('unwrapProjection', () => {
+  it('preserves projection freshness and opaque cursor metadata', () => {
+    const result = unwrapProjection<string[]>({
+      data: {
+        message: 'success',
+        data: [],
+        meta: {
+          source: 'projection',
+          syncStatus: 'stale',
+          lastSyncedAt: '2026-07-22T08:00:00Z',
+          nextCursor: 'opaque-value',
+        },
+      },
+      response: response(200),
+    });
+    expect(result).toEqual({
+      resource: [],
+      meta: {
+        source: 'projection',
+        syncStatus: 'stale',
+        lastSyncedAt: '2026-07-22T08:00:00Z',
+        nextCursor: 'opaque-value',
+      },
+    });
   });
 });

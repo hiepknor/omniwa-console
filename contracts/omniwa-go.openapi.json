@@ -60,6 +60,596 @@
         }
       }
     },
+    "/campaigns": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "List campaigns",
+        "parameters": [
+          {
+            "description": "Campaign status",
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-100)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Creates a text campaign draft. Every recipient requires instance-scoped opt-in evidence; raw evidence references are hashed before persistence.",
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "Create campaign draft",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pkg_campaign_handler.CreateCampaignRequest"
+              }
+            }
+          },
+          "description": "Campaign draft",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "Get campaign",
+        "parameters": [
+          {
+            "description": "Campaign ID",
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/abort": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "Abort campaign",
+        "parameters": [
+          {
+            "description": "Campaign ID",
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignDetailResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/audit": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "List campaign audit history",
+        "parameters": [
+          {
+            "description": "Campaign ID",
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-100)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignAuditListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/pause": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "Pause campaign",
+        "parameters": [
+          {
+            "description": "Campaign ID",
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignDetailResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/recipients": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "List campaign recipients",
+        "parameters": [
+          {
+            "description": "Campaign ID",
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-100)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignRecipientListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/resume": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "Resume campaign",
+        "parameters": [
+          {
+            "description": "Campaign ID",
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignDetailResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/schedule": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "Schedule campaign",
+        "parameters": [
+          {
+            "description": "Campaign ID",
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pkg_campaign_handler.ScheduleCampaignRequest"
+              }
+            }
+          },
+          "description": "Schedule",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaigns/{campaignId}/start": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaigns"
+        ],
+        "summary": "Start campaign",
+        "parameters": [
+          {
+            "description": "Campaign ID",
+            "name": "campaignId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignDetailResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/chat/archive": {
       "post": {
         "security": [
@@ -165,8 +755,184 @@
               }
             }
           },
+          "429": {
+            "description": "Outbound rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/info/{chatId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Get a projected chat",
+        "parameters": [
+          {
+            "description": "Chat JID",
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chat not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/list": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "List projected chats",
+        "parameters": [
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque pagination cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -483,6 +1249,103 @@
         }
       }
     },
+    "/chat/{chatId}/messages": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "List projected messages for a chat",
+        "parameters": [
+          {
+            "description": "Chat JID",
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque pagination cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/community/add": {
       "post": {
         "security": [
@@ -650,6 +1513,106 @@
         }
       }
     },
+    "/events": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Events"
+        ],
+        "summary": "List durable event history",
+        "parameters": [
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque pagination cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Exact event type",
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryItem"
+                          }
+                        },
+                        "meta": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryMeta"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/group/create": {
       "post": {
         "security": [
@@ -690,6 +1653,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Mutation or information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -820,8 +1793,28 @@
               }
             }
           },
+          "404": {
+            "description": "Projected group not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Groups projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -889,8 +1882,38 @@
               }
             }
           },
+          "404": {
+            "description": "Cached invite link not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Groups projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -1063,6 +2086,16 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Groups projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -1101,6 +2134,16 @@
                       }
                     }
                   ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -1290,6 +2333,107 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/search": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Prefix-search groups from the persisted instance projection without querying WhatsApp",
+        "tags": [
+          "Group"
+        ],
+        "summary": "Search projected groups",
+        "parameters": [
+          {
+            "description": "Case-insensitive group JID or name prefix",
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque cursor bound to the instance and normalized query",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/types.GroupInfo"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid search or cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Groups projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -2403,6 +3547,85 @@
         }
       }
     },
+    "/label/info/{labelId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Get one label from the persisted instance projection",
+        "tags": [
+          "Label"
+        ],
+        "summary": "Get label details",
+        "parameters": [
+          {
+            "description": "Label ID",
+            "name": "labelId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/apidocs.LabelItem"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Label not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/label/list": {
       "get": {
         "security": [
@@ -2431,6 +3654,16 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -2543,6 +3776,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Outbound rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
                 }
               }
             }
@@ -2681,6 +3924,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Outbound rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
                 }
               }
             }
@@ -2949,6 +4202,16 @@
               }
             }
           },
+          "429": {
+            "description": "Outbound rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -3020,6 +4283,165 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/message/{messageId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Message"
+        ],
+        "summary": "Get a projected message",
+        "parameters": [
+          {
+            "description": "Provider message ID",
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Message not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/message/{messageId}/delivery": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Message"
+        ],
+        "summary": "List projected message receipts",
+        "parameters": [
+          {
+            "description": "Provider message ID",
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessageReceipt"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Message not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -3148,6 +4570,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -3217,6 +4649,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -3264,6 +4706,16 @@
                       }
                     }
                   ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -3336,6 +4788,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -3730,6 +5192,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -3783,6 +5255,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -3844,6 +5326,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -3897,6 +5389,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -3958,6 +5460,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -4011,6 +5523,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -4072,6 +5594,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -4125,6 +5657,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -4211,6 +5753,16 @@
               }
             }
           },
+          "429": {
+            "description": "Outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -4264,6 +5816,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
                 }
               }
             }
@@ -4325,6 +5887,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -4374,6 +5946,253 @@
           },
           "400": {
             "description": "Error on validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information or outbound rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/server/capabilities": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Server"
+        ],
+        "summary": "Get server capabilities",
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CapabilitiesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/server/health": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Server"
+        ],
+        "summary": "Get split server health",
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ServerHealth"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/server/overview": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Server"
+        ],
+        "summary": "Get persisted overview metrics",
+        "parameters": [
+          {
+            "description": "Metric window as a Go duration (maximum 720h)",
+            "name": "window",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "24h"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.Overview"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid metric window",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/server/projection-health": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Server"
+        ],
+        "summary": "Get projection health metrics",
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -4549,6 +6368,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -4658,6 +6487,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -4719,8 +6558,107 @@
               }
             }
           },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/contact/{contactId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Get one normalized contact from the persisted instance projection",
+        "tags": [
+          "User"
+        ],
+        "summary": "Get a projected contact",
+        "parameters": [
+          {
+            "description": "Contact JID",
+            "name": "contactId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid contact JID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Contact not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -4772,6 +6710,117 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/contacts/search": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Prefix-search normalized contacts from the persisted instance projection without querying WhatsApp",
+        "tags": [
+          "User"
+        ],
+        "summary": "Search projected contacts",
+        "parameters": [
+          {
+            "description": "Case-insensitive prefix matched against normalized contact fields",
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque cursor bound to the normalized search query",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid search or cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -4831,6 +6880,16 @@
               }
             }
           },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
             "content": {
@@ -4875,6 +6934,16 @@
                       }
                     }
                   ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -4932,6 +7001,16 @@
                       }
                     }
                   ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Information query rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
                 }
               }
             }
@@ -5275,6 +7354,117 @@
       }
     },
     "schemas": {
+      "apidocs.CampaignAuditListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.AuditEvent"
+            }
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
+          }
+        }
+      },
+      "apidocs.CampaignDetailResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignDetail"
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          }
+        }
+      },
+      "apidocs.CampaignErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "campaign_state_conflict"
+          },
+          "error": {
+            "type": "string",
+            "example": "campaign state conflict"
+          }
+        }
+      },
+      "apidocs.CampaignListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"
+            }
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
+          }
+        }
+      },
+      "apidocs.CampaignRecipientListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient"
+            }
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
+          }
+        }
+      },
+      "apidocs.CapabilitiesData": {
+        "type": "object",
+        "properties": {
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "campaign_orchestration",
+              "rate_limit_retry_after",
+              "groups_projection"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "example": "1.2.3"
+          }
+        }
+      },
+      "apidocs.CapabilitiesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/apidocs.CapabilitiesData"
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          }
+        }
+      },
       "apidocs.ConnectData": {
         "type": "object",
         "properties": {
@@ -5431,6 +7621,23 @@
           }
         }
       },
+      "apidocs.OutboundRateLimitResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "outbound_rate_limited"
+          },
+          "error": {
+            "type": "string",
+            "example": "outbound_rate_limited"
+          },
+          "retryAfter": {
+            "type": "integer",
+            "example": 5
+          }
+        }
+      },
       "apidocs.PairData": {
         "type": "object",
         "properties": {
@@ -5528,6 +7735,25 @@
           }
         }
       },
+      "apidocs.ProjectionMeta": {
+        "type": "object",
+        "properties": {
+          "lastSyncedAt": {
+            "type": "string"
+          },
+          "nextCursor": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "example": "projection"
+          },
+          "syncStatus": {
+            "type": "string",
+            "example": "ready"
+          }
+        }
+      },
       "apidocs.QRCodeData": {
         "type": "object",
         "properties": {
@@ -5559,6 +7785,23 @@
           "message": {
             "type": "string",
             "example": "success"
+          }
+        }
+      },
+      "apidocs.RateLimitResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "rate_limited"
+          },
+          "error": {
+            "type": "string",
+            "example": "rate_limited"
+          },
+          "retryAfter": {
+            "type": "integer",
+            "example": 90
           }
         }
       },
@@ -5644,6 +7887,9 @@
           "message": {
             "type": "string",
             "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
           }
         }
       },
@@ -5692,6 +7938,196 @@
           },
           "callId": {
             "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.AuditEvent": {
+        "type": "object",
+        "properties": {
+          "actorType": {
+            "type": "string"
+          },
+          "campaignId": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromStatus": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "recipientId": {
+            "type": "string"
+          },
+          "toStatus": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus"
+          },
+          "textBody": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "scheduled",
+          "running",
+          "paused",
+          "completed",
+          "aborted",
+          "failed"
+        ],
+        "x-enum-varnames": [
+          "CampaignStatusDraft",
+          "CampaignStatusScheduled",
+          "CampaignStatusRunning",
+          "CampaignStatusPaused",
+          "CampaignStatusCompleted",
+          "CampaignStatusAborted",
+          "CampaignStatusFailed"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient": {
+        "type": "object",
+        "properties": {
+          "attemptCount": {
+            "type": "integer"
+          },
+          "campaignId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "deliveredAt": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "lastErrorCode": {
+            "type": "string"
+          },
+          "nextAttemptAt": {
+            "type": "string"
+          },
+          "optInSource": {
+            "type": "string"
+          },
+          "optedInAt": {
+            "type": "string"
+          },
+          "providerMessageId": {
+            "type": "string"
+          },
+          "readAt": {
+            "type": "string"
+          },
+          "recipientJid": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientStatus"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "processing",
+          "sent",
+          "delivered",
+          "read",
+          "failed",
+          "skipped",
+          "aborted"
+        ],
+        "x-enum-varnames": [
+          "RecipientStatusPending",
+          "RecipientStatusProcessing",
+          "RecipientStatusSent",
+          "RecipientStatusDelivered",
+          "RecipientStatusRead",
+          "RecipientStatusFailed",
+          "RecipientStatusSkipped",
+          "RecipientStatusAborted"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignDetail": {
+        "type": "object",
+        "properties": {
+          "byStatus": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "campaign": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"
+          },
+          "recipientCount": {
+            "type": "integer"
           }
         }
       },
@@ -6247,6 +8683,478 @@
         "properties": {
           "jid": {
             "$ref": "#/components/schemas/types.JID"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType": {
+        "type": "string",
+        "enum": [
+          "direct",
+          "group",
+          "newsletter",
+          "broadcast",
+          "unknown"
+        ],
+        "x-enum-varnames": [
+          "ChatTypeDirect",
+          "ChatTypeGroup",
+          "ChatTypeNewsletter",
+          "ChatTypeBroadcast",
+          "ChatTypeUnknown"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection": {
+        "type": "string",
+        "enum": [
+          "incoming",
+          "outgoing",
+          "system"
+        ],
+        "x-enum-varnames": [
+          "MessageDirectionIncoming",
+          "MessageDirectionOutgoing",
+          "MessageDirectionSystem"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance": {
+        "type": "string",
+        "enum": [
+          "live",
+          "history_sync",
+          "write_through"
+        ],
+        "x-enum-varnames": [
+          "MessageProvenanceLive",
+          "MessageProvenanceHistorySync",
+          "MessageProvenanceWriteThrough"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus": {
+        "type": "string",
+        "enum": [
+          "not_started",
+          "syncing",
+          "ready",
+          "stale",
+          "failed"
+        ],
+        "x-enum-varnames": [
+          "SyncStatusNotStarted",
+          "SyncStatusSyncing",
+          "SyncStatusReady",
+          "SyncStatusStale",
+          "SyncStatusFailed"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ConnectionHealth": {
+        "type": "object",
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ingestedAt": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryMeta": {
+        "type": "object",
+        "properties": {
+          "backfill": {
+            "type": "boolean"
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "nextCursor": {
+            "type": "string"
+          },
+          "retentionSeconds": {
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.HealthDimension": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.InstanceHealth": {
+        "type": "object",
+        "properties": {
+          "connection": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ConnectionHealth"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "projection": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth"
+          },
+          "throttling": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ThrottlingHealth"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.Overview": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "type": "string"
+          },
+          "instances": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewInstances"
+          },
+          "messages": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewMessages"
+          },
+          "projections": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewProjectionCounts"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewScope"
+          },
+          "window": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewWindow"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewInstances": {
+        "type": "object",
+        "properties": {
+          "connected": {
+            "type": "integer"
+          },
+          "disconnected": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewMessages": {
+        "type": "object",
+        "properties": {
+          "incoming": {
+            "type": "integer"
+          },
+          "outgoing": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewProjectionCounts": {
+        "type": "object",
+        "properties": {
+          "chats": {
+            "type": "integer"
+          },
+          "contacts": {
+            "type": "integer"
+          },
+          "events": {
+            "type": "integer"
+          },
+          "groups": {
+            "type": "integer"
+          },
+          "messages": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewScope": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewWindow": {
+        "type": "object",
+        "properties": {
+          "durationSeconds": {
+            "type": "integer"
+          },
+          "end": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat": {
+        "type": "object",
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "chatId": {
+            "type": "string"
+          },
+          "contactId": {
+            "type": "string"
+          },
+          "disappearingTimer": {
+            "type": "integer"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "lastActivityAt": {
+            "type": "string"
+          },
+          "lastMessageAt": {
+            "type": "string"
+          },
+          "lastMessageId": {
+            "type": "string"
+          },
+          "mutedUntil": {
+            "type": "string"
+          },
+          "pinned": {
+            "type": "boolean"
+          },
+          "type": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType"
+          },
+          "unreadCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage": {
+        "type": "object",
+        "properties": {
+          "caption": {
+            "type": "string"
+          },
+          "chatId": {
+            "type": "string"
+          },
+          "contentSummary": {
+            "type": "string"
+          },
+          "contentText": {
+            "type": "string"
+          },
+          "deliveredAt": {
+            "type": "string"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection"
+          },
+          "historySyncId": {
+            "type": "string"
+          },
+          "mediaDurationSeconds": {
+            "type": "integer"
+          },
+          "mediaFileName": {
+            "type": "string"
+          },
+          "mediaHeight": {
+            "type": "integer"
+          },
+          "mediaMimeType": {
+            "type": "string"
+          },
+          "mediaSize": {
+            "type": "integer"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "mediaWidth": {
+            "type": "integer"
+          },
+          "messageId": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "participantJid": {
+            "type": "string"
+          },
+          "playedAt": {
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance"
+          },
+          "providerTimestamp": {
+            "type": "string"
+          },
+          "quotedMessageId": {
+            "type": "string"
+          },
+          "readAt": {
+            "type": "string"
+          },
+          "recipientJid": {
+            "type": "string"
+          },
+          "retentionExpiresAt": {
+            "type": "string"
+          },
+          "senderJid": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessageReceipt": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string"
+          },
+          "receiptAt": {
+            "type": "string"
+          },
+          "receiptType": {
+            "type": "string"
+          },
+          "recipientJid": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth": {
+        "type": "object",
+        "properties": {
+          "byStatus": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "resources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionResourceHealth"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionResourceHealth": {
+        "type": "object",
+        "properties": {
+          "eventLagSeconds": {
+            "type": "integer"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "lastEventAt": {
+            "type": "string"
+          },
+          "lastReconciledAt": {
+            "type": "string"
+          },
+          "reconcileAgeSeconds": {
+            "type": "integer"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "type": "integer"
+          },
+          "staleSince": {
+            "type": "string"
+          },
+          "syncStatus": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ServerHealth": {
+        "type": "object",
+        "properties": {
+          "api": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.HealthDimension"
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "instances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.InstanceHealth"
+            }
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ThrottlingHealth": {
+        "type": "object",
+        "properties": {
+          "circuitState": {
+            "type": "string"
+          },
+          "observed": {
+            "type": "boolean"
+          },
+          "openUntil": {
+            "type": "string"
+          },
+          "retryAfterSeconds": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
           }
         }
       },
@@ -6962,6 +9870,12 @@
       "github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo": {
         "type": "object",
         "properties": {
+          "About": {
+            "type": "string"
+          },
+          "AboutUpdatedAt": {
+            "type": "string"
+          },
           "BusinessName": {
             "type": "string"
           },
@@ -6977,7 +9891,28 @@
           "Jid": {
             "type": "string"
           },
+          "LID": {
+            "type": "string"
+          },
+          "PhoneJID": {
+            "type": "string"
+          },
+          "PictureID": {
+            "type": "string"
+          },
+          "PictureRemoved": {
+            "type": "boolean"
+          },
+          "PictureUpdatedAt": {
+            "type": "string"
+          },
           "PushName": {
+            "type": "string"
+          },
+          "RedactedPhone": {
+            "type": "string"
+          },
+          "Username": {
             "type": "string"
           }
         }
@@ -7111,6 +10046,62 @@
         "type": "object",
         "properties": {
           "time.Time": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_campaign_handler.CampaignRecipientConsent": {
+        "type": "object",
+        "required": [
+          "jid",
+          "optInEvidenceReference",
+          "optInSource",
+          "optedInAt"
+        ],
+        "properties": {
+          "jid": {
+            "type": "string"
+          },
+          "optInEvidenceReference": {
+            "type": "string"
+          },
+          "optInSource": {
+            "type": "string"
+          },
+          "optedInAt": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_campaign_handler.CreateCampaignRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "recipients",
+          "text"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "recipients": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/pkg_campaign_handler.CampaignRecipientConsent"
+            }
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_campaign_handler.ScheduleCampaignRequest": {
+        "type": "object",
+        "required": [
+          "startsAt"
+        ],
+        "properties": {
+          "startsAt": {
             "type": "string"
           }
         }

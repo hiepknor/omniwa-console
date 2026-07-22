@@ -21,12 +21,12 @@ async function probeKey(client: ReturnType<typeof createApiClient>): Promise<Key
   const admin = await client.GET('/instance/all');
   if (admin.data !== undefined) return 'admin';
   if (admin.response.status !== 401 && admin.response.status !== 403) {
-    throw new ApiFailure(admin.error, admin.response.status);
+    throw new ApiFailure(admin.error, admin.response.status, admin.response.headers);
   }
 
   const scoped = await client.GET('/instance/status');
   if (scoped.data !== undefined) return 'api';
-  throw new ApiFailure(scoped.error, scoped.response.status);
+  throw new ApiFailure(scoped.error, scoped.response.status, scoped.response.headers);
 }
 
 function isValidOrigin(value: string) {

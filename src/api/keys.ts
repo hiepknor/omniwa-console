@@ -1,4 +1,5 @@
 export const queryKeys = {
+  capabilities: (scope: string) => ['capabilities', scope] as const,
   health: ['health'] as const,
   healthReadiness: ['health', 'readiness'] as const,
   dashboard: ['dashboard'] as const,
