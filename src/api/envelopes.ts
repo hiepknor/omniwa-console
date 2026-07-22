@@ -88,10 +88,13 @@ export class ApiFailure extends Error {
     super(message);
     this.name = 'ApiFailure';
     this.httpStatus = httpStatus;
-    this.category = categoryForStatus(httpStatus);
-    // Transient conditions worth an automatic retry. 501 (not_implemented) is a
-    // permanent condition, so it is excluded despite being 5xx.
-    this.retryable = httpStatus === 429 || (httpStatus >= 500 && httpStatus !== 501);
+    // omniwa-go surfaces WhatsApp throttling as a 500 whose body carries the
+    // upstream 429 (e.g. "info query returned status 429: rate-overlimit").
+    // Treat that as rate_limited so the client backs off instead of retrying.
+    const rateLimited = httpStatus === 429 || /rate.?over.?limit|status 429|too many|rate.?limit/i.test(message);
+    this.category = rateLimited ? 'rate_limited' : categoryForStatus(httpStatus);
+    // A rate-limited condition must NOT be auto-retried (retrying deepens the throttle).
+    this.retryable = !rateLimited && (httpStatus >= 500 && httpStatus !== 501);
   }
 }
 

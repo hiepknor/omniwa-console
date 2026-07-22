@@ -68,7 +68,19 @@ function AppRuntime() {
         }),
         mutationCache: new MutationCache({ onError: handleError, onSuccess: handleSuccess }),
         defaultOptions: {
-          queries: { retry: 1, staleTime: 10_000 },
+          queries: {
+            // Never auto-retry permanent or rate-limited failures (retrying a
+            // WhatsApp throttle deepens it); allow one retry for transient 5xx only.
+            retry: (failureCount, error) => {
+              if (error instanceof ApiFailure) {
+                if (error.category === 'rate_limited' || !error.retryable) return false;
+              }
+              return failureCount < 1;
+            },
+            staleTime: 10_000,
+            // Avoid a refetch storm (incl. WhatsApp-live reads) on every tab focus.
+            refetchOnWindowFocus: false,
+          },
         },
       });
     },

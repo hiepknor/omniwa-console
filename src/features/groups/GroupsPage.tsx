@@ -241,7 +241,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
                 }
               },
             })}
-            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<button className="btn" type="button" disabled={refresh.isPending} onClick={() => refresh.mutate()}>Refresh</button>} />}
+            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<button className="btn" type="button" disabled={refresh.isPending || list.isFetching} onClick={() => refresh.mutate()}>Refresh</button>} />}
           />
         </div>
       </DataTableWorkspace>
