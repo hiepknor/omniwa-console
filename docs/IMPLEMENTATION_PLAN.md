@@ -1,129 +1,161 @@
-# Implementation Plan
+# OmniWA GO Integration Plan
 
-Status: M0–M7.1 are complete as of 2026-07-19. M6.5 campaigns and the Groups
-Named-Lists mode remain blocked pending the platform contract; contract gaps
-are recorded in the five `*_CONTRACT_GAPS.md` documents.
+This roadmap replaces the historical pre-migration milestones. Backend G0–G6 is
+available at OmniWA GO commit `7f9e6ac`; the remaining work is frontend
+integration in small, independently reviewable pull requests.
 
-Milestones are ordered so every milestone ends with a running, verifiable
-console. Each panel milestone includes its query hooks, routes, loading /
-empty / error states, and envelope-correct pagination.
+Each phase must satisfy `docs/DELIVERY_WORKFLOW.md` and keep
+`docs/PANELS.md` synchronized with operations actually consumed.
 
-## M0 — Foundation (scaffold, done)
+## Current baseline
 
-- Vite + React + TypeScript project with Tailwind, React Router,
-  TanStack Query.
-- Vendored contract, `contract:sync` and `api:generate` scripts, generated
-  schema committed.
-- `src/api/` boundary: client factory, envelope helpers, query-key helpers.
-- `src/lib/session.ts`, connect screen, authenticated shell layout with
-  sidebar navigation and route stubs for every panel.
-- `pnpm check` (typecheck + build) green.
+Completed:
 
-## M1 — Connect + Overview (done)
+- OmniWA GO contract sync and generated TypeScript schema.
+- Runtime `apikey` session model with admin and instance-token clients.
+- Instance lifecycle, QR, status, logout, and advanced settings.
+- Existing Groups list/info/mutation UI using the earlier response mapping.
+- Global capability provider and reusable instance capability hook.
+- Projection envelope metadata adapter and shared projection notice.
+- Machine-readable error adapter, `Retry-After` countdown, jittered manual retry,
+  duplicate scheduling protection, and no automatic mutation retry.
 
-- Connect screen probes `getHealth`, stores session, redirects.
-- Overview panel: dashboard summary, metric cards, action-required list.
-- Error envelope rendering (category, message, requestId) and 401-clears-
-  session behavior wired globally.
+Not yet integrated:
 
-Exit: operator can connect to a local platform and read real state.
+- projection-native Groups search/cursor/freshness;
+- Contacts, Labels, Chats, Messages, and delivery projections;
+- durable Events;
+- Overview, split Health, and Projection Health;
+- Campaign UI;
+- removal of remaining legacy polling/stub assumptions.
 
-## M2 — Instances (done)
+## Phase 1 — Groups projection
 
-- Instance list + detail, create/update forms, connect/disconnect/
-  reconnect, QR pairing view (poll `refreshInstanceQr` until paired),
-  sessions list, provider capabilities, destroy with typed confirmation.
+Goal: make Groups the first complete projection consumer.
 
-Exit: full instance lifecycle from the browser, including first-time QR
-pairing.
+- Call instance-scoped capabilities when the selected instance changes.
+- Use `groups_projection` as the initial-readiness signal without interpreting
+  an empty list as readiness or hiding an existing stale snapshot.
+- Adapt `/group/list` and `/group/info` with projection metadata.
+- Move search to `GET /group/search` with prefix query, limit, and opaque cursor.
+- Reset cursor when instance or query changes; keep scope in the URL.
+- Render ready-empty, syncing, stale, failed, and 503 not-ready distinctly.
+- Keep invite-link reads projection/cache-backed; reset remains a confirmed
+  mutation followed by projection refresh.
+- Remove comments and polling behavior that describe group reads as live
+  WhatsApp queries.
 
-## M3 — Workspace core (primary surface, done)
+Exit: Groups performs no live-read fallback and all freshness/pagination states
+are test-covered.
 
-- Three-pane workspace: conversation list (chats with search/label filters),
-  message timeline with bubble statuses, composer (text + media via
-  `registerMedia`), retry/cancel, delivery timeline in the context panel.
-- Async-accepted rendering on bubbles; disconnected-instance composer state.
+## Phase 2 — Contacts and Labels
 
-Exit: operator can converse and trace any message end to end from one screen.
+Goal: supply directory context for the Chats workspace.
 
-## M4 — Realtime (done)
+- Gate contacts and labels independently.
+- Implement contacts list, prefix search, detail, and opaque cursor behavior.
+- Preserve normalized/redacted identity output exactly as returned.
+- Handle `/user/check` complete stale-cache metadata without accepting partial
+  results.
+- Keep `/label/list` on its documented legacy bare-array adapter.
+- Integrate label detail and projected associations needed by Chats.
 
-- SSE client (fetch-based reader), invalidation mapping, live indicator,
-  reconnect/backoff, polling fallback, event ticker on Overview.
+Exit: contact and label reads are authoritative and deep-linkable; no browser
+identity cache or reconstruction exists.
 
-Exit: instance and queue panels update without manual refresh.
+## Phase 3 — Chats, Messages, and delivery
 
-## M5 — Operations panels (done)
+Goal: replace the Chats workspace stubs with persisted projections.
 
-- Queue & Jobs (status, job browser, detail drawer).
-- Webhooks (register, lifecycle, deliveries, single + bulk redrive).
-- Events (history + live tail, audit records).
+- Implement chat list/detail and keyset pagination.
+- Implement message list/detail and delivery/read receipt history.
+- Preserve message direction, sender/recipient, content summary, media metadata,
+  provenance, lifecycle, and retention state.
+- Keep media binary outside the projection cache.
+- Wire text/media send through existing public commands, then refresh the
+  affected chat/message projections.
+- Never interpret send acknowledgement as `sent`, `delivered`, or `read`.
+- Verify new messages do not shift already-loaded cursor pages.
 
-Exit: operational troubleshooting parity with `omniwa-tui`.
+Exit: an operator can browse persisted conversations, inspect delivery history,
+and send without client-side message accumulation.
 
-## M6 — Workspace completion + Directory + Settings (done)
+## Phase 4 — Durable Events, Overview, and Health
 
-- Contract-backed group management workbench (metadata, local state, member
-  commands, invite-link refresh acceptance, and one-off text commands).
-- Contact and label directory reads embedded in the Chats workspace, including
-  jump-to-conversation flows supported by the v1 contract.
-- Settings (get / validate / activate) and admin-keys panel (admin scope
-  only, show-once secret dialog).
-- Named Lists and bulk selection shipped deferred pending the platform
-  contract.
+Goal: replace operations stubs and weak liveness assumptions.
 
-Exit: the currently available v1-contract operations assigned in
-`docs/PANELS.md` are represented. Contract-blocked enhancements remain tracked
-in `docs/M6_CONTRACT_GAPS.md` and are not emulated in browser state.
+- Implement `/events` exact-type filter and opaque cursor history.
+- Use durable history for event audit and future reconnect recovery.
+- Implement `/server/overview` with URL-backed window, capped at 720h.
+- Render generated/window timestamps and projection-derived counts.
+- Implement split `/server/health` and `/server/projection-health` views.
+- Show circuit-breaker `openUntil` and `retryAfterSeconds` without probing.
+- Remove any use of `/server/ok` as connection/readiness state.
 
-## M6.5 — Campaigns, Named Lists, and send lists (blocked on platform contract)
+Exit: operators can distinguish API health, instance connection, projection
+freshness, and rate-limit posture.
 
-- Blocked until the operations in `docs/CAMPAIGNS_PROPOSAL.md` and the Named
-  Lists operations described in `docs/M6_CONTRACT_GAPS.md` exist in the
-  platform OpenAPI contract. Then: reusable group lists, send-list CRUD,
-  campaign wizard, campaign monitoring with segmented progress, and
-  per-recipient drill-down.
+## Phase 5 — Campaign orchestration
 
-Exit: an opt-in notification campaign can be created, observed, paused, and
-aborted entirely through platform APIs.
+Goal: provide consent-aware campaign creation and monitoring without moving
+worker logic into the browser.
 
-## M7 — Hardening (done)
+- Gate with `campaign_orchestration` and `outbound_rate_limit`.
+- Build `/messages` campaign list/detail with status and opaque cursor.
+- Build `/messages/new` creation flow requiring opt-in evidence per recipient.
+- Never persist or echo the raw evidence reference after submission.
+- Implement schedule/start/pause/resume/abort with server-confirmed transitions.
+- Add recipient and audit pagination and preserve all recipient states.
+- Explain that leased work may finish after pause.
+- Handle HTTP 409 transitions and outbound 429 without automatic mutation retry.
 
-- Deep-link audit (filters and cursors in URL params).
-- Accessibility pass (keyboard navigation, focus management in dialogs).
-- Bundle audit and route-level code splitting.
-- Production navigation exposes only contract-backed surfaces; blocked routes
-  remain available as explicit direct-link explanations.
-- Route-aware document titles, a skip-to-content link, mobile-first connection
-  ordering, and compact transport-outage reporting improve orientation and
-  recovery without duplicating the same failure across dashboard sections.
-- Automated architecture and bundle checks protect API and feature boundaries,
-  the single main landmark, route splitting, and the per-chunk size budget.
-- Propose the extended web dashboard profile back to the platform repo's
-  `platform_clients.rs` so the SDK profile matches shipped reality.
+Exit: campaigns can be created, controlled, and audited entirely through
+OmniWA GO. See `docs/CAMPAIGNS.md`.
 
-## M7.1 — Post-sync contract compatibility (done)
+## Phase 6 — Polling and integration hardening
 
-- Preserve `200 Success` versus `202 Accepted` for every consumed dual-response
-  command through a shared `CommandResult` API-boundary type.
-- Render completed and accepted feedback distinctly without conflating command
-  completion with provider delivery.
-- Adopt provider capability arrays with a legacy scalar fallback, and identify
-  the active instance session from `activeSessionId`.
-- Verify generated-schema freshness, panel operation ownership, and dual-status
-  command normalization through `pnpm contract:check`.
+Goal: remove migration scaffolding and prove production safety.
 
-Exit: contract resyncs cannot silently discard command disposition, and the
-Instances panel consumes the current non-legacy v1 fields.
+- Remove obsolete legacy adapters, copy, and operation assumptions.
+- Audit every query interval; projection polling is bounded and unsupported/live
+  reads do not poll.
+- Audit query-key scope, cursor reset, stale snapshot preservation, and mutation
+  invalidation across all integrated panels.
+- Complete keyboard, focus, responsive, deep-link, and bundle verification.
+- Add a browser-safe realtime bridge only if a separately authorized backend/BFF
+  exists; otherwise retain REST + durable Events posture.
+- Keep unsupported Queue/Webhooks/Global Settings/Admin Keys routes explicit.
 
-## Verification per milestone
+Exit: docs, panel ownership, code, generated contract, and navigation describe
+the same shipped product.
 
-- `pnpm check` must pass (design, contract, architecture, typecheck, production
-  build, and bundle checks).
-- Manual verify against a locally running OmniWA API (see `docs/api/` in
-  the platform repo for runtime setup).
-- No feature imports another feature; no `fetch` outside `src/api/`; feature
-  panels do not introduce additional `main` landmarks. These boundaries are
-  enforced by `pnpm architecture:check` as part of `pnpm check`.
-- Route chunks remain below the documented 300 KiB raw-JavaScript budget and
-  route-level splitting is verified by `pnpm bundle:check` after every build.
+## Phase sequencing
+
+```text
+Foundation (done)
+  → Groups
+  → Contacts + Labels
+  → Chats + Messages
+  → Events + Overview + Health
+  → Campaigns
+  → Hardening
+```
+
+Groups comes first because it exercises every shared projection concern with a
+small existing panel. Campaigns come after message/delivery visibility so the
+console can observe outcomes rather than merely submit work.
+
+## Verification for every phase
+
+Minimum automation:
+
+```bash
+git diff --check
+pnpm test
+pnpm check
+```
+
+Each phase also verifies capability changes, ready-empty versus not-ready,
+stale-data preservation, cursor scope/reset, rate-limit behavior, duplicate
+mutation prevention, direct deep links, keyboard flow, and narrow viewport
+layout where applicable.

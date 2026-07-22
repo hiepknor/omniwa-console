@@ -1,37 +1,45 @@
-# Realtime
+# Realtime and Durable Recovery
 
-## Status: disabled (REST polling only)
+## Current browser posture
 
-The console does **not** open a realtime connection against omniwa-go.
+The client-only console does not open OmniWA GO's `/ws` connection. That socket
+uses the global admin key; exposing it to browser code would give every operator
+session full instance-administration authority.
 
-omniwa-go's only realtime channel is a WebSocket `/ws` that emits
-`{ queue, payload }` frames (`../omniwa-go/docs/wiki-en/websocket-events.md`).
-Critically, `/ws` authenticates with the **global admin key** — even when
-filtered by `instanceId` — and the omniwa-go wiki explicitly forbids opening it
-from a browser SPA, because that would expose the admin secret in front-end code
-and in every network request. Safely bridging `/ws` would require a BFF/proxy
-that terminates the browser socket and holds the key server-side, which this
-client-only console does not have.
+`RealtimeProvider` therefore reports `polling` and supplies a bounded refetch
+interval to panels that still use its compatibility hooks. Projection-backed
+reads are safe database queries, but polling must remain purposeful and must
+never target WhatsApp-live information queries.
 
-## What the console does instead
+## Durable events
 
-Panels fall back to **REST polling**. `src/api/RealtimeProvider.tsx` keeps the
-previous hook surface (`useRealtimeStatus`, `useRealtimeStatusOrNull`,
-`useRealtimeEvents`, `useRealtimeRefetchInterval`) so feature code and shared
-components compile unchanged, but:
+`GET /events?type=&limit=&cursor=` is the authoritative history and recovery
+source:
 
-- `useRealtimeStatus()` / `useRealtimeStatusOrNull()` report a steady `polling`.
-- `useRealtimeEvents()` returns an empty list (no live ticker/tail).
-- `useRealtimeRefetchInterval()` returns `REALTIME_REFETCH_INTERVAL` (15s), so
-  mounted queries refetch on that interval while visible.
+- events are persisted before external fan-out;
+- cursors are opaque;
+- `type` is exact and at most 64 characters;
+- the default page size is 50 and maximum is 200;
+- retention defaults to 30 days;
+- no events are backfilled from before durable persistence was deployed;
+- responses expose normalized safe summaries, not raw provider payloads.
 
-The shell indicator therefore shows "polling" and operators know freshness is
-bounded by the interval, not live.
+The Events panel should use this endpoint for history, audit context, and any
+future reconnect recovery. Toast history is not an event store.
 
-## Re-enabling realtime later
+## Future live bridge
 
-If omniwa-go realtime is wanted, add a BFF that proxies `/ws` (browser ↔ BFF
-session, BFF ↔ omniwa-go with the global key) and reintroduce a stream client in
-`src/api/` that maps `queue` event types to the TanStack Query keys in
-`src/api/keys.ts` for targeted invalidation — the same invalidation-only design
-the console used for the Platform SSE stream.
+A browser-safe live channel requires a trusted BFF or a new scoped backend
+transport. The bridge would hold/administer server credentials, authenticate the
+browser separately, and emit safe normalized events.
+
+When available, the console should:
+
+1. consume live events for low-latency notification;
+2. invalidate targeted TanStack Query keys instead of writing provider payloads
+   directly into caches;
+3. resume durable history from `/events` after disconnect;
+4. deduplicate live and durable records by backend identity;
+5. keep polling as a bounded fallback, not a simultaneous request storm.
+
+WebSocket reconnect does not define history correctness. `/events` does.

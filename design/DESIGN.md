@@ -71,7 +71,7 @@ should be able to go from any error toast to a log query in one copy-paste.
 | `pending / pairing / queued / accepted` | `color-mix(in oklab, var(--warn), var(--fg-2) 56%)` | In-flight, waiting states |
 | `degraded / retrying / suspended` | `color-mix(in oklab, var(--warn), var(--danger) 38%)` | Needs attention, self-recovering |
 | `failed / disconnected / dead` | `color-mix(in oklab, var(--danger), var(--fg-2) 55%)` | Terminal failures, action required |
-| `info / streaming` | `color-mix(in oklab, var(--muted), var(--fg-2) 44%)` | Neutral events, SSE activity |
+| `info / streaming` | `color-mix(in oklab, var(--muted), var(--fg-2) 44%)` | Neutral events, live activity |
 | `retired / archived / unknown` | `var(--muted)` | Inactive, no action possible |
 
 Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
@@ -288,7 +288,8 @@ this subsection binds to it.
 - Four directly comparable metric cards summarize synced groups, Named List coverage, administrator access, and stale activity. They follow the same hierarchy and responsive wrapping as Queue & Jobs metrics.
 - The group table is the primary surface. Search, active filters, result count, freshness, bulk selection, and cursor pagination remain attached to one continuous workbench.
 - Every row exposes selection, group identity, member count, operator role, local state, Named List membership, and last activity. Status always uses a semantic dot plus a text label.
-- Bulk selection owns one action only: **Add to Named List**. The quick-add menu may create a proposed local Named List, but must not imply any change to WhatsApp group membership.
+- The historical **Add to Named List** bulk action is not part of the current
+  implementation contract. Do not create local Named Lists in browser state.
 - Selecting a group opens the shared 440px on-demand overlay drawer used by
   Webhooks. The table never reflows; closing the drawer restores focus to
   the selected row. Below 900px the drawer becomes a full-width in-flow
@@ -348,9 +349,11 @@ this subsection binds to it.
   outside closes. Active filters still become dismissible pills in the table
   toolbar.
 
-### Named Lists panel mode (Groups)
+### Named Lists panel mode (historical exploration)
 
-- The "Named Lists" header button (and any "In lists" chip) switches the
+- This pattern is retained only as visual research. OmniWA GO exposes no Named
+  Lists API, so production Groups must not enable it. The original concept: a
+  "Named Lists" header button (and any "In lists" chip) switches the
   docked detail panel into list-management mode — never a modal, so the
   table stays visible and selectable. Deep link `?list=nl_*`.
 - Panel anatomy top-to-bottom: mode header with close; list picker
@@ -361,7 +364,7 @@ this subsection binds to it.
   list") whenever table rows are checked, a member search input, and the
   member list with per-row Remove.
 
-### Campaign components (proposed contract — see docs/CAMPAIGNS_PROPOSAL.md)
+### Campaign components (backend available; console pending — see docs/CAMPAIGNS.md)
 
 - **Progress bar**: 6px track (Recessed), segments colored by outcome —
   delivered emerald, accepted and queued as distinct amber steps, failed
@@ -379,11 +382,9 @@ this subsection binds to it.
   the six-column table. Campaign detail follows the Webhooks master-detail
   pattern: an on-demand 440px overlay drawer that closes without reflowing
   the table, and becomes an in-flow panel below 900px.
-- **Named Lists** contain groups only, added by row-selection on the
-  Groups table — the UI offers no raw-number or contact import surface,
-  by design. Deleting a list is allowed; campaigns snapshot member groups
-  at start, and deletion is blocked while a scheduled or running campaign
-  references it.
+- **Audience input:** the implemented campaign flow must follow the public API's
+  per-recipient JID and opt-in evidence contract. The historical Named Lists
+  interaction is not a substitute for backend consent enforcement.
 
 ### Settings command surface
 

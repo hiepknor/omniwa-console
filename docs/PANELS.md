@@ -1,178 +1,198 @@
 # Panel Contracts
 
-## OmniWA GO backing (current)
+This file assigns public OmniWA GO `METHOD /path` operations to console panels
+and distinguishes backend availability from frontend integration status.
 
-The console now targets the **OmniWA GO** API. omniwa-go has no `operationId`s,
-so panels are contracted by `METHOD /path`. `pnpm contract:check` verifies typed
-calls against `contracts/omniwa-go.openapi.json`; this document records which
-backend capabilities the console has actually integrated.
+Rules:
 
-Shared session bootstrap calls `GET /server/capabilities` for the active admin
-session. The API layer also exposes an instance-token-scoped capability hook for
-projection panels to call when their selected instance changes. Projection
-capabilities are instance-scoped and appear only after that resource's initial
-sync is ready; the Groups projection migration is the first planned consumer.
+- A feature may call only operations owned by its panel below.
+- Shared app/API infrastructure may call operations listed under Shared.
+- When a panel needs another operation, update this document in the same PR.
+- “Backend available” does not mean the console has integrated the endpoint.
+- Unsupported surfaces remain explicit unavailable routes; they are not
+  emulated with browser business logic.
 
-Backing status per panel:
+## Status overview
 
-| Panel | omniwa-go backing | Console status |
+| Panel | Backend | Console |
 | --- | --- | --- |
-| instances | `/instance/*` | **wired** (admin lifecycle, token-scoped connection/QR/status/logout, advanced settings) |
-| groups | projection `/group/*` plus `/send/text` | **wired on legacy list/info paths**; projection metadata and search pending |
-| chats | projection `/chat/*`, `/message/*`, `/user/*`, `/label/*` | pending integration |
-| messages | projection reads, `/send/*`, `/campaigns/*` | pending integration |
-| overview | `/server/overview`, `/server/health`, `/server/projection-health` | pending integration |
-| queue | none | `not_implemented` |
-| webhooks | none (per-instance webhook URL only) | `not_implemented` |
-| settings | none (only per-instance advanced-settings) | `not_implemented` |
-| admin-keys | none (static env + instance tokens) | `not_implemented` |
-| events | durable `/events`; realtime remains WebSocket-only | pending integration |
+| Shared capability/error/projection layer | Available | Integrated |
+| Instances | Available | Integrated |
+| Groups | Projection available | Legacy mapping integrated; projection search/meta migration next |
+| Chats, Messages, Contacts, Labels | Projection available | Pending migration |
+| Events | Durable history available | Pending migration |
+| Overview and Health | Persisted/split APIs available | Pending migration |
+| Campaigns (`/messages`) | Orchestration available | Pending implementation |
+| Queue/jobs | No generic management API | Unsupported |
+| Webhook administration | No management API | Unsupported |
+| Global Settings | No global settings API | Unsupported |
+| Admin Keys | No key-management API | Unsupported |
 
-Stubbed `src/api/` modules throw `notImplemented`, which panels render as an
-unavailable state. The per-panel operation lists below are the **historical
-omniwa Platform v1 contract** and are retained for reference until each panel is
-re-mapped to omniwa-go `METHOD /path` operations.
+## Shared infrastructure
 
----
+Owner: `src/api/CapabilitiesProvider.tsx`, envelope/error adapters, and app
+providers.
 
-Each panel is one feature directory under `src/features/` and one primary
-route. (Historical Platform contract follows.)
+```text
+GET /server/capabilities
+```
 
-This is the "full resource console" surface: a superset of the frozen
-`omniwa-web-dashboard` SDK profile (overview / instances / operations),
-extended to parity with the `omniwa-tui` screen surface plus web-appropriate
-write operations. When the platform repo next revises the web dashboard
-profile in `omniwa-sdk/src/platform_clients.rs`, this table is the input.
+The session call negotiates server-wide features. Projection panels use the
+same endpoint with the selected instance token. Unknown capabilities remain
+preserved.
 
-Realtime = the panel subscribes to SSE-driven invalidation while mounted.
+## Instances — `/instances`, `/instances/:instanceId`
 
-## overview — `/overview` (realtime)
+Status: integrated.
 
-Landing panel: health, key metrics, action-required list, live event ticker.
+```text
+GET    /instance/all
+GET    /instance/info/{instanceId}
+POST   /instance/create
+DELETE /instance/delete/{instanceId}
+GET    /instance/status
+GET    /instance/qr
+POST   /instance/connect
+POST   /instance/disconnect
+POST   /instance/reconnect
+DELETE /instance/logout
+GET    /instance/{instanceId}/advanced-settings
+PUT    /instance/{instanceId}/advanced-settings
+```
 
-Operations: `getDashboardSummary`, `getMetrics`, `getQueueMetrics`,
-`getMessageMetrics`, `getWebhookMetrics`, `getMediaMetrics`,
-`listActionRequiredItems`, `getHealth`, `getHealthReadiness`, `streamEvents`.
+Admin operations use the session client; connection/QR/logout operations use
+the instance token. `/server/ok` is not connection state.
 
-## instances — `/instances`, `/instances/:instanceId` (realtime)
+## Groups — `/groups/:instanceId?`
 
-Instance lifecycle: create, connect/disconnect, QR pairing (render QR from
-`refreshInstanceQr` on screen), sessions, provider capabilities, destroy.
+Status: list/info and mutations integrated through the earlier mapping;
+projection metadata, capability gate, and server search are the next phase.
 
-Operations: `listInstances`, `getInstance`, `createInstance`,
-`updateInstance`, `destroyInstance`, `connectInstance`,
-`disconnectInstance`, `requestInstanceReconnect`, `refreshInstanceQr`,
-`listInstanceSessions`, `getProviderCapabilities`,
-`refreshProviderCapabilities`, `streamEvents`.
+Reads:
 
-Destructive actions (`destroyInstance`, `disconnectInstance`) require a
-typed confirmation dialog.
+```text
+GET  /instance/all
+GET  /group/list
+GET  /group/search?q=&limit=&cursor=
+POST /group/info
+POST /group/invitelink        # reset:false is projection/cache read
+```
 
-## chats — `/chats/:instanceId?/:chatId?` (realtime) — PRIMARY
+Mutations:
 
-Direct conversations with contacts only (groups are excluded from this
-surface). An adaptive messaging workspace: desktop shows conversation list ·
-bubble timeline · context panel together, tablet preserves a two-pane
-master-detail layout, and mobile uses one contextual pane. Selecting a message
-opens its contact card, labels, and delivery timeline where space is compact.
-Send commands may complete synchronously or be accepted for
-asynchronous work. Bubbles follow message and delivery history independently —
-command completion never claims upstream WhatsApp delivery.
+```text
+POST /group/create
+POST /group/name
+POST /group/description
+POST /group/settings
+POST /group/participant
+POST /group/invitelink        # reset:true is live mutation + write-through
+POST /group/leave
+POST /send/text
+```
 
-Contact and label lookup lives here too: the conversation-list search
-matches contacts, and labels (read-only synced projections) act as
-filters — there is no separate directory panel.
+Search is prefix-based and cursor-scoped to instance and normalized query.
+Changing either resets the cursor. The panel never decodes cursors or falls back
+to a live WhatsApp read.
 
-Operations: `listInstanceChats`, `listChats`, `getChat`,
-`listInstanceMessages`, `getMessage`, `getMessageDeliveryHistory`,
-`sendInstanceTextMessage`, `sendInstanceMediaMessage`,
-`sendInstanceMessage`, `retryMessage`, `cancelMessage`, `registerMedia`,
-`getMedia`, `listInstanceContacts`, `listContacts`, `getContact`,
-`listInstanceLabels`, `listLabels`, `getLabel`, `requestInstanceReconnect`,
-`streamEvents`.
+## Chats workspace — `/chats/:instanceId?/:chatId?`
 
-## groups — `/groups/:instanceId?` (realtime) — PRIMARY
+Status: backend available; console migration pending.
 
-Management table of groups loaded from the selected instance, with projected
-metadata (name, ID, member/admin counts, local state, lifecycle status, and
-projection update time). Search and status filtering apply only to loaded
-pages because the v1 read has no server-side filters. A row opens a detail
-drawer for metadata, local state, member commands, invite-link refresh
-acceptance, and a one-off "Send text…" command. The console renders member
-roles as supplied and leaves command authorization to the platform; it does
-not infer operator capabilities from free-form role values.
+Core projection ownership:
 
-Named List membership, bulk selection, the operator's own role, and true
-group last-activity time remain blocked on public-contract additions tracked
-in `docs/M6_CONTRACT_GAPS.md`. They are not emulated locally. Recurring sends
-belong to the proposed Messages campaigns surface.
+```text
+GET /instance/all
+GET /chat/list
+GET /chat/info/{chatId}
+GET /chat/{chatId}/messages
+GET /message/{messageId}
+GET /message/{messageId}/delivery
+GET /user/contacts
+GET /user/contacts/search?q=&limit=&cursor=
+GET /user/contact/{contactId}
+GET /label/list
+GET /label/info/{labelId}
+```
 
-Operations: `listInstances`, `listInstanceGroups`, `getGroup`, `updateGroup`,
-`updateGroupLocalState`, `refreshInstanceGroups`, `refreshGroupInviteLink`,
-`listGroupMembers`, `addGroupMember`, `removeGroupMember`,
-`promoteGroupMember`, `demoteGroupMember`, `sendGroupTextMessage`,
-`streamEvents` — plus proposed `listNamedLists`, `createNamedList`,
-`getNamedList`, `updateNamedList`, `deleteNamedList`.
+Core commands used by the workspace when implemented:
 
-## messages — `/messages`, `/messages/new` — PROPOSED
+```text
+POST /send/text
+POST /send/media
+POST /message/react
+POST /message/markread
+POST /message/markplayed
+POST /message/edit
+POST /message/delete
+POST /chat/archive
+POST /chat/unarchive
+POST /chat/mute
+POST /chat/unmute
+POST /chat/pin
+POST /chat/unpin
+```
 
-Campaign management and send setup: campaign table with segmented outcome
-progress, 3-step creation wizard (Audience → Message → Review), pause /
-resume / abort. **No v1 operations exist for this panel** — it is a
-proposed platform contract extension documented in
-`docs/CAMPAIGNS_PROPOSAL.md` (proposed operation IDs: `listCampaigns`,
-`createCampaign`, `getCampaign`, `listCampaignRecipients`,
-`pauseCampaign`, `resumeCampaign`, `abortCampaign`). The prototypes exist
-to validate the UX and to drive the contract proposal; the panel must not
-ship by looping `send*` operations client-side (business logic stays
-platform-side per the Phase J guardrail).
+The first migration may implement only the core read/send slice. Any additional
+command becomes owned when its UI is included and verified.
 
-## queue — `/queue` (realtime)
+## Campaigns — `/messages`, `/messages/new`
 
-Queue status and job browser with job detail drawer.
+Status: backend available; console implementation pending. Full behavior is in
+`docs/CAMPAIGNS.md`.
 
-Operations: `getQueueStatus`, `listJobs`, `getJob`, `streamEvents`.
+All operations in this section use the selected instance token. Pagination
+defaults to 50 and is capped at 100.
 
-## webhooks — `/webhooks`, `/webhooks/:webhookId`
+```text
+POST /campaigns
+GET  /campaigns
+GET  /campaigns/{campaignId}
+GET  /campaigns/{campaignId}/recipients
+GET  /campaigns/{campaignId}/audit
+POST /campaigns/{campaignId}/schedule
+POST /campaigns/{campaignId}/start
+POST /campaigns/{campaignId}/pause
+POST /campaigns/{campaignId}/resume
+POST /campaigns/{campaignId}/abort
+```
 
-Webhook registration and lifecycle (activate/suspend/retire), delivery
-history, single and bulk redrive.
+Campaign execution, opt-in enforcement, leases, pacing, and retry stay in
+OmniWA GO.
 
-Operations: `listWebhooks`, `getWebhook`, `registerWebhook`,
-`updateWebhook`, `activateWebhook`, `suspendWebhook`, `retireWebhook`,
-`listWebhookDeliveries`, `getWebhookDeliveryHistory`,
-`retryWebhookDelivery`, `redriveWebhookDelivery`,
-`bulkRedriveWebhookDeliveries`.
+## Events — `/events`
 
-## events — `/events` (realtime)
+Status: durable backend available; console migration pending.
 
-Event history plus live tail, and audit record browser.
+```text
+GET /events?type=&limit=&cursor=
+```
 
-Operations: `listEvents`, `streamEvents`, `listAuditRecords`.
+The endpoint uses the selected instance token. The panel owns history,
+filtering, cursor pagination, reconnect recovery, and safe event summaries. It
+does not open the admin-key WebSocket.
 
-## settings — `/settings`
+## Overview — `/overview`
 
-Read settings, validate a proposed settings payload, activate validated
-settings.
+Status: backend available; console migration pending.
 
-Operations: `getSettings`, `validateSettings`, `activateSettings`.
+```text
+GET /server/overview?window=
+GET /server/health
+GET /server/projection-health
+```
 
-## admin-keys — `/settings/api-keys` (admin key required)
+`GET /server/ok` is liveness only and is not used for WhatsApp connection,
+projection readiness, or circuit-breaker posture.
 
-API key management. This panel renders only when the session key kind is
-admin; with a regular API key it stays hidden and authorization errors are
-expected if reached directly.
+## Unsupported routes
 
-Operations: `listApiKeys`, `provisionApiKey`, `rotateApiKey`,
-`revokeApiKey`.
+The following routes have no equivalent public management API and remain
+neutral unavailable surfaces:
 
-Provisioned/rotated key secrets are shown exactly once in a copy dialog and
-never stored.
+- `/queue`
+- `/webhooks`, `/webhooks/:webhookId`
+- `/settings`
+- `/settings/api-keys`
 
-## Coverage
-
-Every operation in the v1 contract (77 total) is owned by at least one panel
-above; `streamEvents` is shared by the realtime panels through the single
-SSE connection described in `docs/REALTIME.md`. The `messages` panel
-(campaigns) and the Named Lists panel mode of `groups` reference proposed
-(not yet existing) operations only.
+See `docs/UNSUPPORTED_SURFACES.md` for boundaries and future enablement rules.

@@ -1,119 +1,109 @@
 # omniwa-console
 
-`omniwa-console` is a standalone web operations console for OmniWA Platform.
+`omniwa-console` is a standalone React + Vite operations console for the public
+OmniWA GO REST API. It is a client-only SPA: it contains no backend, database,
+WhatsApp provider integration, campaign worker, or domain orchestration.
 
-This repository implements an external browser client for OmniWA Platform.
-It does not contain OmniWA backend logic.
+The console is being migrated panel by panel onto OmniWA GO's persisted
+projections and operational APIs. Implemented surfaces remain usable while
+pending and unsupported surfaces render explicit states instead of simulated
+data.
 
-## What It Is
+## Product role
 
-`omniwa-console` is a browser-based operations console for working with OmniWA
-resources. It is the web counterpart of `omniwa-tui`: where the TUI serves
-SSH-first operators, the console serves operators who want visual density,
-mouse-friendly navigation, QR pairing on screen, and shareable deep links.
+The console serves self-hosted operators who need visual instance management,
+QR pairing, group administration, conversation and event inspection, health
+posture, and campaign monitoring.
 
-Core properties:
+It is not:
 
-- React + Vite single-page application, TypeScript throughout.
-- API-client-only; all platform state comes from OmniWA public REST APIs.
-- Contract-driven: request/response types are generated from the published
-  OpenAPI v1 specification. No hand-written DTOs.
-- Realtime-aware, with SSE (`streamEvents`) preferred when available.
-- Full resource console: instances, messages, chats, contacts, labels,
-  groups, queue/jobs, webhooks, events, settings.
-- Operator tool, not an end-user chat product.
+- a WhatsApp Web clone or consumer chat client;
+- a backend or direct database administration tool;
+- a place to implement pacing, retries, consent, or campaign execution;
+- a holder for the global admin key in build-time configuration;
+- an adapter for private OmniWA GO packages.
 
-## Repository Scope
+## Technical boundaries
 
-This repository owns:
+- React 18, Vite, strict TypeScript, React Router, TanStack Query, and Tailwind.
+- All network access is implemented in `src/api/` with `openapi-fetch`.
+- The contract is vendored at `contracts/omniwa-go.openapi.json` and generated
+  types live in `src/api/generated/schema.d.ts`.
+- Authentication uses the runtime `apikey` header: either a global admin key or
+  a per-instance token.
+- Server state belongs to TanStack Query; filters, cursors, and selection state
+  that define operator context belong in the URL.
+- The SPA does not open OmniWA GO's admin-key WebSocket. Durable history comes
+  from `/events`; ordinary panels use safe REST reads and bounded polling until
+  a browser-safe realtime bridge exists.
 
-- Browser UX and SPA application shell.
-- Panel contracts for OmniWA resources (see `docs/PANELS.md`).
-- Generated TypeScript API client boundary (see `docs/API_CLIENT.md`).
-- Local API key entry and session storage (see `docs/AUTH_AND_SESSION.md`).
-- SSE ingestion and normalization for browser presentation.
-- Static build packaging for deployment behind any web server.
+## Backend capabilities
 
-This repository does not own:
+The current backend exposes capability negotiation, projection-backed Groups,
+Contacts, Labels, Chats, Messages, durable Events, Overview/Health, split
+information/outbound rate limiting, and campaign orchestration. The console
+must gate integrations with `GET /server/capabilities` and preserve projection
+freshness metadata.
 
-- OmniWA backend domain logic.
-- Backend command/query handlers.
-- Database migrations or schemas.
-- Terminal UI (`omniwa-tui`), CLI, or MCP server code.
-- Internal service orchestration.
-
-## Non-Goals
-
-`omniwa-console` is not:
-
-- A WhatsApp Web clone or end-user messenger.
-- A CRM or campaign/broadcast tool.
-- A backend admin panel with direct database access.
-- A mobile app.
-- A multi-tenant SaaS control plane (MVP model is Single Tenant + Multi Instance).
-
-## Platform Client Guardrails (inherited from OmniWA Phase J)
-
-- The console references public OpenAPI operation IDs only.
-- The console must not import OmniWA backend packages, Application
-  commands/queries, Domain concepts, or Provider code.
-- The console contains no business logic; it renders resources and submits
-  commands through the public API.
-- All REST access goes through the generated client boundary in `src/api/`;
-  feature code never calls `fetch` against the platform directly.
-
-## Stack
-
-| Concern | Choice |
-| --- | --- |
-| Build | Vite |
-| UI | React 18 + TypeScript |
-| Routing | React Router |
-| Server state | TanStack Query |
-| API types | `openapi-typescript` (generated from the vendored contract) |
-| API calls | `openapi-fetch` (typed thin client over `fetch`) |
-| Styling | Tailwind CSS v4 |
-| Realtime | Native `EventSource` over `GET /v1/events/stream` |
+See [docs/OMNIWA_GO_CONTRACT.md](docs/OMNIWA_GO_CONTRACT.md) for the handoff and
+cross-cutting contract semantics.
 
 ## Documentation
 
-| Document | Contents |
+| Document | Purpose |
 | --- | --- |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Layers, module boundaries, dependency rules |
-| [docs/PANELS.md](docs/PANELS.md) | Every console panel and the operation IDs it uses |
-| [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, pagination, error handling |
-| [docs/FEEDBACK.md](docs/FEEDBACK.md) | Toast, surface notice, banner, and feedback lifecycle contract |
-| [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | API key entry, storage, and scope handling |
-| [docs/REALTIME.md](docs/REALTIME.md) | SSE ingestion, reconnect, cache invalidation |
-| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Milestones and per-panel build order |
-| [docs/DELIVERY_WORKFLOW.md](docs/DELIVERY_WORKFLOW.md) | Required task lifecycle from intake through PR, merge, and post-merge verification |
-| [docs/INSTANCES_CONTRACT_GAPS.md](docs/INSTANCES_CONTRACT_GAPS.md) | Contract gaps discovered while implementing Instances |
-| [AGENTS.md](AGENTS.md) | Working agreement for AI coding agents in this repo |
+| [AGENTS.md](AGENTS.md) | Mandatory repository rules for coding agents |
+| [docs/DELIVERY_WORKFLOW.md](docs/DELIVERY_WORKFLOW.md) | Required delivery lifecycle from intake through merge |
+| [docs/OMNIWA_GO_CONTRACT.md](docs/OMNIWA_GO_CONTRACT.md) | Backend handoff, capabilities, projections, errors, and health semantics |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | SPA layers, state ownership, and safety boundaries |
+| [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
+| [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | Runtime key entry, scope, and storage |
+| [docs/PANELS.md](docs/PANELS.md) | Panel ownership and integration status by `METHOD /path` |
+| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Ordered OmniWA GO integration phases |
+| [docs/FEEDBACK.md](docs/FEEDBACK.md) | Feedback and projection-state presentation |
+| [docs/REALTIME.md](docs/REALTIME.md) | Browser realtime posture and durable event recovery |
+| [docs/RATE_LIMIT.md](docs/RATE_LIMIT.md) | Information and outbound rate-limit behavior |
+| [docs/CAMPAIGNS.md](docs/CAMPAIGNS.md) | Campaign contract and planned UI |
+| [docs/UNSUPPORTED_SURFACES.md](docs/UNSUPPORTED_SURFACES.md) | Routes with no public OmniWA GO management API |
 
 ## Development
 
+Dependencies are pre-installed in the agent environment. Do not fetch packages
+from an implementation sandbox.
+
 ```bash
-pnpm install          # install dependencies
-pnpm contract:sync    # copy the OpenAPI spec from the sibling omniwa repo
-pnpm api:generate     # regenerate src/api/generated/schema.d.ts from the contract
-pnpm dev              # start the dev server (default http://localhost:5173)
-pnpm check            # design + contract + architecture + typecheck + build + bundle gates
+pnpm dev
+pnpm test
+pnpm check
 ```
 
-The console talks to a running OmniWA API (default `http://localhost:3000`).
-The API base URL and key are entered on the connect screen at runtime; nothing
-is baked into the build.
+The default API origin is `http://localhost:4000`. The operator enters the
+origin and key on `/connect`; credentials are never compiled into the bundle.
 
-## OmniWA Platform Dependency
+Contract refresh is an orchestrator action and requires the sibling
+`../omniwa-go` checkout:
 
-`omniwa-console` depends on OmniWA Platform exposing stable external contracts:
+```bash
+pnpm contract:sync
+pnpm api:generate
+```
 
-- REST API endpoints under `/v1`.
-- OpenAPI specification (vendored at `contracts/omniwa-v1.openapi.json`).
-- `x-api-key` header authentication.
-- Success / collection / error envelopes.
-- Cursor pagination, filtering, and sorting conventions.
-- SSE event stream (`streamEvents`).
+Commit the vendored contract and generated schema together. Never edit generated
+files manually.
+
+## Required delivery workflow
+
+Every file-changing task uses a fresh branch and pull request from the latest
+`origin/main`. Before handoff, run:
+
+```bash
+git diff --check
+pnpm test
+pnpm check
+```
+
+Do not merge without explicit user authorization. Full rules are in
+`docs/DELIVERY_WORKFLOW.md`.
 
 ## License
 
