@@ -49,6 +49,23 @@ your task in `docs/`.
 - Tailwind for styling; compose utilities in components rather than
   writing CSS files.
 
+## Git and pull-request workflow
+
+- Every task that changes files must use a new branch created from the latest
+  `origin/main`. Never commit directly to `main`.
+- Use one branch and one pull request per task. Branch names use the
+  `feat/<slug>`, `fix/<slug>`, or `docs/<slug>` convention.
+- Before implementation, verify the worktree state, fetch `origin`, and create
+  the task branch from `origin/main`. Preserve unrelated user changes and never
+  include them in the task commit.
+- After implementation, run `pnpm check`, commit only task-owned files, push
+  the branch to `origin`, and create a GitHub pull request targeting `main`.
+- Pull request descriptions must summarize the change, list verification
+  performed, and call out contract or `docs/PANELS.md` changes when applicable.
+- Do not merge a pull request unless the user explicitly requests it.
+- Read-only investigation or review tasks that produce no file changes do not
+  require a branch or pull request.
+
 ## Definition of done for a task
 
 1. `pnpm check` passes.
