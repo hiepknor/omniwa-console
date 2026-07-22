@@ -27,7 +27,9 @@ export function ChatsPage() {
   const picker = usePickerInstances();
   const selectedInstance = picker.data?.resource?.items.find((instance) => instance.id === instanceId);
   const contactId = searchParams.get('directory') === 'contacts' ? chatId : undefined;
-  const chat = useChat(contactId ? undefined : chatId);
+  const labelId = searchParams.get('directory') === 'labels' ? chatId : undefined;
+  const directoryResourceId = contactId ?? labelId;
+  const chat = useChat(directoryResourceId ? undefined : chatId);
   const chatReadState = useResilientReadState(chat, chat.data?.resource !== undefined);
   const selectedChat = chat.data?.resource;
   const requestedPane = searchParams.get('pane');
@@ -68,6 +70,8 @@ export function ChatsPage() {
   let timeline: React.ReactNode;
   if (!instanceId || !chatId) {
     timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Conversation</span><h2>Select a conversation</h2><p>Choose a direct chat to inspect its message timeline.</p></div></div></div>;
+  } else if (directoryResourceId) {
+    timeline = <div className="timeline-pane" role="region" aria-label="Directory selection"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Directory</span><h2>Projection details selected.</h2><p>Review the persisted definition in the context panel.</p></div></div></div>;
   } else if (chatReadState.isInitialError) {
     timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><InlineError error={chatReadState.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" /></div></div>;
   } else if (chatReadState.isInitialLoading) {
@@ -91,18 +95,18 @@ export function ChatsPage() {
           <div className="t"><h1 id="chat-title">{threadTitle}</h1>{threadMeta && <span className="head-meta">{threadMeta}</span>}</div>
           <div className="spacer" />
           <RealtimeIndicator />
-          {chatId && <button className="btn sm contact-toggle chat-icon-action" type="button" data-pane-target="context" aria-label="Open contact details" aria-controls="chat-context" onClick={openContactContext}>
+          {chatId && !directoryResourceId && <button className="btn sm contact-toggle chat-icon-action" type="button" data-pane-target="context" aria-label="Open contact details" aria-controls="chat-context" onClick={openContactContext}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5h.01" /></svg>
           </button>}
         </header>
         {timeline}
-        {instanceId && chatId && !chatReadState.isInitialLoading && !chatReadState.isInitialError && !(chat.data?.unavailable && selectedChat === undefined) && (
+        {instanceId && chatId && !directoryResourceId && !chatReadState.isInitialLoading && !chatReadState.isInitialError && !(chat.data?.unavailable && selectedChat === undefined) && (
           <Composer instanceId={instanceId} chatId={chatId} chatName={threadTitle} />
         )}
       </section>
 
-      {activePane === 'context' && <button className="chat-context-backdrop" type="button" aria-label="Close details" onClick={() => setActivePane(contactId ? 'conversations' : 'thread')} />}
-      <ContextPanel instanceId={instanceId} token={selectedInstance?.token} contactId={contactId} chat={selectedChat} onBack={() => setActivePane(contactId ? 'conversations' : 'thread')} />
+      {activePane === 'context' && <button className="chat-context-backdrop" type="button" aria-label="Close details" onClick={() => setActivePane(directoryResourceId ? 'conversations' : 'thread')} />}
+      <ContextPanel instanceId={instanceId} token={selectedInstance?.token} contactId={contactId} labelId={labelId} chat={selectedChat} onBack={() => setActivePane(directoryResourceId ? 'conversations' : 'thread')} />
     </div>
   );
 }
