@@ -20,10 +20,11 @@ import {
   type DataTableState,
 } from '@/components/data-table';
 import { formatCount, relativeTime } from '@/lib/format';
+import { cursorRecoveryAction } from '@/lib/cursor-recovery';
+import { projectionCollectionState } from '@/lib/projection-collection-state';
 import { useResilientReadState } from '@/lib/query-state';
 import { CreateGroupDialog } from './CreateGroupDialog';
 import { GroupDrawer } from './GroupDrawer';
-import { groupCollectionState } from './group-read-state';
 import { useCreateGroup, useInstanceGroups, usePickerInstances, useRefreshGroups } from './hooks';
 
 function statusDot(status: string | undefined) {
@@ -149,7 +150,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   const [searchDraft, setSearchDraft] = useState(search);
   const capabilities = useInstanceCapabilities(instanceId, token);
   const projectionAdvertised = hasCapability(capabilities.data, 'groups_projection');
-  const list = useInstanceGroups(instanceId, token, { search, cursor, limit: 50 });
+  const list = useInstanceGroups(instanceId, token, { search, cursor, limit: 50 }, projectionAdvertised);
   const refresh = useRefreshGroups(instanceId);
   const readState = useResilientReadState(list, list.data?.resource !== undefined);
   const unavailable = list.data?.unavailable !== undefined;
@@ -157,7 +158,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   const projectionErrorCode = list.error instanceof ApiFailure ? list.error.code : undefined;
 
   useEffect(() => setSearchDraft(search), [search]);
-  const collectionState = groupCollectionState({
+  const collectionState = projectionCollectionState({
     errorCode: projectionErrorCode,
     hasInitialError: readState.isInitialError,
     hasResource: list.data?.resource !== undefined,
@@ -174,6 +175,10 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   const metricsAvailable = collectionState === 'ready' || collectionState === 'empty';
   const zeroGroups = metricsAvailable && groups.length === 0;
   const selectedGroup = groups.find((group) => group.id === groupId);
+  const retryList = () => {
+    if (cursorRecoveryAction(projectionErrorCode, cursor) === 'reset') onSetParam('cursor', '');
+    else void list.refetch();
+  };
 
   const columns: DataTableColumn<GroupResource>[] = [
     {
@@ -188,7 +193,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   const tableState: DataTableState<GroupResource> = collectionState === 'not_ready'
     ? { status: 'unavailable', message: <span className="groups-state-copy"><strong>Group projection is not ready.</strong><span>No live WhatsApp lookup will be used. The console will retry only when you refresh or the bounded projection poll runs.</span></span> }
     : collectionState === 'error'
-      ? { status: 'error', error: readState.error, onRetry: list.refetch }
+      ? { status: 'error', error: readState.error, onRetry: retryList }
     : collectionState === 'loading'
       ? { status: 'loading', skeletonRows: 6 }
       : collectionState === 'syncing'
@@ -250,7 +255,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
             attached
             columns={columns}
             state={tableState}
-            refreshIssue={readState.isStaleError ? { error: readState.error, onRetry: list.refetch } : undefined}
+            refreshIssue={readState.isStaleError ? { error: readState.error, onRetry: retryList } : undefined}
             getRowKey={(group) => group.id}
             getRowState={(group) => ({ active: group.id === groupId })}
             getRowActionLabel={(group) => `Open group ${group.subject ?? group.id}`}

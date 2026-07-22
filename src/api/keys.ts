@@ -25,8 +25,10 @@ export const queryKeys = {
   messageDeliveryHistory: (messageId: string) =>
     ['messages', messageId, 'delivery-history'] as const,
   instanceContacts: (instanceId: string, params?: Record<string, unknown>) =>
-    ['instances', instanceId, 'contacts', params ?? {}] as const,
-  contact: (contactId: string) => ['contacts', contactId] as const,
+    params === undefined
+      ? ['instances', instanceId, 'contacts'] as const
+      : ['instances', instanceId, 'contacts', params] as const,
+  contact: (instanceId: string, contactId: string) => ['instances', instanceId, 'contact', contactId] as const,
   instanceLabels: (instanceId: string) => ['instances', instanceId, 'labels'] as const,
   media: (mediaId: string) => ['media', mediaId] as const,
   providerCapabilities: ['provider', 'capabilities'] as const,

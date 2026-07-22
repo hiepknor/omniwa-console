@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupCollectionState } from './group-read-state';
+import { projectionCollectionState } from './projection-collection-state';
 
 const base = {
   hasInitialError: false,
@@ -10,7 +10,7 @@ const base = {
   unavailable: false,
 };
 
-describe('groupCollectionState', () => {
+describe('projectionCollectionState', () => {
   it.each([
     [{ ...base, hasResource: false, errorCode: 'projection_not_ready', hasInitialError: true }, 'not_ready'],
     [{ ...base, errorCode: 'projection_not_ready' }, 'ready'],
@@ -24,6 +24,6 @@ describe('groupCollectionState', () => {
     [{ ...base, projectionStatus: 'syncing' as const }, 'ready'],
     [{ ...base, projectionStatus: 'stale' as const }, 'ready'],
   ] as const)('maps %o to %s', (input, expected) => {
-    expect(groupCollectionState(input)).toBe(expected);
+    expect(projectionCollectionState(input)).toBe(expected);
   });
 });
