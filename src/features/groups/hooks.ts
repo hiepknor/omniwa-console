@@ -10,7 +10,6 @@ import {
   getGroup,
   getGroupInviteLink,
   leaveGroup,
-  listGroupMembers,
   listInstanceGroups,
   promoteGroupMember,
   refreshGroupInviteLink,
@@ -48,38 +47,32 @@ export function usePickerInstances() {
   });
 }
 
-// /group/list and /group/info are live WhatsApp queries that WhatsApp rate-limits.
-// They must NOT poll — fetch on demand, cache long, refetch only on Refresh or
-// after a mutation invalidates.
-const WHATSAPP_LIVE = { refetchInterval: false as const, staleTime: 5 * 60_000 };
+// Group reads are PostgreSQL projection reads. Keep polling bounded; capability
+// negotiation and explicit mutation invalidation remain the primary refresh
+// mechanisms.
+const GROUP_PROJECTION_READ = { refetchInterval: 60_000, staleTime: 30_000 };
 
-export function useInstanceGroups(instanceId: string | undefined, token: string | undefined) {
+export function useInstanceGroups(
+  instanceId: string | undefined,
+  token: string | undefined,
+  params: { search?: string; cursor?: string; limit?: number },
+) {
   const tokenClient = useGroupClient(token);
   return useQuery({
-    queryKey: queryKeys.instanceGroups(instanceId ?? '', {}),
-    queryFn: () => listInstanceGroups(tokenClient as ApiClient, instanceId ?? ''),
+    queryKey: queryKeys.instanceGroups(instanceId ?? '', params),
+    queryFn: () => listInstanceGroups(tokenClient as ApiClient, instanceId ?? '', params),
     enabled: instanceId !== undefined && tokenClient !== undefined,
-    ...WHATSAPP_LIVE,
+    ...GROUP_PROJECTION_READ,
   });
 }
 
-export function useGroup(groupId: string | undefined, token: string | undefined) {
+export function useGroup(instanceId: string | undefined, groupId: string | undefined, token: string | undefined) {
   const tokenClient = useGroupClient(token);
   return useQuery({
-    queryKey: queryKeys.group(groupId ?? ''),
+    queryKey: queryKeys.group(instanceId ?? '', groupId ?? ''),
     queryFn: () => getGroup(tokenClient as ApiClient, groupId ?? ''),
-    enabled: groupId !== undefined && tokenClient !== undefined,
-    ...WHATSAPP_LIVE,
-  });
-}
-
-export function useGroupMembers(groupId: string | undefined, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
-  return useQuery({
-    queryKey: queryKeys.groupMembers(groupId ?? ''),
-    queryFn: () => listGroupMembers(tokenClient as ApiClient, groupId ?? ''),
-    enabled: groupId !== undefined && tokenClient !== undefined,
-    ...WHATSAPP_LIVE,
+    enabled: instanceId !== undefined && groupId !== undefined && tokenClient !== undefined,
+    ...GROUP_PROJECTION_READ,
   });
 }
 
@@ -102,12 +95,16 @@ function useGroupFeedback(groupId: string) {
   };
 }
 
-export function useRefreshGroupInviteLink(groupId: string, token: string | undefined) {
+export function useRefreshGroupInviteLink(instanceId: string | undefined, groupId: string, token: string | undefined) {
   const tokenClient = useGroupClient(token);
+  const queryClient = useQueryClient();
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: () => refreshGroupInviteLink(tokenClient as ApiClient, groupId),
-    onSuccess: (result) => accepted(result, 'Invite link refresh', 'refresh-invite-link', 'omniwa-go reset the invite link.', 'omniwa-go reset the invite link.'),
+    onSuccess: async (result) => {
+      accepted(result, 'Invite link refresh', 'refresh-invite-link', 'omniwa-go reset the invite link.', 'omniwa-go reset the invite link.');
+      if (instanceId) await queryClient.invalidateQueries({ queryKey: queryKeys.group(instanceId, groupId) });
+    },
   });
 }
 
@@ -120,8 +117,8 @@ export function useUpdateGroupLocalState(groupId: string, instanceId: string | u
     onSuccess: async (result, body) => {
       accepted(result, 'Local state update', `local-state:${Object.keys(body)[0] ?? 'state'}`);
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.group(groupId) }),
-        ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) })] : []),
+        queryClient.invalidateQueries({ queryKey: queryKeys.group(instanceId ?? '', groupId) }),
+        ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId) })] : []),
       ]);
     },
   });
@@ -136,25 +133,21 @@ export function useUpdateGroup(groupId: string, instanceId: string | undefined, 
     onSuccess: async (result) => {
       accepted(result, 'Metadata update', 'update-metadata');
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.group(groupId) }),
-        ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) })] : []),
+        queryClient.invalidateQueries({ queryKey: queryKeys.group(instanceId ?? '', groupId) }),
+        ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId) })] : []),
       ]);
     },
   });
 }
 
-function useInvalidateGroupMembers(groupId: string) {
+function useInvalidateGroupDetail(instanceId: string | undefined, groupId: string) {
   const queryClient = useQueryClient();
-  return () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: queryKeys.groupMembers(groupId) }),
-      queryClient.invalidateQueries({ queryKey: queryKeys.group(groupId) }),
-    ]);
+  return () => queryClient.invalidateQueries({ queryKey: queryKeys.group(instanceId ?? '', groupId) });
 }
 
-export function useAddGroupMember(groupId: string, token: string | undefined) {
+export function useAddGroupMember(instanceId: string | undefined, groupId: string, token: string | undefined) {
   const tokenClient = useGroupClient(token);
-  const invalidate = useInvalidateGroupMembers(groupId);
+  const invalidate = useInvalidateGroupDetail(instanceId, groupId);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (jid: string) => addGroupMember(tokenClient as ApiClient, groupId, { jid }),
@@ -162,9 +155,9 @@ export function useAddGroupMember(groupId: string, token: string | undefined) {
   });
 }
 
-export function usePromoteGroupMember(groupId: string, token: string | undefined) {
+export function usePromoteGroupMember(instanceId: string | undefined, groupId: string, token: string | undefined) {
   const tokenClient = useGroupClient(token);
-  const invalidate = useInvalidateGroupMembers(groupId);
+  const invalidate = useInvalidateGroupDetail(instanceId, groupId);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (memberJid: string) => promoteGroupMember(tokenClient as ApiClient, groupId, memberJid),
@@ -172,9 +165,9 @@ export function usePromoteGroupMember(groupId: string, token: string | undefined
   });
 }
 
-export function useDemoteGroupMember(groupId: string, token: string | undefined) {
+export function useDemoteGroupMember(instanceId: string | undefined, groupId: string, token: string | undefined) {
   const tokenClient = useGroupClient(token);
-  const invalidate = useInvalidateGroupMembers(groupId);
+  const invalidate = useInvalidateGroupDetail(instanceId, groupId);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (memberJid: string) => demoteGroupMember(tokenClient as ApiClient, groupId, memberJid),
@@ -182,9 +175,9 @@ export function useDemoteGroupMember(groupId: string, token: string | undefined)
   });
 }
 
-export function useRemoveGroupMember(groupId: string, token: string | undefined) {
+export function useRemoveGroupMember(instanceId: string | undefined, groupId: string, token: string | undefined) {
   const tokenClient = useGroupClient(token);
-  const invalidate = useInvalidateGroupMembers(groupId);
+  const invalidate = useInvalidateGroupDetail(instanceId, groupId);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (memberJid: string) => removeGroupMember(tokenClient as ApiClient, groupId, memberJid),
@@ -201,21 +194,21 @@ export function useSendGroupText(groupId: string, token: string | undefined) {
   });
 }
 
-/** Refetch the group directory from omniwa-go's live connection. */
+/** Refetch the persisted group directory without issuing a live WhatsApp query. */
 export function useRefreshGroups(instanceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) }),
+    mutationFn: () => queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId) }),
   });
 }
 
-export function useGroupInviteLink(groupId: string | undefined, token: string | undefined) {
+export function useGroupInviteLink(instanceId: string | undefined, groupId: string | undefined, token: string | undefined) {
   const tokenClient = useGroupClient(token);
   return useQuery({
-    queryKey: [...queryKeys.group(groupId ?? ''), 'invite-link'],
+    queryKey: [...queryKeys.group(instanceId ?? '', groupId ?? ''), 'invite-link'],
     queryFn: () => getGroupInviteLink(tokenClient as ApiClient, groupId ?? ''),
-    enabled: groupId !== undefined && tokenClient !== undefined,
-    ...WHATSAPP_LIVE,
+    enabled: instanceId !== undefined && groupId !== undefined && tokenClient !== undefined,
+    ...GROUP_PROJECTION_READ,
   });
 }
 
@@ -233,7 +226,7 @@ export function useCreateGroup(instanceId: string, token: string | undefined) {
         requestId: result.requestId,
         dedupeKey: `instance:${instanceId}:create-group`,
       });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId) });
     },
   });
 }
@@ -246,7 +239,7 @@ export function useLeaveGroup(groupId: string, instanceId: string | undefined, t
     mutationFn: () => leaveGroup(tokenClient as ApiClient, groupId),
     onSuccess: async (result) => {
       accepted(result, 'Leave group', 'leave');
-      if (instanceId) await queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) });
+      if (instanceId) await queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId) });
     },
   });
 }
@@ -261,8 +254,8 @@ export function useUpdateGroupSetting(groupId: string, instanceId: string | unde
     onSuccess: async (result, { setting }) => {
       accepted(result, 'Group setting', `setting:${setting}`);
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.group(groupId) }),
-        ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) })] : []),
+        queryClient.invalidateQueries({ queryKey: queryKeys.group(instanceId ?? '', groupId) }),
+        ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId) })] : []),
       ]);
     },
   });
