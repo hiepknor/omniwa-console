@@ -495,15 +495,15 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
 .groups-drawer .kv{grid-template-columns:88px minmax(0,1fr);row-gap:var(--space-2)}
 .groups-drawer .kv dd{min-width:0;overflow-wrap:anywhere}
 .groups-drawer-placeholder,.groups-drawer-state{min-height:220px}
-.groups-state-stack{border:1px solid var(--border-subtle);border-radius:var(--radius-sm);overflow:hidden}
-.groups-state-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);min-height:52px;padding:var(--space-2) var(--space-3)}
-.groups-state-row+.groups-state-row{border-top:1px solid var(--border-subtle)}
-.groups-state-row>span{display:grid;gap:2px}.groups-state-row strong{font-size:13px;font-weight:400;color:var(--fg-2)}.groups-state-row small{font-size:11px;color:var(--muted)}
-.groups-state-row.is-pending{background:var(--accent-tint)}
-.groups-state-switch.btn{position:relative;display:block;flex:0 0 38px;width:38px;height:22px;min-height:22px;padding:0;border-radius:999px}
-.groups-state-switch>span{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .15s ease,background .15s ease}
-.groups-state-switch.is-on{border-color:var(--border-strong);background:var(--accent-hover)}
-.groups-state-switch.is-on>span{transform:translateX(16px);background:var(--fg)}
+.toggle-list{border:1px solid var(--border-subtle);border-radius:var(--radius-sm);overflow:hidden}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);min-height:52px;padding:var(--space-2) var(--space-3)}
+.toggle-row+.toggle-row{border-top:1px solid var(--border-subtle)}
+.toggle-row>span{display:grid;gap:2px}.toggle-row strong{font-size:13px;font-weight:400;color:var(--fg-2)}.toggle-row small{font-size:11px;color:var(--muted)}
+.toggle-row.is-pending{background:var(--accent-tint)}
+.toggle-switch.btn{position:relative;display:block;flex:0 0 38px;width:38px;height:22px;min-height:22px;padding:0;border-radius:999px}
+.toggle-switch>span{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .15s ease,background .15s ease}
+.toggle-switch.is-on{border-color:var(--border-strong);background:var(--accent-hover)}
+.toggle-switch.is-on>span{transform:translateX(16px);background:var(--fg)}
 .groups-metadata-form{display:grid;gap:var(--space-3)}
 .groups-description,.groups-textarea{resize:vertical;line-height:20px}
 .groups-add-member{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--space-2);margin-bottom:var(--space-3)}
