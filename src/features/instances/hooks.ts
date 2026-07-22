@@ -7,11 +7,15 @@ import {
   createInstance,
   destroyInstance,
   disconnectInstance,
+  getAdvancedSettings,
   getInstance,
   getInstanceQr,
   getInstanceStatus,
   listInstances,
+  logoutInstance,
   reconnectInstance,
+  updateAdvancedSettings,
+  type InstanceAdvancedSettings,
   type InstanceCreateRequest,
 } from '@/api/instances';
 import { instanceKeys, queryKeys } from '@/api/keys';
@@ -124,5 +128,32 @@ export function useReconnectInstance(instanceId: string, token: string | undefin
   return useMutation({
     mutationFn: () => reconnectInstance(tokenClient as ApiClient),
     onSuccess: () => invalidate(instanceId),
+  });
+}
+
+export function useLogoutInstance(instanceId: string, token: string | undefined) {
+  const tokenClient = useInstanceClient(token);
+  const invalidate = useInvalidateInstance();
+  return useMutation({
+    mutationFn: () => logoutInstance(tokenClient as ApiClient),
+    onSuccess: () => invalidate(instanceId),
+  });
+}
+
+export function useInstanceAdvancedSettings(instanceId: string, token: string | undefined) {
+  const tokenClient = useInstanceClient(token);
+  return useQuery({
+    queryKey: [...queryKeys.instance(instanceId), 'advanced-settings'],
+    queryFn: () => getAdvancedSettings(tokenClient as ApiClient, instanceId),
+    enabled: tokenClient !== undefined,
+  });
+}
+
+export function useUpdateAdvancedSettings(instanceId: string, token: string | undefined) {
+  const tokenClient = useInstanceClient(token);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: InstanceAdvancedSettings) => updateAdvancedSettings(tokenClient as ApiClient, instanceId, body),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...queryKeys.instance(instanceId), 'advanced-settings'] }),
   });
 }

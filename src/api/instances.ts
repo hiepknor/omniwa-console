@@ -5,6 +5,7 @@ import { unwrap, unwrapCommand, type CommandResult, type UnavailableRead } from 
 type GoInstance = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance'];
 type GoStatus = components['schemas']['apidocs.StatusData'];
 type GoQr = components['schemas']['apidocs.QRCodeData'];
+type GoAdvancedSettings = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_instance_model.AdvancedSettings'];
 
 export type InstanceStatus = 'connected' | 'disconnected';
 
@@ -28,6 +29,14 @@ export type InstanceResource = {
 
 export type InstanceStatusResource = { connected: boolean; loggedIn: boolean; name?: string };
 export type InstanceQr = { qrcode?: string; code?: string };
+export type InstanceAdvancedSettings = {
+  alwaysOnline: boolean;
+  readMessages: boolean;
+  rejectCall: boolean;
+  ignoreGroups: boolean;
+  ignoreStatus: boolean;
+  msgRejectCall: string;
+};
 export type InstanceCreateRequest = { name?: string };
 
 export type InstancePagination = { nextCursor?: string | null; hasMore?: boolean };
@@ -107,4 +116,33 @@ export async function reconnectInstance(client: ApiClient): Promise<CommandResul
 
 export async function logoutInstance(client: ApiClient): Promise<CommandResult> {
   return unwrapCommand(await client.DELETE('/instance/logout'));
+}
+
+function toAdvancedSettings(raw: GoAdvancedSettings | undefined): InstanceAdvancedSettings {
+  return {
+    alwaysOnline: raw?.alwaysOnline ?? false,
+    readMessages: raw?.readMessages ?? false,
+    rejectCall: raw?.rejectCall ?? false,
+    ignoreGroups: raw?.ignoreGroups ?? false,
+    ignoreStatus: raw?.ignoreStatus ?? false,
+    msgRejectCall: raw?.msgRejectCall ?? '',
+  };
+}
+
+export async function getAdvancedSettings(client: ApiClient, instanceId: string): Promise<InstanceAdvancedSettings> {
+  // Returns the raw AdvancedSettings object (no {message,data} envelope).
+  const data = unwrap<GoAdvancedSettings>(
+    await client.GET('/instance/{instanceId}/advanced-settings', { params: { path: { instanceId } } }),
+  );
+  return toAdvancedSettings(data);
+}
+
+export async function updateAdvancedSettings(
+  client: ApiClient,
+  instanceId: string,
+  body: InstanceAdvancedSettings,
+): Promise<CommandResult> {
+  return unwrapCommand(
+    await client.PUT('/instance/{instanceId}/advanced-settings', { params: { path: { instanceId } }, body }),
+  );
 }
