@@ -1,13 +1,13 @@
 import type { ApiClient } from './client';
 import type { components } from './generated/platform-schema';
-import { notImplemented, type CommandResult, type UnavailableRead } from './envelopes';
+import { notImplemented, NOT_IMPLEMENTED_READ, type CommandResult, type UnavailableRead } from './envelopes';
 
 // omniwa-go has no global settings surface (only per-instance advanced settings).
 export type SettingsResource = components['schemas']['SettingsResource'];
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
 
 export async function getSettings(_client: ApiClient): Promise<ReadResult<SettingsResource>> {
-  throw notImplemented('Settings');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function validateSettings(

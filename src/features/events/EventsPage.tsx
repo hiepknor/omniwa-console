@@ -94,7 +94,7 @@ function EventHistory() {
     : listReadState.isInitialLoading
       ? { status: 'loading', skeletonRows: 7 }
       : unavailable && events.length === 0
-        ? { status: 'unavailable', message: 'Event history is not available yet.' }
+        ? { status: 'unavailable', message: 'Event history is not available on OmniWA GO.' }
         : filtered.length === 0
           ? { status: 'empty', message: events.length === 0 ? 'No event history yet.' : 'No events match this search.' }
           : { status: 'ready', rows: filtered };
@@ -185,7 +185,7 @@ function AuditRecords() {
     : listReadState.isInitialLoading
       ? { status: 'loading', skeletonRows: 7 }
       : unavailable && records.length === 0
-        ? { status: 'unavailable', message: 'Audit records are not available yet.' }
+        ? { status: 'unavailable', message: 'Audit records are not available on OmniWA GO.' }
         : records.length === 0
           ? { status: 'empty', message: 'No audit records yet.' }
           : { status: 'ready', rows: records };

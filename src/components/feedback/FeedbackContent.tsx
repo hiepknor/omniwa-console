@@ -7,7 +7,6 @@ export function FeedbackContent({
   title,
   detail,
   requestId,
-  showMissingRequestId = false,
   action,
   onDismiss,
 }: {
@@ -16,12 +15,12 @@ export function FeedbackContent({
   title: string;
   detail?: string;
   requestId?: string;
-  showMissingRequestId?: boolean;
   action?: FeedbackAction;
   onDismiss?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-  const requestIdLabel = requestId ?? (showMissingRequestId ? 'Request ID unavailable' : undefined);
+  // omniwa-go never returns a request id, so the row shows only when one exists.
+  const requestIdLabel = requestId;
   const copyRequestId = async () => {
     if (!requestId) return;
     try {

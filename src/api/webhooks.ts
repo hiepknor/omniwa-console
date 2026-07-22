@@ -1,6 +1,6 @@
 import type { ApiClient } from './client';
 import type { components } from './generated/platform-schema';
-import { notImplemented, type CollectionEnvelope, type CommandResult, type PublicData, type UnavailableRead } from './envelopes';
+import { notImplemented, NOT_IMPLEMENTED_READ, type CollectionEnvelope, type CommandResult, type PublicData, type UnavailableRead } from './envelopes';
 
 // omniwa-go configures a webhook URL per instance (on create/connect) but has no
 // webhook management/delivery REST surface. This panel is stubbed.
@@ -14,11 +14,11 @@ export async function listWebhooks(
   _client: ApiClient,
   _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<{ items: WebhookResource[]; pagination: WebhookPagination }>> {
-  throw notImplemented('Webhooks');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getWebhook(_client: ApiClient, _webhookId: string): Promise<ReadResult<WebhookResource>> {
-  throw notImplemented('Webhook detail');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function registerWebhook(_client: ApiClient, _body: WebhookRequest): Promise<CommandResult> {
@@ -49,14 +49,14 @@ export async function listWebhookDeliveries(
   _client: ApiClient,
   _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<{ items: WebhookDeliveryResource[]; pagination: WebhookPagination }>> {
-  throw notImplemented('Webhook deliveries');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getWebhookDeliveryHistory(
   _client: ApiClient,
   _deliveryId: string,
 ): Promise<ReadResult<{ data: PublicData; requestId: string }>> {
-  throw notImplemented('Webhook delivery history');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function retryWebhookDelivery(_client: ApiClient, _deliveryId: string): Promise<CommandResult> {

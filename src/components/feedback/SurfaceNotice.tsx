@@ -7,7 +7,6 @@ export function SurfaceNotice({
   title,
   detail,
   requestId,
-  showMissingRequestId = false,
   action,
   className,
   announcement = false,
@@ -17,7 +16,6 @@ export function SurfaceNotice({
   title: string;
   detail?: string;
   requestId?: string;
-  showMissingRequestId?: boolean;
   action?: FeedbackAction;
   className?: string;
   announcement?: false | 'polite' | 'assertive';
@@ -33,7 +31,6 @@ export function SurfaceNotice({
         title={title}
         detail={detail}
         requestId={requestId}
-        showMissingRequestId={showMissingRequestId}
         action={action}
       />
     </div>

@@ -33,7 +33,7 @@ export function HealthStrip() {
         ? 'Posture pending'
       : apiHealthy
         ? 'Partially observable'
-        : 'Posture pending';
+        : 'Unavailable';
   const heading = healthState.isError && !apiStale
     ? 'The API cannot be reached.'
     : apiStale || readinessStale
@@ -44,7 +44,7 @@ export function HealthStrip() {
         ? 'The API is responding. Readiness is still pending.'
       : apiHealthy
         ? 'The API is responding. Readiness cannot be reached.'
-        : 'Platform posture is still being determined.';
+        : 'Health metrics are not available on OmniWA GO.';
   const detail = healthState.isError && !apiStale
     ? 'The console cannot read platform posture until the API responds.'
     : apiStale || readinessStale
@@ -55,7 +55,7 @@ export function HealthStrip() {
         ? 'The console is waiting for the readiness probe before reporting platform posture.'
       : apiHealthy
         ? 'Commands can reach the API, but the console cannot confirm that the platform is ready to process work.'
-        : 'Health reads have not reported a conclusive platform posture yet.';
+        : 'OmniWA GO does not expose health or readiness metrics.';
   const diagnostics: OverviewDiagnostic[] = [];
   const originUnavailable = isTransportFailure(healthState.error) && isTransportFailure(readinessState.error);
   if (healthState.isError) diagnostics.push({ source: originUnavailable ? 'Platform API' : 'API health', error: healthState.error });
@@ -63,7 +63,7 @@ export function HealthStrip() {
 
   return (
     <section className="overview-posture" aria-labelledby="overview-posture-title">
-      <div className="overview-section-label"><span>Platform posture</span><span>{summary}</span></div>
+      <div className="overview-section-label"><span>Health</span><span>{summary}</span></div>
       <h2 id="overview-posture-title">{heading}</h2>
       <p>{detail}</p>
       <div className="overview-posture-reads" aria-label="Platform posture reads">

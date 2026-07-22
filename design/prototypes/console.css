@@ -228,7 +228,7 @@ tbody tr.selected{background:var(--accent-tint);box-shadow:inset 2px 0 0 var(--f
 @media(max-width:1024px){.cols{grid-template-columns:1fr}}
 
 /* ===== Overview command surface ===== */
-.overview-content{min-width:0}
+.overview-content{min-width:0;display:flex;flex-direction:column;gap:var(--space-4)}
 .overview-content h2{font-size:18px;font-weight:400;line-height:24px;letter-spacing:-.02em;color:var(--fg)}
 .overview-content p{font-size:12px;line-height:18px;color:var(--muted)}
 .overview-refresh-cadence{font-size:11px;line-height:16px;color:var(--muted);white-space:nowrap}
@@ -236,7 +236,7 @@ tbody tr.selected{background:var(--accent-tint);box-shadow:inset 2px 0 0 var(--f
   text-transform:uppercase;letter-spacing:1.8px;color:var(--muted)}
 .overview-section-label span:last-child{text-align:right;color:var(--fg-2)}
 .overview-section-label>span{min-width:0;overflow-wrap:anywhere}
-.overview-posture{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--space-2) var(--space-8);margin-bottom:var(--space-4);
+.overview-posture{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--space-2) var(--space-8);
   padding:var(--space-5) var(--space-6);border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:color-mix(in oklab,var(--fg) 2.5%,transparent)}
 .overview-posture .overview-section-label{grid-column:1/-1;padding-bottom:var(--space-3);border-bottom:1px solid var(--border-subtle)}
 .overview-posture h2{align-self:end;max-width:720px;margin-top:var(--space-2);font-size:clamp(20px,2vw,28px);line-height:1.15}
@@ -251,7 +251,7 @@ tbody tr.selected{background:var(--accent-tint);box-shadow:inset 2px 0 0 var(--f
 .dot-ok{background:var(--ok)}.dot-pending{background:var(--pending)}.dot-degraded{background:var(--degraded)}
 .dot-failed{background:var(--failed)}.dot-info{background:var(--info)}
 
-.overview-command-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);grid-template-areas:"attention attention" "actions coverage";gap:var(--space-3);margin-bottom:var(--space-6)}
+.overview-command-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);grid-template-areas:"attention attention" "actions coverage";gap:var(--space-3)}
 .overview-attention,.overview-actions,.overview-coverage,.overview-events{min-width:0;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:color-mix(in oklab,var(--fg) 2.5%,transparent)}
 .overview-attention{grid-area:attention;display:flex;min-height:244px;flex-direction:column;padding:var(--space-5) var(--space-6)}
 .overview-command-grid:not(.has-urgent-attention) .overview-attention{min-height:0}

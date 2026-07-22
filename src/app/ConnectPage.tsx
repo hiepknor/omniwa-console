@@ -137,8 +137,8 @@ export function ConnectPage({
             <span className="eyebrow">Self-hosted platform access</span>
             <h1 id="connect-title">Connect to your OmniWA runtime.</h1>
             <p>
-              Enter the platform origin and an API key. The console verifies health before creating
-              a browser session.
+              Enter the OmniWA GO origin and an API key. The console validates the key and detects
+              its scope before creating a browser session.
             </p>
           </div>
           <div className="connect-intro-note">
@@ -255,8 +255,6 @@ export function ConnectPage({
                 kind="error"
                 label={connectionError.category}
                 title={connectionError.message}
-                requestId={connectionError.requestId}
-                showMissingRequestId
                 className="connect-error"
                 announcement="assertive"
               />

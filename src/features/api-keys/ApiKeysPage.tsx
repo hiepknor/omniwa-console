@@ -84,7 +84,7 @@ function AdminApiKeysSurface() {
     : readState.isInitialLoading
       ? { status: 'loading', skeletonRows: 6 }
       : unavailable && apiKeys.length === 0
-        ? { status: 'unavailable', message: 'API key inventory is not available from this platform.' }
+        ? { status: 'unavailable', message: 'API key management is not available on OmniWA GO.' }
         : apiKeys.length === 0
           ? { status: 'empty', message: 'No API keys are visible to this administrator.' }
           : { status: 'ready', rows: apiKeys };

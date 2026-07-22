@@ -1,6 +1,6 @@
 import type { ApiClient } from './client';
 import type { components } from './generated/platform-schema';
-import { notImplemented, type CollectionEnvelope, type UnavailableRead } from './envelopes';
+import { NOT_IMPLEMENTED_READ, type CollectionEnvelope, type UnavailableRead } from './envelopes';
 
 // omniwa-go exposes only `GET /server/ok`. Dashboard, metrics, and
 // action-required have no backing, so the overview panel is stubbed.
@@ -12,35 +12,35 @@ export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
 export type ActionRequiredPagination = CollectionEnvelope['meta']['pagination'];
 
 export async function getHealth(_client: ApiClient): Promise<ReadResult<HealthResource>> {
-  throw notImplemented('Health');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getHealthReadiness(_client: ApiClient): Promise<ReadResult<HealthResource>> {
-  throw notImplemented('Health readiness');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getDashboardSummary(_client: ApiClient): Promise<ReadResult<DashboardResource>> {
-  throw notImplemented('Dashboard');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getQueueMetrics(_client: ApiClient): Promise<ReadResult<MetricsResource>> {
-  throw notImplemented('Queue metrics');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getMessageMetrics(_client: ApiClient): Promise<ReadResult<MetricsResource>> {
-  throw notImplemented('Message metrics');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getWebhookMetrics(_client: ApiClient): Promise<ReadResult<MetricsResource>> {
-  throw notImplemented('Webhook metrics');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getMediaMetrics(_client: ApiClient): Promise<ReadResult<MetricsResource>> {
-  throw notImplemented('Media metrics');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function listActionRequiredItems(
   _client: ApiClient,
 ): Promise<{ items: HealthResource[]; pagination?: ActionRequiredPagination; unavailable?: UnavailableRead }> {
-  throw notImplemented('Action required');
+  return { items: [], unavailable: NOT_IMPLEMENTED_READ };
 }

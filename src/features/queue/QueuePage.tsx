@@ -104,7 +104,7 @@ export function QueuePage() {
     : listReadState.isInitialLoading
       ? { status: 'loading', skeletonRows: 6 }
       : unavailable && jobs.length === 0
-        ? { status: 'unavailable', message: 'Job data is not available yet.' }
+        ? { status: 'unavailable', message: 'Jobs are not available on OmniWA GO.' }
         : filteredJobs.length === 0
           ? { status: 'empty', message: jobs.length === 0 ? 'No jobs yet.' : 'No jobs match these filters.' }
           : { status: 'ready', rows: filteredJobs };
@@ -130,7 +130,7 @@ export function QueuePage() {
           <MetricCard label="Dead-lettered" value={queueResource?.deadJobCount} context={queueResource?.deadJobCount !== undefined && queueResource.deadJobCount > 0 ? 'Action required' : 'No action required'} attention={queueResource?.deadJobCount !== undefined && queueResource.deadJobCount > 0} />
         </div>
         {queue.isError && <InlineError error={queue.error} onRetry={queue.refetch} className="queue-metric-error" />}
-        {queue.data?.unavailable && <div className="empty queue-metric-pending">Queue posture is not available yet.</div>}
+        {queue.data?.unavailable && <div className="empty queue-metric-pending">Queue metrics are not available on OmniWA GO.</div>}
       </section>
 
       <DataTableWorkspace className="queue-workbench" aria-labelledby="jobs-table-title">
@@ -181,7 +181,7 @@ export function QueuePage() {
       {jobId && (detail.data?.resource
         ? <JobDrawer job={detail.data.resource} requestedJobId={jobId} onClose={closeJob} />
         : detail.data?.unavailable
-          ? <JobDrawerState jobId={jobId} onClose={closeJob}>Job data is not available yet.</JobDrawerState>
+          ? <JobDrawerState jobId={jobId} onClose={closeJob}>Jobs are not available on OmniWA GO.</JobDrawerState>
           : detail.isError
             ? <JobDrawerState jobId={jobId} onClose={closeJob}><InlineError error={detail.error} onRetry={detail.refetch} /></JobDrawerState>
             : <JobDrawerState jobId={jobId} onClose={closeJob} announce>Loading job details…</JobDrawerState>)}

@@ -1,6 +1,6 @@
 import type { ApiClient } from './client';
 import type { components } from './generated/platform-schema';
-import { notImplemented, type CollectionEnvelope, type CommandResult, type PublicData, type UnavailableRead } from './envelopes';
+import { notImplemented, NOT_IMPLEMENTED_READ, type CollectionEnvelope, type CommandResult, type PublicData, type UnavailableRead } from './envelopes';
 
 // omniwa-go has no list-chats / list-messages / message-history REST surface, and
 // realtime (its only message source) is WebSocket-only and disabled here. The
@@ -20,11 +20,11 @@ export async function listInstanceChats(
   _instanceId: string,
   _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<{ items: ChatResource[]; pagination: ChatPagination }>> {
-  throw notImplemented('Chats');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getChat(_client: ApiClient, _chatId: string): Promise<ReadResult<ChatResource>> {
-  throw notImplemented('Chat detail');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function listInstanceMessages(
@@ -32,18 +32,18 @@ export async function listInstanceMessages(
   _instanceId: string,
   _params: { cursor?: string; limit?: number; sort?: string } = {},
 ): Promise<ReadResult<{ items: MessageResource[]; pagination: ChatPagination }>> {
-  throw notImplemented('Messages');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getMessage(_client: ApiClient, _messageId: string): Promise<ReadResult<MessageResource>> {
-  throw notImplemented('Message detail');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getMessageDeliveryHistory(
   _client: ApiClient,
   _messageId: string,
 ): Promise<ReadResult<{ data: PublicData; requestId: string }>> {
-  throw notImplemented('Message delivery history');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function listInstanceContacts(
@@ -51,11 +51,11 @@ export async function listInstanceContacts(
   _instanceId: string,
   _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<{ items: ContactResource[]; pagination: ChatPagination }>> {
-  throw notImplemented('Contacts');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getContact(_client: ApiClient, _contactId: string): Promise<ReadResult<ContactResource>> {
-  throw notImplemented('Contact detail');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function listInstanceLabels(
@@ -63,11 +63,11 @@ export async function listInstanceLabels(
   _instanceId: string,
   _params: { cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<{ items: LabelResource[]; pagination: ChatPagination }>> {
-  throw notImplemented('Labels');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function getMedia(_client: ApiClient, _mediaId: string): Promise<ReadResult<MediaResource>> {
-  throw notImplemented('Media');
+  return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
 export async function sendInstanceTextMessage(

@@ -33,7 +33,6 @@ export function InlineError({
       label={category}
       title={message}
       requestId={failure?.requestId}
-      showMissingRequestId
       action={failure?.retryable ? { label: 'Retry', run: onRetry } : undefined}
       className={className}
       announcement={announce ? 'assertive' : false}

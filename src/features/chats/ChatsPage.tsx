@@ -71,7 +71,7 @@ export function ChatsPage() {
   } else if (chatReadState.isInitialLoading) {
     timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading conversation details.</h2><p>The conversation read is in progress.</p></div></div></div>;
   } else if (chat.data?.unavailable && selectedChat === undefined) {
-    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Conversation details are not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div></div></div>;
+    timeline = <div className="timeline-pane" role="log" aria-label="Message timeline" aria-live="off"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Unavailable</span><h2>Chats are not available on OmniWA GO.</h2><p>OmniWA GO has no chat list or message-history API.</p></div></div></div>;
   } else {
     timeline = <>{chatReadState.isStaleError && <InlineError error={chatReadState.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" />}<MessageTimeline instanceId={instanceId} chatId={chatId} /></>;
   }

@@ -219,7 +219,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
         </DataTableToolbar>}
         <div className={`groups-table max-[640px]:[&_.empty]:!px-4 max-[640px]:[&_.empty]:!py-8 ${stateOnlyTable ? 'max-[1024px]:[&_.responsive-table]:!w-full max-[1024px]:[&_.responsive-table]:!min-w-0 max-[1024px]:[&_thead]:!hidden' : ''} ${zeroGroups ? '[&_.responsive-table]:!w-full [&_.responsive-table]:!min-w-0 [&_thead]:!hidden [&_.responsive-table-scroll]:!border-b-0' : ''}`}>
           <DataTable
-            caption="Groups with membership counts, local state, status, and update time"
+            caption="Groups with membership counts, admin counts, status, and creation time"
             captionId="groups-table-title"
             layout="wide"
             attached
@@ -284,7 +284,10 @@ export function GroupsPage() {
   };
 
   let content: React.ReactNode;
-  if (instanceId) {
+  if (instanceId && selectedInstance && !selectedInstance.connected) {
+    // Groups load from the instance's live WhatsApp connection; gate on it.
+    content = <ScopeGate label="INSTANCE OFFLINE" title="This instance isn't connected" detail="Groups load from the instance's live WhatsApp connection. Connect and pair this instance first." action={<Link className="btn primary" to={`/instances/${encodeURIComponent(instanceId)}`}>Open instance</Link>} />;
+  } else if (instanceId) {
     content = <GroupsWorkbench instanceId={instanceId} token={selectedInstance?.token} groupId={groupId} onSetParam={setParam} />;
   } else if (pickerReadState.isInitialError) {
     content = isTransportError(pickerReadState.error)

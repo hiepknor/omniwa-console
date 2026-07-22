@@ -252,7 +252,7 @@ export function ConversationList({ instanceId, chatId }: {
   } else if (chatsReadState.isInitialLoading) {
     listContent = <div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading conversations.</h2><p>The first conversation read is in progress.</p></div>;
   } else if (unavailable && chats.length === 0) {
-    listContent = <div className="chat-calm-state"><span className="eyebrow">Data pending</span><h2>Conversations are not available yet.</h2><p>No failure has been reported. This read remains pending.</p></div>;
+    listContent = <div className="chat-calm-state"><span className="eyebrow">Unavailable</span><h2>Chats are not available on OmniWA GO.</h2><p>OmniWA GO has no chat list or message-history API.</p></div>;
   } else if (filteredChats.length === 0) {
     listContent = (
       <div className="chat-calm-state"><span className="eyebrow">0 chats</span><h2>{chats.length === 0 ? 'No direct conversations yet.' : 'No conversations match these filters.'}</h2><p>{chats.length === 0 ? 'New direct conversations will appear here.' : 'Adjust the search or remove a label filter.'}</p></div>
