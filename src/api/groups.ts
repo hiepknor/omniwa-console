@@ -23,6 +23,8 @@ type GoGroup = {
   NameSetAt?: string;
   IsAnnounce?: boolean;
   IsLocked?: boolean;
+  IsJoinApprovalRequired?: boolean;
+  MemberAddMode?: string;
   Suspended?: boolean;
   Participants?: GoParticipant[];
 };
@@ -49,6 +51,8 @@ export type GroupResource = {
   updatedAt?: string;
   announce?: boolean;
   locked?: boolean;
+  joinApproval?: boolean;
+  adminsOnlyAdd?: boolean;
   // Chat-local state (mute/pin/archive) is not exposed by omniwa-go.
   muted?: boolean;
   pinned?: boolean;
@@ -56,10 +60,26 @@ export type GroupResource = {
   members: GroupMemberResource[];
 };
 
+/** A single group setting; each maps to a paired on/off action on /group/settings. */
+export type GroupSetting = 'announce' | 'locked' | 'joinApproval' | 'adminsOnlyAdd';
+export type GroupSettingAction =
+  | 'announcement' | 'not_announcement'
+  | 'locked' | 'unlocked'
+  | 'approval_on' | 'approval_off'
+  | 'admin_add' | 'all_member_add';
+
+const GROUP_SETTING_ACTIONS: Record<GroupSetting, { on: GroupSettingAction; off: GroupSettingAction }> = {
+  announce: { on: 'announcement', off: 'not_announcement' },
+  locked: { on: 'locked', off: 'unlocked' },
+  joinApproval: { on: 'approval_on', off: 'approval_off' },
+  adminsOnlyAdd: { on: 'admin_add', off: 'all_member_add' },
+};
+
 export type GroupMetadataRequest = { subject?: string; description?: string };
 export type GroupLocalStateRequest = { muted?: boolean; pinned?: boolean; archived?: boolean };
 export type GroupMemberRequest = { jid: string };
 export type GroupTextMessageRequest = { text: string };
+export type GroupCreateRequest = { name: string; participants: string[] };
 
 export type GroupPagination = { nextCursor?: string | null; hasMore?: boolean };
 export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
@@ -89,6 +109,8 @@ function toGroup(raw: GoGroup): GroupResource {
     updatedAt: raw.NameSetAt || raw.GroupCreated || undefined,
     announce: raw.IsAnnounce ?? undefined,
     locked: raw.IsLocked ?? undefined,
+    joinApproval: raw.IsJoinApprovalRequired ?? undefined,
+    adminsOnlyAdd: raw.MemberAddMode === 'admin_add',
     members,
   };
 }
@@ -140,8 +162,32 @@ export async function updateGroupLocalState(
   throw notImplemented('Group local state');
 }
 
+export async function getGroupInviteLink(client: ApiClient, groupJid: string): Promise<string | undefined> {
+  const link = unwrap<string>(await client.POST('/group/invitelink', { body: { groupJid, reset: false } }));
+  return typeof link === 'string' && link ? link : undefined;
+}
+
 export async function refreshGroupInviteLink(client: ApiClient, groupJid: string): Promise<CommandResult> {
   return unwrapCommand(await client.POST('/group/invitelink', { body: { groupJid, reset: true } }));
+}
+
+export async function createGroup(client: ApiClient, body: GroupCreateRequest): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/group/create', { body: { groupName: body.name, participants: body.participants } }));
+}
+
+export async function leaveGroup(client: ApiClient, groupJid: string): Promise<CommandResult> {
+  // swaggo mis-types groupJid as an object; the API accepts a string.
+  return unwrapCommand(await client.POST('/group/leave', { body: { groupJid } as never }));
+}
+
+export async function updateGroupSetting(
+  client: ApiClient,
+  groupJid: string,
+  setting: GroupSetting,
+  enabled: boolean,
+): Promise<CommandResult> {
+  const action = enabled ? GROUP_SETTING_ACTIONS[setting].on : GROUP_SETTING_ACTIONS[setting].off;
+  return unwrapCommand(await client.POST('/group/settings', { body: { action, groupJid } }));
 }
 
 function participantAction(

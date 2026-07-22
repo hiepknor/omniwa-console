@@ -1,7 +1,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import type { GroupMemberResource, GroupResource } from '@/api/groups';
+import type { GroupMemberResource, GroupResource, GroupSetting } from '@/api/groups';
 import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
+import { SettingToggle } from '@/components/SettingToggle';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import { ModalDialog } from '@/components/dialog/ModalDialog';
 import { DetailDrawer, DetailDrawerState, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
@@ -11,13 +12,23 @@ import {
   useAddGroupMember,
   useDemoteGroupMember,
   useGroup,
+  useGroupInviteLink,
   useGroupMembers,
+  useLeaveGroup,
   usePromoteGroupMember,
   useRefreshGroupInviteLink,
   useRemoveGroupMember,
   useSendGroupText,
   useUpdateGroup,
+  useUpdateGroupSetting,
 } from './hooks';
+
+const GROUP_SETTINGS: { key: GroupSetting; label: string; hint: string }[] = [
+  { key: 'announce', label: 'Announce only', hint: 'Only admins can send messages' },
+  { key: 'locked', label: 'Locked info', hint: 'Only admins can edit group info' },
+  { key: 'joinApproval', label: 'Approve new members', hint: 'Admins approve join requests' },
+  { key: 'adminsOnlyAdd', label: 'Admins add members', hint: 'Only admins can add participants' },
+];
 
 function groupStatusDot(status: string | undefined) {
   switch (status?.toLowerCase()) {
@@ -74,12 +85,16 @@ function SendTextDialog({ groupId, token, onClose }: { groupId: string; token: s
   );
 }
 
-function GroupDrawerContent({ group, instanceId, token }: { group: GroupResource; instanceId: string | undefined; token: string | undefined }) {
+function GroupDrawerContent({ group, instanceId, token, onClose }: { group: GroupResource; instanceId: string | undefined; token: string | undefined; onClose: () => void }) {
   const [subject, setSubject] = useState(group.subject ?? '');
   const [description, setDescription] = useState(group.description ?? '');
   const [memberJid, setMemberJid] = useState('');
   const [removeTarget, setRemoveTarget] = useState<GroupMemberResource>();
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const invite = useRefreshGroupInviteLink(group.id, token);
+  const inviteLink = useGroupInviteLink(group.id, token);
+  const settingMutation = useUpdateGroupSetting(group.id, instanceId, token);
+  const leave = useLeaveGroup(group.id, instanceId, token);
   const update = useUpdateGroup(group.id, instanceId, token);
   const membersQuery = useGroupMembers(group.id, token);
   const addMember = useAddGroupMember(group.id, token);
@@ -135,9 +150,38 @@ function GroupDrawerContent({ group, instanceId, token }: { group: GroupResource
         </form>
       </section>
 
+      <section aria-labelledby="group-settings-title">
+        <span className="eyebrow">Configuration</span>
+        <h3 id="group-settings-title">Group settings</h3>
+        <div className="toggle-list">
+          {GROUP_SETTINGS.map(({ key, label, hint }) => {
+            const checked = Boolean(group[key]);
+            const pending = settingMutation.isPending && settingMutation.variables?.setting === key;
+            return (
+              <SettingToggle
+                key={key}
+                label={label}
+                hint={hint}
+                checked={checked}
+                pending={pending}
+                onChange={() => settingMutation.mutate({ setting: key, enabled: !checked })}
+              />
+            );
+          })}
+        </div>
+        {settingMutation.error && <InlineError error={settingMutation.error} announce onRetry={() => settingMutation.variables && settingMutation.mutate(settingMutation.variables)} />}
+      </section>
+
       <section aria-labelledby="group-invite-title">
-        <div className="drawer-section-head"><h3 id="group-invite-title">Invite link</h3><button className="btn" type="button" disabled={invite.isPending} onClick={() => invite.mutate()}>{invite.isPending ? 'Resetting…' : 'Reset invite link'}</button></div>
-        <p className="help">Resetting revokes the previous invite link and issues a new one.</p>
+        <div className="drawer-section-head"><h3 id="group-invite-title">Invite link</h3><button className="btn" type="button" disabled={invite.isPending} onClick={() => invite.mutate()}>{invite.isPending ? 'Resetting…' : 'Reset link'}</button></div>
+        {inviteLink.data ? (
+          <DrawerIdentifier value={inviteLink.data} label="Copy group invite link" />
+        ) : inviteLink.isError ? (
+          <InlineError error={inviteLink.error} onRetry={inviteLink.refetch} />
+        ) : (
+          <p className="help">{inviteLink.isLoading ? 'Loading invite link…' : 'No invite link.'}</p>
+        )}
+        <p className="help">Resetting revokes the previous link and issues a new one.</p>
         {invite.error && <InlineError error={invite.error} announce onRetry={() => invite.mutate()} />}
       </section>
 
@@ -164,10 +208,35 @@ function GroupDrawerContent({ group, instanceId, token }: { group: GroupResource
           </div>
         )}
       </section>
+
+      <section aria-labelledby="group-danger-title">
+        <span className="eyebrow">Danger zone</span>
+        <h3 id="group-danger-title">Leave group</h3>
+        <div className="action-group destructive">
+          <span>Leaving removes this account from the group. Requires typed confirmation.</span>
+          <div className="actions">
+            <button className="btn danger" type="button" onClick={() => setConfirmLeave(true)}>Leave group…</button>
+          </div>
+        </div>
+      </section>
       {removeTarget && (() => {
         const memberRef = removeTarget.memberRef ?? removeTarget.id;
         return <TypedConfirmationDialog title="Remove group member" description={<p>This removes the member from the group. It takes effect on the linked WhatsApp account.</p>} resourceId={memberRef} confirmValue={memberRef} confirmLabel="Remove member" pendingLabel="Removing…" error={remove.error} isPending={remove.isPending} onCancel={() => setRemoveTarget(undefined)} onConfirm={() => remove.mutate(memberRef, { onSuccess: () => setRemoveTarget(undefined) })} />;
       })()}
+      {confirmLeave && (
+        <TypedConfirmationDialog
+          title="Leave group"
+          description={<p>This removes {group.subject || 'this group'} from the linked WhatsApp account. You can only rejoin with a new invite.</p>}
+          resourceId={group.id}
+          confirmValue={group.id}
+          confirmLabel="Leave group"
+          pendingLabel="Leaving…"
+          error={leave.error}
+          isPending={leave.isPending}
+          onCancel={() => { leave.reset(); setConfirmLeave(false); }}
+          onConfirm={() => leave.mutate(undefined, { onSuccess: () => { setConfirmLeave(false); onClose(); } })}
+        />
+      )}
     </>
   );
 }
@@ -198,7 +267,7 @@ export function GroupDrawer({ groupId, subject: initialSubject, instanceId, toke
           ) : (
             <>
               {readState.isStaleError && <section><InlineError error={readState.error} onRetry={groupQuery.refetch} /></section>}
-              <GroupDrawerContent group={group} instanceId={instanceId} token={token} />
+              <GroupDrawerContent group={group} instanceId={instanceId} token={token} onClose={onClose} />
               <section aria-labelledby="group-send-command-title"><div className="drawer-section-head"><div><h3 id="group-send-command-title">Send text</h3><span className="drawer-note">One-off command to this group.</span></div><button className="btn" type="button" onClick={() => setSendOpen(true)}>Send text…</button></div></section>
             </>
           )}

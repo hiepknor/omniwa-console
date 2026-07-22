@@ -17,8 +17,9 @@ import {
 } from '@/components/data-table';
 import { formatCount, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
+import { CreateGroupDialog } from './CreateGroupDialog';
 import { GroupDrawer } from './GroupDrawer';
-import { useInstanceGroups, usePickerInstances, useRefreshGroups } from './hooks';
+import { useCreateGroup, useInstanceGroups, usePickerInstances, useRefreshGroups } from './hooks';
 
 function statusDot(status: string | undefined) {
   switch (status?.toLowerCase()) {
@@ -260,6 +261,9 @@ export function GroupsPage() {
   const instances = picker.data?.resource?.items ?? [];
   const selectedInstance = instances.find((instance) => instance.id === instanceId);
   const groupId = searchParams.get('group') || undefined;
+  const createOpen = searchParams.get('create') === '1';
+  const create = useCreateGroup(instanceId ?? '', selectedInstance?.token);
+  const canCreateGroup = Boolean(instanceId && selectedInstance?.connected);
 
   useEffect(() => {
     if (instanceId !== undefined || instances.length !== 1) return;
@@ -309,9 +313,18 @@ export function GroupsPage() {
         title="Groups"
         scope={<InstancePicker instances={instances} selected={selectedInstance} selectedId={instanceId} onSelect={chooseInstance} triggerRef={pickerTriggerRef} />}
         status={<RealtimeIndicator />}
+        actions={canCreateGroup ? <button className="btn primary" type="button" onClick={() => { create.reset(); setParam('create', '1'); }}>New group</button> : undefined}
       />
       {pickerReadState.isStaleError && <InlineError error={pickerReadState.error} onRetry={picker.refetch} className="groups-picker-error" />}
       {content}
+      {createOpen && instanceId && (
+        <CreateGroupDialog
+          error={create.error}
+          isPending={create.isPending}
+          onCancel={() => setParam('create', '')}
+          onCreate={(body) => create.mutate(body, { onSuccess: () => setParam('create', '') })}
+        />
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { InlineError } from '@/components/InlineError';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { TypedConfirmationDialog } from '@/components/TypedConfirmationDialog';
 import { DetailDrawer, DetailDrawerState, DrawerIdentifier } from '@/components/drawer/DetailDrawer';
+import { SettingToggle } from '@/components/SettingToggle';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
@@ -20,31 +21,6 @@ import {
   useReconnectInstance,
   useUpdateAdvancedSettings,
 } from './hooks';
-
-function SettingToggle({ label, hint, checked, disabled, onChange }: {
-  label: string;
-  hint: string;
-  checked: boolean;
-  disabled: boolean;
-  onChange: () => void;
-}) {
-  return (
-    <div className="toggle-row">
-      <span><strong>{label}</strong><small>{hint}</small></span>
-      <button
-        className={`toggle-switch${checked ? ' is-on' : ''}`}
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        aria-label={`${label}: ${checked ? 'on' : 'off'}`}
-        disabled={disabled}
-        onClick={onChange}
-      >
-        <span aria-hidden="true" />
-      </button>
-    </div>
-  );
-}
 
 const ADVANCED_TOGGLES: { key: keyof InstanceAdvancedSettings; label: string; hint: string }[] = [
   { key: 'alwaysOnline', label: 'Always online', hint: 'Keep the account presence online' },
