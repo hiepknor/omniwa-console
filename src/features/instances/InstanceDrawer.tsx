@@ -250,7 +250,7 @@ export function InstanceDrawer({
             <div className="action-group destructive">
               <span>Disconnecting drops the live connection; logging out unpairs the device (re-scan a QR to use it again); destroying removes the instance entirely. All require typed confirmation.</span>
               <div className="actions">
-                <button className="btn danger" type="button" disabled={!tokenAvailable} onClick={() => setConfirmation('disconnect')}>Disconnect</button>
+                <button className="btn danger" type="button" disabled={!tokenAvailable} onClick={() => setConfirmation('disconnect')}>Disconnect…</button>
                 <button className="btn danger" type="button" disabled={!tokenAvailable || !loggedIn} onClick={() => setConfirmation('logout')}>Log out…</button>
                 <button className="btn danger" type="button" onClick={() => setConfirmation('destroy')}>Destroy…</button>
               </div>
