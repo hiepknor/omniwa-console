@@ -32,7 +32,7 @@ function SettingToggle({ label, hint, checked, disabled, onChange }: {
     <div className="toggle-row">
       <span><strong>{label}</strong><small>{hint}</small></span>
       <button
-        className={`btn toggle-switch${checked ? ' is-on' : ''}`}
+        className={`toggle-switch${checked ? ' is-on' : ''}`}
         type="button"
         role="switch"
         aria-checked={checked}
@@ -145,13 +145,17 @@ export function InstanceDrawer({
   const tokenAvailable = Boolean(instance.token);
 
   const status = useInstanceStatus(instance.id, instance.token);
+  // Only trust the pairing state once status has actually loaded — otherwise
+  // loggedIn defaults to false and we would fetch a QR for an already-paired
+  // instance (omniwa-go answers /instance/qr with 400 in that case).
+  const statusReady = status.data !== undefined;
   const connected = status.data?.connected ?? instance.connected;
   const loggedIn = status.data?.loggedIn ?? false;
   const pair = pairStatus(connected, loggedIn);
-  const needsPairing = tokenAvailable && !loggedIn;
+  const needsPairing = tokenAvailable && statusReady && !loggedIn;
 
-  // A pairing QR only exists once the websocket is connected, so only poll then.
-  const qr = useInstanceQr(instance.id, instance.token, tokenAvailable && connected && !loggedIn);
+  // A pairing QR only exists once the websocket is connected and login is pending.
+  const qr = useInstanceQr(instance.id, instance.token, needsPairing && connected);
   const connect = useConnectInstance(instance.id, instance.token);
   const reconnect = useReconnectInstance(instance.id, instance.token);
   const disconnect = useDisconnectInstance(instance.id, instance.token);
