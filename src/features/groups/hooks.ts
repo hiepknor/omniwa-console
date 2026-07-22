@@ -5,8 +5,11 @@ import { createApiClient, type ApiClient } from '@/api/client';
 import type { CommandResult } from '@/api/envelopes';
 import {
   addGroupMember,
+  createGroup,
   demoteGroupMember,
   getGroup,
+  getGroupInviteLink,
+  leaveGroup,
   listGroupMembers,
   listInstanceGroups,
   promoteGroupMember,
@@ -15,8 +18,11 @@ import {
   sendGroupTextMessage,
   updateGroup,
   updateGroupLocalState,
+  updateGroupSetting,
+  type GroupCreateRequest,
   type GroupLocalStateRequest,
   type GroupMetadataRequest,
+  type GroupSetting,
 } from '@/api/groups';
 import { listInstances } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
@@ -198,5 +204,63 @@ export function useRefreshGroups(instanceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) }),
+  });
+}
+
+export function useGroupInviteLink(groupId: string | undefined, token: string | undefined) {
+  const tokenClient = useGroupClient(token);
+  return useQuery({
+    queryKey: [...queryKeys.group(groupId ?? ''), 'invite-link'],
+    queryFn: () => getGroupInviteLink(tokenClient as ApiClient, groupId ?? ''),
+    enabled: groupId !== undefined && tokenClient !== undefined,
+  });
+}
+
+export function useCreateGroup(instanceId: string, token: string | undefined) {
+  const tokenClient = useGroupClient(token);
+  const queryClient = useQueryClient();
+  const feedback = useFeedback();
+  return useMutation({
+    mutationFn: (body: GroupCreateRequest) => createGroup(tokenClient as ApiClient, body),
+    onSuccess: async (result) => {
+      feedback.command(result.disposition, {
+        action: 'Create group',
+        acceptedDetail: 'omniwa-go accepted the group creation.',
+        completedDetail: 'omniwa-go created the group.',
+        requestId: result.requestId,
+        dedupeKey: `instance:${instanceId}:create-group`,
+      });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) });
+    },
+  });
+}
+
+export function useLeaveGroup(groupId: string, instanceId: string | undefined, token: string | undefined) {
+  const tokenClient = useGroupClient(token);
+  const queryClient = useQueryClient();
+  const accepted = useGroupFeedback(groupId);
+  return useMutation({
+    mutationFn: () => leaveGroup(tokenClient as ApiClient, groupId),
+    onSuccess: async (result) => {
+      accepted(result, 'Leave group', 'leave');
+      if (instanceId) await queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) });
+    },
+  });
+}
+
+export function useUpdateGroupSetting(groupId: string, instanceId: string | undefined, token: string | undefined) {
+  const tokenClient = useGroupClient(token);
+  const queryClient = useQueryClient();
+  const accepted = useGroupFeedback(groupId);
+  return useMutation({
+    mutationFn: ({ setting, enabled }: { setting: GroupSetting; enabled: boolean }) =>
+      updateGroupSetting(tokenClient as ApiClient, groupId, setting, enabled),
+    onSuccess: async (result, { setting }) => {
+      accepted(result, 'Group setting', `setting:${setting}`);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.group(groupId) }),
+        ...(instanceId ? [queryClient.invalidateQueries({ queryKey: queryKeys.instanceGroups(instanceId, {}) })] : []),
+      ]);
+    },
   });
 }
