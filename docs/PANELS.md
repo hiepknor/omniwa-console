@@ -3,23 +3,30 @@
 ## OmniWA GO backing (current)
 
 The console now targets the **OmniWA GO** API. omniwa-go has no `operationId`s,
-so panels are contracted by `METHOD /path`. `pnpm contract:check` verifies that
-every typed `client.<METHOD>('/path')` call in `src/features/` is both present in
-`contracts/omniwa-go.openapi.json` and listed for its panel here.
+so panels are contracted by `METHOD /path`. `pnpm contract:check` verifies typed
+calls against `contracts/omniwa-go.openapi.json`; this document records which
+backend capabilities the console has actually integrated.
+
+Shared session bootstrap calls `GET /server/capabilities` for the active admin
+session. The API layer also exposes an instance-token-scoped capability hook for
+projection panels to call when their selected instance changes. Projection
+capabilities are instance-scoped and appear only after that resource's initial
+sync is ready; the Groups projection migration is the first planned consumer.
 
 Backing status per panel:
 
-| Panel | omniwa-go backing | Status |
+| Panel | omniwa-go backing | Console status |
 | --- | --- | --- |
-| instances | `/instance/*` | **backed & wired** (list/create/info/delete + token-scoped connect/qr/status/disconnect/reconnect) |
-| groups | `/group/*` | backed; feature wiring pending (stubbed) |
-| chats | none (no list/history REST; realtime off) | `not_implemented` |
-| overview | none (only `GET /server/ok`) | `not_implemented` |
+| instances | `/instance/*` | **wired** (admin lifecycle, token-scoped connection/QR/status/logout, advanced settings) |
+| groups | projection `/group/*` plus `/send/text` | **wired on legacy list/info paths**; projection metadata and search pending |
+| chats | projection `/chat/*`, `/message/*`, `/user/*`, `/label/*` | pending integration |
+| messages | projection reads, `/send/*`, `/campaigns/*` | pending integration |
+| overview | `/server/overview`, `/server/health`, `/server/projection-health` | pending integration |
 | queue | none | `not_implemented` |
 | webhooks | none (per-instance webhook URL only) | `not_implemented` |
 | settings | none (only per-instance advanced-settings) | `not_implemented` |
 | admin-keys | none (static env + instance tokens) | `not_implemented` |
-| events | none (realtime is WS-only, disabled) | `not_implemented` |
+| events | durable `/events`; realtime remains WebSocket-only | pending integration |
 
 Stubbed `src/api/` modules throw `notImplemented`, which panels render as an
 unavailable state. The per-panel operation lists below are the **historical

@@ -2,6 +2,7 @@ import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@ta
 import { lazy, useMemo, useRef, useState } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { ApiProvider } from '@/api/ApiProvider';
+import { CapabilitiesProvider } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
@@ -107,12 +108,14 @@ function AppRuntime() {
               {
                 element: (
                   <ApiProvider session={session}>
-                    <RealtimeProvider
-                      session={session}
-                      onAuthError={() => disconnectRef.current('session-invalid')}
-                    >
-                      <Shell session={session} onDisconnect={() => disconnectRef.current()} />
-                    </RealtimeProvider>
+                    <CapabilitiesProvider>
+                      <RealtimeProvider
+                        session={session}
+                        onAuthError={() => disconnectRef.current('session-invalid')}
+                      >
+                        <Shell session={session} onDisconnect={() => disconnectRef.current()} />
+                      </RealtimeProvider>
+                    </CapabilitiesProvider>
                   </ApiProvider>
                 ),
                 children: [

@@ -57,6 +57,557 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List campaigns */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Campaign status */
+                    status?: string;
+                    /** @description Page size (1-100) */
+                    limit?: number;
+                    /** @description Opaque cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Create campaign draft
+         * @description Creates a text campaign draft. Every recipient requires instance-scoped opt-in evidence; raw evidence references are hashed before persistence.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Campaign draft */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["pkg_campaign_handler.CreateCampaignRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignDetailResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{campaignId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get campaign */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Campaign ID */
+                    campaignId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignDetailResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{campaignId}/abort": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Abort campaign */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Campaign ID */
+                    campaignId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignDetailResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{campaignId}/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List campaign audit history */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page size (1-100) */
+                    limit?: number;
+                    /** @description Opaque cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Campaign ID */
+                    campaignId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignAuditListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{campaignId}/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pause campaign */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Campaign ID */
+                    campaignId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignDetailResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{campaignId}/recipients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List campaign recipients */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page size (1-100) */
+                    limit?: number;
+                    /** @description Opaque cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Campaign ID */
+                    campaignId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignRecipientListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{campaignId}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume campaign */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Campaign ID */
+                    campaignId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignDetailResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{campaignId}/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Schedule campaign */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Campaign ID */
+                    campaignId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Schedule */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["pkg_campaign_handler.ScheduleCampaignRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignDetailResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaigns/{campaignId}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start campaign */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Campaign ID */
+                    campaignId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignDetailResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/chat/archive": {
         parameters: {
             query?: never;
@@ -161,6 +712,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Outbound rate limited */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -172,6 +732,144 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/info/{chatId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a projected chat */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Chat JID */
+                    chatId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat"];
+                        };
+                    };
+                };
+                /** @description Chat not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/chat/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List projected chats */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque pagination cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat"][];
+                        };
+                    };
+                };
+                /** @description Invalid pagination */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -473,6 +1171,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/chat/{chatId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List projected messages for a chat */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque pagination cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Chat JID */
+                    chatId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage"][];
+                        };
+                    };
+                };
+                /** @description Invalid pagination */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/community/add": {
         parameters: {
             query?: never;
@@ -651,6 +1422,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List durable event history */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque pagination cursor */
+                    cursor?: string;
+                    /** @description Exact event type */
+                    type?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryItem"][];
+                            meta?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryMeta"];
+                        };
+                    };
+                };
+                /** @description Invalid pagination */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/group/create": {
         parameters: {
             query?: never;
@@ -694,6 +1538,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Mutation or information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -822,8 +1675,26 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Projected group not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Groups projection not ready */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -886,8 +1757,35 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Cached invite link not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Groups projection not ready */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1067,6 +1965,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Groups projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
             };
         };
         put?: never;
@@ -1106,6 +2013,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
                             data?: components["schemas"]["types.GroupInfo"][];
                         };
+                    };
+                };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -1309,6 +2225,81 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search projected groups
+         * @description Prefix-search groups from the persisted instance projection without querying WhatsApp
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Case-insensitive group JID or name prefix */
+                    q?: string;
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque cursor bound to the instance and normalized query */
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["types.GroupInfo"][];
+                        };
+                    };
+                };
+                /** @description Invalid search or cursor */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Groups projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2462,6 +3453,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/label/info/{labelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get label details
+         * @description Get one label from the persisted instance projection
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Label ID */
+                    labelId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["apidocs.LabelItem"];
+                        };
+                    };
+                };
+                /** @description Label not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/label/list": {
         parameters: {
             query?: never;
@@ -2493,6 +3555,15 @@ export interface paths {
                 };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2612,6 +3683,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Outbound rate limited */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -2740,6 +3820,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Outbound rate limited */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -2996,6 +4085,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Outbound rate limited */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -3071,6 +4169,142 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a projected message */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Provider message ID */
+                    messageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage"];
+                        };
+                    };
+                };
+                /** @description Message not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/message/{messageId}/delivery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List projected message receipts */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Provider message ID */
+                    messageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessageReceipt"][];
+                        };
+                    };
+                };
+                /** @description Message not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3183,6 +4417,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -3247,6 +4490,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -3293,6 +4545,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
                             data?: components["schemas"]["types.NewsletterMetadata"][];
                         };
+                    };
+                };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -3359,6 +4620,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -3790,6 +5060,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -3867,6 +5146,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -3929,6 +5217,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -3989,6 +5286,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -4059,6 +5365,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -4119,6 +5434,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -4183,6 +5507,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -4243,6 +5576,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -4320,6 +5662,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -4380,6 +5731,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -4444,6 +5804,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -4506,6 +5875,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information or outbound rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -4517,6 +5895,240 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/capabilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get server capabilities */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CapabilitiesResponse"];
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get split server health */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ServerHealth"];
+                        };
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get persisted overview metrics */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Metric window as a Go duration (maximum 720h) */
+                    window?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.Overview"];
+                        };
+                    };
+                };
+                /** @description Invalid metric window */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/projection-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get projection health metrics */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth"];
+                        };
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4684,6 +6296,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -4791,6 +6412,15 @@ export interface paths {
                         };
                     };
                 };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -4852,6 +6482,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -4863,6 +6502,86 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/contact/{contactId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a projected contact
+         * @description Get one normalized contact from the persisted instance projection
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Contact JID */
+                    contactId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo"];
+                        };
+                    };
+                };
+                /** @description Invalid contact JID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Contact not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4902,6 +6621,90 @@ export interface paths {
                 };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/contacts/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search projected contacts
+         * @description Prefix-search normalized contacts from the persisted instance projection without querying WhatsApp
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Case-insensitive prefix matched against normalized contact fields */
+                    q?: string;
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque cursor bound to the normalized search query */
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo"][];
+                        };
+                    };
+                };
+                /** @description Invalid search or cursor */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Projection not ready */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4961,6 +6764,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -5009,6 +6821,15 @@ export interface paths {
                         };
                     };
                 };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
                     headers: {
@@ -5048,6 +6869,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
                             data?: components["schemas"]["types.PrivacySettings"];
                         };
+                    };
+                };
+                /** @description Information query rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -5316,6 +7146,52 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        "apidocs.CampaignAuditListResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.AuditEvent"][];
+            /** @example success */
+            message?: string;
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
+        };
+        "apidocs.CampaignDetailResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignDetail"];
+            /** @example success */
+            message?: string;
+        };
+        "apidocs.CampaignErrorResponse": {
+            /** @example campaign_state_conflict */
+            code?: string;
+            /** @example campaign state conflict */
+            error?: string;
+        };
+        "apidocs.CampaignListResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"][];
+            /** @example success */
+            message?: string;
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
+        };
+        "apidocs.CampaignRecipientListResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient"][];
+            /** @example success */
+            message?: string;
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
+        };
+        "apidocs.CapabilitiesData": {
+            /**
+             * @example [
+             *       "campaign_orchestration",
+             *       "rate_limit_retry_after",
+             *       "groups_projection"
+             *     ]
+             */
+            capabilities?: string[];
+            /** @example 1.2.3 */
+            version?: string;
+        };
+        "apidocs.CapabilitiesResponse": {
+            data?: components["schemas"]["apidocs.CapabilitiesData"];
+            /** @example success */
+            message?: string;
+        };
         "apidocs.ConnectData": {
             /** @example MESSAGE,CONNECTION,QRCODE */
             eventString?: string;
@@ -5382,6 +7258,14 @@ export interface components {
             /** @example 2026-07-21T10:30:00Z */
             timestamp?: string;
         };
+        "apidocs.OutboundRateLimitResponse": {
+            /** @example outbound_rate_limited */
+            code?: string;
+            /** @example outbound_rate_limited */
+            error?: string;
+            /** @example 5 */
+            retryAfter?: number;
+        };
         "apidocs.PairData": {
             /** @example ABCD-EFGH */
             PairingCode?: string;
@@ -5417,6 +7301,14 @@ export interface components {
             voterName?: string;
             voterPhone?: string;
         };
+        "apidocs.ProjectionMeta": {
+            lastSyncedAt?: string;
+            nextCursor?: string;
+            /** @example projection */
+            source?: string;
+            /** @example ready */
+            syncStatus?: string;
+        };
         "apidocs.QRCodeData": {
             /** @example 2@abc123... */
             code?: string;
@@ -5430,6 +7322,14 @@ export interface components {
             data?: components["schemas"]["apidocs.QRCodeData"];
             /** @example success */
             message?: string;
+        };
+        "apidocs.RateLimitResponse": {
+            /** @example rate_limited */
+            code?: string;
+            /** @example rate_limited */
+            error?: string;
+            /** @example 90 */
+            retryAfter?: number;
         };
         "apidocs.SendMessageData": {
             /** @example 3EB0C767D26A8D4E2A1B */
@@ -5469,6 +7369,7 @@ export interface components {
             data?: unknown;
             /** @example success */
             message?: string;
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
         };
         "apidocs.TimestampData": {
             /** @example 2026-07-21T10:30:00Z */
@@ -5488,6 +7389,60 @@ export interface components {
         "github_com_evolution-foundation_evolution-go_pkg_call_service.RejectCallStruct": {
             callCreator?: components["schemas"]["types.JID"];
             callId?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.AuditEvent": {
+            actorType?: string;
+            campaignId?: string;
+            eventType?: string;
+            fromStatus?: string;
+            id?: string;
+            instanceId?: string;
+            metadata?: number[];
+            occurredAt?: string;
+            recipientId?: string;
+            toStatus?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign": {
+            contentType?: string;
+            createdAt?: string;
+            finishedAt?: string;
+            id?: string;
+            instanceId?: string;
+            name?: string;
+            startsAt?: string;
+            status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus"];
+            textBody?: string;
+            updatedAt?: string;
+            version?: number;
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus": "draft" | "scheduled" | "running" | "paused" | "completed" | "aborted" | "failed";
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient": {
+            attemptCount?: number;
+            campaignId?: string;
+            createdAt?: string;
+            deliveredAt?: string;
+            id?: string;
+            instanceId?: string;
+            lastErrorCode?: string;
+            nextAttemptAt?: string;
+            optInSource?: string;
+            optedInAt?: string;
+            providerMessageId?: string;
+            readAt?: string;
+            recipientJid?: string;
+            sentAt?: string;
+            status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientStatus"];
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientStatus": "pending" | "processing" | "sent" | "delivered" | "read" | "failed" | "skipped" | "aborted";
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignDetail": {
+            byStatus?: {
+                [key: string]: number;
+            };
+            campaign?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"];
+            recipientCount?: number;
         };
         "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
             chat?: string;
@@ -5683,6 +7638,158 @@ export interface components {
         };
         "github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct": {
             jid?: components["schemas"]["types.JID"];
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType": "direct" | "group" | "newsletter" | "broadcast" | "unknown";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection": "incoming" | "outgoing" | "system";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance": "live" | "history_sync" | "write_through";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus": "not_started" | "syncing" | "ready" | "stale" | "failed";
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ConnectionHealth": {
+            connected?: boolean;
+            status?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryItem": {
+            id?: string;
+            ingestedAt?: string;
+            occurredAt?: string;
+            summary?: {
+                [key: string]: unknown;
+            };
+            type?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryMeta": {
+            backfill?: boolean;
+            generatedAt?: string;
+            nextCursor?: string;
+            retentionSeconds?: number;
+            source?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.HealthDimension": {
+            status?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.InstanceHealth": {
+            connection?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ConnectionHealth"];
+            instanceId?: string;
+            projection?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth"];
+            throttling?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ThrottlingHealth"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.Overview": {
+            generatedAt?: string;
+            instances?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewInstances"];
+            messages?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewMessages"];
+            projections?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewProjectionCounts"];
+            scope?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewScope"];
+            window?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewWindow"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewInstances": {
+            connected?: number;
+            disconnected?: number;
+            total?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewMessages": {
+            incoming?: number;
+            outgoing?: number;
+            total?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewProjectionCounts": {
+            chats?: number;
+            contacts?: number;
+            events?: number;
+            groups?: number;
+            messages?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewScope": {
+            instanceId?: string;
+            type?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewWindow": {
+            durationSeconds?: number;
+            end?: string;
+            start?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat": {
+            archived?: boolean;
+            chatId?: string;
+            contactId?: string;
+            disappearingTimer?: number;
+            displayName?: string;
+            lastActivityAt?: string;
+            lastMessageAt?: string;
+            lastMessageId?: string;
+            mutedUntil?: string;
+            pinned?: boolean;
+            type?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType"];
+            unreadCount?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage": {
+            caption?: string;
+            chatId?: string;
+            contentSummary?: string;
+            contentText?: string;
+            deliveredAt?: string;
+            direction?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection"];
+            historySyncId?: string;
+            mediaDurationSeconds?: number;
+            mediaFileName?: string;
+            mediaHeight?: number;
+            mediaMimeType?: string;
+            mediaSize?: number;
+            mediaType?: string;
+            mediaWidth?: number;
+            messageId?: string;
+            messageType?: string;
+            participantJid?: string;
+            playedAt?: string;
+            provenance?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance"];
+            providerTimestamp?: string;
+            quotedMessageId?: string;
+            readAt?: string;
+            recipientJid?: string;
+            retentionExpiresAt?: string;
+            senderJid?: string;
+            sentAt?: string;
+            status?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessageReceipt": {
+            messageId?: string;
+            receiptAt?: string;
+            receiptType?: string;
+            recipientJid?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth": {
+            byStatus?: {
+                [key: string]: number;
+            };
+            generatedAt?: string;
+            resources?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionResourceHealth"][];
+            status?: string;
+            total?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionResourceHealth": {
+            eventLagSeconds?: number;
+            instanceId?: string;
+            lastEventAt?: string;
+            lastReconciledAt?: string;
+            reconcileAgeSeconds?: number;
+            resource?: string;
+            schemaVersion?: number;
+            staleSince?: string;
+            syncStatus?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ServerHealth": {
+            api?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.HealthDimension"];
+            generatedAt?: string;
+            instances?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.InstanceHealth"][];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ThrottlingHealth": {
+            circuitState?: string;
+            observed?: boolean;
+            openUntil?: string;
+            retryAfterSeconds?: number;
+            status?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.Button": {
             /**
@@ -6040,12 +8147,21 @@ export interface components {
             number?: string[];
         };
         "github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo": {
+            About?: string;
+            AboutUpdatedAt?: string;
             BusinessName?: string;
             FirstName?: string;
             Found?: boolean;
             FullName?: string;
             Jid?: string;
+            LID?: string;
+            PhoneJID?: string;
+            PictureID?: string;
+            PictureRemoved?: boolean;
+            PictureUpdatedAt?: string;
             PushName?: string;
+            RedactedPhone?: string;
+            Username?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_user_service.GetAvatarStruct": {
             number?: string;
@@ -6094,6 +8210,20 @@ export interface components {
         };
         "jsontime.UnixString": {
             "time.Time"?: string;
+        };
+        "pkg_campaign_handler.CampaignRecipientConsent": {
+            jid: string;
+            optInEvidenceReference: string;
+            optInSource: string;
+            optedInAt: string;
+        };
+        "pkg_campaign_handler.CreateCampaignRequest": {
+            name: string;
+            recipients: components["schemas"]["pkg_campaign_handler.CampaignRecipientConsent"][];
+            text: string;
+        };
+        "pkg_campaign_handler.ScheduleCampaignRequest": {
+            startsAt: string;
         };
         /** @enum {string} */
         "types.AddressingMode": "pn" | "lid";
