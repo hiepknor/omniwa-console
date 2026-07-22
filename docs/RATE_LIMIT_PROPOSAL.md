@@ -2,9 +2,9 @@
 
 **Audience:** the omniwa-go backend team.
 **Status:** proposal. The console has shipped its client-side mitigation
-(“Tier 1”, see below); this document proposes the **server-side** work needed to
+(“Tier 1”, see §7); this document proposes the **server-side** work needed to
 *guarantee* WhatsApp is never rate-limited, regardless of how many clients call
-the API.
+the API — and to unlock the console panels that are currently stubbed.
 
 ---
 
@@ -12,8 +12,8 @@ the API.
 
 Several read endpoints resolve by issuing a **live WhatsApp query** (whatsmeow
 “info query”): `GET /group/list`, `POST /group/info`, `POST /group/invitelink`,
-`GET /instance/qr`, and the `/user/*` lookups. WhatsApp rate-limits these per
-account.
+the `/user/*` lookups, and anything that reads live account/chat state. WhatsApp
+rate-limits these per account.
 
 Observed failure mode (reproduced):
 
@@ -22,120 +22,135 @@ Observed failure mode (reproduced):
    info query.
 2. WhatsApp returns `429`. omniwa-go surfaces this as **`HTTP 500`** with body
    `{"error":"info query returned status 429: rate-overlimit"}`.
-3. Because it looks like a generic 500, naive clients **retry**, which deepens
-   the throttle. The cooldown then lasts many minutes.
+3. Because it looks like a generic 500, naive clients **retry**, deepening the
+   throttle; the cooldown then lasts many minutes.
 4. In the worst case the account’s socket is dropped and the device is
    **logged out** (must re-pair via QR).
 
 Root issue: **expensive, rate-limited WhatsApp queries are exposed as if they
-were cheap reads**, with no server-side budgeting, caching, coalescing, or
-back-pressure. One client cannot see another client’s load, so no client-side
-fix can *guarantee* the cap is respected — only the server can, because it is
-the single choke point in front of WhatsApp.
+were cheap reads**. Every read hits WhatsApp live. No client can see another
+client’s load, so no client-side fix can *guarantee* the cap — only the server
+can, because it is the single choke point in front of WhatsApp.
 
 ## 2. Goals
 
-- **G1 — Never exceed WhatsApp’s info-query rate** for an account, across all
+- **G1** — Never exceed WhatsApp’s info-query rate for an account, across all
   callers, even under bursts.
-- **G2 — Never spiral**: a WhatsApp 429 must trigger back-off, not more queries.
-- **G3 — Keep reads fast and cheap** for callers (serve cache, not a live query,
-  whenever possible).
-- **G4 — Make throttling machine-readable** so clients can back off precisely.
-- **G5 — Protect the session**: rate-limit handling must not cause logouts.
+- **G2** — Never spiral: a WhatsApp 429 must trigger back-off, not more queries.
+- **G3** — Keep reads fast and cheap for callers (never a live query on the read
+  path).
+- **G4** — Make throttling machine-readable so clients back off precisely.
+- **G5** — Protect the session: rate-limit handling must not cause logouts.
+- **G6** — Unlock read surfaces the API cannot currently serve at all (chat
+  list/history, contacts, events) by making them queryable.
 
-## 3. Proposed design (layered)
+## 3. Recommended architecture — DB/cache-first (event-sourced projection)
 
-### 3.1 Per-instance token-bucket limiter (G1)
-Put a **token-bucket** in front of every outbound WhatsApp info query, **keyed
-by instance**. Size it *below* WhatsApp’s real limit, with margin (configurable,
-e.g. `WA_INFO_RATE = 5/min`, `burst = 3`). When empty:
+**Reads should never hit WhatsApp.** omniwa-go should be the local **source of
+truth**: maintain its own datastore of account state (it already runs Postgres
+for instances) and serve every read from it. WhatsApp is touched only to
+**receive events**, to **perform actions**, and for a rare, controlled
+**cold-start sync**.
 
-- prefer to **serve cache** (§3.2) if a value exists;
-- else **queue** the request up to `WA_INFO_MAX_WAIT` (e.g. 5s) then fail;
-- if it can’t be served in time, return **`429` + `Retry-After`** (§3.4).
+### 3.1 Persist account state
+Extend the datastore beyond instances to cover **groups, participants, contacts,
+chats, messages, labels** — the resources clients read.
 
-This is the component that makes G1 a guarantee: the bucket is the only path to
-WhatsApp, so the aggregate rate is bounded no matter how many callers there are.
+### 3.2 Ingest the event stream into the DB
+Consume the whatsmeow event stream (the same source that powers `/ws`:
+`message`, `send_message`, `group`, `participant`, `contact`, `newsletter`,
+`connection`, …) and **write those events into the datastore**. This is the core
+work — turning the ephemeral stream into persisted, queryable state. Group
+renames, membership changes, new messages, etc. land in the DB within seconds.
 
-### 3.2 Read-through cache for info queries (G3)
-Cache the result of each WhatsApp-live read, keyed by `(instanceId, kind, arg)`
-(e.g. `(inst, group_info, groupJid)`), with a short TTL
-(`WA_INFO_CACHE_TTL`, e.g. 30–60s). Reads are served from cache within the TTL
-and only spend a bucket token on a miss. Invalidate a group’s cache entry when:
+### 3.3 Write-through on mutations
+When a mutation succeeds (`/group/name·description·participant·settings`, sends,
+…), update the local record immediately rather than waiting for the echo event,
+so the caller’s next read is consistent.
 
-- a mutation for it succeeds (`/group/name·description·participant·settings`),
-- a relevant `/ws` group event arrives (see §3.6),
-- or the TTL expires.
+### 3.4 Reads become DB queries
+`/group/list`, `/group/info`, contacts, chats, and message history read from the
+datastore — with server-side **pagination, filtering, and search** (which
+clients want anyway). No token budget is spent; no WhatsApp query is issued.
 
-With a 30–60s TTL, a console polling every 15s costs **one** WhatsApp query per
-TTL instead of one per poll.
+### 3.5 Cold-start & reconciliation sync
+When an instance first connects (or after downtime that dropped events), run a
+**bounded, rate-limited** full sync **once** to populate the DB (list groups,
+contacts), then rely on events. A low-rate periodic reconciliation closes gaps
+from missed events. **This is the only remaining live-query path** — and it is
+rare and controlled, so the limiter (§4) fully contains it.
 
-### 3.3 Single-flight / request coalescing (G1, G3)
-If several callers ask for the *same* uncached key at once, issue **one**
-WhatsApp query and fan the result out to all waiters. Prevents a thundering herd
-from spending N tokens for one logical read.
+**Payoff:** reads become rate-limit-proof (G1, G3), and the resources that have
+**no live query today** (chat list/history, contacts, durable events) become
+serveable from the DB (G6) — which lets the console un-stub those panels.
 
-### 3.4 Proper throttling responses (G4)
-When a request can’t be served without exceeding the budget, or when WhatsApp
-itself returns 429, respond with:
+## 4. Protecting the residual live paths
 
-- **HTTP `429 Too Many Requests`** (not 500), and
-- a **`Retry-After`** header (seconds), and
-- body `{"error":"rate_limited","retryAfter":<seconds>}`.
+A few things are inherently live and cannot be served from the DB:
 
-This lets clients back off exactly. (The console already treats a body
-containing `rate-overlimit`/`429` as `rate_limited` and stops retrying; a real
-`429` + `Retry-After` makes that precise and lets it show a countdown.)
+- **Cold-start / reconciliation sync** (§3.5),
+- **QR generation** (`/instance/qr`) — rotates, one-time; never cacheable,
+- **Actions** (send, connect, mutations).
 
-### 3.5 Per-instance circuit breaker on WhatsApp 429 (G2, G5)
-When WhatsApp returns a 429 for an instance, **open a breaker** for a cooldown
-(`WA_INFO_COOLDOWN`, e.g. 60–120s, ideally honoring any upstream `Retry-After`).
-While open:
+Guard the *query* parts of these with a small safety layer so even the sync path
+and any residual live read can never exceed the cap:
 
-- serve cache for reads; reject new live queries with `429` + `Retry-After`;
-- **do not** keep probing WhatsApp (that is what extends the ban and can drop
-  the socket). Half-open with a single trial query after the cooldown.
+- **4.1 Per-instance token-bucket limiter** in front of every outbound WhatsApp
+  info query (size below WhatsApp’s cap, e.g. `WA_INFO_RATE = 5/min`,
+  `burst = 3`). When empty: serve the DB value if present, else queue up to
+  `WA_INFO_MAX_WAIT`, else return `429` (§4.3). This is the hard guarantee for G1.
+- **4.2 Single-flight coalescing** — concurrent identical live queries collapse
+  into one.
+- **4.3 Proper throttling responses** — respond `HTTP 429` (not 500) with a
+  `Retry-After` header and body `{"error":"rate_limited","retryAfter":<s>}` so
+  clients back off precisely (G4).
+- **4.4 Per-instance circuit breaker (G2, G5)** — when WhatsApp returns 429, open
+  a breaker for `WA_INFO_COOLDOWN` (honoring any upstream `Retry-After`): serve
+  cache/DB, reject new live queries with `429 + Retry-After`, and **stop probing
+  WhatsApp** (probing is what extends the ban and drops the socket). Half-open
+  with a single trial query after the cooldown.
 
-### 3.6 (Deepest) event-sourced projection (G1, G3)
-The strongest fix: maintain group/contact state as a **local projection** kept
-current from the `/ws` event stream (`group`, `participant`, `newsletter`,
-`contact` events) plus a low-rate background reconciliation. Then `/group/list`
-and `/group/info` become **cache reads of a maintained projection** — cheap and
-never rate-limited — exactly like the omniwa Platform’s projection model. Live
-WhatsApp queries are reserved for cold-start / explicit resync only. This lets
-clients poll freely and removes the class of problem, not just its symptoms.
-
-## 4. Suggested config knobs
+## 5. Suggested config knobs
 
 | Key | Meaning | Example |
 | --- | --- | --- |
-| `WA_INFO_RATE` | Info queries/min per instance (below WhatsApp’s cap) | `5/min` |
+| `WA_INFO_RATE` | Live info queries/min per instance (below WhatsApp’s cap) | `5/min` |
 | `WA_INFO_BURST` | Token-bucket burst | `3` |
-| `WA_INFO_CACHE_TTL` | Read-through cache TTL | `45s` |
+| `WA_SYNC_INTERVAL` | Background reconciliation cadence | `30m` |
 | `WA_INFO_MAX_WAIT` | Max queue wait before 429 | `5s` |
 | `WA_INFO_COOLDOWN` | Circuit-breaker open duration | `90s` |
+| `WA_MSG_RETENTION` | Message-history retention | `30d` |
 
-## 5. Priority / phasing
+## 6. Priority / phasing
 
-1. **§3.4 proper `429` + `Retry-After`** and **§3.5 circuit breaker** — smallest
+The projection is the target, built **incrementally by resource** — each one
+turns a live-query read into a DB read and unlocks the matching console panel:
+
+1. **§4.3 proper `429` + `Retry-After`** and **§4.4 circuit breaker** — smallest
    change, biggest safety win (stops the spiral and the logouts). Do first.
-2. **§3.2 cache + §3.3 single-flight + §3.1 limiter** — makes normal usage
-   essentially never hit the cap.
-3. **§3.6 event-sourced projection** — the durable end state; larger effort.
+2. **Groups projection** (§3.2–3.4 for groups + §3.5 sync + §4 limiter) — removes
+   the observed failure; console groups can poll freely again.
+3. **Contacts projection** — unlocks contact lookup/search in the console.
+4. **Chats + messages projection** — the big one; unlocks the **Chats** panel
+   (list + history), which is stubbed today purely for lack of a read source.
+5. **Events/audit** — persist the event stream durably; unlocks the **Events**
+   panel.
 
-## 6. What the console already does (the contract to design against)
+## 7. What the console already does (Tier-1 client contract)
 
 Client-side “Tier 1” (shipped) removes the console as a *cause* but cannot
 guarantee the cap:
 
 - WhatsApp-live reads (`/group/list·info·invitelink`) **do not poll** —
-  `staleTime` 5m, refetch only on explicit Refresh or after a mutation; cheap
-  DB reads (`/instance/all·info·status`) still poll.
+  `staleTime` 5m, refetch only on explicit Refresh or after a mutation; cheap DB
+  reads (`/instance/all·info·status`) still poll.
 - Errors whose body contains `rate-overlimit`/`429`/`too many` are classified
   `rate_limited` and are **never auto-retried**.
-- `refetchOnWindowFocus` is off; the Refresh control is disabled while a fetch
-  is in flight.
+- `refetchOnWindowFocus` is off; the Refresh control is disabled while a fetch is
+  in flight.
 
-The console will adopt any of the above server behaviors immediately: it already
-honors `rate_limited`, and would use a real `429` + `Retry-After` to show a
-precise back-off and re-enable safe polling once §3.6 lands.
+The console adopts the server behavior above immediately: it already honors
+`rate_limited`; it would use a real `429` + `Retry-After` to show a precise
+back-off; and **once a resource is DB-backed (§3), the console re-enables safe
+polling for it and un-stubs the corresponding panel** (chats, contacts, events).
+Each backend projection therefore pays off directly as new console capability.
