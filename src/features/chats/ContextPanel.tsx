@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { hasCapability } from '@/api/capabilities';
+import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
 import type { ChatResource, MessageResource } from '@/api/chats';
+import { ProjectionNotice } from '@/components/ProjectionNotice';
 import type { PublicData } from '@/api/envelopes';
 import { CategoryPill, StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
@@ -8,7 +11,7 @@ import { formatClockTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import {
   useCancelMessage,
-  useInstanceContacts,
+  useContact,
   useInstanceLabels,
   useInstanceMessages,
   useMessageDeliveryHistory,
@@ -153,23 +156,23 @@ function SelectedMessage({ message, instanceId }: { message: MessageResource; in
   );
 }
 
-function ContextPanelDetails({ instanceId, chat, onBack }: {
+function ContextPanelDetails({ instanceId, token, contactsEnabled, chat, onBack }: {
   instanceId: string | undefined;
+  token: string | undefined;
+  contactsEnabled: boolean;
   chat: ChatResource;
   onBack: () => void;
 }) {
   const [searchParams] = useSearchParams();
   const selectedMessageId = searchParams.get('message');
-  const contacts = useInstanceContacts(instanceId);
+  const contactQuery = useContact(instanceId, chat.id, token, contactsEnabled);
   const labels = useInstanceLabels(instanceId);
-  const contactsReadState = useResilientReadState(contacts, contacts.data?.resource !== undefined);
+  const contactReadState = useResilientReadState(contactQuery, contactQuery.data?.resource !== undefined);
   const labelsReadState = useResilientReadState(labels, labels.data?.resource !== undefined);
   const messagesQuery = useInstanceMessages(instanceId);
   const loadedMessages = useMemo(() => (messagesQuery.data?.pages ?? []).flatMap((page) => page.resource?.items ?? []), [messagesQuery.data?.pages]);
   const selectedMessage = loadedMessages.find((message) => message.id === selectedMessageId && message.chatId === chat.id);
-  const contact = chat.displayName
-    ? contacts.data?.resource?.items.find((item) => item.displayName === chat.displayName)
-    : undefined;
+  const contact = contactQuery.data?.resource;
   const labelNames = new Map((labels.data?.resource?.items ?? []).map((label) => [label.id, label.name ?? label.id]));
 
   return (
@@ -180,16 +183,17 @@ function ContextPanelDetails({ instanceId, chat, onBack }: {
           <svg viewBox="0 0 24 24" aria-hidden="true">{selectedMessageId ? <path d="m7 7 10 10M17 7 7 17" /> : <path d="m15 18-6-6 6-6" />}</svg>
         </button>
       </header>
+      <ProjectionNotice meta={contactQuery.data?.meta} />
       <section aria-labelledby="contact-facts-title">
         <h3 id="contact-facts-title">Contact</h3>
         <dl className="kv">
           <dt>Name</dt><dd>{chat.displayName ?? '—'}</dd>
-          <dt>Contact</dt><dd><span className="mono context-technical-value" title={contact?.id}>{contacts.isLoading ? 'Loading…' : contact?.id ?? '—'}</span></dd>
+          <dt>Contact</dt><dd><span className="mono context-technical-value" title={contact?.id}>{contactQuery.isLoading ? 'Loading…' : contact?.id ?? '—'}</span></dd>
           <dt>Chat</dt><dd><span className="mono context-technical-value" title={chat.id}>{chat.id}</span></dd>
           <dt>Labels</dt><dd>{chat.labelIds?.length ? chat.labelIds.map((labelId) => <CategoryPill compact className="mr-1 mb-1" key={labelId}>{labelNames.get(labelId) ?? labelId}</CategoryPill>) : '—'}</dd>
         </dl>
         <p className="help read-only-note !text-[var(--fg-2)]">Labels are synced from WhatsApp — read-only here.</p>
-        {contactsReadState.isError && <InlineError error={contactsReadState.error} onRetry={() => { void contacts.refetch(); }} className="chat-context-error" />}
+        {contactReadState.isError && <InlineError error={contactReadState.error} onRetry={() => { void contactQuery.refetch(); }} className="chat-context-error" />}
         {labelsReadState.isError && <InlineError error={labelsReadState.error} onRetry={() => { void labels.refetch(); }} className="chat-context-error" />}
       </section>
       {selectedMessage && instanceId
@@ -199,11 +203,49 @@ function ContextPanelDetails({ instanceId, chat, onBack }: {
   );
 }
 
-export function ContextPanel({ instanceId, chat, onBack }: {
+export function ContextPanel({ instanceId, token, contactId, chat, onBack }: {
   instanceId: string | undefined;
+  token: string | undefined;
+  contactId: string | undefined;
   chat: ChatResource | undefined;
   onBack: () => void;
 }) {
+  const capabilities = useInstanceCapabilities(instanceId, token);
+  const contactsEnabled = hasCapability(capabilities.data, 'contacts_projection');
+  const contactQuery = useContact(instanceId, contactId, token, contactsEnabled);
+  const contactReadState = useResilientReadState(contactQuery, contactQuery.data?.resource !== undefined);
+  const contact = contactQuery.data?.resource;
+
+  if (contactId) {
+    return (
+      <aside className="context context--contact" id="chat-context" aria-label="Contact details">
+        <header className="context-head">
+          <div><span className="eyebrow">Directory</span><h2>Contact details</h2></div>
+          <button className="btn sm context-close chat-icon-action" type="button" data-pane-target="conversations" aria-label="Back to contacts" aria-controls="chat-conversations" onClick={onBack}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg></button>
+        </header>
+        {contactReadState.isInitialLoading ? <section className="chat-calm-state" aria-live="polite"><h2>Loading contact.</h2></section>
+          : contactReadState.isInitialError ? <section><InlineError error={contactReadState.error} onRetry={() => { void contactQuery.refetch(); }} className="chat-context-error" /></section>
+          : contact ? <>
+            <ProjectionNotice meta={contactQuery.data?.meta} />
+            {contactReadState.isStaleError && <InlineError error={contactReadState.error} onRetry={() => { void contactQuery.refetch(); }} className="chat-context-error" />}
+            <section aria-labelledby="projected-contact-facts-title">
+              <h3 id="projected-contact-facts-title">Normalized identity</h3>
+              <dl className="kv">
+                <dt>Name</dt><dd>{contact.displayName ?? '—'}</dd>
+                <dt>JID</dt><dd><span className="mono context-technical-value" title={contact.id}>{contact.id}</span></dd>
+                <dt>Username</dt><dd>{contact.username ?? '—'}</dd>
+                <dt>Phone</dt><dd>{contact.redactedPhone ?? '—'}</dd>
+                <dt>Business</dt><dd>{contact.businessName ?? '—'}</dd>
+                <dt>About</dt><dd>{contact.about ?? '—'}</dd>
+                <dt>Known</dt><dd>{contact.found ? 'yes' : 'no'}</dd>
+              </dl>
+              <p className="help read-only-note !text-[var(--fg-2)]">Identity fields are normalized and redacted by OmniWA GO.</p>
+            </section>
+          </> : <section className="chat-calm-state"><h2>Contact details are unavailable.</h2></section>}
+      </aside>
+    );
+  }
+
   if (!chat) {
     return (
       <aside className="context context--contact" id="chat-context" aria-label="Contact and selected message context">
@@ -220,5 +262,5 @@ export function ContextPanel({ instanceId, chat, onBack }: {
     );
   }
 
-  return <ContextPanelDetails instanceId={instanceId} chat={chat} onBack={onBack} />;
+  return <ContextPanelDetails instanceId={instanceId} token={token} contactsEnabled={contactsEnabled} chat={chat} onBack={onBack} />;
 }

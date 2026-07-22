@@ -130,6 +130,8 @@ Projection list cursors are opaque. Pass them back exactly as received.
 - Put filter and cursor state in URL search params for deep links.
 - Reset the cursor when instance, search, or filter scope changes.
 - Never decode, construct, concatenate, or transfer a cursor to another scope.
+- On `invalid_cursor`, remove the current cursor and return to the first page;
+  never retry the same opaque value in a loop.
 - Default `limit` is 50 and maximum is 200 unless the endpoint says otherwise.
 
 Use `useInfiniteQuery` only when the UI intentionally accumulates pages. A
@@ -145,6 +147,8 @@ Keys mirror resource and credential scope:
 ['instances']
 ['instances', instanceId, 'groups', { search, cursor, limit }]
 ['instances', instanceId, 'group', groupId]
+['instances', instanceId, 'contacts', { search, cursor, limit }]
+['instances', instanceId, 'contact', contactId]
 ['instances', instanceId, 'messages', { cursor }]
 ['events', { type, cursor, limit }]
 ```

@@ -1,11 +1,11 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
+import { getContact, listContacts } from '@/api/contacts';
 import {
   cancelMessage,
   getChat,
   getMessageDeliveryHistory,
   listInstanceChats,
-  listInstanceContacts,
   listInstanceLabels,
   listInstanceMessages,
   registerMedia,
@@ -17,6 +17,7 @@ import { getInstance, listInstances } from '@/api/instances';
 import { notImplemented } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
+import { useInstanceClient } from '@/api/useInstanceClient';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 
 export function usePickerInstances() {
@@ -29,7 +30,7 @@ export function usePickerInstances() {
   });
 }
 
-export function useInstanceChats(instanceId: string | undefined) {
+export function useInstanceChats(instanceId: string | undefined, enabled = true) {
   const client = useApi();
   const refetchInterval = useRealtimeRefetchInterval();
   return useInfiniteQuery({
@@ -37,7 +38,7 @@ export function useInstanceChats(instanceId: string | undefined) {
     queryFn: ({ pageParam }) => listInstanceChats(client, instanceId ?? '', { cursor: pageParam, limit: 50 }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
-    enabled: instanceId !== undefined,
+    enabled: enabled && instanceId !== undefined,
     refetchInterval,
   });
 }
@@ -70,14 +71,35 @@ export function useInstanceMessages(instanceId: string | undefined) {
   });
 }
 
-export function useInstanceContacts(instanceId: string | undefined) {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
+export function useInstanceContacts(
+  instanceId: string | undefined,
+  token: string | undefined,
+  params: { search?: string; cursor?: string; limit?: number } = {},
+  enabled = true,
+) {
+  const client = useInstanceClient(token);
   return useQuery({
-    queryKey: queryKeys.instanceContacts(instanceId ?? '', {}),
-    queryFn: () => listInstanceContacts(client, instanceId ?? '', { limit: 200 }),
-    enabled: instanceId !== undefined,
-    refetchInterval,
+    queryKey: queryKeys.instanceContacts(instanceId ?? '', params),
+    queryFn: () => listContacts(client!, params),
+    enabled: enabled && instanceId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useContact(
+  instanceId: string | undefined,
+  contactId: string | undefined,
+  token: string | undefined,
+  enabled = true,
+) {
+  const client = useInstanceClient(token);
+  return useQuery({
+    queryKey: queryKeys.contact(instanceId ?? '', contactId ?? ''),
+    queryFn: () => getContact(client!, contactId ?? ''),
+    enabled: enabled && instanceId !== undefined && contactId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 
@@ -140,13 +162,13 @@ export function useSendTextMessage(instanceId: string) {
   });
 }
 
-export function useInstanceLabels(instanceId: string | undefined) {
+export function useInstanceLabels(instanceId: string | undefined, enabled = true) {
   const client = useApi();
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.instanceLabels(instanceId ?? ''),
     queryFn: () => listInstanceLabels(client, instanceId ?? '', { limit: 100 }),
-    enabled: instanceId !== undefined,
+    enabled: enabled && instanceId !== undefined,
     refetchInterval,
   });
 }

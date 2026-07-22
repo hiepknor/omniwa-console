@@ -1,7 +1,6 @@
-import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useApi, useApiSession } from '@/api/ApiProvider';
-import { createApiClient, type ApiClient } from '@/api/client';
+import { useApi } from '@/api/ApiProvider';
+import type { ApiClient } from '@/api/client';
 import type { CommandResult } from '@/api/envelopes';
 import {
   addGroupMember,
@@ -25,17 +24,9 @@ import {
 } from '@/api/groups';
 import { listInstances } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
+import { useInstanceClient } from '@/api/useInstanceClient';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
-
-/** Build a client authenticated with a specific instance's token (groups are token-scoped). */
-function useGroupClient(token: string | undefined): ApiClient | undefined {
-  const session = useApiSession();
-  return useMemo(
-    () => (token ? createApiClient({ baseUrl: session.baseUrl, apiKey: token }) : undefined),
-    [session.baseUrl, token],
-  );
-}
 
 export function usePickerInstances() {
   const client = useApi();
@@ -56,18 +47,19 @@ export function useInstanceGroups(
   instanceId: string | undefined,
   token: string | undefined,
   params: { search?: string; cursor?: string; limit?: number },
+  enabled = true,
 ) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   return useQuery({
     queryKey: queryKeys.instanceGroups(instanceId ?? '', params),
     queryFn: () => listInstanceGroups(tokenClient as ApiClient, instanceId ?? '', params),
-    enabled: instanceId !== undefined && tokenClient !== undefined,
+    enabled: enabled && instanceId !== undefined && tokenClient !== undefined,
     ...GROUP_PROJECTION_READ,
   });
 }
 
 export function useGroup(instanceId: string | undefined, groupId: string | undefined, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   return useQuery({
     queryKey: queryKeys.group(instanceId ?? '', groupId ?? ''),
     queryFn: () => getGroup(tokenClient as ApiClient, groupId ?? ''),
@@ -96,7 +88,7 @@ function useGroupFeedback(groupId: string) {
 }
 
 export function useRefreshGroupInviteLink(instanceId: string | undefined, groupId: string, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const queryClient = useQueryClient();
   const accepted = useGroupFeedback(groupId);
   return useMutation({
@@ -109,7 +101,7 @@ export function useRefreshGroupInviteLink(instanceId: string | undefined, groupI
 }
 
 export function useUpdateGroupLocalState(groupId: string, instanceId: string | undefined, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const queryClient = useQueryClient();
   const accepted = useGroupFeedback(groupId);
   return useMutation({
@@ -125,7 +117,7 @@ export function useUpdateGroupLocalState(groupId: string, instanceId: string | u
 }
 
 export function useUpdateGroup(groupId: string, instanceId: string | undefined, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const queryClient = useQueryClient();
   const accepted = useGroupFeedback(groupId);
   return useMutation({
@@ -146,7 +138,7 @@ function useInvalidateGroupDetail(instanceId: string | undefined, groupId: strin
 }
 
 export function useAddGroupMember(instanceId: string | undefined, groupId: string, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const invalidate = useInvalidateGroupDetail(instanceId, groupId);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
@@ -156,7 +148,7 @@ export function useAddGroupMember(instanceId: string | undefined, groupId: strin
 }
 
 export function usePromoteGroupMember(instanceId: string | undefined, groupId: string, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const invalidate = useInvalidateGroupDetail(instanceId, groupId);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
@@ -166,7 +158,7 @@ export function usePromoteGroupMember(instanceId: string | undefined, groupId: s
 }
 
 export function useDemoteGroupMember(instanceId: string | undefined, groupId: string, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const invalidate = useInvalidateGroupDetail(instanceId, groupId);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
@@ -176,7 +168,7 @@ export function useDemoteGroupMember(instanceId: string | undefined, groupId: st
 }
 
 export function useRemoveGroupMember(instanceId: string | undefined, groupId: string, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const invalidate = useInvalidateGroupDetail(instanceId, groupId);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
@@ -186,7 +178,7 @@ export function useRemoveGroupMember(instanceId: string | undefined, groupId: st
 }
 
 export function useSendGroupText(groupId: string, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const accepted = useGroupFeedback(groupId);
   return useMutation({
     mutationFn: (text: string) => sendGroupTextMessage(tokenClient as ApiClient, groupId, { text }),
@@ -203,7 +195,7 @@ export function useRefreshGroups(instanceId: string) {
 }
 
 export function useGroupInviteLink(instanceId: string | undefined, groupId: string | undefined, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   return useQuery({
     queryKey: [...queryKeys.group(instanceId ?? '', groupId ?? ''), 'invite-link'],
     queryFn: () => getGroupInviteLink(tokenClient as ApiClient, groupId ?? ''),
@@ -213,7 +205,7 @@ export function useGroupInviteLink(instanceId: string | undefined, groupId: stri
 }
 
 export function useCreateGroup(instanceId: string, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const queryClient = useQueryClient();
   const feedback = useFeedback();
   return useMutation({
@@ -232,7 +224,7 @@ export function useCreateGroup(instanceId: string, token: string | undefined) {
 }
 
 export function useLeaveGroup(groupId: string, instanceId: string | undefined, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const queryClient = useQueryClient();
   const accepted = useGroupFeedback(groupId);
   return useMutation({
@@ -245,7 +237,7 @@ export function useLeaveGroup(groupId: string, instanceId: string | undefined, t
 }
 
 export function useUpdateGroupSetting(groupId: string, instanceId: string | undefined, token: string | undefined) {
-  const tokenClient = useGroupClient(token);
+  const tokenClient = useInstanceClient(token);
   const queryClient = useQueryClient();
   const accepted = useGroupFeedback(groupId);
   return useMutation({

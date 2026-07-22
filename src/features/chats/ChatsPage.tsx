@@ -25,7 +25,9 @@ export function ChatsPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const picker = usePickerInstances();
-  const chat = useChat(chatId);
+  const selectedInstance = picker.data?.resource?.items.find((instance) => instance.id === instanceId);
+  const contactId = searchParams.get('directory') === 'contacts' ? chatId : undefined;
+  const chat = useChat(contactId ? undefined : chatId);
   const chatReadState = useResilientReadState(chat, chat.data?.resource !== undefined);
   const selectedChat = chat.data?.resource;
   const requestedPane = searchParams.get('pane');
@@ -99,8 +101,8 @@ export function ChatsPage() {
         )}
       </section>
 
-      {activePane === 'context' && <button className="chat-context-backdrop" type="button" aria-label="Close details" onClick={() => setActivePane('thread')} />}
-      <ContextPanel instanceId={instanceId} chat={selectedChat} onBack={() => setActivePane('thread')} />
+      {activePane === 'context' && <button className="chat-context-backdrop" type="button" aria-label="Close details" onClick={() => setActivePane(contactId ? 'conversations' : 'thread')} />}
+      <ContextPanel instanceId={instanceId} token={selectedInstance?.token} contactId={contactId} chat={selectedChat} onBack={() => setActivePane(contactId ? 'conversations' : 'thread')} />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import type { ProjectionSyncStatus } from '@/api/envelopes';
 
-export type GroupCollectionState = 'not_ready' | 'error' | 'loading' | 'syncing' | 'unavailable' | 'empty' | 'ready';
+export type ProjectionCollectionState = 'not_ready' | 'error' | 'loading' | 'syncing' | 'unavailable' | 'empty' | 'ready';
 
-export function groupCollectionState(input: {
+export function projectionCollectionState(input: {
   errorCode?: string;
   hasInitialError: boolean;
   hasResource: boolean;
@@ -11,7 +11,7 @@ export function groupCollectionState(input: {
   projectionStatus?: ProjectionSyncStatus;
   readinessAdvertised: boolean;
   unavailable: boolean;
-}): GroupCollectionState {
+}): ProjectionCollectionState {
   if (!input.hasResource && input.errorCode === 'projection_not_ready') return 'not_ready';
   if (input.hasInitialError) return 'error';
   if (input.isInitialLoading) return 'loading';

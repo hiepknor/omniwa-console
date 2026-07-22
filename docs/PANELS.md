@@ -19,7 +19,9 @@ Rules:
 | Shared capability/error/projection layer | Available | Integrated |
 | Instances | Available | Integrated |
 | Groups | Projection available | Projection list/detail/search integrated |
-| Chats, Messages, Contacts, Labels | Projection available | Pending migration |
+| Chats and Messages | Projection available | Pending migration |
+| Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
+| Labels | Projection available | Pending migration |
 | Events | Durable history available | Pending migration |
 | Overview and Health | Persisted/split APIs available | Pending migration |
 | Campaigns (`/messages`) | Orchestration available | Pending implementation |
@@ -98,7 +100,8 @@ to a live WhatsApp read.
 
 ## Chats workspace — `/chats/:instanceId?/:chatId?`
 
-Status: backend available; console migration pending.
+Status: Contacts list/search/detail is integrated as the directory fallback and
+context surface. Chats, Messages, delivery history, and Labels remain pending.
 
 Core projection ownership:
 

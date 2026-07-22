@@ -7,7 +7,6 @@ import { notImplemented, NOT_IMPLEMENTED_READ, type CollectionEnvelope, type Com
 // chats workspace is stubbed until omniwa-go grows chat/history endpoints.
 export type ChatResource = components['schemas']['ChatResource'];
 export type MessageResource = components['schemas']['MessageResource'];
-export type ContactResource = components['schemas']['ContactResource'];
 export type LabelResource = components['schemas']['LabelResource'];
 export type MediaResource = components['schemas']['MediaResource'];
 export type MediaMessageRequest = components['schemas']['MediaMessageRequest'];
@@ -43,18 +42,6 @@ export async function getMessageDeliveryHistory(
   _client: ApiClient,
   _messageId: string,
 ): Promise<ReadResult<{ data: PublicData; requestId: string }>> {
-  return { unavailable: NOT_IMPLEMENTED_READ };
-}
-
-export async function listInstanceContacts(
-  _client: ApiClient,
-  _instanceId: string,
-  _params: { cursor?: string; limit?: number } = {},
-): Promise<ReadResult<{ items: ContactResource[]; pagination: ChatPagination }>> {
-  return { unavailable: NOT_IMPLEMENTED_READ };
-}
-
-export async function getContact(_client: ApiClient, _contactId: string): Promise<ReadResult<ContactResource>> {
   return { unavailable: NOT_IMPLEMENTED_READ };
 }
 
