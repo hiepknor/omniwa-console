@@ -1,5 +1,13 @@
 import type { ApiClient } from './client';
-import { notImplemented, unwrap, unwrapCommand, type CommandResult, type UnavailableRead } from './envelopes';
+import {
+  notImplemented,
+  unwrap,
+  unwrapCommand,
+  unwrapProjection,
+  type CommandResult,
+  type ProjectionMeta,
+  type UnavailableRead,
+} from './envelopes';
 
 // omniwa-go's /group/* routes are token-scoped (act on the instance whose token
 // is in the header) and return whatsmeow-shaped groups with participants
@@ -82,11 +90,8 @@ export type GroupTextMessageRequest = { text: string };
 export type GroupCreateRequest = { name: string; participants: string[] };
 
 export type GroupPagination = { nextCursor?: string | null; hasMore?: boolean };
-export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
+export type ReadResult<T> = { resource?: T; meta?: ProjectionMeta; unavailable?: UnavailableRead };
 export type GroupListPage = { items: GroupResource[]; pagination: GroupPagination };
-export type GroupMemberListPage = { items: GroupMemberResource[]; pagination: GroupPagination };
-
-const NO_PAGINATION: GroupPagination = { nextCursor: null, hasMore: false };
 
 function toMember(raw: GoParticipant): GroupMemberResource {
   return {
@@ -118,24 +123,28 @@ function toGroup(raw: GoGroup): GroupResource {
 export async function listInstanceGroups(
   client: ApiClient,
   _instanceId?: string,
-  _params: { cursor?: string; limit?: number } = {},
+  params: { search?: string; cursor?: string; limit?: number } = {},
 ): Promise<ReadResult<GroupListPage>> {
-  const data = unwrap<GoGroup[]>(await client.GET('/group/list'));
-  return { resource: { items: (data ?? []).map(toGroup), pagination: NO_PAGINATION } };
+  const search = params.search?.trim() ?? '';
+  const result = search || params.cursor
+    ? await client.GET('/group/search', {
+      params: { query: { q: search, limit: params.limit ?? 50, cursor: params.cursor } },
+    })
+    : await client.GET('/group/list');
+  const projection = unwrapProjection<GoGroup[]>(result);
+  const nextCursor = projection.meta?.nextCursor ?? null;
+  return {
+    resource: {
+      items: (projection.resource ?? []).map(toGroup),
+      pagination: { nextCursor, hasMore: nextCursor !== null },
+    },
+    meta: projection.meta,
+  };
 }
 
 export async function getGroup(client: ApiClient, groupJid: string): Promise<ReadResult<GroupResource>> {
-  const data = unwrap<GoGroup>(await client.POST('/group/info', { body: { groupJid } }));
-  return { resource: data ? toGroup(data) : undefined };
-}
-
-export async function listGroupMembers(
-  client: ApiClient,
-  groupJid: string,
-  _params: { cursor?: string; limit?: number } = {},
-): Promise<ReadResult<GroupMemberListPage>> {
-  const data = unwrap<GoGroup>(await client.POST('/group/info', { body: { groupJid } }));
-  return { resource: { items: (data?.Participants ?? []).map(toMember), pagination: NO_PAGINATION } };
+  const projection = unwrapProjection<GoGroup>(await client.POST('/group/info', { body: { groupJid } }));
+  return { resource: projection.resource ? toGroup(projection.resource) : undefined, meta: projection.meta };
 }
 
 export async function updateGroup(

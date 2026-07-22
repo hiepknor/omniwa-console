@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { hasCapability } from '@/api/capabilities';
+import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
+import { ApiFailure } from '@/api/envelopes';
 import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
 import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { PageHeader } from '@/components/PageHeader';
+import { ProjectionNotice } from '@/components/ProjectionNotice';
 import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { isTransportError } from '@/components/feedback/feedback-policy';
 import {
@@ -19,6 +23,7 @@ import { formatCount, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { CreateGroupDialog } from './CreateGroupDialog';
 import { GroupDrawer } from './GroupDrawer';
+import { groupCollectionState } from './group-read-state';
 import { useCreateGroup, useInstanceGroups, usePickerInstances, useRefreshGroups } from './hooks';
 
 function statusDot(status: string | undefined) {
@@ -139,23 +144,34 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   onSetParam: (name: string, value: string) => void;
 }) {
   const [searchParams] = useSearchParams();
-  const list = useInstanceGroups(instanceId, token);
+  const search = searchParams.get('search')?.trim() ?? '';
+  const cursor = searchParams.get('cursor') || undefined;
+  const [searchDraft, setSearchDraft] = useState(search);
+  const capabilities = useInstanceCapabilities(instanceId, token);
+  const projectionAdvertised = hasCapability(capabilities.data, 'groups_projection');
+  const list = useInstanceGroups(instanceId, token, { search, cursor, limit: 50 });
   const refresh = useRefreshGroups(instanceId);
   const readState = useResilientReadState(list, list.data?.resource !== undefined);
   const unavailable = list.data?.unavailable !== undefined;
   const groups = useMemo(() => list.data?.resource?.items ?? [], [list.data]);
-  const search = searchParams.get('search') ?? '';
-  const filteredGroups = useMemo(() => {
-    const needle = search.trim().toLowerCase();
-    if (!needle) return groups;
-    return groups.filter((group) => group.id.toLowerCase().includes(needle) || group.subject?.toLowerCase().includes(needle));
-  }, [groups, search]);
-  const latestUpdate = groups.map((group) => group.updatedAt).filter((value): value is string => value !== undefined).sort().at(-1);
+  const projectionErrorCode = list.error instanceof ApiFailure ? list.error.code : undefined;
+
+  useEffect(() => setSearchDraft(search), [search]);
+  const collectionState = groupCollectionState({
+    errorCode: projectionErrorCode,
+    hasInitialError: readState.isInitialError,
+    hasResource: list.data?.resource !== undefined,
+    isInitialLoading: readState.isInitialLoading,
+    itemCount: groups.length,
+    projectionStatus: list.data?.meta?.syncStatus,
+    readinessAdvertised: projectionAdvertised,
+    unavailable,
+  });
   const adminCounts = groups.filter((group) => group.adminCount !== undefined);
   const knownAdmins = adminCounts.reduce((total, group) => total + (group.adminCount ?? 0), 0);
   const totalMembers = groups.reduce((total, group) => total + (group.memberCount ?? 0), 0);
   const announceOnly = groups.filter((group) => group.announce).length;
-  const metricsAvailable = !readState.isInitialLoading && !readState.isInitialError && !(unavailable && groups.length === 0);
+  const metricsAvailable = collectionState === 'ready' || collectionState === 'empty';
   const zeroGroups = metricsAvailable && groups.length === 0;
   const selectedGroup = groups.find((group) => group.id === groupId);
 
@@ -169,17 +185,21 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
     { id: 'status', header: 'Status', size: 'md', kind: 'status', mobile: 'secondary', cell: (group) => <StatusIndicator dotClass={statusDot(group.status)}>{group.status ?? '—'}</StatusIndicator> },
     { id: 'created', header: 'Created', size: 'md', kind: 'date', align: 'end', mobile: 'meta', cell: (group) => <span className="ts" title={group.updatedAt}>{relativeTime(group.updatedAt) || '—'}</span>, mobileCell: (group) => relativeTime(group.updatedAt) || undefined },
   ];
-  const tableState: DataTableState<GroupResource> = readState.isInitialError
-    ? { status: 'error', error: readState.error, onRetry: list.refetch }
-    : readState.isInitialLoading
+  const tableState: DataTableState<GroupResource> = collectionState === 'not_ready'
+    ? { status: 'unavailable', message: <span className="groups-state-copy"><strong>Group projection is not ready.</strong><span>No live WhatsApp lookup will be used. The console will retry only when you refresh or the bounded projection poll runs.</span></span> }
+    : collectionState === 'error'
+      ? { status: 'error', error: readState.error, onRetry: list.refetch }
+    : collectionState === 'loading'
       ? { status: 'loading', skeletonRows: 6 }
-      : unavailable && groups.length === 0
-        ? { status: 'unavailable', message: <span className="groups-state-copy"><strong>Group data is not available yet.</strong><span>No failure has been reported. This read remains pending.</span></span> }
-        : filteredGroups.length === 0
-          ? { status: 'empty', message: groups.length === 0
-            ? <span className="groups-state-copy"><strong>No groups synced yet.</strong><span>Groups appear after this instance syncs its group directory.</span><button className="btn" type="button" disabled={refresh.isPending} onClick={() => refresh.mutate()}>{refresh.isPending ? 'Requesting sync…' : 'Refresh group sync'}</button></span>
-            : <span className="groups-state-copy"><strong>No groups match this search.</strong><span>Adjust or clear the search.</span></span> }
-          : { status: 'ready', rows: filteredGroups };
+      : collectionState === 'syncing'
+        ? { status: 'unavailable', message: <span className="groups-state-copy"><strong>Group projection is synchronizing.</strong><span>No authoritative empty result is available yet. Existing stored rows remain visible when supplied.</span></span> }
+      : collectionState === 'unavailable'
+        ? { status: 'unavailable', message: <span className="groups-state-copy"><strong>Group data is not available yet.</strong><span>{projectionAdvertised ? 'The projection reported an unavailable state.' : 'Initial projection readiness has not been advertised for this instance.'}</span></span> }
+        : collectionState === 'empty'
+          ? { status: 'empty', message: search
+            ? <span className="groups-state-copy"><strong>No groups match this prefix.</strong><span>Adjust or clear the search.</span></span>
+            : <span className="groups-state-copy"><strong>No groups synced yet.</strong><span>The ready projection currently contains no groups.</span><button className="btn" type="button" disabled={refresh.isPending} onClick={() => refresh.mutate()}>{refresh.isPending ? 'Refreshing…' : 'Refresh projection'}</button></span> }
+          : { status: 'ready', rows: groups };
   const stateOnlyTable = tableState.status === 'empty' || tableState.status === 'unavailable' || tableState.status === 'error';
   const closeGroup = () => {
     const activeRow = document.querySelector<HTMLElement>('.groups-table tr[data-active="true"]');
@@ -188,6 +208,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
   };
   return (
     <>
+      <ProjectionNotice meta={list.data?.meta} className="!mb-4" />
       {!zeroGroups && <section className="groups-metric-section max-[640px]:!mb-4" aria-labelledby="groups-posture-title">
         <div className="groups-metric-head">
           <div><h2 id="groups-posture-title">Loaded group posture</h2><span className="groups-posture-note">Counts reflect loaded pages.</span></div>
@@ -205,18 +226,21 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
           <div className="min-w-0 flex-1">
             <div className="flex min-w-0 items-center justify-between gap-3">
               <h2>Groups</h2>
-              {list.isSuccess && !unavailable && groups.length > 0 && <span className="groups-result-count num !mt-0 min-[641px]:!hidden">{filteredGroups.length} visible</span>}
+              {list.isSuccess && !unavailable && groups.length > 0 && <span className="groups-result-count num !mt-0 min-[641px]:!hidden">{groups.length} visible</span>}
             </div>
             <span className="groups-posture-note">Group directory for this instance</span>
           </div>
-          {list.isSuccess && !unavailable && groups.length > 0 && <span className="groups-result-count num max-[640px]:!hidden">{filteredGroups.length} visible</span>}
+          {list.isSuccess && !unavailable && groups.length > 0 && <span className="groups-result-count num max-[640px]:!hidden">{groups.length} visible</span>}
         </div>
-        {groups.length > 0 && <DataTableToolbar>
-          <label className="search-field">
+        {(groups.length > 0 || search) && <DataTableToolbar>
+          <form className="flex min-w-0 flex-1 gap-2" onSubmit={(event) => { event.preventDefault(); onSetParam('search', searchDraft.trim()); }}>
+          <label className="search-field min-w-0 flex-1">
             <span className="visually-hidden">Search groups</span>
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
-            <input className="search" type="search" value={search} onChange={(event) => onSetParam('search', event.target.value)} placeholder="Search loaded groups" />
+            <input className="search" type="search" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} placeholder="Search groups by name or JID prefix" />
           </label>
+          <button className="btn" type="submit" disabled={list.isFetching || searchDraft.trim() === search}>Search</button>
+          </form>
         </DataTableToolbar>}
         <div className={`groups-table max-[640px]:[&_.empty]:!px-4 max-[640px]:[&_.empty]:!py-8 ${stateOnlyTable ? 'max-[1024px]:[&_.responsive-table]:!w-full max-[1024px]:[&_.responsive-table]:!min-w-0 max-[1024px]:[&_thead]:!hidden' : ''} ${zeroGroups ? '[&_.responsive-table]:!w-full [&_.responsive-table]:!min-w-0 [&_thead]:!hidden [&_.responsive-table-scroll]:!border-b-0' : ''}`}>
           <DataTable
@@ -241,7 +265,7 @@ function GroupsWorkbench({ instanceId, token, groupId, onSetParam }: {
                 }
               },
             })}
-            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Updated {relativeTime(latestUpdate) || '—'}</span></> : <span className="num">Results —</span>} actions={<button className="btn" type="button" disabled={refresh.isPending || list.isFetching} onClick={() => refresh.mutate()}>Refresh</button>} />}
+            footer={zeroGroups ? undefined : <DataTableFooter primary={tableState.status === 'ready' || tableState.status === 'empty' ? <><span className="num">{groups.length} loaded groups</span><span className="freshness">Synchronized {relativeTime(list.data?.meta?.lastSyncedAt) || '—'}</span></> : <span className="num">Results —</span>} actions={<><button className="btn" type="button" disabled={!cursor || list.isFetching} onClick={() => onSetParam('cursor', '')}>First page</button><button className="btn" type="button" disabled={!list.data?.resource?.pagination.nextCursor || list.isFetching} onClick={() => onSetParam('cursor', list.data?.resource?.pagination.nextCursor ?? '')}>Next page</button><button className="btn" type="button" disabled={refresh.isPending || list.isFetching} onClick={() => refresh.mutate()}>Refresh</button></>} />}
           />
         </div>
       </DataTableWorkspace>
@@ -288,10 +312,7 @@ export function GroupsPage() {
   };
 
   let content: React.ReactNode;
-  if (instanceId && selectedInstance && !selectedInstance.connected) {
-    // Groups load from the instance's live WhatsApp connection; gate on it.
-    content = <ScopeGate label="INSTANCE OFFLINE" title="This instance isn't connected" detail="Groups load from the instance's live WhatsApp connection. Connect and pair this instance first." action={<Link className="btn primary" to={`/instances/${encodeURIComponent(instanceId)}`}>Open instance</Link>} />;
-  } else if (instanceId) {
+  if (instanceId) {
     content = <GroupsWorkbench instanceId={instanceId} token={selectedInstance?.token} groupId={groupId} onSetParam={setParam} />;
   } else if (pickerReadState.isInitialError) {
     content = isTransportError(pickerReadState.error)

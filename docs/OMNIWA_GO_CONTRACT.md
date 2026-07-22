@@ -91,7 +91,9 @@ decode, construct, modify, or reuse it after its scope changes. Default page
 size is 50 and the server maximum is 200 unless an endpoint documents otherwise.
 
 Legacy response exception: `GET /label/list` remains a bare array. Do not force
-it through the projection envelope adapter.
+it through the projection envelope adapter. The Groups client temporarily
+accepts the historical raw `/group/list` response as well as the current
+projection envelope, but never invents readiness metadata for the raw form.
 
 ## Projection resources
 

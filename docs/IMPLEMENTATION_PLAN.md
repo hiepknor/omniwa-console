@@ -14,7 +14,7 @@ Completed:
 - OmniWA GO contract sync and generated TypeScript schema.
 - Runtime `apikey` session model with admin and instance-token clients.
 - Instance lifecycle, QR, status, logout, and advanced settings.
-- Existing Groups list/info/mutation UI using the earlier response mapping.
+- Groups projection list/info/search, freshness, opaque cursor, and mutation UI.
 - Global capability provider and reusable instance capability hook.
 - Projection envelope metadata adapter and shared projection notice.
 - Machine-readable error adapter, `Retry-After` countdown, jittered manual retry,
@@ -22,14 +22,13 @@ Completed:
 
 Not yet integrated:
 
-- projection-native Groups search/cursor/freshness;
 - Contacts, Labels, Chats, Messages, and delivery projections;
 - durable Events;
 - Overview, split Health, and Projection Health;
 - Campaign UI;
 - removal of remaining legacy polling/stub assumptions.
 
-## Phase 1 — Groups projection
+## Phase 1 — Groups projection (implemented)
 
 Goal: make Groups the first complete projection consumer.
 
@@ -45,8 +44,10 @@ Goal: make Groups the first complete projection consumer.
 - Remove comments and polling behavior that describe group reads as live
   WhatsApp queries.
 
-Exit: Groups performs no live-read fallback and all freshness/pagination states
-are test-covered.
+Exit achieved: Groups performs no live-read fallback, scopes cache keys by
+instance, preserves projection freshness, and uses server prefix search with
+opaque cursor pagination. Adapter and shared projection-state tests cover the
+contract boundary.
 
 ## Phase 2 — Contacts and Labels
 

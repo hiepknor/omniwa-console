@@ -14,9 +14,10 @@ export const queryKeys = {
   instanceChats: (instanceId: string, params?: Record<string, unknown>) =>
     ['instances', instanceId, 'chats', params ?? {}] as const,
   instanceGroups: (instanceId: string, params?: Record<string, unknown>) =>
-    ['instances', instanceId, 'groups', params ?? {}] as const,
-  group: (groupId: string) => ['groups', groupId] as const,
-  groupMembers: (groupId: string) => ['groups', groupId, 'members'] as const,
+    params === undefined
+      ? ['instances', instanceId, 'groups'] as const
+      : ['instances', instanceId, 'groups', params] as const,
+  group: (instanceId: string, groupId: string) => ['instances', instanceId, 'group', groupId] as const,
   chat: (chatId: string) => ['chats', chatId] as const,
   instanceMessages: (instanceId: string, params?: Record<string, unknown>) =>
     ['instances', instanceId, 'messages', params ?? {}] as const,

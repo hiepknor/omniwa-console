@@ -18,7 +18,7 @@ Rules:
 | --- | --- | --- |
 | Shared capability/error/projection layer | Available | Integrated |
 | Instances | Available | Integrated |
-| Groups | Projection available | Legacy mapping integrated; projection search/meta migration next |
+| Groups | Projection available | Projection list/detail/search integrated |
 | Chats, Messages, Contacts, Labels | Projection available | Pending migration |
 | Events | Durable history available | Pending migration |
 | Overview and Health | Persisted/split APIs available | Pending migration |
@@ -65,8 +65,9 @@ the instance token. `/server/ok` is not connection state.
 
 ## Groups — `/groups/:instanceId?`
 
-Status: list/info and mutations integrated through the earlier mapping;
-projection metadata, capability gate, and server search are the next phase.
+Status: projection list/info/search and mutations integrated. Reads remain
+available from persisted projection data while the WhatsApp instance is
+offline; live mutations still require provider connectivity.
 
 Reads:
 
