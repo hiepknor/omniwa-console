@@ -1,261 +1,186 @@
 # Architecture
 
-## OmniWA GO backend (current)
-
-This console now targets the **OmniWA GO** API, not the omniwa Platform v1
-contract. Key deltas from the sections below (which describe the original
-Platform design and are kept for historical context):
-
-- **Contract:** `contracts/omniwa-go.openapi.json`, converted from omniwa-go's
-  Swagger 2.0 (`../omniwa-go/docs/swagger.json`) via `pnpm contract:sync`
-  (`scripts/sync-omniwa-go-contract.mjs` → `swagger2openapi`). Types regenerate
-  with `pnpm api:generate`.
-- **Auth:** `apikey` header (global admin key or per-instance token), not
-  `x-api-key`. See `docs/AUTH_AND_SESSION.md`.
-- **Envelopes:** success is `{ message, data }` (some endpoints return the
-  payload raw); errors are `{ error: string }` with category inferred from the
-  HTTP status. Commands are always synchronous (no `202`/operation ids). See
-  `src/api/envelopes.ts`.
-- **Realtime:** disabled — `/ws` needs the global key and is unsafe from a
-  browser. Panels poll instead. See `docs/REALTIME.md`.
-- **Pagination:** none (flat list endpoints).
-- **Panel coverage:** only instances, groups, send, contacts, labels, and
-  message actions have an omniwa-go backend. Overview, queue, webhooks, api-keys,
-  settings, events, and chats have no backing and their `src/api/` modules throw
-  `notImplemented` (category `not_implemented`), which the panels render as an
-  unavailable state. The **instances** vertical is wired to live `/instance/*`
-  endpoints; **groups** is stubbed pending wiring to `/group/*`.
-- **Two client scopes:** admin routes (`/instance/all·info·create·delete`) use
-  the session's global key; token-scoped routes
-  (`/instance/connect·qr·status·disconnect·reconnect`) act on the instance whose
-  token is in the header, so the console builds a per-instance client from each
-  instance's `token` (see `useApiSession` and `src/features/instances/hooks.ts`).
-
-Full migration context: `docs/HANDOFF_FROM_OMNIWA_GO.md`.
-
-## Style
-
-`omniwa-console` is a client-only single-page application. There is no
-server-side code in this repository. The build output is static assets served
-by any web server; all platform state lives in OmniWA and is fetched at
-runtime through the public REST API.
+`omniwa-console` is a static, client-only SPA for OmniWA GO's public REST API.
+All business rules, persistence, WhatsApp access, reconciliation, rate limiting,
+consent enforcement, and campaign execution belong to the backend.
 
 ```mermaid
 flowchart LR
-    Operator[Operator Browser]
-    Console[omniwa-console SPA]
-    Client[Generated API Client Boundary]
-    API[OmniWA Public REST API /v1]
-    SSE[SSE /v1/events/stream]
+    Operator[Operator browser]
+    Shell[React application shell]
+    Features[Feature panels]
+    API[Typed API boundary]
+    GO[OmniWA GO public REST API]
+    DB[(Persisted projections)]
+    WA[WhatsApp]
 
-    Operator --> Console
-    Console --> Client
-    Client -->|x-api-key| API
-    Console -->|EventSource| SSE
+    Operator --> Shell
+    Shell --> Features
+    Features --> API
+    API -->|apikey| GO
+    GO --> DB
+    GO --> WA
 ```
+
+The browser never talks directly to WhatsApp, PostgreSQL, private Go packages,
+or internal queues.
 
 ## Layers
 
-Dependencies point downward only. A layer may import from layers below it,
-never above.
+Dependencies point downward only:
 
 | Layer | Path | Owns | May import |
 | --- | --- | --- | --- |
-| App shell | `src/app/` | Router, layout, providers, navigation, connect screen wiring | features, components, api, lib |
-| Features | `src/features/<panel>/` | One directory per panel: pages, panel-specific components, query hooks | components, api, lib |
-| Components | `src/components/` | Reusable presentational components (tables, feedback, badges, empty states, envelope-aware list views) | api, lib |
-| API boundary | `src/api/` | Generated types, typed client factory, envelope helpers, query-key conventions, SSE client | lib |
-| Lib | `src/lib/` | Session storage, formatting, small utilities | (nothing internal) |
+| App shell | `src/app/` | Router, providers, layout, navigation, connect flow | features, components, api, lib |
+| Features | `src/features/<panel>/` | Page, panel-specific components, TanStack Query hooks | components, api, lib |
+| Shared components | `src/components/` | Tables, drawers, dialogs, feedback, projection notices | api types, lib |
+| API boundary | `src/api/` | Client factory, generated types, adapters, resource calls, query keys | lib |
+| Utilities | `src/lib/` | Session storage, formatting, small framework-independent helpers | no higher layer |
 
-Rules:
+Rules enforced by `pnpm architecture:check`:
 
-- Feature code never imports another feature. Shared logic moves down into
-  `components/`, `api/`, or `lib/`.
-- Only `src/api/` touches the network. Features consume typed hooks and
-  helpers; they never construct URLs or headers.
-- `src/api/generated/` is machine-written by `pnpm api:generate` and never
-  edited by hand.
+- no network access outside `src/api/`;
+- no feature-to-feature imports;
+- no feature-owned application `main` landmark;
+- generated API files remain machine-owned.
 
-## Shared table system
+Shared behavior moves down into components, API, or lib. It is not copied
+between features.
 
-All list panels use the WARP table primitives in
-`src/components/data-table/`. Features supply typed columns, data, row
-actions, and URL-backed controls; they do not define table breakpoints,
-sticky offsets, column geometry, loading layouts, or overflow behavior.
+## Contract boundary
 
-The shared contract provides:
+The vendored contract is `contracts/omniwa-go.openapi.json`, converted from
+`../omniwa-go/docs/swagger.json` by `pnpm contract:sync`. Generated TypeScript
+types are committed at `src/api/generated/schema.d.ts`.
 
-- independent typed column size, content kind, alignment, mobile role, and
-  sticky-role presets instead of arbitrary layout classes;
-- stable loading, unavailable, empty, and envelope-aware error states inside
-  the table geometry;
-- separate checked-row and active-row states so bulk selection is not
-  confused with an open detail drawer;
-- a stationary footer outside the horizontal scroller and automatic edge
-  cues while more columns remain off-screen;
-- one container-aware responsive policy: full tables when their workspace is
-  wider than 620px, compact summaries when a rail or narrow viewport reduces
-  the workspace to 620px or less, sticky identity columns on wider tablets,
-  and 44px controls for coarse pointers.
-- schema-driven compact summaries for standard tables, with a custom summary
-  escape hatch only for rows whose mobile hierarchy differs materially;
-- selection controls that remain available in compact summaries and keep
-  checked state separate from the row whose detail drawer is active;
-- shared active-filter chips and filter counts while each feature retains
-  ownership of its URL search parameters.
+The public boundary is `METHOD /path`, because the OmniWA GO Swagger does not
+define operation IDs. `docs/PANELS.md` assigns each consumed operation to its
+panel. Backend source may be inspected to clarify runtime behavior, but no Go
+package, model, or private route crosses into the SPA.
 
-New panels extend the preset vocabulary in the shared component when needed;
-they must not add panel-specific row heights, sticky offsets, or responsive
-table breakpoints. `pnpm design:check` compares critical geometry between the
-production stylesheet and the static prototype stylesheet, and is part of
-the required `pnpm check` gate.
+## Credential scopes
 
-## Shared detail drawer system
+The active session contains one runtime origin and one `apikey`. Admin calls use
+the session client. Instance operations use a scoped client created from the
+instance token. Secrets are never placed in URLs, query keys, logs, analytics,
+feedback, or generated static assets.
 
-Resource inspectors and management panels use `DetailDrawer` from
-`src/components/drawer/`. Features own their typed content and commands, but
-they do not own drawer positioning, breakpoints, overlays, focus management,
-or close controls.
+See `docs/AUTH_AND_SESSION.md`.
 
-The shared contract provides:
+## State ownership
 
-- a 440px fixed inspector on workspaces at least 1280px wide, with reserved
-  content space so the drawer never covers table columns;
-- a modal side sheet below 1280px and a full-width sheet on narrow phones,
-  including body scroll lock, inert background content, focus trapping,
-  Escape handling, focus restoration, and a 44px close target;
-- one shared header action rail: the 32px visual Close control, resource status,
-  and 44px Copy target occupy the same right-hand grid column while retaining
-  44px interaction targets;
-- a single identifier row with truncation, full-value tooltip, and copy
-  action instead of repeating IDs in the facts list;
-- shared loading, unavailable, and error-state geometry; and
-- one content order: identity and status, summary facts, configuration,
-  activity or history, recovery actions, then destructive actions last.
+- **Server state:** TanStack Query only. No hand-rolled resource cache.
+- **Projection freshness:** response `meta`; never inferred from collection
+  length.
+- **URL state:** filters, opaque cursors, selected instance/resource, open panel
+  modes, and other shareable operator context.
+- **Local component state:** transient form input and disclosure state only.
+- **Durable history:** backend Events and Campaign Audit APIs, never toast or
+  local-storage history.
 
-Nested confirmation dialogs take keyboard priority over their parent drawer.
-Feature drawers may add section content and status-dot semantics, but must not
-reimplement the shell or introduce panel-specific responsive behavior.
-`pnpm design:check` rejects feature drawers that drift back to owned shell
-markup.
+Mutations invalidate the narrowest affected query keys after acknowledgement.
+Important lifecycle and send state is not optimistic.
 
-## Shared modal system
+## Capability and projection flow
 
-Command forms, typed confirmations, and one-time secret surfaces use
-`ModalDialog` from `src/components/dialog/`. The shared shell owns the
-backdrop, maximum viewport height, scrollable body, action footer, compact
-Close control, outside-click policy, and responsive placement. Feature code
-owns fields, validation, command feedback, and button labels only.
+```mermaid
+flowchart TD
+    Select[Login or select instance]
+    Caps[GET /server/capabilities]
+    Gate{Initial capability signal}
+    Read[Read projection endpoint]
+    Meta{syncStatus / error code}
+    Ready[Render ready or genuinely empty]
+    Stale[Render usable data + freshness warning]
+    Pending[Render syncing/not-ready]
 
-Dialog semantics are proportional to operational risk:
+    Select --> Caps
+    Caps --> Gate
+    Gate -->|available or safe projection probe| Read
+    Gate -->|waiting for first usable read| Pending
+    Read --> Meta
+    Meta -->|ready| Ready
+    Meta -->|syncing or stale| Stale
+    Meta -->|projection_not_ready| Pending
+```
 
-- command forms use primary submission and neutral cancellation;
-- reversible confirmations do not require typed input;
-- destructive or high-impact confirmations require an explicit phrase or
-  stable resource identifier, with danger styling reserved for destructive
-  commands;
-- show-once secrets use explicit acknowledgement with no ambient Close,
-  Escape, or backdrop dismissal.
+No branch falls back to a WhatsApp-live read.
 
-The shared footer accepts one primary action and an optional secondary action;
-features do not own footer grids or mobile spans. Dialog descriptions connect
-through `aria-describedby`, pending commands expose `aria-busy`, and headers
-show operator-relevant resource identity rather than OpenAPI operation IDs.
+Capability polling must not erase a usable projection snapshot. Once a read
+returns data, its `meta.syncStatus` (or a later `projection_not_ready` error) is
+the resource-state authority.
 
-Centered command dialogs are 520px wide on desktop; complex administrative
-forms may opt into the shared 680px `wide` size. Both retain a 16px viewport
-gutter on phones. Their body scrolls independently while the header and footer
-remain visible; actions keep 44px touch targets. Long operation or resource
-context truncates in the header and exposes its full string through a title.
+## Shared UI systems
 
-Mobile navigation and table-filter sheets keep their purpose-specific bottom
-sheet layouts, but use the same `useModalDialog` lifecycle and `IconButton`
-controls. That lifecycle locks body scroll, makes background branches inert,
-traps focus, handles Escape, and restores focus to the originating control.
-Open composite controls inside a modal receive the first Escape press so they
-close before the owning dialog.
-Feature components must not render their own dialog role, overlay, or shell
-geometry. `pnpm design:check` enforces these boundaries.
+### Tables
 
-## Automated architecture gates
+List panels use `src/components/data-table/`. The shared system owns responsive
+geometry, sticky columns, loading/error/empty rows, mobile summaries, selection
+semantics, and overflow cues. Features own typed columns, filters, rows, and URL
+state. Panel-specific table breakpoints or duplicate shells are not allowed.
 
-`pnpm architecture:check` scans the TypeScript source and rejects direct
-network access outside `src/api/`, imports from one feature into another, and
-feature-owned `main` landmarks. `pnpm bundle:check` runs after the production
-build, verifies that route-level page chunks still exist, and rejects any raw
-JavaScript chunk larger than 300 KiB. Both checks are included in `pnpm check`.
+### Drawers
 
-## Shared feedback system
+Resource inspectors use `src/components/drawer/DetailDrawer`. The shared shell
+owns overlay behavior, focus trap/restoration, Escape, responsive placement,
+header identity, and state geometry. Features own resource facts and commands.
 
-Transient feedback, scoped API failures, and workspace conditions use the
-primitives in `src/components/feedback/`. Features report outcomes through the
-provider and keep scoped errors attached to their dialog, drawer, form, or
-table. They do not implement panel-specific toast queues, timers, or transport
-banners. Query and mutation cache callbacks update browser transport state
-without issuing an extra health operation from the shell. See
-`docs/FEEDBACK.md` for routing and lifecycle policy.
+### Dialogs
 
-## Contract-driven boundary
+Forms and confirmations use `src/components/dialog/ModalDialog` and shared
+confirmation components. Destructive or high-impact actions require explicit
+confirmation proportional to risk. Pending actions cannot be submitted twice.
 
-The OpenAPI contract is vendored at `contracts/omniwa-v1.openapi.json` and
-synced from the sibling platform repo with `pnpm contract:sync`. The
-TypeScript types in `src/api/generated/schema.d.ts` are generated from the
-vendored copy, so this repo builds standalone without the platform repo
-checked out.
+### Feedback
 
-This mirrors the OmniWA Phase J guardrail: platform clients consume the
-public OpenAPI surface only. The generated client plays the role the Rust
-`omniwa-sdk` plays for `omniwa-tui`.
+Transport conditions, scoped failures, command acknowledgements, projection
+freshness, and toasts follow `docs/FEEDBACK.md`. Features do not implement
+custom toast queues, retry timers, or transport banners.
 
-## State model
+`pnpm design:check` protects the shared table, drawer, dialog, and workspace
+contracts.
 
-- **Server state** is owned by TanStack Query. Every read maps to one
-  OpenAPI operation; query keys follow the convention in
-  `docs/API_CLIENT.md`. Mutations invalidate the affected keys.
-- **Realtime** events from SSE do not write into caches directly; they
-  trigger targeted invalidation (see `docs/REALTIME.md`).
-- **Session state** (API base URL, API key, key kind) lives in
-  `sessionStorage` behind `src/lib/session.ts` (see
-  `docs/AUTH_AND_SESSION.md`).
-- **UI state** (filters, selected rows, open drawers) lives in URL search
-  params first, component state second — panels should be deep-linkable.
+## Realtime and polling
+
+OmniWA GO's `/ws` requires the global admin key and is not opened by this SPA.
+Projection reads and bounded polling provide current state; `/events` provides
+durable history and future reconnect recovery. A future browser-safe realtime
+bridge may invalidate query keys but must not write provider payloads directly
+into caches. See `docs/REALTIME.md`.
+
+## Error and safety posture
+
+- Normalize failures once in `src/api/envelopes.ts`.
+- Keep known 429 and projection-not-ready conditions machine-readable.
+- Preserve usable stale snapshots when refresh fails.
+- Never expose credentials, raw provider payloads, stack traces, or reconstructed
+  redacted identities.
+- Render only contract-supplied identifiers needed by the operator workflow.
+- Do not automatically retry mutations or duplicate campaign/send execution.
 
 ## Routing
 
-The messaging workflow is primary; operations panels are secondary:
-
-```
+```text
 /connect
-/chats/:instanceId?/:chatId?         # primary: adaptive direct-conversation workspace
-                                     #   ?pane=conversations|context selects the compact pane
-/groups/:instanceId?                 # primary: group management table
-                                     #   ?list=nl_* opens the Named Lists panel mode
-/messages                            # campaigns (proposed contract)
-/messages/new                        # campaign wizard (proposed)
 /overview
-/instances
-/instances/:instanceId
-/queue
-/webhooks
-/webhooks/:webhookId
+/instances/:instanceId?
+/groups/:instanceId?
+/chats/:instanceId?/:chatId?
+/messages
+/messages/new
 /events
+/queue
+/webhooks/:webhookId?
 /settings
 /settings/api-keys
 ```
 
-The workspace remembers the instance, chat, compact-layout pane, filters, and
-selected message in the URL so every operator context is a shareable deep
-link. Desktop renders conversation, timeline, and context panes together;
-tablet preserves the conversation list beside one detail pane; mobile renders
-one pane with contextual back navigation. Unauthenticated visits to any route
-redirect to `/connect`.
+`docs/PANELS.md` is authoritative for whether a route is wired, pending, or
+unsupported. Unsupported routes remain explicit unavailable surfaces until a
+public API exists; they are never backed by fabricated browser state.
 
-## Error and safety posture
+## Build and bundle gates
 
-- The API never returns secrets, raw phone/JID, or provider payloads; the
-  console renders what the contract provides and adds no client-side
-  reconstruction of redacted data.
-- Error envelopes surface with their product-safe category and retryability
-  flag; the console never shows stack traces or invents error detail.
-- The API key is displayed nowhere after entry (see
-  `docs/AUTH_AND_SESSION.md`).
+`pnpm check` runs documentation, design, contract, architecture, TypeScript,
+production build, and bundle checks. Route-level splitting must remain intact
+and raw JavaScript chunks must stay under the documented 300 KiB budget.

@@ -62,7 +62,7 @@
           <span class="stream-fact">Fresh through <time class="mono num" datetime="2026-07-16T08:53:29Z">08:53:29Z</time></span>
           <details class="behavior-note">
             <summary aria-label="Explain live tail and cursor behavior">How live tail works</summary>
-            <p><span class="mono">streamEvents</span> prepends new events into a bounded 200-row presentation buffer. Pause stops presentation only. Load older pages backward through <span class="mono">listEvents</span> cursors; streamed payloads are not claimed to update server caches.</p>
+            <p><span class="mono">GET /events</span> provides durable cursor history. A future browser-safe live bridge may prepend normalized events into a bounded presentation buffer; it must recover gaps from the durable endpoint.</p>
           </details>
         </div>
       </div>
@@ -185,7 +185,7 @@
           <section aria-labelledby="provenance-title">
             <h3 id="provenance-title">Stream provenance</h3>
             <dl class="event-facts">
-              <dt>Source</dt><dd class="mono">streamEvents</dd>
+              <dt>Source</dt><dd class="mono">events projection</dd>
               <dt>Ordering</dt><dd>Newest first</dd>
               <dt>Freshness</dt><dd>Within current live tail</dd>
             </dl>

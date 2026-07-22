@@ -1,79 +1,82 @@
-# Feedback and Notification Contract
+# Feedback and State Presentation
 
-OmniWA Console uses one feedback model with three renderers. Features report
-an outcome or condition; centralized policy decides whether it becomes a
-toast, a surface notice, or a workspace banner.
+The console uses one shared feedback system. Features report outcomes and
+conditions; centralized components decide whether they appear as a toast,
+surface notice, projection notice, or workspace banner.
 
 ## Message classes
 
 | Class | Lifetime | Placement | Examples |
 | --- | --- | --- | --- |
-| Transient feedback | Timed | Toast viewport | Command accepted, confirmed completion |
-| Surface feedback | Until the surface changes | Form, dialog, drawer, or table | Validation and scoped API failures |
-| Workspace condition | Until the condition resolves | Below the page header | Transport outage, invalid session |
+| Transient acknowledgement | Timed | Toast viewport | API command completed at its HTTP boundary |
+| Surface feedback | Until state changes | Form, dialog, drawer, table | Validation, scoped API failure, rate-limit countdown |
+| Projection state | Until freshness changes | Owning data surface | Syncing, stale, not started, failed |
+| Workspace condition | Until resolved | Below page header | Browser transport outage, invalid session |
 
-Operational resource status, loading, empty, unavailable, and stale data are
-surface state. They are not notifications and must not create toasts.
+Loading, genuinely empty data, stale data, delivery status, campaign status,
+and health posture are resource state, not toast notifications.
 
 ## Routing policy
 
 | Condition | Renderer |
 | --- | --- |
-| Async command accepted | `accepted` toast; never call it completed or successful |
-| Contract-confirmed completion | `completed` toast |
-| Validation failure | Field message next to the invalid control |
-| Command failure while its dialog or drawer remains open | Surface notice |
-| Command failure after its originating surface closes | Persistent error toast |
-| Query/list failure | Surface notice inside the owning panel |
-| Authentication failure | Clear the session and show a Connect notice |
-| Authorization failure | Persistent surface notice; keep the session |
+| Server acknowledges a command | Completed/acknowledged toast; never imply WhatsApp delivery |
+| Validation failure | Field message beside the invalid control |
+| Mutation failure while its surface is open | Surface notice in that form/dialog/drawer |
+| Query failure before first snapshot | Error state in the owning panel |
+| Refresh failure after a usable snapshot | Keep data visible and show one scoped refresh issue |
+| `syncing` | Projection notice; preserve usable data if supplied |
+| `stale` | Warning with `lastSyncedAt`; preserve data |
+| `not_started`, `failed`, or `projection_not_ready` | Not-ready/failure surface, never an empty list |
+| `rate_limited` or `outbound_rate_limited` | Countdown surface; no automatic retry |
+| Authentication failure (401) | Clear session and return to Connect |
+| Authorization failure (403) | Persistent inline notice; keep session |
 | Browser transport failure | One deduplicated workspace banner |
-| `readStatus: unavailable` | Neutral unavailable state, never an error notification |
-| Panel with no omniwa-go backend | Read stubs return `unavailable` (reason `not_implemented`); render the panel's neutral unavailable state, never a red error |
+| No public backend surface | Neutral unavailable state |
 
-The transport banner shows on every route with a page header except `/connect`
-(which has its own inline connection error) and `/chats` (which owns its
-adaptive workspace state).
-
-Background polling failures never create toasts. A new failure may announce
-once, but repeated polling must update existing surface or connection state.
-When the workspace transport banner owns a browser transport failure, scoped
-surface errors for that same failure are suppressed. Data surfaces may retain a
-neutral unavailable state, but must not repeat the connection error.
-After a surface has a usable snapshot, a failed refresh must preserve that
-snapshot, mark the owning surface stale, and provide one scoped retry action.
-Only a failure before the first usable snapshot may replace the surface with a
-full error state. Starting a retry must not temporarily replace stale content
-with a loading state.
+Background polling failures never create repeated toasts. Starting a refresh
+must not replace an existing snapshot with a loading skeleton.
 
 ## API errors
 
-API feedback renders the product-safe category and message from `ApiFailure`.
-Retry is shown only when `retryable` is true. omniwa-go does not return request
-IDs, so the request-ID row renders only when an id is actually present (it is
-never fabricated or shown as "unavailable").
+`InlineError` renders normalized `ApiFailure` information:
 
-When a request ID is present it is monospaced, truncates locally on dense
-layouts, wraps on phone layouts, and includes a copy affordance. Feedback
-content must never log or render credentials, raw provider payloads, or
-reconstructed identifiers.
+- machine-readable code when present, otherwise category;
+- product-safe message;
+- request ID only when the backend actually provides one;
+- retry action only when safe;
+- rate-limit detail and countdown from the shared timer logic.
+
+The current backend does not provide request IDs, so the UI never fabricates an
+“unavailable” value. Credentials, stack traces, raw provider payloads, and
+reconstructed redacted identities are never feedback content.
+
+## Mutation acknowledgement
+
+Current mutation endpoints complete synchronously at the HTTP boundary. The
+toast says what the server acknowledged, not what WhatsApp recipients
+experienced. Send delivery/read state and campaign recipient state come from
+their projections.
+
+Lifecycle, destructive, invite-link reset, send, and campaign mutations:
+
+- disable duplicate submission while pending;
+- are not automatically retried;
+- are not optimistically presented as complete;
+- refresh authoritative projection state after acknowledgement.
 
 ## Toast behavior
 
-- Accepted: 6 seconds. Completed: 4 seconds. Neutral information: 6 seconds.
+- Acknowledged completion: 4 seconds. Neutral information: 6 seconds.
 - Error and actionable warning toasts do not auto-dismiss.
-- At most three toasts are visible. `dedupeKey` replaces an existing toast.
-- Hover, keyboard focus, and a hidden document pause the timer.
-- Toasts survive route navigation but do not persist across page reloads.
-- Desktop/tablet: bottom-right. Phone: above bottom navigation and safe area.
-- Toasts never take focus. Every toast has an explicit dismiss control.
-
-The browser does not keep notification history. Durable operational history
-belongs to the Events and Audit APIs, not to a client-side toast archive.
+- At most three toasts are visible; `dedupeKey` replaces an existing toast.
+- Hover, keyboard focus, and a hidden document pause timers.
+- Toasts survive route navigation but not page reload.
+- Toasts never take focus and always provide dismissal.
 
 ## Accessibility
 
-Accepted, completed, and informational feedback use polite status semantics.
-A new user-triggered error may use assertive alert semantics. Background query
-errors must not be re-announced on every poll. Status always uses a dot plus a
-text label; color alone never communicates meaning.
+User-triggered errors may use assertive alerts. Informational, synchronization,
+and background state use polite status semantics. Polling must not repeatedly
+announce the same condition. Color is always paired with text and status icons
+are decorative when the same state is written nearby.

@@ -12,11 +12,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
+    "docs:check": "node scripts/check-docs.mjs",
     "design:check": "node scripts/check-table-contract.mjs && node scripts/check-drawer-contract.mjs && node scripts/check-dialog-contract.mjs && node scripts/check-chat-workspace.mjs",
     "contract:check": "node scripts/check-contract-compatibility.mjs",
     "architecture:check": "node scripts/check-architecture.mjs",
     "bundle:check": "node scripts/check-bundle.mjs",
-    "check": "pnpm design:check && pnpm contract:check && pnpm architecture:check && pnpm typecheck && pnpm build && pnpm bundle:check",
+    "check": "pnpm docs:check && pnpm design:check && pnpm contract:check && pnpm architecture:check && pnpm typecheck && pnpm build && pnpm bundle:check",
     "contract:sync": "node scripts/sync-omniwa-go-contract.mjs",
     "api:generate": "openapi-typescript contracts/omniwa-go.openapi.json -o src/api/generated/schema.d.ts"
   },

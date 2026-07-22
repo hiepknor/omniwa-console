@@ -96,7 +96,7 @@ For every networked change, answer these questions before implementation:
 1. Which `METHOD /path` operations are required, and which panel owns them?
 2. Which credential scope is required: admin key or instance token?
 3. Is the response raw, enveloped, projection-backed, paginated, stale-capable,
-   or asynchronously accepted?
+   and which HTTP success status acknowledges it?
 4. Which machine-readable errors and HTTP headers affect UI behavior?
 5. Is the cursor opaque and bound to an instance or filter?
 6. Is the action a read or mutation, and is retry safe?

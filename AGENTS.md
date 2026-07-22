@@ -29,8 +29,9 @@ your task in `docs/`.
   `pnpm install`, `pnpm add`, or anything that fetches. Dependencies are
   pre-installed; if a new package is needed, stop and request it — the
   orchestrator installs it and hands back control.
-- `pnpm check` runs the design, contract, architecture, typecheck, build, and
-  bundle gates offline and must pass before a task is considered done.
+- `pnpm check` runs the documentation, design, contract, architecture,
+  typecheck, build, and bundle gates offline and must pass before a task is
+  considered done.
 - `pnpm contract:sync` requires the sibling `../omniwa-go` checkout; only the
   orchestrator runs it.
 

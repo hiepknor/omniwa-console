@@ -1,133 +1,170 @@
 # API Client Boundary
 
-All network access lives in `src/api/`. Feature code consumes typed hooks
-and helpers; it never calls `fetch` directly against the platform.
+All HTTP access lives in `src/api/`. Features consume typed API functions and
+TanStack Query hooks; components never construct URLs, headers, envelopes, or
+credential scopes.
 
 ## Generation pipeline
 
-```
-contracts/omniwa-v1.openapi.json      # vendored copy of the platform contract
-        │  pnpm contract:sync         # refresh from ../omniwa/docs/api/openapi/
+```text
+../omniwa-go/docs/swagger.json
+        │  pnpm contract:sync (Swagger 2 → OpenAPI 3)
         ▼
-src/api/generated/schema.d.ts         # pnpm api:generate (openapi-typescript)
+contracts/omniwa-go.openapi.json
+        │  pnpm api:generate
         ▼
-src/api/client.ts                     # openapi-fetch client factory
+src/api/generated/schema.d.ts
+        │
+        ▼
+src/api/client.ts (openapi-fetch)
 ```
 
-- `contracts/omniwa-v1.openapi.json` is committed so the repo builds without
-  the platform repo present. `pnpm contract:sync` copies the latest spec from
-  the sibling checkout; commit contract bumps as their own change.
-- `src/api/generated/` is never edited by hand.
-- `openapi-fetch` keys every call by path + method, which the contract binds
-  1:1 to operation IDs — so panel contracts in `docs/PANELS.md` stay
-  verifiable against the code.
+The contract and generated schema are committed so the console builds offline.
+Only the orchestrator runs contract sync. Generated files are never edited by
+hand. `pnpm contract:check` verifies schema freshness, every typed `METHOD
+/path` call against the vendored contract, and feature ownership against
+`docs/PANELS.md`.
 
-## Client factory
+Swaggo occasionally describes whatsmeow runtime values inaccurately. Any
+runtime narrowing required for those endpoints stays quarantined in `src/api/`
+with an explanatory comment; features still receive stable console types.
 
-`createApiClient(session)` returns an `openapi-fetch` client configured with:
+## Client scopes
 
-- `baseUrl` from the session (default `http://localhost:3000`).
-- `x-api-key` header from the session.
+`createApiClient({ baseUrl, apiKey })` creates a client with exactly one
+credential header:
 
-The client is created once per session in the app shell and provided through
-React context (`useApi()`).
-
-## Development mock workspace
-
-The Connect screen exposes **Open mock workspace** in Vite development only.
-It creates a non-persistent session for `http://mock.omniwa.local`; the client
-factory then lazy-loads `src/api/mock/transport.ts`. Fixtures remain behind the
-same OpenAPI client, envelope parsers, query hooks, and panel operation
-allowlists as the real platform.
-
-- Features never import fixtures or branch on mock mode.
-- The mock origin never performs a network request.
-- Commands return contract-shaped accepted/completed envelopes; completion at
-  the command boundary still does not imply message delivery.
-- Realtime uses a deterministic development stream through the API boundary.
-- Production builds remove the mock transport and Connect entry point. The
-  small origin predicate remains safe, but cannot activate without `DEV`.
-
-The shell displays **Mock data** for the full session so fixture content cannot
-be mistaken for platform state.
-
-## Envelopes
-
-Every response is one of three envelopes:
-
-| Envelope | Shape | Used by |
-| --- | --- | --- |
-| `SuccessEnvelope` | `{ data: object, meta }` | Single resource / operation responses |
-| `CollectionEnvelope` | `{ data: object[], meta: meta & { pagination } }` | List / history responses |
-| `ErrorEnvelope` | `{ error: { code, message, details }, meta }` | All failures |
-
-`meta` always carries `requestId`, `correlationId`, `timestamp`. Error
-toasts and detail drawers must show `requestId` so operators can correlate
-with platform logs.
-
-`error.details.category` is one of: `authentication`, `authorization`,
-`business`, `conflict`, `infrastructure`, `validation`, `not_found`,
-`not_implemented`, `internal`. `error.details.retryable` is explicit when
-known — offer a retry affordance only when it is `true`.
-
-Helpers in `src/api/envelopes.ts` unwrap these shapes and narrow errors into
-a typed `ApiFailure` so features never parse envelopes themselves.
-
-## Pagination
-
-Collections use opaque cursor pagination:
-
-- Request: `cursor`, `limit` (server caps at 200), plus whitelisted `sort`,
-  `search`, and `filters`.
-- Response: `meta.pagination.nextCursor` / `previousCursor` / `hasMore`,
-  plus the *accepted* (server-normalized) sort/search/filters, which the UI
-  reflects back into its controls.
-
-Cursors are opaque; never parse or construct them. List panels use TanStack
-Query `useInfiniteQuery` with `nextCursor` as the page param.
-
-## Query keys
-
-Convention: `[resource, scope?, params?]`, mirroring the URL hierarchy.
-
+```http
+apikey: <global-admin-key-or-instance-token>
 ```
+
+The authenticated shell provides the session client through `ApiProvider`.
+Instance-scoped hooks create a second client from the selected instance token.
+Tokens never appear in query keys; the stable instance ID owns cache scope.
+
+## Capability negotiation
+
+`CapabilitiesProvider` queries `GET /server/capabilities` for the active
+session. Projection panels call `useInstanceCapabilities(instanceId, token)`
+when instance scope changes.
+
+- Preserve unknown capability strings.
+- Use each projection capability as an initial-readiness signal for its owning
+  feature; response metadata remains authoritative after a usable read.
+- Capability absence must not be represented as an empty resource list or hide
+  an existing stale snapshot.
+- A panel that is not yet integrated remains unavailable even if the backend
+  advertises its capability.
+
+## Success envelopes
+
+Most endpoints return:
+
+```json
+{ "message": "success", "data": {} }
+```
+
+Projection endpoints add freshness and cursor metadata:
+
+```json
+{
+  "message": "success",
+  "data": [],
+  "meta": {
+    "source": "projection",
+    "syncStatus": "ready",
+    "lastSyncedAt": "2026-07-22T08:00:00Z",
+    "nextCursor": "opaque-value"
+  }
+}
+```
+
+Use:
+
+- `unwrap<T>` for ordinary enveloped or known bare responses;
+- `unwrapProjection<T>` when freshness/cursor metadata must be preserved;
+- `unwrapCommand` for server-acknowledged mutations.
+
+Known bare-response endpoints must remain explicit. In particular,
+`GET /label/list` returns a legacy bare array.
+
+## Projection state
+
+`ProjectionResult<T>` contains `{ resource, meta }`. Consumers distinguish:
+
+- `ready`: authoritative, including an empty result;
+- `syncing`: synchronization in progress, possibly with usable data;
+- `stale`: usable stored data with a freshness warning;
+- `not_started` or `failed`: not an empty result;
+- HTTP 503 `projection_not_ready`: render a not-ready surface and never call a
+  live WhatsApp endpoint as fallback.
+
+Use the shared `ProjectionNotice` rather than panel-specific state copy.
+
+## Errors
+
+Runtime errors are normalized to `ApiFailure` with:
+
+- product-safe `message`;
+- machine-readable `code` when supplied;
+- inferred `category`;
+- HTTP status;
+- retryability;
+- `retryAfterSeconds` and absolute `retryAt` for rate limits;
+- optional request ID for forward compatibility (current OmniWA GO responses do
+  not provide one).
+
+The adapter recognizes the codes documented in
+`docs/OMNIWA_GO_CONTRACT.md`. It reads `Retry-After` before the body fallback and
+never automatically retries `rate_limited`, `outbound_rate_limited`, or
+`projection_not_ready`.
+
+## Pagination and filtering
+
+Projection list cursors are opaque. Pass them back exactly as received.
+
+- Include instance, normalized filters/search, and current cursor in the query
+  key.
+- Put filter and cursor state in URL search params for deep links.
+- Reset the cursor when instance, search, or filter scope changes.
+- Never decode, construct, concatenate, or transfer a cursor to another scope.
+- Default `limit` is 50 and maximum is 200 unless the endpoint says otherwise.
+
+Use `useInfiniteQuery` only when the UI intentionally accumulates pages. A
+page-at-a-time UI may bind the current opaque cursor directly to the URL.
+
+## Query keys and invalidation
+
+Keys mirror resource and credential scope:
+
+```text
+['capabilities', 'session']
+['capabilities', 'instance:<instanceId>']
 ['instances']
-['instances', instanceId]
-['instances', instanceId, 'chats', { cursor, search }]
-['messages', messageId, 'delivery-history']
-['queue', 'status']
-['webhooks', webhookId, 'deliveries', params]
+['instances', instanceId, 'groups', { search, cursor, limit }]
+['groups', groupId]
+['instances', instanceId, 'messages', { cursor }]
+['events', { type, cursor, limit }]
 ```
 
-Mutations invalidate the narrowest key that covers the affected reads. SSE
-invalidation (see `docs/REALTIME.md`) reuses the same keys.
+Mutations wait for server acknowledgement, then invalidate the narrowest keys
+that cover changed projections. Do not clear the full cache for a local change.
 
-## Command disposition semantics
+## Mutation semantics
 
-Public write operations may return either `200 Success` or `202 Accepted`.
-The API boundary preserves that distinction as `CommandResult.disposition`:
+Current OmniWA GO mutation responses are synchronous at the HTTP boundary. A
+completed request does not prove WhatsApp delivery, message read state, or
+campaign recipient completion.
 
-- `200` becomes `completed`: the platform completed the command boundary.
-- `202` becomes `accepted`: work continues asynchronously and must be followed
-  through resource reads or SSE invalidation.
+- Disable duplicate submission while pending.
+- Do not automatically retry mutations.
+- Avoid optimistic updates for send, destructive actions, invite-link reset,
+  instance/campaign lifecycle, and other authoritative state transitions.
+- Refresh the projection after acknowledgement.
 
-Do not infer disposition from `data.accepted` alone. A synchronously completed
-command may still carry `accepted: true`; HTTP status is the authoritative
-transport distinction. Features consume `unwrapCommand` and never inspect the
-raw response.
+## Global query policy
 
-Command completion is not upstream completion. In particular, a completed
-send command does not mean WhatsApp delivery. Message UI continues to render
-accepted, queued, delivered, failed, and canceled as separate resource states
-and follows delivery history independently.
-
-`pnpm contract:check` verifies generated-schema freshness, operation ownership
-in `docs/PANELS.md`, and disposition preservation for consumed operations that
-declare both `200` and `202`.
-
-## Auth headers
-
-Exactly one header carries credentials: `x-api-key`. There are no cookies
-and no token refresh. A 401/`authentication` failure clears the session and
-returns the operator to `/connect`; a 403/`authorization` failure renders in
-place (the key lacks scope — reconnecting won't help).
+The app disables refetch-on-window-focus to avoid request storms. Queries may
+retry once only for retryable transient 5xx failures. Rate limits and permanent
+service conditions are never automatically retried. Projection polling must be
+bounded and must not reach WhatsApp live.

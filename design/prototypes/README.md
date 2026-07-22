@@ -18,12 +18,14 @@ visual spec (structure, spacing, states, status vocabulary).
 | --- | --- | --- |
 | `chats.html` | Chats | Direct conversations only: three-pane workspace, instance selector + label filters, bubble timeline with per-message delivery status, failed-message retry, composer, contact context panel; contact/label lookup via search + filters |
 | `groups.html` | Groups | Management table of all groups (metadata, row checkboxes, bulk "Add to Named List" dropdown) + detail drawer (invite link, members, one-off send) |
-| `lists.html` | Groups › Named Lists panel | Named Lists as a right-panel mode over the live table: list picker with campaign usage, add-from-selection strip, member search, add/edit/delete — **proposed contract** |
-| `campaigns.html` | Messages | Campaign management: segmented progress bars, running-campaign drawer (counters, recipients, pause/abort) — **proposed contract** |
-| `campaign-new.html` | Messages › New | 3-step send-setup wizard at Review: audience, message preview, platform-capped pacing — **proposed contract** |
+| `lists.html` | Historical exploration | Named Lists concept; not present in the OmniWA GO contract and not an implementation target |
+| `campaigns.html` | Messages | Campaign management reference: segmented progress, recipient outcomes, audit, and lifecycle controls — **backend ready, console pending** |
+| `campaign-new.html` | Messages › New | Creation-flow reference; must be adapted to per-recipient opt-in evidence — **backend ready, console pending** |
 
-Campaign/list screens reference operations that do not exist in the v1
-contract yet — see [`../../docs/CAMPAIGNS_PROPOSAL.md`](../../docs/CAMPAIGNS_PROPOSAL.md).
+Campaign screens are visual references, not contract references. The current
+API and required consent flow are documented in
+[`../../docs/CAMPAIGNS.md`](../../docs/CAMPAIGNS.md). Named Lists must not be
+implemented unless OmniWA GO adds them to its public contract.
 
 ## Operations (secondary)
 
