@@ -34,7 +34,7 @@ export function usePickerInstances() {
   const metadata = useServerCapability('instance_metadata_views');
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: [...queryKeys.instances({ metadata }), 'picker'] as const,
+    queryKey: queryKeys.instances({ metadata }),
     queryFn: () => listInstances(client, { metadata }),
     refetchInterval,
   });
@@ -199,7 +199,7 @@ export function useRefreshGroups(instanceId: string) {
 export function useGroupInviteLink(instanceId: string | undefined, groupId: string | undefined, token: string | undefined) {
   const tokenClient = useInstanceClient(token);
   return useQuery({
-    queryKey: [...queryKeys.group(instanceId ?? '', groupId ?? ''), 'invite-link'],
+    queryKey: queryKeys.groupInvite(instanceId ?? '', groupId ?? ''),
     queryFn: () => getGroupInviteLink(tokenClient as ApiClient, groupId ?? ''),
     enabled: instanceId !== undefined && groupId !== undefined && tokenClient !== undefined,
     ...GROUP_PROJECTION_READ,

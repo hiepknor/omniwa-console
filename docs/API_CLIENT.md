@@ -166,6 +166,13 @@ Keys mirror resource and credential scope:
 
 Mutations wait for server acknowledgement, then invalidate the narrowest keys
 that cover changed projections. Do not clear the full cache for a local change.
+List key factories omit the parameter object when called without parameters;
+that shorter key is the canonical invalidation prefix. Concrete reads append
+their normalized filter/cursor object. Do not manufacture an empty parameter
+object in mutation invalidation, because it would miss cached filtered or
+paginated variants. The literal `session` scope is the non-secret cache scope
+for v2 panels whose active API client already represents one operator session;
+credentials never enter a key.
 
 Resource adapters stay split by backend domain. Chat projection DTOs live in
 `src/api/chats.ts`; Message, receipt, and verified send contracts live in

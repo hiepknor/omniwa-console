@@ -90,8 +90,12 @@ export function InstanceWorkspaceV2({ instance, refreshError, onRetry, onClose, 
   };
   const runPairing = () => (connected ? reconnect : connect).mutate();
   const updateCredential = (nextToken: string | undefined) => {
-    for (const suffix of ['status', 'qr', 'advanced-settings']) {
-      queryClient.removeQueries({ queryKey: [...queryKeys.instance(instance.id), suffix], exact: true });
+    for (const queryKey of [
+      queryKeys.instanceStatus(instance.id),
+      queryKeys.instanceQr(instance.id),
+      queryKeys.instanceAdvancedSettings(instance.id),
+    ]) {
+      queryClient.removeQueries({ queryKey, exact: true });
     }
     setCredential(instance.id, nextToken);
   };

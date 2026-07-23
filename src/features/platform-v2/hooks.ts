@@ -58,7 +58,7 @@ function useRecoveryCommand(action: 'replay' | 'discard') {
       action === 'replay'
         ? replayProjectionFailure(client, body)
         : discardProjectionFailure(client, body),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['projection-failures'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.projectionFailuresRoot }),
   });
 }
 

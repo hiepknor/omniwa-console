@@ -43,6 +43,14 @@ for (const path of await sourceFiles(sourceRoot)) {
   if (file.startsWith('src/features/') && /<main(?:\s|>)/.test(source)) {
     failures.push(`${file}: Shell owns the document main landmark`);
   }
+
+  if (file.startsWith('src/features/') && /\bqueryKey:\s*\[/.test(source)) {
+    failures.push(`${file}: feature query keys must come from src/api/keys.ts factories`);
+  }
+
+  if (file.startsWith('src/features/') && /const\s+SCOPE\s*=\s*['"]session['"]/.test(source)) {
+    failures.push(`${file}: session query scope must use the canonical API key constant`);
+  }
 }
 
 if (failures.length > 0) {
