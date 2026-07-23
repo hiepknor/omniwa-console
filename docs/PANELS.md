@@ -188,12 +188,13 @@ POST /chat/pin
 POST /chat/unpin
 ```
 
-## Campaigns — `/messages`, `/messages/new`
+## Campaigns — `/messages`, `/messages/new`, `/messages/:campaignId` (v2)
 
 Status: integrated in the current Console and approved for route-level v2
 redesign. Full behavior is in `docs/CAMPAIGNS.md`.
 
-All operations in this section use the selected instance token. Pagination
+All operations in this section use the instance credential. V2 uses the active
+instance session directly and never calls the admin fleet list. Pagination
 defaults to 50 and is capped at 100.
 
 ```text
@@ -221,7 +222,8 @@ route-level v2 redesign.
 GET /events?type=&limit=&cursor=
 ```
 
-The endpoint uses the selected instance token. The panel owns history,
+The endpoint uses the instance credential. V2 uses the active instance session
+directly and never calls the admin fleet list. The panel owns history,
 filtering, cursor pagination, reconnect recovery, and safe event summaries. It
 does not open the admin-key WebSocket.
 

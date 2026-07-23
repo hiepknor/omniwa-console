@@ -66,8 +66,17 @@ const WebhooksPage = lazy(() =>
 const EventsPage = lazy(() =>
   import('@/features/events/EventsPage').then((module) => ({ default: module.EventsPage })),
 );
+const EventsPageV2 = lazy(() =>
+  import('@/features/events-v2/EventsPageV2').then((module) => ({ default: module.EventsPageV2 })),
+);
 const CampaignsPage = lazy(() =>
   import('@/features/campaigns/CampaignsPage').then((module) => ({ default: module.CampaignsPage })),
+);
+const CampaignsPageV2 = lazy(() =>
+  import('@/features/campaigns-v2/CampaignsPageV2').then((module) => ({ default: module.CampaignsPageV2 })),
+);
+const CreateCampaignV2 = lazy(() =>
+  import('@/features/campaigns-v2/CreateCampaignV2').then((module) => ({ default: module.CreateCampaignV2 })),
 );
 const SettingsPage = lazy(() =>
   import('@/features/settings/SettingsPage').then((module) => ({ default: module.SettingsPage })),
@@ -179,8 +188,16 @@ function AppRuntime() {
                         { path: '/groups', element: <GroupsPage /> },
                         { path: '/groups/:instanceId', element: <GroupsPage /> },
                       ]),
-                  { path: '/messages', element: <CampaignsPage /> },
-                  { path: '/messages/new', element: <CampaignsPage /> },
+                  ...(UI_GENERATION === 'v2'
+                    ? [
+                        { path: '/messages', element: <CampaignsPageV2 /> },
+                        { path: '/messages/new', element: <CreateCampaignV2 /> },
+                        { path: '/messages/:campaignId', element: <CampaignsPageV2 /> },
+                      ]
+                    : [
+                        { path: '/messages', element: <CampaignsPage /> },
+                        { path: '/messages/new', element: <CampaignsPage /> },
+                      ]),
                   { path: '/overview', element: <ActiveOverviewPage /> },
                   ...(UI_GENERATION === 'v2'
                     ? [{ path: '/recovery', element: <RecoveryPageV2 /> }]
@@ -190,7 +207,7 @@ function AppRuntime() {
                   { path: '/queue', element: <QueuePage /> },
                   { path: '/webhooks', element: <WebhooksPage /> },
                   { path: '/webhooks/:webhookId', element: <WebhooksPage /> },
-                  { path: '/events', element: <EventsPage /> },
+                  { path: '/events', element: UI_GENERATION === 'v2' ? <EventsPageV2 /> : <EventsPage /> },
                   { path: '/settings', element: <SettingsPage /> },
                   { path: '/settings/api-keys', element: <ApiKeysPage /> },
                   { path: '*', element: <Navigate to="/overview" replace /> },
