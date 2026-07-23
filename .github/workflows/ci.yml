@@ -51,3 +51,73 @@ jobs:
           curl --silent --fail "http://127.0.0.1:$host_port/events" | grep -F '<div id="root"></div>'
           test "$(docker exec "$container_id" id -u)" = 101
           test "$(docker image inspect omniwa-console:ci --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$SOURCE_SHA"
+
+  publish:
+    name: publish immutable image
+    needs: console
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      github.repository == 'hiepknor/omniwa-console'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE_NAME: ghcr.io/hiepknor/omniwa-console
+    steps:
+      - name: Checkout verified source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify source revision
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push immutable image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          sbom: true
+          provenance: mode=max
+          build-args: |
+            OCI_REVISION=${{ github.sha }}
+            OCI_VERSION=sha-${{ github.sha }}
+
+      - name: Resolve and verify immutable digest
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          image_ref="$IMAGE_NAME:sha-$SOURCE_SHA"
+          digest="$(docker buildx imagetools inspect "$image_ref" | awk '$1 == "Digest:" { print $2; exit }')"
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          docker pull --quiet --platform linux/amd64 "$IMAGE_NAME@$digest"
+          test "$(docker image inspect "$IMAGE_NAME@$digest" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$SOURCE_SHA"
+          test "$(docker image inspect "$IMAGE_NAME@$digest" --format '{{ .Config.User }}')" = 101
+          {
+            echo "### Immutable Console image"
+            printf '%c%s@%s%c\n' 96 "$IMAGE_NAME" "$digest" 96
+            printf 'Source revision: %c%s%c\n' 96 "$SOURCE_SHA" 96
+          } >> "$GITHUB_STEP_SUMMARY"
