@@ -62,14 +62,9 @@
           <p id="connect-api-key-help">Never displayed again after entry.</p>
         </div>
 
-        <label class="connect-remember">
-          <input type="checkbox" data-remember>
-          <span><strong>Remember on this device</strong><small>Unchecked sessions end when this tab closes.</small></span>
-        </label>
-
-        <div class="connect-storage-warning" hidden data-storage-warning>
-          <span class="status"><span class="dot" style="background:var(--pending)"></span>persistent browser storage</span>
-          <p>This stores the API key in this browser. Use only on a trusted device.</p>
+        <div class="connect-storage-warning">
+          <span class="status"><span class="dot" style="background:var(--info)"></span>memory-only credential</span>
+          <p>The API key is cleared on reload or sign-out and is never written to browser storage.</p>
         </div>
 
         <div class="connect-error" role="alert" hidden data-connect-error>
@@ -91,8 +86,6 @@
   const baseUrl = document.querySelector('#connect-base-url');
   const apiKey = document.querySelector('#connect-api-key');
   const keyToggle = document.querySelector('[data-key-toggle]');
-  const remember = document.querySelector('[data-remember]');
-  const storageWarning = document.querySelector('[data-storage-warning]');
   const error = document.querySelector('[data-connect-error]');
   const submit = document.querySelector('[data-connect-submit]');
 
@@ -116,7 +109,6 @@
     keyToggle.setAttribute('aria-pressed', String(reveal));
     apiKey.focus();
   });
-  remember.addEventListener('change', () => { storageWarning.hidden = !remember.checked; });
   baseUrl.addEventListener('input', updateSubmitState);
   apiKey.addEventListener('input', updateSubmitState);
   form.addEventListener('submit', (event) => {

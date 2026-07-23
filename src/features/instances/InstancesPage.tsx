@@ -23,6 +23,7 @@ import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDr
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { CreateInstanceDialog } from './CreateInstanceDialog';
+import { CredentialHealthPanel } from './CredentialHealthPanel';
 import { InstanceDrawer, InstanceDrawerState } from './InstanceDrawer';
 import { useCreateInstance, useInstance, useInstances } from './hooks';
 
@@ -149,6 +150,8 @@ export function InstancesPage() {
           <button className="btn primary" type="button" onClick={() => { create.reset(); setParam('create', '1'); }}>New instance</button>
         }
       />
+
+      <CredentialHealthPanel />
 
       <DataTableWorkspace className="instances-workspace" aria-labelledby="instances-table-title">
         <DataTableToolbar>

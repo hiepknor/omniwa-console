@@ -9,6 +9,7 @@ import {
   disconnectInstance,
   getAdvancedSettings,
   getInstance,
+  getInstanceCredentialHealth,
   getInstanceQr,
   getInstanceStatus,
   listInstances,
@@ -56,6 +57,16 @@ export function useInstance(instanceId: string | undefined) {
     queryFn: () => getInstance(client, instanceId ?? '', metadata),
     enabled: instanceId !== undefined,
     refetchInterval,
+  });
+}
+
+export function useInstanceCredentialHealth(enabled: boolean) {
+  const client = useApi();
+  return useQuery({
+    queryKey: queryKeys.instanceCredentialHealth,
+    queryFn: () => getInstanceCredentialHealth(client),
+    enabled,
+    staleTime: 60_000,
   });
 }
 

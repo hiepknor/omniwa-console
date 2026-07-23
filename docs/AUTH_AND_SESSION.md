@@ -18,8 +18,7 @@ The console does not broaden a token by proxying through the admin client.
 `/connect` accepts:
 
 - API origin, default `http://localhost:4000`;
-- API key, entered as a password value;
-- optional persistence on the current device.
+- API key, entered as a password value with autocomplete disabled.
 
 `ConnectPage` classifies the key without exposing it:
 
@@ -32,7 +31,7 @@ The console does not broaden a token by proxying through the admin client.
 After connection, the shell calls `GET /server/capabilities`. Projection panels
 repeat capability negotiation with their selected instance token.
 
-## Session storage
+## Session lifetime
 
 ```ts
 interface ConsoleSession {
@@ -43,11 +42,11 @@ interface ConsoleSession {
 }
 ```
 
-- Default storage is `sessionStorage` and ends with the tab session.
-- “Remember on this device” opts into `localStorage` with an explicit warning.
-- Connecting clears any older session before saving the new one.
-- Disconnect and authentication failure clear both storage locations and the
-  TanStack Query cache.
+- The active admin key or instance token is held in React memory only.
+- Reload, sign-out, and authentication failure discard the active session and
+  clear the TanStack Query cache.
+- Application startup removes credentials left in `sessionStorage` or
+  `localStorage` by older Console builds; current builds never write them.
 - The UI may show a masked fingerprint; it never renders the complete key.
 
 ## Secret-handling rules
@@ -55,8 +54,7 @@ interface ConsoleSession {
 - Never put the global key or instance token in a URL, query key, log, error,
   analytics event, screenshot fixture, or committed file.
 - Query caches are scoped by stable instance ID, never by credential value.
-- The login credential follows the operator's configured session persistence;
-  one-time instance credentials use runtime memory only.
+- Login and one-time instance credentials use runtime memory only.
 - Ordinary instance list/detail resources never contain bearer tokens, even
   when the old-backend fallback response includes them.
 - Instance-token rotation must refresh the scoped client without persisting the

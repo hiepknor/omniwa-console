@@ -51,6 +51,9 @@ Status: integrated.
 ```text
 GET    /instance/all
 GET    /instance/info/{instanceId}
+GET    /instance/metadata
+GET    /instance/metadata/{instanceId}
+GET    /instance/credential-health
 POST   /instance/create
 DELETE /instance/delete/{instanceId}
 GET    /instance/status
@@ -63,8 +66,11 @@ GET    /instance/{instanceId}/advanced-settings
 PUT    /instance/{instanceId}/advanced-settings
 ```
 
-Admin operations use the session client; connection/QR/logout operations use
-the instance token. `/server/ok` is not connection state.
+Admin operations use the memory-only session client; connection/QR/logout
+operations use the instance token. Metadata reads are preferred when
+`instance_metadata_views` is advertised. Credential Health renders factual C3
+migration signals, treats zero instances as non-representative, and never
+derives a plaintext-removal decision. `/server/ok` is not connection state.
 
 ## Groups — `/groups/:instanceId?`
 
