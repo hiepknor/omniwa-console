@@ -47,7 +47,8 @@ preserved.
 
 ## Instances — `/instances`, `/instances/:instanceId`
 
-Status: integrated.
+Status: integrated in legacy and v2. V2 uses only the metadata reads approved
+for redesign and does not fall back to credential-bearing legacy fleet reads.
 
 ```text
 GET    /instance/all
@@ -69,10 +70,12 @@ PUT    /instance/{instanceId}/advanced-settings
 ```
 
 Admin operations use the memory-only session client; connection/QR/logout
-operations use the instance token. Metadata reads are preferred when
-`instance_metadata_views` is advertised. Credential Health renders factual C3
-migration signals, treats zero instances as non-representative, and never
-derives a plaintext-removal decision. `/server/ok` is not connection state.
+operations use the instance token. In v2, metadata reads are required when
+`instance_metadata_views` is advertised; `/instance/all` and
+`/instance/info/{instanceId}` remain legacy-only and are never a v2 fallback.
+Credential Health renders factual C3 migration signals, treats zero instances
+as non-representative, and never derives a plaintext-removal decision.
+`/server/ok` is not connection state.
 
 ## Groups — `/groups/:instanceId?`
 

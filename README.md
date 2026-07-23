@@ -63,6 +63,7 @@ cross-cutting contract semantics.
 | [docs/UI_STATE_MODEL.md](docs/UI_STATE_MODEL.md) | Shared session, capability, projection, resource, transport, and command states |
 | [docs/UI_V2_SHELL_CONNECT.md](docs/UI_V2_SHELL_CONNECT.md) | Generation-gated Shell and Connect behavior, navigation scope, and review checklist |
 | [docs/UI_V2_PLATFORM_RECOVERY.md](docs/UI_V2_PLATFORM_RECOVERY.md) | Persisted Platform Overview and audited projection-recovery workflow |
+| [docs/UI_V2_INSTANCES.md](docs/UI_V2_INSTANCES.md) | Metadata-only fleet management, live instance workspace, and credential lifecycle |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | SPA layers, state ownership, and safety boundaries |
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
 | [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | Runtime key entry, scope, and storage |

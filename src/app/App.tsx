@@ -41,6 +41,10 @@ const ActiveOverviewPage = UI_GENERATION === 'v2' ? OverviewPageV2 : OverviewPag
 const InstancesPage = lazy(() =>
   import('@/features/instances/InstancesPage').then((module) => ({ default: module.InstancesPage })),
 );
+const InstancesPageV2 = lazy(() =>
+  import('@/features/instances-v2/InstancesPageV2').then((module) => ({ default: module.InstancesPageV2 })),
+);
+const ActiveInstancesPage = UI_GENERATION === 'v2' ? InstancesPageV2 : InstancesPage;
 const ChatsPage = lazy(() =>
   import('@/features/chats/ChatsPage').then((module) => ({ default: module.ChatsPage })),
 );
@@ -161,8 +165,8 @@ function AppRuntime() {
                   ...(UI_GENERATION === 'v2'
                     ? [{ path: '/recovery', element: <RecoveryPageV2 /> }]
                     : []),
-                  { path: '/instances', element: <InstancesPage /> },
-                  { path: '/instances/:instanceId', element: <InstancesPage /> },
+                  { path: '/instances', element: <ActiveInstancesPage /> },
+                  { path: '/instances/:instanceId', element: <ActiveInstancesPage /> },
                   { path: '/queue', element: <QueuePage /> },
                   { path: '/webhooks', element: <WebhooksPage /> },
                   { path: '/webhooks/:webhookId', element: <WebhooksPage /> },

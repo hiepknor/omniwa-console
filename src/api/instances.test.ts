@@ -14,6 +14,16 @@ describe('credential-safe instance adapter', () => {
     expect(result.resource?.items[0]).not.toHaveProperty('proxy');
   });
 
+  it('drops malformed metadata records that cannot support a stable route identity', async () => {
+    const GET = vi.fn()
+      .mockResolvedValueOnce(ok({ message: 'success', data: [{ name: 'Missing ID' }, { id: 'instance-1', name: 'Valid' }] }))
+      .mockResolvedValueOnce(ok({ message: 'success', data: { name: 'Missing ID' } }));
+    const client = { GET } as unknown as ApiClient;
+
+    expect((await listInstances(client, { metadata: true })).resource?.items.map((item) => item.id)).toEqual(['instance-1']);
+    expect((await getInstance(client, 'instance-1', true)).resource).toBeUndefined();
+  });
+
   it('discards tokens from the old-backend list and detail fallback', async () => {
     const GET = vi.fn()
       .mockResolvedValueOnce(ok({ message: 'success', data: [{ id: 'instance-1', token: 'legacy-secret' }] }))
