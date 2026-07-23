@@ -1,28 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
-import type { PublicData } from '@/api/envelopes';
-import type { components } from '@/api/generated/platform-schema';
 import { queryKeys } from '@/api/keys';
-import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
+import { getOverview, getServerHealth } from '@/api/overview';
 export { useResilientReadState as useStableReadState } from '@/lib/query-state';
-import {
-  getDashboardSummary,
-  getHealth,
-  getHealthReadiness,
-  getMediaMetrics,
-  getMessageMetrics,
-  getQueueMetrics,
-  getWebhookMetrics,
-  listActionRequiredItems,
-  type ReadResult,
-} from '@/api/overview';
-
-export type { ReadResult };
-
-export type HealthResource = components['schemas']['HealthResource'];
-export type MetricsResource = components['schemas']['MetricsResource'];
-export type DashboardResource = components['schemas']['DashboardResource'];
-export type ActionRequiredItem = Extract<PublicData, { resourceType: 'health' }>;
 
 export function isTransportFailure(error: unknown): boolean {
   if (error instanceof TypeError) return true;
@@ -31,80 +11,20 @@ export function isTransportFailure(error: unknown): boolean {
 
 export function useHealth() {
   const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
     queryKey: queryKeys.health,
-    queryFn: () => getHealth(client),
-    refetchInterval,
+    queryFn: () => getServerHealth(client),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
   });
 }
 
-export function useHealthReadiness() {
+export function useOverview(window = '24h') {
   const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: queryKeys.healthReadiness,
-    queryFn: () => getHealthReadiness(client),
-    refetchInterval,
-  });
-}
-
-export function useDashboardSummary() {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
-  return useQuery({
-    queryKey: queryKeys.dashboard,
-    queryFn: () => getDashboardSummary(client),
-    refetchInterval,
-  });
-}
-
-export function useQueueMetrics() {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
-  return useQuery({
-    queryKey: queryKeys.queueMetrics,
-    queryFn: () => getQueueMetrics(client),
-    refetchInterval,
-  });
-}
-
-export function useMessageMetrics() {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
-  return useQuery({
-    queryKey: queryKeys.messageMetrics,
-    queryFn: () => getMessageMetrics(client),
-    refetchInterval,
-  });
-}
-
-export function useWebhookMetrics() {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
-  return useQuery({
-    queryKey: queryKeys.webhookMetrics,
-    queryFn: () => getWebhookMetrics(client),
-    refetchInterval,
-  });
-}
-
-export function useMediaMetrics() {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
-  return useQuery({
-    queryKey: queryKeys.mediaMetrics,
-    queryFn: () => getMediaMetrics(client),
-    refetchInterval,
-  });
-}
-
-export function useActionRequiredItems() {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
-  return useQuery({
-    queryKey: queryKeys.actionRequired,
-    queryFn: () => listActionRequiredItems(client),
-    refetchInterval,
+    queryKey: queryKeys.overview(window),
+    queryFn: () => getOverview(client, window),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
   });
 }
