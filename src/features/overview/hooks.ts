@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
 import { queryKeys } from '@/api/keys';
-import { getOverview, getServerHealth } from '@/api/overview';
+import { getOverview, getProjectionHealth, getServerHealth } from '@/api/overview';
 export { useResilientReadState as useStableReadState } from '@/lib/query-state';
 
 export function isTransportFailure(error: unknown): boolean {
@@ -14,6 +14,16 @@ export function useHealth() {
   return useQuery({
     queryKey: queryKeys.health,
     queryFn: () => getServerHealth(client),
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+}
+
+export function useProjectionHealth() {
+  const client = useApi();
+  return useQuery({
+    queryKey: queryKeys.projectionHealth,
+    queryFn: () => getProjectionHealth(client),
     staleTime: 15_000,
     refetchInterval: 30_000,
   });

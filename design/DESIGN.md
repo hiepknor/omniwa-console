@@ -163,11 +163,11 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 ### Overview command surface
 
-- Scan order is fixed: compact system-health posture → five comparable metrics → action-required work queue → bounded live-event stream.
-- Health uses a quiet bordered strip with dot + label states; degraded services remain visible without becoming a saturated alert banner.
-- The five metric cards share equal visual weight and dense spacing. They may wrap from five to three, two, then one column, but values and labels remain directly comparable.
-- Action required is the primary content column. Its semantic table keeps status, resource ID/name, age, and a contextual row action aligned; horizontal overflow stays inside the table container.
-- Live events is secondary and uses a bounded, keyboard-reachable stream with monospaced event/resource fields and right-aligned age.
+- Scan order is fixed: compact split-health posture → six comparable persisted metrics → action-required state → bounded live-event state.
+- Health uses a quiet bordered strip with dot + label states. Platform API and aggregate projection health stay separate; per-instance connection, projection, and throttling reads are visibly grouped under an accessible instance identifier.
+- The six metric cards share equal visual weight and dense spacing. They wrap from six to three, two, then one column, but values and labels remain directly comparable. Missing values render `Not reported`, never zero.
+- Action required is the primary follow-up column. Until the public API exposes a consolidated action read, it renders a neutral unavailable state and routes operators to resource panels without inferring an empty queue.
+- Live events is secondary. Because the browser does not open the admin-key WebSocket, Overview renders an explicit polling-only state and directs operators to durable instance event history.
 
 ### Drawers & dialogs
 
@@ -423,7 +423,7 @@ this subsection binds to it.
   filters.
 - **Page header**: a 64px shared contract on desktop with a subtle bottom border. The left context cluster contains an optional 10px uppercase section label or breadcrumb, the 18px/400 title, and compact contextual metadata such as an instance selector or contract badge. The right action cluster contains connection state and at most one primary action; refresh and pause remain restrained secondary controls. At ≤640px the header becomes a single-column stack with context before actions and 44px action targets. Workspace pages apply the same hierarchy to their internal thread header instead of adding a global header.
 - **Grid**: 8px base unit. Vertical rhythm 16px between related blocks, 24px between sections.
-- **Density**: tables full-width; Overview metric cards in `repeat(auto-fit, minmax(200px, 1fr))` grid; never center-constrain content below 1440px.
+- **Density**: tables full-width; Overview metric cards use a dense six/three/two/one responsive grid with a 160px minimum; never center-constrain content below 1440px.
 - **Instance-scoped pages** show a breadcrumb: `Instances / {name}` with mono ID, and a horizontal tab row (Chats · Contacts · Labels · Groups · Messages) under the header.
 - Empty states: centered in the table container, 14px secondary text + one ghost action; never illustrations.
 

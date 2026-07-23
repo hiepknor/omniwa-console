@@ -9,15 +9,16 @@ type ProjectionPayload = components['schemas']['github_com_evolution-foundation_
 export type OverviewResource = {
   generatedAt?: string;
   scope: { type: 'server' | 'instance' | 'unknown'; instanceId?: string };
-  window: { start?: string; end?: string; durationSeconds: number };
-  instances: { total: number; connected: number; disconnected: number };
-  projections: { groups: number; contacts: number; chats: number; messages: number; events: number };
-  messages: { total: number; incoming: number; outgoing: number };
+  window: { start?: string; end?: string; durationSeconds?: number };
+  instances: { total?: number; connected?: number; disconnected?: number };
+  projections: { groups?: number; contacts?: number; chats?: number; messages?: number; events?: number };
+  messages: { total?: number; incoming?: number; outgoing?: number };
 };
 
 export type ProjectionHealthResource = {
+  generatedAt?: string;
   status: string;
-  total: number;
+  total?: number;
   byStatus: Readonly<Record<string, number>>;
   resources: ReadonlyArray<{
     resource: string;
@@ -46,8 +47,8 @@ export type ServerHealthResource = {
   instances: InstanceHealthResource[];
 };
 
-function count(value: number | undefined): number {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0;
+function optionalCount(value: number | undefined): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined;
 }
 
 function text(value: string | undefined, fallback: string): string {
@@ -56,8 +57,9 @@ function text(value: string | undefined, fallback: string): string {
 
 function projectionHealth(payload: ProjectionPayload | undefined): ProjectionHealthResource {
   return {
+    generatedAt: payload?.generatedAt,
     status: text(payload?.status, 'unknown'),
-    total: count(payload?.total),
+    total: optionalCount(payload?.total),
     byStatus: { ...(payload?.byStatus ?? {}) },
     resources: (payload?.resources ?? []).map((resource) => ({
       resource: text(resource.resource, 'unknown'),
@@ -79,24 +81,24 @@ export async function getOverview(client: ApiClient, window = '24h'): Promise<Ov
     window: {
       start: payload?.window?.start,
       end: payload?.window?.end,
-      durationSeconds: count(payload?.window?.durationSeconds),
+      durationSeconds: optionalCount(payload?.window?.durationSeconds),
     },
     instances: {
-      total: count(payload?.instances?.total),
-      connected: count(payload?.instances?.connected),
-      disconnected: count(payload?.instances?.disconnected),
+      total: optionalCount(payload?.instances?.total),
+      connected: optionalCount(payload?.instances?.connected),
+      disconnected: optionalCount(payload?.instances?.disconnected),
     },
     projections: {
-      groups: count(payload?.projections?.groups),
-      contacts: count(payload?.projections?.contacts),
-      chats: count(payload?.projections?.chats),
-      messages: count(payload?.projections?.messages),
-      events: count(payload?.projections?.events),
+      groups: optionalCount(payload?.projections?.groups),
+      contacts: optionalCount(payload?.projections?.contacts),
+      chats: optionalCount(payload?.projections?.chats),
+      messages: optionalCount(payload?.projections?.messages),
+      events: optionalCount(payload?.projections?.events),
     },
     messages: {
-      total: count(payload?.messages?.total),
-      incoming: count(payload?.messages?.incoming),
-      outgoing: count(payload?.messages?.outgoing),
+      total: optionalCount(payload?.messages?.total),
+      incoming: optionalCount(payload?.messages?.incoming),
+      outgoing: optionalCount(payload?.messages?.outgoing),
     },
   };
 }
@@ -122,4 +124,9 @@ export async function getServerHealth(client: ApiClient): Promise<ServerHealthRe
       },
     })),
   };
+}
+
+export async function getProjectionHealth(client: ApiClient): Promise<ProjectionHealthResource> {
+  const payload = unwrap<ProjectionPayload>(await client.GET('/server/projection-health'));
+  return projectionHealth(payload);
 }

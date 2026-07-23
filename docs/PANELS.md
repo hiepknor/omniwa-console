@@ -208,7 +208,8 @@ does not open the admin-key WebSocket.
 
 ## Overview — `/overview`
 
-Status: backend available; console migration pending.
+Status: integrated with persisted metrics, split health, URL-backed windows,
+explicit unavailable action state, and polling-only realtime posture.
 
 ```text
 GET /server/overview?window=
@@ -218,6 +219,10 @@ GET /server/projection-health
 
 `GET /server/ok` is liveness only and is not used for WhatsApp connection,
 projection readiness, or circuit-breaker posture.
+
+The metric window is stored in the URL and is capped by the supported 720-hour
+contract. Missing counters remain unreported rather than being coerced to zero.
+Instance health dimensions are grouped by the server-provided instance ID.
 
 ## Unsupported routes
 
