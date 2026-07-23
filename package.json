@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:legacy": "VITE_CONSOLE_UI_GENERATION=legacy vite build && VITE_CONSOLE_UI_GENERATION=legacy pnpm artifact:check",
+    "build:v2": "VITE_CONSOLE_UI_GENERATION=v2 vite build && VITE_CONSOLE_UI_GENERATION=v2 pnpm artifact:check",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -19,7 +21,8 @@
     "architecture:check": "node scripts/check-architecture.mjs",
     "credential:check": "node scripts/check-credential-boundary.mjs",
     "bundle:check": "node scripts/check-bundle.mjs",
-    "check": "pnpm docs:check && pnpm design:check && pnpm contract:check && pnpm architecture:check && pnpm credential:check && pnpm typecheck && pnpm build && pnpm bundle:check",
+    "artifact:check": "node scripts/check-generation-artifact.mjs",
+    "check": "pnpm docs:check && pnpm design:check && pnpm contract:check && pnpm architecture:check && pnpm credential:check && pnpm typecheck && pnpm build && pnpm bundle:check && pnpm artifact:check",
     "contract:sync": "node scripts/sync-omniwa-go-contract.mjs",
     "api:generate": "openapi-typescript contracts/omniwa-go.openapi.json -o src/api/generated/schema.d.ts"
   },

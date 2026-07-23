@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
 const resources = Object.fromEntries(await Promise.all(Object.entries({
-  app: new URL('../src/app/App.tsx', import.meta.url),
+  app: new URL('../src/app/generation-v2.tsx', import.meta.url),
   page: new URL('../src/features/instances-v2/InstancesPageV2.tsx', import.meta.url),
   workspace: new URL('../src/features/instances-v2/InstanceWorkspaceV2.tsx', import.meta.url),
   create: new URL('../src/features/instances-v2/CreateInstanceV2.tsx', import.meta.url),
@@ -11,7 +11,7 @@ const resources = Object.fromEntries(await Promise.all(Object.entries({
 }).map(async ([name, url]) => [name, await readFile(url, 'utf8')])));
 
 const failures = [];
-for (const required of ['InstancesPageV2', 'ActiveInstancesPage', "path: '/instances/:instanceId'"]) {
+for (const required of ['InstancesPageV2', "path: '/instances/:instanceId'"]) {
   if (!resources.app.includes(required)) failures.push(`v2 route boundary is missing ${required}`);
 }
 for (const required of ['metadata: true', 'useInstanceV2', 'useCredentialHealthV2']) {

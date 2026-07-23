@@ -15,7 +15,9 @@
     "types": ["vite/client"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@generation": ["src/app/generation-v2.tsx"],
+      "@generation-styles": ["src/styles/index-v2.css"]
     }
   },
   "include": ["src"]

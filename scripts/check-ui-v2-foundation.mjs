@@ -1,9 +1,11 @@
 import { readFile } from 'node:fs/promises';
 
 const resources = Object.fromEntries(await Promise.all(Object.entries({
-  index: new URL('../src/index.css', import.meta.url),
+  v2Index: new URL('../src/styles/index-v2.css', import.meta.url),
+  legacyIndex: new URL('../src/styles/index-legacy.css', import.meta.url),
   tokens: new URL('../src/styles/tokens.css', import.meta.url),
   base: new URL('../src/styles/base.css', import.meta.url),
+  legacyCompat: new URL('../src/styles/legacy-compat.css', import.meta.url),
   v2: new URL('../src/styles/ui-v2.css', import.meta.url),
   prototype: new URL('../design/prototypes/console.css', import.meta.url),
   primitives: new URL('../src/components/v2/primitives.tsx', import.meta.url),
@@ -16,11 +18,11 @@ const resources = Object.fromEntries(await Promise.all(Object.entries({
 }).map(async ([name, url]) => [name, await readFile(url, 'utf8')])));
 
 const failures = [];
-const importOrder = ['./styles/tokens.css', './styles/base.css', './styles/console.css', './styles/ui-v2.css'];
+const importOrder = ['./tokens.css', './base.css', './legacy-compat.css', './console.css', './ui-v2.css'];
 let previousIndex = -1;
 for (const resource of importOrder) {
-  const index = resources.index.indexOf(resource);
-  if (index <= previousIndex) failures.push(`src/index.css import order is invalid at ${resource}`);
+  const index = resources.legacyIndex.indexOf(resource);
+  if (index <= previousIndex) failures.push(`legacy CSS entry import order is invalid at ${resource}`);
   previousIndex = index;
 }
 
@@ -33,7 +35,8 @@ if (resources.prototype.includes('--bg:') || resources.prototype.includes('--fon
 for (const token of ['--bg:', '--font-body:', '--space-4:', '--radius-md:', '--focus-ring:']) {
   if (!resources.tokens.includes(token)) failures.push(`canonical token source is missing ${token}`);
 }
-if (!resources.base.includes('@layer base') || !resources.base.includes('.ui-legacy-root,.ui-legacy-root *')) failures.push('layered reset or explicit legacy compatibility boundary is missing');
+if (!resources.base.includes('@layer base') || !resources.legacyCompat.includes('.ui-legacy-root,.ui-legacy-root *')) failures.push('layered reset or explicit legacy compatibility boundary is missing');
+if (!resources.v2Index.includes("@import './ui-v2.css'") || resources.v2Index.includes('console.css') || resources.v2Index.includes('legacy-compat.css')) failures.push('v2 CSS entry must exclude legacy presentation');
 if (resources.v2.includes('.btn{') || resources.v2.includes('.card{') || resources.v2.includes('.drawer{')) {
   failures.push('v2 CSS must not reuse legacy geometry selectors');
 }

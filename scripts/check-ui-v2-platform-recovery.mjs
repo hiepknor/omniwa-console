@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
 const resources = Object.fromEntries(await Promise.all(Object.entries({
-  app: new URL('../src/app/App.tsx', import.meta.url),
+  app: new URL('../src/app/generation-v2.tsx', import.meta.url),
   shell: new URL('../src/app/ShellV2.tsx', import.meta.url),
   overview: new URL('../src/features/platform-v2/OverviewPageV2.tsx', import.meta.url),
   recovery: new URL('../src/features/platform-v2/RecoveryPageV2.tsx', import.meta.url),
@@ -12,7 +12,7 @@ const resources = Object.fromEntries(await Promise.all(Object.entries({
 }).map(async ([name, url]) => [name, await readFile(url, 'utf8')])));
 
 const failures = [];
-for (const required of ['OverviewPageV2', 'RecoveryPageV2', "path: '/recovery'", "UI_GENERATION === 'v2'"]) {
+for (const required of ['OverviewPageV2', 'RecoveryPageV2', "path: '/recovery'", "UI_GENERATION = 'v2'"]) {
   if (!resources.app.includes(required)) failures.push(`v2 route boundary is missing ${required}`);
 }
 for (const required of ["GET('/server/overview'", "GET('/server/health'", "GET('/server/projection-health'"]) {

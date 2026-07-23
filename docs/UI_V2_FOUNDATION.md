@@ -18,11 +18,11 @@ without an authenticated backend session.
 
 ## Cascade isolation
 
-The shared document reset is in the CSS base layer. Existing Shell and Connect
-markup carry `ui-legacy-root`, which preserves the historical unlayered reset
-until each complete route is replaced. V2 components use unique semantic class
-names imported after legacy feature CSS, so they do not depend on Tailwind
-specificity or prototype selector order.
+The shared document reset is in the CSS base layer. The rollback Shell and
+Connect markup carry `ui-legacy-root`, whose unlayered reset is imported only
+by `index-legacy.css`. The v2 artifact imports `index-v2.css` and contains no
+legacy presentation stylesheet. V2 components use unique semantic class names
+and do not depend on legacy selector order.
 
 Do not add a v2 fix to `console.css`, reuse generic legacy selectors such as
 `.btn`, `.card`, or `.drawer`, or copy styles from a static prototype. Extend a
@@ -65,6 +65,6 @@ reset changes to prove that the compatibility boundary did not restyle them.
 
 ## Removal gate
 
-`ui-legacy-root`, static prototype styles and the legacy reset compatibility
-rule are removed only after all Production routes run v2 and post-cutover
-verification succeeds.
+Legacy source, static prototype styles, and the rollback-only compatibility
+rule are deleted only after all Production routes run v2 and post-cutover
+verification succeeds. They are already excluded from the v2 artifact graph.

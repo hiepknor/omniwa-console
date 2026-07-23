@@ -4,8 +4,10 @@ const resources = Object.fromEntries(
   await Promise.all(
     Object.entries({
       app: new URL('../src/app/App.tsx', import.meta.url),
+      manifest: new URL('../src/app/generation-v2.tsx', import.meta.url),
+      build: new URL('../vite.config.ts', import.meta.url),
       connect: new URL('../src/app/ConnectPageV2.tsx', import.meta.url),
-      connectFlow: new URL('../src/app/ConnectPage.tsx', import.meta.url),
+      connectFlow: new URL('../src/app/connect-flow.ts', import.meta.url),
       generation: new URL('../src/lib/ui-generation.ts', import.meta.url),
       shell: new URL('../src/app/ShellV2.tsx', import.meta.url),
       styles: new URL('../src/styles/ui-v2.css', import.meta.url),
@@ -18,8 +20,14 @@ const failures = [];
 if (!resources.generation.includes("value === 'v2' ? 'v2' : 'legacy'")) {
   failures.push('UI generation must fail closed to legacy unless v2 is explicit');
 }
-for (const required of ['UI_GENERATION', 'ActiveConnectPage', 'ActiveShell']) {
+for (const required of ['ActiveConnectPage', 'ActiveShell', 'authenticatedRoutes']) {
   if (!resources.app.includes(required)) failures.push(`App generation boundary is missing ${required}`);
+}
+for (const required of ['resolveUiGeneration(process.env.VITE_CONSOLE_UI_GENERATION)', "generation === 'v2'", 'generation-v2.tsx', 'generation-legacy.tsx', 'index-v2.css', 'index-legacy.css']) {
+  if (!resources.build.includes(required)) failures.push(`build-time generation alias is missing ${required}`);
+}
+for (const required of ["UI_GENERATION = 'v2'", 'ConnectPageV2', 'ShellV2']) {
+  if (!resources.manifest.includes(required)) failures.push(`v2 generation manifest is missing ${required}`);
 }
 if (!resources.connect.includes('useConnectFlow(onConnected)')) {
   failures.push('v2 Connect must reuse the audited connection flow');

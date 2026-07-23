@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 const resources = {
   app: new URL('../src/app/ConnectPage.tsx', import.meta.url),
+  flow: new URL('../src/app/connect-flow.ts', import.meta.url),
   prototype: new URL('../design/prototypes/connect.html', import.meta.url),
   design: new URL('../design/DESIGN.md', import.meta.url),
   auth: new URL('../docs/AUTH_AND_SESSION.md', import.meta.url),
@@ -12,6 +13,7 @@ const entries = await Promise.all(
   Object.entries(resources).map(async ([name, url]) => [name, await readFile(url, 'utf8')]),
 );
 const source = Object.fromEntries(entries);
+source.app += `\n${source.flow}`;
 const failures = [];
 
 for (const [name, text] of Object.entries(source)) {

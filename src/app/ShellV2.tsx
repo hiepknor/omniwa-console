@@ -145,7 +145,7 @@ export function ShellV2({ session, onDisconnect }: { session: ConsoleSession; on
             <Button onClick={onDisconnect}>Sign out</Button>
           </footer>
         </aside>
-        <main id="ui-v2-main" className="ui-v2-shell__main ui-legacy-root" tabIndex={-1}>
+        <main id="ui-v2-main" className="ui-v2-shell__main" tabIndex={-1}>
           <Suspense
             fallback={<div className="ui-v2-route-loading" role="status">Loading panel…</div>}
           >

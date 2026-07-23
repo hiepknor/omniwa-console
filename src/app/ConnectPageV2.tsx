@@ -2,7 +2,7 @@ import { Button, Field, StateNotice, Status, Surface, UiV2Boundary } from '@/com
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { UiState } from '@/components/v2/state-model';
 import type { ConsoleSession } from '@/lib/session';
-import { useConnectFlow } from './ConnectPage';
+import { useConnectFlow } from './connect-flow';
 
 type ConnectNotice = 'session-invalid' | undefined;
 

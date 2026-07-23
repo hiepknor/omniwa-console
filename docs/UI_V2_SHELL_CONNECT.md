@@ -54,9 +54,10 @@ advertised because the current public contract does not support those Console
 workflows. Recovery appears only with admin scope, its complete route, and the
 `projection_failure_operations` capability; it is never an empty placeholder.
 
-Feature panels remain inside an explicit legacy compatibility boundary while
-they are replaced route by route. This prevents a partial card-level redesign
-and preserves current journeys during the staged migration.
+Build-time aliases now select a complete route manifest and CSS entrypoint
+before bundling. The v2 artifact contains no legacy panels or compatibility
+CSS; the independently built legacy artifact preserves reviewed rollback
+journeys until post-Production deletion.
 
 ## Review checklist
 
