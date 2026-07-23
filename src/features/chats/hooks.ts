@@ -23,7 +23,7 @@ export function usePickerInstances() {
   const metadata = useServerCapability('instance_metadata_views');
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: [...queryKeys.instances({ metadata }), 'picker'] as const,
+    queryKey: queryKeys.instances({ metadata }),
     queryFn: () => listInstances(client, { limit: 50, metadata }),
     refetchInterval,
   });
@@ -159,7 +159,7 @@ export function useSendTextMessage(instanceId: string, token: string | undefined
       });
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.instanceChats(instanceId) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, variables.chatId, {}) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, variables.chatId) }),
       ]);
     },
   });
@@ -183,7 +183,7 @@ export function useSendMediaMessage(instanceId: string, token: string | undefine
       });
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.instanceChats(instanceId) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, variables.chatId, {}) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, variables.chatId) }),
       ]);
     },
   });

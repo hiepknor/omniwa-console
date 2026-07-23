@@ -42,6 +42,7 @@ Rules enforced by `pnpm architecture:check`:
 - no network access outside `src/api/`;
 - no feature-to-feature imports;
 - no feature-owned application `main` landmark;
+- no ad hoc feature query-key arrays or duplicated session-scope constants;
 - generated API files remain machine-owned.
 
 Shared behavior moves down into components, API, or lib. It is not copied

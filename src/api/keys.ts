@@ -1,9 +1,12 @@
+export const SESSION_QUERY_SCOPE = 'session' as const;
+
 export const queryKeys = {
   capabilities: (scope: string) => ['capabilities', scope] as const,
   health: ['health'] as const,
   healthReadiness: ['health', 'readiness'] as const,
   projectionHealth: ['health', 'projection'] as const,
   overview: (window: string) => ['overview', window] as const,
+  projectionFailuresRoot: ['projection-failures'] as const,
   projectionFailures: (params: { instanceId?: string; resource?: string; limit: number; cursor?: string }) =>
     ['projection-failures', params] as const,
   queueMetrics: ['metrics', 'queue'] as const,
@@ -14,9 +17,17 @@ export const queryKeys = {
   instances: (params?: { initialCursor?: string; metadata?: boolean }) => ['instances', params ?? {}] as const,
   instanceCredentialHealth: ['instances', 'credential-health'] as const,
   instance: (instanceId: string) => ['instances', instanceId] as const,
+  instanceMetadata: (instanceId: string, metadata: boolean) =>
+    ['instances', instanceId, { metadata }] as const,
+  instanceStatus: (instanceId: string) => ['instances', instanceId, 'status'] as const,
+  instanceQr: (instanceId: string) => ['instances', instanceId, 'qr'] as const,
+  instanceAdvancedSettings: (instanceId: string) =>
+    ['instances', instanceId, 'advanced-settings'] as const,
   instanceSessions: (instanceId: string) => ['instances', instanceId, 'sessions'] as const,
   instanceChats: (instanceId: string, params?: Record<string, unknown>) =>
-    ['instances', instanceId, 'chats', params ?? {}] as const,
+    params === undefined
+      ? ['instances', instanceId, 'chats'] as const
+      : ['instances', instanceId, 'chats', params] as const,
   instanceGroups: (instanceId: string, params?: Record<string, unknown>) =>
     params === undefined
       ? ['instances', instanceId, 'groups'] as const
@@ -24,7 +35,9 @@ export const queryKeys = {
   group: (instanceId: string, groupId: string) => ['instances', instanceId, 'group', groupId] as const,
   chat: (instanceId: string, chatId: string) => ['instances', instanceId, 'chat', chatId] as const,
   instanceMessages: (instanceId: string, chatId: string, params?: Record<string, unknown>) =>
-    ['instances', instanceId, 'chats', chatId, 'messages', params ?? {}] as const,
+    params === undefined
+      ? ['instances', instanceId, 'chats', chatId, 'messages'] as const
+      : ['instances', instanceId, 'chats', chatId, 'messages', params] as const,
   message: (instanceId: string, messageId: string) => ['instances', instanceId, 'message', messageId] as const,
   messageDeliveryHistory: (instanceId: string, messageId: string) =>
     ['instances', instanceId, 'message', messageId, 'delivery-history'] as const,
@@ -39,10 +52,19 @@ export const queryKeys = {
   providerCapabilities: ['provider', 'capabilities'] as const,
   queueStatus: ['queue', 'status'] as const,
   jobs: (params?: Record<string, unknown>) => ['jobs', params ?? {}] as const,
-  instanceCampaigns: (instanceId: string, params?: Record<string, unknown>) => ['instances', instanceId, 'campaigns', params ?? {}] as const,
+  instanceCampaigns: (instanceId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'campaigns'] as const
+      : ['instances', instanceId, 'campaigns', params] as const,
   campaign: (instanceId: string, campaignId: string) => ['instances', instanceId, 'campaigns', campaignId] as const,
-  campaignRecipients: (instanceId: string, campaignId: string) => ['instances', instanceId, 'campaigns', campaignId, 'recipients'] as const,
-  campaignAudit: (instanceId: string, campaignId: string) => ['instances', instanceId, 'campaigns', campaignId, 'audit'] as const,
+  campaignRecipients: (instanceId: string, campaignId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'campaigns', campaignId, 'recipients'] as const
+      : ['instances', instanceId, 'campaigns', campaignId, 'recipients', params] as const,
+  campaignAudit: (instanceId: string, campaignId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'campaigns', campaignId, 'audit'] as const
+      : ['instances', instanceId, 'campaigns', campaignId, 'audit', params] as const,
   job: (jobId: string) => ['jobs', jobId] as const,
   webhooks: (params?: Record<string, unknown>) => ['webhooks', params ?? {}] as const,
   webhook: (webhookId: string) => ['webhooks', webhookId] as const,
@@ -51,7 +73,11 @@ export const queryKeys = {
   webhookDeliveryHistory: (deliveryId: string) =>
     ['webhook-deliveries', deliveryId, 'history'] as const,
   instanceEvents: (instanceId: string, params?: Record<string, unknown>) =>
-    ['instances', instanceId, 'events', params ?? {}] as const,
+    params === undefined
+      ? ['instances', instanceId, 'events'] as const
+      : ['instances', instanceId, 'events', params] as const,
+  groupInvite: (instanceId: string, groupId: string) =>
+    ['instances', instanceId, 'group', groupId, 'invite-link'] as const,
   auditRecords: (params?: Record<string, unknown>) => ['audit-records', params ?? {}] as const,
   settings: ['settings'] as const,
   apiKeys: (params?: Record<string, unknown>) => ['api-keys', params ?? {}] as const,

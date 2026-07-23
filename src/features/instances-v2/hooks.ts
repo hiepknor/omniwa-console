@@ -37,7 +37,7 @@ export function useInstancesV2(enabled: boolean) {
 export function useInstanceV2(instanceId: string | undefined, enabled: boolean) {
   const client = useApi();
   return useQuery({
-    queryKey: [...queryKeys.instance(instanceId ?? ''), { metadata: true }] as const,
+    queryKey: queryKeys.instanceMetadata(instanceId ?? '', true),
     queryFn: () => getInstance(client, instanceId ?? '', true),
     enabled: enabled && instanceId !== undefined,
     staleTime: 10_000,
@@ -118,7 +118,7 @@ function useScopedCommand(instanceId: string, token: string | undefined, command
 export function useInstanceStatusV2(instanceId: string, token: string | undefined) {
   const client = useInstanceClient(token);
   return useQuery({
-    queryKey: [...queryKeys.instance(instanceId), 'status'],
+    queryKey: queryKeys.instanceStatus(instanceId),
     queryFn: () => {
       if (!client) throw new Error('Instance token is not attached.');
       return getInstanceStatus(client);
@@ -131,7 +131,7 @@ export function useInstanceStatusV2(instanceId: string, token: string | undefine
 export function useInstanceQrV2(instanceId: string, token: string | undefined, enabled: boolean) {
   const client = useInstanceClient(token);
   return useQuery({
-    queryKey: [...queryKeys.instance(instanceId), 'qr'],
+    queryKey: queryKeys.instanceQr(instanceId),
     queryFn: () => {
       if (!client) throw new Error('Instance token is not attached.');
       return getInstanceQr(client);
@@ -157,7 +157,7 @@ export function useLogoutInstanceV2(instanceId: string, token: string | undefine
 export function useAdvancedSettingsV2(instanceId: string, token: string | undefined) {
   const client = useInstanceClient(token);
   return useQuery({
-    queryKey: [...queryKeys.instance(instanceId), 'advanced-settings'],
+    queryKey: queryKeys.instanceAdvancedSettings(instanceId),
     queryFn: () => {
       if (!client) throw new Error('Instance token is not attached.');
       return getAdvancedSettings(client, instanceId);
@@ -174,6 +174,6 @@ export function useUpdateAdvancedSettingsV2(instanceId: string, token: string | 
       if (!client) throw new Error('Attach an instance token before updating settings.');
       return updateAdvancedSettings(client, instanceId, body);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...queryKeys.instance(instanceId), 'advanced-settings'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.instanceAdvancedSettings(instanceId) }),
   });
 }
