@@ -81,4 +81,13 @@ describe('ConnectPage contract', () => {
       detail: expect.stringContaining(detail),
     });
   });
+
+  it('preserves normalized feedback for non-credential failures', () => {
+    const failure = new ApiFailure({ error: 'backend unavailable' }, 500);
+    expect(connectErrorForFailure(failure)).toEqual({
+      category: 'internal',
+      message: 'backend unavailable',
+      requestId: undefined,
+    });
+  });
 });
