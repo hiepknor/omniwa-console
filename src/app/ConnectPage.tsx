@@ -74,14 +74,7 @@ export function normalizeApiOrigin(value: string): string | undefined {
   }
 }
 
-export function ConnectPage({
-  notice,
-  onConnected,
-}: {
-  notice?: 'session-invalid';
-  onConnected: (session: ConsoleSession) => void;
-}) {
-  useDocumentTitle('Connect');
+export function useConnectFlow(onConnected: (session: ConsoleSession) => void) {
   const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
@@ -143,9 +136,48 @@ export function ConnectPage({
     }
   };
 
-  const canSubmit = normalizeApiOrigin(baseUrl) !== undefined && apiKey.trim().length > 0 && !pending;
-  const baseUrlError = error?.category === 'validation' ? error : undefined;
-  const connectionError = error?.category !== 'validation' ? error : undefined;
+  return {
+    apiKey,
+    apiKeyInput,
+    baseUrl,
+    baseUrlInput,
+    baseUrlError: error?.category === 'validation' ? error : undefined,
+    canSubmit: baseUrl.trim().length > 0 && apiKey.trim().length > 0 && !pending,
+    connectionError: error?.category !== 'validation' ? error : undefined,
+    pending,
+    probeStage,
+    setApiKey,
+    setBaseUrl,
+    setShowApiKey,
+    showApiKey,
+    submit,
+  };
+}
+
+export function ConnectPage({
+  notice,
+  onConnected,
+}: {
+  notice?: 'session-invalid';
+  onConnected: (session: ConsoleSession) => void;
+}) {
+  useDocumentTitle('Connect');
+  const {
+    apiKey,
+    apiKeyInput,
+    baseUrl,
+    baseUrlError,
+    baseUrlInput,
+    canSubmit,
+    connectionError,
+    pending,
+    probeStage,
+    setApiKey,
+    setBaseUrl,
+    setShowApiKey,
+    showApiKey,
+    submit,
+  } = useConnectFlow(onConnected);
 
   return (
     <main className="connect-screen ui-legacy-root">

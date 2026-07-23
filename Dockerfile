@@ -1,5 +1,8 @@
 FROM node:22.17-alpine AS build
 
+ARG VITE_CONSOLE_UI_GENERATION=legacy
+ENV VITE_CONSOLE_UI_GENERATION=$VITE_CONSOLE_UI_GENERATION
+
 WORKDIR /workspace
 RUN corepack enable && corepack prepare pnpm@10.12.4 --activate
 

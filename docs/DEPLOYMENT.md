@@ -9,11 +9,17 @@ Build only from a reviewed commit with a clean worktree:
 ```bash
 revision=$(git rev-parse HEAD)
 docker build \
+  --build-arg VITE_CONSOLE_UI_GENERATION="legacy" \
   --build-arg OCI_REVISION="$revision" \
   --build-arg OCI_VERSION="sha-$revision" \
   --tag "omniwa-console:sha-$revision" \
   .
 ```
+
+The UI generation is selected at build time and defaults closed to `legacy`.
+Use `--build-arg VITE_CONSOLE_UI_GENERATION=v2` only for a reviewed v2 artifact;
+see [UI_V2_SHELL_CONNECT.md](UI_V2_SHELL_CONNECT.md). Promotion must use the
+exact digest, and rollback redeploys the reviewed legacy-generation digest.
 
 Record the resulting repository digest, not only the mutable local tag. Promote
 the exact digest across environments. The image listens on port `8080` and

@@ -6,11 +6,17 @@ import { CapabilitiesProvider } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { clearSession, type ConsoleSession } from '@/lib/session';
+import { UI_GENERATION } from '@/lib/ui-generation';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
+import { ConnectPageV2 } from './ConnectPageV2';
 import { Shell } from './Shell';
+import { ShellV2 } from './ShellV2';
 
 type ConnectNotice = 'session-invalid' | undefined;
+
+const ActiveConnectPage = UI_GENERATION === 'v2' ? ConnectPageV2 : ConnectPage;
+const ActiveShell = UI_GENERATION === 'v2' ? ShellV2 : Shell;
 
 const developmentRoutes = import.meta.env.DEV
   ? [{
@@ -129,7 +135,7 @@ function AppRuntime() {
                         session={session}
                         onAuthError={() => disconnectRef.current('session-invalid')}
                       >
-                        <Shell session={session} onDisconnect={() => disconnectRef.current()} />
+                        <ActiveShell session={session} onDisconnect={() => disconnectRef.current()} />
                       </RealtimeProvider>
                     </CapabilitiesProvider>
                   </ApiProvider>
@@ -162,7 +168,7 @@ function AppRuntime() {
               {
                 path: '/connect',
                 element: (
-                  <ConnectPage
+                  <ActiveConnectPage
                     notice={connectNoticeRef.current}
                     onConnected={(nextSession) => onConnectedRef.current(nextSession)}
                   />

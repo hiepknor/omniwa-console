@@ -61,6 +61,7 @@ cross-cutting contract semantics.
 | [docs/REDESIGN_BRIEF.md](docs/REDESIGN_BRIEF.md) | Contract-first UI redesign architecture, migration order, and cutover gates |
 | [docs/UI_V2_FOUNDATION.md](docs/UI_V2_FOUNDATION.md) | Canonical tokens, cascade isolation, production primitives, and gallery review |
 | [docs/UI_STATE_MODEL.md](docs/UI_STATE_MODEL.md) | Shared session, capability, projection, resource, transport, and command states |
+| [docs/UI_V2_SHELL_CONNECT.md](docs/UI_V2_SHELL_CONNECT.md) | Generation-gated Shell and Connect behavior, navigation scope, and review checklist |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | SPA layers, state ownership, and safety boundaries |
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
 | [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | Runtime key entry, scope, and storage |
