@@ -4,6 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailureNotice, Button, Field, PageHeader, ProjectionStatus, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
+import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { CreateGroupV2 } from './CreateGroupV2';
 import { GroupWorkspaceV2 } from './GroupWorkspaceV2';
 import { useCreateGroupV2, useGroupsV2 } from './hooks';
@@ -26,11 +27,11 @@ export function GroupsPageV2() {
   const create = useCreateGroupV2();
   const groups = useMemo(() => list.data?.resource?.items ?? [], [list.data]);
   const authoritative = list.data?.meta?.syncStatus === undefined || list.data.meta.syncStatus === 'ready';
-  const listParams = new URLSearchParams(searchParams); listParams.delete('create');
-  const listUrl = `/groups${listParams.size ? `?${listParams}` : ''}`;
-  const setParam = (key: string, value?: string) => { const next = new URLSearchParams(searchParams); if (value) next.set(key, value); else next.delete(key); if (key === 'search') next.delete('cursor'); setSearchParams(next, { replace: true }); };
+  const listParams = omitSearchParams(searchParams, ['create']);
+  const listUrl = withSearchParams('/groups', listParams);
+  const setParam = (key: string, value?: string) => setSearchParams(updateSearchParams(searchParams, { [key]: value }, key === 'search' ? ['cursor'] : []), { replace: true });
   const applySearch = () => setParam('search', searchDraft.trim());
-  const openGroup = (id: string) => { const next = new URLSearchParams(searchParams); next.delete('create'); navigate(`/groups/${encodeURIComponent(id)}${next.size ? `?${next}` : ''}`); };
+  const openGroup = (id: string) => navigate(withSearchParams(`/groups/${encodeURIComponent(id)}`, listParams));
   const closeCreate = () => { create.reset(); setParam('create'); };
 
   if (!instanceScope) return <Blocked detail="Groups requires an instance credential. Admin scope cannot read token-scoped group projections, and no request was sent." state="invalid" />;

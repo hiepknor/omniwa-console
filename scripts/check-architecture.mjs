@@ -51,6 +51,14 @@ for (const path of await sourceFiles(sourceRoot)) {
   if (file.startsWith('src/features/') && /const\s+SCOPE\s*=\s*['"]session['"]/.test(source)) {
     failures.push(`${file}: session query scope must use the canonical API key constant`);
   }
+
+  if (file.includes('-v2/') && !file.includes('.test.') && /new\s+URLSearchParams\s*\(/.test(source)) {
+    failures.push(`${file}: v2 URL state must use the shared src/lib/url-search-state.ts helpers`);
+  }
+
+  if (file.includes('-v2/') && file.endsWith('/hooks.ts') && /(?:staleTime|refetchInterval):\s*\d/.test(source)) {
+    failures.push(`${file}: v2 read timing must use the shared src/lib/query-policy.ts values`);
+  }
 }
 
 if (failures.length > 0) {

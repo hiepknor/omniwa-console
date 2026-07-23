@@ -213,3 +213,9 @@ The app disables refetch-on-window-focus to avoid request storms. Queries may
 retry once only for retryable transient 5xx failures. Rate limits and permanent
 service conditions are never automatically retried. Projection polling must be
 bounded and must not reach WhatsApp live.
+
+V2 read cadences come from `src/lib/query-policy.ts`: fleet reads poll every 15
+seconds, platform and campaign reads every 30 seconds, ordinary persisted
+projections every 60 seconds, and QR reads every 20 seconds only while the
+pairing surface is active. A disabled route or missing scoped credential must
+return `false` from its polling policy rather than leave a background timer.

@@ -1,17 +1,13 @@
+import { readOptionalSearchParam, readSearchText, updateSearchParams } from '@/lib/url-search-state';
+
 export function eventRouteState(searchParams: URLSearchParams) {
   return {
-    type: (searchParams.get('type') ?? '').slice(0, 64),
-    cursor: searchParams.get('cursor')?.trim() || undefined,
-    event: searchParams.get('event')?.trim() || undefined,
+    type: readSearchText(searchParams, 'type').slice(0, 64),
+    cursor: readOptionalSearchParam(searchParams, 'cursor'),
+    event: readOptionalSearchParam(searchParams, 'event'),
   };
 }
 
 export function setEventParam(searchParams: URLSearchParams, key: string, value?: string) {
-  const next = new URLSearchParams(searchParams);
-  if (value) next.set(key, value); else next.delete(key);
-  if (key === 'type') {
-    next.delete('cursor');
-    next.delete('event');
-  }
-  return next;
+  return updateSearchParams(searchParams, { [key]: value }, key === 'type' ? ['cursor', 'event'] : []);
 }

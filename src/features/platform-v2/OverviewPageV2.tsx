@@ -7,6 +7,7 @@ import { queryKeys } from '@/api/keys';
 import { Button, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
+import { updateSearchParams } from '@/lib/url-search-state';
 import { failureDetail, failureRequestId, readFailureState } from './state';
 import { usePlatformHealth, usePlatformOverview, usePlatformProjectionHealth } from './hooks';
 import { overviewWindowFromSearch, overviewWindowOptions } from './route-state';
@@ -44,9 +45,7 @@ export function OverviewPageV2() {
   const refreshing = overview.isFetching || health.isFetching || projection.isFetching;
 
   const setWindow = (value: string) => {
-    const next = new URLSearchParams(searchParams);
-    if (value === '24h') next.delete('window'); else next.set('window', value);
-    setSearchParams(next, { replace: true });
+    setSearchParams(updateSearchParams(searchParams, { window: value === '24h' ? undefined : value }), { replace: true });
   };
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.overview(window) });

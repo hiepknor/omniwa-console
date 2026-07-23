@@ -1,3 +1,5 @@
+import { readOptionalSearchParam, readSearchNumber } from '@/lib/url-search-state';
+
 export const overviewWindowOptions = [
   { value: '1h', label: 'Last hour' },
   { value: '24h', label: 'Last 24 hours' },
@@ -10,12 +12,10 @@ export function overviewWindowFromSearch(value: string | null): string {
 }
 
 export function recoveryFiltersFromSearch(searchParams: URLSearchParams) {
-  const limitValue = Number(searchParams.get('limit'));
-  const limit = [25, 50, 100, 200].includes(limitValue) ? limitValue : 50;
   return {
-    instanceId: searchParams.get('instanceId')?.trim() || undefined,
-    resource: searchParams.get('resource')?.trim() || undefined,
-    cursor: searchParams.get('cursor')?.trim() || undefined,
-    limit,
+    instanceId: readOptionalSearchParam(searchParams, 'instanceId'),
+    resource: readOptionalSearchParam(searchParams, 'resource'),
+    cursor: readOptionalSearchParam(searchParams, 'cursor'),
+    limit: readSearchNumber(searchParams, 'limit', [25, 50, 100, 200], 50),
   };
 }

@@ -43,6 +43,8 @@ Rules enforced by `pnpm architecture:check`:
 - no feature-to-feature imports;
 - no feature-owned application `main` landmark;
 - no ad hoc feature query-key arrays or duplicated session-scope constants;
+- no panel-local URLSearchParams mutation in v2 production code;
+- no panel-local numeric polling/staleness policy in v2 query hooks;
 - generated API files remain machine-owned.
 
 Shared behavior moves down into components, API, or lib. It is not copied

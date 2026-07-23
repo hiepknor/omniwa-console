@@ -5,6 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { Button, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
+import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { CreateInstanceV2 } from './CreateInstanceV2';
 import { CredentialHealthV2 } from './CredentialHealthV2';
 import { useCreateInstanceV2, useInstanceV2, useInstancesV2 } from './hooks';
@@ -35,14 +36,11 @@ export function InstancesPageV2() {
   }, [instances, filters.search, filters.status]);
 
   const setParam = (key: string, value?: string) => {
-    const next = new URLSearchParams(searchParams);
-    if (value) next.set(key, value); else next.delete(key);
-    setSearchParams(next, { replace: true });
+    setSearchParams(updateSearchParams(searchParams, { [key]: value }), { replace: true });
   };
-  const routeParams = new URLSearchParams(searchParams);
-  routeParams.delete('create');
-  const listUrl = `/instances${routeParams.size ? `?${routeParams}` : ''}`;
-  const openInstance = (id: string) => navigate(`/instances/${encodeURIComponent(id)}${routeParams.size ? `?${routeParams}` : ''}`);
+  const routeParams = omitSearchParams(searchParams, ['create']);
+  const listUrl = withSearchParams('/instances', routeParams);
+  const openInstance = (id: string) => navigate(withSearchParams(`/instances/${encodeURIComponent(id)}`, routeParams));
   const closeCreate = () => { create.reset(); setParam('create'); };
 
   if (session.keyKind !== 'admin') return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Instances" description="Fleet metadata, pairing, lifecycle, settings, and credential posture." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'session', state: 'invalid' }} detail="Instance fleet management requires an admin credential. No fleet request was sent." /></div></div>;

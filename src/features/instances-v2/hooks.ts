@@ -22,6 +22,7 @@ import {
 } from '@/api/instances';
 import { instanceKeys, queryKeys } from '@/api/keys';
 import { useInstanceClient } from '@/api/useInstanceClient';
+import { CREDENTIAL_HEALTH_STALE_TIME, FLEET_STALE_TIME, pollingWhen, QUERY_INTERVALS } from '@/lib/query-policy';
 
 export function useInstancesV2(enabled: boolean) {
   const client = useApi();
@@ -29,8 +30,8 @@ export function useInstancesV2(enabled: boolean) {
     queryKey: queryKeys.instances({ metadata: true }),
     queryFn: () => listInstances(client, { metadata: true }),
     enabled,
-    staleTime: 10_000,
-    refetchInterval: enabled ? 15_000 : false,
+    staleTime: FLEET_STALE_TIME,
+    refetchInterval: pollingWhen(enabled, QUERY_INTERVALS.fleet),
   });
 }
 
@@ -40,8 +41,8 @@ export function useInstanceV2(instanceId: string | undefined, enabled: boolean) 
     queryKey: queryKeys.instanceMetadata(instanceId ?? '', true),
     queryFn: () => getInstance(client, instanceId ?? '', true),
     enabled: enabled && instanceId !== undefined,
-    staleTime: 10_000,
-    refetchInterval: enabled && instanceId ? 15_000 : false,
+    staleTime: FLEET_STALE_TIME,
+    refetchInterval: pollingWhen(enabled && Boolean(instanceId), QUERY_INTERVALS.fleet),
   });
 }
 
@@ -51,7 +52,7 @@ export function useCredentialHealthV2(enabled: boolean) {
     queryKey: queryKeys.instanceCredentialHealth,
     queryFn: () => getInstanceCredentialHealth(client),
     enabled,
-    staleTime: 60_000,
+    staleTime: CREDENTIAL_HEALTH_STALE_TIME,
   });
 }
 
@@ -124,7 +125,7 @@ export function useInstanceStatusV2(instanceId: string, token: string | undefine
       return getInstanceStatus(client);
     },
     enabled: client !== undefined,
-    refetchInterval: client ? 15_000 : false,
+    refetchInterval: pollingWhen(Boolean(client), QUERY_INTERVALS.fleet),
   });
 }
 
@@ -137,7 +138,7 @@ export function useInstanceQrV2(instanceId: string, token: string | undefined, e
       return getInstanceQr(client);
     },
     enabled: enabled && client !== undefined,
-    refetchInterval: enabled && client ? 20_000 : false,
+    refetchInterval: pollingWhen(enabled && Boolean(client), QUERY_INTERVALS.qr),
   });
 }
 
