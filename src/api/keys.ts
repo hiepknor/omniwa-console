@@ -2,7 +2,7 @@ export const queryKeys = {
   capabilities: (scope: string) => ['capabilities', scope] as const,
   health: ['health'] as const,
   healthReadiness: ['health', 'readiness'] as const,
-  dashboard: ['dashboard'] as const,
+  overview: (window: string) => ['overview', window] as const,
   queueMetrics: ['metrics', 'queue'] as const,
   messageMetrics: ['metrics', 'messages'] as const,
   webhookMetrics: ['metrics', 'webhooks'] as const,
@@ -52,7 +52,7 @@ export const queryKeys = {
 export const overviewKeys = [
   queryKeys.health,
   queryKeys.healthReadiness,
-  queryKeys.dashboard,
+  queryKeys.overview('24h'),
   queryKeys.queueMetrics,
   queryKeys.messageMetrics,
   queryKeys.webhookMetrics,

@@ -1,95 +1,75 @@
-import { isTransportFailure, useHealth, useHealthReadiness, useStableReadState } from './hooks';
-import { OverviewDiagnostics, type OverviewDiagnostic } from './OverviewDiagnostics';
+import { relativeTime } from '@/lib/format';
+import { useHealth, useStableReadState } from './hooks';
+import { OverviewDiagnostics } from './OverviewDiagnostics';
 
-function isPositive(status: string | undefined): boolean {
-  const normalized = status?.toLowerCase();
-  return normalized === 'ok' || normalized === 'healthy' || normalized === 'alive' || normalized === 'ready';
+function dot(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'healthy':
+    case 'connected':
+    case 'closed':
+      return 'dot-ok';
+    case 'degraded':
+    case 'syncing':
+    case 'half_open':
+      return 'dot-pending';
+    case 'throttled':
+    case 'failed':
+    case 'open':
+      return 'dot-failed';
+    default:
+      return 'dot-info';
+  }
 }
 
-function displayStatus(status: string | undefined, fallback: string): string {
-  if (!status) return fallback;
-  return status.charAt(0).toUpperCase() + status.slice(1);
+function label(value: string): string {
+  return value.replaceAll('_', ' ').replace(/^./u, (letter) => letter.toUpperCase());
 }
 
 export function HealthStrip() {
   const health = useHealth();
-  const readiness = useHealthReadiness();
-  const healthState = useStableReadState(health);
-  const readinessState = useStableReadState(readiness);
-  const apiStale = healthState.isError && health.data?.resource?.status !== undefined;
-  const readinessStale = readinessState.isError && readiness.data?.resource?.status !== undefined;
-  const apiHealthy = isPositive(health.data?.resource?.status);
-  const readinessHealthy = isPositive(readiness.data?.resource?.status);
-  const readinessPending = readinessState.isInitialLoading || (!readinessState.isError && !readiness.data?.resource?.status);
-  const apiStatus = apiStale ? `${displayStatus(health.data?.resource?.status, 'Unknown')} · Stale` : healthState.isError ? 'Unreachable' : displayStatus(health.data?.resource?.status, 'Pending');
-  const readinessStatus = readinessStale ? `${displayStatus(readiness.data?.resource?.status, 'Unknown')} · Stale` : readinessState.isError ? 'Unreachable' : displayStatus(readiness.data?.resource?.status, 'Pending');
-  const summary = healthState.isError && !apiStale
-    ? 'Not observable'
-    : apiStale || readinessStale
-      ? 'Stale posture'
-    : apiHealthy && readinessHealthy
-      ? 'Operational'
-      : apiHealthy && readinessPending
-        ? 'Posture pending'
-      : apiHealthy
-        ? 'Partially observable'
-        : 'Unavailable';
-  const heading = healthState.isError && !apiStale
-    ? 'The API cannot be reached.'
-    : apiStale || readinessStale
-      ? 'Last-known platform posture is stale.'
-    : apiHealthy && readinessHealthy
-      ? 'The API is responding and the platform is ready.'
-      : apiHealthy && readinessPending
-        ? 'The API is responding. Readiness is still pending.'
-      : apiHealthy
-        ? 'The API is responding. Readiness cannot be reached.'
-        : 'Health metrics are not available on OmniWA GO.';
-  const detail = healthState.isError && !apiStale
-    ? 'The console cannot read platform posture until the API responds.'
-    : apiStale || readinessStale
-      ? 'The console is preserving the last successful health reads because a refresh failed.'
-    : apiHealthy && readinessHealthy
-      ? 'The console can reach the API and confirm that the platform is ready to process work.'
-      : apiHealthy && readinessPending
-        ? 'The console is waiting for the readiness probe before reporting platform posture.'
-      : apiHealthy
-        ? 'Commands can reach the API, but the console cannot confirm that the platform is ready to process work.'
-        : 'OmniWA GO does not expose health or readiness metrics.';
-  const diagnostics: OverviewDiagnostic[] = [];
-  const originUnavailable = isTransportFailure(healthState.error) && isTransportFailure(readinessState.error);
-  if (healthState.isError) diagnostics.push({ source: originUnavailable ? 'Platform API' : 'API health', error: healthState.error });
-  if (readinessState.isError && !originUnavailable) diagnostics.push({ source: 'Readiness', error: readinessState.error });
+  const state = useStableReadState(health, health.data !== undefined);
+  const snapshot = health.data;
+  const degraded = snapshot?.instances.filter((instance) => (
+    !instance.connection.connected
+    || instance.projection.status === 'degraded'
+    || instance.projection.status === 'failed'
+    || instance.throttling.status === 'throttled'
+  )).length ?? 0;
+
+  if (state.isInitialLoading) {
+    return <section className="overview-posture" aria-labelledby="overview-posture-title"><div className="overview-section-label"><span>Health</span><span>Checking</span></div><h2 id="overview-posture-title">Reading independent health dimensions.</h2><p>API, connection, projection and query throttling are evaluated separately.</p></section>;
+  }
+  if (state.isInitialError || !snapshot) {
+    return <section className="overview-posture" aria-labelledby="overview-posture-title"><div className="overview-section-label"><span>Health</span><span>Unavailable</span></div><h2 id="overview-posture-title">The health snapshot cannot be read.</h2><p>No instance or projection status is inferred while the API is unreachable.</p><OverviewDiagnostics id="overview-health-diagnostics" diagnostics={[{ source: 'Server health', error: state.error }]} onRetry={() => { void health.refetch(); }} /></section>;
+  }
 
   return (
     <section className="overview-posture" aria-labelledby="overview-posture-title">
-      <div className="overview-section-label"><span>Health</span><span>{summary}</span></div>
-      <h2 id="overview-posture-title">{heading}</h2>
-      <p>{detail}</p>
-      <div className="overview-posture-reads" aria-label="Platform posture reads">
-        {originUnavailable ? (
-          <div className="overview-posture-read">
-            <span className="dot dot-failed" aria-hidden="true"></span>
-            <span><strong>Platform API</strong><small>Unreachable</small></span>
-          </div>
-        ) : (
-          <>
-            <div className="overview-posture-read">
-              <span className={`dot ${apiStale ? 'dot-pending' : healthState.isError ? 'dot-failed' : apiHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
-              <span><strong>API</strong><small>{apiStatus}</small></span>
-            </div>
-            <div className="overview-posture-read overview-posture-read-unreachable">
-              <span className={`dot ${readinessStale ? 'dot-pending' : readinessState.isError ? 'dot-failed' : readinessHealthy ? 'dot-ok' : 'dot-info'}`} aria-hidden="true"></span>
-              <span><strong>Readiness</strong><small>{readinessStatus}</small></span>
-            </div>
-          </>
-        )}
+      <div className="overview-section-label"><span>Split health</span><span>{state.isStaleError ? 'Stale snapshot' : degraded > 0 ? `${degraded} need review` : 'Operational'}</span></div>
+      <h2 id="overview-posture-title">API, connection, projection and throttling.</h2>
+      <p>Generated {relativeTime(snapshot.generatedAt) || 'at an unknown time'}. A healthy API does not imply that every WhatsApp instance is connected or ready.</p>
+      <div className="overview-posture-reads" aria-label="Independent server health dimensions">
+        <div className="overview-posture-read">
+          <span className={`dot ${dot(snapshot.api.status)}`} aria-hidden="true" />
+          <span><strong>API</strong><small>{label(snapshot.api.status)}</small></span>
+        </div>
+        {snapshot.instances.flatMap((instance) => [
+          <div className="overview-posture-read" key={`${instance.instanceId}:connection`} title={instance.instanceId}>
+            <span className={`dot ${dot(instance.connection.status)}`} aria-hidden="true" />
+            <span><strong>Connection</strong><small>{label(instance.connection.status)}</small></span>
+          </div>,
+          <div className="overview-posture-read" key={`${instance.instanceId}:projection`} title={instance.instanceId}>
+            <span className={`dot ${dot(instance.projection.status)}`} aria-hidden="true" />
+            <span><strong>Projection</strong><small>{label(instance.projection.status)}</small></span>
+          </div>,
+          <div className="overview-posture-read" key={`${instance.instanceId}:throttling`} title={instance.instanceId}>
+            <span className={`dot ${dot(instance.throttling.status)}`} aria-hidden="true" />
+            <span><strong>Throttling</strong><small>{instance.throttling.observed ? `${label(instance.throttling.status)} · ${label(instance.throttling.circuitState)}` : 'Not observed · closed'}</small></span>
+          </div>,
+        ])}
       </div>
-      {!originUnavailable && <OverviewDiagnostics
-        id="overview-health-diagnostics"
-        diagnostics={diagnostics}
-        onRetry={() => { void Promise.all([health.refetch(), readiness.refetch()]); }}
-      />}
+      {snapshot.instances.length === 0 && <p>No instances exist in this health scope.</p>}
+      {state.isStaleError && <OverviewDiagnostics id="overview-health-diagnostics" diagnostics={[{ source: 'Server health refresh', error: state.error }]} onRetry={() => { void health.refetch(); }} />}
     </section>
   );
 }
