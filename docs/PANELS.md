@@ -142,11 +142,21 @@ rendered chronologically. Text send acknowledgement only confirms the action
 response; projected status and per-recipient receipts remain authoritative for
 delivery.
 
-Core commands used by the workspace when implemented:
+Implemented commands owned by the workspace:
 
 ```text
 POST /send/text
 POST /send/media
+```
+
+Media send accepts an HTTP(S) URL plus an explicit `image`, `video`,
+`audio`, or `document` type. Binary upload and base64 input stay outside the
+Console. Like text send, its server acknowledgement is not delivery and an
+uncertain failure has no one-click retry.
+
+Additional commands are not owned until their UI is included and verified:
+
+```text
 POST /message/react
 POST /message/markread
 POST /message/markplayed
@@ -159,9 +169,6 @@ POST /chat/unmute
 POST /chat/pin
 POST /chat/unpin
 ```
-
-The first migration may implement only the core read/send slice. Any additional
-command becomes owned when its UI is included and verified.
 
 ## Campaigns — `/messages`, `/messages/new`
 

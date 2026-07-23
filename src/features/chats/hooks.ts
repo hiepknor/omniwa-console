@@ -6,7 +6,9 @@ import {
   getMessage,
   listMessageReceipts,
   listMessages,
+  sendMediaMessage,
   sendTextMessage,
+  type SendMediaInput,
 } from '@/api/messages';
 import { listInstances } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
@@ -154,6 +156,30 @@ export function useSendTextMessage(instanceId: string, token: string | undefined
         completedDetail: 'The send command completed. Delivery status remains separate and will update in message history.',
         requestId: result.requestId,
         dedupeKey: `message:${variables.chatId}:send`,
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.instanceChats(instanceId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, variables.chatId, {}) }),
+      ]);
+    },
+  });
+}
+
+export function useSendMediaMessage(instanceId: string, token: string | undefined) {
+  const client = useInstanceClient(token);
+  const queryClient = useQueryClient();
+  const feedback = useFeedback();
+  return useMutation({
+    mutationFn: ({ chatId, ...input }: SendMediaInput & { chatId: string }) => (
+      sendMediaMessage(client!, chatId, input)
+    ),
+    onSuccess: async (result, variables) => {
+      feedback.command(result.disposition, {
+        action: 'Media send',
+        acceptedDetail: 'The media send command was accepted. Delivery status will update in message history.',
+        completedDetail: 'The media send command completed. Delivery status remains separate and will update in message history.',
+        requestId: result.requestId,
+        dedupeKey: `message:${variables.chatId}:media-send`,
       });
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.instanceChats(instanceId) }),
