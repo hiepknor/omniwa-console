@@ -1,6 +1,6 @@
 # Campaign Integration Contract
 
-Status: backend available; console integration pending.
+Status: backend and console integration available.
 
 Campaign execution belongs entirely to OmniWA GO. The SPA creates, schedules,
 controls, and observes campaigns through the public API. It never loops over

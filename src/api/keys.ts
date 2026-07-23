@@ -8,7 +8,7 @@ export const queryKeys = {
   webhookMetrics: ['metrics', 'webhooks'] as const,
   mediaMetrics: ['metrics', 'media'] as const,
   actionRequired: ['action-required'] as const,
-  instances: (params?: { initialCursor?: string }) => ['instances', params ?? {}] as const,
+  instances: (params?: { initialCursor?: string; metadata?: boolean }) => ['instances', params ?? {}] as const,
   instance: (instanceId: string) => ['instances', instanceId] as const,
   instanceSessions: (instanceId: string) => ['instances', instanceId, 'sessions'] as const,
   instanceChats: (instanceId: string, params?: Record<string, unknown>) =>

@@ -14,6 +14,9 @@ export const capabilityNames = [
   'events_projection',
   'outbound_rate_limit',
   'campaign_orchestration',
+  'instance_metadata_views',
+  'instance_token_rotation',
+  'instance_credential_health',
 ] as const;
 
 export type CapabilityName = (typeof capabilityNames)[number];

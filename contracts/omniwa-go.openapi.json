@@ -2520,7 +2520,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.InstanceListResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/pkg_instance_handler.InstanceView"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -2624,7 +2639,19 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.CreateInstanceResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/pkg_instance_handler.InstanceView"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -2641,6 +2668,74 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instance/credential-health": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Returns global, secret-free migration facts. This endpoint does not declare that plaintext removal is safe.",
+        "tags": [
+          "Instance"
+        ],
+        "summary": "Get instance credential migration health",
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialHealth"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Credential health is not configured",
             "content": {
               "application/json": {
                 "schema": {
@@ -2842,7 +2937,19 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.InstanceResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/pkg_instance_handler.InstanceView"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -2977,6 +3084,156 @@
           },
           "400": {
             "description": "Error on validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instance/metadata": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Lists instances without returning bearer tokens, proxy credentials, or QR ceremony material.",
+        "tags": [
+          "Instance"
+        ],
+        "summary": "List credential-free instance metadata",
+        "responses": {
+          "200": {
+            "description": "All instance metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/pkg_instance_handler.InstanceMetadataView"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instance/metadata/{instanceId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Gets one instance without returning bearer tokens, proxy credentials, or QR ceremony material.",
+        "tags": [
+          "Instance"
+        ],
+        "summary": "Get credential-free instance metadata",
+        "parameters": [
+          {
+            "description": "Instance Id",
+            "name": "instanceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instance metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/pkg_instance_handler.InstanceMetadataView"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid instance ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3251,6 +3508,106 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instance/rotate-token/{instanceId}": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Atomically replaces an instance bearer token. The new token is returned only in this response.",
+        "tags": [
+          "Instance"
+        ],
+        "summary": "Rotate an instance token",
+        "parameters": [
+          {
+            "description": "Instance Id",
+            "name": "instanceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pkg_instance_handler.RotateTokenRequest"
+              }
+            }
+          },
+          "description": "Rotation reason and current credential version",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Token rotated; persist data.token immediately",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_instance_credential.RotationResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Credential version conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Rotation is not configured",
             "content": {
               "application/json": {
                 "schema": {
@@ -6157,6 +6514,288 @@
         }
       }
     },
+    "/server/projection-failures": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Server"
+        ],
+        "summary": "List projection dead letters",
+        "parameters": [
+          {
+            "description": "Instance ID filter",
+            "name": "instanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Projection resource filter",
+            "name": "resource",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque pagination cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailurePage"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/server/projection-failures/discard": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Server"
+        ],
+        "summary": "Discard projection dead letter",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/pkg_server_handler.ProjectionFailureOperationRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureOperationResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/server/projection-failures/replay": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Server"
+        ],
+        "summary": "Replay projection dead letter",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/pkg_server_handler.ProjectionFailureOperationRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureOperationResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/server/projection-health": {
       "get": {
         "security": [
@@ -7334,6 +7973,17 @@
         "description": "Label data",
         "required": true
       },
+      "pkg_server_handler.ProjectionFailureOperationRequest": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/pkg_server_handler.ProjectionFailureOperationRequest"
+            }
+          }
+        },
+        "description": "Failure identity and audit reason",
+        "required": true
+      },
       "github_com_evolution-foundation_evolution-go_pkg_user_service.BlockStruct": {
         "content": {
           "application/json": {
@@ -7444,8 +8094,15 @@
             "example": [
               "campaign_orchestration",
               "rate_limit_retry_after",
-              "groups_projection"
+              "groups_projection",
+              "instance_metadata_views",
+              "instance_credential_health",
+              "instance_token_rotation"
             ]
+          },
+          "revision": {
+            "type": "string",
+            "example": "0123456789abcdef0123456789abcdef01234567"
           },
           "version": {
             "type": "string",
@@ -7494,18 +8151,6 @@
           }
         }
       },
-      "apidocs.CreateInstanceResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"
-          },
-          "message": {
-            "type": "string",
-            "example": "success"
-          }
-        }
-      },
       "apidocs.DownloadMediaData": {
         "type": "object",
         "properties": {
@@ -7522,36 +8167,17 @@
       "apidocs.ErrorResponse": {
         "type": "object",
         "properties": {
+          "code": {
+            "type": "string",
+            "example": "validation_error"
+          },
           "error": {
             "type": "string",
             "example": "phone number is required"
-          }
-        }
-      },
-      "apidocs.InstanceListResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"
-            }
           },
-          "message": {
+          "requestId": {
             "type": "string",
-            "example": "success"
-          }
-        }
-      },
-      "apidocs.InstanceResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"
-          },
-          "message": {
-            "type": "string",
-            "example": "success"
+            "example": "0123456789abcdef0123456789abcdef"
           }
         }
       },
@@ -8283,6 +8909,74 @@
           }
         }
       },
+      "github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialCoverage": {
+        "type": "object",
+        "properties": {
+          "currentDigest": {
+            "type": "integer"
+          },
+          "otherKeyVersion": {
+            "type": "integer"
+          },
+          "plaintextOnly": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialHealth": {
+        "type": "object",
+        "properties": {
+          "currentKeyVersion": {
+            "type": "integer"
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "instances": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialCoverage"
+          },
+          "plaintextFallback": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_instance_credential.PlaintextFallbackUsage"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_instance_credential.PlaintextFallbackUsage": {
+        "type": "object",
+        "properties": {
+          "affectedInstances": {
+            "type": "integer"
+          },
+          "firstObservedAt": {
+            "type": "string"
+          },
+          "lastObservedAt": {
+            "type": "string"
+          },
+          "lookups": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_instance_credential.RotationResult": {
+        "type": "object",
+        "properties": {
+          "credentialVersion": {
+            "type": "integer"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "rotatedAt": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
       "github_com_evolution-foundation_evolution-go_pkg_instance_model.AdvancedSettings": {
         "type": "object",
         "properties": {
@@ -8303,81 +8997,6 @@
           },
           "rejectCall": {
             "type": "boolean"
-          }
-        }
-      },
-      "github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance": {
-        "type": "object",
-        "properties": {
-          "alwaysOnline": {
-            "description": "Advanced Settings",
-            "type": "boolean"
-          },
-          "client_name": {
-            "type": "string"
-          },
-          "connected": {
-            "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string"
-          },
-          "disconnect_reason": {
-            "type": "string"
-          },
-          "events": {
-            "type": "string"
-          },
-          "expiration": {
-            "type": "integer"
-          },
-          "id": {
-            "type": "string"
-          },
-          "ignoreGroups": {
-            "type": "boolean"
-          },
-          "ignoreStatus": {
-            "type": "boolean"
-          },
-          "jid": {
-            "type": "string"
-          },
-          "msgRejectCall": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "natsEnable": {
-            "type": "string"
-          },
-          "os_name": {
-            "type": "string"
-          },
-          "proxy": {
-            "type": "string"
-          },
-          "qrcode": {
-            "type": "string"
-          },
-          "rabbitmqEnable": {
-            "type": "string"
-          },
-          "readMessages": {
-            "type": "boolean"
-          },
-          "rejectCall": {
-            "type": "boolean"
-          },
-          "token": {
-            "type": "string"
-          },
-          "webhook": {
-            "type": "string"
-          },
-          "websocketEnable": {
-            "type": "string"
           }
         }
       },
@@ -8701,6 +9320,28 @@
           "ChatTypeNewsletter",
           "ChatTypeBroadcast",
           "ChatTypeUnknown"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_model.EventFailureClass": {
+        "type": "string",
+        "enum": [
+          "retryable",
+          "permanent"
+        ],
+        "x-enum-varnames": [
+          "EventFailureRetryable",
+          "EventFailurePermanent"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_model.FailureAction": {
+        "type": "string",
+        "enum": [
+          "replay",
+          "discard"
+        ],
+        "x-enum-varnames": [
+          "FailureActionReplay",
+          "FailureActionDiscard"
         ]
       },
       "github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection": {
@@ -9063,6 +9704,81 @@
           }
         }
       },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureItem": {
+        "type": "object",
+        "properties": {
+          "deadLetteredAt": {
+            "type": "string"
+          },
+          "eventKey": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "failureClass": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.EventFailureClass"
+          },
+          "ingestedAt": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "lastAttemptAt": {
+            "type": "string"
+          },
+          "lastErrorCode": {
+            "type": "string"
+          },
+          "maxAttempts": {
+            "type": "integer"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "retryCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureOperationResult": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.FailureAction"
+          },
+          "eventKey": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailurePage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureItem"
+            }
+          },
+          "nextCursor": {
+            "type": "string"
+          }
+        }
+      },
       "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth": {
         "type": "object",
         "properties": {
@@ -9092,7 +9808,19 @@
       "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionResourceHealth": {
         "type": "object",
         "properties": {
+          "deadLetterEvents": {
+            "type": "integer"
+          },
+          "degradedReasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "eventLagSeconds": {
+            "type": "integer"
+          },
+          "failedEvents": {
             "type": "integer"
           },
           "instanceId": {
@@ -9103,6 +9831,15 @@
           },
           "lastReconciledAt": {
             "type": "string"
+          },
+          "oldestUnprocessedAt": {
+            "type": "string"
+          },
+          "pendingEvents": {
+            "type": "integer"
+          },
+          "processingEvents": {
+            "type": "integer"
           },
           "reconcileAgeSeconds": {
             "type": "integer"
@@ -9116,8 +9853,14 @@
           "staleSince": {
             "type": "string"
           },
+          "storedSyncStatus": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"
+          },
           "syncStatus": {
             "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"
+          },
+          "workLagSeconds": {
+            "type": "integer"
           }
         }
       },
@@ -10102,6 +10845,189 @@
         ],
         "properties": {
           "startsAt": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_instance_handler.InstanceMetadataView": {
+        "type": "object",
+        "properties": {
+          "alwaysOnline": {
+            "type": "boolean"
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "credentialVersion": {
+            "type": "integer"
+          },
+          "disconnect_reason": {
+            "type": "string"
+          },
+          "events": {
+            "type": "string"
+          },
+          "expiration": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ignoreGroups": {
+            "type": "boolean"
+          },
+          "ignoreStatus": {
+            "type": "boolean"
+          },
+          "jid": {
+            "type": "string"
+          },
+          "msgRejectCall": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "natsEnable": {
+            "type": "string"
+          },
+          "os_name": {
+            "type": "string"
+          },
+          "rabbitmqEnable": {
+            "type": "string"
+          },
+          "readMessages": {
+            "type": "boolean"
+          },
+          "rejectCall": {
+            "type": "boolean"
+          },
+          "webhook": {
+            "type": "string"
+          },
+          "websocketEnable": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_instance_handler.InstanceView": {
+        "type": "object",
+        "properties": {
+          "alwaysOnline": {
+            "type": "boolean"
+          },
+          "client_name": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "credentialVersion": {
+            "type": "integer"
+          },
+          "disconnect_reason": {
+            "type": "string"
+          },
+          "events": {
+            "type": "string"
+          },
+          "expiration": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "ignoreGroups": {
+            "type": "boolean"
+          },
+          "ignoreStatus": {
+            "type": "boolean"
+          },
+          "jid": {
+            "type": "string"
+          },
+          "msgRejectCall": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "natsEnable": {
+            "type": "string"
+          },
+          "os_name": {
+            "type": "string"
+          },
+          "proxy": {
+            "type": "string"
+          },
+          "qrcode": {
+            "type": "string"
+          },
+          "rabbitmqEnable": {
+            "type": "string"
+          },
+          "readMessages": {
+            "type": "boolean"
+          },
+          "rejectCall": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "webhook": {
+            "type": "string"
+          },
+          "websocketEnable": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_instance_handler.RotateTokenRequest": {
+        "type": "object",
+        "required": [
+          "expectedVersion",
+          "reason"
+        ],
+        "properties": {
+          "expectedVersion": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_server_handler.ProjectionFailureOperationRequest": {
+        "type": "object",
+        "required": [
+          "eventKey",
+          "instanceId",
+          "reason",
+          "resource"
+        ],
+        "properties": {
+          "eventKey": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "resource": {
             "type": "string"
           }
         }

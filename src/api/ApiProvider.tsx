@@ -1,9 +1,13 @@
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { createApiClient, type ApiClient } from './client';
 import type { ConsoleSession } from '@/lib/session';
 
 const ApiContext = createContext<ApiClient | null>(null);
 const SessionContext = createContext<ConsoleSession | null>(null);
+const InstanceCredentialsContext = createContext<{
+  credentials: Readonly<Record<string, string>>;
+  setCredential: (instanceId: string, token: string | undefined) => void;
+} | null>(null);
 
 export function ApiProvider({
   session,
@@ -16,11 +20,37 @@ export function ApiProvider({
     () => createApiClient(session),
     [session.baseUrl, session.apiKey],
   );
+  const [credentials, setCredentials] = useState<Readonly<Record<string, string>>>({});
+  const setCredential = useCallback((instanceId: string, token: string | undefined) => {
+    setCredentials((current) => {
+      const next = { ...current };
+      if (token) next[instanceId] = token;
+      else delete next[instanceId];
+      return next;
+    });
+  }, []);
   return (
     <SessionContext.Provider value={session}>
-      <ApiContext.Provider value={client}>{children}</ApiContext.Provider>
+      <ApiContext.Provider value={client}>
+        <InstanceCredentialsContext.Provider value={{ credentials, setCredential }}>
+          {children}
+        </InstanceCredentialsContext.Provider>
+      </ApiContext.Provider>
     </SessionContext.Provider>
   );
+}
+
+/** In-memory only credentials captured from one-time create/rotation responses. */
+export function useInstanceCredential(instanceId: string | undefined): string | undefined {
+  const context = useContext(InstanceCredentialsContext);
+  if (!context) throw new Error('useInstanceCredential must be used inside ApiProvider');
+  return instanceId ? context.credentials[instanceId] : undefined;
+}
+
+export function useSetInstanceCredential(): (instanceId: string, token: string | undefined) => void {
+  const context = useContext(InstanceCredentialsContext);
+  if (!context) throw new Error('useSetInstanceCredential must be used inside ApiProvider');
+  return context.setCredential;
 }
 
 export function useApi(): ApiClient {

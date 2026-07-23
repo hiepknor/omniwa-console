@@ -4,12 +4,14 @@ import { listEvents } from '@/api/events-api';
 import { listInstances } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
 import { useInstanceClient } from '@/api/useInstanceClient';
+import { useServerCapability } from '@/api/CapabilitiesProvider';
 
 export function useEventInstances() {
   const client = useApi();
+  const metadata = useServerCapability('instance_metadata_views');
   return useQuery({
-    queryKey: [...queryKeys.instances({}), 'events-picker'] as const,
-    queryFn: () => listInstances(client, { limit: 50 }),
+    queryKey: [...queryKeys.instances({ metadata }), 'events-picker'] as const,
+    queryFn: () => listInstances(client, { limit: 50, metadata }),
     staleTime: 30_000,
     refetchInterval: 60_000,
   });

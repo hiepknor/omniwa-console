@@ -39,8 +39,11 @@ apikey: <global-admin-key-or-instance-token>
 ```
 
 The authenticated shell provides the session client through `ApiProvider`.
-Instance-scoped hooks create a second client from the selected instance token.
-Tokens never appear in query keys; the stable instance ID owns cache scope.
+Credential-free metadata owns ordinary instance list/detail reads. A one-time
+create or rotation token may populate the in-memory instance credential vault;
+instance-scoped hooks create a second client from that vault. The vault is not
+browser-persisted. Tokens never appear in query keys; the stable instance ID
+owns cache scope.
 
 ## Capability negotiation
 

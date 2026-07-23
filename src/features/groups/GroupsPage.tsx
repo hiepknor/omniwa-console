@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } 
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { hasCapability } from '@/api/capabilities';
 import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
+import { useInstanceCredential } from '@/api/ApiProvider';
 import { ApiFailure } from '@/api/envelopes';
 import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
@@ -289,9 +290,10 @@ export function GroupsPage() {
   const pickerReadState = useResilientReadState(picker, picker.data?.resource !== undefined);
   const instances = picker.data?.resource?.items ?? [];
   const selectedInstance = instances.find((instance) => instance.id === instanceId);
+  const token = useInstanceCredential(instanceId);
   const groupId = searchParams.get('group') || undefined;
   const createOpen = searchParams.get('create') === '1';
-  const create = useCreateGroup(instanceId ?? '', selectedInstance?.token);
+  const create = useCreateGroup(instanceId ?? '', token);
   const canCreateGroup = Boolean(instanceId && selectedInstance?.connected);
 
   useEffect(() => {
@@ -318,7 +320,7 @@ export function GroupsPage() {
 
   let content: React.ReactNode;
   if (instanceId) {
-    content = <GroupsWorkbench instanceId={instanceId} token={selectedInstance?.token} groupId={groupId} onSetParam={setParam} />;
+    content = <GroupsWorkbench instanceId={instanceId} token={token} groupId={groupId} onSetParam={setParam} />;
   } else if (pickerReadState.isInitialError) {
     content = isTransportError(pickerReadState.error)
       ? <div className="empty groups-picker-state">Instances are unavailable while the API reconnects.</div>

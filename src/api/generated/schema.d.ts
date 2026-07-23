@@ -2394,7 +2394,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.InstanceListResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["pkg_instance_handler.InstanceView"][];
+                        };
                     };
                 };
                 /** @description Internal server error */
@@ -2511,7 +2513,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.CreateInstanceResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["pkg_instance_handler.InstanceView"];
+                        };
                     };
                 };
                 /** @description Error on validation */
@@ -2534,6 +2538,74 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/credential-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get instance credential migration health
+         * @description Returns global, secret-free migration facts. This endpoint does not declare that plaintext removal is safe.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialHealth"];
+                        };
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Credential health is not configured */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2742,7 +2814,9 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.InstanceResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["pkg_instance_handler.InstanceView"];
+                        };
                     };
                 };
                 /** @description Error on validation */
@@ -2864,6 +2938,145 @@ export interface paths {
                 };
                 /** @description Error on validation */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/metadata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List credential-free instance metadata
+         * @description Lists instances without returning bearer tokens, proxy credentials, or QR ceremony material.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description All instance metadata */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["pkg_instance_handler.InstanceMetadataView"][];
+                        };
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/metadata/{instanceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get credential-free instance metadata
+         * @description Gets one instance without returning bearer tokens, proxy credentials, or QR ceremony material.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance Id */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Instance metadata */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["pkg_instance_handler.InstanceMetadataView"];
+                        };
+                    };
+                };
+                /** @description Invalid instance ID */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Instance not found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3144,6 +3357,91 @@ export interface paths {
                 };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/instance/rotate-token/{instanceId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rotate an instance token
+         * @description Atomically replaces an instance bearer token. The new token is returned only in this response.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Instance Id */
+                    instanceId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Rotation reason and current credential version */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["pkg_instance_handler.RotateTokenRequest"];
+                };
+            };
+            responses: {
+                /** @description Token rotated; persist data.token immediately */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_credential.RotationResult"];
+                        };
+                    };
+                };
+                /** @description Invalid request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Instance not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Credential version conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Rotation is not configured */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -6079,6 +6377,246 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/server/projection-failures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List projection dead letters */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Instance ID filter */
+                    instanceId?: string;
+                    /** @description Projection resource filter */
+                    resource?: string;
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque pagination cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailurePage"];
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/projection-failures/discard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discard projection dead letter */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["pkg_server_handler.ProjectionFailureOperationRequest"];
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureOperationResult"];
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/projection-failures/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replay projection dead letter */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["pkg_server_handler.ProjectionFailureOperationRequest"];
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureOperationResult"];
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/server/projection-health": {
         parameters: {
             query?: never;
@@ -7180,10 +7718,15 @@ export interface components {
              * @example [
              *       "campaign_orchestration",
              *       "rate_limit_retry_after",
-             *       "groups_projection"
+             *       "groups_projection",
+             *       "instance_metadata_views",
+             *       "instance_credential_health",
+             *       "instance_token_rotation"
              *     ]
              */
             capabilities?: string[];
+            /** @example 0123456789abcdef0123456789abcdef01234567 */
+            revision?: string;
             /** @example 1.2.3 */
             version?: string;
         };
@@ -7205,11 +7748,6 @@ export interface components {
             /** @example success */
             message?: string;
         };
-        "apidocs.CreateInstanceResponse": {
-            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"];
-            /** @example success */
-            message?: string;
-        };
         "apidocs.DownloadMediaData": {
             /** @example data:image/jpeg;base64,/9j/4AAQ... */
             base64?: string;
@@ -7217,18 +7755,12 @@ export interface components {
             timestamp?: string;
         };
         "apidocs.ErrorResponse": {
+            /** @example validation_error */
+            code?: string;
             /** @example phone number is required */
             error?: string;
-        };
-        "apidocs.InstanceListResponse": {
-            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"][];
-            /** @example success */
-            message?: string;
-        };
-        "apidocs.InstanceResponse": {
-            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance"];
-            /** @example success */
-            message?: string;
+            /** @example 0123456789abcdef0123456789abcdef */
+            requestId?: string;
         };
         "apidocs.LabelItem": {
             id?: string;
@@ -7497,6 +8029,30 @@ export interface components {
             action?: string;
             groupJid?: string;
         };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialCoverage": {
+            currentDigest?: number;
+            otherKeyVersion?: number;
+            plaintextOnly?: number;
+            total?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialHealth": {
+            currentKeyVersion?: number;
+            generatedAt?: string;
+            instances?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialCoverage"];
+            plaintextFallback?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_instance_credential.PlaintextFallbackUsage"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_credential.PlaintextFallbackUsage": {
+            affectedInstances?: number;
+            firstObservedAt?: string;
+            lastObservedAt?: string;
+            lookups?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_instance_credential.RotationResult": {
+            credentialVersion?: number;
+            instanceId?: string;
+            rotatedAt?: string;
+            token?: string;
+        };
         "github_com_evolution-foundation_evolution-go_pkg_instance_model.AdvancedSettings": {
             alwaysOnline?: boolean;
             ignoreGroups?: boolean;
@@ -7504,32 +8060,6 @@ export interface components {
             msgRejectCall?: string;
             readMessages?: boolean;
             rejectCall?: boolean;
-        };
-        "github_com_evolution-foundation_evolution-go_pkg_instance_model.Instance": {
-            /** @description Advanced Settings */
-            alwaysOnline?: boolean;
-            client_name?: string;
-            connected?: boolean;
-            createdAt?: string;
-            disconnect_reason?: string;
-            events?: string;
-            expiration?: number;
-            id?: string;
-            ignoreGroups?: boolean;
-            ignoreStatus?: boolean;
-            jid?: string;
-            msgRejectCall?: string;
-            name?: string;
-            natsEnable?: string;
-            os_name?: string;
-            proxy?: string;
-            qrcode?: string;
-            rabbitmqEnable?: string;
-            readMessages?: boolean;
-            rejectCall?: boolean;
-            token?: string;
-            webhook?: string;
-            websocketEnable?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_instance_service.ConnectStruct": {
             immediate?: boolean;
@@ -7641,6 +8171,10 @@ export interface components {
         };
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType": "direct" | "group" | "newsletter" | "broadcast" | "unknown";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_projection_model.EventFailureClass": "retryable" | "permanent";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_projection_model.FailureAction": "replay" | "discard";
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection": "incoming" | "outgoing" | "system";
         /** @enum {string} */
@@ -7759,6 +8293,31 @@ export interface components {
             receiptType?: string;
             recipientJid?: string;
         };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureItem": {
+            deadLetteredAt?: string;
+            eventKey?: string;
+            eventType?: string;
+            failureClass?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.EventFailureClass"];
+            ingestedAt?: string;
+            instanceId?: string;
+            lastAttemptAt?: string;
+            lastErrorCode?: string;
+            maxAttempts?: number;
+            occurredAt?: string;
+            resource?: string;
+            retryCount?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureOperationResult": {
+            action?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.FailureAction"];
+            eventKey?: string;
+            instanceId?: string;
+            occurredAt?: string;
+            resource?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailurePage": {
+            items?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureItem"][];
+            nextCursor?: string;
+        };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth": {
             byStatus?: {
                 [key: string]: number;
@@ -7769,15 +8328,23 @@ export interface components {
             total?: number;
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionResourceHealth": {
+            deadLetterEvents?: number;
+            degradedReasons?: string[];
             eventLagSeconds?: number;
+            failedEvents?: number;
             instanceId?: string;
             lastEventAt?: string;
             lastReconciledAt?: string;
+            oldestUnprocessedAt?: string;
+            pendingEvents?: number;
+            processingEvents?: number;
             reconcileAgeSeconds?: number;
             resource?: string;
             schemaVersion?: number;
             staleSince?: string;
+            storedSyncStatus?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"];
             syncStatus?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"];
+            workLagSeconds?: number;
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ServerHealth": {
             api?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.HealthDimension"];
@@ -8224,6 +8791,65 @@ export interface components {
         };
         "pkg_campaign_handler.ScheduleCampaignRequest": {
             startsAt: string;
+        };
+        "pkg_instance_handler.InstanceMetadataView": {
+            alwaysOnline?: boolean;
+            client_name?: string;
+            connected?: boolean;
+            createdAt?: string;
+            credentialVersion?: number;
+            disconnect_reason?: string;
+            events?: string;
+            expiration?: number;
+            id?: string;
+            ignoreGroups?: boolean;
+            ignoreStatus?: boolean;
+            jid?: string;
+            msgRejectCall?: string;
+            name?: string;
+            natsEnable?: string;
+            os_name?: string;
+            rabbitmqEnable?: string;
+            readMessages?: boolean;
+            rejectCall?: boolean;
+            webhook?: string;
+            websocketEnable?: string;
+        };
+        "pkg_instance_handler.InstanceView": {
+            alwaysOnline?: boolean;
+            client_name?: string;
+            connected?: boolean;
+            createdAt?: string;
+            credentialVersion?: number;
+            disconnect_reason?: string;
+            events?: string;
+            expiration?: number;
+            id?: string;
+            ignoreGroups?: boolean;
+            ignoreStatus?: boolean;
+            jid?: string;
+            msgRejectCall?: string;
+            name?: string;
+            natsEnable?: string;
+            os_name?: string;
+            proxy?: string;
+            qrcode?: string;
+            rabbitmqEnable?: string;
+            readMessages?: boolean;
+            rejectCall?: boolean;
+            token?: string;
+            webhook?: string;
+            websocketEnable?: string;
+        };
+        "pkg_instance_handler.RotateTokenRequest": {
+            expectedVersion: number;
+            reason: string;
+        };
+        "pkg_server_handler.ProjectionFailureOperationRequest": {
+            eventKey: string;
+            instanceId: string;
+            reason: string;
+            resource: string;
         };
         /** @enum {string} */
         "types.AddressingMode": "pn" | "lid";
@@ -10900,6 +11526,12 @@ export interface components {
         "github_com_evolution-foundation_evolution-go_pkg_label_service.MessageLabelStruct": {
             content: {
                 "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_label_service.MessageLabelStruct"];
+            };
+        };
+        /** @description Failure identity and audit reason */
+        "pkg_server_handler.ProjectionFailureOperationRequest": {
+            content: {
+                "application/json": components["schemas"]["pkg_server_handler.ProjectionFailureOperationRequest"];
             };
         };
         /** @description Block data */

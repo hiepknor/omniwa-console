@@ -14,13 +14,15 @@ import { getLabel, listLabels } from '@/api/labels';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
 import { useInstanceClient } from '@/api/useInstanceClient';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
+import { useServerCapability } from '@/api/CapabilitiesProvider';
 
 export function usePickerInstances() {
   const client = useApi();
+  const metadata = useServerCapability('instance_metadata_views');
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: [...queryKeys.instances({}), 'picker'] as const,
-    queryFn: () => listInstances(client, { limit: 50 }),
+    queryKey: [...queryKeys.instances({ metadata }), 'picker'] as const,
+    queryFn: () => listInstances(client, { limit: 50, metadata }),
     refetchInterval,
   });
 }

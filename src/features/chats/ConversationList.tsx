@@ -14,6 +14,7 @@ import {
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { hasCapability } from '@/api/capabilities';
 import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
+import { useInstanceCredential } from '@/api/ApiProvider';
 import { ApiFailure } from '@/api/envelopes';
 import type { InstanceResource } from '@/api/instances';
 import { InlineError } from '@/components/InlineError';
@@ -191,6 +192,7 @@ export function ConversationList({ instanceId, chatId }: {
   const pickerReadState = useResilientReadState(picker, picker.data?.resource !== undefined);
   const instances = picker.data?.resource?.items ?? [];
   const selectedInstance = instances.find((instance) => instance.id === instanceId);
+  const token = useInstanceCredential(instanceId);
   const search = searchParams.get('search')?.trim() ?? '';
   const cursor = searchParams.get('cursor') || undefined;
   const directory = searchParams.get('directory');
@@ -199,18 +201,18 @@ export function ConversationList({ instanceId, chatId }: {
   const directoryMode = contactsMode || labelsMode;
   const explicitChats = directory === 'chats';
   const [searchDraft, setSearchDraft] = useState(search);
-  const capabilities = useInstanceCapabilities(instanceId, selectedInstance?.token);
+  const capabilities = useInstanceCapabilities(instanceId, token);
   const chatsAdvertised = hasCapability(capabilities.data, 'chats_projection');
   const contactsAdvertised = hasCapability(capabilities.data, 'contacts_projection');
   const labelsAdvertised = hasCapability(capabilities.data, 'labels_projection');
-  const chatsQuery = useInstanceChats(instanceId, selectedInstance?.token, chatsAdvertised && !directoryMode);
+  const chatsQuery = useInstanceChats(instanceId, token, chatsAdvertised && !directoryMode);
   const resetChats = useResetInstanceChats(instanceId);
   const pages = chatsQuery.data?.pages ?? [];
   const chats = useMemo(() => pages.flatMap((page) => page.resource.items), [pages]);
   const chatsReadState = useResilientReadState(chatsQuery, pages.length > 0);
-  const contactsQuery = useInstanceContacts(instanceId, selectedInstance?.token, { search, cursor, limit: 50 }, contactsAdvertised && (contactsMode || (!explicitChats && !labelsMode && !chatsAdvertised && chats.length === 0)));
+  const contactsQuery = useInstanceContacts(instanceId, token, { search, cursor, limit: 50 }, contactsAdvertised && (contactsMode || (!explicitChats && !labelsMode && !chatsAdvertised && chats.length === 0)));
   const contactsReadState = useResilientReadState(contactsQuery, contactsQuery.data?.resource !== undefined);
-  const labelsQuery = useInstanceLabels(instanceId, selectedInstance?.token, labelsAdvertised && labelsMode);
+  const labelsQuery = useInstanceLabels(instanceId, token, labelsAdvertised && labelsMode);
   const labelsReadState = useResilientReadState(labelsQuery, labelsQuery.data?.resource !== undefined);
   const labels = labelsQuery.data?.resource ?? [];
   const contacts = contactsQuery.data?.resource.items ?? [];
