@@ -28,17 +28,36 @@ export function Surface({ title, description, actions, children, className }: { 
   );
 }
 
-export function Field({ label, hint, error, id, className, ...props }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; error?: string }) {
-  const fieldId = id ?? `ui-v2-${props.name ?? label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+export const Field = forwardRef<
+  HTMLInputElement,
+  InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string; error?: string }
+>(function Field({ label, hint, error, id, className, ...props }, ref) {
+  const fieldId =
+    id ?? `ui-v2-${props.name ?? label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
   const descriptionId = hint || error ? `${fieldId}-description` : undefined;
   return (
     <label className="ui-v2-field" htmlFor={fieldId}>
       <span className="ui-v2-field__label">{label}</span>
-      <input {...props} id={fieldId} className={classes('ui-v2-input', className)} aria-invalid={error ? true : undefined} aria-describedby={descriptionId} />
-      {descriptionId ? <span className="ui-v2-field__hint" id={descriptionId} data-error={error ? true : undefined}>{error ?? hint}</span> : null}
+      <input
+        {...props}
+        ref={ref}
+        id={fieldId}
+        className={classes('ui-v2-input', className)}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={descriptionId}
+      />
+      {descriptionId ? (
+        <span
+          className="ui-v2-field__hint"
+          id={descriptionId}
+          data-error={error ? true : undefined}
+        >
+          {error ?? hint}
+        </span>
+      ) : null}
     </label>
   );
-}
+});
 
 export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?: string; title: string; description?: string; actions?: ReactNode }) {
   return (

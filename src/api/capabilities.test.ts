@@ -9,6 +9,7 @@ describe('capabilities', () => {
         message: 'success',
         data: {
           version: '1.2.3',
+          revision: 'abcdef1234567890',
           capabilities: ['groups_projection', 'future_projection', 'groups_projection'],
         },
       },
@@ -17,6 +18,7 @@ describe('capabilities', () => {
     const snapshot = await getCapabilities({ GET } as unknown as ApiClient);
     expect(snapshot).toEqual({
       version: '1.2.3',
+      revision: 'abcdef1234567890',
       capabilities: ['future_projection', 'groups_projection'],
     });
     expect(hasCapability(snapshot, 'groups_projection')).toBe(true);
