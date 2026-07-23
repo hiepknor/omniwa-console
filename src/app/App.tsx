@@ -12,6 +12,16 @@ import { Shell } from './Shell';
 
 type ConnectNotice = 'session-invalid' | undefined;
 
+const developmentRoutes = import.meta.env.DEV
+  ? [{
+      path: '/__ui-v2',
+      lazy: async () => {
+        const { UiV2Gallery } = await import('./UiV2Gallery');
+        return { Component: UiV2Gallery };
+      },
+    }]
+  : [];
+
 const OverviewPage = lazy(() =>
   import('@/features/overview/OverviewPage').then((module) => ({ default: module.OverviewPage })),
 );
@@ -110,6 +120,7 @@ function AppRuntime() {
       createBrowserRouter(
         session
           ? [
+              ...developmentRoutes,
               {
                 element: (
                   <ApiProvider session={session}>
@@ -147,6 +158,7 @@ function AppRuntime() {
               },
             ]
           : [
+              ...developmentRoutes,
               {
                 path: '/connect',
                 element: (

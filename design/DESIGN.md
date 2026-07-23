@@ -4,10 +4,16 @@
 > WhatsApp platform operations console using the Open Design Warp system.
 > Source: `od://design-systems/warp/DESIGN.md`.
 
-This is the brand contract for `omniwa-console`. Prototypes in
-`design/prototypes/` and all implemented panels bind to it. Where this file
-is silent, follow the dense-operational defaults of the `frontend-design`
-craft rules; where they conflict, this file wins.
+This is the brand contract for `omniwa-console`. Production tokens and shared
+components are the implementation source of truth. During the v2 migration,
+legacy prototypes in `design/prototypes/` may illustrate existing journeys but
+must import canonical tokens and may not own or duplicate runtime component
+geometry. Where this file is silent, follow the dense-operational defaults of
+the `frontend-design` craft rules; where they conflict, this file wins.
+
+The production component gallery at `/__ui-v2` is available only in local
+development and renders the same primitives used by v2 routes. New foundation
+states are reviewed there instead of being built as parallel static HTML/CSS.
 
 ## 1. Visual Theme & Atmosphere
 

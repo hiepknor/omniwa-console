@@ -1,0 +1,35 @@
+/* v2 owns unique semantic classes. Legacy feature geometry never enters this scope. */
+  .ui-v2-root{min-height:100vh;background:var(--canvas);color:var(--text-1);font:400 14px/1.5 var(--font-body);isolation:isolate}
+  .ui-v2-root :where(button,input){font:inherit}
+  .ui-v2-root :where(button,a,input,[tabindex]):focus-visible{outline:0;box-shadow:var(--focus-ring)}
+  .ui-v2-root :where(h1,h2,p){margin:0}
+  .ui-v2-gallery__main{width:min(100%,var(--container-max));margin:0 auto;padding:0 var(--container-gutter-desktop) var(--space-8)}
+  .ui-v2-page-header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:var(--space-6);min-height:104px;padding:var(--space-5) 0;border-bottom:1px solid var(--border-subtle)}
+  .ui-v2-page-header__copy{display:grid;gap:var(--space-1);min-width:0}.ui-v2-page-header h1{font-size:22px;font-weight:400;line-height:30px;letter-spacing:-.02em}.ui-v2-page-header p{max-width:72ch;color:var(--text-2)}
+  .ui-v2-page-header__actions,.ui-v2-surface__actions,.ui-v2-cluster{display:flex;align-items:center;justify-content:flex-end;gap:var(--space-2);flex-wrap:wrap}
+  .ui-v2-eyebrow{font-size:10px;line-height:16px;text-transform:uppercase;letter-spacing:2.2px;color:var(--text-3)}
+  .ui-v2-gallery__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4);padding-top:var(--space-4)}
+  .ui-v2-surface{min-width:0;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--panel);overflow:hidden}
+  .ui-v2-surface__header{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);min-height:72px;padding:var(--space-4);border-bottom:1px solid var(--border-subtle)}
+  .ui-v2-surface__header h2{font-size:14px;font-weight:500;line-height:20px}.ui-v2-surface__header p{margin-top:var(--space-1);font-size:12px;line-height:18px;color:var(--text-3)}
+  .ui-v2-surface__body{padding:var(--space-4)}
+  .ui-v2-button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:6px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius-pill);background:color-mix(in oklab,var(--fg) 3%,transparent);color:var(--text-1);font-size:13px;font-weight:500;line-height:20px;cursor:pointer}
+  .ui-v2-button:hover:not(:disabled){border-color:var(--border-strong);background:color-mix(in oklab,var(--fg) 7%,transparent)}
+  .ui-v2-button--primary{border-color:var(--accent-edge);background:var(--accent);color:var(--fg)}.ui-v2-button--primary:hover:not(:disabled){background:var(--accent-hover)}
+  .ui-v2-button--danger{border-color:color-mix(in oklab,var(--danger) 42%,transparent);color:var(--failed)}
+  .ui-v2-button:disabled{opacity:.4;cursor:not-allowed}
+  .ui-v2-status{display:inline-flex;align-items:center;gap:var(--space-2);min-width:0;font-size:12px;line-height:18px;color:var(--text-2)}
+  .ui-v2-status__dot{flex:0 0 8px;width:8px;height:8px;border-radius:50%;background:var(--inactive)}
+  .ui-v2-status[data-tone="healthy"] .ui-v2-status__dot{background:var(--ok)}.ui-v2-status[data-tone="pending"] .ui-v2-status__dot{background:var(--pending)}.ui-v2-status[data-tone="degraded"] .ui-v2-status__dot{background:var(--degraded)}.ui-v2-status[data-tone="failed"] .ui-v2-status__dot{background:var(--failed)}
+  .ui-v2-status-list{display:flex;align-items:center;gap:var(--space-5);flex-wrap:wrap}
+  .ui-v2-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4)}
+  .ui-v2-field{display:grid;gap:var(--space-2);min-width:0}.ui-v2-field__label{font-size:11px;line-height:16px;text-transform:uppercase;letter-spacing:1.4px;color:var(--text-3)}
+  .ui-v2-input{width:100%;min-height:40px;padding:8px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--recessed);color:var(--text-1)}.ui-v2-input:hover{border-color:var(--border)}.ui-v2-input[aria-invalid="true"]{border-color:color-mix(in oklab,var(--danger) 56%,transparent)}
+  .ui-v2-field__hint{font-size:12px;line-height:18px;color:var(--text-3)}.ui-v2-field__hint[data-error="true"]{color:var(--failed)}
+  .ui-v2-table-wrap{max-width:100%;overflow:auto;border:1px solid var(--border-subtle);border-radius:var(--radius-sm)}
+  .ui-v2-table{width:100%;min-width:620px;border-collapse:collapse;table-layout:fixed}.ui-v2-table th,.ui-v2-table td{height:44px;padding:8px 12px;border-bottom:1px solid var(--border-subtle);text-align:left}.ui-v2-table th{font-size:11px;font-weight:400;line-height:16px;text-transform:uppercase;letter-spacing:1.4px;color:var(--text-3)}.ui-v2-table td{font-size:13px;color:var(--text-1)}.ui-v2-table tr:last-child td{border-bottom:0}.ui-v2-table tbody tr:hover{background:color-mix(in oklab,var(--fg) 4%,transparent)}
+  .ui-v2-mono{font-family:var(--font-mono);font-size:12px;color:var(--text-2)}
+  .ui-v2-visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  @media(max-width:900px){.ui-v2-gallery__main{padding-inline:var(--container-gutter-tablet)}.ui-v2-gallery__grid{grid-template-columns:minmax(0,1fr)}}
+  @media(max-width:640px){.ui-v2-gallery__main{padding-inline:var(--container-gutter-phone)}.ui-v2-page-header{grid-template-columns:minmax(0,1fr);align-items:start}.ui-v2-page-header__actions{justify-content:flex-start}.ui-v2-page-header__actions .ui-v2-button{min-height:44px}.ui-v2-form-grid{grid-template-columns:minmax(0,1fr)}.ui-v2-button{min-height:44px}.ui-v2-table{min-width:0}.ui-v2-table thead{display:none}.ui-v2-table tbody,.ui-v2-table tr,.ui-v2-table td{display:block}.ui-v2-table tr{padding:var(--space-3);border-bottom:1px solid var(--border-subtle)}.ui-v2-table tr:last-child{border-bottom:0}.ui-v2-table td{display:grid;grid-template-columns:104px minmax(0,1fr);align-items:center;gap:var(--space-2);height:auto;min-height:32px;padding:4px 0;border:0}.ui-v2-table td::before{content:attr(data-label);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-3)}}
+  @media(prefers-reduced-motion:reduce){.ui-v2-root *, .ui-v2-root *::before,.ui-v2-root *::after{scroll-behavior:auto!important;transition-duration:.01ms!important}}

@@ -148,7 +148,7 @@ export function ConnectPage({
   const connectionError = error?.category !== 'validation' ? error : undefined;
 
   return (
-    <main className="connect-screen">
+    <main className="connect-screen ui-legacy-root">
       <header className="connect-masthead">
         <div className="connect-brand">
           <span className="mark" aria-hidden="true">
