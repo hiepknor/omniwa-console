@@ -28,16 +28,41 @@ Do not start C3 until every supported Console environment is recorded here.
 | Environment | Release commit | Immutable artifact digest | Completed at (UTC) | Operator | Verified |
 | --- | --- | --- | --- | --- | --- |
 | Development | `ba2f2cd08fc3763489fdd1c46ffb183ec0aeec80` (PR #28) | `ghcr.io/hiepknor/omniwa-console@sha256:ec43ccd37b2e06104905159f644c4d8a0b359e308d21d2fde36d8c43178be556` | 2026-07-23 02:07:33 | Codex | Yes |
-| Staging | Pending | Pending | Pending | Pending | No |
-| Production | Pending | Pending | Pending | Pending | No |
+| Staging | `fe4121cf87b8d4690bb087a87d858efdbcb49841` (PR #32) | `ghcr.io/hiepknor/omniwa-console@sha256:163f068e5acb6b60f59cd7a27b8d14d21ba0a2d04d02ce7f2cf3b804b6da5f59` | 2026-07-23 07:18:16 | Codex | Yes |
+| Production | `fe4121cf87b8d4690bb087a87d858efdbcb49841` (PR #32) | `ghcr.io/hiepknor/omniwa-console@sha256:163f068e5acb6b60f59cd7a27b8d14d21ba0a2d04d02ce7f2cf3b804b6da5f59` | 2026-07-23 07:18:16 | Codex | Yes |
 
-The development container is pinned directly to the multi-platform registry
-digest, reports OCI revision `ba2f2cd08fc3763489fdd1c46ffb183ec0aeec80`, runs
-as UID 101, and passed `/healthz`, `/events` deep-link, SPA fallback, and
-Content-Security-Policy checks. CI published the artifact only after its image
-smoke job passed and attached SBOM and provenance attestations. Staging and
-production remain blocked until their environment owners and targets are
-available.
+The development container remains pinned to the earlier multi-platform
+registry digest, reports OCI revision
+`ba2f2cd08fc3763489fdd1c46ffb183ec0aeec80`, runs as UID 101, and passed
+`/healthz`, `/events` deep-link, SPA fallback, and Content-Security-Policy
+checks. It was not part of the Staging and Production promotion.
+
+Staging and Production run the PR #32 digest on separate loopback-bound
+containers behind Caddy and Cloudflare at `staging-console.onio.cc` and
+`console.onio.cc`. Both report OCI revision
+`fe4121cf87b8d4690bb087a87d858efdbcb49841`, run as UID 101, use an
+`unless-stopped` restart policy, and passed public HTTPS `/healthz`, `/events`
+deep-link, SPA fallback, and security-header checks. Their declarative
+deployment is stored on the target host at
+`/opt/omniwa-console/docker-compose.yml`. The pre-promotion Compose files are
+retained as `docker-compose.yml.pre-fe4121c-staging` and
+`docker-compose.yml.pre-fe4121c-production` for scoped rollback.
+
+An authenticated browser audit against each official API origin also verified:
+
+- the expected Staging or Production environment badge and API origin;
+- all three required capabilities were discovered;
+- instance list/detail reads used credential-free `/instance/metadata`;
+- Credential Health rendered key version 1, zero fallback lookups, and the
+  explicit zero-workload warning instead of a removal-safety verdict;
+- the admin key was absent from browser storage, URLs, console output, request
+  URLs, analytics, and error reporting; and
+- reload and sign-out cleared the in-memory credential.
+
+CI published the artifact only after its image smoke job passed and attached
+SBOM and provenance attestations. The public Staging and Production Console
+deployments are complete, but Development remains on the earlier release.
+This record does not start an approved quiet window or authorize C4.
 
 ## Observation baseline
 
@@ -61,14 +86,21 @@ zero plaintext-only rows and zero rows on another key version.
 
 ## C3 observation log
 
-Record every sample with the same immutable Console release. Any plaintext
-fallback first observed after deployment restarts the approved quiet window.
+Record each sample with its immutable Console release. Any plaintext fallback
+first observed after deployment restarts the eventual approved quiet window.
 
 | Sample at (UTC) | Environment | Total | Current digest | Plaintext only | Other key version | Fallback lookups | Last fallback at | Backend health | Evidence link |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
 | 2026-07-23 01:48:13 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Superseded local-artifact baseline |
 | 2026-07-23 02:08:35 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Authenticated sample after registry-digest deployment |
 | Pending | Development | — | — | — | — | — | — | — | Next quiet-window sample |
+| 2026-07-23 07:18:16 | Staging | 0 | 0 | 0 | 0 | 0 | Never observed | API healthy; projection not started with zero resources; no instances | Authenticated browser sample after PR #32 promotion |
+| 2026-07-23 07:18:16 | Production | 0 | 0 | 0 | 0 | 0 | Never observed | API healthy; projection not started with zero resources; no instances | Authenticated browser sample after PR #32 promotion |
+
+The Staging and Production samples confirm the deployed integration path, not
+credential adoption: both official backends still contain zero instances.
+Their `0/0` results are not representative workload evidence and must not be
+used to infer `safeToRemove` or to start the quiet-window clock.
 
 ## Recovery exercises
 
@@ -88,14 +120,23 @@ registry-digest deployment:
   instance connection, projection, and throttling state; the existing
   projection dead letters remain a separate remediation item.
 
-These exercises satisfy only the development recovery evidence. They do not
-start or complete the final quiet window while staging, production, the
-approved duration, and owner approvals remain pending.
+Staging and Production also passed isolated disposable-fixture rotation drills:
+create and rotate returned HTTP 200, the prior token returned HTTP 401, the
+replacement token returned HTTP 200, and a stale-generation attempt returned
+HTTP 409. The fixtures were deleted afterward. Logical backups of both users
+and auth databases restored successfully into isolated databases; source and
+restore matched at zero instances, 20 schema migrations, zero current digests,
+and one auth-schema table. Backup artifacts are root-only (`0600`) on the
+deployment host.
 
-The development quiet-window clock may use 2026-07-23 02:07:33 UTC as its
-deployment baseline. The cumulative fallback was last observed before that
-baseline. Any later fallback restarts the clock; the duration still requires
-explicit owner approval.
+These exercises establish recovery mechanics but do not start or complete the
+final quiet window. The proposed 14-day duration, representative workload,
+and five named owner approvals remain pending.
+
+The development fallback was last observed before its deployment baseline.
+Any later fallback restarts the eventual clock. No environment's quiet-window
+clock is active until the duration, representative workload, and owner scope
+are explicitly approved.
 
 Required final conditions throughout the approved final window:
 
