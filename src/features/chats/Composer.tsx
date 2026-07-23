@@ -1,38 +1,25 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InlineError } from '@/components/InlineError';
-import { useResilientReadState } from '@/lib/query-state';
-import { dismissVirtualKeyboard } from '@/lib/useVisualViewport';
-import { useMessagingInstance, useRequestInstanceReconnect, useSendMediaMessage, useSendTextMessage } from './hooks';
-import { MediaAttachDialog } from './MediaAttachDialog';
+import { useSendTextMessage } from './hooks';
 
-export function Composer({ instanceId, chatId, chatName }: {
+export function Composer({ instanceId, token, instanceStatus, chatId, chatName }: {
   instanceId: string;
+  token: string;
+  instanceStatus: string | undefined;
   chatId: string;
   chatName: string;
 }) {
   const [text, setText] = useState('');
-  const [attachOpen, setAttachOpen] = useState(false);
-  const instance = useMessagingInstance(instanceId);
-  const send = useSendTextMessage(instanceId);
-  const sendMedia = useSendMediaMessage(instanceId);
-  const reconnect = useRequestInstanceReconnect(instanceId);
-  const instanceReadState = useResilientReadState(instance, instance.data?.resource !== undefined);
-  const connected = instance.data?.resource?.status?.toLocaleLowerCase() === 'connected';
+  const send = useSendTextMessage(instanceId, token);
+  const connected = instanceStatus?.toLocaleLowerCase() === 'connected';
 
-  if (instanceReadState.isInitialError) {
-    return <InlineError error={instanceReadState.error} onRetry={() => { void instance.refetch(); }} className="composer-error" />;
-  }
-
-  if (!instance.isLoading && !connected) {
+  if (!connected) {
     return (
       <div className="composer-disconnected">
-        {instanceReadState.isStaleError && <InlineError error={instanceReadState.error} onRetry={() => { void instance.refetch(); }} />}
-        {reconnect.isError && <InlineError error={reconnect.error} onRetry={() => reconnect.mutate()} className="composer-error" announce />}
         <div className="composer-warn" role="status">
           <span>Sends are unavailable while this instance is disconnected.</span>
           <div className="composer-warn-actions">
-            <button className="btn" type="button" disabled={reconnect.isPending} onClick={() => reconnect.mutate()}>{reconnect.isPending ? 'Requesting…' : 'Request reconnect'}</button>
             <Link to={`/instances/${encodeURIComponent(instanceId)}`}>Manage instance</Link>
           </div>
         </div>
@@ -48,12 +35,8 @@ export function Composer({ instanceId, chatId, chatName }: {
 
   return (
     <>
-      {instanceReadState.isStaleError && <InlineError error={instanceReadState.error} onRetry={() => { void instance.refetch(); }} />}
-      {send.isError && <InlineError error={send.error} onRetry={submit} className="composer-error" announce />}
-      <form className="composer" aria-label="Send a direct message" onSubmit={(event) => { event.preventDefault(); submit(); }}>
-        <button className="btn attach-button" type="button" disabled={!connected || send.isPending || sendMedia.isPending} title="Attach media" aria-label="Attach media" onClick={(event) => { dismissVirtualKeyboard(); event.currentTarget.focus(); setAttachOpen(true); }}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.5 11.5-8.8 8.8a6 6 0 0 1-8.5-8.5l9.4-9.4a4 4 0 0 1 5.7 5.7l-9.4 9.4a2 2 0 0 1-2.8-2.8l8.8-8.8" /></svg>
-        </button>
+      {send.isError && <><InlineError error={send.error} onRetry={submit} allowRetry={false} className="composer-error" announce /><p className="composer-note">Send outcome is uncertain. Check projected history before submitting again.</p></>}
+      <form className="composer" aria-label="Send a text message" onSubmit={(event) => { event.preventDefault(); submit(); }}>
         <label className="composer-field" htmlFor="message-compose">
           <span className="visually-hidden">Message {chatName}</span>
           <textarea
@@ -76,15 +59,7 @@ export function Composer({ instanceId, chatId, chatName }: {
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 17 8-17 8 3-8-3-8Z" /><path d="M7 12h14" /></svg>
         </button>
       </form>
-      <p className="composer-note">Command outcome appears immediately; delivery status remains separate and updates in history.</p>
-      {attachOpen && (
-        <MediaAttachDialog
-          error={sendMedia.error}
-          isPending={sendMedia.isPending}
-          onCancel={() => { sendMedia.reset(); setAttachOpen(false); }}
-          onSubmit={(values) => sendMedia.mutate({ chatId, ...values }, { onSuccess: () => setAttachOpen(false) })}
-        />
-      )}
+      <p className="composer-note">Acknowledgement is not delivery. Persisted status and receipts update independently in history.</p>
     </>
   );
 }

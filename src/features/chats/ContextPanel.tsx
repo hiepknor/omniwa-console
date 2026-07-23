@@ -5,70 +5,17 @@ import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
 import type { ChatResource } from '@/api/chats';
 import type { MessageResource } from '@/api/messages';
 import { ProjectionNotice } from '@/components/ProjectionNotice';
-import type { PublicData } from '@/api/envelopes';
 import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { formatClockTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import {
-  useCancelMessage,
   useContact,
   useLabel,
+  useMessage,
   useInstanceMessages,
   useMessageDeliveryHistory,
-  useRetryMessage,
 } from './hooks';
-
-type DeliveryStep = {
-  status: string;
-  timestamp?: string;
-  detail?: string;
-  retryable?: boolean;
-};
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function recordOf(value: unknown): Record<string, unknown> | undefined {
-  return isRecord(value) ? value : undefined;
-}
-
-function firstString(record: Record<string, unknown>, keys: readonly string[]): string | undefined {
-  for (const key of keys) {
-    const value = record[key];
-    if (typeof value === 'string' && value.trim()) return value;
-  }
-  return undefined;
-}
-
-function deliverySteps(data: PublicData | undefined): DeliveryStep[] | undefined {
-  const record = recordOf(data);
-  if (!record) return undefined;
-  for (const key of ['history', 'attempts', 'steps', 'events']) {
-    const candidate = record[key];
-    if (!Array.isArray(candidate)) continue;
-    const steps = candidate.flatMap((item): DeliveryStep[] => {
-      if (!isRecord(item)) return [];
-      const status = firstString(item, ['status', 'state']);
-      if (!status) return [];
-      const timestamp = firstString(item, ['timestamp', 'createdAt', 'updatedAt', 'occurredAt', 'at', 'time']);
-      const detail = firstString(item, ['reason', 'detail', 'message', 'error', 'reasonCode']);
-      return [{
-        status,
-        ...(timestamp ? { timestamp } : {}),
-        ...(detail ? { detail } : {}),
-        ...(typeof item.retryable === 'boolean' ? { retryable: item.retryable } : {}),
-      }];
-    });
-    if (steps.length > 0) return steps;
-  }
-  return undefined;
-}
-
-function historySaysRetryable(data: PublicData | undefined, steps: DeliveryStep[] | undefined): boolean {
-  return recordOf(data)?.retryable === true || steps?.some((step) => step.retryable) === true;
-}
 
 function statusDot(status: string | undefined): string {
   switch (status?.toLocaleLowerCase()) {
@@ -92,75 +39,58 @@ function formatTimestamp(value: string | undefined): string {
   return date.toLocaleString();
 }
 
-function DeliveryHistory({ messageId }: { messageId: string }) {
-  const query = useMessageDeliveryHistory(messageId);
+function DeliveryHistory({ instanceId, messageId, token, enabled }: { instanceId: string; messageId: string; token: string | undefined; enabled: boolean }) {
+  const query = useMessageDeliveryHistory(instanceId, messageId, token, enabled);
   const readState = useResilientReadState(query, query.data?.resource !== undefined);
-  const steps = deliverySteps(query.data?.resource?.data);
+  const receipts = query.data?.resource ?? [];
 
   if (readState.isInitialLoading) return <p className="help" aria-live="polite">Loading delivery history…</p>;
   if (readState.isInitialError) return <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-context-error" />;
-  if (query.data?.unavailable && query.data.resource === undefined) return <p className="help">Delivery history is unavailable for this message.</p>;
-  if (!steps) {
-    return (
-      <div className="delivery-history-fallback">
-        <p className="help">Delivery history is recorded but not projected in a renderable shape.</p>
-        <span className="mono">{query.data?.resource?.requestId ?? 'Request ID unavailable'}</span>
-      </div>
-    );
-  }
+  if (!enabled && query.data?.resource === undefined) return <p className="help">Delivery projection is not ready.</p>;
+  if (receipts.length === 0) return <><ProjectionNotice meta={query.data?.meta} /><p className="help">No per-recipient receipts have been projected.</p></>;
 
   return (
-    <>{readState.isStaleError && <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-context-error" />}<ol className="timeline delivery-timeline">
-      {steps.map((step, index) => (
-        <li key={`${step.status}-${step.timestamp ?? index}`}>
-          <span className={`dot ${statusDot(step.status)}`} aria-hidden="true" />
-          <span className="what">{step.status}{step.detail && <span className="detail">{step.detail}</span>}</span>
-          <time className="ts" dateTime={step.timestamp}>{step.timestamp ? formatClockTime(step.timestamp) : '—'}</time>
+    <><ProjectionNotice meta={query.data?.meta} />{readState.isStaleError && <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-context-error" />}<ol className="timeline delivery-timeline">
+      {receipts.map((receipt) => (
+        <li key={`${receipt.recipientJid}-${receipt.receiptType}-${receipt.receiptAt}`}>
+          <span className={`dot ${statusDot(receipt.receiptType)}`} aria-hidden="true" />
+          <span className="what">{receipt.receiptType}<span className="detail mono">{receipt.recipientJid}</span></span>
+          <time className="ts" dateTime={receipt.receiptAt}>{formatClockTime(receipt.receiptAt)}</time>
         </li>
       ))}
     </ol></>
   );
 }
 
-function SelectedMessage({ message, instanceId }: { message: MessageResource; instanceId: string }) {
-  const retry = useRetryMessage(instanceId);
-  const cancel = useCancelMessage(instanceId);
-  const history = useMessageDeliveryHistory(message.id);
-  const steps = deliverySteps(history.data?.resource?.data);
+function SelectedMessage({ message, instanceId, token, messagesEnabled }: { message: MessageResource; instanceId: string; token: string | undefined; messagesEnabled: boolean }) {
   const status = message.status?.toLocaleLowerCase() ?? 'unknown';
-  const retryable = historySaysRetryable(history.data?.resource?.data, steps);
-  const canRetry = status === 'failed';
-  const canCancel = ['accepted', 'queued', 'pending', 'processing'].includes(status);
 
   return (
     <section className="selected-message-detail" aria-labelledby="selected-message-title">
       <div className="section-title-row">
-        <div><span className="eyebrow">Message actions</span><h3 id="selected-message-title">Selected message</h3></div>
+        <div><span className="eyebrow">Persisted message</span><h3 id="selected-message-title">Selected message</h3></div>
         <span className="mono message-id" title={message.id}>{message.id}</span>
       </div>
       <dl className="kv message-facts">
-        <dt>Status</dt><dd><StatusIndicator dotClass={statusDot(status)}>{status}{retryable ? ' · retryable' : ''}</StatusIndicator></dd>
-        <dt>Type</dt><dd>{message.type ?? '—'}</dd>
+        <dt>Status</dt><dd><StatusIndicator dotClass={statusDot(status)}>{status}</StatusIndicator></dd>
+        <dt>Type</dt><dd>{message.type}</dd>
+        <dt>Direction</dt><dd>{message.direction}</dd>
+        <dt>Provenance</dt><dd>{message.provenance}</dd>
         {message.createdAt && <><dt>Created</dt><dd>{formatTimestamp(message.createdAt)}</dd></>}
         {message.deliveredAt && <><dt>Delivered</dt><dd>{formatTimestamp(message.deliveredAt)}</dd></>}
         {message.readAt && <><dt>Read</dt><dd>{formatTimestamp(message.readAt)}</dd></>}
       </dl>
       <h4>Delivery history</h4>
-      <DeliveryHistory messageId={message.id} />
-      {retry.isError && <InlineError error={retry.error} onRetry={() => retry.mutate(message.id)} className="chat-context-error" announce />}
-      {cancel.isError && <InlineError error={cancel.error} onRetry={() => cancel.mutate(message.id)} className="chat-context-error" announce />}
-      <div className="actions message-actions" aria-label="Selected message actions">
-        <button className="btn" type="button" disabled={!canRetry || retry.isPending || cancel.isPending} title={canRetry ? undefined : 'Retry is available for failed messages.'} onClick={() => retry.mutate(message.id)}>{retry.isPending ? 'Retrying…' : 'Retry'}</button>
-        <button className="btn danger" type="button" disabled={!canCancel || retry.isPending || cancel.isPending} title={canCancel ? undefined : 'Cancel is available for in-flight messages.'} onClick={() => cancel.mutate(message.id)}>{cancel.isPending ? 'Cancelling…' : 'Cancel'}</button>
-      </div>
+      <DeliveryHistory instanceId={instanceId} messageId={message.id} token={token} enabled={messagesEnabled} />
     </section>
   );
 }
 
-function ContextPanelDetails({ instanceId, token, contactsEnabled, chat, onBack }: {
+function ContextPanelDetails({ instanceId, token, contactsEnabled, messagesEnabled, chat, onBack }: {
   instanceId: string | undefined;
   token: string | undefined;
   contactsEnabled: boolean;
+  messagesEnabled: boolean;
   chat: ChatResource;
   onBack: () => void;
 }) {
@@ -168,9 +98,11 @@ function ContextPanelDetails({ instanceId, token, contactsEnabled, chat, onBack 
   const selectedMessageId = searchParams.get('message');
   const contactQuery = useContact(instanceId, chat.type === 'direct' ? chat.id : undefined, token, contactsEnabled);
   const contactReadState = useResilientReadState(contactQuery, contactQuery.data?.resource !== undefined);
-  const messagesQuery = useInstanceMessages(instanceId);
+  const messagesQuery = useInstanceMessages(instanceId, chat.id, token, messagesEnabled);
   const loadedMessages = useMemo(() => (messagesQuery.data?.pages ?? []).flatMap((page) => page.resource?.items ?? []), [messagesQuery.data?.pages]);
-  const selectedMessage = loadedMessages.find((message) => message.id === selectedMessageId && message.chatId === chat.id);
+  const selectedMessageQuery = useMessage(instanceId, selectedMessageId ?? undefined, token, messagesEnabled);
+  const selectedMessage = selectedMessageQuery.data?.resource
+    ?? loadedMessages.find((message) => message.id === selectedMessageId && message.chatId === chat.id);
   const contact = contactQuery.data?.resource;
 
   return (
@@ -195,8 +127,9 @@ function ContextPanelDetails({ instanceId, token, contactsEnabled, chat, onBack 
         {contactReadState.isError && <InlineError error={contactReadState.error} onRetry={() => { void contactQuery.refetch(); }} className="chat-context-error" />}
       </section>
       {selectedMessage && instanceId
-        ? <SelectedMessage message={selectedMessage} instanceId={instanceId} />
+        ? <><ProjectionNotice meta={selectedMessageQuery.data?.meta} /><SelectedMessage message={selectedMessage} instanceId={instanceId} token={token} messagesEnabled={messagesEnabled} /></>
         : <section><p className="help">{selectedMessageId ? 'The selected message is not in the loaded history. Load older messages in the timeline.' : 'Select a message in the timeline to inspect delivery.'}</p></section>}
+      {selectedMessageQuery.isError && <InlineError error={selectedMessageQuery.error} onRetry={() => { void selectedMessageQuery.refetch(); }} className="chat-context-error" />}
     </aside>
   );
 }
@@ -212,6 +145,7 @@ export function ContextPanel({ instanceId, token, contactId, labelId, chat, onBa
   const capabilities = useInstanceCapabilities(instanceId, token);
   const contactsEnabled = hasCapability(capabilities.data, 'contacts_projection');
   const labelsEnabled = hasCapability(capabilities.data, 'labels_projection');
+  const messagesEnabled = hasCapability(capabilities.data, 'messages_projection');
   const contactQuery = useContact(instanceId, contactId, token, contactsEnabled);
   const contactReadState = useResilientReadState(contactQuery, contactQuery.data?.resource !== undefined);
   const contact = contactQuery.data?.resource;
@@ -293,5 +227,5 @@ export function ContextPanel({ instanceId, token, contactId, labelId, chat, onBa
     );
   }
 
-  return <ContextPanelDetails instanceId={instanceId} token={token} contactsEnabled={contactsEnabled} chat={chat} onBack={onBack} />;
+  return <ContextPanelDetails instanceId={instanceId} token={token} contactsEnabled={contactsEnabled} messagesEnabled={messagesEnabled} chat={chat} onBack={onBack} />;
 }

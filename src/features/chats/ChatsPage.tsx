@@ -7,6 +7,7 @@ import { ProjectionNotice } from '@/components/ProjectionNotice';
 import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { useResilientReadState } from '@/lib/query-state';
 import { dismissVirtualKeyboard, useVisualViewport } from '@/lib/useVisualViewport';
+import { Composer } from './Composer';
 import { ContextPanel } from './ContextPanel';
 import { ConversationList } from './ConversationList';
 import { MessageTimeline } from './MessageTimeline';
@@ -33,6 +34,8 @@ export function ChatsPage() {
   const directoryResourceId = contactId ?? labelId;
   const capabilities = useInstanceCapabilities(instanceId, selectedInstance?.token);
   const chatsEnabled = hasCapability(capabilities.data, 'chats_projection');
+  const messagesEnabled = hasCapability(capabilities.data, 'messages_projection');
+  const outboundEnabled = hasCapability(capabilities.data, 'outbound_rate_limit');
   const chat = useChat(instanceId, directoryResourceId ? undefined : chatId, selectedInstance?.token, chatsEnabled);
   const chatReadState = useResilientReadState(chat, chat.data?.resource !== undefined);
   const selectedChat = chat.data?.resource;
@@ -85,7 +88,7 @@ export function ChatsPage() {
   } else if (selectedChat === undefined) {
     timeline = <div className="timeline-pane" role="region" aria-label="Chat unavailable"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Unavailable</span><h2>Conversation details are unavailable.</h2><p>Refresh the persisted Chat projection before opening message history.</p></div></div></div>;
   } else {
-    timeline = <>{chatReadState.isStaleError && <InlineError error={chatReadState.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" />}<MessageTimeline instanceId={instanceId} chatId={chatId} /></>;
+    timeline = <>{chatReadState.isStaleError && <InlineError error={chatReadState.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" />}<MessageTimeline instanceId={instanceId} chatId={chatId} token={selectedInstance?.token} enabled={messagesEnabled} /></>;
   }
 
   return (
@@ -107,6 +110,9 @@ export function ChatsPage() {
         </header>
         {selectedChat && <ProjectionNotice meta={chat.data?.meta} />}
         {timeline}
+        {instanceId && chatId && selectedChat && messagesEnabled && outboundEnabled && selectedInstance?.token && !directoryResourceId && (
+          <Composer instanceId={instanceId} token={selectedInstance.token} instanceStatus={selectedInstance.status} chatId={chatId} chatName={threadTitle} />
+        )}
       </section>
 
       {activePane === 'context' && <button className="chat-context-backdrop" type="button" aria-label="Close details" onClick={() => setActivePane(directoryResourceId ? 'conversations' : 'thread')} />}

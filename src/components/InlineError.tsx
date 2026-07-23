@@ -9,11 +9,13 @@ import { SurfaceNotice } from './feedback/SurfaceNotice';
 export function InlineError({
   error,
   onRetry,
+  allowRetry = true,
   className = 'overview-error',
   announce = false,
 }: {
   error: unknown;
   onRetry: () => void;
+  allowRetry?: boolean;
   className?: string;
   announce?: boolean;
 }) {
@@ -72,7 +74,7 @@ export function InlineError({
           ? 'The projection is not ready. No live WhatsApp lookup will be used as a fallback.'
           : undefined}
       requestId={failure?.requestId}
-      action={!retryScheduled && (failure?.retryable || (rateLimited && retryAfter === 0))
+      action={allowRetry && !retryScheduled && (failure?.retryable || (rateLimited && retryAfter === 0))
         ? {
             label: 'Retry',
             run: () => {

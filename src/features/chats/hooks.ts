@@ -3,16 +3,12 @@ import { useApi } from '@/api/ApiProvider';
 import { getContact, listContacts } from '@/api/contacts';
 import { getChat, listChats } from '@/api/chats';
 import {
-  cancelMessage,
-  getMessageDeliveryHistory,
-  listInstanceMessages,
-  registerMedia,
-  retryMessage,
-  sendInstanceMediaMessage,
-  sendInstanceTextMessage,
+  getMessage,
+  listMessageReceipts,
+  listMessages,
+  sendTextMessage,
 } from '@/api/messages';
-import { getInstance, listInstances } from '@/api/instances';
-import { notImplemented } from '@/api/envelopes';
+import { listInstances } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
 import { getLabel, listLabels } from '@/api/labels';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
@@ -61,20 +57,40 @@ export function useChat(instanceId: string | undefined, chatId: string | undefin
   });
 }
 
-export function useInstanceMessages(instanceId: string | undefined) {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
+export function useInstanceMessages(
+  instanceId: string | undefined,
+  chatId: string | undefined,
+  token: string | undefined,
+  enabled = true,
+) {
+  const client = useInstanceClient(token);
   return useInfiniteQuery({
-    queryKey: queryKeys.instanceMessages(instanceId ?? '', {}),
-    queryFn: ({ pageParam }) => listInstanceMessages(client, instanceId ?? '', {
-      cursor: pageParam,
-      limit: 100,
-      sort: '-createdAt',
-    }),
+    queryKey: queryKeys.instanceMessages(instanceId ?? '', chatId ?? '', {}),
+    queryFn: ({ pageParam }) => listMessages(client!, chatId ?? '', { cursor: pageParam, limit: 100 }),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
-    enabled: instanceId !== undefined,
-    refetchInterval,
+    getNextPageParam: (lastPage) => lastPage.resource.pagination.nextCursor ?? undefined,
+    enabled: enabled && instanceId !== undefined && chatId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useResetInstanceMessages(instanceId: string | undefined, chatId: string | undefined) {
+  const queryClient = useQueryClient();
+  return () => queryClient.resetQueries({
+    queryKey: queryKeys.instanceMessages(instanceId ?? '', chatId ?? '', {}),
+    exact: true,
+  });
+}
+
+export function useMessage(instanceId: string | undefined, messageId: string | undefined, token: string | undefined, enabled = true) {
+  const client = useInstanceClient(token);
+  return useQuery({
+    queryKey: queryKeys.message(instanceId ?? '', messageId ?? ''),
+    queryFn: () => getMessage(client!, messageId ?? ''),
+    enabled: enabled && instanceId !== undefined && messageId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 
@@ -110,51 +126,24 @@ export function useContact(
   });
 }
 
-export function useMessageDeliveryHistory(messageId: string | undefined) {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
+export function useMessageDeliveryHistory(instanceId: string | undefined, messageId: string | undefined, token: string | undefined, enabled = true) {
+  const client = useInstanceClient(token);
   return useQuery({
-    queryKey: queryKeys.messageDeliveryHistory(messageId ?? ''),
-    queryFn: () => getMessageDeliveryHistory(client, messageId ?? ''),
-    enabled: messageId !== undefined,
-    refetchInterval,
+    queryKey: queryKeys.messageDeliveryHistory(instanceId ?? '', messageId ?? ''),
+    queryFn: () => listMessageReceipts(client!, messageId ?? ''),
+    enabled: enabled && instanceId !== undefined && messageId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 
-export function useMessagingInstance(instanceId: string | undefined) {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
-  return useQuery({
-    queryKey: queryKeys.instance(instanceId ?? ''),
-    queryFn: () => getInstance(client, instanceId ?? ''),
-    enabled: instanceId !== undefined,
-    refetchInterval,
-  });
-}
-
-export function useRequestInstanceReconnect(instanceId: string) {
-  const queryClient = useQueryClient();
-  const feedback = useFeedback();
-  return useMutation({
-    mutationFn: () => Promise.reject(notImplemented('Instance reconnect')),
-    onSuccess: async () => {
-      feedback.accepted({
-        title: 'Instance reconnect accepted',
-        detail: 'Connection state will update automatically.',
-        dedupeKey: `instance:${instanceId}:reconnect`,
-      });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.instance(instanceId) });
-    },
-  });
-}
-
-export function useSendTextMessage(instanceId: string) {
-  const client = useApi();
+export function useSendTextMessage(instanceId: string, token: string | undefined) {
+  const client = useInstanceClient(token);
   const queryClient = useQueryClient();
   const feedback = useFeedback();
   return useMutation({
     mutationFn: ({ chatId, text }: { chatId: string; text: string }) => (
-      sendInstanceTextMessage(client, instanceId, { to: chatId, text })
+      sendTextMessage(client!, chatId, text)
     ),
     onSuccess: async (result, variables) => {
       feedback.command(result.disposition, {
@@ -164,7 +153,10 @@ export function useSendTextMessage(instanceId: string) {
         requestId: result.requestId,
         dedupeKey: `message:${variables.chatId}:send`,
       });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, {}) });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.instanceChats(instanceId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, variables.chatId, {}) }),
+      ]);
     },
   });
 }
@@ -188,82 +180,5 @@ export function useLabel(instanceId: string | undefined, labelId: string | undef
     enabled: enabled && instanceId !== undefined && labelId !== undefined && client !== undefined,
     staleTime: 30_000,
     refetchInterval: 60_000,
-  });
-}
-
-
-function useMessageAction(instanceId: string, action: 'retry' | 'cancel') {
-  const client = useApi();
-  const queryClient = useQueryClient();
-  const feedback = useFeedback();
-  return useMutation({
-    mutationFn: (messageId: string) => action === 'retry'
-      ? retryMessage(client, messageId)
-      : cancelMessage(client, messageId),
-    onSuccess: async (result, messageId) => {
-      feedback.command(result.disposition, {
-        action: `Message ${action}`,
-        acceptedDetail: 'The command was accepted. Message status will update in history.',
-        completedDetail: 'The command completed. Delivery status remains separate and will update in history.',
-        requestId: result.requestId,
-        dedupeKey: `message:${messageId}:${action}`,
-      });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.message(messageId) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, {}) }),
-      ]);
-    },
-  });
-}
-
-export function useRetryMessage(instanceId: string) {
-  return useMessageAction(instanceId, 'retry');
-}
-
-export function useCancelMessage(instanceId: string) {
-  return useMessageAction(instanceId, 'cancel');
-}
-
-export function useSendMediaMessage(instanceId: string) {
-  const client = useApi();
-  const queryClient = useQueryClient();
-  const feedback = useFeedback();
-  return useMutation({
-    mutationFn: async ({ chatId, reference, contentType, caption }: {
-      chatId: string;
-      reference: string;
-      contentType?: string;
-      caption?: string;
-    }) => {
-      const isUrl = /^https?:\/\//iu.test(reference);
-      const registration = await registerMedia(client, {
-        ...(isUrl ? { url: reference } : { mediaRef: reference }),
-        ...(contentType ? { contentType } : {}),
-      });
-      feedback.command(registration.disposition, {
-        action: 'Media registration',
-        acceptedDetail: 'The media reference was accepted for processing.',
-        completedDetail: 'The media reference was registered.',
-        requestId: registration.requestId,
-        dedupeKey: `media:${reference}:register`,
-      });
-      const registeredReference = registration.operation?.resultRef ?? reference;
-      return sendInstanceMediaMessage(client, instanceId, {
-        type: 'media',
-        to: chatId,
-        ...(registration.operation?.resultRef ? { mediaId: registeredReference } : { mediaRef: registeredReference }),
-        ...(caption ? { caption } : {}),
-      });
-    },
-    onSuccess: async (result, variables) => {
-      feedback.command(result.disposition, {
-        action: 'Media message send',
-        acceptedDetail: 'The send command was accepted. Delivery status will update in message history.',
-        completedDetail: 'The send command completed. Delivery status remains separate and will update in message history.',
-        requestId: result.requestId,
-        dedupeKey: `message:${variables.chatId}:send-media`,
-      });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(instanceId, {}) });
-    },
   });
 }
