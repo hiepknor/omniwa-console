@@ -248,6 +248,13 @@ tbody tr.selected{background:var(--accent-tint);box-shadow:inset 2px 0 0 var(--f
 .overview-posture-read strong{font-size:12px;line-height:16px;color:var(--fg-2)}
 .overview-posture-read small{font-size:11px;line-height:16px;color:var(--muted)}
 .overview-posture-read-unreachable strong{color:var(--fg)}
+.overview-instance-health-list{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1px;margin-top:var(--space-3);overflow:hidden;border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--border-subtle)}
+.overview-instance-health{min-width:0;background:var(--bg)}
+.overview-instance-health-head{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);padding:var(--space-2) var(--space-4);border-bottom:1px solid var(--border-subtle)}
+.overview-instance-health-head strong{min-width:0;overflow:hidden;font-size:11px;line-height:16px;color:var(--fg-2);text-overflow:ellipsis;white-space:nowrap}
+.overview-instance-health-head span{flex:0 0 auto;font-size:10px;line-height:16px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted)}
+.overview-instance-health-reads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.overview-instance-health-empty{grid-column:1/-1;margin-top:var(--space-3)}
 .dot-ok{background:var(--ok)}.dot-pending{background:var(--pending)}.dot-degraded{background:var(--degraded)}
 .dot-failed{background:var(--failed)}.dot-info{background:var(--info)}
 
@@ -336,6 +343,9 @@ tbody tr.selected{background:var(--accent-tint);box-shadow:inset 2px 0 0 var(--f
   .overview-posture-reads{grid-template-columns:minmax(0,1fr)}
   .overview-posture-read{min-height:52px;padding-inline:var(--space-2)}
   .overview-posture-read+.overview-posture-read{border-top:1px solid var(--border-subtle);border-left:0}
+  .overview-instance-health-list{grid-template-columns:minmax(0,1fr)}
+  .overview-instance-health-reads{grid-template-columns:minmax(0,1fr)}
+  .overview-instance-health-head{align-items:flex-start;flex-direction:column;gap:2px;padding-inline:var(--space-2)}
   .overview-command-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"attention" "actions" "coverage"}
   .overview-attention{min-height:0;padding:var(--space-4)}
   .overview-attention-body{align-items:flex-start;flex-direction:column;padding:var(--space-5) 0}

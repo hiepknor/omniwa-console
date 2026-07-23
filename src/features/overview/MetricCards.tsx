@@ -2,10 +2,10 @@ import { formatCount, relativeTime } from '@/lib/format';
 import { useOverview, useStableReadState } from './hooks';
 import { OverviewDiagnostics } from './OverviewDiagnostics';
 
-type Metric = { label: string; value: number; context: string };
+type Metric = { label: string; value?: number; context: string };
 
-export function MetricCards() {
-  const overview = useOverview('24h');
+export function MetricCards({ window = '24h' }: { window?: string }) {
+  const overview = useOverview(window);
   const state = useStableReadState(overview, overview.data !== undefined);
   const snapshot = overview.data;
 
@@ -16,14 +16,21 @@ export function MetricCards() {
     return <section className="overview-coverage" aria-labelledby="overview-metrics-error"><div className="overview-section-label"><span>Persisted metrics</span><span>Unavailable</span></div><h2 id="overview-metrics-error">The overview snapshot cannot be read.</h2><p>Unavailable counters remain unreported; they are not presented as zero.</p><OverviewDiagnostics id="overview-metric-diagnostics" diagnostics={[{ source: 'Persisted overview', error: state.error }]} onRetry={() => { void overview.refetch(); }} /></section>;
   }
 
-  const window = snapshot.window.durationSeconds > 0 ? `${Math.round(snapshot.window.durationSeconds / 3_600)}h window` : 'Window unavailable';
+  const duration = snapshot.window.durationSeconds;
+  const windowLabel = duration !== undefined && duration > 0 ? `${Math.round(duration / 3_600)}h window` : 'Window unavailable';
+  const instanceContext = snapshot.instances.connected === undefined
+    ? 'Connected count unavailable'
+    : `${formatCount(snapshot.instances.connected)} connected · persisted state`;
+  const messageContext = snapshot.messages.incoming === undefined || snapshot.messages.outgoing === undefined
+    ? `Direction counts unavailable · ${windowLabel}`
+    : `${formatCount(snapshot.messages.incoming)} in · ${formatCount(snapshot.messages.outgoing)} out · ${windowLabel}`;
   const metrics: Metric[] = [
-    { label: 'Instances', value: snapshot.instances.total, context: `${formatCount(snapshot.instances.connected)} connected · persisted state` },
+    { label: 'Instances', value: snapshot.instances.total, context: instanceContext },
     { label: 'Groups', value: snapshot.projections.groups, context: 'Active projection rows' },
     { label: 'Contacts', value: snapshot.projections.contacts, context: 'Active projection rows' },
     { label: 'Chats', value: snapshot.projections.chats, context: 'Active projection rows' },
-    { label: 'Messages', value: snapshot.messages.total, context: `${formatCount(snapshot.messages.incoming)} in · ${formatCount(snapshot.messages.outgoing)} out · ${window}` },
-    { label: 'Events', value: snapshot.projections.events, context: `Durable history · ${window}` },
+    { label: 'Messages', value: snapshot.messages.total, context: messageContext },
+    { label: 'Events', value: snapshot.projections.events, context: `Durable history · ${windowLabel}` },
   ];
 
   return (
@@ -32,9 +39,12 @@ export function MetricCards() {
         <div><span className="overview-eyebrow">Persisted metrics</span><h2 id="overview-metrics-title">Projection snapshot</h2></div>
         <span className="overview-metric-state">{state.isStaleError ? 'Stale' : `Generated ${relativeTime(snapshot.generatedAt) || '—'}`}</span>
       </div>
-      <p>Scope: <span className="mono">{snapshot.scope.type}{snapshot.scope.instanceId ? `:${snapshot.scope.instanceId}` : ''}</span>. Flow counters use the explicit {window}; entity counters are current active rows.</p>
+      <p>Scope: <span className="mono">{snapshot.scope.type}{snapshot.scope.instanceId ? `:${snapshot.scope.instanceId}` : ''}</span>. Flow counters use the explicit {windowLabel}; entity counters are current active rows.</p>
       <div className="overview-metrics">
-        {metrics.map((metric) => <article className="overview-metric-card" data-state={state.isStaleError ? 'stale' : 'fresh'} key={metric.label}><div className="label">{metric.label}</div><div className="value num">{formatCount(metric.value)}</div><div className="ctx"><span>{metric.context}</span></div></article>)}
+        {metrics.map((metric) => {
+          const reported = metric.value !== undefined;
+          return <article className="overview-metric-card" data-state={state.isStaleError ? 'stale' : reported ? 'fresh' : 'unavailable'} key={metric.label}><div className="label">{metric.label}</div><div className={reported ? 'value num' : 'value overview-value-unavailable'}>{reported ? formatCount(metric.value) : 'Not reported'}</div><div className="ctx"><span>{reported ? metric.context : 'Source value unavailable'}</span></div></article>;
+        })}
       </div>
       {state.isStaleError && <OverviewDiagnostics id="overview-metric-diagnostics" diagnostics={[{ source: 'Persisted overview refresh', error: state.error }]} onRetry={() => { void overview.refetch(); }} />}
     </section>

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from './client';
-import { getOverview, getServerHealth } from './overview';
+import { getOverview, getProjectionHealth, getServerHealth } from './overview';
 
 function ok(data: unknown) {
   return { data, response: new Response(null, { status: 200 }) };
@@ -44,6 +44,38 @@ describe('persisted overview adapters', () => {
       connection: { status: 'disconnected', connected: false },
       projection: expect.objectContaining({ status: 'degraded', total: 2 }),
       throttling: expect.objectContaining({ status: 'throttled', circuitState: 'open', retryAfterSeconds: 45 }),
+    }));
+  });
+
+  it('preserves unavailable overview counters instead of coercing them to zero', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: {
+      scope: { type: 'server' },
+      instances: { total: 2 },
+      projections: { groups: 0 },
+      messages: {},
+    } }));
+    const result = await getOverview({ GET } as unknown as ApiClient, '24h');
+    expect(result.instances).toEqual({ total: 2, connected: undefined, disconnected: undefined });
+    expect(result.projections).toEqual(expect.objectContaining({ groups: 0, contacts: undefined }));
+    expect(result.messages).toEqual({ total: undefined, incoming: undefined, outgoing: undefined });
+    expect(result.window.durationSeconds).toBeUndefined();
+  });
+
+  it('reads aggregate projection health from its assigned operation', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: {
+      generatedAt: '2026-07-23T01:00:00Z',
+      status: 'degraded',
+      total: 4,
+      byStatus: { ready: 3, stale: 1 },
+      resources: [{ resource: 'groups', syncStatus: 'stale', eventLagSeconds: 12 }],
+    } }));
+    const result = await getProjectionHealth({ GET } as unknown as ApiClient);
+    expect(GET).toHaveBeenCalledWith('/server/projection-health');
+    expect(result).toEqual(expect.objectContaining({
+      generatedAt: '2026-07-23T01:00:00Z',
+      status: 'degraded',
+      total: 4,
+      byStatus: { ready: 3, stale: 1 },
     }));
   });
 
