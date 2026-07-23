@@ -65,7 +65,7 @@ cross-cutting contract semantics.
 | [docs/FEEDBACK.md](docs/FEEDBACK.md) | Feedback and projection-state presentation |
 | [docs/REALTIME.md](docs/REALTIME.md) | Browser realtime posture and durable event recovery |
 | [docs/RATE_LIMIT.md](docs/RATE_LIMIT.md) | Information and outbound rate-limit behavior |
-| [docs/CAMPAIGNS.md](docs/CAMPAIGNS.md) | Campaign contract and planned UI |
+| [docs/CAMPAIGNS.md](docs/CAMPAIGNS.md) | Campaign contract and integrated UI behavior |
 | [docs/UNSUPPORTED_SURFACES.md](docs/UNSUPPORTED_SURFACES.md) | Routes with no public OmniWA GO management API |
 
 ## Development

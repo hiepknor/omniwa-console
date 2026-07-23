@@ -159,8 +159,7 @@ command becomes owned when its UI is included and verified.
 
 ## Campaigns — `/messages`, `/messages/new`
 
-Status: backend available; console implementation pending. Full behavior is in
-`docs/CAMPAIGNS.md`.
+Status: integrated. Full behavior is in `docs/CAMPAIGNS.md`.
 
 All operations in this section use the selected instance token. Pagination
 defaults to 50 and is capped at 100.
@@ -183,7 +182,8 @@ OmniWA GO.
 
 ## Events — `/events`
 
-Status: durable backend available; console migration pending.
+Status: integrated with durable history, exact-type filtering, opaque cursor
+pagination, retention metadata, and explicit no-backfill state.
 
 ```text
 GET /events?type=&limit=&cursor=
@@ -195,7 +195,8 @@ does not open the admin-key WebSocket.
 
 ## Overview — `/overview`
 
-Status: backend available; console migration pending.
+Status: integrated with URL-backed overview windows and separate API,
+projection, and rate-limit health presentation.
 
 ```text
 GET /server/overview?window=
