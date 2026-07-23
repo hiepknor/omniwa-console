@@ -50,6 +50,8 @@ cross-cutting contract semantics.
 
 ## Documentation
 
+- [Immutable deployment](./docs/DEPLOYMENT.md)
+
 | Document | Purpose |
 | --- | --- |
 | [AGENTS.md](AGENTS.md) | Mandatory repository rules for coding agents |
