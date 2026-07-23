@@ -19,7 +19,8 @@ Rules:
 | Shared capability/error/projection layer | Available | Integrated |
 | Instances | Available | Integrated |
 | Groups | Projection available | Projection list/detail/search integrated |
-| Chats and Messages | Projection available | Pending migration |
+| Chats | Projection available | Projection list/detail integrated |
+| Messages and delivery | Projection available | Pending migration |
 | Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
 | Labels | Projection available | Directory list/detail integrated in Chats workspace |
 | Events | Durable history available | Pending migration |
@@ -100,9 +101,9 @@ to a live WhatsApp read.
 
 ## Chats workspace — `/chats/:instanceId?/:chatId?`
 
-Status: Contacts list/search/detail and Labels list/detail are integrated as
-directory/context surfaces. Chats, Messages, and delivery history remain
-pending.
+Status: Chat list/detail, Contacts list/search/detail, and Labels list/detail are
+integrated. Messages, delivery history, and Composer commands remain pending and
+are not exposed as working behavior.
 
 Core projection ownership:
 
@@ -125,6 +126,10 @@ the backend's legacy bare-array list; capability readiness distinguishes a valid
 empty label projection from an unavailable one. Label assignments are consumed
 from future Chat/Message projection fields rather than reconstructed in the
 browser.
+
+Chat pagination is accumulated intentionally. An invalid opaque cursor resets
+the Chat query to its first page. The public Chat DTO currently has no label
+association field, so the Console does not show or infer chat-label filters.
 
 Core commands used by the workspace when implemented:
 

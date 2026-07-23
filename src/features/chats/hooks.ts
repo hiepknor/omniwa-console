@@ -1,17 +1,16 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
 import { getContact, listContacts } from '@/api/contacts';
+import { getChat, listChats } from '@/api/chats';
 import {
   cancelMessage,
-  getChat,
   getMessageDeliveryHistory,
-  listInstanceChats,
   listInstanceMessages,
   registerMedia,
   retryMessage,
   sendInstanceMediaMessage,
   sendInstanceTextMessage,
-} from '@/api/chats';
+} from '@/api/messages';
 import { getInstance, listInstances } from '@/api/instances';
 import { notImplemented } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
@@ -30,27 +29,35 @@ export function usePickerInstances() {
   });
 }
 
-export function useInstanceChats(instanceId: string | undefined, enabled = true) {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
+export function useInstanceChats(instanceId: string | undefined, token: string | undefined, enabled = true) {
+  const client = useInstanceClient(token);
   return useInfiniteQuery({
     queryKey: queryKeys.instanceChats(instanceId ?? '', {}),
-    queryFn: ({ pageParam }) => listInstanceChats(client, instanceId ?? '', { cursor: pageParam, limit: 50 }),
+    queryFn: ({ pageParam }) => listChats(client!, { cursor: pageParam, limit: 50 }),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.resource?.pagination?.nextCursor,
-    enabled: enabled && instanceId !== undefined,
-    refetchInterval,
+    getNextPageParam: (lastPage) => lastPage.resource.pagination.nextCursor ?? undefined,
+    enabled: enabled && instanceId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 
-export function useChat(chatId: string | undefined) {
-  const client = useApi();
-  const refetchInterval = useRealtimeRefetchInterval();
+export function useResetInstanceChats(instanceId: string | undefined) {
+  const queryClient = useQueryClient();
+  return () => queryClient.resetQueries({
+    queryKey: queryKeys.instanceChats(instanceId ?? '', {}),
+    exact: true,
+  });
+}
+
+export function useChat(instanceId: string | undefined, chatId: string | undefined, token: string | undefined, enabled = true) {
+  const client = useInstanceClient(token);
   return useQuery({
-    queryKey: queryKeys.chat(chatId ?? ''),
-    queryFn: () => getChat(client, chatId ?? ''),
-    enabled: chatId !== undefined,
-    refetchInterval,
+    queryKey: queryKeys.chat(instanceId ?? '', chatId ?? ''),
+    queryFn: () => getChat(client!, chatId ?? ''),
+    enabled: enabled && instanceId !== undefined && chatId !== undefined && client !== undefined,
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 }
 

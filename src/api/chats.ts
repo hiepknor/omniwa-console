@@ -1,77 +1,82 @@
 import type { ApiClient } from './client';
-import type { components } from './generated/platform-schema';
-import { notImplemented, NOT_IMPLEMENTED_READ, type CollectionEnvelope, type CommandResult, type PublicData, type UnavailableRead } from './envelopes';
+import { unwrapProjection, type ProjectionMeta } from './envelopes';
+import type { components } from './generated/schema';
 
-// omniwa-go has no list-chats / list-messages / message-history REST surface, and
-// realtime (its only message source) is WebSocket-only and disabled here. The
-// chats workspace is stubbed until omniwa-go grows chat/history endpoints.
-export type ChatResource = components['schemas']['ChatResource'];
-export type MessageResource = components['schemas']['MessageResource'];
-export type MediaResource = components['schemas']['MediaResource'];
-export type MediaMessageRequest = components['schemas']['MediaMessageRequest'];
-export type MediaRegistrationRequest = components['schemas']['MediaRegistrationRequest'];
-export type ChatPagination = CollectionEnvelope['meta']['pagination'];
-export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
+type ChatPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat'];
 
-export async function listInstanceChats(
-  _client: ApiClient,
-  _instanceId: string,
-  _params: { cursor?: string; limit?: number } = {},
-): Promise<ReadResult<{ items: ChatResource[]; pagination: ChatPagination }>> {
-  return { unavailable: NOT_IMPLEMENTED_READ };
+export type ChatType = 'direct' | 'group' | 'newsletter' | 'broadcast' | 'unknown';
+
+export type ChatResource = {
+  resourceType: 'chat';
+  id: string;
+  contactId?: string;
+  type: ChatType;
+  displayName?: string;
+  lastMessageId?: string;
+  lastMessageAt?: string;
+  lastActivityAt?: string;
+  unreadCount: number;
+  archived?: boolean;
+  pinned?: boolean;
+  mutedUntil?: string;
+  disappearingTimer?: number;
+};
+
+export type ChatPage = {
+  items: ChatResource[];
+  pagination: { nextCursor: string | null; hasMore: boolean };
+};
+
+export type ChatReadResult<T> = { resource: T; meta?: ProjectionMeta };
+
+function nonEmpty(value: string | undefined): string | undefined {
+  return value?.trim() || undefined;
 }
 
-export async function getChat(_client: ApiClient, _chatId: string): Promise<ReadResult<ChatResource>> {
-  return { unavailable: NOT_IMPLEMENTED_READ };
+function chatType(value: string | undefined): ChatType {
+  return value === 'direct' || value === 'group' || value === 'newsletter' || value === 'broadcast'
+    ? value
+    : 'unknown';
 }
 
-export async function listInstanceMessages(
-  _client: ApiClient,
-  _instanceId: string,
-  _params: { cursor?: string; limit?: number; sort?: string } = {},
-): Promise<ReadResult<{ items: MessageResource[]; pagination: ChatPagination }>> {
-  return { unavailable: NOT_IMPLEMENTED_READ };
+function toChat(payload: ChatPayload, fallbackId = ''): ChatResource {
+  return {
+    resourceType: 'chat',
+    id: nonEmpty(payload.chatId) ?? fallbackId,
+    contactId: nonEmpty(payload.contactId),
+    type: chatType(payload.type),
+    displayName: nonEmpty(payload.displayName),
+    lastMessageId: nonEmpty(payload.lastMessageId),
+    lastMessageAt: nonEmpty(payload.lastMessageAt),
+    lastActivityAt: nonEmpty(payload.lastActivityAt),
+    unreadCount: Math.max(0, payload.unreadCount ?? 0),
+    archived: payload.archived,
+    pinned: payload.pinned,
+    mutedUntil: nonEmpty(payload.mutedUntil),
+    disappearingTimer: payload.disappearingTimer,
+  };
 }
 
-export async function getMessage(_client: ApiClient, _messageId: string): Promise<ReadResult<MessageResource>> {
-  return { unavailable: NOT_IMPLEMENTED_READ };
+export async function listChats(
+  client: ApiClient,
+  params: { cursor?: string; limit?: number } = {},
+): Promise<ChatReadResult<ChatPage>> {
+  const projection = unwrapProjection<ChatPayload[]>(await client.GET('/chat/list', {
+    params: { query: { cursor: params.cursor, limit: params.limit ?? 50 } },
+  }));
+  const nextCursor = projection.meta?.nextCursor ?? null;
+  return {
+    resource: {
+      items: (projection.resource ?? []).map((payload) => toChat(payload)).filter((chat) => chat.id !== ''),
+      pagination: { nextCursor, hasMore: nextCursor !== null },
+    },
+    meta: projection.meta,
+  };
 }
 
-export async function getMessageDeliveryHistory(
-  _client: ApiClient,
-  _messageId: string,
-): Promise<ReadResult<{ data: PublicData; requestId: string }>> {
-  return { unavailable: NOT_IMPLEMENTED_READ };
-}
-
-export async function getMedia(_client: ApiClient, _mediaId: string): Promise<ReadResult<MediaResource>> {
-  return { unavailable: NOT_IMPLEMENTED_READ };
-}
-
-export async function sendInstanceTextMessage(
-  _client: ApiClient,
-  _instanceId: string,
-  _body: { to: string; text: string },
-): Promise<CommandResult> {
-  throw notImplemented('Send text message');
-}
-
-export async function sendInstanceMediaMessage(
-  _client: ApiClient,
-  _instanceId: string,
-  _body: MediaMessageRequest,
-): Promise<CommandResult> {
-  throw notImplemented('Send media message');
-}
-
-export async function retryMessage(_client: ApiClient, _messageId: string): Promise<CommandResult> {
-  throw notImplemented('Retry message');
-}
-
-export async function cancelMessage(_client: ApiClient, _messageId: string): Promise<CommandResult> {
-  throw notImplemented('Cancel message');
-}
-
-export async function registerMedia(_client: ApiClient, _body: MediaRegistrationRequest): Promise<CommandResult> {
-  throw notImplemented('Register media');
+export async function getChat(client: ApiClient, chatId: string): Promise<ChatReadResult<ChatResource>> {
+  const projection = unwrapProjection<ChatPayload>(await client.GET('/chat/info/{chatId}', {
+    params: { path: { chatId } },
+  }));
+  return { resource: toChat(projection.resource, chatId), meta: projection.meta };
 }

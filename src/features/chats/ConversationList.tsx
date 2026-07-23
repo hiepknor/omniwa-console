@@ -16,7 +16,6 @@ import { hasCapability } from '@/api/capabilities';
 import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import type { InstanceResource } from '@/api/instances';
-import { CategoryPill } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { ProjectionNotice } from '@/components/ProjectionNotice';
 import { RealtimeIndicator } from '@/components/RealtimeIndicator';
@@ -24,7 +23,7 @@ import { relativeTime } from '@/lib/format';
 import { cursorRecoveryAction } from '@/lib/cursor-recovery';
 import { projectionCollectionState } from '@/lib/projection-collection-state';
 import { useResilientReadState } from '@/lib/query-state';
-import { useInstanceChats, useInstanceContacts, useInstanceLabels, usePickerInstances } from './hooks';
+import { useInstanceChats, useInstanceContacts, useInstanceLabels, usePickerInstances, useResetInstanceChats } from './hooks';
 
 function statusDot(status: string | undefined) {
   switch (status?.toLowerCase()) {
@@ -200,31 +199,20 @@ export function ConversationList({ instanceId, chatId }: {
   const directoryMode = contactsMode || labelsMode;
   const explicitChats = directory === 'chats';
   const [searchDraft, setSearchDraft] = useState(search);
-  const chatsQuery = useInstanceChats(instanceId, !directoryMode);
-  const activeLabelIds = searchParams.getAll('label');
-  const pages = chatsQuery.data?.pages ?? [];
-  const chats = useMemo(() => pages.flatMap((page) => page.resource?.items ?? []), [pages]);
-  const chatsReadState = useResilientReadState(chatsQuery, pages.some((page) => page.resource !== undefined));
-  const unavailable = pages.some((page) => page.unavailable !== undefined);
   const capabilities = useInstanceCapabilities(instanceId, selectedInstance?.token);
+  const chatsAdvertised = hasCapability(capabilities.data, 'chats_projection');
   const contactsAdvertised = hasCapability(capabilities.data, 'contacts_projection');
   const labelsAdvertised = hasCapability(capabilities.data, 'labels_projection');
-  const contactsQuery = useInstanceContacts(instanceId, selectedInstance?.token, { search, cursor, limit: 50 }, contactsAdvertised && (contactsMode || (!explicitChats && !labelsMode && unavailable)));
+  const chatsQuery = useInstanceChats(instanceId, selectedInstance?.token, chatsAdvertised && !directoryMode);
+  const resetChats = useResetInstanceChats(instanceId);
+  const pages = chatsQuery.data?.pages ?? [];
+  const chats = useMemo(() => pages.flatMap((page) => page.resource.items), [pages]);
+  const chatsReadState = useResilientReadState(chatsQuery, pages.length > 0);
+  const contactsQuery = useInstanceContacts(instanceId, selectedInstance?.token, { search, cursor, limit: 50 }, contactsAdvertised && (contactsMode || (!explicitChats && !labelsMode && !chatsAdvertised && chats.length === 0)));
   const contactsReadState = useResilientReadState(contactsQuery, contactsQuery.data?.resource !== undefined);
-  const labelsQuery = useInstanceLabels(instanceId, selectedInstance?.token, labelsAdvertised && !contactsMode);
+  const labelsQuery = useInstanceLabels(instanceId, selectedInstance?.token, labelsAdvertised && labelsMode);
   const labelsReadState = useResilientReadState(labelsQuery, labelsQuery.data?.resource !== undefined);
   const labels = labelsQuery.data?.resource ?? [];
-  const labelNames = useMemo(() => new Map(labels.map((label) => [label.id, label.name ?? label.id])), [labels]);
-  const filteredChats = useMemo(() => {
-    const needle = search.trim().toLocaleLowerCase();
-    return chats.filter((chat) => {
-      const matchesSearch = !needle
-        || chat.id.toLocaleLowerCase().includes(needle)
-        || chat.displayName?.toLocaleLowerCase().includes(needle);
-      const matchesLabels = activeLabelIds.every((labelId) => chat.labelIds?.includes(labelId));
-      return matchesSearch && matchesLabels;
-    });
-  }, [activeLabelIds, chats, search]);
   const contacts = contactsQuery.data?.resource.items ?? [];
   const contactErrorCode = contactsQuery.error instanceof ApiFailure ? contactsQuery.error.code : undefined;
   const contactState = projectionCollectionState({
@@ -247,12 +235,21 @@ export function ConversationList({ instanceId, chatId }: {
     readinessAdvertised: labelsAdvertised,
     unavailable: false,
   });
-  const showingContacts = contactsMode || (!explicitChats && !labelsMode && unavailable && chats.length === 0);
+  const chatErrorCode = chatsQuery.error instanceof ApiFailure ? chatsQuery.error.code : undefined;
+  const chatState = projectionCollectionState({
+    errorCode: chatErrorCode,
+    hasInitialError: chatsReadState.isInitialError,
+    hasResource: pages.length > 0,
+    isInitialLoading: chatsReadState.isInitialLoading,
+    itemCount: chats.length,
+    projectionStatus: pages[0]?.meta?.syncStatus,
+    readinessAdvertised: chatsAdvertised,
+    unavailable: false,
+  });
+  const showingContacts = contactsMode || (!explicitChats && !labelsMode && !chatsAdvertised && chats.length === 0);
   const showingLabels = labelsMode;
   const selectedContact = contactsMode ? chatId : undefined;
   const selectedLabel = labelsMode ? chatId : undefined;
-  const labelsAvailable = labelsAdvertised && labels.length > 0;
-  const remainingLabels = labels.filter((label) => !activeLabelIds.includes(label.id));
   const filteredLabels = useMemo(() => {
     const needle = search.toLocaleLowerCase();
     return labels.filter((label) => !needle
@@ -319,24 +316,17 @@ export function ConversationList({ instanceId, chatId }: {
       void contactsQuery.refetch();
     }
   };
-  const removeLabel = (labelId: string) => {
-    const next = new URLSearchParams(searchParams);
-    next.delete('label');
-    activeLabelIds.filter((id) => id !== labelId).forEach((id) => next.append('label', id));
-    setSearchParams(next, { replace: true });
+  const retryChats = () => {
+    const attemptedCursor = pages.at(-1)?.meta?.nextCursor;
+    if (cursorRecoveryAction(chatErrorCode, attemptedCursor) === 'reset') void resetChats();
+    else void chatsQuery.refetch();
   };
-  const addLabel = (labelId: string) => {
-    const next = new URLSearchParams(searchParams);
-    next.append('label', labelId);
-    setSearchParams(next, { replace: true });
-  };
-
   let listContent: React.ReactNode;
   if (!instanceId) {
     listContent = pickerReadState.isInitialError ? (
       <InlineError error={pickerReadState.error} onRetry={() => { void picker.refetch(); }} className="chat-list-error" />
     ) : (
-      <div className="chat-calm-state"><span className="eyebrow">Instance required</span><h2>Select an instance</h2><p>Choose an instance to review its direct conversations.</p></div>
+      <div className="chat-calm-state"><span className="eyebrow">Instance required</span><h2>Select an instance</h2><p>Choose an instance to review its projected conversations.</p></div>
     );
   } else if (showingContacts && contactState === 'error') {
     listContent = <InlineError error={contactsReadState.error} onRetry={retryContacts} className="chat-list-error" />;
@@ -370,20 +360,18 @@ export function ConversationList({ instanceId, chatId }: {
         <span className="right"><span className="when">{label.color ? `color ${label.color}` : '—'}</span></span>
       </button>
     ));
-  } else if (chatsReadState.isInitialError) {
-    listContent = <InlineError error={chatsReadState.error} onRetry={() => { void chatsQuery.refetch(); }} className="chat-list-error" />;
-  } else if (chatsReadState.isInitialLoading) {
+  } else if (chatState === 'error') {
+    listContent = <InlineError error={chatsReadState.error} onRetry={retryChats} className="chat-list-error" />;
+  } else if (chatState === 'loading') {
     listContent = <div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading conversations.</h2><p>The first conversation read is in progress.</p></div>;
-  } else if (unavailable && chats.length === 0) {
-    listContent = <div className="chat-calm-state"><span className="eyebrow">Unavailable</span><h2>Chats are not available yet.</h2><p>The public chat projection has not been integrated into this Console build.</p></div>;
-  } else if (filteredChats.length === 0) {
+  } else if (chatState === 'not_ready' || chatState === 'syncing' || chatState === 'unavailable') {
+    listContent = <div className="chat-calm-state"><span className="eyebrow">Chat projection</span><h2>Chats are not ready yet.</h2><p>No live WhatsApp lookup will be used as a fallback.</p></div>;
+  } else if (chatState === 'empty') {
     listContent = (
-      <div className="chat-calm-state"><span className="eyebrow">0 chats</span><h2>{chats.length === 0 ? 'No direct conversations yet.' : 'No conversations match these filters.'}</h2><p>{chats.length === 0 ? 'New direct conversations will appear here.' : 'Adjust the search or remove a label filter.'}</p></div>
+      <div className="chat-calm-state"><span className="eyebrow">0 chats</span><h2>No conversations yet.</h2><p>New projected conversations will appear here.</p></div>
     );
   } else {
-    listContent = filteredChats.map((chat) => {
-      const firstLabelId = chat.labelIds?.[0];
-      const remainingLabelCount = Math.max(0, (chat.labelIds?.length ?? 0) - 1);
+    listContent = chats.map((chat) => {
       return (
       <button
         className={`convo${chat.id === chatId ? ' selected' : ''}`}
@@ -396,9 +384,7 @@ export function ConversationList({ instanceId, chatId }: {
         <span className="meta">
           <span className="name">{chat.displayName ?? chat.id}</span>
           <span className="sub">
-            {firstLabelId
-              ? <><CategoryPill compact>{labelNames.get(firstLabelId) ?? firstLabelId}</CategoryPill>{remainingLabelCount > 0 && <span className="chat-label-count">+{remainingLabelCount}</span>}</>
-              : <span className="chat-row-summary">{chat.type ?? 'Direct conversation'}</span>}
+            <span className="chat-row-summary">{chat.type}</span>
           </span>
         </span>
         <span className="right">
@@ -411,37 +397,23 @@ export function ConversationList({ instanceId, chatId }: {
   }
 
   return (
-    <aside className="convos" id="chat-conversations" aria-label={showingContacts ? 'Contact directory' : showingLabels ? 'Label directory' : 'Direct conversations'}>
+    <aside className="convos" id="chat-conversations" aria-label={showingContacts ? 'Contact directory' : showingLabels ? 'Label directory' : 'Conversations'}>
       <header className="head">
         <div className="chat-inbox-title-row"><h1>{showingContacts ? 'Contacts' : showingLabels ? 'Labels' : 'Chats'}</h1><div className="flex items-center gap-2"><PickerPopover label="Directory" trigger={(open) => <button className="btn sm" type="button" disabled={!instanceId} aria-haspopup="menu" aria-expanded={open}>{showingContacts ? 'Contacts' : showingLabels ? 'Labels' : 'Chats'}</button>}>{(close) => (['chats', 'contacts', 'labels'] as const).map((item) => <button key={item} type="button" role="menuitem" disabled={(item === 'chats' && !showingContacts && !showingLabels) || (item === 'contacts' && showingContacts) || (item === 'labels' && showingLabels)} onClick={() => { chooseDirectory(item); close(); }}>{item[0]?.toLocaleUpperCase()}{item.slice(1)}</button>)}</PickerPopover><RealtimeIndicator /></div></div>
         <InstancePicker instances={instances} selected={selectedInstance} onSelect={chooseInstance} />
-        <form onSubmit={(event) => { event.preventDefault(); setSearch(searchDraft.trim()); }}>
-          <label className="chat-search-label" htmlFor="chat-search">Search {showingContacts ? 'contacts' : showingLabels ? 'labels' : 'direct chats'}</label>
-          <div className="flex gap-2"><input className="search !min-h-11 min-w-0 flex-1" id="chat-search" type="search" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} placeholder={showingContacts ? 'Name, JID, username, or phone prefix…' : showingLabels ? 'Label name or ID…' : 'Search direct chats…'} disabled={!instanceId} /><button className="btn sm" type="submit" disabled={!instanceId || searchDraft.trim() === search}>Search</button></div>
-        </form>
-        {!showingContacts && !showingLabels && <div className="filters" role="group" aria-label="Active conversation filters">
-          {activeLabelIds.map((labelId) => (
-            <button data-badge="filter" className="chip filter-active" key={labelId} type="button" aria-label={`Remove label filter ${labelNames.get(labelId) ?? labelId}`} onClick={() => removeLabel(labelId)}>
-              {labelNames.get(labelId) ?? labelId} <span className="x" aria-hidden="true">✕</span>
-            </button>
-          ))}
-          {labelsAvailable && remainingLabels.length > 0 && (
-            <PickerPopover label="Labels" trigger={(open) => <button data-badge="filter" className="chip add" type="button" aria-haspopup="menu" aria-expanded={open}>+ label</button>}>
-              {(close) => remainingLabels.map((label) => (
-                <button key={label.id} type="button" role="menuitem" onClick={() => { addLabel(label.id); close(); }}>{label.name ?? label.id}</button>
-              ))}
-            </PickerPopover>
-          )}
-        </div>}
+        {(showingContacts || showingLabels) && <form onSubmit={(event) => { event.preventDefault(); setSearch(searchDraft.trim()); }}>
+          <label className="chat-search-label" htmlFor="chat-search">Search {showingContacts ? 'contacts' : showingLabels ? 'labels' : 'chats'}</label>
+          <div className="flex gap-2"><input className="search !min-h-11 min-w-0 flex-1" id="chat-search" type="search" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} placeholder={showingContacts ? 'Name, JID, username, or phone prefix…' : showingLabels ? 'Label name or ID…' : 'Search loaded chats…'} disabled={!instanceId} /><button className="btn sm" type="submit" disabled={!instanceId || searchDraft.trim() === search}>Search</button></div>
+        </form>}
       </header>
       {pickerReadState.isStaleError && <InlineError error={pickerReadState.error} onRetry={() => { void picker.refetch(); }} className="chat-list-error" />}
-      {!showingContacts && !showingLabels && labelsReadState.isError && <InlineError error={labelsReadState.error} onRetry={() => { void labelsQuery.refetch(); }} className="chat-list-error" />}
       {showingContacts && <ProjectionNotice meta={contactsQuery.data?.meta} className="chat-list-error" />}
       {showingLabels && <ProjectionNotice meta={labelsQuery.data?.meta} className="chat-list-error" />}
-      <nav className="list" aria-label={showingContacts ? 'Contact results' : showingLabels ? 'Label results' : 'Direct chat results'}>
+      {!showingContacts && !showingLabels && <ProjectionNotice meta={pages[0]?.meta} className="chat-list-error" />}
+      <nav className="list" aria-label={showingContacts ? 'Contact results' : showingLabels ? 'Label results' : 'Chat results'}>
         {showingContacts && contactsReadState.isStaleError && <InlineError error={contactsReadState.error} onRetry={retryContacts} className="chat-list-error" />}
         {showingLabels && labelsReadState.isStaleError && <InlineError error={labelsReadState.error} onRetry={() => { void labelsQuery.refetch(); }} className="chat-list-error" />}
-        {!showingContacts && !showingLabels && chatsReadState.isStaleError && <InlineError error={chatsReadState.error} onRetry={() => { void chatsQuery.refetch(); }} className="chat-list-error" />}
+        {!showingContacts && !showingLabels && chatsReadState.isStaleError && <InlineError error={chatsReadState.error} onRetry={retryChats} className="chat-list-error" />}
         {listContent}
       </nav>
       <footer className="table-foot">
