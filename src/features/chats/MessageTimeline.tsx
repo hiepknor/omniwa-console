@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { MessageResource } from '@/api/chats';
+import type { MessageResource } from '@/api/messages';
 import { InlineError } from '@/components/InlineError';
 import { calendarDayKey, calendarDayLabel, formatClockTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';

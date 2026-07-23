@@ -2,10 +2,11 @@ import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { hasCapability } from '@/api/capabilities';
 import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
-import type { ChatResource, MessageResource } from '@/api/chats';
+import type { ChatResource } from '@/api/chats';
+import type { MessageResource } from '@/api/messages';
 import { ProjectionNotice } from '@/components/ProjectionNotice';
 import type { PublicData } from '@/api/envelopes';
-import { CategoryPill, StatusIndicator } from '@/components/badges';
+import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { formatClockTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
@@ -13,7 +14,6 @@ import {
   useCancelMessage,
   useContact,
   useLabel,
-  useInstanceLabels,
   useInstanceMessages,
   useMessageDeliveryHistory,
   useRetryMessage,
@@ -157,46 +157,42 @@ function SelectedMessage({ message, instanceId }: { message: MessageResource; in
   );
 }
 
-function ContextPanelDetails({ instanceId, token, contactsEnabled, labelsEnabled, chat, onBack }: {
+function ContextPanelDetails({ instanceId, token, contactsEnabled, chat, onBack }: {
   instanceId: string | undefined;
   token: string | undefined;
   contactsEnabled: boolean;
-  labelsEnabled: boolean;
   chat: ChatResource;
   onBack: () => void;
 }) {
   const [searchParams] = useSearchParams();
   const selectedMessageId = searchParams.get('message');
-  const contactQuery = useContact(instanceId, chat.id, token, contactsEnabled);
-  const labels = useInstanceLabels(instanceId, token, labelsEnabled);
+  const contactQuery = useContact(instanceId, chat.type === 'direct' ? chat.id : undefined, token, contactsEnabled);
   const contactReadState = useResilientReadState(contactQuery, contactQuery.data?.resource !== undefined);
-  const labelsReadState = useResilientReadState(labels, labels.data?.resource !== undefined);
   const messagesQuery = useInstanceMessages(instanceId);
   const loadedMessages = useMemo(() => (messagesQuery.data?.pages ?? []).flatMap((page) => page.resource?.items ?? []), [messagesQuery.data?.pages]);
   const selectedMessage = loadedMessages.find((message) => message.id === selectedMessageId && message.chatId === chat.id);
   const contact = contactQuery.data?.resource;
-  const labelNames = new Map((labels.data?.resource ?? []).map((label) => [label.id, label.name ?? label.id]));
 
   return (
     <aside className={`context${selectedMessageId ? ' context--message' : ' context--contact'}`} id="chat-context" aria-label="Contact and selected message context">
       <header className="context-head">
-        <div><span className="eyebrow">{selectedMessageId ? 'Message' : 'Context'}</span><h2>{selectedMessageId ? 'Message details' : 'Contact details'}</h2></div>
+        <div><span className="eyebrow">{selectedMessageId ? 'Message' : 'Context'}</span><h2>{selectedMessageId ? 'Message details' : 'Conversation details'}</h2></div>
         <button className="btn sm context-close chat-icon-action" type="button" data-pane-target="thread" aria-label={selectedMessageId ? 'Close message details' : 'Back to conversation'} aria-controls="chat-thread" onClick={onBack}>
           <svg viewBox="0 0 24 24" aria-hidden="true">{selectedMessageId ? <path d="m7 7 10 10M17 7 7 17" /> : <path d="m15 18-6-6 6-6" />}</svg>
         </button>
       </header>
       <ProjectionNotice meta={contactQuery.data?.meta} />
       <section aria-labelledby="contact-facts-title">
-        <h3 id="contact-facts-title">Contact</h3>
+        <h3 id="contact-facts-title">Conversation</h3>
         <dl className="kv">
           <dt>Name</dt><dd>{chat.displayName ?? '—'}</dd>
-          <dt>Contact</dt><dd><span className="mono context-technical-value" title={contact?.id}>{contactQuery.isLoading ? 'Loading…' : contact?.id ?? '—'}</span></dd>
+          {chat.type === 'direct' && <><dt>Contact</dt><dd><span className="mono context-technical-value" title={contact?.id}>{contactQuery.isLoading ? 'Loading…' : contact?.id ?? '—'}</span></dd></>}
           <dt>Chat</dt><dd><span className="mono context-technical-value" title={chat.id}>{chat.id}</span></dd>
-          <dt>Labels</dt><dd>{chat.labelIds?.length ? chat.labelIds.map((labelId) => <CategoryPill compact className="mr-1 mb-1" key={labelId}>{labelNames.get(labelId) ?? labelId}</CategoryPill>) : '—'}</dd>
+          <dt>Type</dt><dd>{chat.type}</dd>
+          <dt>Unread</dt><dd>{chat.unreadCount}</dd>
         </dl>
         <p className="help read-only-note !text-[var(--fg-2)]">Labels are synced from WhatsApp — read-only here.</p>
         {contactReadState.isError && <InlineError error={contactReadState.error} onRetry={() => { void contactQuery.refetch(); }} className="chat-context-error" />}
-        {labelsReadState.isError && <InlineError error={labelsReadState.error} onRetry={() => { void labels.refetch(); }} className="chat-context-error" />}
       </section>
       {selectedMessage && instanceId
         ? <SelectedMessage message={selectedMessage} instanceId={instanceId} />
@@ -291,11 +287,11 @@ export function ContextPanel({ instanceId, token, contactId, labelId, chat, onBa
         <section className="chat-calm-state">
           <span className="eyebrow">Context</span>
           <h2>Select a conversation</h2>
-          <p>Choose a direct chat to inspect its contact and delivery context.</p>
+          <p>Choose a projected chat to inspect its conversation and delivery context.</p>
         </section>
       </aside>
     );
   }
 
-  return <ContextPanelDetails instanceId={instanceId} token={token} contactsEnabled={contactsEnabled} labelsEnabled={labelsEnabled} chat={chat} onBack={onBack} />;
+  return <ContextPanelDetails instanceId={instanceId} token={token} contactsEnabled={contactsEnabled} chat={chat} onBack={onBack} />;
 }

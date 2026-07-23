@@ -153,12 +153,19 @@ Keys mirror resource and credential scope:
 ['instances', instanceId, 'contact', contactId]
 ['instances', instanceId, 'labels']
 ['instances', instanceId, 'label', labelId]
+['instances', instanceId, 'chats', {}] # infinite-query cursors stay in page params
+['instances', instanceId, 'chat', chatId]
 ['instances', instanceId, 'messages', { cursor }]
 ['events', { type, cursor, limit }]
 ```
 
 Mutations wait for server acknowledgement, then invalidate the narrowest keys
 that cover changed projections. Do not clear the full cache for a local change.
+
+Resource adapters stay split by backend domain. Chat projection DTOs live in
+`src/api/chats.ts`; Message, receipt, media, and send contracts live in
+`src/api/messages.ts`. Do not restore the former cross-domain Platform types or
+infer fields such as chat-label associations that OmniWA GO does not expose.
 
 ## Mutation semantics
 

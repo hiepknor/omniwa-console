@@ -19,6 +19,8 @@ Completed:
   normalized detail views.
 - Labels projection directory with legacy bare-list compatibility and
   freshness-aware detail views.
+- Chats projection list/detail with stable keyset pagination and explicit
+  backend-owned fields.
 - Global capability provider and reusable instance capability hook.
 - Projection envelope metadata adapter and shared projection notice.
 - Machine-readable error adapter, `Retry-After` countdown, jittered manual retry,
@@ -26,7 +28,7 @@ Completed:
 
 Not yet integrated:
 
-- Chats, Messages, and delivery projections;
+- Messages and delivery projections;
 - durable Events;
 - Overview, split Health, and Projection Health;
 - Campaign UI;
@@ -79,6 +81,12 @@ rather than a Console-invented endpoint.
 
 Goal: replace the Chats workspace stubs with persisted projections.
 
+Chats slice implemented: list/detail reads are instance-token scoped,
+capability-gated, and normalized from the OmniWA GO projection contract. The
+workspace keeps stale snapshots visible, recovers invalid accumulated cursors
+by resetting to the first page, and does not expose Message/Composer behavior
+until the independent Messages slice is complete.
+
 - Implement chat list/detail and keyset pagination.
 - Implement message list/detail and delivery/read receipt history.
 - Preserve message direction, sender/recipient, content summary, media metadata,
@@ -87,6 +95,8 @@ Goal: replace the Chats workspace stubs with persisted projections.
 - Wire text/media send through existing public commands, then refresh the
   affected chat/message projections.
 - Never interpret send acknowledgement as `sent`, `delivered`, or `read`.
+- Consume label associations only when OmniWA GO adds them to the public
+  Chat/Message DTO; do not reconstruct persisted associations in the browser.
 - Verify new messages do not shift already-loaded cursor pages.
 
 Exit: an operator can browse persisted conversations, inspect delivery history,
