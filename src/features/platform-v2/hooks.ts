@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
 import { queryKeys } from '@/api/keys';
+import { PLATFORM_READ_POLICY, RECOVERY_STALE_TIME } from '@/lib/query-policy';
 import { getOverview, getProjectionHealth, getServerHealth } from '@/api/overview';
 import {
   discardProjectionFailure,
@@ -15,8 +16,7 @@ export function usePlatformOverview(window: string) {
   return useQuery({
     queryKey: queryKeys.overview(window),
     queryFn: () => getOverview(client, window),
-    staleTime: 15_000,
-    refetchInterval: 30_000,
+    ...PLATFORM_READ_POLICY,
   });
 }
 
@@ -25,8 +25,7 @@ export function usePlatformHealth() {
   return useQuery({
     queryKey: queryKeys.health,
     queryFn: () => getServerHealth(client),
-    staleTime: 15_000,
-    refetchInterval: 30_000,
+    ...PLATFORM_READ_POLICY,
   });
 }
 
@@ -35,8 +34,7 @@ export function usePlatformProjectionHealth() {
   return useQuery({
     queryKey: queryKeys.projectionHealth,
     queryFn: () => getProjectionHealth(client),
-    staleTime: 15_000,
-    refetchInterval: 30_000,
+    ...PLATFORM_READ_POLICY,
   });
 }
 
@@ -46,7 +44,7 @@ export function useProjectionFailures(filters: ProjectionFailureFilters, enabled
     queryKey: queryKeys.projectionFailures(filters),
     queryFn: () => getProjectionFailures(client, filters),
     enabled,
-    staleTime: 10_000,
+    staleTime: RECOVERY_STALE_TIME,
   });
 }
 

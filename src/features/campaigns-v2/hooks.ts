@@ -2,30 +2,29 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
 import { createCampaign, getCampaign, listCampaignAudit, listCampaignRecipients, listCampaigns, transitionCampaign, type CampaignRecipientConsent, type CampaignStatus } from '@/api/campaigns';
 import { queryKeys, SESSION_QUERY_SCOPE } from '@/api/keys';
-
-const READ_POLICY = { staleTime: 15_000, refetchInterval: 30_000 };
+import { CAMPAIGN_READ_POLICY } from '@/lib/query-policy';
 
 export function useCampaignsV2(status: CampaignStatus | undefined, cursor: string | undefined, enabled: boolean) {
   const client = useApi();
   const params = { status, cursor, limit: 50 };
-  return useQuery({ queryKey: queryKeys.instanceCampaigns(SESSION_QUERY_SCOPE, params), queryFn: () => listCampaigns(client, params), enabled, ...READ_POLICY });
+  return useQuery({ queryKey: queryKeys.instanceCampaigns(SESSION_QUERY_SCOPE, params), queryFn: () => listCampaigns(client, params), enabled, ...CAMPAIGN_READ_POLICY });
 }
 
 export function useCampaignV2(campaignId: string | undefined, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.campaign(SESSION_QUERY_SCOPE, campaignId ?? ''), queryFn: () => getCampaign(client, campaignId!), enabled: enabled && Boolean(campaignId), ...READ_POLICY });
+  return useQuery({ queryKey: queryKeys.campaign(SESSION_QUERY_SCOPE, campaignId ?? ''), queryFn: () => getCampaign(client, campaignId!), enabled: enabled && Boolean(campaignId), ...CAMPAIGN_READ_POLICY });
 }
 
 export function useCampaignRecipientsV2(campaignId: string | undefined, cursor: string | undefined, enabled: boolean) {
   const client = useApi();
   const params = { cursor, limit: 50 };
-  return useQuery({ queryKey: queryKeys.campaignRecipients(SESSION_QUERY_SCOPE, campaignId ?? '', params), queryFn: () => listCampaignRecipients(client, campaignId!, params), enabled: enabled && Boolean(campaignId), ...READ_POLICY });
+  return useQuery({ queryKey: queryKeys.campaignRecipients(SESSION_QUERY_SCOPE, campaignId ?? '', params), queryFn: () => listCampaignRecipients(client, campaignId!, params), enabled: enabled && Boolean(campaignId), ...CAMPAIGN_READ_POLICY });
 }
 
 export function useCampaignAuditV2(campaignId: string | undefined, cursor: string | undefined, enabled: boolean) {
   const client = useApi();
   const params = { cursor, limit: 50 };
-  return useQuery({ queryKey: queryKeys.campaignAudit(SESSION_QUERY_SCOPE, campaignId ?? '', params), queryFn: () => listCampaignAudit(client, campaignId!, params), enabled: enabled && Boolean(campaignId), ...READ_POLICY });
+  return useQuery({ queryKey: queryKeys.campaignAudit(SESSION_QUERY_SCOPE, campaignId ?? '', params), queryFn: () => listCampaignAudit(client, campaignId!, params), enabled: enabled && Boolean(campaignId), ...CAMPAIGN_READ_POLICY });
 }
 
 function useInvalidateCampaign(campaignId?: string) {

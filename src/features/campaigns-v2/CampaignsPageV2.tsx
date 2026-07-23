@@ -5,6 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { CampaignStatus } from '@/api/campaigns';
 import { ApiFailureNotice, Button, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
+import { omitSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { CampaignInspectorV2 } from './CampaignInspectorV2';
 import { useCampaignsV2 } from './hooks';
 import { campaignRouteState, setCampaignParam } from './route-state';
@@ -25,8 +26,8 @@ export function CampaignsPageV2() {
   const campaigns = useCampaignsV2(route.status, route.cursor, orchestration);
   const items = useMemo(() => campaigns.data?.items ?? [], [campaigns.data]);
   const setParam = (key: string, value?: string) => setSearchParams(setCampaignParam(searchParams, key, value), { replace: true });
-  const listParams = new URLSearchParams(searchParams); listParams.delete('created'); listParams.delete('tab'); listParams.delete('recipientCursor'); listParams.delete('auditCursor');
-  const listUrl = `/messages${listParams.size ? `?${listParams}` : ''}`;
+  const listParams = omitSearchParams(searchParams, ['created', 'tab', 'recipientCursor', 'auditCursor']);
+  const listUrl = withSearchParams('/messages', listParams);
 
   if (!instanceScope) return <Blocked detail="Campaign orchestration requires an instance credential. Admin scope cannot operate token-scoped campaigns, and no campaign request was sent." state="invalid" />;
   if (capabilities.isPending) return <Blocked detail="Discovering instance capabilities before enabling campaign orchestration." state="discovering" />;

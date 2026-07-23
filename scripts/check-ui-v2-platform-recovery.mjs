@@ -25,7 +25,7 @@ for (const required of ["GET('/server/projection-failures'", "'/server/projectio
 for (const required of ['projection_failure_operations', "keyKind !== 'admin'", 'useSearchParams()', 'minimum 8 characters', 'acknowledgement does not prove projection recovery', 'Automatic retries are disabled']) {
   if (!resources.recovery.includes(required)) failures.push(`Recovery workflow is missing ${required}`);
 }
-if (!resources.routeState.includes("searchParams.get('cursor')")) failures.push('Recovery route state is missing its opaque cursor');
+if (!resources.routeState.includes("readOptionalSearchParam(searchParams, 'cursor')")) failures.push('Recovery route state is missing its opaque cursor');
 if (resources.hooks.includes('retry:') || resources.recovery.includes('optimistic')) {
   failures.push('Recovery commands must not add retry or optimistic behavior');
 }

@@ -7,6 +7,7 @@ import { ApiFailure } from '@/api/envelopes';
 import { Button, Dialog, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
+import { updateSearchParams } from '@/lib/url-search-state';
 import { commandFailureState, failureDetail, failureRequestId, readFailureState } from './state';
 import { useDiscardProjectionFailure, useProjectionFailures, useReplayProjectionFailure } from './hooks';
 import { recoveryFiltersFromSearch } from './route-state';
@@ -50,16 +51,12 @@ export function RecoveryPageV2() {
   useEffect(() => setResourceDraft(filters.resource ?? ''), [filters.resource]);
 
   const updateFilters = (updates: Record<string, string | undefined>, replace = true) => {
-    const next = new URLSearchParams(searchParams);
-    for (const [key, value] of Object.entries(updates)) {
-      if (value) next.set(key, value); else next.delete(key);
-    }
-    if ('instanceId' in updates || 'resource' in updates || 'limit' in updates) {
-      next.delete('cursor');
-      next.delete('failureInstance');
-      next.delete('failureResource');
-      next.delete('failureEvent');
-    }
+    const scopeChanged = 'instanceId' in updates || 'resource' in updates || 'limit' in updates;
+    const next = updateSearchParams(
+      searchParams,
+      updates,
+      scopeChanged ? ['cursor', 'failureInstance', 'failureResource', 'failureEvent'] : [],
+    );
     setSearchParams(next, { replace });
   };
   const selectFailure = (failure: ProjectionFailure | undefined) => {

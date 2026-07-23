@@ -7,21 +7,20 @@ import {
   type GroupCreateRequest, type GroupMetadataRequest, type GroupSetting,
 } from '@/api/groups';
 import { queryKeys, SESSION_QUERY_SCOPE } from '@/api/keys';
-
-const READ_POLICY = { staleTime: 30_000, refetchInterval: 60_000 };
+import { PROJECTION_READ_POLICY } from '@/lib/query-policy';
 
 export function useGroupsV2(search: string, cursor: string | undefined, enabled: boolean) {
   const client = useApi();
   const params = { search: search || undefined, cursor, limit: 50 };
-  return useQuery({ queryKey: queryKeys.instanceGroups(SESSION_QUERY_SCOPE, params), queryFn: () => listInstanceGroups(client, undefined, params), enabled, ...READ_POLICY });
+  return useQuery({ queryKey: queryKeys.instanceGroups(SESSION_QUERY_SCOPE, params), queryFn: () => listInstanceGroups(client, undefined, params), enabled, ...PROJECTION_READ_POLICY });
 }
 export function useGroupV2(groupId: string | undefined, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.group(SESSION_QUERY_SCOPE, groupId ?? ''), queryFn: () => getGroup(client, groupId ?? ''), enabled: enabled && Boolean(groupId), ...READ_POLICY });
+  return useQuery({ queryKey: queryKeys.group(SESSION_QUERY_SCOPE, groupId ?? ''), queryFn: () => getGroup(client, groupId ?? ''), enabled: enabled && Boolean(groupId), ...PROJECTION_READ_POLICY });
 }
 export function useGroupInviteV2(groupId: string, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.groupInvite(SESSION_QUERY_SCOPE, groupId), queryFn: () => getGroupInviteLink(client, groupId), enabled, ...READ_POLICY });
+  return useQuery({ queryKey: queryKeys.groupInvite(SESSION_QUERY_SCOPE, groupId), queryFn: () => getGroupInviteLink(client, groupId), enabled, ...PROJECTION_READ_POLICY });
 }
 function useInvalidateGroupV2(groupId?: string) {
   const queryClient = useQueryClient();

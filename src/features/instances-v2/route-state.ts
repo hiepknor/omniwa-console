@@ -1,12 +1,12 @@
 import type { InstanceResource, InstanceStatus } from '@/api/instances';
+import { readSearchEnum, readSearchText } from '@/lib/url-search-state';
 
 export type InstanceFiltersV2 = { search: string; status?: InstanceStatus };
 
 export function instanceFiltersFromSearch(searchParams: URLSearchParams): InstanceFiltersV2 {
-  const status = searchParams.get('status');
   return {
-    search: searchParams.get('search') ?? '',
-    status: status === 'connected' || status === 'disconnected' ? status : undefined,
+    search: readSearchText(searchParams, 'search'),
+    status: readSearchEnum(searchParams, 'status', ['', 'connected', 'disconnected'], '') || undefined,
   };
 }
 
