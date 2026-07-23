@@ -57,6 +57,8 @@ cross-cutting contract semantics.
 | [AGENTS.md](AGENTS.md) | Mandatory repository rules for coding agents |
 | [docs/DELIVERY_WORKFLOW.md](docs/DELIVERY_WORKFLOW.md) | Required delivery lifecycle from intake through merge |
 | [docs/OMNIWA_GO_CONTRACT.md](docs/OMNIWA_GO_CONTRACT.md) | Backend handoff, capabilities, projections, errors, and health semantics |
+| [docs/CONTRACT_UI_MATRIX.md](docs/CONTRACT_UI_MATRIX.md) | Reviewed UI disposition for every public contract operation |
+| [docs/REDESIGN_BRIEF.md](docs/REDESIGN_BRIEF.md) | Contract-first UI redesign architecture, migration order, and cutover gates |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | SPA layers, state ownership, and safety boundaries |
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
 | [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | Runtime key entry, scope, and storage |

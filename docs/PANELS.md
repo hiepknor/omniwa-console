@@ -25,6 +25,7 @@ Rules:
 | Labels | Projection available | Directory list/detail integrated in Chats workspace |
 | Events | Durable history available | Integrated with retention and no-backfill metadata |
 | Overview and Health | Persisted/split APIs available | Integrated |
+| Projection Recovery | Admin failure operations available | Approved for v2 redesign; not integrated |
 | Campaigns (`/messages`) | Orchestration available | Integrated |
 | Queue/jobs | No generic management API | Unsupported |
 | Webhook administration | No management API | Unsupported |
@@ -55,6 +56,7 @@ GET    /instance/metadata
 GET    /instance/metadata/{instanceId}
 GET    /instance/credential-health
 POST   /instance/create
+POST   /instance/rotate-token/{instanceId}
 DELETE /instance/delete/{instanceId}
 GET    /instance/status
 GET    /instance/qr
@@ -172,8 +174,8 @@ POST /chat/unpin
 
 ## Campaigns — `/messages`, `/messages/new`
 
-Status: backend available; console implementation pending. Full behavior is in
-`docs/CAMPAIGNS.md`.
+Status: integrated in the current Console and approved for route-level v2
+redesign. Full behavior is in `docs/CAMPAIGNS.md`.
 
 All operations in this section use the selected instance token. Pagination
 defaults to 50 and is capped at 100.
@@ -196,7 +198,8 @@ OmniWA GO.
 
 ## Events — `/events`
 
-Status: durable backend available; console migration pending.
+Status: durable history integrated in the current Console and approved for
+route-level v2 redesign.
 
 ```text
 GET /events?type=&limit=&cursor=
@@ -223,6 +226,23 @@ projection readiness, or circuit-breaker posture.
 The metric window is stored in the URL and is capped by the supported 720-hour
 contract. Missing counters remain unreported rather than being coerced to zero.
 Instance health dimensions are grouped by the server-provided instance ID.
+
+## Projection Recovery — `/recovery`
+
+Status: approved for the v2 redesign; not integrated in the current Console.
+The route must remain absent from Production navigation until its complete
+list/filter/detail/replay/discard workflow and capability states are verified.
+
+```text
+GET  /server/projection-failures?instanceId=&resource=&limit=
+POST /server/projection-failures/replay
+POST /server/projection-failures/discard
+```
+
+These operations require the admin key and the
+`projection_failure_operations` capability. Replay and discard are explicit,
+audited server commands: Console does not optimistically remove a failure,
+automatically retry a command, or render acknowledgement as recovered state.
 
 ## Unsupported routes
 
