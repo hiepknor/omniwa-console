@@ -38,11 +38,15 @@ production primitive and its gallery state instead.
 | `Status` | Semantic tone plus visible text; color is never the only signal |
 | `Surface` | Shared section containment and header/action geometry |
 | `Field` | Native label association, hint/error description and invalid state |
+| `StateNotice` | Independent session/capability/projection/resource/transport/command presentation |
+| `Tabs` | Controlled tab selection with arrow/Home/End keyboard navigation |
+| `ScopeSelector` | Explicit platform/admin versus instance/token context selection |
+| `Dialog` | Modal focus ownership, Escape/backdrop behavior and focus restoration |
+| `Inspector` | Shared detail frame with modal or non-modal focus behavior |
 
 The gallery also exercises the first responsive resource-table treatment.
-Interactive inspector, dialog, tabs, scope selection and shared resource-state
-surfaces remain foundation work and must land before any route-level v2 feature
-migration.
+Feature migrations must map API facts into these contracts rather than adding
+panel-specific state or overlay geometry.
 
 ## Review matrix
 
