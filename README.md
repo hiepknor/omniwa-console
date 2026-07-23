@@ -65,6 +65,7 @@ cross-cutting contract semantics.
 | [docs/UI_V2_PLATFORM_RECOVERY.md](docs/UI_V2_PLATFORM_RECOVERY.md) | Persisted Platform Overview and audited projection-recovery workflow |
 | [docs/UI_V2_INSTANCES.md](docs/UI_V2_INSTANCES.md) | Metadata-only fleet management, live instance workspace, and credential lifecycle |
 | [docs/UI_V2_CONVERSATIONS.md](docs/UI_V2_CONVERSATIONS.md) | Instance-scoped projection workspace for chats, messages, directories, and bounded sends |
+| [docs/UI_V2_GROUPS.md](docs/UI_V2_GROUPS.md) | Projection-backed group directory, membership, settings, invite, and command workflow |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | SPA layers, state ownership, and safety boundaries |
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
 | [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | Runtime key entry, scope, and storage |
