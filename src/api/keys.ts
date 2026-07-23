@@ -42,7 +42,8 @@ export const queryKeys = {
     ['webhook-deliveries', params ?? {}] as const,
   webhookDeliveryHistory: (deliveryId: string) =>
     ['webhook-deliveries', deliveryId, 'history'] as const,
-  events: (params?: Record<string, unknown>) => ['events', params ?? {}] as const,
+  instanceEvents: (instanceId: string, params?: Record<string, unknown>) =>
+    ['instances', instanceId, 'events', params ?? {}] as const,
   auditRecords: (params?: Record<string, unknown>) => ['audit-records', params ?? {}] as const,
   settings: ['settings'] as const,
   apiKeys: (params?: Record<string, unknown>) => ['api-keys', params ?? {}] as const,
