@@ -5,6 +5,8 @@ const resources = {
   prototype: new URL('../design/prototypes/connect.html', import.meta.url),
   design: new URL('../design/DESIGN.md', import.meta.url),
   auth: new URL('../docs/AUTH_AND_SESSION.md', import.meta.url),
+  appCss: new URL('../src/styles/console.css', import.meta.url),
+  prototypeCss: new URL('../design/prototypes/console.css', import.meta.url),
 };
 const entries = await Promise.all(
   Object.entries(resources).map(async ([name, url]) => [name, await readFile(url, 'utf8')]),
@@ -34,8 +36,35 @@ for (const required of [
   'requestId={connectionError.requestId}',
   'spellCheck={false}',
   'disabled={pending}',
+  "probeStage === 'verify-key' ? 'active'",
+  'detail={connectionError.detail}',
+  "aria-label={pending ? 'Validate origin, complete'",
 ]) {
   if (!source.app.includes(required)) failures.push(`app: missing hardened Connect behavior: ${required}`);
+}
+
+for (const required of [
+  '.connect-sequence li[data-state=active]',
+  '.connect-sequence-index::after{content:"✓"',
+  '.connect-submit:disabled{background:var(--recessed)',
+  '@media(hover:none) and (pointer:coarse){.connect-key-toggle{min-width:44px;min-height:44px}}',
+]) {
+  for (const name of ['appCss', 'prototypeCss']) {
+    if (!source[name].includes(required)) failures.push(`${name}: missing synchronized Connect visual state: ${required}`);
+  }
+}
+
+function connectCssBlock(text) {
+  const start = text.indexOf('/* ===== Connect entry surface ===== */');
+  const end = text.indexOf('/* ===== Shared dropdown contract ===== */', start);
+  return text.slice(start, end).replace(
+    '/* Synced verbatim from design/prototypes/console.css — Shared dropdown contract. */',
+    '',
+  ).trim();
+}
+
+if (connectCssBlock(source.appCss) !== connectCssBlock(source.prototypeCss)) {
+  failures.push('css: application and prototype Connect blocks differ');
 }
 
 for (const required of ['GET /instance/all', 'GET /instance/status', '15 seconds', 'memory only']) {

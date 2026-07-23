@@ -1662,6 +1662,11 @@ html.chat-viewport-lock .workspace--chats{height:100%}
 .connect-sequence li:not(:last-child)::after{content:"";position:absolute;right:calc(var(--space-4) / -2);width:var(--space-2);height:1px;background:var(--border-subtle)}
 .connect-sequence-index{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid var(--border);border-radius:50%;background:var(--recessed);font-size:9px;line-height:12px;color:var(--meta)}
 .connect-sequence strong{overflow:hidden;font-size:10px;font-weight:400;line-height:15px;color:var(--muted);text-overflow:ellipsis;white-space:nowrap}
+.connect-sequence li[data-state=complete] .connect-sequence-index{border-color:var(--info);font-size:0;color:var(--fg-2)}
+.connect-sequence li[data-state=complete] .connect-sequence-index::after{content:"✓";font-size:10px;line-height:1}
+.connect-sequence li[data-state=complete] strong{color:var(--fg-2)}
+.connect-sequence li[data-state=active] .connect-sequence-index{border-color:var(--border-strong);background:var(--accent-hover);color:var(--fg)}
+.connect-sequence li[data-state=active] strong{color:var(--fg)}
 .connect-field{display:grid;gap:var(--space-2)}
 .connect-label-row{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3)}
 .connect-label-row label{font-size:11px;line-height:16px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted)}
@@ -1676,7 +1681,7 @@ html.chat-viewport-lock .workspace--chats{height:100%}
 .connect-error{border-left:3px solid var(--failed)}
 .connect-error .mono{font-size:10px;color:var(--muted)}
 .connect-submit{width:100%;min-height:44px;justify-content:center;margin-top:var(--space-1)}
-.connect-submit:disabled{cursor:not-allowed}
+.connect-submit:disabled{background:var(--recessed);border-color:var(--border-subtle);box-shadow:none;opacity:.28;cursor:not-allowed}
 .connect-submit[aria-busy=true]::before{content:"";width:12px;height:12px;border:1px solid currentColor;border-right-color:transparent;border-radius:50%;animation:connect-spin .7s linear infinite}
 @keyframes connect-spin{to{transform:rotate(360deg)}}
 
@@ -1701,6 +1706,7 @@ html.chat-viewport-lock .workspace--chats{height:100%}
   .connect-sequence strong{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){.connect-screen *{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}.connect-submit[aria-busy=true]::before{border-right-color:currentColor}}
+@media(hover:none) and (pointer:coarse){.connect-key-toggle{min-width:44px;min-height:44px}}
 
 /* ===== Shared dropdown contract ===== */
 .dropdown{position:relative;display:inline-flex;min-width:0}

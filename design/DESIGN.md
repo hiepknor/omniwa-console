@@ -197,10 +197,14 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
   with `GET /instance/status`. The probe times out after 15 seconds. Errors
   render category, message, and `requestId` when present. The key is never
   rendered after a session is created.
+- While connecting, the check strip distinguishes completed and current steps
+  without changing its compact geometry. Credential failures use a human title
+  plus an actionable detail while retaining the normalized category and request
+  ID. Disabled primary actions remain visibly quieter than enabled actions.
 - At tablet widths the explanation precedes the form in one flow. At phone
   widths the form comes first, the explanatory content follows, and the compact
   connection-check strip is hidden. Every primary input/action remains at
-  least 44px tall.
+  least 44px tall; the key reveal control also has a 44px coarse-pointer target.
 
 ### QR pairing panel
 

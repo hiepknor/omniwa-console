@@ -68,8 +68,8 @@
         </div>
 
         <div class="connect-error" role="alert" hidden data-connect-error>
-          <span class="status"><span class="dot" style="background:var(--failed)"></span><strong data-error-category>validation</strong></span>
-          <p data-error-message>API base URL must be a valid origin.</p>
+          <span class="status"><span class="dot" style="background:var(--failed)"></span><strong data-error-category>authentication</strong></span>
+          <p data-error-message><strong>Authentication failed.</strong> The API did not authorize this key. Verify the API origin and credential, then try again.</p>
           <span class="mono" data-error-request>request ID unavailable</span>
         </div>
 
@@ -88,6 +88,16 @@
   const keyToggle = document.querySelector('[data-key-toggle]');
   const error = document.querySelector('[data-connect-error]');
   const submit = document.querySelector('[data-connect-submit]');
+  const sequenceItems = [...document.querySelectorAll('.connect-sequence li')];
+
+  const setSequenceState = (activeIndex) => {
+    sequenceItems.forEach((item, index) => {
+      item.dataset.state = index < activeIndex ? 'complete' : index === activeIndex ? 'active' : '';
+      if (index < activeIndex) item.setAttribute('aria-label', `${item.textContent.trim()}, complete`);
+      else item.removeAttribute('aria-label');
+      if (index === activeIndex) item.setAttribute('aria-current', 'step'); else item.removeAttribute('aria-current');
+    });
+  };
 
   const normalizedOrigin = () => {
     try {
@@ -122,11 +132,13 @@
       submit.disabled = true;
       submit.setAttribute('aria-busy', 'true');
       submit.textContent = 'Connecting…';
+      setSequenceState(1);
       baseUrl.disabled = true;
       apiKey.disabled = true;
       keyToggle.disabled = true;
     } catch {
       error.hidden = false;
+      setSequenceState(-1);
       baseUrl.focus();
       updateSubmitState();
     }

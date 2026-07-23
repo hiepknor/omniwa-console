@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from '@/api/client';
-import { normalizeApiOrigin, probeKey } from './ConnectPage';
+import { ApiFailure } from '@/api/envelopes';
+import { connectErrorForFailure, normalizeApiOrigin, probeKey } from './ConnectPage';
 
 function result(status: number, data?: unknown, error?: unknown) {
   return {
@@ -32,17 +33,22 @@ describe('ConnectPage contract', () => {
   it('classifies an admin key without issuing a scoped probe', async () => {
     const GET = vi.fn().mockResolvedValueOnce(result(200, { message: 'success', data: [] }));
     const signal = new AbortController().signal;
-    await expect(probeKey({ GET } as unknown as ApiClient, signal)).resolves.toBe('admin');
+    const onStage = vi.fn();
+    await expect(probeKey({ GET } as unknown as ApiClient, signal, onStage)).resolves.toBe('admin');
     expect(GET).toHaveBeenCalledOnce();
     expect(GET).toHaveBeenCalledWith('/instance/all', { signal });
+    expect(onStage).toHaveBeenCalledOnce();
+    expect(onStage).toHaveBeenCalledWith('verify-key');
   });
 
   it.each([401, 403])('falls back to the scoped status probe after admin HTTP %s', async (status) => {
     const GET = vi.fn()
       .mockResolvedValueOnce(result(status, undefined, { error: 'not admin' }))
       .mockResolvedValueOnce(result(200, { message: 'success', data: { connected: true } }));
-    await expect(probeKey({ GET } as unknown as ApiClient)).resolves.toBe('api');
+    const onStage = vi.fn();
+    await expect(probeKey({ GET } as unknown as ApiClient, undefined, onStage)).resolves.toBe('api');
     expect(GET).toHaveBeenNthCalledWith(2, '/instance/status', { signal: undefined });
+    expect(onStage.mock.calls).toEqual([['verify-key'], ['detect-scope']]);
   });
 
   it('preserves a non-authentication admin probe failure', async () => {
@@ -62,6 +68,17 @@ describe('ConnectPage contract', () => {
       category: 'authentication',
       httpStatus: 401,
       message: 'invalid key',
+    });
+  });
+
+  it.each([
+    [401, 'Authentication failed', 'The API did not authorize this key.'],
+    [403, 'Access denied', 'This key does not have access'],
+  ])('maps HTTP %s to actionable credential feedback', (status, title, detail) => {
+    const failure = new ApiFailure({ error: 'not authorized' }, status);
+    expect(connectErrorForFailure(failure)).toMatchObject({
+      message: title,
+      detail: expect.stringContaining(detail),
     });
   });
 });

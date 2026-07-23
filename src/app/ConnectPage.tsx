@@ -8,10 +8,12 @@ import type { ConsoleSession, KeyKind } from '@/lib/session';
 type ConnectError = {
   category: string;
   message: string;
+  detail?: string;
   requestId?: string;
 };
 
 export const CONNECT_TIMEOUT_MS = 15_000;
+export type ConnectProbeStage = 'verify-key' | 'detect-scope';
 
 /**
  * Validate the pasted apikey against omniwa-go and classify it. The global admin
@@ -22,16 +24,43 @@ export const CONNECT_TIMEOUT_MS = 15_000;
 export async function probeKey(
   client: ReturnType<typeof createApiClient>,
   signal?: AbortSignal,
+  onStage?: (stage: ConnectProbeStage) => void,
 ): Promise<KeyKind> {
+  onStage?.('verify-key');
   const admin = await client.GET('/instance/all', { signal });
   if (admin.data !== undefined) return 'admin';
   if (admin.response.status !== 401 && admin.response.status !== 403) {
     throw new ApiFailure(admin.error, admin.response.status, admin.response.headers);
   }
 
+  onStage?.('detect-scope');
   const scoped = await client.GET('/instance/status', { signal });
   if (scoped.data !== undefined) return 'api';
   throw new ApiFailure(scoped.error, scoped.response.status, scoped.response.headers);
+}
+
+export function connectErrorForFailure(error: ApiFailure): ConnectError {
+  if (error.category === 'authentication') {
+    return {
+      category: error.category,
+      message: 'Authentication failed',
+      detail: 'The API did not authorize this key. Verify the API origin and credential, then try again.',
+      requestId: error.requestId,
+    };
+  }
+  if (error.category === 'authorization') {
+    return {
+      category: error.category,
+      message: 'Access denied',
+      detail: 'This key does not have access to the requested runtime scope.',
+      requestId: error.requestId,
+    };
+  }
+  return {
+    category: error.category,
+    message: error.message,
+    requestId: error.requestId,
+  };
 }
 
 export function normalizeApiOrigin(value: string): string | undefined {
@@ -57,6 +86,7 @@ export function ConnectPage({
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
   const [pending, setPending] = useState(false);
+  const [probeStage, setProbeStage] = useState<ConnectProbeStage>();
   const [error, setError] = useState<ConnectError | null>(null);
   const baseUrlInput = useRef<HTMLInputElement>(null);
   const apiKeyInput = useRef<HTMLInputElement>(null);
@@ -87,7 +117,7 @@ export function ConnectPage({
       const session: ConsoleSession = {
         baseUrl: origin,
         apiKey: normalizedKey,
-        keyKind: await probeKey(client, controller.signal),
+        keyKind: await probeKey(client, controller.signal, setProbeStage),
         connectedAt: new Date().toISOString(),
       };
       onConnected(session);
@@ -98,7 +128,7 @@ export function ConnectPage({
           message: 'The OmniWA API did not respond within 15 seconds.',
         });
       } else if (err instanceof ApiFailure) {
-        setError({ category: err.category, message: err.message, requestId: err.requestId });
+        setError(connectErrorForFailure(err));
       } else {
         setError({
           category: 'network',
@@ -108,6 +138,7 @@ export function ConnectPage({
     } finally {
       window.clearTimeout(timeoutId);
       pendingRef.current = false;
+      setProbeStage(undefined);
       setPending(false);
     }
   };
@@ -175,16 +206,16 @@ export function ConnectPage({
 
           <form className="connect-form" onSubmit={submit}>
             <ol className="connect-sequence max-[640px]:!hidden" aria-label="Connection checks">
-              <li>
-                <span className="connect-sequence-index num !text-[var(--fg-2)]">01</span>
+              <li data-state={pending ? 'complete' : undefined} aria-label={pending ? 'Validate origin, complete' : undefined}>
+                <span className="connect-sequence-index num">01</span>
                 <strong>Validate origin</strong>
               </li>
-              <li>
-                <span className="connect-sequence-index num !text-[var(--fg-2)]">02</span>
+              <li data-state={probeStage === 'verify-key' ? 'active' : probeStage === 'detect-scope' ? 'complete' : undefined} aria-current={probeStage === 'verify-key' ? 'step' : undefined}>
+                <span className="connect-sequence-index num">02</span>
                 <strong>Verify key</strong>
               </li>
-              <li>
-                <span className="connect-sequence-index num !text-[var(--fg-2)]">03</span>
+              <li data-state={probeStage === 'detect-scope' ? 'active' : undefined} aria-current={probeStage === 'detect-scope' ? 'step' : undefined}>
+                <span className="connect-sequence-index num">03</span>
                 <strong>Detect scope</strong>
               </li>
             </ol>
@@ -267,6 +298,7 @@ export function ConnectPage({
                 kind="error"
                 label={connectionError.category}
                 title={connectionError.message}
+                detail={connectionError.detail}
                 requestId={connectionError.requestId}
                 className="connect-error"
                 announcement="assertive"
