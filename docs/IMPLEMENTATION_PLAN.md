@@ -30,7 +30,7 @@ Completed:
 
 Not yet integrated:
 
-- media send and additional chat/message action commands;
+- binary media upload and additional chat/message action commands;
 - durable Events;
 - Overview, split Health, and Projection Health;
 - Campaign UI;
@@ -90,29 +90,30 @@ by resetting to the first page.
 
 Messages slice implemented: history/detail/receipt reads are chat- and
 instance-scoped, independently capability-gated, and retain normalized content,
-media metadata, lifecycle, provenance, and retention fields. Text send uses the
-existing action endpoint and invalidates only the affected Chat/Message keys;
-its acknowledgement is never rendered as delivery. Unsupported retry, cancel,
-reconnect, and media controls are not exposed. An uncertain send failure has no
-one-click retry because the current endpoint has no Console-owned idempotency
-contract.
+media metadata, lifecycle, provenance, and retention fields. Text and URL media
+sends use existing action endpoints and invalidate only the affected
+Chat/Message keys; acknowledgements are never rendered as delivery. Unsupported
+retry, cancel, reconnect, binary upload, and additional message actions are not
+exposed. An uncertain send failure has no one-click retry because the endpoints
+have no Console-owned idempotency contract.
 
 - Implement chat list/detail and keyset pagination.
 - Implement message list/detail and delivery/read receipt history.
 - Preserve message direction, sender/recipient, content summary, media metadata,
   provenance, lifecycle, and retention state.
 - Keep media binary outside the projection cache.
-- Wire text send through the existing public command, then refresh the affected
-  Chat/Message projections. Integrate media only after its backend request and
-  storage-reference contract is verified independently.
+- Wire text and URL media send through the existing public commands, then
+  refresh the affected Chat/Message projections. Keep binary upload outside the
+  browser until its client-side memory and size constraints are specified.
 - Never interpret send acknowledgement as `sent`, `delivered`, or `read`.
 - Consume label associations only when OmniWA GO adds them to the public
   Chat/Message DTO; do not reconstruct persisted associations in the browser.
 - Verify new messages do not shift already-loaded cursor pages.
 
-Exit status: persisted browsing, receipt inspection, and text send are achieved
-without client-side message accumulation. Media/action ownership remains a
-separate slice and is not represented by placeholders.
+Exit status: persisted browsing, receipt inspection, text send, and URL media
+send are achieved without client-side message accumulation. Binary upload and
+additional action ownership remain separate slices and are not represented by
+placeholders.
 
 ## Phase 4 — Durable Events, Overview, and Health
 

@@ -180,10 +180,14 @@ completed request does not prove WhatsApp delivery, message read state, or
 campaign recipient completion.
 
 Do not offer one-click retry after an uncertain send failure. A transport/5xx
-failure can occur after WhatsApp accepted the message, and `/send/text` has no
-Console-owned idempotency contract. Operators must inspect projected history
-before submitting again. Rate-limit cooldown handling remains visible but does
-not auto-resubmit a send.
+failure can occur after WhatsApp accepted the message, and neither `/send/text`
+nor `/send/media` has a Console-owned idempotency contract. Operators must
+inspect projected history before submitting again. Rate-limit cooldown handling
+remains visible but does not auto-resubmit a send.
+
+Media sends use the JSON URL branch with an explicit supported media type. The
+Console does not retain binary uploads or base64 media in component, mutation,
+or query state.
 
 The Composer requires both `messages_projection` and `outbound_rate_limit`.
 Projection readiness makes the write-through result observable; outbound

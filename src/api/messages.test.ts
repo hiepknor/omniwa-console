@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from './client';
-import { getMessage, listMessageReceipts, listMessages, sendTextMessage } from './messages';
+import { getMessage, listMessageReceipts, listMessages, sendMediaMessage, sendTextMessage } from './messages';
 
 function ok(data: unknown) {
   return { data, response: new Response(null, { status: 200 }) };
@@ -54,6 +54,30 @@ describe('messages projection adapter', () => {
     expect(POST).toHaveBeenCalledWith('/send/text', { body: { number: message.chatId, text: 'Hi' } });
     expect(result.disposition).toBe('completed');
     expect(result.data).toEqual({ messageId: 'message-2', acknowledgedAt: '2026-07-22T08:02:00Z' });
+    expect(result.data).not.toHaveProperty('Message');
+  });
+
+  it('maps a URL media send and quarantines provider-native response fields', async () => {
+    const POST = vi.fn().mockResolvedValue(ok({ message: 'success', data: {
+      ID: 'message-3',
+      Timestamp: '2026-07-22T08:03:00Z',
+      Message: { imageMessage: { url: 'provider-private' } },
+    } }));
+    const result = await sendMediaMessage({ POST } as unknown as ApiClient, message.chatId, {
+      url: 'https://example.com/photo.jpg',
+      mediaType: 'image',
+      caption: 'Launch photo',
+      filename: 'photo.jpg',
+    });
+    expect(POST).toHaveBeenCalledWith('/send/media', { body: {
+      number: message.chatId,
+      url: 'https://example.com/photo.jpg',
+      type: 'image',
+      caption: 'Launch photo',
+      filename: 'photo.jpg',
+    } });
+    expect(result.disposition).toBe('completed');
+    expect(result.data).toEqual({ messageId: 'message-3', acknowledgedAt: '2026-07-22T08:03:00Z' });
     expect(result.data).not.toHaveProperty('Message');
   });
 });
