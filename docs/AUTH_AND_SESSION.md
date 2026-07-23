@@ -55,7 +55,10 @@ interface ConsoleSession {
 - Never put the global key or instance token in a URL, query key, log, error,
   analytics event, screenshot fixture, or committed file.
 - Query caches are scoped by stable instance ID, never by credential value.
-- API clients hold keys only in runtime memory and configured browser storage.
+- The login credential follows the operator's configured session persistence;
+  one-time instance credentials use runtime memory only.
+- Ordinary instance list/detail resources never contain bearer tokens, even
+  when the old-backend fallback response includes them.
 - Instance-token rotation must refresh the scoped client without persisting the
   old token elsewhere.
 - The SPA does not open `/ws`, because doing so would expose the global admin

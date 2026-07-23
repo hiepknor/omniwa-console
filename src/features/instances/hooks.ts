@@ -14,12 +14,15 @@ import {
   listInstances,
   logoutInstance,
   reconnectInstance,
+  rotateInstanceToken,
   updateAdvancedSettings,
   type InstanceAdvancedSettings,
   type InstanceCreateRequest,
 } from '@/api/instances';
 import { instanceKeys, queryKeys } from '@/api/keys';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
+import { useServerCapability } from '@/api/CapabilitiesProvider';
+import { useSetInstanceCredential } from '@/api/ApiProvider';
 
 /**
  * Build a client authenticated with a specific instance's token, for omniwa-go's
@@ -35,20 +38,22 @@ function useInstanceClient(token: string | undefined): ApiClient | undefined {
 
 export function useInstances() {
   const client = useApi();
+  const metadata = useServerCapability('instance_metadata_views');
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: queryKeys.instances(),
-    queryFn: () => listInstances(client),
+    queryKey: queryKeys.instances({ metadata }),
+    queryFn: () => listInstances(client, { metadata }),
     refetchInterval,
   });
 }
 
 export function useInstance(instanceId: string | undefined) {
   const client = useApi();
+  const metadata = useServerCapability('instance_metadata_views');
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: queryKeys.instance(instanceId ?? ''),
-    queryFn: () => getInstance(client, instanceId ?? ''),
+    queryKey: [...queryKeys.instance(instanceId ?? ''), { metadata }] as const,
+    queryFn: () => getInstance(client, instanceId ?? '', metadata),
     enabled: instanceId !== undefined,
     refetchInterval,
   });
@@ -90,9 +95,10 @@ function useInvalidateInstance() {
 export function useCreateInstance() {
   const client = useApi();
   const invalidate = useInvalidateInstance();
+  const setCredential = useSetInstanceCredential();
   return useMutation({
     mutationFn: (body: InstanceCreateRequest) => createInstance(client, body),
-    onSuccess: () => invalidate(),
+    onSuccess: (result) => { setCredential(result.instanceId, result.token); return invalidate(); },
   });
 }
 
@@ -102,6 +108,16 @@ export function useDestroyInstance(instanceId: string) {
   return useMutation({
     mutationFn: () => destroyInstance(client, instanceId),
     onSuccess: () => invalidate(instanceId),
+  });
+}
+
+export function useRotateInstanceToken(instanceId: string) {
+  const client = useApi();
+  const invalidate = useInvalidateInstance();
+  const setCredential = useSetInstanceCredential();
+  return useMutation({
+    mutationFn: ({ expectedVersion, reason }: { expectedVersion: number; reason: string }) => rotateInstanceToken(client, instanceId, expectedVersion, reason),
+    onSuccess: (result) => { setCredential(instanceId, result.token); return invalidate(instanceId); },
   });
 }
 

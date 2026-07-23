@@ -23,9 +23,9 @@ Rules:
 | Messages and delivery | Projection available | History/detail/receipts and text send integrated |
 | Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
 | Labels | Projection available | Directory list/detail integrated in Chats workspace |
-| Events | Durable history available | Pending migration |
-| Overview and Health | Persisted/split APIs available | Pending migration |
-| Campaigns (`/messages`) | Orchestration available | Pending implementation |
+| Events | Durable history available | Integrated with retention and no-backfill metadata |
+| Overview and Health | Persisted/split APIs available | Integrated |
+| Campaigns (`/messages`) | Orchestration available | Integrated |
 | Queue/jobs | No generic management API | Unsupported |
 | Webhook administration | No management API | Unsupported |
 | Global Settings | No global settings API | Unsupported |

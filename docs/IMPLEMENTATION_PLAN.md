@@ -131,6 +131,8 @@ freshness, and rate-limit posture.
 
 ## Phase 5 — Campaign orchestration
 
+Status: implemented.
+
 Goal: provide consent-aware campaign creation and monitoring without moving
 worker logic into the browser.
 

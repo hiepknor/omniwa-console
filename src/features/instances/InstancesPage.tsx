@@ -44,6 +44,7 @@ export function InstancesPage() {
   const queryClient = useQueryClient();
   const createOpen = searchParams.get('create') === '1';
   const [filterOpen, setFilterOpen] = useState(false);
+  const [createdSecret, setCreatedSecret] = useState<{ instanceId: string; token: string }>();
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const feedback = useFeedback();
   const search = searchParams.get('search') ?? '';
@@ -240,9 +241,10 @@ export function InstancesPage() {
         <CreateInstanceDialog
           error={create.error}
           isPending={create.isPending}
-          onCancel={() => setParam('create', '')}
+          created={createdSecret}
+          onCancel={() => { setCreatedSecret(undefined); setParam('create', ''); }}
           onCreate={(body) => create.mutate(body, { onSuccess: (result) => {
-            setParam('create', '');
+            setCreatedSecret({ instanceId: result.instanceId, token: result.token });
             feedback.command(result.disposition, { action: 'Create instance', acceptedDetail: 'omniwa-go accepted the command. The instance will appear after it is recorded.', completedDetail: 'omniwa-go created the instance.', requestId: result.requestId, dedupeKey: 'instance:create' });
           } })}
         />

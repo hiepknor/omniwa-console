@@ -26,14 +26,16 @@ import { listInstances } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
 import { useInstanceClient } from '@/api/useInstanceClient';
 import { useRealtimeRefetchInterval } from '@/api/RealtimeProvider';
+import { useServerCapability } from '@/api/CapabilitiesProvider';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 
 export function usePickerInstances() {
   const client = useApi();
+  const metadata = useServerCapability('instance_metadata_views');
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: [...queryKeys.instances({}), 'picker'] as const,
-    queryFn: () => listInstances(client),
+    queryKey: [...queryKeys.instances({ metadata }), 'picker'] as const,
+    queryFn: () => listInstances(client, { metadata }),
     refetchInterval,
   });
 }

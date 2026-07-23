@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { hasCapability } from '@/api/capabilities';
+import { useInstanceCredential } from '@/api/ApiProvider';
 import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import type { EventResource } from '@/api/events-api';
@@ -34,11 +35,11 @@ export function EventsPage() {
   const selectedId = searchParams.get('event') || undefined;
   const instances = useEventInstances();
   const instanceItems = instances.data?.resource?.items ?? [];
-  const selectedInstance = instanceItems.find((instance) => instance.id === instanceId);
-  const capabilities = useInstanceCapabilities(instanceId, selectedInstance?.token);
+  const token = useInstanceCredential(instanceId);
+  const capabilities = useInstanceCapabilities(instanceId, token);
   const projectionEnabled = hasCapability(capabilities.data, 'events_projection');
   const queryParams = useMemo(() => ({ cursor: initialCursor, type: eventType }), [eventType, initialCursor]);
-  const list = useEvents(instanceId, selectedInstance?.token, queryParams, projectionEnabled);
+  const list = useEvents(instanceId, token, queryParams, projectionEnabled);
   const resetEvents = useResetEvents(instanceId, queryParams);
   const pages = list.data?.pages ?? [];
   const listReadState = useResilientReadState(list, pages.length > 0);
@@ -89,7 +90,7 @@ export function EventsPage() {
   let tableState: DataTableState<EventResource>;
   if (!instanceId) {
     tableState = { status: 'unavailable', message: instanceItems.length === 0 ? 'Create an instance before reading event history.' : 'Select an instance to read its event history.' };
-  } else if (!selectedInstance?.token) {
+  } else if (!token) {
     tableState = { status: 'unavailable', message: 'The selected instance has no usable access token.' };
   } else if (!projectionEnabled && events.length === 0) {
     tableState = capabilities.isLoading

@@ -1,7 +1,7 @@
 # OmniWA GO Public Contract
 
 This is the console-facing handoff for the OmniWA GO backend at commit
-`7f9e6ac` (2026-07-22). The vendored machine contract at
+`2682ddd` (2026-07-23). The vendored machine contract at
 `contracts/omniwa-go.openapi.json` remains authoritative for paths and schemas;
 this document records cross-cutting semantics that generated types cannot
 express reliably.
@@ -13,9 +13,10 @@ Every request uses exactly one `apikey` header:
 - the global admin key for server-wide and instance-lifecycle operations;
 - an instance token for WhatsApp-account-scoped reads and mutations.
 
-The browser session may use either key kind. Instance panels build a scoped API
-client from the token returned by the instance API. Tokens never enter URLs,
-query keys, logs, feedback, or rendered output.
+The browser session may use either key kind. Ordinary admin list/detail reads
+use credential-free instance metadata. Instance panels build a scoped client
+only from a one-time create/rotation secret held in memory; a reload clears it.
+Tokens never enter resource view models, URLs, query keys, logs, or feedback.
 
 ## Capability negotiation
 
@@ -43,6 +44,9 @@ Known capabilities:
 - `events_projection`
 - `outbound_rate_limit`
 - `campaign_orchestration`
+- `instance_metadata_views`
+- `instance_token_rotation`
+- `instance_credential_health`
 
 Unknown capability strings must be preserved for forward compatibility. A
 projection capability is an initial-readiness/feature-negotiation signal, not a

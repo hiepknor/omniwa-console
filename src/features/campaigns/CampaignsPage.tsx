@@ -1,38 +1,540 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { hasCapability } from '@/api/capabilities';
-import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
-import type { Campaign, CampaignRecipientConsent, CampaignStatus } from '@/api/campaigns';
-import { InlineError } from '@/components/InlineError';
-import { PageHeader } from '@/components/PageHeader';
-import { SelectDropdown } from '@/components/SelectDropdown';
-import { DataTable, DataTableFooter, DataTableWorkspace, type DataTableColumn, type DataTableState } from '@/components/data-table';
-import { formatCount, relativeTime } from '@/lib/format';
-import { useCampaign, useCampaignAudit, useCampaignInstances, useCampaignRecipients, useCampaigns, useCampaignTransition, useCreateCampaign } from './hooks';
+import { useEffect, useMemo, useState } from "react";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
+import { hasCapability } from "@/api/capabilities";
+import { useInstanceCapabilities } from "@/api/CapabilitiesProvider";
+import { useInstanceCredential } from "@/api/ApiProvider";
+import type {
+  Campaign,
+  CampaignRecipientConsent,
+  CampaignStatus,
+} from "@/api/campaigns";
+import { InlineError } from "@/components/InlineError";
+import { PageHeader } from "@/components/PageHeader";
+import { SelectDropdown } from "@/components/SelectDropdown";
+import {
+  DataTable,
+  DataTableFooter,
+  DataTableWorkspace,
+  type DataTableColumn,
+  type DataTableState,
+} from "@/components/data-table";
+import { formatCount, relativeTime } from "@/lib/format";
+import {
+  useCampaign,
+  useCampaignAudit,
+  useCampaignInstances,
+  useCampaignRecipients,
+  useCampaigns,
+  useCampaignTransition,
+  useCreateCampaign,
+} from "./hooks";
 
-const statuses: CampaignStatus[] = ['draft', 'scheduled', 'running', 'paused', 'completed', 'aborted', 'failed'];
-function parseRecipients(value: string): CampaignRecipientConsent[] { return value.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => { const [jid, optInSource, optInEvidenceReference, optedInAt] = line.split('|').map((part) => part.trim()); if (!jid || !optInSource || !optInEvidenceReference || !optedInAt || Number.isNaN(Date.parse(optedInAt))) throw new Error('Each recipient must be jid | source | evidence reference | ISO opt-in time.'); return { jid, optInSource, optInEvidenceReference, optedInAt: new Date(optedInAt).toISOString() }; }); }
-
-function CreateCampaign({ instanceId, token }: { instanceId: string; token: string }) {
-  const create = useCreateCampaign(instanceId, token); const navigate = useNavigate(); const [name, setName] = useState(''); const [text, setText] = useState(''); const [rows, setRows] = useState(''); const [validation, setValidation] = useState<string>();
-  const submit = async (event: React.FormEvent) => { event.preventDefault(); setValidation(undefined); try { const recipients = parseRecipients(rows); if (!recipients.length) throw new Error('At least one consent-backed recipient is required.'); const result = await create.mutateAsync({ name, text, recipients }); setRows(''); navigate(`/messages?instance=${encodeURIComponent(instanceId)}&campaign=${encodeURIComponent(result.campaign.id)}`, { replace: true }); } catch (error) { if (!(error instanceof Error) || !('category' in error)) setValidation(error instanceof Error ? error.message : 'Invalid campaign input.'); } };
-  return <form className="card p-5" onSubmit={(event) => void submit(event)}><div className="overview-section-label"><span>New campaign draft</span><span>Text only</span></div><h2 className="text-lg font-medium">Consent-backed recipients</h2><p className="mt-1 text-sm text-(--meta)">Execution, pacing and retries stay on OmniWA GO. Evidence references are submitted once and are not retained by this console.</p><label className="field mt-4"><span>Name</span><input required maxLength={255} value={name} onChange={(event) => setName(event.target.value)} /></label><label className="field mt-3"><span>Message text</span><textarea required rows={5} value={text} onChange={(event) => setText(event.target.value)} /></label><label className="field mt-3"><span>Recipients — one per line</span><textarea required rows={7} value={rows} onChange={(event) => setRows(event.target.value)} placeholder="84901234567@s.whatsapp.net | checkout | consent-record-id | 2026-07-22T08:00:00Z" /><small>Format: JID | opt-in source | evidence reference | ISO opt-in time</small></label>{validation && <p className="mt-3 text-sm text-red-600">{validation}</p>}{create.isError && <InlineError error={create.error} className="mt-3" />}<div className="mt-4 flex justify-end gap-2"><Link className="btn" to={`/messages?instance=${encodeURIComponent(instanceId)}`}>Cancel</Link><button className="btn primary" type="submit" disabled={create.isPending}>{create.isPending ? 'Creating…' : 'Create draft'}</button></div></form>;
+const statuses: CampaignStatus[] = [
+  "draft",
+  "scheduled",
+  "running",
+  "paused",
+  "completed",
+  "aborted",
+  "failed",
+];
+function parseRecipients(value: string): CampaignRecipientConsent[] {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [jid, optInSource, optInEvidenceReference, optedInAt] = line
+        .split("|")
+        .map((part) => part.trim());
+      if (
+        !jid ||
+        !optInSource ||
+        !optInEvidenceReference ||
+        !optedInAt ||
+        Number.isNaN(Date.parse(optedInAt))
+      )
+        throw new Error(
+          "Each recipient must be jid | source | evidence reference | ISO opt-in time.",
+        );
+      return {
+        jid,
+        optInSource,
+        optInEvidenceReference,
+        optedInAt: new Date(optedInAt).toISOString(),
+      };
+    });
 }
 
-function CampaignDetailPanel({ instanceId, token, campaignId }: { instanceId: string; token: string; campaignId: string }) {
-  const detail = useCampaign(instanceId, token, campaignId, true); const recipients = useCampaignRecipients(instanceId, token, campaignId, true); const audit = useCampaignAudit(instanceId, token, campaignId, true); const transition = useCampaignTransition(instanceId, token, campaignId); const [startsAt, setStartsAt] = useState(''); const campaign = detail.data?.campaign;
-  const command = (action: 'schedule' | 'start' | 'pause' | 'resume' | 'abort') => { if (action === 'abort' && !window.confirm('Abort this campaign? Pending recipients will become terminal and the campaign cannot be restarted.')) return; transition.mutate({ action, startsAt: action === 'schedule' ? new Date(startsAt).toISOString() : undefined }); };
-  if (detail.isLoading) return <div className="card p-5">Loading campaign details…</div>; if (detail.isError || !campaign || !detail.data) return <div className="card p-5"><InlineError error={detail.error ?? new Error('Campaign unavailable')} onRetry={() => void detail.refetch()} /></div>;
-  const recipientRows = recipients.data?.pages.flatMap((page) => page.items) ?? []; const auditRows = audit.data?.pages.flatMap((page) => page.items) ?? [];
-  return <div className="grid gap-4"><section className="card p-5"><div className="overview-section-label"><span>{campaign.status}</span><span>{formatCount(detail.data.recipientCount)} recipients</span></div><h2 className="text-lg font-medium">{campaign.name}</h2><p className="mt-2 whitespace-pre-wrap text-sm">{campaign.text}</p><div className="mt-4 flex flex-wrap gap-2">{campaign.status === 'draft' && <><input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} /><button className="btn" disabled={!startsAt || transition.isPending} onClick={() => command('schedule')}>Schedule</button></>}{campaign.status === 'scheduled' && <button className="btn primary" disabled={transition.isPending} onClick={() => command('start')}>Start</button>}{campaign.status === 'running' && <button className="btn" disabled={transition.isPending} onClick={() => command('pause')}>Pause</button>}{campaign.status === 'paused' && <button className="btn primary" disabled={transition.isPending} onClick={() => command('resume')}>Resume</button>}{!['completed', 'aborted', 'failed'].includes(campaign.status) && <button className="btn danger" disabled={transition.isPending} onClick={() => command('abort')}>Abort</button>}</div>{campaign.status === 'running' && <p className="mt-2 text-xs text-(--meta)">Pausing stops new claims; a recipient already leased by a worker may still finish.</p>}{transition.isError && <InlineError error={transition.error} className="mt-3" allowRetry={false} />}</section><section className="card p-5"><h3 className="font-medium">Recipient state</h3><div className="mt-3 grid gap-2">{recipientRows.map((row) => <div className="flex justify-between gap-3 border-b border-(--line) py-2 text-sm" key={row.id}><span className="mono truncate">{row.jid}</span><span>{row.status} · {row.attemptCount} attempts</span></div>)}{!recipients.isLoading && recipientRows.length === 0 && <p className="text-sm text-(--meta)">No recipient state reported.</p>}</div>{recipients.hasNextPage && <button className="btn mt-3" disabled={recipients.isFetchingNextPage} onClick={() => void recipients.fetchNextPage()}>Load more recipients</button>}</section><section className="card p-5"><h3 className="font-medium">Durable audit</h3><div className="mt-3 grid gap-2">{auditRows.map((row) => <div className="flex justify-between gap-3 border-b border-(--line) py-2 text-sm" key={row.id}><span><span className="mono">{row.eventType}</span>{row.fromStatus || row.toStatus ? ` · ${row.fromStatus ?? '—'} → ${row.toStatus ?? '—'}` : ''}</span><time>{relativeTime(row.occurredAt) || '—'}</time></div>)}{!audit.isLoading && auditRows.length === 0 && <p className="text-sm text-(--meta)">No audit events reported.</p>}</div>{audit.hasNextPage && <button className="btn mt-3" disabled={audit.isFetchingNextPage} onClick={() => void audit.fetchNextPage()}>Load more audit</button>}</section></div>;
+function CreateCampaign({
+  instanceId,
+  token,
+}: {
+  instanceId: string;
+  token: string;
+}) {
+  const create = useCreateCampaign(instanceId, token);
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [text, setText] = useState("");
+  const [rows, setRows] = useState("");
+  const [validation, setValidation] = useState<string>();
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setValidation(undefined);
+    try {
+      const recipients = parseRecipients(rows);
+      if (!recipients.length)
+        throw new Error("At least one consent-backed recipient is required.");
+      const result = await create.mutateAsync({ name, text, recipients });
+      setRows("");
+      navigate(
+        `/messages?instance=${encodeURIComponent(instanceId)}&campaign=${encodeURIComponent(result.campaign.id)}`,
+        { replace: true },
+      );
+    } catch (error) {
+      if (!(error instanceof Error) || !("category" in error))
+        setValidation(
+          error instanceof Error ? error.message : "Invalid campaign input.",
+        );
+    }
+  };
+  return (
+    <form className="card p-5" onSubmit={(event) => void submit(event)}>
+      <div className="overview-section-label">
+        <span>New campaign draft</span>
+        <span>Text only</span>
+      </div>
+      <h2 className="text-lg font-medium">Consent-backed recipients</h2>
+      <p className="mt-1 text-sm text-(--meta)">
+        Execution, pacing and retries stay on OmniWA GO. Evidence references are
+        submitted once and are not retained by this console.
+      </p>
+      <label className="field mt-4">
+        <span>Name</span>
+        <input
+          required
+          maxLength={255}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+        />
+      </label>
+      <label className="field mt-3">
+        <span>Message text</span>
+        <textarea
+          required
+          rows={5}
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+        />
+      </label>
+      <label className="field mt-3">
+        <span>Recipients — one per line</span>
+        <textarea
+          required
+          rows={7}
+          value={rows}
+          onChange={(event) => setRows(event.target.value)}
+          placeholder="84901234567@s.whatsapp.net | checkout | consent-record-id | 2026-07-22T08:00:00Z"
+        />
+        <small>
+          Format: JID | opt-in source | evidence reference | ISO opt-in time
+        </small>
+      </label>
+      {validation && <p className="mt-3 text-sm text-red-600">{validation}</p>}
+      {create.isError && <InlineError error={create.error} className="mt-3" />}
+      <div className="mt-4 flex justify-end gap-2">
+        <Link
+          className="btn"
+          to={`/messages?instance=${encodeURIComponent(instanceId)}`}
+        >
+          Cancel
+        </Link>
+        <button
+          className="btn primary"
+          type="submit"
+          disabled={create.isPending}
+        >
+          {create.isPending ? "Creating…" : "Create draft"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function CampaignDetailPanel({
+  instanceId,
+  token,
+  campaignId,
+}: {
+  instanceId: string;
+  token: string;
+  campaignId: string;
+}) {
+  const detail = useCampaign(instanceId, token, campaignId, true);
+  const recipients = useCampaignRecipients(instanceId, token, campaignId, true);
+  const audit = useCampaignAudit(instanceId, token, campaignId, true);
+  const transition = useCampaignTransition(instanceId, token, campaignId);
+  const [startsAt, setStartsAt] = useState("");
+  const campaign = detail.data?.campaign;
+  const command = (
+    action: "schedule" | "start" | "pause" | "resume" | "abort",
+  ) => {
+    if (
+      action === "abort" &&
+      !window.confirm(
+        "Abort this campaign? Pending recipients will become terminal and the campaign cannot be restarted.",
+      )
+    )
+      return;
+    transition.mutate({
+      action,
+      startsAt:
+        action === "schedule" ? new Date(startsAt).toISOString() : undefined,
+    });
+  };
+  if (detail.isLoading)
+    return <div className="card p-5">Loading campaign details…</div>;
+  if (detail.isError || !campaign || !detail.data)
+    return (
+      <div className="card p-5">
+        <InlineError
+          error={detail.error ?? new Error("Campaign unavailable")}
+          onRetry={() => void detail.refetch()}
+        />
+      </div>
+    );
+  const recipientRows =
+    recipients.data?.pages.flatMap((page) => page.items) ?? [];
+  const auditRows = audit.data?.pages.flatMap((page) => page.items) ?? [];
+  return (
+    <div className="grid gap-4">
+      <section className="card p-5">
+        <div className="overview-section-label">
+          <span>{campaign.status}</span>
+          <span>{formatCount(detail.data.recipientCount)} recipients</span>
+        </div>
+        <h2 className="text-lg font-medium">{campaign.name}</h2>
+        <p className="mt-2 whitespace-pre-wrap text-sm">{campaign.text}</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {campaign.status === "draft" && (
+            <>
+              <input
+                type="datetime-local"
+                value={startsAt}
+                onChange={(event) => setStartsAt(event.target.value)}
+              />
+              <button
+                className="btn"
+                disabled={!startsAt || transition.isPending}
+                onClick={() => command("schedule")}
+              >
+                Schedule
+              </button>
+            </>
+          )}
+          {campaign.status === "scheduled" && (
+            <button
+              className="btn primary"
+              disabled={transition.isPending}
+              onClick={() => command("start")}
+            >
+              Start
+            </button>
+          )}
+          {campaign.status === "running" && (
+            <button
+              className="btn"
+              disabled={transition.isPending}
+              onClick={() => command("pause")}
+            >
+              Pause
+            </button>
+          )}
+          {campaign.status === "paused" && (
+            <button
+              className="btn primary"
+              disabled={transition.isPending}
+              onClick={() => command("resume")}
+            >
+              Resume
+            </button>
+          )}
+          {!["completed", "aborted", "failed"].includes(campaign.status) && (
+            <button
+              className="btn danger"
+              disabled={transition.isPending}
+              onClick={() => command("abort")}
+            >
+              Abort
+            </button>
+          )}
+        </div>
+        {campaign.status === "running" && (
+          <p className="mt-2 text-xs text-(--meta)">
+            Pausing stops new claims; a recipient already leased by a worker may
+            still finish.
+          </p>
+        )}
+        {transition.isError && (
+          <InlineError
+            error={transition.error}
+            className="mt-3"
+            allowRetry={false}
+          />
+        )}
+      </section>
+      <section className="card p-5">
+        <h3 className="font-medium">Recipient state</h3>
+        <div className="mt-3 grid gap-2">
+          {recipientRows.map((row) => (
+            <div
+              className="flex justify-between gap-3 border-b border-(--line) py-2 text-sm"
+              key={row.id}
+            >
+              <span className="mono truncate">{row.jid}</span>
+              <span>
+                {row.status} · {row.attemptCount} attempts
+              </span>
+            </div>
+          ))}
+          {!recipients.isLoading && recipientRows.length === 0 && (
+            <p className="text-sm text-(--meta)">
+              No recipient state reported.
+            </p>
+          )}
+        </div>
+        {recipients.hasNextPage && (
+          <button
+            className="btn mt-3"
+            disabled={recipients.isFetchingNextPage}
+            onClick={() => void recipients.fetchNextPage()}
+          >
+            Load more recipients
+          </button>
+        )}
+      </section>
+      <section className="card p-5">
+        <h3 className="font-medium">Durable audit</h3>
+        <div className="mt-3 grid gap-2">
+          {auditRows.map((row) => (
+            <div
+              className="flex justify-between gap-3 border-b border-(--line) py-2 text-sm"
+              key={row.id}
+            >
+              <span>
+                <span className="mono">{row.eventType}</span>
+                {row.fromStatus || row.toStatus
+                  ? ` · ${row.fromStatus ?? "—"} → ${row.toStatus ?? "—"}`
+                  : ""}
+              </span>
+              <time>{relativeTime(row.occurredAt) || "—"}</time>
+            </div>
+          ))}
+          {!audit.isLoading && auditRows.length === 0 && (
+            <p className="text-sm text-(--meta)">No audit events reported.</p>
+          )}
+        </div>
+        {audit.hasNextPage && (
+          <button
+            className="btn mt-3"
+            disabled={audit.isFetchingNextPage}
+            onClick={() => void audit.fetchNextPage()}
+          >
+            Load more audit
+          </button>
+        )}
+      </section>
+    </div>
+  );
 }
 
 export function CampaignsPage() {
-  const location = useLocation(); const [params, setParams] = useSearchParams(); const instanceId = params.get('instance') || undefined; const campaignId = params.get('campaign') || undefined; const status = statuses.includes(params.get('status') as CampaignStatus) ? params.get('status') as CampaignStatus : undefined; const picker = useCampaignInstances(); const instances = picker.data?.resource?.items ?? []; const selected = instances.find((item) => item.id === instanceId); const capabilities = useInstanceCapabilities(instanceId, selected?.token); const enabled = hasCapability(capabilities.data, 'campaign_orchestration'); const outbound = hasCapability(capabilities.data, 'outbound_rate_limit'); const campaigns = useCampaigns(instanceId, selected?.token, status, enabled); const rows = useMemo(() => campaigns.data?.pages.flatMap((page) => page.items) ?? [], [campaigns.data]);
-  const setParam = (key: string, value: string) => { const next = new URLSearchParams(params); if (value) next.set(key, value); else next.delete(key); if (key === 'instance' || key === 'status') next.delete('campaign'); setParams(next, { replace: true }); };
-  useEffect(() => { if (!instanceId && instances.length === 1 && instances[0]) setParam('instance', instances[0].id); }, [instanceId, instances]);
-  const columns: DataTableColumn<Campaign>[] = [{ id: 'name', header: 'Campaign', size: 'xl', sticky: 'identity', mobile: 'identity', cell: (item) => <span>{item.name}</span> }, { id: 'status', header: 'Status', size: 'md', mobile: 'secondary', cell: (item) => item.status }, { id: 'starts', header: 'Starts', size: 'md', kind: 'date', mobile: 'meta', cell: (item) => relativeTime(item.startsAt) || '—' }, { id: 'updated', header: 'Updated', size: 'md', kind: 'date', mobile: 'hidden', cell: (item) => relativeTime(item.updatedAt) || '—' }];
-  let tableState: DataTableState<Campaign> = { status: 'unavailable', message: 'Select an instance to view campaigns.' }; if (instanceId && (!enabled || !outbound) && rows.length === 0) tableState = { status: 'unavailable', message: 'Campaign orchestration and the independent outbound limiter must both be available.' }; else if (campaigns.isLoading) tableState = { status: 'loading', skeletonRows: 6 }; else if (campaigns.isError) tableState = { status: 'error', error: campaigns.error, onRetry: campaigns.refetch }; else if (rows.length === 0 && instanceId) tableState = { status: 'empty', message: status ? `No ${status} campaigns.` : 'No campaigns yet.' }; else if (rows.length) tableState = { status: 'ready', rows };
-  const options = instances.map((item) => ({ value: item.id, label: item.displayName ?? item.id, description: item.id, meta: item.status }));
-  return <><PageHeader title="Campaigns" meta={<span>Durable consent-aware orchestration</span>} scope={options.length ? <SelectDropdown label="Instance" value={instanceId ?? ''} options={options} onChange={(value) => setParam('instance', value)} /> : undefined} actions={enabled && outbound && instanceId ? <Link className="btn primary" to={`/messages/new?instance=${encodeURIComponent(instanceId)}`}>New campaign</Link> : undefined} /><div className="overview-content">{location.pathname.endsWith('/new') && instanceId && selected?.token ? <CreateCampaign instanceId={instanceId} token={selected.token} /> : campaignId && instanceId && selected?.token ? <CampaignDetailPanel instanceId={instanceId} token={selected.token} campaignId={campaignId} /> : <DataTableWorkspace aria-labelledby="campaign-table"><div className="events-section-head"><div><h2>Campaigns</h2><span>Backend-owned pacing, retries and recipient state</span></div><select value={status ?? ''} onChange={(event) => setParam('status', event.target.value)}><option value="">All statuses</option>{statuses.map((item) => <option key={item}>{item}</option>)}</select></div><DataTable caption="Campaign list" captionId="campaign-table" columns={columns} state={tableState} getRowKey={(item) => item.id} getRowActionLabel={(item) => `Open campaign ${item.name}`} getRowProps={(item) => ({ className: 'responsive-table-actionable', tabIndex: 0, onClick: () => setParam('campaign', item.id), onKeyDown: (event) => { if (event.key === 'Enter') setParam('campaign', item.id); } })} footer={<DataTableFooter primary={<span className="num">{rows.length} loaded campaigns</span>} actions={campaigns.hasNextPage ? <button className="btn" onClick={() => void campaigns.fetchNextPage()}>Load more</button> : undefined} />} /></DataTableWorkspace>}</div></>;
+  const location = useLocation();
+  const [params, setParams] = useSearchParams();
+  const instanceId = params.get("instance") || undefined;
+  const campaignId = params.get("campaign") || undefined;
+  const status = statuses.includes(params.get("status") as CampaignStatus)
+    ? (params.get("status") as CampaignStatus)
+    : undefined;
+  const picker = useCampaignInstances();
+  const instances = picker.data?.resource?.items ?? [];
+  const token = useInstanceCredential(instanceId);
+  const capabilities = useInstanceCapabilities(instanceId, token);
+  const enabled = hasCapability(capabilities.data, "campaign_orchestration");
+  const outbound = hasCapability(capabilities.data, "outbound_rate_limit");
+  const campaigns = useCampaigns(instanceId, token, status, enabled);
+  const rows = useMemo(
+    () => campaigns.data?.pages.flatMap((page) => page.items) ?? [],
+    [campaigns.data],
+  );
+  const setParam = (key: string, value: string) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    if (key === "instance" || key === "status") next.delete("campaign");
+    setParams(next, { replace: true });
+  };
+  useEffect(() => {
+    if (!instanceId && instances.length === 1 && instances[0])
+      setParam("instance", instances[0].id);
+  }, [instanceId, instances]);
+  const columns: DataTableColumn<Campaign>[] = [
+    {
+      id: "name",
+      header: "Campaign",
+      size: "xl",
+      sticky: "identity",
+      mobile: "identity",
+      cell: (item) => <span>{item.name}</span>,
+    },
+    {
+      id: "status",
+      header: "Status",
+      size: "md",
+      mobile: "secondary",
+      cell: (item) => item.status,
+    },
+    {
+      id: "starts",
+      header: "Starts",
+      size: "md",
+      kind: "date",
+      mobile: "meta",
+      cell: (item) => relativeTime(item.startsAt) || "—",
+    },
+    {
+      id: "updated",
+      header: "Updated",
+      size: "md",
+      kind: "date",
+      mobile: "hidden",
+      cell: (item) => relativeTime(item.updatedAt) || "—",
+    },
+  ];
+  let tableState: DataTableState<Campaign> = {
+    status: "unavailable",
+    message: "Select an instance to view campaigns.",
+  };
+  if (instanceId && (!enabled || !outbound) && rows.length === 0)
+    tableState = {
+      status: "unavailable",
+      message:
+        "Campaign orchestration and the independent outbound limiter must both be available.",
+    };
+  else if (campaigns.isLoading)
+    tableState = { status: "loading", skeletonRows: 6 };
+  else if (campaigns.isError)
+    tableState = {
+      status: "error",
+      error: campaigns.error,
+      onRetry: campaigns.refetch,
+    };
+  else if (rows.length === 0 && instanceId)
+    tableState = {
+      status: "empty",
+      message: status ? `No ${status} campaigns.` : "No campaigns yet.",
+    };
+  else if (rows.length) tableState = { status: "ready", rows };
+  const options = instances.map((item) => ({
+    value: item.id,
+    label: item.displayName ?? item.id,
+    description: item.id,
+    meta: item.status,
+  }));
+  return (
+    <>
+      <PageHeader
+        title="Campaigns"
+        meta={<span>Durable consent-aware orchestration</span>}
+        scope={
+          options.length ? (
+            <SelectDropdown
+              label="Instance"
+              value={instanceId ?? ""}
+              options={options}
+              onChange={(value) => setParam("instance", value)}
+            />
+          ) : undefined
+        }
+        actions={
+          enabled && outbound && instanceId ? (
+            <Link
+              className="btn primary"
+              to={`/messages/new?instance=${encodeURIComponent(instanceId)}`}
+            >
+              New campaign
+            </Link>
+          ) : undefined
+        }
+      />
+      <div className="overview-content">
+        {location.pathname.endsWith("/new") && instanceId && token ? (
+          <CreateCampaign instanceId={instanceId} token={token} />
+        ) : campaignId && instanceId && token ? (
+          <CampaignDetailPanel
+            instanceId={instanceId}
+            token={token}
+            campaignId={campaignId}
+          />
+        ) : (
+          <DataTableWorkspace aria-labelledby="campaign-table">
+            <div className="events-section-head">
+              <div>
+                <h2>Campaigns</h2>
+                <span>Backend-owned pacing, retries and recipient state</span>
+              </div>
+              <select
+                value={status ?? ""}
+                onChange={(event) => setParam("status", event.target.value)}
+              >
+                <option value="">All statuses</option>
+                {statuses.map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
+              </select>
+            </div>
+            <DataTable
+              caption="Campaign list"
+              captionId="campaign-table"
+              columns={columns}
+              state={tableState}
+              getRowKey={(item) => item.id}
+              getRowActionLabel={(item) => `Open campaign ${item.name}`}
+              getRowProps={(item) => ({
+                className: "responsive-table-actionable",
+                tabIndex: 0,
+                onClick: () => setParam("campaign", item.id),
+                onKeyDown: (event) => {
+                  if (event.key === "Enter") setParam("campaign", item.id);
+                },
+              })}
+              footer={
+                <DataTableFooter
+                  primary={
+                    <span className="num">{rows.length} loaded campaigns</span>
+                  }
+                  actions={
+                    campaigns.hasNextPage ? (
+                      <button
+                        className="btn"
+                        onClick={() => void campaigns.fetchNextPage()}
+                      >
+                        Load more
+                      </button>
+                    ) : undefined
+                  }
+                />
+              }
+            />
+          </DataTableWorkspace>
+        )}
+      </div>
+    </>
+  );
 }

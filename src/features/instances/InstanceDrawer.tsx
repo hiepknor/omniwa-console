@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { CommandResult } from '@/api/envelopes';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
+import { useInstanceCredential } from '@/api/ApiProvider';
+import { useServerCapability } from '@/api/CapabilitiesProvider';
 import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
@@ -19,6 +21,7 @@ import {
   useInstanceStatus,
   useLogoutInstance,
   useReconnectInstance,
+  useRotateInstanceToken,
   useUpdateAdvancedSettings,
 } from './hooks';
 
@@ -117,10 +120,12 @@ export function InstanceDrawer({
 }) {
   const instanceName = instance.displayName || 'Unnamed instance';
   const [confirmation, setConfirmation] = useState<'disconnect' | 'logout' | 'destroy'>();
+  const [rotationReason, setRotationReason] = useState('');
   const feedback = useFeedback();
-  const tokenAvailable = Boolean(instance.token);
+  const token = useInstanceCredential(instance.id);
+  const tokenAvailable = Boolean(token);
 
-  const status = useInstanceStatus(instance.id, instance.token);
+  const status = useInstanceStatus(instance.id, token);
   // Only trust the pairing state once status has actually loaded — otherwise
   // loggedIn defaults to false and we would fetch a QR for an already-paired
   // instance (omniwa-go answers /instance/qr with 400 in that case).
@@ -131,12 +136,14 @@ export function InstanceDrawer({
   const needsPairing = tokenAvailable && statusReady && !loggedIn;
 
   // A pairing QR only exists once the websocket is connected and login is pending.
-  const qr = useInstanceQr(instance.id, instance.token, needsPairing && connected);
-  const connect = useConnectInstance(instance.id, instance.token);
-  const reconnect = useReconnectInstance(instance.id, instance.token);
-  const disconnect = useDisconnectInstance(instance.id, instance.token);
-  const logout = useLogoutInstance(instance.id, instance.token);
+  const qr = useInstanceQr(instance.id, token, needsPairing && connected);
+  const connect = useConnectInstance(instance.id, token);
+  const reconnect = useReconnectInstance(instance.id, token);
+  const disconnect = useDisconnectInstance(instance.id, token);
+  const logout = useLogoutInstance(instance.id, token);
   const destroy = useDestroyInstance(instance.id);
+  const rotationAvailable = useServerCapability('instance_token_rotation') && (instance.credentialVersion ?? 0) > 0;
+  const rotate = useRotateInstanceToken(instance.id);
 
   const commandFeedback = (result: CommandResult, action: string) => {
     feedback.command(result.disposition, {
@@ -172,6 +179,15 @@ export function InstanceDrawer({
             />
           )}
 
+          {rotationAvailable && (
+            <section aria-labelledby="credential-rotation-title">
+              <span className="eyebrow">Credential lifecycle</span>
+              <h3 id="credential-rotation-title">Rotate instance token</h3>
+              {rotate.data ? <div className="field"><label htmlFor="rotated-instance-token">One-time replacement token</label><input className="input mono" id="rotated-instance-token" value={rotate.data.token} readOnly autoComplete="off" onFocus={(event) => event.currentTarget.select()} /><small>Store it now. It remains in Console memory only until sign-out or reload.</small></div> : <><label className="field" htmlFor="rotation-reason"><span>Operator reason</span><input id="rotation-reason" value={rotationReason} maxLength={255} onChange={(event) => setRotationReason(event.target.value)} placeholder="Scheduled credential rotation" /></label><button className="btn danger" type="button" disabled={rotationReason.trim().length === 0 || rotate.isPending} onClick={() => rotate.mutate({ expectedVersion: instance.credentialVersion ?? 0, reason: rotationReason.trim() })}>{rotate.isPending ? 'Rotating…' : 'Rotate token'}</button></>}
+              {rotate.isError && <InlineError error={rotate.error} allowRetry={false} />}
+            </section>
+          )}
+
           {needsPairing && (
             <section aria-labelledby="pair-device-title">
               <div className="drawer-section-head"><div><span className="eyebrow">Pairing workflow</span><h3 id="pair-device-title">Pair device</h3></div></div>
@@ -202,7 +218,7 @@ export function InstanceDrawer({
             </section>
           )}
 
-          {tokenAvailable && loggedIn && <AdvancedSettings instanceId={instance.id} token={instance.token} />}
+          {tokenAvailable && loggedIn && <AdvancedSettings instanceId={instance.id} token={token} />}
 
           {tokenAvailable && loggedIn && (
             <section aria-labelledby="lifecycle-title">

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { hasCapability } from '@/api/capabilities';
+import { useInstanceCredential } from '@/api/ApiProvider';
 import { useInstanceCapabilities } from '@/api/CapabilitiesProvider';
 import { InlineError } from '@/components/InlineError';
 import { ProjectionNotice } from '@/components/ProjectionNotice';
@@ -29,14 +30,15 @@ export function ChatsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const picker = usePickerInstances();
   const selectedInstance = picker.data?.resource?.items.find((instance) => instance.id === instanceId);
+  const token = useInstanceCredential(instanceId);
   const contactId = searchParams.get('directory') === 'contacts' ? chatId : undefined;
   const labelId = searchParams.get('directory') === 'labels' ? chatId : undefined;
   const directoryResourceId = contactId ?? labelId;
-  const capabilities = useInstanceCapabilities(instanceId, selectedInstance?.token);
+  const capabilities = useInstanceCapabilities(instanceId, token);
   const chatsEnabled = hasCapability(capabilities.data, 'chats_projection');
   const messagesEnabled = hasCapability(capabilities.data, 'messages_projection');
   const outboundEnabled = hasCapability(capabilities.data, 'outbound_rate_limit');
-  const chat = useChat(instanceId, directoryResourceId ? undefined : chatId, selectedInstance?.token, chatsEnabled);
+  const chat = useChat(instanceId, directoryResourceId ? undefined : chatId, token, chatsEnabled);
   const chatReadState = useResilientReadState(chat, chat.data?.resource !== undefined);
   const selectedChat = chat.data?.resource;
   const requestedPane = searchParams.get('pane');
@@ -88,7 +90,7 @@ export function ChatsPage() {
   } else if (selectedChat === undefined) {
     timeline = <div className="timeline-pane" role="region" aria-label="Chat unavailable"><div className="timeline-stack"><div className="chat-calm-state"><span className="eyebrow">Unavailable</span><h2>Conversation details are unavailable.</h2><p>Refresh the persisted Chat projection before opening message history.</p></div></div></div>;
   } else {
-    timeline = <>{chatReadState.isStaleError && <InlineError error={chatReadState.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" />}<MessageTimeline instanceId={instanceId} chatId={chatId} token={selectedInstance?.token} enabled={messagesEnabled} /></>;
+    timeline = <>{chatReadState.isStaleError && <InlineError error={chatReadState.error} onRetry={() => { void chat.refetch(); }} className="chat-thread-error" />}<MessageTimeline instanceId={instanceId} chatId={chatId} token={token} enabled={messagesEnabled} /></>;
   }
 
   return (
@@ -110,13 +112,13 @@ export function ChatsPage() {
         </header>
         {selectedChat && <ProjectionNotice meta={chat.data?.meta} />}
         {timeline}
-        {instanceId && chatId && selectedChat && messagesEnabled && outboundEnabled && selectedInstance?.token && !directoryResourceId && (
-          <Composer instanceId={instanceId} token={selectedInstance.token} instanceStatus={selectedInstance.status} chatId={chatId} chatName={threadTitle} />
+        {instanceId && chatId && selectedChat && messagesEnabled && outboundEnabled && token && !directoryResourceId && (
+          <Composer instanceId={instanceId} token={token} instanceStatus={selectedInstance?.status ?? 'disconnected'} chatId={chatId} chatName={threadTitle} />
         )}
       </section>
 
       {activePane === 'context' && <button className="chat-context-backdrop" type="button" aria-label="Close details" onClick={() => setActivePane(directoryResourceId ? 'conversations' : 'thread')} />}
-      <ContextPanel instanceId={instanceId} token={selectedInstance?.token} contactId={contactId} labelId={labelId} chat={selectedChat} onBack={() => setActivePane(directoryResourceId ? 'conversations' : 'thread')} />
+      <ContextPanel instanceId={instanceId} token={token} contactId={contactId} labelId={labelId} chat={selectedChat} onBack={() => setActivePane(directoryResourceId ? 'conversations' : 'thread')} />
     </div>
   );
 }
