@@ -28,16 +28,16 @@ Do not start C3 until every supported Console environment is recorded here.
 | Environment | Release commit | Immutable artifact digest | Completed at (UTC) | Operator | Verified |
 | --- | --- | --- | --- | --- | --- |
 | Development | `ba2f2cd08fc3763489fdd1c46ffb183ec0aeec80` (PR #28) | `ghcr.io/hiepknor/omniwa-console@sha256:ec43ccd37b2e06104905159f644c4d8a0b359e308d21d2fde36d8c43178be556` | 2026-07-23 02:07:33 | Codex | Yes |
-| Staging | Pending | Pending | Pending | Pending | No |
+| Staging | `b6c6ba3a71c3b07a2760e0f3ac52f68800424cff` (PR #51) | `ghcr.io/hiepknor/omniwa-console@sha256:0897f074fdf04fdff9fe396d6749ca9a9c641510ab35d96123e989d26d837abb` | 2026-07-23 14:55:57 | Codex | Deploy and rollback smoke only; 0 instances, C3 not started |
 | Production | Pending | Pending | Pending | Pending | No |
 
-The development container is pinned directly to the multi-platform registry
-digest, reports OCI revision `ba2f2cd08fc3763489fdd1c46ffb183ec0aeec80`, runs
-as UID 101, and passed `/healthz`, `/events` deep-link, SPA fallback, and
-Content-Security-Policy checks. CI published the artifact only after its image
-smoke job passed and attached SBOM and provenance attestations. Staging and
-production remain blocked until their environment owners and targets are
-available.
+The development and Staging containers are pinned directly to multi-platform
+registry digests and run as UID 101. Development passed `/healthz`, `/events`
+deep-link, SPA fallback, and Content-Security-Policy checks. Staging runs the v2
+digest recorded above and passed equivalent deploy smoke, but its 0/0
+credential-health sample is non-representative. CI published both artifacts
+only after image smoke and attached SBOM/provenance attestations. Production
+remains pending.
 
 ## Observation baseline
 
@@ -68,6 +68,7 @@ fallback first observed after deployment restarts the approved quiet window.
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
 | 2026-07-23 01:48:13 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Superseded local-artifact baseline |
 | 2026-07-23 02:08:35 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Authenticated sample after registry-digest deployment |
+| 2026-07-23 14:52:49 | Staging | 0 | 0 | 0 | 0 | 0 | — | API healthy; no instances; projection and throttling dimensions unreported | [Non-representative deploy smoke](UI_V2_ROLLOUT_EVIDENCE.md) |
 | Pending | Development | — | — | — | — | — | — | — | Next quiet-window sample |
 
 ## Recovery exercises

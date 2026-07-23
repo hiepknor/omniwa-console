@@ -51,6 +51,7 @@ cross-cutting contract semantics.
 ## Documentation
 
 - [Immutable deployment](./docs/DEPLOYMENT.md)
+- [UI v2 rollout evidence](./docs/UI_V2_ROLLOUT_EVIDENCE.md)
 
 | Document | Purpose |
 | --- | --- |
