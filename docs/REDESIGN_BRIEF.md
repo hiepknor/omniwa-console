@@ -1,6 +1,6 @@
 # Contract-first UI redesign
 
-Status: approved direction, implementation in progress.
+Status: route implementation complete; immutable rollout and legacy deletion pending.
 
 This brief replaces panel-by-panel visual patching with a contract-first rebuild
 of the Console presentation layer. The current public routes stay operational
@@ -36,6 +36,8 @@ Use these sources in order:
 5. [PANELS.md](PANELS.md) — operation ownership of implemented and approved
    panels.
 6. Production tokens and shared components — canonical visual implementation.
+7. [UI_V2_GUIDE.md](UI_V2_GUIDE.md) — canonical implemented presentation,
+   route, state, and review behavior.
 
 Backend source may clarify middleware and runtime semantics, but no private Go
 type or route crosses into the SPA.
