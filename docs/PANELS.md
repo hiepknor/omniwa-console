@@ -110,17 +110,16 @@ Search is prefix-based and cursor-scoped to instance and normalized query.
 Changing either resets the cursor. The panel never decodes cursors or falls back
 to a live WhatsApp read.
 
-## Chats workspace — `/chats/:instanceId?/:chatId?`
+## Chats workspace — `/chats/:chatId?` (v2), `/chats/:instanceId?/:chatId?` (legacy)
 
 Status: Chat and Message list/detail, delivery receipts, Contacts
-list/search/detail, Labels list/detail, and text send are integrated. Media and
-additional message actions remain unowned and are not exposed as working
-behavior.
+list/search/detail, Labels list/detail, and bounded text/media sends are
+integrated in legacy and v2. V2 uses the active instance credential as its
+scope and never calls the admin fleet list.
 
 Core projection ownership:
 
 ```text
-GET /instance/all
 GET /chat/list
 GET /chat/info/{chatId}
 GET /chat/{chatId}/messages
@@ -133,19 +132,26 @@ GET /label/list
 GET /label/info/{labelId}
 ```
 
+Legacy-only instance picker ownership:
+
+```text
+GET /instance/all
+```
+
 Contacts use server prefix search and opaque cursors. Labels intentionally keep
 the backend's legacy bare-array list; capability readiness distinguishes a valid
 empty label projection from an unavailable one. Label assignments are consumed
 from future Chat/Message projection fields rather than reconstructed in the
 browser.
 
-Chat pagination is accumulated intentionally. An invalid opaque cursor resets
-the Chat query to its first page. The public Chat DTO currently has no label
-association field, so the Console does not show or infer chat-label filters.
-Message history is independently accumulated per chat, newest page first, then
-rendered chronologically. Text send acknowledgement only confirms the action
-response; projected status and per-recipient receipts remain authoritative for
-delivery.
+Legacy Chat pagination is accumulated intentionally. V2 keeps the current Chat
+and Message cursors in the URL, renders one bounded page, and uses browser
+history or “Start over” rather than decoding a cursor. An invalid opaque cursor
+resets its own query to the first page. The public Chat DTO currently has no
+label association field, so the Console does not show or infer chat-label
+filters. Each message page renders chronologically. Send acknowledgement only
+confirms the action response; projected status and per-recipient receipts
+remain authoritative for delivery.
 
 Implemented commands owned by the workspace:
 
