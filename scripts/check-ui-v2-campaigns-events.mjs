@@ -4,7 +4,7 @@ const read = (path) => fs.readFileSync(path, 'utf8');
 const app = read('src/app/generation-v2.tsx');
 const campaigns = [read('src/features/campaigns-v2/CampaignsPageV2.tsx'), read('src/features/campaigns-v2/CampaignInspectorV2.tsx'), read('src/features/campaigns-v2/CreateCampaignV2.tsx'), read('src/features/campaigns-v2/hooks.ts')].join('\n');
 const events = [read('src/features/events-v2/EventsPageV2.tsx'), read('src/features/events-v2/hooks.ts')].join('\n');
-const docs = read('docs/UI_V2_CAMPAIGNS_EVENTS.md');
+const docs = read('docs/UI_V2_GUIDE.md');
 
 const requireText = (value, phrase, label) => { if (!value.includes(phrase)) throw new Error(`${label} must include ${phrase}`); };
 requireText(app, "path: '/messages/:campaignId'", 'v2 campaign routes');

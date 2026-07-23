@@ -60,15 +60,7 @@ cross-cutting contract semantics.
 | [docs/CONTRACT_UI_MATRIX.md](docs/CONTRACT_UI_MATRIX.md) | Reviewed UI disposition for every public contract operation |
 | [docs/CONTRACT_BACKLOG.md](docs/CONTRACT_BACKLOG.md) | Deferred/external decision units, accountable roles, and exit criteria |
 | [docs/REDESIGN_BRIEF.md](docs/REDESIGN_BRIEF.md) | Contract-first UI redesign architecture, migration order, and cutover gates |
-| [docs/UI_V2_FOUNDATION.md](docs/UI_V2_FOUNDATION.md) | Canonical tokens, cascade isolation, production primitives, and gallery review |
-| [docs/UI_STATE_MODEL.md](docs/UI_STATE_MODEL.md) | Shared session, capability, projection, resource, transport, and command states |
-| [docs/UI_V2_SHELL_CONNECT.md](docs/UI_V2_SHELL_CONNECT.md) | Generation-gated Shell and Connect behavior, navigation scope, and review checklist |
-| [docs/UI_V2_PLATFORM_RECOVERY.md](docs/UI_V2_PLATFORM_RECOVERY.md) | Persisted Platform Overview and audited projection-recovery workflow |
-| [docs/UI_V2_INSTANCES.md](docs/UI_V2_INSTANCES.md) | Metadata-only fleet management, live instance workspace, and credential lifecycle |
-| [docs/UI_V2_CONVERSATIONS.md](docs/UI_V2_CONVERSATIONS.md) | Instance-scoped projection workspace for chats, messages, directories, and bounded sends |
-| [docs/UI_V2_GROUPS.md](docs/UI_V2_GROUPS.md) | Projection-backed group directory, membership, settings, invite, and command workflow |
-| [docs/UI_V2_CAMPAIGNS_EVENTS.md](docs/UI_V2_CAMPAIGNS_EVENTS.md) | Consent-aware campaign orchestration and durable normalized event history |
-| [docs/UI_V2_CUTOVER_READINESS.md](docs/UI_V2_CUTOVER_READINESS.md) | Generation-isolated artifacts, rollback boundary, and remaining Production gates |
+| [docs/UI_V2_GUIDE.md](docs/UI_V2_GUIDE.md) | Canonical v2 foundation, state model, route behavior, and review contract |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | SPA layers, state ownership, and safety boundaries |
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
 | [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | Runtime key entry, scope, and storage |
