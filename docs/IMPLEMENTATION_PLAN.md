@@ -152,6 +152,7 @@ OmniWA GO. See `docs/CAMPAIGNS.md`.
 
 Status: implemented in code; immutable deployment and the separately approved
 credential observation window remain operational rollout work.
+Track that rollout in [CREDENTIAL_ROLLOUT_EVIDENCE.md](./CREDENTIAL_ROLLOUT_EVIDENCE.md).
 
 Goal: remove migration scaffolding and prove production safety.
 
