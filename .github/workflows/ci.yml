@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  console:
+    name: check / test / image smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Build tested image
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: >-
+          docker build
+          --build-arg OCI_REVISION="$SOURCE_SHA"
+          --build-arg OCI_VERSION="sha-$SOURCE_SHA"
+          --tag omniwa-console:ci
+          .
+
+      - name: Smoke test image
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          container_id="$(docker run --detach --rm --publish 127.0.0.1::8080 omniwa-console:ci)"
+          trap 'docker stop "$container_id" >/dev/null 2>&1 || true' EXIT
+          host_port="$(docker port "$container_id" 8080/tcp | awk -F: '{ print $NF }')"
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail "http://127.0.0.1:$host_port/healthz" >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          test "$(curl --silent "http://127.0.0.1:$host_port/healthz")" = ok
+          curl --silent --fail "http://127.0.0.1:$host_port/events" | grep -F '<div id="root"></div>'
+          test "$(docker exec "$container_id" id -u)" = 101
+          test "$(docker image inspect omniwa-console:ci --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$SOURCE_SHA"
