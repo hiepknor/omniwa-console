@@ -47,7 +47,7 @@ for (const required of [
   '.connect-sequence li[data-state=active]',
   '.connect-sequence-index::after{content:"✓"',
   '.connect-submit:disabled{background:var(--recessed)',
-  '@media(hover:none) and (pointer:coarse){.connect-key-toggle{min-width:44px;min-height:44px}}',
+  '.connect-key-toggle{min-height:24px;padding:2px 9px;border:1px solid var(--border-subtle);border-radius:var(--radius-pill)',
 ]) {
   for (const name of ['appCss', 'prototypeCss']) {
     if (!source[name].includes(required)) failures.push(`${name}: missing synchronized Connect visual state: ${required}`);
@@ -65,6 +65,14 @@ function connectCssBlock(text) {
 
 if (connectCssBlock(source.appCss) !== connectCssBlock(source.prototypeCss)) {
   failures.push('css: application and prototype Connect blocks differ');
+}
+
+for (const name of ['appCss', 'prototypeCss']) {
+  const connectCss = connectCssBlock(source[name]);
+  const responsiveCss = connectCss.slice(connectCss.indexOf('@media'));
+  if (responsiveCss.includes('.connect-key-toggle')) {
+    failures.push(`${name}: Connect key toggle must retain its desktop shape at responsive breakpoints`);
+  }
 }
 
 for (const required of ['GET /instance/all', 'GET /instance/status', '15 seconds', 'memory only']) {

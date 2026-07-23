@@ -204,7 +204,8 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 - At tablet widths the explanation precedes the form in one flow. At phone
   widths the form comes first, the explanatory content follows, and the compact
   connection-check strip is hidden. Every primary input/action remains at
-  least 44px tall; the key reveal control also has a 44px coarse-pointer target.
+  least 44px tall. The key reveal control retains the same compact pill shape
+  on desktop, tablet, and phone layouts.
 
 ### QR pairing panel
 

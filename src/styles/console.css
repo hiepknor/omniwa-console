@@ -661,7 +661,6 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
   .connect-sequence strong{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){.connect-screen *{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}.connect-submit[aria-busy=true]::before{border-right-color:currentColor}}
-@media(hover:none) and (pointer:coarse){.connect-key-toggle{min-width:44px;min-height:44px}}
 
 /* Synced verbatim from design/prototypes/console.css — Shared dropdown contract. */
 /* ===== Shared dropdown contract ===== */
