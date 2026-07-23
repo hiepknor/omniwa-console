@@ -8,7 +8,6 @@ import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
-import { PanelStub } from './PanelStub';
 import { Shell } from './Shell';
 
 type ConnectNotice = 'session-invalid' | undefined;
@@ -33,6 +32,9 @@ const WebhooksPage = lazy(() =>
 );
 const EventsPage = lazy(() =>
   import('@/features/events/EventsPage').then((module) => ({ default: module.EventsPage })),
+);
+const CampaignsPage = lazy(() =>
+  import('@/features/campaigns/CampaignsPage').then((module) => ({ default: module.CampaignsPage })),
 );
 const SettingsPage = lazy(() =>
   import('@/features/settings/SettingsPage').then((module) => ({ default: module.SettingsPage })),
@@ -126,8 +128,8 @@ function AppRuntime() {
                   { path: '/chats/:instanceId/:chatId', element: <ChatsPage /> },
                   { path: '/groups', element: <GroupsPage /> },
                   { path: '/groups/:instanceId', element: <GroupsPage /> },
-                  { path: '/messages', element: <PanelStub panel="messages" /> },
-                  { path: '/messages/new', element: <PanelStub panel="messages" /> },
+                  { path: '/messages', element: <CampaignsPage /> },
+                  { path: '/messages/new', element: <CampaignsPage /> },
                   { path: '/overview', element: <OverviewPage /> },
                   { path: '/instances', element: <InstancesPage /> },
                   { path: '/instances/:instanceId', element: <InstancesPage /> },
