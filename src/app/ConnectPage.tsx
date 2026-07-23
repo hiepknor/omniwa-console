@@ -11,30 +11,37 @@ type ConnectError = {
   requestId?: string;
 };
 
+export const CONNECT_TIMEOUT_MS = 15_000;
+
 /**
  * Validate the pasted apikey against omniwa-go and classify it. The global admin
  * key can list every instance (`GET /instance/all`); a per-instance token cannot,
  * but can read its own status (`GET /instance/status`). A 401 on both means the
  * key is invalid.
  */
-async function probeKey(client: ReturnType<typeof createApiClient>): Promise<KeyKind> {
-  const admin = await client.GET('/instance/all');
+export async function probeKey(
+  client: ReturnType<typeof createApiClient>,
+  signal?: AbortSignal,
+): Promise<KeyKind> {
+  const admin = await client.GET('/instance/all', { signal });
   if (admin.data !== undefined) return 'admin';
   if (admin.response.status !== 401 && admin.response.status !== 403) {
     throw new ApiFailure(admin.error, admin.response.status, admin.response.headers);
   }
 
-  const scoped = await client.GET('/instance/status');
+  const scoped = await client.GET('/instance/status', { signal });
   if (scoped.data !== undefined) return 'api';
   throw new ApiFailure(scoped.error, scoped.response.status, scoped.response.headers);
 }
 
-function isValidOrigin(value: string) {
+export function normalizeApiOrigin(value: string): string | undefined {
   try {
-    const url = new URL(value);
-    return url.origin === value.replace(/\/$/, '');
+    const url = new URL(value.trim());
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return undefined;
+    if (url.username || url.password || url.pathname !== '/' || url.search || url.hash) return undefined;
+    return url.origin;
   } catch {
-    return false;
+    return undefined;
   }
 }
 
@@ -53,33 +60,44 @@ export function ConnectPage({
   const [error, setError] = useState<ConnectError | null>(null);
   const baseUrlInput = useRef<HTMLInputElement>(null);
   const apiKeyInput = useRef<HTMLInputElement>(null);
+  const pendingRef = useRef(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (pendingRef.current) return;
     setError(null);
 
-    if (!isValidOrigin(baseUrl)) {
+    const origin = normalizeApiOrigin(baseUrl);
+    if (!origin) {
       setError({
         category: 'validation',
-        message: 'API base URL must be a valid URL, e.g. http://localhost:3000',
+        message: 'API base URL must be an HTTP(S) origin, e.g. http://localhost:4000',
       });
       baseUrlInput.current?.focus();
       return;
     }
 
-    const origin = new URL(baseUrl).origin;
+    const normalizedKey = apiKey.trim();
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), CONNECT_TIMEOUT_MS);
+    pendingRef.current = true;
     setPending(true);
     try {
-      const client = createApiClient({ baseUrl: origin, apiKey });
+      const client = createApiClient({ baseUrl: origin, apiKey: normalizedKey });
       const session: ConsoleSession = {
         baseUrl: origin,
-        apiKey,
-        keyKind: await probeKey(client),
+        apiKey: normalizedKey,
+        keyKind: await probeKey(client, controller.signal),
         connectedAt: new Date().toISOString(),
       };
       onConnected(session);
     } catch (err) {
-      if (err instanceof ApiFailure) {
+      if (controller.signal.aborted) {
+        setError({
+          category: 'timeout',
+          message: 'The OmniWA API did not respond within 15 seconds.',
+        });
+      } else if (err instanceof ApiFailure) {
         setError({ category: err.category, message: err.message, requestId: err.requestId });
       } else {
         setError({
@@ -88,11 +106,13 @@ export function ConnectPage({
         });
       }
     } finally {
+      window.clearTimeout(timeoutId);
+      pendingRef.current = false;
       setPending(false);
     }
   };
 
-  const canSubmit = isValidOrigin(baseUrl) && apiKey.trim().length > 0 && !pending;
+  const canSubmit = normalizeApiOrigin(baseUrl) !== undefined && apiKey.trim().length > 0 && !pending;
   const baseUrlError = error?.category === 'validation' ? error : undefined;
   const connectionError = error?.category !== 'validation' ? error : undefined;
 
@@ -161,7 +181,7 @@ export function ConnectPage({
               </li>
               <li>
                 <span className="connect-sequence-index num !text-[var(--fg-2)]">02</span>
-                <strong>Probe health</strong>
+                <strong>Verify key</strong>
               </li>
               <li>
                 <span className="connect-sequence-index num !text-[var(--fg-2)]">03</span>
@@ -183,13 +203,16 @@ export function ConnectPage({
                 value={baseUrl}
                 required
                 autoComplete="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={pending}
                 aria-describedby={`connect-base-url-help${baseUrlError ? ' connect-base-url-error' : ''}`}
                 aria-invalid={baseUrlError ? 'true' : undefined}
                 onChange={(event) => setBaseUrl(event.target.value)}
               />
               <p id="connect-base-url-help">
-                In local development, use the console origin to route requests through the Vite
-                proxy.
+                Enter the OmniWA GO API origin directly. Local development defaults to port 4000.
               </p>
               {baseUrlError && <p id="connect-base-url-error" className="help error" role="alert">{baseUrlError.message}</p>}
             </div>
@@ -202,6 +225,7 @@ export function ConnectPage({
                   type="button"
                   aria-controls="connect-api-key"
                   aria-pressed={showApiKey}
+                  disabled={pending}
                   onClick={() => {
                     setShowApiKey((shown) => !shown);
                     apiKeyInput.current?.focus();
@@ -219,6 +243,10 @@ export function ConnectPage({
                 placeholder="Paste API key"
                 required
                 autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={pending}
                 aria-describedby="connect-api-key-help"
                 value={apiKey}
                 onChange={(event) => setApiKey(event.target.value)}
@@ -239,6 +267,7 @@ export function ConnectPage({
                 kind="error"
                 label={connectionError.category}
                 title={connectionError.message}
+                requestId={connectionError.requestId}
                 className="connect-error"
                 announcement="assertive"
               />

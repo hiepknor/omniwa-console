@@ -188,18 +188,19 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
   It uses a compact brand masthead, a platform-access explanation, and one
   bounded connection form. The three connection checks live inside the form
   so operational context stays attached to the action it describes.
-- The form owns only API origin, masked API key, and the explicit
-  remember-device choice. Remembering reveals an inline trusted-device
-  warning before submission; session-only storage remains the default. The
-  connect action remains disabled until both credentials are valid and uses
-  an explicit `Connecting…` busy state after submission.
-- Connection status follows the contract: validate origin → probe
-  `getHealth` → detect admin scope with `listApiKeys`. Errors render category,
-  message, and `requestId` when present. The key is never rendered after a
-  session is created.
+- The form owns only an HTTP(S) API origin and a masked API key. Credentials
+  remain in memory only and are cleared on reload or sign-out. The connect
+  action remains disabled until both values are valid and uses an explicit
+  `Connecting…` busy state after submission.
+- Connection status follows the public OmniWA GO contract: validate origin →
+  verify the key with `GET /instance/all` → on HTTP 401/403 detect scoped access
+  with `GET /instance/status`. The probe times out after 15 seconds. Errors
+  render category, message, and `requestId` when present. The key is never
+  rendered after a session is created.
 - At tablet widths the explanation precedes the form in one flow. At phone
-  widths the checks remain a compact three-column strip and every primary
-  input/action remains at least 44px tall.
+  widths the form comes first, the explanatory content follows, and the compact
+  connection-check strip is hidden. Every primary input/action remains at
+  least 44px tall.
 
 ### QR pairing panel
 

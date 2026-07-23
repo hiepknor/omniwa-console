@@ -24,7 +24,7 @@
       <div class="connect-intro-copy">
         <span class="eyebrow">Self-hosted platform access</span>
         <h1 id="connect-title">Connect to your OmniWA runtime.</h1>
-        <p>Enter the platform origin and an API key. The console verifies health before creating a browser session.</p>
+        <p>Enter the OmniWA GO origin and an API key. The console validates the key and detects its scope before creating a browser session.</p>
       </div>
       <div class="connect-intro-note">
         <span class="dot" style="background:var(--info)"></span>
@@ -40,7 +40,7 @@
       <form class="connect-form" data-connect-form>
         <ol class="connect-sequence" aria-label="Connection checks">
           <li><span class="connect-sequence-index num">01</span><strong>Validate origin</strong></li>
-          <li><span class="connect-sequence-index num">02</span><strong>Probe health</strong></li>
+          <li><span class="connect-sequence-index num">02</span><strong>Verify key</strong></li>
           <li><span class="connect-sequence-index num">03</span><strong>Detect scope</strong></li>
         </ol>
 
@@ -49,8 +49,8 @@
             <label for="connect-base-url">API base URL</label>
             <span>Origin only</span>
           </div>
-          <input class="input" id="connect-base-url" name="baseUrl" type="url" value="http://localhost:3000" required autocomplete="url" aria-describedby="connect-base-url-help">
-          <p id="connect-base-url-help">In local development, use the console origin to route requests through the Vite proxy.</p>
+          <input class="input" id="connect-base-url" name="baseUrl" type="url" value="http://localhost:4000" required autocomplete="url" autocapitalize="none" autocorrect="off" spellcheck="false" aria-describedby="connect-base-url-help">
+          <p id="connect-base-url-help">Enter the OmniWA GO API origin directly. Local development defaults to port 4000.</p>
         </div>
 
         <div class="connect-field">
@@ -58,7 +58,7 @@
             <label for="connect-api-key">API key</label>
             <button class="connect-key-toggle" type="button" aria-controls="connect-api-key" aria-pressed="false" data-key-toggle>Show</button>
           </div>
-          <input class="input" id="connect-api-key" name="apiKey" type="password" placeholder="Paste API key" required autocomplete="off" aria-describedby="connect-api-key-help">
+          <input class="input" id="connect-api-key" name="apiKey" type="password" placeholder="Paste API key" required autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" aria-describedby="connect-api-key-help">
           <p id="connect-api-key-help">Never displayed again after entry.</p>
         </div>
 
@@ -89,17 +89,19 @@
   const error = document.querySelector('[data-connect-error]');
   const submit = document.querySelector('[data-connect-submit]');
 
-  const hasValidOrigin = () => {
+  const normalizedOrigin = () => {
     try {
-      const url = new URL(baseUrl.value);
-      return url.origin === baseUrl.value.replace(/\/$/, '');
+      const url = new URL(baseUrl.value.trim());
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') return undefined;
+      if (url.username || url.password || url.pathname !== '/' || url.search || url.hash) return undefined;
+      return url.origin;
     } catch {
-      return false;
+      return undefined;
     }
   };
   const updateSubmitState = () => {
     if (submit.getAttribute('aria-busy') === 'true') return;
-    submit.disabled = !hasValidOrigin() || !apiKey.value.trim();
+    submit.disabled = !normalizedOrigin() || !apiKey.value.trim();
   };
 
   keyToggle.addEventListener('click', () => {
@@ -115,12 +117,14 @@
     event.preventDefault();
     error.hidden = true;
     try {
-      const url = new URL(baseUrl.value);
-      if (url.origin !== baseUrl.value.replace(/\/$/, '')) throw new Error('origin');
+      if (!normalizedOrigin()) throw new Error('origin');
       if (!apiKey.value) return apiKey.focus();
       submit.disabled = true;
       submit.setAttribute('aria-busy', 'true');
       submit.textContent = 'Connecting…';
+      baseUrl.disabled = true;
+      apiKey.disabled = true;
+      keyToggle.disabled = true;
     } catch {
       error.hidden = false;
       baseUrl.focus();
