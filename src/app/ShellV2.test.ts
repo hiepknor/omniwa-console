@@ -9,6 +9,11 @@ describe('navigationForKeyKind', () => {
     expect(pathsFor('admin')).toEqual(['/overview', '/instances']);
   });
 
+  it('adds Recovery only after its server capability is available', () => {
+    expect(navigationForKeyKind('admin', true).flatMap((section) => section.items.map((item) => item.to)))
+      .toEqual(['/overview', '/recovery', '/instances']);
+  });
+
   it('shows contract-backed instance operations for an API credential', () => {
     expect(pathsFor('api')).toEqual(['/overview', '/chats', '/groups', '/messages', '/events']);
   });

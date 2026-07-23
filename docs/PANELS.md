@@ -24,8 +24,8 @@ Rules:
 | Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
 | Labels | Projection available | Directory list/detail integrated in Chats workspace |
 | Events | Durable history available | Integrated with retention and no-backfill metadata |
-| Overview and Health | Persisted/split APIs available | Integrated |
-| Projection Recovery | Admin failure operations available | Approved for v2 redesign; not integrated |
+| Overview and Health | Persisted/split APIs available | Integrated in legacy and v2 |
+| Projection Recovery | Admin failure operations available | Integrated in v2 |
 | Campaigns (`/messages`) | Orchestration available | Integrated |
 | Queue/jobs | No generic management API | Unsupported |
 | Webhook administration | No management API | Unsupported |
@@ -211,8 +211,9 @@ does not open the admin-key WebSocket.
 
 ## Overview — `/overview`
 
-Status: integrated with persisted metrics, split health, URL-backed windows,
-explicit unavailable action state, and polling-only realtime posture.
+Status: integrated in legacy and v2 with persisted metrics, split health,
+URL-backed windows, explicit unavailable action state, and polling-only
+realtime posture.
 
 ```text
 GET /server/overview?window=
@@ -229,20 +230,21 @@ Instance health dimensions are grouped by the server-provided instance ID.
 
 ## Projection Recovery — `/recovery`
 
-Status: approved for the v2 redesign; not integrated in the current Console.
-The route must remain absent from Production navigation until its complete
-list/filter/detail/replay/discard workflow and capability states are verified.
+Status: integrated behind the v2 generation boundary. The route appears in v2
+navigation only for an admin session when capability discovery advertises
+`projection_failure_operations`.
 
 ```text
-GET  /server/projection-failures?instanceId=&resource=&limit=
+GET  /server/projection-failures?instanceId=&resource=&limit=&cursor=
 POST /server/projection-failures/replay
 POST /server/projection-failures/discard
 ```
 
-These operations require the admin key and the
-`projection_failure_operations` capability. Replay and discard are explicit,
-audited server commands: Console does not optimistically remove a failure,
-automatically retry a command, or render acknowledgement as recovered state.
+Filters, page size, opaque cursor, and selected failure are URL-backed. These
+operations require the admin key and the `projection_failure_operations`
+capability. Replay and discard are explicit, audited server commands: Console
+does not optimistically remove a failure, automatically retry a command, or
+render acknowledgement as recovered state.
 
 ## Unsupported routes
 

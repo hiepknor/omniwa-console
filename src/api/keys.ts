@@ -4,6 +4,8 @@ export const queryKeys = {
   healthReadiness: ['health', 'readiness'] as const,
   projectionHealth: ['health', 'projection'] as const,
   overview: (window: string) => ['overview', window] as const,
+  projectionFailures: (params: { instanceId?: string; resource?: string; limit: number; cursor?: string }) =>
+    ['projection-failures', params] as const,
   queueMetrics: ['metrics', 'queue'] as const,
   messageMetrics: ['metrics', 'messages'] as const,
   webhookMetrics: ['metrics', 'webhooks'] as const,

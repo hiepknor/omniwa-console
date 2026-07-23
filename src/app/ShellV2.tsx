@@ -6,18 +6,22 @@ import { environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/compone
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { ConsoleSession, KeyKind } from '@/lib/session';
 
-type V2IconName = 'overview' | 'instances' | 'chats' | 'groups' | 'campaigns' | 'events';
+type V2IconName = 'overview' | 'recovery' | 'instances' | 'chats' | 'groups' | 'campaigns' | 'events';
 type V2NavItem = { to: string; label: string; icon: V2IconName; end?: boolean };
 type V2NavSection = { label: string; items: V2NavItem[] };
 
 const overview = { to: '/overview', label: 'Overview', icon: 'overview', end: true } as const;
 
-export function navigationForKeyKind(keyKind: KeyKind): V2NavSection[] {
+export function navigationForKeyKind(keyKind: KeyKind, recoveryAvailable = false): V2NavSection[] {
   if (keyKind === 'admin') {
     return [
       {
         label: 'Platform',
-        items: [overview, { to: '/instances', label: 'Instances', icon: 'instances' }],
+        items: [
+          overview,
+          ...(recoveryAvailable ? [{ to: '/recovery', label: 'Recovery', icon: 'recovery' as const }] : []),
+          { to: '/instances', label: 'Instances', icon: 'instances' },
+        ],
       },
     ];
   }
@@ -47,6 +51,7 @@ export function scopeLabelForKeyKind(keyKind: KeyKind): string {
 function ShellIcon({ name }: { name: V2IconName }) {
   const content: Record<V2IconName, ReactNode> = {
     overview: <><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></>,
+    recovery: <><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></>,
     instances: <><rect x="3" y="4" width="18" height="7" rx="1.5" /><rect x="3" y="13" width="18" height="7" rx="1.5" /><path d="M7 7.5h.01M7 16.5h.01" /></>,
     chats: <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
     groups: <><circle cx="9" cy="8" r="4" /><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2M16 4a4 4 0 0 1 0 8M18 15a5 5 0 0 1 4 4.9V21" /></>,
@@ -73,8 +78,9 @@ function EnvironmentLabel({ baseUrl }: { baseUrl: string }) {
 
 export function ShellV2({ session, onDisconnect }: { session: ConsoleSession; onDisconnect: () => void }) {
   const location = useLocation();
-  const sections = navigationForKeyKind(session.keyKind);
   const capabilities = useServerCapabilities();
+  const recoveryAvailable = capabilities.data?.capabilities.includes('projection_failure_operations') ?? false;
+  const sections = navigationForKeyKind(session.keyKind, recoveryAvailable);
   const allItems = sections.flatMap((section) => section.items);
   const active = allItems.find(
     (item) =>
