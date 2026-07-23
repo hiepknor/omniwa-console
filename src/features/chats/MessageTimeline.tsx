@@ -1,11 +1,15 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { ApiFailure } from '@/api/envelopes';
 import type { MessageResource } from '@/api/messages';
 import { InlineError } from '@/components/InlineError';
+import { ProjectionNotice } from '@/components/ProjectionNotice';
+import { cursorRecoveryAction } from '@/lib/cursor-recovery';
 import { calendarDayKey, calendarDayLabel, formatClockTime } from '@/lib/format';
+import { projectionCollectionState } from '@/lib/projection-collection-state';
 import { useResilientReadState } from '@/lib/query-state';
 import { dismissVirtualKeyboard } from '@/lib/useVisualViewport';
-import { useInstanceMessages } from './hooks';
+import { useInstanceMessages, useResetInstanceMessages } from './hooks';
 
 function messageDirection(direction: string | undefined): 'in' | 'out' {
   const normalized = direction?.toLowerCase();
@@ -56,7 +60,8 @@ function MessageBubble({ message, selected, onSelect }: {
   const status = message.status?.toLocaleLowerCase();
   const time = formatClockTime(message.createdAt);
   const type = humanizedType(message.type);
-  const mediaLike = ['image', 'video', 'audio', 'document', 'media'].includes(message.type?.toLowerCase() ?? '');
+  const mediaLike = message.mediaType !== undefined || ['image', 'video', 'audio', 'document', 'media'].includes(message.type.toLowerCase());
+  const text = message.contentText ?? message.caption ?? message.contentSummary;
   const directionLabel = isOutgoing ? 'Outgoing' : knownDirection ? 'Incoming' : 'Message';
   const statusLabel = isOutgoing && status ? `, ${status}` : '';
 
@@ -69,11 +74,12 @@ function MessageBubble({ message, selected, onSelect }: {
       onClick={onSelect}
     >
       {mediaLike
-        ? <div className="media" role="img" aria-label={`${type} content unavailable in the message projection`}>
+        ? <div className="media" role="img" aria-label={`${type}; media binary is outside the message projection`}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M8 9h8M8 13h5M8 17h7" /></svg>
-            <span className="media-copy"><span className="media-title">{type}</span><span className="media-meta">{message.id}</span></span>
+            <span className="media-copy"><span className="media-title">{message.mediaFileName ?? type}</span><span className="media-meta">{message.mediaMimeType ?? message.mediaType ?? message.id}</span></span>
           </div>
-        : <p className="message-placeholder"><span>{type}</span> <span className="mono">{message.id}</span></p>}
+        : text ? <p>{text}</p> : <p className="message-placeholder"><span>{type}</span> <span className="mono">{message.id}</span></p>}
+      {mediaLike && text && <p>{text}</p>}
       {isOutgoing && (
         <span className="foot"><span className={`dot ${statusDot(status)}`} aria-hidden="true" />{status ?? 'unknown'} · {time}</span>
       )}
@@ -82,8 +88,9 @@ function MessageBubble({ message, selected, onSelect }: {
   );
 }
 
-export function MessageTimeline({ instanceId, chatId }: { instanceId: string; chatId: string }) {
-  const query = useInstanceMessages(instanceId);
+export function MessageTimeline({ instanceId, chatId, token, enabled }: { instanceId: string; chatId: string; token: string | undefined; enabled: boolean }) {
+  const query = useInstanceMessages(instanceId, chatId, token, enabled);
+  const resetMessages = useResetInstanceMessages(instanceId, chatId);
   const [searchParams, setSearchParams] = useSearchParams();
   const paneRef = useRef<HTMLDivElement>(null);
   const nearBottomRef = useRef(true);
@@ -91,12 +98,21 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
   const previousLastMessageRef = useRef<string>();
   const [newMessagesWaiting, setNewMessagesWaiting] = useState(false);
   const pages = query.data?.pages ?? [];
-  const readState = useResilientReadState(query, pages.some((page) => page.resource !== undefined));
-  const unavailable = pages.some((page) => page.unavailable !== undefined);
+  const readState = useResilientReadState(query, pages.length > 0);
   const messages = useMemo(() => pages
-    .flatMap((page) => page.resource?.items ?? [])
-    .filter((message) => message.chatId === chatId)
+    .flatMap((page) => page.resource.items)
     .sort((left, right) => messageTimestamp(left) - messageTimestamp(right)), [chatId, pages]);
+  const errorCode = query.error instanceof ApiFailure ? query.error.code : undefined;
+  const collectionState = projectionCollectionState({
+    errorCode,
+    hasInitialError: readState.isInitialError,
+    hasResource: pages.length > 0,
+    isInitialLoading: readState.isInitialLoading,
+    itemCount: messages.length,
+    projectionStatus: pages[0]?.meta?.syncStatus,
+    readinessAdvertised: enabled,
+    unavailable: false,
+  });
   const selectedMessageId = searchParams.get('message');
   const sections = useMemo(() => {
     const grouped = new Map<string, MessageResource[]>();
@@ -166,6 +182,12 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
     setNewMessagesWaiting(false);
   };
 
+  const retryMessages = () => {
+    const attemptedCursor = pages.at(-1)?.meta?.nextCursor;
+    if (cursorRecoveryAction(errorCode, attemptedCursor) === 'reset') void resetMessages();
+    else void query.refetch();
+  };
+
   const selectMessage = (messageId: string) => {
     dismissVirtualKeyboard();
     const next = new URLSearchParams(searchParams);
@@ -179,14 +201,14 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
   };
 
   let content: React.ReactNode;
-  if (readState.isInitialError) {
-    content = <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-thread-error" />;
-  } else if (readState.isInitialLoading) {
-    content = <div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading message history.</h2><p>The first instance message page is in progress.</p></div>;
-  } else if (unavailable && messages.length === 0) {
-    content = <div className="chat-calm-state"><span className="eyebrow">Unavailable</span><h2>Message history is not available on OmniWA GO.</h2><p>OmniWA GO has no message-history API.</p></div>;
-  } else if (messages.length === 0) {
-    content = <div className="chat-calm-state"><span className="eyebrow">0 messages</span><h2>No messages loaded for this conversation yet.</h2><p>History loads per instance, so older conversation messages may appear as more pages are loaded.</p></div>;
+  if (collectionState === 'error') {
+    content = <InlineError error={readState.error} onRetry={retryMessages} className="chat-thread-error" />;
+  } else if (collectionState === 'loading') {
+    content = <div className="chat-calm-state" aria-live="polite"><span className="eyebrow">Loading</span><h2>Loading message history.</h2><p>The newest persisted message page is in progress.</p></div>;
+  } else if (collectionState === 'not_ready' || collectionState === 'syncing' || collectionState === 'unavailable') {
+    content = <div className="chat-calm-state"><span className="eyebrow">Message projection</span><h2>Message history is not ready yet.</h2><p>No live WhatsApp history lookup will be used as a fallback.</p></div>;
+  } else if (collectionState === 'empty') {
+    content = <div className="chat-calm-state"><span className="eyebrow">0 messages</span><h2>No messages in this conversation yet.</h2><p>The projection is ready and this is an authoritative empty history.</p></div>;
   } else {
     content = sections.map((section) => (
       <div className="message-day" key={calendarDayKey(section[0]?.createdAt)}>
@@ -211,8 +233,9 @@ export function MessageTimeline({ instanceId, chatId }: { instanceId: string; ch
         }}
       >
         <div className="timeline-stack">
-          {readState.isStaleError && <InlineError error={readState.error} onRetry={() => { void query.refetch(); }} className="chat-thread-error" />}
-          {query.hasNextPage && !unavailable && (
+          <ProjectionNotice meta={pages[0]?.meta} />
+          {readState.isStaleError && <InlineError error={readState.error} onRetry={retryMessages} className="chat-thread-error" />}
+          {query.hasNextPage && (
             <button className="btn sm load-older" type="button" disabled={query.isFetchingNextPage} onClick={() => { void loadOlder(); }}>
               {query.isFetchingNextPage ? 'Loading older…' : 'Load older'}
             </button>

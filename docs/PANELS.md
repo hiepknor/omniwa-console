@@ -20,7 +20,7 @@ Rules:
 | Instances | Available | Integrated |
 | Groups | Projection available | Projection list/detail/search integrated |
 | Chats | Projection available | Projection list/detail integrated |
-| Messages and delivery | Projection available | Pending migration |
+| Messages and delivery | Projection available | History/detail/receipts and text send integrated |
 | Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
 | Labels | Projection available | Directory list/detail integrated in Chats workspace |
 | Events | Durable history available | Pending migration |
@@ -101,9 +101,10 @@ to a live WhatsApp read.
 
 ## Chats workspace — `/chats/:instanceId?/:chatId?`
 
-Status: Chat list/detail, Contacts list/search/detail, and Labels list/detail are
-integrated. Messages, delivery history, and Composer commands remain pending and
-are not exposed as working behavior.
+Status: Chat and Message list/detail, delivery receipts, Contacts
+list/search/detail, Labels list/detail, and text send are integrated. Media and
+additional message actions remain unowned and are not exposed as working
+behavior.
 
 Core projection ownership:
 
@@ -130,6 +131,10 @@ browser.
 Chat pagination is accumulated intentionally. An invalid opaque cursor resets
 the Chat query to its first page. The public Chat DTO currently has no label
 association field, so the Console does not show or infer chat-label filters.
+Message history is independently accumulated per chat, newest page first, then
+rendered chronologically. Text send acknowledgement only confirms the action
+response; projected status and per-recipient receipts remain authoritative for
+delivery.
 
 Core commands used by the workspace when implemented:
 

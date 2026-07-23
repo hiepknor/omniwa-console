@@ -21,6 +21,8 @@ Completed:
   freshness-aware detail views.
 - Chats projection list/detail with stable keyset pagination and explicit
   backend-owned fields.
+- Messages projection history/detail, per-recipient receipts, and text send
+  acknowledgement with independent delivery state.
 - Global capability provider and reusable instance capability hook.
 - Projection envelope metadata adapter and shared projection notice.
 - Machine-readable error adapter, `Retry-After` countdown, jittered manual retry,
@@ -28,7 +30,7 @@ Completed:
 
 Not yet integrated:
 
-- Messages and delivery projections;
+- media send and additional chat/message action commands;
 - durable Events;
 - Overview, split Health, and Projection Health;
 - Campaign UI;
@@ -84,23 +86,33 @@ Goal: replace the Chats workspace stubs with persisted projections.
 Chats slice implemented: list/detail reads are instance-token scoped,
 capability-gated, and normalized from the OmniWA GO projection contract. The
 workspace keeps stale snapshots visible, recovers invalid accumulated cursors
-by resetting to the first page, and does not expose Message/Composer behavior
-until the independent Messages slice is complete.
+by resetting to the first page.
+
+Messages slice implemented: history/detail/receipt reads are chat- and
+instance-scoped, independently capability-gated, and retain normalized content,
+media metadata, lifecycle, provenance, and retention fields. Text send uses the
+existing action endpoint and invalidates only the affected Chat/Message keys;
+its acknowledgement is never rendered as delivery. Unsupported retry, cancel,
+reconnect, and media controls are not exposed. An uncertain send failure has no
+one-click retry because the current endpoint has no Console-owned idempotency
+contract.
 
 - Implement chat list/detail and keyset pagination.
 - Implement message list/detail and delivery/read receipt history.
 - Preserve message direction, sender/recipient, content summary, media metadata,
   provenance, lifecycle, and retention state.
 - Keep media binary outside the projection cache.
-- Wire text/media send through existing public commands, then refresh the
-  affected chat/message projections.
+- Wire text send through the existing public command, then refresh the affected
+  Chat/Message projections. Integrate media only after its backend request and
+  storage-reference contract is verified independently.
 - Never interpret send acknowledgement as `sent`, `delivered`, or `read`.
 - Consume label associations only when OmniWA GO adds them to the public
   Chat/Message DTO; do not reconstruct persisted associations in the browser.
 - Verify new messages do not shift already-loaded cursor pages.
 
-Exit: an operator can browse persisted conversations, inspect delivery history,
-and send without client-side message accumulation.
+Exit status: persisted browsing, receipt inspection, and text send are achieved
+without client-side message accumulation. Media/action ownership remains a
+separate slice and is not represented by placeholders.
 
 ## Phase 4 — Durable Events, Overview, and Health
 
