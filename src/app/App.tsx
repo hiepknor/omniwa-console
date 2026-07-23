@@ -48,6 +48,9 @@ const ActiveInstancesPage = UI_GENERATION === 'v2' ? InstancesPageV2 : Instances
 const ChatsPage = lazy(() =>
   import('@/features/chats/ChatsPage').then((module) => ({ default: module.ChatsPage })),
 );
+const ConversationsPageV2 = lazy(() =>
+  import('@/features/conversations-v2/ConversationsPageV2').then((module) => ({ default: module.ConversationsPageV2 })),
+);
 const GroupsPage = lazy(() =>
   import('@/features/groups/GroupsPage').then((module) => ({ default: module.GroupsPage })),
 );
@@ -154,9 +157,16 @@ function AppRuntime() {
                 children: [
                   { path: '/connect', element: <Navigate to="/overview" replace /> },
                   { path: '/', element: <Navigate to="/overview" replace /> },
-                  { path: '/chats', element: <ChatsPage /> },
-                  { path: '/chats/:instanceId', element: <ChatsPage /> },
-                  { path: '/chats/:instanceId/:chatId', element: <ChatsPage /> },
+                  ...(UI_GENERATION === 'v2'
+                    ? [
+                        { path: '/chats', element: <ConversationsPageV2 /> },
+                        { path: '/chats/:chatId', element: <ConversationsPageV2 /> },
+                      ]
+                    : [
+                        { path: '/chats', element: <ChatsPage /> },
+                        { path: '/chats/:instanceId', element: <ChatsPage /> },
+                        { path: '/chats/:instanceId/:chatId', element: <ChatsPage /> },
+                      ]),
                   { path: '/groups', element: <GroupsPage /> },
                   { path: '/groups/:instanceId', element: <GroupsPage /> },
                   { path: '/messages', element: <CampaignsPage /> },
