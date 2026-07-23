@@ -107,6 +107,85 @@ const BACKEND_RISK = new Set([
   'POST /chat/unpin',
 ]);
 
+export const BACKLOG_DECISIONS = [
+  {
+    id: 'product-call-control',
+    target: 'deferred-product-workflow',
+    workflow: 'call-control',
+    owner: 'Product',
+    status: 'awaiting-workflow-approval',
+    exitCriteria: 'Approve an operator call-control journey, scope, safety behavior, and navigation placement.',
+  },
+  {
+    id: 'product-contacts-and-labels',
+    target: 'deferred-product-workflow',
+    workflow: 'contacts-and-labels',
+    owner: 'Product',
+    status: 'awaiting-workflow-approval',
+    exitCriteria: 'Approve coherent privacy, profile, blocklist, and label-management journeys with mutation safety requirements.',
+  },
+  {
+    id: 'product-conversations',
+    target: 'deferred-product-workflow',
+    workflow: 'conversations',
+    owner: 'Product',
+    status: 'awaiting-workflow-approval',
+    exitCriteria: 'Approve bounded message actions, rich outbound types, history sync, polls, and delivery semantics as complete operator workflows.',
+  },
+  {
+    id: 'product-groups-and-communities',
+    target: 'deferred-product-workflow',
+    workflow: 'groups-and-communities',
+    owner: 'Product',
+    status: 'awaiting-workflow-approval',
+    exitCriteria: 'Approve community, group-join, and group-photo journeys including confirmation, acknowledgement, and refresh behavior.',
+  },
+  {
+    id: 'product-instance-fleet',
+    target: 'deferred-product-workflow',
+    workflow: 'instance-fleet',
+    owner: 'Product',
+    status: 'awaiting-workflow-approval',
+    exitCriteria: 'Approve any remaining admin fleet journey without restoring credential-bearing legacy reads or bypassing metadata views.',
+  },
+  {
+    id: 'product-newsletters',
+    target: 'deferred-product-workflow',
+    workflow: 'newsletters',
+    owner: 'Product',
+    status: 'awaiting-workflow-approval',
+    exitCriteria: 'Approve newsletter discovery, creation, membership, and message inspection as one operator workflow.',
+  },
+  {
+    id: 'backend-chat-state-commands',
+    target: 'deferred-backend-risk',
+    workflow: 'conversations',
+    owner: 'Backend',
+    status: 'blocked-backend-verification',
+    exitCriteria: 'Document and verify idempotency, acknowledgement, projection write-through, and machine-readable failures for chat-state commands.',
+  },
+  {
+    id: 'backend-live-group-list',
+    target: 'deferred-backend-risk',
+    workflow: 'groups-and-communities',
+    owner: 'Backend',
+    status: 'blocked-backend-verification',
+    exitCriteria: 'Provide a supported projection-backed use case or explicitly approve the live-read reliability and readiness semantics.',
+  },
+  {
+    id: 'external-passkey-helper',
+    target: 'external-client',
+    workflow: 'external-passkey-helper',
+    owner: 'External client',
+    status: 'out-of-console-scope',
+    exitCriteria: 'Remain in the passkey helper; any Console ownership change requires a separately approved product and security decision.',
+  },
+];
+
+export function backlogDecisionFor(target, workflow) {
+  return BACKLOG_DECISIONS.find((decision) => decision.target === target && decision.workflow === workflow);
+}
+
 const PROJECTION_READS = new Set([
   'GET /events',
   'GET /group/list',

@@ -12,6 +12,10 @@ complete operator workflow is approved; `deferred-backend-risk` operations are
 blocked by documented backend reliability concerns; and `external-client`
 operations belong to the passkey helper rather than Console.
 
+Deferred and external operations are grouped into accountable decision units in
+[CONTRACT_BACKLOG.md](CONTRACT_BACKLOG.md). That register records role ownership
+and exit criteria without treating a deferred endpoint as an approved panel.
+
 Scope values are derived from the backend route middleware, not from URL shape
 alone. Capability names come from the backend Console handoff. A value of
 `none-advertised` means the backend currently publishes no dedicated capability

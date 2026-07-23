@@ -18,6 +18,7 @@
     "design:check": "node scripts/check-table-contract.mjs && node scripts/check-drawer-contract.mjs && node scripts/check-dialog-contract.mjs && node scripts/check-chat-workspace.mjs && node scripts/check-connect-contract.mjs && node scripts/check-overview-contract.mjs && node scripts/check-ui-v2-foundation.mjs && node scripts/check-ui-v2-shell-connect.mjs && node scripts/check-ui-v2-platform-recovery.mjs && node scripts/check-ui-v2-instances.mjs && node scripts/check-ui-v2-conversations.mjs && node scripts/check-ui-v2-groups.mjs && node scripts/check-ui-v2-campaigns-events.mjs",
     "contract:check": "node scripts/check-contract-compatibility.mjs && node scripts/check-contract-ui-matrix.mjs",
     "contract:ui:matrix": "node scripts/print-contract-ui-matrix.mjs",
+    "contract:ui:backlog": "node scripts/print-contract-backlog.mjs",
     "architecture:check": "node scripts/check-architecture.mjs",
     "credential:check": "node scripts/check-credential-boundary.mjs",
     "ci:check": "node scripts/check-ci-generations.mjs",
