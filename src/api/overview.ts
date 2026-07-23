@@ -22,9 +22,17 @@ export type ProjectionHealthResource = {
   byStatus: Readonly<Record<string, number>>;
   resources: ReadonlyArray<{
     resource: string;
+    instanceId?: string;
     syncStatus: string;
+    pendingEvents?: number;
+    processingEvents?: number;
+    failedEvents?: number;
+    deadLetterEvents?: number;
     eventLagSeconds?: number;
     reconcileAgeSeconds?: number;
+    lastEventAt?: string;
+    lastReconciledAt?: string;
+    oldestUnprocessedAt?: string;
   }>;
 };
 
@@ -63,9 +71,17 @@ function projectionHealth(payload: ProjectionPayload | undefined): ProjectionHea
     byStatus: { ...(payload?.byStatus ?? {}) },
     resources: (payload?.resources ?? []).map((resource) => ({
       resource: text(resource.resource, 'unknown'),
+      instanceId: resource.instanceId?.trim() || undefined,
       syncStatus: text(resource.syncStatus, 'unknown'),
+      pendingEvents: optionalCount(resource.pendingEvents),
+      processingEvents: optionalCount(resource.processingEvents),
+      failedEvents: optionalCount(resource.failedEvents),
+      deadLetterEvents: optionalCount(resource.deadLetterEvents),
       eventLagSeconds: resource.eventLagSeconds,
       reconcileAgeSeconds: resource.reconcileAgeSeconds,
+      lastEventAt: resource.lastEventAt,
+      lastReconciledAt: resource.lastReconciledAt,
+      oldestUnprocessedAt: resource.oldestUnprocessedAt,
     })),
   };
 }

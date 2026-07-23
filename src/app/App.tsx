@@ -31,6 +31,13 @@ const developmentRoutes = import.meta.env.DEV
 const OverviewPage = lazy(() =>
   import('@/features/overview/OverviewPage').then((module) => ({ default: module.OverviewPage })),
 );
+const OverviewPageV2 = lazy(() =>
+  import('@/features/platform-v2/OverviewPageV2').then((module) => ({ default: module.OverviewPageV2 })),
+);
+const RecoveryPageV2 = lazy(() =>
+  import('@/features/platform-v2/RecoveryPageV2').then((module) => ({ default: module.RecoveryPageV2 })),
+);
+const ActiveOverviewPage = UI_GENERATION === 'v2' ? OverviewPageV2 : OverviewPage;
 const InstancesPage = lazy(() =>
   import('@/features/instances/InstancesPage').then((module) => ({ default: module.InstancesPage })),
 );
@@ -150,7 +157,10 @@ function AppRuntime() {
                   { path: '/groups/:instanceId', element: <GroupsPage /> },
                   { path: '/messages', element: <CampaignsPage /> },
                   { path: '/messages/new', element: <CampaignsPage /> },
-                  { path: '/overview', element: <OverviewPage /> },
+                  { path: '/overview', element: <ActiveOverviewPage /> },
+                  ...(UI_GENERATION === 'v2'
+                    ? [{ path: '/recovery', element: <RecoveryPageV2 /> }]
+                    : []),
                   { path: '/instances', element: <InstancesPage /> },
                   { path: '/instances/:instanceId', element: <InstancesPage /> },
                   { path: '/queue', element: <QueuePage /> },

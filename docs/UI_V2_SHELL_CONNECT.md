@@ -45,14 +45,14 @@ credential kind:
 
 | Scope | Visible v2 navigation |
 | --- | --- |
-| Admin | Overview, Instances |
+| Admin | Overview, Recovery when supported, Instances |
 | Instance | Overview, Conversations, Groups, Campaigns, Events |
 | Unknown | Overview |
 
 Queue, webhook administration, global settings, and API-key management are not
 advertised because the current public contract does not support those Console
-workflows. Recovery is added with its complete route in the next vertical
-slice; it is not exposed as an empty placeholder.
+workflows. Recovery appears only with admin scope, its complete route, and the
+`projection_failure_operations` capability; it is never an empty placeholder.
 
 Feature panels remain inside an explicit legacy compatibility boundary while
 they are replaced route by route. This prevents a partial card-level redesign

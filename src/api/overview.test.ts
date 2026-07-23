@@ -67,7 +67,7 @@ describe('persisted overview adapters', () => {
       status: 'degraded',
       total: 4,
       byStatus: { ready: 3, stale: 1 },
-      resources: [{ resource: 'groups', syncStatus: 'stale', eventLagSeconds: 12 }],
+      resources: [{ resource: 'groups', instanceId: 'instance-1', syncStatus: 'stale', eventLagSeconds: 12, pendingEvents: 2, deadLetterEvents: 1 }],
     } }));
     const result = await getProjectionHealth({ GET } as unknown as ApiClient);
     expect(GET).toHaveBeenCalledWith('/server/projection-health');
@@ -76,6 +76,7 @@ describe('persisted overview adapters', () => {
       status: 'degraded',
       total: 4,
       byStatus: { ready: 3, stale: 1 },
+      resources: [expect.objectContaining({ instanceId: 'instance-1', pendingEvents: 2, deadLetterEvents: 1 })],
     }));
   });
 

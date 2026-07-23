@@ -51,6 +51,7 @@ for (const forbidden of ["to: '/queue'", "to: '/webhooks'", "to: '/settings'", "
 for (const required of [
   "keyKind === 'admin'",
   "to: '/instances'",
+  "to: '/recovery'",
   "to: '/chats'",
   "to: '/groups'",
   "to: '/messages'",
