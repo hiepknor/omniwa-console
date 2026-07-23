@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useApiSession } from '@/api/ApiProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { instanceKeys } from '@/api/keys';
 import { RowStateBadge, StatusIndicator } from '@/components/badges';
@@ -22,6 +23,7 @@ import {
 import { SelectDropdown, type SelectDropdownOption } from '@/components/SelectDropdown';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
+import type { KeyKind } from '@/lib/session';
 import { CreateInstanceDialog } from './CreateInstanceDialog';
 import { CredentialHealthPanel } from './CredentialHealthPanel';
 import { InstanceDrawer, InstanceDrawerState } from './InstanceDrawer';
@@ -38,12 +40,18 @@ function statusDot(status: string | undefined) {
   }
 }
 
+export function canManageInstances(keyKind: KeyKind): boolean {
+  return keyKind === 'admin';
+}
+
 export function InstancesPage() {
   const { instanceId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const createOpen = searchParams.get('create') === '1';
+  const session = useApiSession();
+  const canManage = canManageInstances(session.keyKind);
+  const createOpen = canManage && searchParams.get('create') === '1';
   const [filterOpen, setFilterOpen] = useState(false);
   const [createdSecret, setCreatedSecret] = useState<{ instanceId: string; token: string }>();
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
@@ -147,11 +155,9 @@ export function InstancesPage() {
         title="Instances"
         status={<PollingIndicator />}
         actions={
-          <button className="btn primary" type="button" onClick={() => { create.reset(); setParam('create', '1'); }}>New instance</button>
+          <button className="btn primary" type="button" disabled={!canManage} title={canManage ? undefined : 'Requires the global admin key'} onClick={() => { create.reset(); setParam('create', '1'); }}>New instance</button>
         }
       />
-
-      <CredentialHealthPanel />
 
       <DataTableWorkspace className="instances-workspace" aria-labelledby="instances-table-title">
         <DataTableToolbar>
@@ -202,6 +208,8 @@ export function InstancesPage() {
           )}
         />
       </DataTableWorkspace>
+
+      <CredentialHealthPanel />
 
       <MobileFilterSheet open={filterOpen} title="Filter instances" onClose={() => setFilterOpen(false)} returnFocusRef={filterTriggerRef}>
         <section className="mobile-filter-section" aria-labelledby="instance-status-filter">

@@ -209,15 +209,16 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 ### QR pairing panel
 
-- QR renders on a white 12px-radius well (QR needs light background) inside a Recessed container, 240×240px, with expiry countdown (mono, amber when <10s) and a "Refresh QR" ghost button. Pairing state machine renders as dot+label steps: `waiting → scanned → paired`.
+- QR renders on a white 12px-radius well (QR needs light background) inside a Recessed container, up to 240×240px, with a restrained "Refresh QR" button. The current public response has no authoritative expiry or intermediate scanned timestamp, so Console must not invent a countdown or scanned state. Pairing remains pending until token-scoped status reports `loggedIn`.
 
 ### Instances lifecycle surface
 
-- The lifecycle table is always the primary surface. It combines search, active filters, freshness, dense status scanning, right-aligned message counts, and cursor pagination without switching to device cards.
-- Opening an instance marks the row with both a restrained edge and a text label, then presents a 440px right slide-over without a backdrop or reserved table column. Below 900px, the slide-over becomes a full-width in-flow panel.
-- Drawer hierarchy is fixed: identity + status → compact facts → QR pairing → lifecycle controls → sessions → provider capabilities.
+- The lifecycle table is always the primary surface. It combines URL-backed search and status filters, freshness, dense connection scanning, created time, and an explicit refresh without switching to device cards. Credential Health follows the table so C3 governance does not displace daily lifecycle work.
+- Opening an instance marks the row with both a restrained edge and a text label, then presents a fixed 440px right slide-over without a reserved table column. Below 1280px it uses the shared modal drawer backdrop and remains capped at the viewport width.
+- Drawer hierarchy is fixed: identity + verified status → compact facts → session credential/rotation → QR pairing → advanced settings → lifecycle controls. Sessions and provider-capability summaries are not rendered because the panel owns no public read for them.
 - Recovery actions are separated from destructive actions. Disconnect and Destroy only launch the typed-confirmation pattern; confirmation is never rendered inline in the drawer.
-- QR remains on a light well with a visible expiry and numbered `waiting for scan → scanned → paired` progression. The UI must not imply that pairing completed before the lifecycle state confirms it.
+- Metadata connection state is visibly labeled as metadata-only. Loading, unavailable, pairing, paired-but-disconnected, and connected states remain distinct; the UI must not imply pairing completion before token-scoped lifecycle status confirms it.
+- One-time create credentials cannot be dismissed with Escape, backdrop, or a close control until the operator explicitly acknowledges storage. Missing Credential Health values render `Not reported`, never zero.
 
 ### Queue and Jobs operational workbench
 

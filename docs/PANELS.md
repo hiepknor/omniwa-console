@@ -55,6 +55,7 @@ GET    /instance/metadata
 GET    /instance/metadata/{instanceId}
 GET    /instance/credential-health
 POST   /instance/create
+POST   /instance/rotate-token/{instanceId}
 DELETE /instance/delete/{instanceId}
 GET    /instance/status
 GET    /instance/qr
@@ -70,7 +71,10 @@ Admin operations use the memory-only session client; connection/QR/logout
 operations use the instance token. Metadata reads are preferred when
 `instance_metadata_views` is advertised. Credential Health renders factual C3
 migration signals, treats zero instances as non-representative, and never
-derives a plaintext-removal decision. `/server/ok` is not connection state.
+coerces missing facts to zero or derives a plaintext-removal decision. Instance
+status is labeled as metadata-only until the token-scoped status read succeeds;
+paired and websocket-connected remain distinct. `/server/ok` is not connection
+state.
 
 ## Groups — `/groups/:instanceId?`
 

@@ -44,9 +44,9 @@ export type InstanceCreateRequest = { name?: string };
 export type InstanceCredentialSecret = { instanceId: string; token: string; credentialVersion: number; rotatedAt?: string };
 export type InstanceCredentialHealth = {
   generatedAt?: string;
-  currentKeyVersion: number;
-  instances: { total: number; currentDigest: number; plaintextOnly: number; otherKeyVersion: number };
-  plaintextFallback: { lookups: number; affectedInstances: number; firstObservedAt?: string; lastObservedAt?: string };
+  currentKeyVersion?: number;
+  instances: { total?: number; currentDigest?: number; plaintextOnly?: number; otherKeyVersion?: number };
+  plaintextFallback: { lookups?: number; affectedInstances?: number; firstObservedAt?: string; lastObservedAt?: string };
 };
 
 export type InstancePagination = { nextCursor?: string | null; hasMore?: boolean };
@@ -54,6 +54,10 @@ export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
 export type InstanceListPage = { items: InstanceResource[]; pagination: InstancePagination };
 
 const NO_PAGINATION: InstancePagination = { nextCursor: null, hasMore: false };
+
+function optionalCount(value: number | undefined): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined;
+}
 
 function toInstance(raw: GoInstance | MetadataInstance): InstanceResource {
   const connected = raw.connected ?? false;
@@ -115,16 +119,16 @@ export async function getInstanceCredentialHealth(client: ApiClient): Promise<In
   const data = unwrap<CredentialHealthPayload>(await client.GET('/instance/credential-health'));
   return {
     generatedAt: data?.generatedAt,
-    currentKeyVersion: data?.currentKeyVersion ?? 0,
+    currentKeyVersion: optionalCount(data?.currentKeyVersion),
     instances: {
-      total: data?.instances?.total ?? 0,
-      currentDigest: data?.instances?.currentDigest ?? 0,
-      plaintextOnly: data?.instances?.plaintextOnly ?? 0,
-      otherKeyVersion: data?.instances?.otherKeyVersion ?? 0,
+      total: optionalCount(data?.instances?.total),
+      currentDigest: optionalCount(data?.instances?.currentDigest),
+      plaintextOnly: optionalCount(data?.instances?.plaintextOnly),
+      otherKeyVersion: optionalCount(data?.instances?.otherKeyVersion),
     },
     plaintextFallback: {
-      lookups: data?.plaintextFallback?.lookups ?? 0,
-      affectedInstances: data?.plaintextFallback?.affectedInstances ?? 0,
+      lookups: optionalCount(data?.plaintextFallback?.lookups),
+      affectedInstances: optionalCount(data?.plaintextFallback?.affectedInstances),
       firstObservedAt: data?.plaintextFallback?.firstObservedAt,
       lastObservedAt: data?.plaintextFallback?.lastObservedAt,
     },

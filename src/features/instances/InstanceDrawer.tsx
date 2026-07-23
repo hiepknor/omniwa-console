@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CommandResult } from '@/api/envelopes';
-import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
+import type { InstanceAdvancedSettings, InstanceResource, InstanceStatusResource } from '@/api/instances';
 import { useInstanceCredential, useSetInstanceCredential } from '@/api/ApiProvider';
 import { useServerCapability } from '@/api/CapabilitiesProvider';
 import { StatusIndicator } from '@/components/badges';
@@ -103,10 +103,38 @@ function AdvancedSettings({ instanceId, token }: { instanceId: string; token: st
 // omniwa-go distinguishes `connected` (websocket to WhatsApp is up) from
 // `loggedIn` (a phone has scanned the QR and the account is paired). Pairing is
 // only complete once loggedIn is true.
-function pairStatus(connected: boolean, loggedIn: boolean): { dot: string; label: string } {
-  if (loggedIn) return { dot: 'dot-ok', label: 'connected' };
-  if (connected) return { dot: 'dot-pending', label: 'pairing' };
-  return { dot: 'dot-failed', label: 'disconnected' };
+export type InstanceLifecyclePresentation = {
+  dot: string;
+  label: string;
+  websocket: string;
+  paired: string;
+  verified: boolean;
+};
+
+export function instanceLifecyclePresentation({
+  tokenAvailable,
+  metadataConnected,
+  status,
+  statusPending,
+  statusError,
+}: {
+  tokenAvailable: boolean;
+  metadataConnected: boolean;
+  status?: InstanceStatusResource;
+  statusPending?: boolean;
+  statusError?: boolean;
+}): InstanceLifecyclePresentation {
+  const metadataState = metadataConnected ? 'connected · metadata' : 'disconnected · metadata';
+  if (!tokenAvailable) return { dot: metadataConnected ? 'dot-info' : 'dot-muted', label: metadataState, websocket: metadataState, paired: 'not verified', verified: false };
+  if (status !== undefined) {
+    if (status.connected && status.loggedIn) return { dot: 'dot-ok', label: 'connected', websocket: 'connected', paired: 'yes', verified: true };
+    if (!status.connected && status.loggedIn) return { dot: 'dot-degraded', label: 'paired · disconnected', websocket: 'disconnected', paired: 'yes', verified: true };
+    if (status.connected) return { dot: 'dot-pending', label: 'pairing', websocket: 'connected', paired: 'no', verified: true };
+    return { dot: 'dot-failed', label: 'disconnected', websocket: 'disconnected', paired: 'no', verified: true };
+  }
+  if (statusError) return { dot: 'dot-failed', label: 'status unavailable', websocket: metadataState, paired: 'not verified', verified: false };
+  if (statusPending) return { dot: 'dot-pending', label: 'checking status', websocket: metadataState, paired: 'checking', verified: false };
+  return { dot: 'dot-muted', label: 'status not reported', websocket: metadataState, paired: 'not verified', verified: false };
 }
 
 export function InstanceDrawer({
@@ -134,7 +162,13 @@ export function InstanceDrawer({
   const statusReady = status.data !== undefined;
   const connected = status.data?.connected ?? instance.connected;
   const loggedIn = status.data?.loggedIn ?? false;
-  const pair = pairStatus(connected, loggedIn);
+  const lifecycle = instanceLifecyclePresentation({
+    tokenAvailable,
+    metadataConnected: instance.connected,
+    status: status.data,
+    statusPending: status.isPending,
+    statusError: status.isError,
+  });
   const needsPairing = tokenAvailable && statusReady && !loggedIn;
 
   // A pairing QR only exists once the websocket is connected and login is pending.
@@ -160,17 +194,19 @@ export function InstanceDrawer({
 
   return (
     <>
-      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<StatusIndicator dotClass={pair.dot}>{pair.label}</StatusIndicator>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
+      <DetailDrawer titleId="instance-detail-title" eyebrow="Instance management" title={instanceName} status={<StatusIndicator dotClass={lifecycle.dot}>{lifecycle.label}</StatusIndicator>} subtitle={<DrawerIdentifier value={instance.id} label="Copy instance identifier" />} className="instances-drawer" closeLabel="Close instance details" suppressEscape={confirmation !== undefined} onClose={onClose}>
           <section aria-labelledby="instance-facts-title">
             <h3 id="instance-facts-title" className="visually-hidden">Instance facts</h3>
             <dl className="kv">
-              <dt>Status</dt><dd><StatusIndicator size="small" dotClass={pair.dot}>{pair.label}</StatusIndicator></dd>
-              <dt>Websocket</dt><dd>{connected ? 'connected' : 'disconnected'}</dd>
-              <dt>Paired</dt><dd>{loggedIn ? 'yes' : 'no'}</dd>
+              <dt>Status</dt><dd><StatusIndicator size="small" dotClass={lifecycle.dot}>{lifecycle.label}</StatusIndicator></dd>
+              <dt>Websocket</dt><dd>{lifecycle.websocket}</dd>
+              <dt>Paired</dt><dd>{lifecycle.paired}</dd>
               <dt>WhatsApp ID</dt><dd className="mono" title={instance.jid}>{instance.jid ?? '—'}</dd>
               <dt>Created</dt><dd className="ts" title={instance.createdAt}>{relativeTime(instance.createdAt) || '—'}</dd>
             </dl>
           </section>
+
+          {tokenAvailable && status.isError && <InlineError error={status.error} onRetry={status.refetch} />}
 
           {!tokenAvailable && (
             <>
@@ -209,6 +245,7 @@ export function InstanceDrawer({
                   <>
                     <img src={qr.data.qrcode} alt="Scan this QR code with WhatsApp to pair the device" className="max-w-[220px]" />
                     <p>On the phone that owns this account: WhatsApp → Linked Devices → Link a Device, then scan. The code refreshes automatically.</p>
+                    <button className="btn" type="button" disabled={qr.isFetching} onClick={() => { void qr.refetch(); }}>{qr.isFetching ? 'Refreshing QR…' : 'Refresh QR'}</button>
                   </>
                 ) : qr.isError ? (
                   <InlineError error={qr.error} onRetry={qr.refetch} />
@@ -266,7 +303,7 @@ export function InstanceDrawer({
       {confirmation === 'disconnect' && (
         <TypedConfirmationDialog
           title="Disconnect instance"
-          description={<p>This disconnects {instanceName} from WhatsApp. You can reconnect and re-pair afterwards.</p>}
+          description={<p>This drops {instanceName}&apos;s live WhatsApp connection without unpairing the device. You can reconnect afterwards.</p>}
           resourceId={instance.id}
           confirmValue={instance.id}
           confirmLabel="Disconnect instance"

@@ -29,7 +29,8 @@ export function CreateInstanceDialog({
       eyebrow="Instance command"
       title="New instance"
       onClose={onCancel}
-      canClose={!isPending}
+      canClose={!isPending && created === undefined}
+      showClose={created === undefined}
       busy={isPending}
       initialFocusRef={inputRef}
       onSubmit={(event) => { event.preventDefault(); submit(); }}
@@ -40,7 +41,7 @@ export function CreateInstanceDialog({
         ? <button className="btn primary" type="button" onClick={onCancel}>I stored the token</button>
         : <button className="btn primary" type="submit" disabled={!trimmedName || isPending}>{isPending ? 'Submitting…' : 'Create instance'}</button>}
     >
-      <p className="dialog-sheet-copy" id={descriptionId}>{created ? 'This access token is shown once. Store it in the integration secret manager before closing.' : 'omniwa-go assigns the instance ID and access token automatically. Give it a display name, then open it to begin QR pairing.'}</p>
+      <p className="dialog-sheet-copy" id={descriptionId}>{created ? 'This access token is shown once. Store it in the integration secret manager, then confirm below. Escape and backdrop dismissal are disabled while the token is visible.' : 'omniwa-go assigns the instance ID and access token automatically. Give it a display name, then open it to begin QR pairing.'}</p>
       {created ? <div className="field"><label htmlFor="new-instance-token">One-time instance token</label><input className="input mono" id="new-instance-token" value={created.token} readOnly autoComplete="off" onFocus={(event) => event.currentTarget.select()} /><small>Instance: <span className="mono">{created.instanceId}</span>. The console keeps this token in memory only until sign-out or reload.</small></div> : <div className="field">
         <label htmlFor="new-instance-name">Display name</label>
         <input ref={inputRef} className="input" id="new-instance-name" value={name} onChange={(event) => setName(event.target.value)} disabled={isPending} autoComplete="off" placeholder="e.g. Sales bot" />

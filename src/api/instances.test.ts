@@ -60,4 +60,17 @@ describe('credential-safe instance adapter', () => {
     });
     expect(health).not.toHaveProperty('safeToRemove');
   });
+
+  it('keeps missing credential-health facts unavailable instead of reporting zero', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: {} }));
+
+    const health = await getInstanceCredentialHealth({ GET } as unknown as ApiClient);
+
+    expect(health).toEqual({
+      generatedAt: undefined,
+      currentKeyVersion: undefined,
+      instances: { total: undefined, currentDigest: undefined, plaintextOnly: undefined, otherKeyVersion: undefined },
+      plaintextFallback: { lookups: undefined, affectedInstances: undefined, firstObservedAt: undefined, lastObservedAt: undefined },
+    });
+  });
 });

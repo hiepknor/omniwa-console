@@ -12,7 +12,7 @@
   <aside class="sidebar" aria-label="OmniWA primary navigation" data-od-id="app-navigation">
     <div class="logo" data-od-id="navigation-brand">
       <span class="mark"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 0-18 0c0 1.6.4 3.1 1.2 4.4L3 21l4.6-1.2A9 9 0 0 0 21 12z"/><path d="M7.5 12.5h2l1.5 2.5 2-6 1.5 3.5h2"/></svg></span>
-      <div><b>OmniWA Console</b><span class="env" title="API endpoint: http://localhost:3000">http://localhost:3000</span></div>
+      <div><b>OmniWA Console</b><span class="env" title="API endpoint: http://localhost:4000">http://localhost:4000</span></div>
     </div>
     <nav aria-label="Primary">
       <a title="Overview" aria-label="Overview" href="overview.html"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg><span class="lbl">Overview</span></a>
@@ -42,74 +42,86 @@
     <header class="page-head" data-od-id="instances-page-header">
       <div class="head-context"><div class="head-title-row"><h1>Instances</h1></div></div>
       <div class="head-right">
-        <span class="live"><span class="dot"></span>live</span>
+        <span class="live"><span class="dot"></span>Polling · 30s</span>
         <button class="btn primary" type="button">New instance</button>
       </div>
     </header>
 
     <section class="instances-workspace data-table-workspace" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-workspace">
-      <div class="instances-toolbar" data-od-id="instances-filter-bar">
-        <div class="instances-toolbar-primary">
+      <div class="data-table-toolbar" data-od-id="instances-filter-bar">
+        <div class="data-table-toolbar-primary">
           <label class="search-field">
             <span class="visually-hidden">Search instances</span>
             <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
             <input class="search" type="search" placeholder="Search name or instance ID" aria-label="Search instances">
           </label>
-          <span class="instances-toolbar-desktop-filters">
-            <span class="chip">status: pairing <span class="x" aria-hidden="true">✕</span></span>
+          <span class="data-table-toolbar-desktop-filters">
+            <span class="chip">All statuses</span>
           </span>
           <button class="mobile-filter-trigger" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"/></svg>
-            Filters <span class="filter-count num">1</span>
+            Filters
           </button>
-          <div class="active-filter-row" aria-label="Active filters">
-            <button class="chip" type="button">Status: pairing <span class="x" aria-hidden="true">×</span></button>
-          </div>
         </div>
       </div>
 
-      <div class="tablewrap adaptive-table instances-table" tabindex="0" role="region" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-table">
-          <div class="responsive-table-scroll"><table class="responsive-table">
+      <div class="tablewrap adaptive-table warp-data-table responsive-table-layout-standard warp-data-table-default warp-data-table-attached" tabindex="0" role="region" aria-labelledby="instances-table-title" data-od-id="instances-lifecycle-table">
+          <div class="responsive-table-scroll-shell"><div class="responsive-table-scroll"><table class="responsive-table">
             <caption id="instances-table-title" class="visually-hidden">Instance lifecycle and recent activity</caption>
-            <thead><tr><th scope="col" class="responsive-table-desktop-cell">Name</th><th scope="col" class="responsive-table-desktop-cell">ID</th><th scope="col" class="responsive-table-desktop-cell">Status</th><th scope="col" class="responsive-table-desktop-cell r">Msgs 24h</th><th scope="col" class="responsive-table-desktop-cell">Last activity</th><th scope="col" class="responsive-table-mobile-header">Summary</th></tr></thead>
+            <thead><tr><th scope="col" class="responsive-table-desktop-cell">Name</th><th scope="col" class="responsive-table-desktop-cell">ID</th><th scope="col" class="responsive-table-desktop-cell">Status</th><th scope="col" class="responsive-table-desktop-cell">Created</th><th scope="col" class="responsive-table-mobile-header">Summary</th></tr></thead>
             <tbody>
               <tr tabindex="0">
                 <td class="responsive-table-desktop-cell"><span class="resource-name">sales-primary</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_2bq81c</span></td>
                 <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
-                <td class="responsive-table-desktop-cell num r">8,204</td><td class="responsive-table-desktop-cell ts" title="2026-07-16T08:52:41Z">14s ago</td>
-                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">sales-primary</span><span class="mobile-row-id mono">inst_2bq81c</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span><span class="mobile-row-meta">14s ago</span></span><span class="mobile-row-disclosure" aria-label="Open sales-primary">›</span></div></td>
+                <td class="responsive-table-desktop-cell ts" title="2026-07-16T08:52:41Z">7d ago</td>
+                <td class="responsive-table-mobile-cell" colspan="5"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">sales-primary</span><span class="mobile-row-id mono">inst_2bq81c</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span><span class="mobile-row-meta">7d ago</span></span><span class="mobile-row-disclosure" aria-label="Open sales-primary">›</span></div></td>
               </tr>
-              <tr class="selected open" tabindex="0" aria-selected="true">
+              <tr class="is-active selected open" tabindex="0" aria-selected="true">
                 <td class="responsive-table-desktop-cell"><span class="resource-name">support-vn</span><span class="row-state">Open</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_9f2ka7</span></td>
-                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span></td>
-                <td class="responsive-table-desktop-cell num r">0</td><td class="responsive-table-desktop-cell ts" title="2026-07-16T08:41:00Z">12m ago</td>
-                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">support-vn <span class="row-state">Open</span></span><span class="mobile-row-id mono">inst_9f2ka7</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span><span class="mobile-row-meta">12m ago</span></span><span class="mobile-row-disclosure" aria-label="Open support-vn">›</span></div></td>
+                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
+                <td class="responsive-table-desktop-cell ts" title="2026-07-16T08:41:00Z">7d ago</td>
+                <td class="responsive-table-mobile-cell" colspan="5"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">support-vn <span class="row-state">Open</span></span><span class="mobile-row-id mono">inst_9f2ka7</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span><span class="mobile-row-meta">7d ago</span></span><span class="mobile-row-disclosure" aria-label="Open support-vn">›</span></div></td>
               </tr>
               <tr tabindex="0">
                 <td class="responsive-table-desktop-cell"><span class="resource-name">ops-alerts</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_5rr0zn</span></td>
                 <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span></td>
-                <td class="responsive-table-desktop-cell num r">1,882</td><td class="responsive-table-desktop-cell ts" title="2026-07-16T08:52:20Z">35s ago</td>
-                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">ops-alerts</span><span class="mobile-row-id mono">inst_5rr0zn</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span><span class="mobile-row-meta">35s ago</span></span><span class="mobile-row-disclosure" aria-label="Open ops-alerts">›</span></div></td>
+                <td class="responsive-table-desktop-cell ts" title="2026-07-16T08:52:20Z">7d ago</td>
+                <td class="responsive-table-mobile-cell" colspan="5"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">ops-alerts</span><span class="mobile-row-id mono">inst_5rr0zn</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--ok)"></span>connected</span><span class="mobile-row-meta">7d ago</span></span><span class="mobile-row-disclosure" aria-label="Open ops-alerts">›</span></div></td>
               </tr>
               <tr tabindex="0">
                 <td class="responsive-table-desktop-cell"><span class="resource-name">legacy-bot</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_0aa41m</span></td>
                 <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span></td>
-                <td class="responsive-table-desktop-cell num r">0</td><td class="responsive-table-desktop-cell ts" title="2026-07-15T21:03:11Z">12h ago</td>
-                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">legacy-bot</span><span class="mobile-row-id mono">inst_0aa41m</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span><span class="mobile-row-meta">12h ago</span></span><span class="mobile-row-disclosure" aria-label="Open legacy-bot">›</span></div></td>
+                <td class="responsive-table-desktop-cell ts" title="2026-07-15T21:03:11Z">8d ago</td>
+                <td class="responsive-table-mobile-cell" colspan="5"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">legacy-bot</span><span class="mobile-row-id mono">inst_0aa41m</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span><span class="mobile-row-meta">8d ago</span></span><span class="mobile-row-disclosure" aria-label="Open legacy-bot">›</span></div></td>
               </tr>
               <tr tabindex="0">
                 <td class="responsive-table-desktop-cell"><span class="resource-name">archived-mkt</span></td><td class="responsive-table-desktop-cell"><span class="mono">inst_qq17zz</span></td>
-                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span></td>
-                <td class="responsive-table-desktop-cell num r">—</td><td class="responsive-table-desktop-cell ts" title="2026-06-30T10:00:00Z">16d ago</td>
-                <td class="responsive-table-mobile-cell" colspan="6"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">archived-mkt</span><span class="mobile-row-id mono">inst_qq17zz</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--inactive)"></span>retired</span><span class="mobile-row-meta">16d ago</span></span><span class="mobile-row-disclosure" aria-label="Open archived-mkt">›</span></div></td>
+                <td class="responsive-table-desktop-cell"><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span></td>
+                <td class="responsive-table-desktop-cell ts" title="2026-06-30T10:00:00Z">23d ago</td>
+                <td class="responsive-table-mobile-cell" colspan="5"><div class="mobile-row-summary"><span class="mobile-row-identity"><span class="mobile-row-primary">archived-mkt</span><span class="mobile-row-id mono">inst_qq17zz</span></span><span class="mobile-row-secondary"><span class="status"><span class="dot" style="background:var(--failed)"></span>disconnected</span><span class="mobile-row-meta">23d ago</span></span><span class="mobile-row-disclosure" aria-label="Open archived-mkt">›</span></div></td>
               </tr>
             </tbody>
-          </table></div>
+          </table></div></div>
           <div class="table-foot">
-            <div><span class="num">5 of 8 instances</span><span class="freshness">Updated 14s ago</span></div>
-            <div class="pagination"><span>Showing 1–5</span><button class="btn" type="button">Load more</button></div>
+            <div class="data-table-footer-primary"><span class="num">5 loaded instances</span><span class="freshness">Newest 7d ago</span></div>
+            <div class="pagination"><button class="btn" type="button">Refresh</button></div>
           </div>
       </div>
+    </section>
+
+    <section class="credential-health-prototype" aria-labelledby="credential-health-title" data-od-id="instance-credential-health">
+      <header><div><span class="eyebrow">C3 observation</span><h2 id="credential-health-title">Credential Health</h2></div><button class="btn" type="button">Refresh health</button></header>
+      <dl>
+        <div><dt>Key version</dt><dd class="num">1</dd></div>
+        <div><dt>Instances</dt><dd class="num">5</dd></div>
+        <div><dt>Current digest</dt><dd class="num">5</dd></div>
+        <div><dt>Plaintext only</dt><dd class="num">0</dd></div>
+        <div><dt>Other key version</dt><dd class="num">0</dd></div>
+        <div><dt>Fallback lookups</dt><dd class="num">0</dd></div>
+        <div><dt>Affected instances</dt><dd class="num">0</dd></div>
+        <div><dt>Last fallback</dt><dd class="num">Never observed</dd></div>
+      </dl>
+      <p>Generated just now. These are factual migration signals only; Console never derives a safe-to-remove decision. Missing facts render <strong>Not reported</strong>, never zero.</p>
     </section>
 
       <aside class="drawer instances-drawer" aria-labelledby="instance-detail-title" data-od-id="instance-detail-drawer">
@@ -127,58 +139,28 @@
           <h3 id="instance-facts-title" class="visually-hidden">Instance facts</h3>
           <div class="kv">
             <dt>Status</dt><dd><span class="status"><span class="dot" style="background:var(--pending)"></span>pairing</span></dd>
-            <dt>Provider</dt><dd>baileys</dd>
-            <dt>Created</dt><dd class="ts" title="2026-07-16T08:29:02Z">24m ago</dd>
-            <dt>Webhooks</dt><dd class="num">2 subscribed</dd>
+            <dt>Websocket</dt><dd>connected</dd>
+            <dt>Paired</dt><dd>no</dd>
+            <dt>WhatsApp ID</dt><dd class="mono">—</dd>
+            <dt>Created</dt><dd class="ts" title="2026-07-16T08:29:02Z">7d ago</dd>
           </div>
         </section>
 
         <section aria-labelledby="pair-device-title">
-          <div class="drawer-section-head"><div><span class="eyebrow">Pairing workflow</span><h3 id="pair-device-title">Pair device</h3></div><span class="expiry">Expires in <span class="countdown num">00:37</span></span></div>
+          <div class="drawer-section-head"><div><span class="eyebrow">Pairing workflow</span><h3 id="pair-device-title">Pair device</h3></div></div>
           <div class="qrwell">
             <div class="qr" id="qr" role="img" aria-label="Prototype pairing QR code"></div>
             <div class="qrmeta">
-              <span>Scan from the provider app</span>
+              <span>Scan from WhatsApp Linked Devices. The code refreshes automatically.</span>
               <button class="btn" type="button">Refresh QR</button>
             </div>
-            <div class="steps" aria-label="Pairing progress">
-              <span class="on"><b>1</b> waiting for scan</span><span><b>2</b> scanned</span><span><b>3</b> paired</span>
-            </div>
           </div>
         </section>
 
-        <section aria-labelledby="lifecycle-title">
-          <span class="eyebrow">Instance controls</span>
-          <h3 id="lifecycle-title">Lifecycle</h3>
-          <div class="lifecycle-groups">
-            <div class="action-group"><span>Recovery</span><button class="btn" type="button">Reconnect</button></div>
-            <div class="action-group destructive"><span>Destructive actions require confirmation</span><div class="actions"><button class="btn danger" type="button">Disconnect</button><button class="btn danger" type="button">Destroy…</button></div></div>
-          </div>
-        </section>
-
-        <section aria-labelledby="sessions-title">
-          <span class="eyebrow">Current and recent</span>
-          <h3 id="sessions-title">Sessions</h3>
-          <table class="minitable responsive-minitable">
-            <thead><tr><th scope="col">Session</th><th scope="col">State</th><th scope="col">Since</th></tr></thead>
-            <tbody>
-              <tr><td data-label="Session"><span class="mono">ses_71bb0e</span></td>
-                <td data-label="State"><span class="status sm"><span class="dot" style="background:var(--pending)"></span>handshake</span></td>
-                <td data-label="Updated" class="ts">12m ago</td></tr>
-              <tr><td data-label="Session"><span class="mono">ses_09zu4p</span></td>
-                <td data-label="State"><span class="status sm"><span class="dot" style="background:var(--inactive)"></span>expired</span></td>
-                <td data-label="Updated" class="ts">3h ago</td></tr>
-            </tbody>
-          </table>
-        </section>
-
-        <section aria-labelledby="capabilities-title">
-          <span class="eyebrow">Provider surface</span>
-          <h3 id="capabilities-title">Provider capabilities</h3>
-          <div class="capchips">
-            <span class="chip">text</span><span class="chip">image</span><span class="chip">video</span>
-            <span class="chip">document</span><span class="chip">audio</span><span class="chip">groups</span>
-          </div>
+        <section aria-labelledby="instance-danger-title">
+          <span class="eyebrow">Danger zone</span>
+          <h3 id="instance-danger-title">Destructive actions</h3>
+          <div class="action-group destructive"><span>Disconnect drops the live connection; logout unpairs; destroy removes the instance. All require typed confirmation.</span><div class="actions"><button class="btn danger" type="button">Disconnect…</button><button class="btn danger" type="button" disabled>Log out…</button><button class="btn danger" type="button">Destroy…</button></div></div>
         </section>
         </div>
       </aside>
@@ -205,7 +187,7 @@
 
   (() => {
     const drawer = document.querySelector('.instances-drawer');
-    const selectedRow = document.querySelector('.instances-table tr.selected');
+    const selectedRow = document.querySelector('[data-od-id="instances-lifecycle-table"] tr.selected');
     const closeDrawer = () => {
       drawer.hidden = true;
       selectedRow.focus();

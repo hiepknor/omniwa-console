@@ -5,11 +5,11 @@ import { InlineError } from '@/components/InlineError';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { useInstanceCredentialHealth } from './hooks';
 
-function Fact({ label, value }: { label: string; value: string | number }) {
+function Fact({ label, value }: { label: string; value: string | number | undefined }) {
   return (
     <div className="min-w-0 rounded-[var(--radius-sm)] border border-[var(--border-subtle)] bg-[color-mix(in_oklab,var(--fg)_2%,transparent)] p-3">
       <dt className="text-[10px] font-medium uppercase tracking-[0.6px] text-[var(--muted)]">{label}</dt>
-      <dd className="num mt-1 break-words text-sm text-[var(--fg)]">{value}</dd>
+      <dd className="num mt-1 break-words text-sm text-[var(--fg)]" data-state={value === undefined ? 'unavailable' : 'reported'}>{value ?? 'Not reported'}</dd>
     </div>
   );
 }
@@ -42,7 +42,9 @@ export function CredentialHealthPanel() {
     content = <InlineError error={query.error} onRetry={query.refetch} />;
   } else {
     const health = query.data;
-    const representative = health.instances.total > 0;
+    const representative = health.instances.total !== undefined && health.instances.total > 0;
+    const fallbackLastObserved = health.plaintextFallback.lastObservedAt
+      ?? (health.plaintextFallback.lookups === 0 ? 'Never observed' : undefined);
     content = (
       <div className="grid gap-3">
         <dl className="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-8">
@@ -53,9 +55,9 @@ export function CredentialHealthPanel() {
           <Fact label="Other key version" value={health.instances.otherKeyVersion} />
           <Fact label="Fallback lookups" value={health.plaintextFallback.lookups} />
           <Fact label="Affected instances" value={health.plaintextFallback.affectedInstances} />
-          <Fact label="Last fallback" value={health.plaintextFallback.lastObservedAt ?? 'Never observed'} />
+          <Fact label="Last fallback" value={fallbackLastObserved} />
         </dl>
-        {!representative && (
+        {health.instances.total === 0 && (
           <SurfaceNotice
             kind="warning"
             label="Observation"
@@ -63,15 +65,31 @@ export function CredentialHealthPanel() {
             detail="Zero instances is a 0/0 baseline, not adoption evidence. Do not start the credential quiet window from this snapshot."
           />
         )}
+        {health.instances.total === undefined && (
+          <SurfaceNotice
+            kind="warning"
+            label="Observation"
+            title="Coverage is not reported"
+            detail="The backend did not provide an instance total. No workload or migration-safety conclusion can be made from this snapshot."
+          />
+        )}
+        {representative && health.plaintextFallback.lookups === undefined && (
+          <SurfaceNotice
+            kind="warning"
+            label="Fallback"
+            title="Fallback activity is not reported"
+            detail="The instance workload exists, but fallback counters are unavailable. Continue observation without treating the missing value as zero."
+          />
+        )}
         <p className="text-xs leading-5 text-[var(--muted)]">
-          Generated <span className="mono">{health.generatedAt ?? '—'}</span>. These are factual migration signals only; Console never derives a safe-to-remove decision.
+          Generated <span className="mono">{health.generatedAt ?? 'Not reported'}</span>. These are factual migration signals only; Console never derives a safe-to-remove decision.
         </p>
       </div>
     );
   }
 
   return (
-    <section className="mb-4 grid gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--surface)] p-4" aria-labelledby="credential-health-title">
+    <section className="my-4 grid gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--surface)] p-4" aria-labelledby="credential-health-title">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <span className="eyebrow">C3 observation</span>
