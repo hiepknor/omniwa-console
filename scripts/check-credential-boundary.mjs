@@ -18,6 +18,11 @@ const provider = await read('src/api/ApiProvider.tsx');
 if (!provider.includes('InstanceCredentialsContext')) {
   failures.push('the in-memory instance credential vault is missing');
 }
+
+const instanceDrawer = await read('src/features/instances/InstanceDrawer.tsx');
+if (!instanceDrawer.includes('useSetInstanceCredential') || !instanceDrawer.includes('Use for this session')) {
+  failures.push('existing instance tokens must be attachable to the in-memory vault after reload');
+}
 if (/localStorage|sessionStorage/.test(provider)) {
   failures.push('the instance credential vault must not use browser storage');
 }
