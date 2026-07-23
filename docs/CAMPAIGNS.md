@@ -98,9 +98,9 @@ Therefore the console:
 - applies the shared rate-limit behavior without retrying commands
   automatically.
 
-## Planned UI
+## Integrated UI
 
-The `/messages` route becomes the campaign list and monitoring surface.
-`/messages/new` becomes a consent-aware creation flow. A campaign drawer owns
+The `/messages` route is the campaign list and monitoring surface.
+`/messages/new` is a consent-aware creation flow. A campaign drawer owns
 lifecycle commands, recipient pagination, and audit history. The route and all
 filters/cursors remain deep-linkable.

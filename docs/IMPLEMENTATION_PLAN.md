@@ -1,8 +1,9 @@
 # OmniWA GO Integration Plan
 
 This roadmap replaces the historical pre-migration milestones. Backend G0–G6 is
-available at OmniWA GO commit `7f9e6ac`; the remaining work is frontend
-integration in small, independently reviewable pull requests.
+available at OmniWA GO commit `7f9e6ac`; the planned projection, operations, and
+campaign phases are integrated. Remaining command slices and operational
+rollout work stay independently reviewable.
 
 Each phase must satisfy `docs/DELIVERY_WORKFLOW.md` and keep
 `docs/PANELS.md` synchronized with operations actually consumed.
@@ -23,6 +24,10 @@ Completed:
   backend-owned fields.
 - Messages projection history/detail, per-recipient receipts, and text send
   acknowledgement with independent delivery state.
+- Durable Events history with exact-type filtering and opaque cursors.
+- Persisted Overview plus split API, projection, and rate-limit health views.
+- Consent-aware Campaign creation, lifecycle controls, recipient state, and
+  audit history.
 - Global capability provider and reusable instance capability hook.
 - Projection envelope metadata adapter and shared projection notice.
 - Machine-readable error adapter, `Retry-After` countdown, jittered manual retry,
@@ -31,10 +36,8 @@ Completed:
 Not yet integrated:
 
 - media send and additional chat/message action commands;
-- durable Events;
-- Overview, split Health, and Projection Health;
-- Campaign UI;
-- removal of remaining legacy polling/stub assumptions.
+- a browser-safe realtime bridge, unless a separately authorized backend/BFF
+  becomes available.
 
 ## Phase 1 — Groups projection (implemented)
 
@@ -76,8 +79,8 @@ the documented bare-array list while detail reads retain freshness metadata.
 
 Exit achieved: contact and label reads are capability-gated, authoritative, and
 deep-linkable; no browser identity cache or provider-payload reconstruction
-exists. Label associations remain owned by the upcoming Chat/Message resources
-rather than a Console-invented endpoint.
+exists. Label associations remain dependent on future public Chat/Message DTO
+fields rather than a Console-invented endpoint.
 
 ## Phase 3 — Chats, Messages, and delivery
 
@@ -116,6 +119,8 @@ separate slice and is not represented by placeholders.
 
 ## Phase 4 — Durable Events, Overview, and Health
 
+Status: implemented.
+
 Goal: replace operations stubs and weak liveness assumptions.
 
 - Implement `/events` exact-type filter and opaque cursor history.
@@ -126,8 +131,8 @@ Goal: replace operations stubs and weak liveness assumptions.
 - Show circuit-breaker `openUntil` and `retryAfterSeconds` without probing.
 - Remove any use of `/server/ok` as connection/readiness state.
 
-Exit: operators can distinguish API health, instance connection, projection
-freshness, and rate-limit posture.
+Exit achieved: operators can inspect durable event history and distinguish API
+health, instance connection, projection freshness, and rate-limit posture.
 
 ## Phase 5 — Campaign orchestration
 
