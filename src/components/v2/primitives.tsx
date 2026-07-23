@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react';
+import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react';
 
 function classes(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ');
@@ -6,9 +6,9 @@ function classes(...values: Array<string | false | null | undefined>) {
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger';
 
-export function Button({ variant = 'secondary', className, type = 'button', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
-  return <button {...props} type={type} className={classes('ui-v2-button', `ui-v2-button--${variant}`, className)} />;
-}
+export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }>(function Button({ variant = 'secondary', className, type = 'button', ...props }, ref) {
+  return <button {...props} ref={ref} type={type} className={classes('ui-v2-button', `ui-v2-button--${variant}`, className)} />;
+});
 
 export type StatusTone = 'healthy' | 'pending' | 'degraded' | 'failed' | 'neutral';
 

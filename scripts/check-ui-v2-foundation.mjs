@@ -7,6 +7,8 @@ const resources = Object.fromEntries(await Promise.all(Object.entries({
   v2: new URL('../src/styles/ui-v2.css', import.meta.url),
   prototype: new URL('../design/prototypes/console.css', import.meta.url),
   primitives: new URL('../src/components/v2/primitives.tsx', import.meta.url),
+  interaction: new URL('../src/components/v2/interaction.tsx', import.meta.url),
+  stateModel: new URL('../src/components/v2/state-model.ts', import.meta.url),
   gallery: new URL('../src/app/UiV2Gallery.tsx', import.meta.url),
   app: new URL('../src/app/App.tsx', import.meta.url),
   shell: new URL('../src/app/Shell.tsx', import.meta.url),
@@ -41,8 +43,14 @@ for (const required of ['.ui-v2-root', '.ui-v2-button', '.ui-v2-status', '.ui-v2
 for (const required of ['data-ui-generation="v2"', 'aria-invalid', 'aria-describedby', 'aria-hidden="true"']) {
   if (!resources.primitives.includes(required)) failures.push(`v2 primitives are missing ${required}`);
 }
-for (const required of ['Production component gallery', '<PageHeader', '<Surface', '<Field', '<Status', 'ui-v2-table']) {
+for (const required of ['Production component gallery', '<PageHeader', '<Surface', '<Field', '<Status', '<StateNotice', '<Tabs', '<ScopeSelector', 'ui-v2-table']) {
   if (!resources.gallery.includes(required)) failures.push(`production component gallery is missing ${required}`);
+}
+for (const required of ["axis: 'session'", "axis: 'capability'", "axis: 'projection'", "axis: 'resource'", "axis: 'transport'", "axis: 'command'", 'retainsData']) {
+  if (!resources.stateModel.includes(required)) failures.push(`shared v2 state model is missing ${required}`);
+}
+for (const required of ['role="tablist"', 'aria-selected', '<select', 'role="dialog"', 'useModalDialog', 'useDrawerFocus']) {
+  if (!resources.interaction.includes(required)) failures.push(`v2 interaction primitives are missing ${required}`);
 }
 if (!resources.app.includes("import.meta.env.DEV") || !resources.app.includes("path: '/__ui-v2'")) {
   failures.push('v2 gallery must be reachable only through the development route');
