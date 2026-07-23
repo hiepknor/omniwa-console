@@ -17,8 +17,9 @@ The console does not broaden a token by proxying through the admin client.
 
 `/connect` accepts:
 
-- API origin, default `http://localhost:4000`;
-- API key, entered as a password value with autocomplete disabled.
+- HTTP(S) API origin, default `http://localhost:4000`;
+- API key, trimmed after paste and entered as a password value with
+  autocomplete, autocorrect, capitalization, and spellcheck disabled.
 
 `ConnectPage` classifies the key without exposing it:
 
@@ -27,6 +28,11 @@ The console does not broaden a token by proxying through the admin client.
 3. a 401/403 falls back to `GET /instance/status`;
 4. success there means instance-token scope;
 5. failure renders the normalized API error.
+
+The probe has a 15-second timeout. Origin and credential fields are locked
+while it is active so the visible values cannot diverge from the in-flight
+request. Local development connects directly to the OmniWA GO API origin; the
+Console origin is not an API proxy for these root-level operations.
 
 After connection, the shell calls `GET /server/capabilities`. Projection panels
 repeat capability negotiation with their selected instance token.
