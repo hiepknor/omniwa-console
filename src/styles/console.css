@@ -330,6 +330,17 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
 /* Synced from design/prototypes/console.css lines 634–708. */
 /* ===== Instances lifecycle management ===== */
 .instances-workspace{min-width:0}
+.credential-health-panel{display:grid;gap:var(--space-4);margin:var(--space-4) 0;padding:var(--space-4);border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:var(--surface)}
+.credential-health-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-3);flex-wrap:wrap}
+.credential-health-head h2{margin-top:var(--space-1);font-size:16px;font-weight:500;line-height:22px;color:var(--fg)}
+.credential-health-content{display:grid;gap:var(--space-3)}
+.credential-health-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--space-2)}
+.credential-health-fact{min-width:0;min-height:68px;padding:var(--space-3);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);background:color-mix(in oklab,var(--fg) 2%,transparent)}
+.credential-health-fact dt{font-size:10px;font-weight:500;line-height:14px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.credential-health-fact dd{margin-top:var(--space-1);overflow-wrap:anywhere;font-size:14px;line-height:20px;color:var(--fg)}
+.credential-health-fact dd[data-state="unavailable"]{font-family:var(--font-body);font-size:12px;color:var(--muted)}
+.credential-health-note,.credential-health-loading{font-size:12px;line-height:20px;color:var(--muted)}
+.credential-health-loading{padding-block:var(--space-3)}
 .data-table-toolbar{--data-table-control-height:36px;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);min-height:52px;padding:var(--space-2) var(--space-3);
   border:1px solid var(--border-subtle);border-bottom:0;border-radius:var(--radius-md) var(--radius-md) 0 0;background:color-mix(in oklab,var(--fg) 4%,transparent)}
 .data-table-toolbar-primary,.pagination{display:flex;align-items:center;gap:var(--space-2)}
@@ -375,6 +386,8 @@ textarea.input{resize:vertical;min-height:72px;line-height:1.5}
   .data-table-toolbar{align-items:flex-start;flex-direction:column}.data-table-toolbar-primary{width:100%;flex-wrap:wrap}
   .search-field{width:min(360px,100%)}
 }
+@media(max-width:760px){.credential-health-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:380px){.credential-health-facts{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:640px){
   .data-table-toolbar{padding:var(--space-3)}.data-table-toolbar-primary{align-items:stretch}.search-field{flex:1 0 100%}
   .data-table-toolbar .chip{min-height:44px}

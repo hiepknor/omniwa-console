@@ -3,13 +3,14 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { InlineError } from '@/components/InlineError';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
+import { relativeTime } from '@/lib/format';
 import { useInstanceCredentialHealth } from './hooks';
 
-function Fact({ label, value }: { label: string; value: string | number | undefined }) {
+function Fact({ label, value, title }: { label: string; value: string | number | undefined; title?: string }) {
   return (
-    <div className="min-w-0 rounded-[var(--radius-sm)] border border-[var(--border-subtle)] bg-[color-mix(in_oklab,var(--fg)_2%,transparent)] p-3">
-      <dt className="text-[10px] font-medium uppercase tracking-[0.6px] text-[var(--muted)]">{label}</dt>
-      <dd className="num mt-1 break-words text-sm text-[var(--fg)]" data-state={value === undefined ? 'unavailable' : 'reported'}>{value ?? 'Not reported'}</dd>
+    <div className="credential-health-fact">
+      <dt>{label}</dt>
+      <dd className="num" data-state={value === undefined ? 'unavailable' : 'reported'} title={title}>{value ?? 'Not reported'}</dd>
     </div>
   );
 }
@@ -24,7 +25,7 @@ export function CredentialHealthPanel() {
 
   let content;
   if (capabilities.isPending) {
-    content = <div className="py-4 text-sm text-[var(--muted)]" role="status">Checking credential-health capability…</div>;
+    content = <div className="credential-health-loading" role="status">Checking credential-health capability…</div>;
   } else if (capabilities.isError) {
     content = <InlineError error={capabilities.error} onRetry={capabilities.refetch} />;
   } else if (!supported) {
@@ -37,17 +38,18 @@ export function CredentialHealthPanel() {
       />
     );
   } else if (query.isPending) {
-    content = <div className="py-4 text-sm text-[var(--muted)]" role="status">Loading credential health…</div>;
+    content = <div className="credential-health-loading" role="status">Loading credential health…</div>;
   } else if (query.isError) {
     content = <InlineError error={query.error} onRetry={query.refetch} />;
   } else {
     const health = query.data;
     const representative = health.instances.total !== undefined && health.instances.total > 0;
     const fallbackLastObserved = health.plaintextFallback.lastObservedAt
-      ?? (health.plaintextFallback.lookups === 0 ? 'Never observed' : undefined);
+      ? relativeTime(health.plaintextFallback.lastObservedAt) || health.plaintextFallback.lastObservedAt
+      : health.plaintextFallback.lookups === 0 ? 'Never observed' : undefined;
     content = (
-      <div className="grid gap-3">
-        <dl className="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-8">
+      <div className="credential-health-content">
+        <dl className="credential-health-facts">
           <Fact label="Key version" value={health.currentKeyVersion} />
           <Fact label="Instances" value={health.instances.total} />
           <Fact label="Current digest" value={health.instances.currentDigest} />
@@ -55,7 +57,7 @@ export function CredentialHealthPanel() {
           <Fact label="Other key version" value={health.instances.otherKeyVersion} />
           <Fact label="Fallback lookups" value={health.plaintextFallback.lookups} />
           <Fact label="Affected instances" value={health.plaintextFallback.affectedInstances} />
-          <Fact label="Last fallback" value={fallbackLastObserved} />
+          <Fact label="Last fallback" value={fallbackLastObserved} title={health.plaintextFallback.lastObservedAt} />
         </dl>
         {health.instances.total === 0 && (
           <SurfaceNotice
@@ -81,19 +83,19 @@ export function CredentialHealthPanel() {
             detail="The instance workload exists, but fallback counters are unavailable. Continue observation without treating the missing value as zero."
           />
         )}
-        <p className="text-xs leading-5 text-[var(--muted)]">
-          Generated <span className="mono">{health.generatedAt ?? 'Not reported'}</span>. These are factual migration signals only; Console never derives a safe-to-remove decision.
+        <p className="credential-health-note">
+          Generated <span className="mono" title={health.generatedAt}>{relativeTime(health.generatedAt) || 'Not reported'}</span>. These are factual migration signals only; Console never derives a safe-to-remove decision.
         </p>
       </div>
     );
   }
 
   return (
-    <section className="my-4 grid gap-3 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--surface)] p-4" aria-labelledby="credential-health-title">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+    <section className="credential-health-panel" aria-labelledby="credential-health-title">
+      <header className="credential-health-head">
         <div>
           <span className="eyebrow">C3 observation</span>
-          <h2 id="credential-health-title" className="mt-1 text-base font-semibold text-[var(--fg)]">Credential Health</h2>
+          <h2 id="credential-health-title">Credential Health</h2>
         </div>
         {supported && (
           <button className="btn" type="button" disabled={query.isFetching} onClick={() => query.refetch()}>

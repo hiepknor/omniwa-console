@@ -41,6 +41,7 @@ for (const required of [
   "value ?? 'Not reported'",
   'Coverage is not reported',
   'Fallback activity is not reported',
+  'relativeTime(health.plaintextFallback.lastObservedAt)',
 ]) {
   if (!source.credentialHealth.includes(required)) failures.push(`credential health: missing explicit unavailable state: ${required}`);
 }
@@ -58,9 +59,12 @@ for (const required of ['canClose={!isPending && created === undefined}', 'showC
 
 for (const name of ['appCss', 'prototypeCss']) {
   if (!source[name].includes('@container (max-width:400px)')) failures.push(`${name}: compact row breakpoint is not container-safe at 400px`);
+  for (const required of ['.credential-health-panel', '.credential-health-facts', 'repeat(4,minmax(0,1fr))']) {
+    if (!source[name].includes(required)) failures.push(`${name}: Credential Health layout is not synchronized: ${required}`);
+  }
 }
 
-for (const required of ['http://localhost:4000', 'Polling · 30s', '>Created<', 'Credential Health', 'Refresh QR']) {
+for (const required of ['http://localhost:4000', 'Polling · 30s', '>Created<', 'Credential Health', 'Refresh QR', 'class="credential-health-panel"', 'class="credential-health-facts"']) {
   if (!source.prototype.includes(required)) failures.push(`prototype: missing synchronized Instances behavior: ${required}`);
 }
 for (const stale of ['http://localhost:3000', 'Msgs 24h', 'Provider capabilities', 'Expires in', '>live<']) {

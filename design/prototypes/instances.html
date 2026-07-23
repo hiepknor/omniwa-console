@@ -109,19 +109,19 @@
       </div>
     </section>
 
-    <section class="credential-health-prototype" aria-labelledby="credential-health-title" data-od-id="instance-credential-health">
-      <header><div><span class="eyebrow">C3 observation</span><h2 id="credential-health-title">Credential Health</h2></div><button class="btn" type="button">Refresh health</button></header>
-      <dl>
-        <div><dt>Key version</dt><dd class="num">1</dd></div>
-        <div><dt>Instances</dt><dd class="num">5</dd></div>
-        <div><dt>Current digest</dt><dd class="num">5</dd></div>
-        <div><dt>Plaintext only</dt><dd class="num">0</dd></div>
-        <div><dt>Other key version</dt><dd class="num">0</dd></div>
-        <div><dt>Fallback lookups</dt><dd class="num">0</dd></div>
-        <div><dt>Affected instances</dt><dd class="num">0</dd></div>
-        <div><dt>Last fallback</dt><dd class="num">Never observed</dd></div>
+    <section class="credential-health-panel" aria-labelledby="credential-health-title" data-od-id="instance-credential-health">
+      <header class="credential-health-head"><div><span class="eyebrow">C3 observation</span><h2 id="credential-health-title">Credential Health</h2></div><button class="btn" type="button">Refresh health</button></header>
+      <dl class="credential-health-facts">
+        <div class="credential-health-fact"><dt>Key version</dt><dd class="num">1</dd></div>
+        <div class="credential-health-fact"><dt>Instances</dt><dd class="num">5</dd></div>
+        <div class="credential-health-fact"><dt>Current digest</dt><dd class="num">5</dd></div>
+        <div class="credential-health-fact"><dt>Plaintext only</dt><dd class="num">0</dd></div>
+        <div class="credential-health-fact"><dt>Other key version</dt><dd class="num">0</dd></div>
+        <div class="credential-health-fact"><dt>Fallback lookups</dt><dd class="num">0</dd></div>
+        <div class="credential-health-fact"><dt>Affected instances</dt><dd class="num">0</dd></div>
+        <div class="credential-health-fact"><dt>Last fallback</dt><dd class="num">Never observed</dd></div>
       </dl>
-      <p>Generated just now. These are factual migration signals only; Console never derives a safe-to-remove decision. Missing facts render <strong>Not reported</strong>, never zero.</p>
+      <p class="credential-health-note">Generated just now. These are factual migration signals only; Console never derives a safe-to-remove decision. Missing facts render <strong>Not reported</strong>, never zero.</p>
     </section>
 
       <aside class="drawer instances-drawer" aria-labelledby="instance-detail-title" data-od-id="instance-detail-drawer">
