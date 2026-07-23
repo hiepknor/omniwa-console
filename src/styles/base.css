@@ -11,6 +11,3 @@
   .num{font-feature-settings:"tnum"}
   .mono{font-family:var(--mono);font-size:12px;color:var(--text-2)}
 }
-
-/* Preserve the legacy cascade until each complete route is replaced. */
-.ui-legacy-root,.ui-legacy-root *{box-sizing:border-box;margin:0;padding:0}

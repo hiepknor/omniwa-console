@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 
 const resources = Object.fromEntries(await Promise.all(Object.entries({
-  app: new URL('../src/app/App.tsx', import.meta.url),
+  app: new URL('../src/app/generation-v2.tsx', import.meta.url),
   page: new URL('../src/features/conversations-v2/ConversationsPageV2.tsx', import.meta.url),
   hooks: new URL('../src/features/conversations-v2/hooks.ts', import.meta.url),
   composer: new URL('../src/features/conversations-v2/ComposerV2.tsx', import.meta.url),
@@ -11,7 +11,7 @@ const resources = Object.fromEntries(await Promise.all(Object.entries({
 }).map(async ([name, url]) => [name, await readFile(url, 'utf8')])));
 
 const failures = [];
-for (const required of ['ConversationsPageV2', "path: '/chats/:chatId'", "UI_GENERATION === 'v2'"]) if (!resources.app.includes(required)) failures.push(`v2 route boundary is missing ${required}`);
+for (const required of ['ConversationsPageV2', "path: '/chats/:chatId'", "UI_GENERATION = 'v2'"]) if (!resources.app.includes(required)) failures.push(`v2 route boundary is missing ${required}`);
 for (const required of ["keyKind === 'api'", 'chats_projection', 'messages_projection', 'contacts_projection', 'labels_projection', 'outbound_rate_limit', 'No live WhatsApp fallback']) if (!resources.page.includes(required)) failures.push(`Conversations capability/scope behavior is missing ${required}`);
 for (const required of ['listChats', 'listMessages', 'listContacts', 'listLabels', 'listMessageReceipts', 'sendTextMessage', 'sendMediaMessage']) if (!resources.hooks.includes(required)) failures.push(`Conversations hooks are missing ${required}`);
 if (Object.values(resources).some((source) => source.includes("'/instance/all'"))) failures.push('Conversations v2 must not call GET /instance/all');

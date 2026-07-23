@@ -21,6 +21,17 @@ Use `--build-arg VITE_CONSOLE_UI_GENERATION=v2` only for a reviewed v2 artifact;
 see [UI_V2_SHELL_CONNECT.md](UI_V2_SHELL_CONNECT.md). Promotion must use the
 exact digest, and rollback redeploys the reviewed legacy-generation digest.
 
+Before building OCI images, verify both isolated presentation graphs:
+
+```bash
+pnpm build:v2
+pnpm build:legacy
+```
+
+V2 must not contain legacy route chunks or presentation CSS; the rollback
+artifact must retain both. See
+[UI_V2_CUTOVER_READINESS.md](UI_V2_CUTOVER_READINESS.md).
+
 Record the resulting repository digest, not only the mutable local tag. Promote
 the exact digest across environments. The image listens on port `8080` and
 serves `GET /healthz` without authentication. The bundled Nginx configuration

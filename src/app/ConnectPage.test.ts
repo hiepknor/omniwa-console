@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from '@/api/client';
 import { ApiFailure } from '@/api/envelopes';
-import { connectErrorForFailure, normalizeApiOrigin, probeKey } from './ConnectPage';
+import { connectErrorForFailure, normalizeApiOrigin, probeKey } from './connect-flow';
 
 function result(status: number, data?: unknown, error?: unknown) {
   return {
