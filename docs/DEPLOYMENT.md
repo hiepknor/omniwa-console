@@ -21,6 +21,14 @@ Use `--build-arg VITE_CONSOLE_UI_GENERATION=v2` only for a reviewed v2 artifact;
 see [UI_V2_SHELL_CONNECT.md](UI_V2_SHELL_CONNECT.md). Promotion must use the
 exact digest, and rollback redeploys the reviewed legacy-generation digest.
 
+CI builds, smoke-tests, and publishes both isolated generations from every
+merged `main` revision. The legacy compatibility tag remains
+`sha-<revision>`; the reviewed v2 candidate is tagged
+`sha-<revision>-v2`. These tags are discovery handles only: rollout records
+must resolve and promote the repository digest. Both images carry the
+`cc.onio.console.ui-generation` label, which must match the intended target
+before deployment.
+
 Before building OCI images, verify both isolated presentation graphs:
 
 ```bash
