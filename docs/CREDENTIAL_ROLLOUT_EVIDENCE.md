@@ -27,17 +27,17 @@ Do not start C3 until every supported Console environment is recorded here.
 
 | Environment | Release commit | Immutable artifact digest | Completed at (UTC) | Operator | Verified |
 | --- | --- | --- | --- | --- | --- |
-| Development | `be7ddc8441b8f9a36a0fb12223635dea339e1ba9` (PR #24) | Local OCI image ID `sha256:c9f964f10b29edd25c7bd0e9debeabd1e4cfe0c8d8735c8f1ef5c9e8be65b77b` | 2026-07-23 01:45:41 | Codex | Yes |
+| Development | `ba2f2cd08fc3763489fdd1c46ffb183ec0aeec80` (PR #28) | `ghcr.io/hiepknor/omniwa-console@sha256:ec43ccd37b2e06104905159f644c4d8a0b359e308d21d2fde36d8c43178be556` | 2026-07-23 02:07:33 | Codex | Yes |
 | Staging | Pending | Pending | Pending | Pending | No |
 | Production | Pending | Pending | Pending | Pending | No |
 
-The development container is pinned directly to the content-addressed local
-image ID, reports OCI revision `be7ddc8441b8f9a36a0fb12223635dea339e1ba9`,
-runs as UID 101, and passed `/healthz`, `/events` deep-link, SPA fallback, and
-Content-Security-Policy checks. Publishing the commit tag to GHCR was denied,
-so this artifact is not promotable from a shared registry yet. Staging and
-production remain blocked until an authorized registry digest and environment
-owners are available.
+The development container is pinned directly to the multi-platform registry
+digest, reports OCI revision `ba2f2cd08fc3763489fdd1c46ffb183ec0aeec80`, runs
+as UID 101, and passed `/healthz`, `/events` deep-link, SPA fallback, and
+Content-Security-Policy checks. CI published the artifact only after its image
+smoke job passed and attached SBOM and provenance attestations. Staging and
+production remain blocked until their environment owners and targets are
+available.
 
 ## Observation baseline
 
@@ -66,12 +66,14 @@ fallback first observed after deployment restarts the approved quiet window.
 
 | Sample at (UTC) | Environment | Total | Current digest | Plaintext only | Other key version | Fallback lookups | Last fallback at | Backend health | Evidence link |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
-| 2026-07-23 01:48:13 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Local authenticated health snapshot |
+| 2026-07-23 01:48:13 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Superseded local-artifact baseline |
+| 2026-07-23 02:08:35 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Authenticated sample after registry-digest deployment |
 | Pending | Development | — | — | — | — | — | — | — | Next quiet-window sample |
 
 ## Recovery exercises
 
-Development recovery checks completed on 2026-07-23 after deployment:
+Development recovery checks were repeated at 2026-07-23 02:08 UTC after the
+registry-digest deployment:
 
 - A disposable instance authenticated successfully before rotation. Rotation
   advanced its credential generation from 1 to 2; the old token then returned
@@ -89,6 +91,11 @@ Development recovery checks completed on 2026-07-23 after deployment:
 These exercises satisfy only the development recovery evidence. They do not
 start or complete the final quiet window while staging, production, the
 approved duration, and owner approvals remain pending.
+
+The development quiet-window clock may use 2026-07-23 02:07:33 UTC as its
+deployment baseline. The cumulative fallback was last observed before that
+baseline. Any later fallback restarts the clock; the duration still requires
+explicit owner approval.
 
 Required final conditions throughout the approved final window:
 
