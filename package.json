@@ -20,9 +20,10 @@
     "contract:ui:matrix": "node scripts/print-contract-ui-matrix.mjs",
     "architecture:check": "node scripts/check-architecture.mjs",
     "credential:check": "node scripts/check-credential-boundary.mjs",
+    "ci:check": "node scripts/check-ci-generations.mjs",
     "bundle:check": "node scripts/check-bundle.mjs",
     "artifact:check": "node scripts/check-generation-artifact.mjs",
-    "check": "pnpm docs:check && pnpm design:check && pnpm contract:check && pnpm architecture:check && pnpm credential:check && pnpm typecheck && pnpm build && pnpm bundle:check && pnpm artifact:check",
+    "check": "pnpm docs:check && pnpm design:check && pnpm contract:check && pnpm architecture:check && pnpm credential:check && pnpm ci:check && pnpm typecheck && pnpm build && pnpm bundle:check && pnpm artifact:check",
     "contract:sync": "node scripts/sync-omniwa-go-contract.mjs",
     "api:generate": "openapi-typescript contracts/omniwa-go.openapi.json -o src/api/generated/schema.d.ts"
   },
