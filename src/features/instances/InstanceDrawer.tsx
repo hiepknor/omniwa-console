@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CommandResult } from '@/api/envelopes';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
-import { useInstanceCredential } from '@/api/ApiProvider';
+import { useInstanceCredential, useSetInstanceCredential } from '@/api/ApiProvider';
 import { useServerCapability } from '@/api/CapabilitiesProvider';
 import { StatusIndicator } from '@/components/badges';
 import { InlineError } from '@/components/InlineError';
@@ -121,8 +121,10 @@ export function InstanceDrawer({
   const instanceName = instance.displayName || 'Unnamed instance';
   const [confirmation, setConfirmation] = useState<'disconnect' | 'logout' | 'destroy'>();
   const [rotationReason, setRotationReason] = useState('');
+  const [credentialDraft, setCredentialDraft] = useState('');
   const feedback = useFeedback();
   const token = useInstanceCredential(instance.id);
+  const setCredential = useSetInstanceCredential();
   const tokenAvailable = Boolean(token);
 
   const status = useInstanceStatus(instance.id, token);
@@ -171,13 +173,24 @@ export function InstanceDrawer({
           </section>
 
           {!tokenAvailable && (
-            <SurfaceNotice
-              kind="warning"
-              label="Scope"
-              title="Per-instance token unavailable"
-              detail="This session cannot read this instance's token, so connect, pairing, and disconnect are disabled. Connect using the instance's own key to manage it."
-            />
+            <>
+              <SurfaceNotice
+                kind="warning"
+                label="Scope"
+                title="Per-instance token unavailable"
+                detail="Scoped reads and commands stay disabled until an operator attaches the instance token for this browser session."
+              />
+              <section aria-labelledby="attach-credential-title">
+                <span className="eyebrow">Session credential</span>
+                <h3 id="attach-credential-title">Attach existing token</h3>
+                <label className="field" htmlFor="instance-credential"><span>Instance token</span><input id="instance-credential" type="password" value={credentialDraft} onChange={(event) => setCredentialDraft(event.target.value)} autoComplete="off" spellCheck={false} /></label>
+                <p className="drawer-note">The token is held in memory only. Reloading or signing out clears it; it never enters the instance resource or query cache.</p>
+                <button className="btn primary" type="button" disabled={!credentialDraft.trim()} onClick={() => { setCredential(instance.id, credentialDraft.trim()); setCredentialDraft(''); }}>Use for this session</button>
+              </section>
+            </>
           )}
+
+          {tokenAvailable && <button className="btn" type="button" onClick={() => setCredential(instance.id, undefined)}>Forget session token</button>}
 
           {rotationAvailable && (
             <section aria-labelledby="credential-rotation-title">

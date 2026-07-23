@@ -61,6 +61,9 @@ interface ConsoleSession {
   when the old-backend fallback response includes them.
 - Instance-token rotation must refresh the scoped client without persisting the
   old token elsewhere.
+- An admin may attach an existing instance token to the in-memory vault after a
+  reload. The value is cleared on reload, sign-out, or explicit forget; it is
+  never added to instance resources or query caches.
 - The SPA does not open `/ws`, because doing so would expose the global admin
   key to browser code. See `docs/REALTIME.md`.
 
