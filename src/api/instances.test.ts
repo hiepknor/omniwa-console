@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from './client';
-import { createInstance, getInstance, listInstances, rotateInstanceToken } from './instances';
+import { createInstance, getInstance, getInstanceCredentialHealth, listInstances, rotateInstanceToken } from './instances';
 
 function ok(data: unknown) { return { data, response: new Response(null, { status: 200 }) }; }
 
@@ -36,5 +36,28 @@ describe('credential-safe instance adapter', () => {
     const rotated = await rotateInstanceToken(client, 'instance-1', 2, 'scheduled rotation');
     expect(POST).toHaveBeenLastCalledWith('/instance/rotate-token/{instanceId}', { params: { path: { instanceId: 'instance-1' } }, body: { expectedVersion: 2, reason: 'scheduled rotation' } });
     expect(rotated).toEqual(expect.objectContaining({ instanceId: 'instance-1', token: 'rotated-secret', credentialVersion: 3 }));
+  });
+
+  it('maps secret-free credential health without deriving a safety verdict', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: {
+        generatedAt: '2026-07-23T04:08:42Z',
+        currentKeyVersion: 1,
+        instances: { total: 0, currentDigest: 0, plaintextOnly: 0, otherKeyVersion: 0 },
+        plaintextFallback: { lookups: 0, affectedInstances: 0 },
+      },
+    }));
+
+    const health = await getInstanceCredentialHealth({ GET } as unknown as ApiClient);
+
+    expect(GET).toHaveBeenCalledWith('/instance/credential-health');
+    expect(health).toEqual({
+      generatedAt: '2026-07-23T04:08:42Z',
+      currentKeyVersion: 1,
+      instances: { total: 0, currentDigest: 0, plaintextOnly: 0, otherKeyVersion: 0 },
+      plaintextFallback: { lookups: 0, affectedInstances: 0, firstObservedAt: undefined, lastObservedAt: undefined },
+    });
+    expect(health).not.toHaveProperty('safeToRemove');
   });
 });

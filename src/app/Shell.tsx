@@ -2,7 +2,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { IconButton } from '@/components/IconButton';
 import { Logo } from '@/components/Logo';
-import { EnvironmentBadge, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
+import { EnvironmentBadge, environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import { useModalDialog } from '@/components/useModalDialog';
 import { keyFingerprint, type ConsoleSession } from '@/lib/session';
@@ -209,7 +209,7 @@ export function Shell({
   };
 
   return (
-    <WorkspaceEnvironmentProvider environment={mockSession ? 'mock' : 'platform'}>
+    <WorkspaceEnvironmentProvider environment={mockSession ? 'mock' : environmentForApiOrigin(session.baseUrl)}>
       <div className="shell">
       <a className="fixed top-2 left-2 z-50 -translate-y-20 rounded-sm bg-[var(--fg)] px-3 py-2 text-sm text-[var(--bg)] transition-transform focus:translate-y-0 focus:outline-none" href="#main-content">Skip to main content</a>
       <aside

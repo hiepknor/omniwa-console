@@ -3,7 +3,7 @@ import { createApiClient, DEFAULT_BASE_URL } from '@/api/client';
 import { ApiFailure } from '@/api/envelopes';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
-import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
+import type { ConsoleSession, KeyKind } from '@/lib/session';
 
 type ConnectError = {
   category: string;
@@ -49,7 +49,6 @@ export function ConnectPage({
   const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
-  const [remember, setRemember] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<ConnectError | null>(null);
   const baseUrlInput = useRef<HTMLInputElement>(null);
@@ -78,7 +77,6 @@ export function ConnectPage({
         keyKind: await probeKey(client),
         connectedAt: new Date().toISOString(),
       };
-      saveSession(session, remember);
       onConnected(session);
     } catch (err) {
       if (err instanceof ApiFailure) {
@@ -228,27 +226,13 @@ export function ConnectPage({
               <p id="connect-api-key-help">Never displayed again after entry.</p>
             </div>
 
-            <label className="connect-remember">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(event) => setRemember(event.target.checked)}
-              />
-              <span>
-                <strong>Remember on this device</strong>
-                <small>Unchecked sessions end when this tab closes.</small>
-              </span>
-            </label>
-
-            {remember && (
-              <SurfaceNotice
-                kind="warning"
-                label="Storage"
-                title="Persistent browser storage"
-                detail="This stores the API key in this browser. Use only on a trusted device."
-                className="connect-storage-warning"
-              />
-            )}
+            <SurfaceNotice
+              kind="info"
+              label="Session"
+              title="Memory-only credential"
+              detail="The API key is cleared on reload or sign-out and is never written to browser storage."
+              className="connect-storage-warning"
+            />
 
             {connectionError && (
               <SurfaceNotice

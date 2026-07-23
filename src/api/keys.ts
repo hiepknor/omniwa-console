@@ -9,6 +9,7 @@ export const queryKeys = {
   mediaMetrics: ['metrics', 'media'] as const,
   actionRequired: ['action-required'] as const,
   instances: (params?: { initialCursor?: string; metadata?: boolean }) => ['instances', params ?? {}] as const,
+  instanceCredentialHealth: ['instances', 'credential-health'] as const,
   instance: (instanceId: string) => ['instances', instanceId] as const,
   instanceSessions: (instanceId: string) => ['instances', instanceId, 'sessions'] as const,
   instanceChats: (instanceId: string, params?: Record<string, unknown>) =>

@@ -5,7 +5,7 @@ import { ApiProvider } from '@/api/ApiProvider';
 import { CapabilitiesProvider } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { RealtimeProvider } from '@/api/RealtimeProvider';
-import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
+import { clearSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage } from './ConnectPage';
 import { Shell } from './Shell';
@@ -47,7 +47,10 @@ function AppRuntime() {
   const feedback = useFeedback();
   const feedbackRef = useRef(feedback);
   feedbackRef.current = feedback;
-  const [session, setSession] = useState<ConsoleSession | null>(() => loadSession());
+  const [session, setSession] = useState<ConsoleSession | null>(() => {
+    clearSession();
+    return null;
+  });
   const [connectNotice, setConnectNotice] = useState<ConnectNotice>();
   const connectNoticeRef = useRef(connectNotice);
   connectNoticeRef.current = connectNotice;

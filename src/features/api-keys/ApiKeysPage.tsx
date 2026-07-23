@@ -15,7 +15,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { MobileRowSummary } from '@/components/data-table/MobileRowSummary';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
-import { loadSession } from '@/lib/session';
+import { useApiSession } from '@/api/ApiProvider';
 import { ProvisionKeyDialog } from './ProvisionKeyDialog';
 import { SecretDialog } from './SecretDialog';
 import { ApiKeyDrawer, ApiKeyDrawerState } from './ApiKeyDrawer';
@@ -122,7 +122,8 @@ function AdminApiKeysSurface() {
 }
 
 export function ApiKeysPage() {
-  if (loadSession()?.keyKind !== 'admin') {
+  const session = useApiSession();
+  if (session.keyKind !== 'admin') {
     return (
       <div className="settings-screen api-keys-screen">
         <PageHeader title="API keys" />
