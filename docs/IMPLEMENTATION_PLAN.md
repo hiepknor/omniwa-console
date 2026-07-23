@@ -150,6 +150,9 @@ OmniWA GO. See `docs/CAMPAIGNS.md`.
 
 ## Phase 6 — Polling and integration hardening
 
+Status: implemented in code; immutable deployment and the separately approved
+credential observation window remain operational rollout work.
+
 Goal: remove migration scaffolding and prove production safety.
 
 - Remove obsolete legacy adapters, copy, and operation assumptions.
