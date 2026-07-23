@@ -97,6 +97,9 @@ remains on the reviewed legacy digest until all of the following are recorded:
 The credential C3 observation and approvals remain separately recorded in
 [CREDENTIAL_ROLLOUT_EVIDENCE.md](CREDENTIAL_ROLLOUT_EVIDENCE.md). A zero-instance
 backend is not representative workload and does not start a quiet window.
+UI-generation promotion evidence, unresolved exercises, and named cutover
+approvals are recorded in
+[UI_V2_ROLLOUT_EVIDENCE.md](UI_V2_ROLLOUT_EVIDENCE.md).
 
 ## Rollback and post-cutover deletion
 
