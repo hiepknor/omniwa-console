@@ -275,3 +275,13 @@ neutral unavailable surfaces:
 - `/settings/api-keys`
 
 See `docs/UNSUPPORTED_SURFACES.md` for boundaries and future enablement rules.
+
+## Deferred contract boundaries
+
+Operations classified as `deferred-product-workflow`,
+`deferred-backend-risk`, or `external-client` have no Console panel owner.
+Their accountable decision unit and exit criteria live in
+`docs/CONTRACT_BACKLOG.md`. Moving one into Console requires changing its
+classification in `scripts/contract-ui-policy.mjs`, assigning it to a panel in
+this file, and shipping the complete operator workflow in the same approved
+delivery sequence. Mere backend availability does not assign panel ownership.

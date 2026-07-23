@@ -58,6 +58,7 @@ cross-cutting contract semantics.
 | [docs/DELIVERY_WORKFLOW.md](docs/DELIVERY_WORKFLOW.md) | Required delivery lifecycle from intake through merge |
 | [docs/OMNIWA_GO_CONTRACT.md](docs/OMNIWA_GO_CONTRACT.md) | Backend handoff, capabilities, projections, errors, and health semantics |
 | [docs/CONTRACT_UI_MATRIX.md](docs/CONTRACT_UI_MATRIX.md) | Reviewed UI disposition for every public contract operation |
+| [docs/CONTRACT_BACKLOG.md](docs/CONTRACT_BACKLOG.md) | Deferred/external decision units, accountable roles, and exit criteria |
 | [docs/REDESIGN_BRIEF.md](docs/REDESIGN_BRIEF.md) | Contract-first UI redesign architecture, migration order, and cutover gates |
 | [docs/UI_V2_FOUNDATION.md](docs/UI_V2_FOUNDATION.md) | Canonical tokens, cascade isolation, production primitives, and gallery review |
 | [docs/UI_STATE_MODEL.md](docs/UI_STATE_MODEL.md) | Shared session, capability, projection, resource, transport, and command states |

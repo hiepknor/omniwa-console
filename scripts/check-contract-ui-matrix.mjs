@@ -1,8 +1,9 @@
 import { readFile } from 'node:fs/promises';
-import { allowedClassifications, classifyOperation } from './contract-ui-policy.mjs';
+import { allowedClassifications, BACKLOG_DECISIONS, backlogDecisionFor, classifyOperation } from './contract-ui-policy.mjs';
 
 const contract = JSON.parse(await readFile(new URL('../contracts/omniwa-go.openapi.json', import.meta.url), 'utf8'));
 const documentedMatrix = await readFile(new URL('../docs/CONTRACT_UI_MATRIX.md', import.meta.url), 'utf8');
+const documentedBacklog = await readFile(new URL('../docs/CONTRACT_BACKLOG.md', import.meta.url), 'utf8');
 const panelOwnership = await readFile(new URL('../docs/PANELS.md', import.meta.url), 'utf8');
 const methods = new Set(['get', 'post', 'put', 'delete', 'patch']);
 const operations = [];
@@ -32,7 +33,44 @@ for (const item of operations) {
     const escapedPath = path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const ownershipPattern = new RegExp(`${method}\\s+${escapedPath}(?:[?\\s\x60])`);
     if (!ownershipPattern.test(panelOwnership)) failures.push(`${item.operation}: redesign-v2 operation has no PANELS.md owner`);
+  } else {
+    const decision = backlogDecisionFor(item.target, item.workflow);
+    if (!decision) failures.push(`${item.operation}: no deferred/external decision unit for ${item.target}/${item.workflow}`);
+    else if (!documentedBacklog.includes(`- \`${item.operation}\``)) failures.push(`${item.operation}: missing from documented decision unit ${decision.id}`);
   }
+}
+
+const decisionIds = new Set();
+const decisionKeys = new Set();
+for (const decision of BACKLOG_DECISIONS) {
+  if (decisionIds.has(decision.id)) failures.push(`duplicate backlog decision id: ${decision.id}`);
+  decisionIds.add(decision.id);
+  const decisionKey = `${decision.target}/${decision.workflow}`;
+  if (decisionKeys.has(decisionKey)) failures.push(`duplicate backlog decision classification: ${decisionKey}`);
+  decisionKeys.add(decisionKey);
+  const operationsForDecision = operations.filter((item) => item.target === decision.target && item.workflow === decision.workflow);
+  if (operationsForDecision.length === 0) failures.push(`${decision.id}: decision unit has no contract operations`);
+  const documentedRow = `| \`${decision.id}\` | ${decision.target} | ${decision.owner} | \`${decision.status}\` | ${operationsForDecision.length} |`;
+  if (!documentedBacklog.includes(documentedRow)) failures.push(`${decision.id}: backlog register row is missing or stale`);
+  const sectionStart = documentedBacklog.indexOf(`### \`${decision.id}\``);
+  if (sectionStart === -1) failures.push(`${decision.id}: backlog operation section is missing`);
+  const nextSection = sectionStart === -1 ? -1 : documentedBacklog.indexOf('\n### `', sectionStart + 1);
+  const decisionSection = sectionStart === -1 ? '' : documentedBacklog.slice(sectionStart, nextSection === -1 ? undefined : nextSection);
+  if (!documentedBacklog.includes(decision.exitCriteria)) failures.push(`${decision.id}: exit criteria are missing or stale`);
+  for (const item of operationsForDecision) {
+    if (!decisionSection.includes(`- \`${item.operation}\``)) failures.push(`${item.operation}: missing from documented decision unit ${decision.id}`);
+  }
+}
+
+const documentedBacklogOperations = [...documentedBacklog.matchAll(/^- `((?:GET|POST|PUT|PATCH|DELETE) \/[^`]+)`$/gm)].map((match) => match[1]);
+const expectedBacklogOperations = operations.filter((item) => item.target !== 'redesign-v2').map((item) => item.operation);
+if (documentedBacklogOperations.length !== expectedBacklogOperations.length) {
+  failures.push(`documented backlog has ${documentedBacklogOperations.length} operation rows; expected ${expectedBacklogOperations.length}`);
+}
+for (const operation of new Set([...documentedBacklogOperations, ...expectedBacklogOperations])) {
+  const documentedMatches = documentedBacklogOperations.filter((candidate) => candidate === operation).length;
+  const expectedMatches = expectedBacklogOperations.filter((candidate) => candidate === operation).length;
+  if (documentedMatches !== 1 || expectedMatches !== 1) failures.push(`${operation}: backlog operation is missing, stale, or duplicated`);
 }
 
 const expectedCount = 119;
