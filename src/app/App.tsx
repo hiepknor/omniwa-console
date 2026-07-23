@@ -54,6 +54,9 @@ const ConversationsPageV2 = lazy(() =>
 const GroupsPage = lazy(() =>
   import('@/features/groups/GroupsPage').then((module) => ({ default: module.GroupsPage })),
 );
+const GroupsPageV2 = lazy(() =>
+  import('@/features/groups-v2/GroupsPageV2').then((module) => ({ default: module.GroupsPageV2 })),
+);
 const QueuePage = lazy(() =>
   import('@/features/queue/QueuePage').then((module) => ({ default: module.QueuePage })),
 );
@@ -167,8 +170,15 @@ function AppRuntime() {
                         { path: '/chats/:instanceId', element: <ChatsPage /> },
                         { path: '/chats/:instanceId/:chatId', element: <ChatsPage /> },
                       ]),
-                  { path: '/groups', element: <GroupsPage /> },
-                  { path: '/groups/:instanceId', element: <GroupsPage /> },
+                  ...(UI_GENERATION === 'v2'
+                    ? [
+                        { path: '/groups', element: <GroupsPageV2 /> },
+                        { path: '/groups/:groupId', element: <GroupsPageV2 /> },
+                      ]
+                    : [
+                        { path: '/groups', element: <GroupsPage /> },
+                        { path: '/groups/:instanceId', element: <GroupsPage /> },
+                      ]),
                   { path: '/messages', element: <CampaignsPage /> },
                   { path: '/messages/new', element: <CampaignsPage /> },
                   { path: '/overview', element: <ActiveOverviewPage /> },

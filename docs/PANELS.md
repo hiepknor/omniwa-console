@@ -77,20 +77,27 @@ Credential Health renders factual C3 migration signals, treats zero instances
 as non-representative, and never derives a plaintext-removal decision.
 `/server/ok` is not connection state.
 
-## Groups — `/groups/:instanceId?`
+## Groups — `/groups/:groupId?` (v2), `/groups/:instanceId?` (legacy)
 
-Status: projection list/info/search and mutations integrated. Reads remain
-available from persisted projection data while the WhatsApp instance is
-offline; live mutations still require provider connectivity.
+Status: projection list/info/search and mutations integrated in legacy and v2.
+V2 uses the active instance credential as its scope and never calls the admin
+fleet list. Reads remain available from persisted projection data while the
+WhatsApp instance is offline; live mutations still require provider
+connectivity.
 
 Reads:
 
 ```text
-GET  /instance/all
 GET  /group/list
 GET  /group/search?q=&limit=&cursor=
 POST /group/info
 POST /group/invitelink        # reset:false is projection/cache read
+```
+
+Legacy-only instance picker ownership:
+
+```text
+GET /instance/all
 ```
 
 Mutations:
