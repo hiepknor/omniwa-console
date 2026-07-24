@@ -4,7 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { ProjectionFailure } from '@/api/recovery';
 import { ApiFailure } from '@/api/envelopes';
-import { Button, Dialog, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, Dialog, Field, Inspector, PageHeader, Select, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
@@ -134,7 +134,7 @@ export function RecoveryPageV2() {
           <form className="ui-v2-recovery-filters" onSubmit={applyFilters}>
             <Field label="Instance ID" value={instanceDraft} placeholder="All instances" onChange={(event) => setInstanceDraft(event.target.value)} />
             <Field label="Resource" value={resourceDraft} placeholder="All resources" onChange={(event) => setResourceDraft(event.target.value)} />
-            <label className="ui-v2-field"><span className="ui-v2-field__label">Page size</span><select className="ui-v2-input" value={filters.limit} onChange={(event) => updateFilters({ limit: event.target.value === '50' ? undefined : event.target.value })}>{[25, 50, 100, 200].map((limit) => <option key={limit} value={limit}>{limit}</option>)}</select></label>
+            <Select label="Page size" value={String(filters.limit)} onChange={(value) => updateFilters({ limit: value === '50' ? undefined : value })} options={[25, 50, 100, 200].map((limit) => ({ value: String(limit), label: String(limit) }))} />
             <Button variant="primary" type="submit">Apply filters</Button>
           </form>
 
