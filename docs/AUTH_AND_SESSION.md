@@ -11,7 +11,7 @@ cookie, refresh token, or JWT flow.
 | Instance token | One WhatsApp account | Scoped client for groups, contacts, labels, chats, messages, sends, and other instance resources |
 
 Route middleware and the OpenAPI contract remain authoritative for exact scope.
-The console does not broaden a token by proxying through the admin client.
+The Console does not broaden a token by proxying through the admin client.
 
 ## Connect screen
 
@@ -68,7 +68,7 @@ interface ConsoleSession {
 - An admin may attach an existing instance token to the in-memory vault after a
   reload. The value is cleared on reload, sign-out, or explicit forget; it is
   never added to instance resources or query caches.
-- The SPA does not open `/ws`, because doing so would expose the global admin
+- The Console does not open `/ws`, because doing so would expose the global admin
   key to browser code. See `docs/REALTIME.md`.
 
 ## Failure handling
@@ -85,6 +85,6 @@ interface ConsoleSession {
 Any browser credential is accessible to code running in that origin. A global
 admin key can administer every instance and is substantially more powerful than
 an instance token. Operators should use the least-privileged token that supports
-their workflow, a trusted machine, and a trusted console origin. A future BFF
+their workflow, a trusted machine, and a trusted Console origin. A future BFF
 could replace browser-held admin credentials, but this repository remains a
 client-only SPA.

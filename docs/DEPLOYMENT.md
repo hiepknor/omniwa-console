@@ -1,4 +1,4 @@
-# Immutable Console deployment
+# Immutable Console Deployment
 
 The Console ships as a non-root static OCI image. Runtime API origin and
 credential selection remain operator input; no backend secret is baked into

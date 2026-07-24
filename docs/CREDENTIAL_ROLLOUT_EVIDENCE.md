@@ -1,4 +1,4 @@
-# Credential-safe Console rollout evidence
+# Credential-Safe Console Rollout Evidence
 
 This record controls the C2-to-C4 credential migration. It is deliberately not
 a `safeToRemove` calculation. Backend plaintext response or storage removal is

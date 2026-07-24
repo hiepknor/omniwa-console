@@ -4,14 +4,14 @@
 OmniWA GO REST API. It is a client-only SPA: it contains no backend, database,
 WhatsApp provider integration, campaign worker, or domain orchestration.
 
-The console is being migrated panel by panel onto OmniWA GO's persisted
+The Console is being migrated panel by panel onto OmniWA GO's persisted
 projections and operational APIs. Implemented surfaces remain usable while
 pending and unsupported surfaces render explicit states instead of simulated
 data.
 
 ## Product role
 
-The console serves self-hosted operators who need visual instance management,
+The Console serves self-hosted operators who need visual instance management,
 QR pairing, group administration, conversation and event inspection, health
 posture, and campaign monitoring.
 
@@ -33,7 +33,7 @@ It is not:
   a per-instance token.
 - Server state belongs to TanStack Query; filters, cursors, and selection state
   that define operator context belong in the URL.
-- The SPA does not open OmniWA GO's admin-key WebSocket. Durable history comes
+- The Console does not open OmniWA GO's admin-key WebSocket. Durable history comes
   from `/events`; ordinary panels use safe REST reads and bounded polling until
   a browser-safe realtime bridge exists.
 
@@ -41,7 +41,7 @@ It is not:
 
 The current backend exposes capability negotiation, projection-backed Groups,
 Contacts, Labels, Chats, Messages, durable Events, Overview/Health, split
-information/outbound rate limiting, and campaign orchestration. The console
+information/outbound rate limiting, and campaign orchestration. The Console
 must gate integrations with `GET /server/capabilities` and preserve projection
 freshness metadata.
 
@@ -50,28 +50,19 @@ cross-cutting contract semantics.
 
 ## Documentation
 
-- [Immutable deployment](./docs/DEPLOYMENT.md)
-- [UI v2 rollout evidence](./docs/UI_V2_ROLLOUT_EVIDENCE.md)
+[docs/README.md](docs/README.md) is the full documentation index. The most
+frequently used documents are:
 
 | Document | Purpose |
 | --- | --- |
 | [AGENTS.md](AGENTS.md) | Mandatory repository rules for coding agents |
 | [docs/DELIVERY_WORKFLOW.md](docs/DELIVERY_WORKFLOW.md) | Required delivery lifecycle from intake through merge |
 | [docs/OMNIWA_GO_CONTRACT.md](docs/OMNIWA_GO_CONTRACT.md) | Backend handoff, capabilities, projections, errors, and health semantics |
-| [docs/CONTRACT_UI_MATRIX.md](docs/CONTRACT_UI_MATRIX.md) | Reviewed UI disposition for every public contract operation |
-| [docs/CONTRACT_BACKLOG.md](docs/CONTRACT_BACKLOG.md) | Deferred/external decision units, accountable roles, and exit criteria |
-| [docs/REDESIGN_BRIEF.md](docs/REDESIGN_BRIEF.md) | Contract-first UI redesign architecture, migration order, and cutover gates |
-| [docs/UI_V2_GUIDE.md](docs/UI_V2_GUIDE.md) | Canonical v2 foundation, state model, route behavior, and review contract |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | SPA layers, state ownership, and safety boundaries |
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
-| [docs/AUTH_AND_SESSION.md](docs/AUTH_AND_SESSION.md) | Runtime key entry, scope, and storage |
 | [docs/PANELS.md](docs/PANELS.md) | Panel ownership and integration status by `METHOD /path` |
-| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Ordered OmniWA GO integration phases |
-| [docs/FEEDBACK.md](docs/FEEDBACK.md) | Feedback and projection-state presentation |
-| [docs/REALTIME.md](docs/REALTIME.md) | Browser realtime posture and durable event recovery |
-| [docs/RATE_LIMIT.md](docs/RATE_LIMIT.md) | Information and outbound rate-limit behavior |
-| [docs/CAMPAIGNS.md](docs/CAMPAIGNS.md) | Campaign contract and planned UI |
-| [docs/UNSUPPORTED_SURFACES.md](docs/UNSUPPORTED_SURFACES.md) | Routes with no public OmniWA GO management API |
+| [docs/UI_V2_GUIDE.md](docs/UI_V2_GUIDE.md) | Canonical v2 foundation, state model, route behavior, and review contract |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Immutable image build, generation isolation, and promotion gates |
 
 ## Development
 

@@ -1,4 +1,4 @@
-# UI v2 rollout evidence
+# UI v2 Rollout Evidence
 
 This record controls promotion of the generation-isolated v2 Console artifact.
 It does not approve Production, start the credential quiet window, or authorize
