@@ -4,7 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import type { EventResource } from '@/api/events-api';
-import { ApiFailureNotice, Button, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { ApiFailureNotice, Button, Field, Inspector, PageGuard, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { cursorRecoveryAction } from '@/lib/cursor-recovery';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useEventsV2 } from './hooks';
@@ -52,4 +52,4 @@ export function EventsPageV2() {
 function EventInspectorV2({ event, onClose }: { event: EventResource; onClose: () => void }) { const summary = Object.entries(event.summary).sort(([a], [b]) => a.localeCompare(b)); return <Inspector titleId="event-v2-title" eyebrow="Durable event" title={event.type} subtitle={<span className="ui-v2-mono">{event.id}</span>} status={<Status tone="neutral">Normalized</Status>} modal onClose={onClose}><div className="ui-v2-stack"><dl className="ui-v2-detail-list"><Fact label="Occurred" value={event.occurredAt ?? 'Not reported'} /><Fact label="Ingested" value={event.ingestedAt ?? 'Not reported'} /></dl><section className="ui-v2-stack"><h3>Safe summary</h3>{summary.length ? <dl className="ui-v2-detail-list">{summary.map(([key, value]) => <Fact key={key} label={humanizeToken(key)} value={summaryValue(value)} />)}</dl> : <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="This event contains no normalized summary fields." />}</section></div></Inspector>; }
 function summaryValue(value: unknown) { if (value === null) return 'null'; if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value); return JSON.stringify(value); }
 function Fact({ label, value }: { label: string; value: string }) { return <div><dt>{label}</dt><dd>{value}</dd></div>; }
-function Blocked({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <div className="ui-v2-page"><PageHeader eyebrow="Observability" title="Events" description="Durable normalized event history and recovery context." /><div className="ui-v2-page__content"><StateNotice value={state === 'invalid' ? { axis: 'session', state } : { axis: 'capability', state }} detail={detail} /></div></div>; }
+function Blocked({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Observability" title="Events" description="Durable normalized event history and recovery context." state={state} detail={detail} />; }

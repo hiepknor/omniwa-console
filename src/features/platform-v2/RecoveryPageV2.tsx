@@ -4,7 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { ProjectionFailure } from '@/api/recovery';
 import { ApiFailure } from '@/api/envelopes';
-import { Button, Dialog, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, Dialog, Field, Inspector, PageGuard, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
@@ -21,6 +21,8 @@ function failureIdentity(failure: ProjectionFailure): string {
 function Timestamp({ value }: { value?: string }) {
   return value ? <time dateTime={value} title={value}>{relativeTime(value) || value}</time> : <>Not reported</>;
 }
+
+function Blocked({ detail, state }: { detail?: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." state={state} detail={detail} />; }
 
 export function RecoveryPageV2() {
   const session = useApiSession();
@@ -95,13 +97,13 @@ export function RecoveryPageV2() {
   };
 
   if (session.keyKind !== 'admin') {
-    return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'session', state: 'invalid' }} detail="Projection recovery requires an admin credential. No recovery request was sent." /></div></div>;
+    return <Blocked state="invalid" detail="Projection recovery requires an admin credential. No recovery request was sent." />;
   }
   if (capabilities.isPending) {
-    return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'capability', state: 'discovering' }} detail="Waiting for server capability discovery before reading failures." /></div></div>;
+    return <Blocked state="discovering" detail="Waiting for server capability discovery before reading failures." />;
   }
   if (!capabilityReady) {
-    return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'capability', state: 'unsupported' }} detail={capabilities.isError ? 'Capability discovery failed; recovery remains disabled.' : 'The server does not advertise projection_failure_operations.'} /></div></div>;
+    return <Blocked state="unsupported" detail={capabilities.isError ? 'Capability discovery failed; recovery remains disabled.' : 'The server does not advertise projection_failure_operations.'} />;
   }
 
   return (

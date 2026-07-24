@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { ApiFailureNotice, Button, Field, PageHeader, ProjectionStatus, StateNotice, Status, Surface } from '@/components/v2';
+import { ApiFailureNotice, Button, Field, PageGuard, PageHeader, ProjectionStatus, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { CreateGroupV2 } from './CreateGroupV2';
@@ -54,4 +54,4 @@ export function GroupsPageV2() {
   </div>;
 }
 
-function Blocked({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <div className="ui-v2-page"><PageHeader eyebrow="Messaging" title="Groups" description="Projection-backed group directory and explicit provider commands." /><div className="ui-v2-page__content"><StateNotice value={state === 'invalid' ? { axis: 'session', state } : { axis: 'capability', state }} detail={detail} /></div></div>; }
+function Blocked({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Messaging" title="Groups" description="Projection-backed group directory and explicit provider commands." state={state} detail={detail} />; }

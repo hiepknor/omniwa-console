@@ -6,7 +6,7 @@ import type { ChatResource } from '@/api/chats';
 import type { ContactResource } from '@/api/contacts';
 import type { LabelResource } from '@/api/labels';
 import type { MessageResource } from '@/api/messages';
-import { Button, Field, PageHeader, StateNotice, Status, Surface, Tabs } from '@/components/v2';
+import { Button, Field, PageGuard, PageHeader, StateNotice, Status, Surface, Tabs } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { createSearchParams, omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { ComposerV2 } from './ComposerV2';
@@ -95,7 +95,7 @@ export function ConversationsPageV2() {
   </div>;
 }
 
-function BlockedPage({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <div className="ui-v2-page"><PageHeader eyebrow="Messaging" title="Conversations" description="Projection-backed chats, messages, contacts, labels, and bounded sends." /><div className="ui-v2-page__content"><StateNotice value={state === 'invalid' ? { axis: 'session', state } : { axis: 'capability', state }} detail={detail} /></div></div>; }
+function BlockedPage({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Messaging" title="Conversations" description="Projection-backed chats, messages, contacts, labels, and bounded sends." state={state} detail={detail} />; }
 function ChatList({ items, selectedId, onSelect }: { items: ChatResource[]; selectedId?: string; onSelect: (id: string) => void }) { return <ul className="ui-v2-resource-list">{items.map((item) => <li key={item.id} data-selected={item.id === selectedId || undefined}><button type="button" onClick={() => onSelect(item.id)}><span><strong>{item.displayName ?? item.id}</strong><small>{humanizeToken(item.type)} · {item.lastActivityAt ? relativeTime(item.lastActivityAt) : 'activity unreported'}</small></span><Status tone={item.unreadCount ? 'pending' : 'neutral'}>{item.unreadCount} unread</Status></button></li>)}</ul>; }
 function ContactList({ items, selectedId, onSelect }: { items: ContactResource[]; selectedId?: string; onSelect: (id: string) => void }) { return <ul className="ui-v2-resource-list">{items.map((item) => <li key={item.id} data-selected={item.id === selectedId || undefined}><button type="button" onClick={() => onSelect(item.id)}><span><strong>{item.displayName ?? item.id}</strong><small className="ui-v2-mono">{item.id}</small></span><Status tone={item.found ? 'healthy' : 'neutral'}>{item.found ? 'Known' : 'Unknown'}</Status></button></li>)}</ul>; }
 function LabelList({ items, selectedId, onSelect }: { items: LabelResource[]; selectedId?: string; onSelect: (id: string) => void }) { return <ul className="ui-v2-resource-list">{items.map((item) => <li key={item.id} data-selected={item.id === selectedId || undefined}><button type="button" onClick={() => onSelect(item.id)}><span><strong>{item.name ?? 'Unnamed label'}</strong><small className="ui-v2-mono">{item.id}</small></span><span>{item.color ?? 'Color unreported'}</span></button></li>)}</ul>; }
