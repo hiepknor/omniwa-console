@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { Button, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, Field, Inspector, PageHeader, Select, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
@@ -53,7 +53,7 @@ export function InstancesPageV2() {
       {destroyAck ? <StateNotice value={{ axis: 'command', state: 'acknowledged' }} detail="Destroy was acknowledged by the server. The refreshed metadata list remains authoritative." /> : null}
       <CredentialHealthV2 />
       <Surface title="Fleet metadata" description="List and detail use /instance/metadata only; tokens never enter view models or query keys.">
-        <div className="ui-v2-instance-filters"><Field label="Search" type="search" value={search} placeholder="Name or instance ID" onChange={(event) => setParam('search', event.target.value)} /><label className="ui-v2-field"><span className="ui-v2-field__label">Status</span><select className="ui-v2-input" value={status} onChange={(event) => setParam('status', event.target.value)}><option value="">All statuses</option><option value="connected">Connected</option><option value="disconnected">Disconnected</option></select></label></div>
+        <div className="ui-v2-instance-filters"><Field label="Search" type="search" value={search} placeholder="Name or instance ID" onChange={(event) => setParam('search', event.target.value)} /><Select label="Status" value={status} onChange={(value) => setParam('status', value)} options={[{ value: '', label: 'All statuses' }, { value: 'connected', label: 'Connected' }, { value: 'disconnected', label: 'Disconnected' }]} /></div>
         {state.isInitialLoading ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} detail="Reading instance metadata." /> : null}
         {state.isError ? <FailureNotice error={state.error} stale={state.isStaleError} onRetry={() => list.refetch()} /> : null}
         {list.data && instances.length === 0 ? <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The authoritative metadata list contains no instances. This is not a representative credential-health workload." /> : null}
