@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { CampaignStatus } from '@/api/campaigns';
-import { ApiFailureNotice, Button, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { ApiFailureNotice, Button, PageGuard, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { CampaignInspectorV2 } from './CampaignInspectorV2';
@@ -48,4 +48,4 @@ export function CampaignsPageV2() {
   </div>;
 }
 
-function Blocked({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <div className="ui-v2-page"><PageHeader eyebrow="Messaging" title="Campaigns" description="Server-owned campaign orchestration and durable recipient outcomes." /><div className="ui-v2-page__content"><StateNotice value={state === 'invalid' ? { axis: 'session', state } : { axis: 'capability', state }} detail={detail} /></div></div>; }
+function Blocked({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Messaging" title="Campaigns" description="Server-owned campaign orchestration and durable recipient outcomes." state={state} detail={detail} />; }
