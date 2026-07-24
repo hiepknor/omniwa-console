@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { CampaignStatus } from '@/api/campaigns';
-import { ApiFailureNotice, Button, Dialog, Inspector, StateNotice, Status, Tabs } from '@/components/v2';
+import { ApiFailureNotice, Button, Dialog, Fact, Inspector, StateNotice, Status, Tabs } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useCampaignAuditV2, useCampaignRecipientsV2, useCampaignTransitionV2, useCampaignV2 } from './hooks';
 import { campaignRouteState, setCampaignParam, type CampaignTabV2 } from './route-state';
@@ -69,7 +69,5 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
     </Dialog> : null}
   </>;
 }
-
-function Fact({ label, value }: { label: string; value: string }) { return <div><dt>{label}</dt><dd>{value}</dd></div>; }
 function CursorNav({ current, next, onChange }: { current?: string; next: string | null; onChange: (value?: string) => void }) { return <div className="ui-v2-pagination"><span>{current ? 'Opaque cursor page' : 'First page'}</span><div>{current ? <Button onClick={() => onChange()}>Start over</Button> : null}<Button disabled={!next} onClick={() => onChange(next ?? undefined)}>Next page</Button></div></div>; }
 function PagedRead({ pending, error, retry, children }: { pending: boolean; error: unknown; retry: () => unknown; children: React.ReactNode }) { if (pending) return <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} />; if (error) return <ApiFailureNotice error={error} onRetry={retry} />; return children; }

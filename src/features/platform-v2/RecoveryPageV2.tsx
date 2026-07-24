@@ -4,8 +4,8 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { ProjectionFailure } from '@/api/recovery';
 import { ApiFailure } from '@/api/envelopes';
-import { Button, Dialog, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
-import { humanizeToken, relativeTime } from '@/lib/format';
+import { Button, Dialog, Field, Inspector, PageHeader, RelativeTime, StateNotice, Status, Surface } from '@/components/v2';
+import { humanizeToken } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
 import { commandFailureState, failureDetail, failureRequestId, readFailureState } from './state';
@@ -16,10 +16,6 @@ type RecoveryAction = 'replay' | 'discard';
 
 function failureIdentity(failure: ProjectionFailure): string {
   return JSON.stringify([failure.instanceId, failure.resource, failure.eventKey]);
-}
-
-function Timestamp({ value }: { value?: string }) {
-  return value ? <time dateTime={value} title={value}>{relativeTime(value) || value}</time> : <>Not reported</>;
 }
 
 export function RecoveryPageV2() {
@@ -152,7 +148,7 @@ export function RecoveryPageV2() {
                     <td data-label="Resource">{humanizeToken(failure.resource)}</td>
                     <td data-label="Failure">{humanizeToken(failure.lastErrorCode ?? failure.failureClass)}</td>
                     <td data-label="Attempts" className="ui-v2-mono">{failure.retryCount ?? '—'} / {failure.maxAttempts ?? '—'}</td>
-                    <td data-label="Dead-lettered"><Timestamp value={failure.deadLetteredAt} /></td>
+                    <td data-label="Dead-lettered"><RelativeTime value={failure.deadLetteredAt} /></td>
                   </tr>
                 ))}</tbody>
               </table>
@@ -183,9 +179,9 @@ export function RecoveryPageV2() {
             <div><dt>Event type</dt><dd>{humanizeToken(selected.eventType)}</dd></div>
             <div><dt>Error code</dt><dd className="ui-v2-mono">{selected.lastErrorCode ?? 'Not reported'}</dd></div>
             <div><dt>Attempts</dt><dd>{selected.retryCount ?? '—'} of {selected.maxAttempts ?? '—'}</dd></div>
-            <div><dt>Occurred</dt><dd><Timestamp value={selected.occurredAt} /></dd></div>
-            <div><dt>Last attempt</dt><dd><Timestamp value={selected.lastAttemptAt} /></dd></div>
-            <div><dt>Dead-lettered</dt><dd><Timestamp value={selected.deadLetteredAt} /></dd></div>
+            <div><dt>Occurred</dt><dd><RelativeTime value={selected.occurredAt} /></dd></div>
+            <div><dt>Last attempt</dt><dd><RelativeTime value={selected.lastAttemptAt} /></dd></div>
+            <div><dt>Dead-lettered</dt><dd><RelativeTime value={selected.deadLetteredAt} /></dd></div>
           </dl>
           <div className="ui-v2-command-bar"><Button variant="primary" onClick={() => openCommand('replay')}>Replay…</Button><Button variant="danger" onClick={() => openCommand('discard')}>Discard…</Button></div>
         </Inspector>
