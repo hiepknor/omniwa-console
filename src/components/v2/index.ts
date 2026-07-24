@@ -1,5 +1,7 @@
 export { Button, Field, PageHeader, Status, Surface, UiV2Boundary } from './primitives';
 export { ApiFailureNotice } from './ApiFailureNotice';
+export { CommandAck } from './CommandAck';
+export { PagedSection } from './PagedSection';
 export { ProjectionStatus } from './ProjectionStatus';
 export type { ButtonVariant, StatusTone } from './primitives';
 export { Dialog, Inspector, ScopeSelector, StateNotice, Tabs } from './interaction';
