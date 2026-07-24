@@ -1,6 +1,6 @@
 # Rate-Limit Contract
 
-OmniWA GO owns both rate-limit safety systems. The console must respect their
+OmniWA GO owns both rate-limit safety systems. The Console must respect their
 public contract and must not create a second limiter or retry engine in browser
 state.
 
@@ -16,7 +16,7 @@ HTTP and internal callers by:
 - no WhatsApp probes during cooldown;
 - a single trial query in half-open state.
 
-Projection reads do not call WhatsApp. The console must not reintroduce live
+Projection reads do not call WhatsApp. The Console must not reintroduce live
 reads as a fallback when a projection is unavailable.
 
 ## Outbound safety

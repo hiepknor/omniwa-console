@@ -1,6 +1,6 @@
-# Contract-first UI redesign
+# Contract-First UI Redesign
 
-Status: route implementation complete; immutable rollout and legacy deletion pending.
+**Status:** route implementation complete; immutable rollout and legacy deletion pending.
 
 This brief replaces panel-by-panel visual patching with a contract-first rebuild
 of the Console presentation layer. The current public routes stay operational

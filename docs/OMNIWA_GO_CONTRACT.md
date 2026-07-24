@@ -1,6 +1,6 @@
 # OmniWA GO Public Contract
 
-This is the console-facing handoff for the OmniWA GO backend at commit
+This is the Console-facing handoff for the OmniWA GO backend at commit
 `2682ddd` (2026-07-23). The vendored machine contract at
 `contracts/omniwa-go.openapi.json` remains authoritative for paths and schemas;
 this document records cross-cutting semantics that generated types cannot
@@ -84,7 +84,7 @@ Projection reads use the compatible success envelope:
 | `failed` | Render projection failure; do not substitute a live lookup |
 
 HTTP `503` with code `projection_not_ready` is a resource-read state, not an
-empty collection. The console never calls WhatsApp live to compensate.
+empty collection. The Console never calls WhatsApp live to compensate.
 
 For an actual projection read, `meta.syncStatus` or
 `projection_not_ready` is authoritative. Capability absence must never turn a

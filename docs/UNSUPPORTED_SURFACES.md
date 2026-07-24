@@ -1,6 +1,6 @@
 # Unsupported Console Surfaces
 
-This file records console routes that do not have an equivalent public OmniWA
+This file records Console routes that do not have an equivalent public OmniWA
 GO management API. It prevents old dashboard-contract assumptions from being
 reintroduced as client-side emulation.
 
@@ -13,7 +13,7 @@ reintroduced as client-side emulation.
 
 Durable Events, Overview/Health, Chats/Messages, Contacts/Labels, Groups, and
 Campaigns are supported by the current backend and belong in the integration
-roadmap. They are not unsupported merely because their console panel is still
+roadmap. They are not unsupported merely because their Console panel is still
 pending.
 
 When OmniWA GO adds a public endpoint, update the vendored contract and

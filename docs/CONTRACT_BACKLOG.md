@@ -1,4 +1,4 @@
-# Contract decision register
+# Contract Decision Register
 
 This register groups every public operation that is intentionally outside the
 approved v2 Console panels. It complements the complete per-operation inventory

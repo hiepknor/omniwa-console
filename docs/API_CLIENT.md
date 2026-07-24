@@ -19,7 +19,7 @@ src/api/generated/schema.d.ts
 src/api/client.ts (openapi-fetch)
 ```
 
-The contract and generated schema are committed so the console builds offline.
+The contract and generated schema are committed so the Console builds offline.
 Only the orchestrator runs contract sync. Generated files are never edited by
 hand. `pnpm contract:check` verifies schema freshness, every typed `METHOD
 /path` call against the vendored contract, and feature ownership against
@@ -27,7 +27,7 @@ hand. `pnpm contract:check` verifies schema freshness, every typed `METHOD
 
 Swaggo occasionally describes whatsmeow runtime values inaccurately. Any
 runtime narrowing required for those endpoints stays quarantined in `src/api/`
-with an explanatory comment; features still receive stable console types.
+with an explanatory comment; features still receive stable Console types.
 
 ## Client scopes
 
