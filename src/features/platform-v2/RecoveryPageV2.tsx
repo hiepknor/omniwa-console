@@ -4,7 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { ProjectionFailure } from '@/api/recovery';
 import { ApiFailure } from '@/api/envelopes';
-import { Button, Dialog, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, CursorPagination, Dialog, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
@@ -158,13 +158,12 @@ export function RecoveryPageV2() {
               </table>
             </div>
           ) : null}
-          <div className="ui-v2-pagination">
-            <span>{filters.cursor ? 'Opaque cursor page' : 'First page'}</span>
-            <div>
-              {filters.cursor ? <Button onClick={() => updateFilters({ cursor: undefined, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }, false)}>First page</Button> : null}
-              <Button disabled={!query.data?.nextCursor} onClick={() => updateFilters({ cursor: query.data?.nextCursor, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }, false)}>Next page</Button>
-            </div>
-          </div>
+          <CursorPagination
+            cursor={filters.cursor}
+            nextCursor={query.data?.nextCursor}
+            resetLabel="First page"
+            onCursor={(value) => updateFilters({ cursor: value, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }, false)}
+          />
         </Surface>
       </div>
 
