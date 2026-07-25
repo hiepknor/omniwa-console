@@ -4,12 +4,17 @@
 > WhatsApp platform operations console using the Open Design Warp system.
 > Source: `od://design-systems/warp/DESIGN.md`.
 
-This is the brand contract for `omniwa-console`. Production tokens and shared
-components are the implementation source of truth. During the v2 migration,
-legacy prototypes in `design/prototypes/` may illustrate existing journeys but
-must import canonical tokens and may not own or duplicate runtime component
-geometry. Where this file is silent, follow the dense-operational defaults of
-the `frontend-design` craft rules; where they conflict, this file wins.
+This is the brand contract for `omniwa-console`. **The v2 console is the
+product this contract describes.** Canonical tokens (`src/styles/tokens.css`)
+and the shared v2 primitives (`src/components/v2`, `src/styles/ui-v2.css`) are
+the implementation source of truth — where this document and the code disagree,
+the code wins and this document is corrected. Legacy v1 prototypes in
+`design/prototypes/` and legacy v1 feature code may illustrate existing journeys
+but must import canonical tokens and may not own runtime component geometry.
+Surfaces that exist only in v1 and have not been carried into the v2 shell are
+catalogued in the Appendix, not in the main body. Where this file is silent,
+follow the dense-operational defaults of the `frontend-design` craft rules;
+where they conflict, this file wins.
 
 The production component gallery at `/__ui-v2` is available only in local
 development and renders the same primitives used by v2 routes. New foundation
@@ -39,448 +44,312 @@ should be able to go from any error toast to a log query in one copy-paste.
 **Key characteristics:**
 
 - Dark-mode-native: `#161412` canvas, `#1f1d1b` panels, `color-mix(in oklab, var(--surface), var(--fg) 4%)` elevated surfaces
-- Matter Regular for UI text; Matter Mono / Geist Mono for identifiers and technical values
+- Matter Regular for UI text; Geist Mono / Matter Mono for identifiers and technical values
 - Warm Parchment (`#faf9f6`) foreground with Ash and Stone gray hierarchy
-- No brand accent, gradients, or glow; interaction uses opacity and mist borders
+- No brand accent, gradients, or glow; interaction uses opacity, warm-parchment veils, and mist borders
 - Status is always **dot + label**, never color alone
-- Tables at 13px are the workhorse component; cards exist only on Overview
-- Borders `rgba(255,255,255,0.06–0.09)`; elevation by luminance stepping, not shadow
+- Tables at 13px are the workhorse component; the bordered metric grid is Overview/workbench-only
+- Borders default at `rgba(226,226,226,0.35)` and step by luminance, not shadow
 
 ## 2. Color Palette & Roles
 
+All values below are defined in `src/styles/tokens.css`. Product code references
+the aliased tokens (`--canvas`, `--panel`, `--ok`, …); the base tokens
+(`--bg`, `--success`, …) are the raw inputs those aliases mix from.
+
 ### Background surfaces
 
-- **Canvas** (`#161412`): warm near-black page background.
-- **Panel** (`#1f1d1b`): sidebar, table containers, cards.
-- **Elevated** (`color-mix(in oklab, var(--surface), var(--fg) 4%)`): dropdowns, drawers, dialogs, row hover.
-- **Recessed** (`color-mix(in oklab, var(--bg), black 12%)`): code/QR wells, input backgrounds.
+- **Canvas** — `--canvas` = `--bg` (`#161412`): warm near-black page background.
+- **Panel** — `--panel` = `--surface` (`#1f1d1b`): sidebar rail, table containers, inspectors, dialogs.
+- **Elevated** — `--elevated` = `color-mix(in oklab, var(--surface), var(--fg) 4%)`: raised surfaces and hover states.
+- **Recessed** — `--recessed` = `color-mix(in oklab, var(--bg), black 12%)`: inputs, code/QR wells, message bubbles.
 
 ### Text
 
-- **Primary / Warm Parchment** (`#faf9f6`): headings, cell values.
-- **Secondary / Ash Gray** (`#afaeac`): body, descriptions.
-- **Muted / Stone Gray** (`#868584`): metadata, column headers, placeholders.
-- **Faint / Purple-Tint Gray** (`#666469`): timestamps, disabled, de-emphasized counts.
+- **Primary / Warm Parchment** — `--text-1` = `--fg` (`#faf9f6`): headings, cell values.
+- **Secondary / Ash Gray** — `--text-2` = `--fg-2` (`#afaeac`): body, descriptions.
+- **Muted / Stone Gray** — `--text-3` = `--muted` (`#868584`): metadata, column headers, placeholders.
+- **Faint / Purple-Tint Gray** — `--text-4` = `--meta` (`#666469`): timestamps, disabled, de-emphasized counts.
 
-### Brand & accent
+### Brand, accent & veils
 
-- **Earth Gray** (`#353534`): button backgrounds and interactive surfaces.
-- **Frosted Veil** (`rgba(255,255,255,0.04)`): selected rows and surface differentiation.
-- **Mist Border** (`rgba(226,226,226,0.35)`): primary containment.
-- **Healthy/live** uses a muted semantic green only where status meaning requires it.
+- **Earth Gray** — `--accent` (`#353534`): the single primary-action surface; `--accent-hover` (`#454545`) brightens on hover.
+- **Accent text** — primary buttons render Warm Parchment (`var(--fg)`) on Earth Gray. The `--accent-on` token (`#afaeac`) is reserved for muted-on-accent contexts.
+- **Frosted Veil** — `--accent-tint` = `color-mix(in oklab, var(--fg) 8%, transparent)`: a warm-parchment veil for selected rows and surface differentiation. Row-level states use lighter parchment mixes (`fg 3–7%`) for hover / selected / open.
+- Interaction never introduces a saturated brand accent, gradient, or glow.
 
 ### Status vocabulary (the only other chromatic colors)
 
-| Status | Color | Used for |
-| --- | --- | --- |
-| `ok / connected / delivered / active` | `color-mix(in oklab, var(--success), var(--fg-2) 52%)` | Healthy lifecycle states |
-| `pending / pairing / queued / accepted` | `color-mix(in oklab, var(--warn), var(--fg-2) 56%)` | In-flight, waiting states |
-| `degraded / retrying / suspended` | `color-mix(in oklab, var(--warn), var(--danger) 38%)` | Needs attention, self-recovering |
-| `failed / disconnected / dead` | `color-mix(in oklab, var(--danger), var(--fg-2) 55%)` | Terminal failures, action required |
-| `info / streaming` | `color-mix(in oklab, var(--muted), var(--fg-2) 44%)` | Neutral events, live activity |
-| `retired / archived / unknown` | `var(--muted)` | Inactive, no action possible |
+The status token set mixes each raw semantic hue toward a foreground gray so
+it reads muted on the warm canvas:
 
-Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
-(accessibility and print).
+| Role | Token | Definition | Used for |
+| --- | --- | --- | --- |
+| `ok / connected / delivered / active` | `--ok` | `color-mix(in oklab, var(--success), var(--fg-2) 52%)` | Healthy lifecycle states |
+| `pending / pairing / queued / accepted` | `--pending` | `color-mix(in oklab, var(--warn), var(--fg-2) 56%)` | In-flight, waiting states |
+| `degraded / retrying / suspended` | `--degraded` | `color-mix(in oklab, var(--warn), var(--danger) 38%)` | Needs attention, self-recovering |
+| `failed / disconnected / dead` | `--failed` | `color-mix(in oklab, var(--danger), var(--fg-2) 55%)` | Terminal failures, action required |
+| `info / streaming` | `--info` | `color-mix(in oklab, var(--muted), var(--fg-2) 44%)` | Neutral events, live activity |
+| `retired / archived / unknown` | `--inactive` | `var(--muted)` | Inactive, no action possible |
+
+Raw semantic inputs: `--success #16a34a`, `--warn #eab308`, `--danger #dc2626`.
+
+The shared `<Status>` primitive renders an 8px dot + 12px label and maps its
+`tone` prop to four dot colors — `healthy → --ok`, `pending`, `degraded`,
+`failed` — with a neutral `--inactive` dot as the default. Color-only signaling
+is forbidden (accessibility and print); the label always carries the meaning.
 
 ### Borders
 
-- **Default / Mist** (`rgba(226,226,226,0.35)`): tables, cards, major containment.
-- **Subtle** (`rgba(226,226,226,0.12)`): row dividers, section separators.
-- **Strong** (`rgba(226,226,226,0.50)`): focused inputs, active drawer edge.
+- **Default / Mist** — `--border` (`rgba(226,226,226,0.35)`): the raw border input.
+- **Subtle** — `--border-subtle` = `color-mix(in oklab, var(--border) 36%, transparent)` (≈`0.12` alpha): the workhorse divider for rows, sections, surfaces, tables, and nav.
+- **Strong** — `--border-strong` = `color-mix(in oklab, var(--border), var(--fg) 22%)`: focused inputs, active/open row edges, dialog edges. Strength comes from brightening toward the foreground, not from raising alpha.
+- **Accent edge** — `--accent-edge` = `color-mix(in oklab, var(--fg) 42%, transparent)`: primary-button border.
 
 ## 3. Typography Rules
 
 ### Families
 
-- **UI**: `Matter Regular`, fallback `Inter`, system sans-serif. Enable `font-feature-settings: "tnum"` wherever numbers align vertically.
-- **Mono**: `Matter Mono Regular`, fallback `Geist Mono`, `JetBrains Mono`, system monospace. All IDs, cursors, JIDs, payload keys, code.
+- **UI** — `--font-body`: `Matter Regular`, fallback `Matter`, `Inter`, system sans-serif. Enable `font-feature-settings: "tnum"` wherever numbers align vertically.
+- **Mono** — `--font-mono`: `Geist Mono` first, then `Matter Mono Regular`, then system monospace. All IDs, cursors, JIDs, payload keys, versions, code, and metric values.
 
-### Hierarchy
+### Hierarchy (as implemented in `ui-v2.css`)
 
-| Role | Size | Weight | Notes |
+| Role | Size / line | Weight | Notes |
 | --- | --- | --- | --- |
-| Page title | 18px | 400 | One per page, top-left of content area |
-| Section heading | 14px | 500 | Card titles, drawer sections |
-| Metric value | 26px | 400 | Tabular numerals, tight line-height 1.1 |
-| Body | 14px | 400 | Forms, descriptions, empty states |
-| Table cell / dense UI | 13px | 400 | The console's default text size |
-| Table header / label | 11px | 400 | Uppercase, letter-spacing 0.15em, muted color |
-| Metadata / timestamp | 12px | 400 | Faint color |
-| Mono ID | 12px | 400 | Matter Mono / Geist Mono, secondary color |
-| Button | 13px | 500 | Never bold |
+| Root / body default | 14px / 1.5 | 400 | `.ui-v2-root` base |
+| Page title (`h1`) | 22px / 30px | 400 | One per page, `letter-spacing -0.02em` |
+| Inspector title (`h2`) | 16px / 24px | 500 | Detail inspector header |
+| Surface / section heading | 14px / 20px | 500 | Card and surface titles |
+| Metric value | 24px / 32px | 400 | **Mono**, tabular numerals |
+| Table cell / dense UI | 13px | 400 | Control default (`--control-font-size`) |
+| Status / mono ID | 12px | 400 | `<Status>` label and `.ui-v2-mono` |
+| Field label | 11px | 400 | Uppercase, tracking `1.4px`, muted |
+| Table header | 11px / 16px | 400 | Uppercase, tracking `1.4px`, muted |
+| Eyebrow / metric label / mobile cell label | 10px | 400 | Uppercase, tracking `1.2–2.2px`, muted |
+| Nav section label / select label | 9px | 400 | Uppercase, tracking `1.2–1.8px`, muted |
+
+On coarse pointers `--control-font-size` bumps to 16px to keep tap targets legible.
 
 ### Principles
 
-- Maximum weight is 500. Emphasis comes from luminance (text color tier),
-  not from bolding.
-- Uppercase is reserved for 11px labels (table headers, badge text).
-- No display typography anywhere — this is a tool, not a landing page.
+- Maximum weight is 500. Emphasis comes from luminance (text color tier), not from bolding.
+- Uppercase is reserved for small labels (≤11px): table headers, field labels, eyebrows, nav section labels.
+- No display typography in product surfaces — this is a tool, not a landing page. (The `--text-2xl … --text-4xl` scale in `tokens.css` is inherited Warp marketing type and is intentionally unused by the console.) The only large type is the Connect entry masthead headline (`clamp(36px, 4.2vw, 56px)`), which is a deliberate single exception.
 
-## 4. Component Stylings
+## 4. Foundations & Tokens
 
-### Buttons
+### Spacing & layout scale
 
-- **Primary**: Earth Gray `#353534`, Warm Parchment text, pill radius, 13px/500, padding 6px 12px. Hover changes brightness only. One per view maximum.
-- **Ghost (default)**: `rgba(255,255,255,0.03)` bg, `1px solid rgba(255,255,255,0.08)` border, primary text. Hover bg `0.06`.
-- **Danger**: ghost shape with red-500 text and border `rgba(239,68,68,0.35)`; solid red only inside typed-confirmation dialogs.
-- **Icon button**: 26×26px, 6px radius, ghost treatment.
-- Disabled: 40% opacity, no hover.
+- Spacing: `--space-1..--space-12` = 4 / 8 / 12 / 16 / 20 / 24 / 32 / 48px on an 8px base.
+- Container: product pages are full-bleed with responsive gutters (`--container-gutter-desktop 32px`, `tablet 24px`, `phone 16px`). Only the `/__ui-v2` gallery and Connect center at `--container-max 1500px`.
 
-### Tables (workhorse)
+### Radius
 
-- Container: Panel bg, default border, 12px radius, no outer padding.
-- Desktop header: sticky 44px row with 11px/400 uppercase muted labels,
-  wide tracking, and a subtle bottom border. Body rows are 42px with 13px
-  text and restrained Frosted Veil hover, focus, checked, and selected states.
-- Cells: status = dot+label; IDs = mono 12px with copy-on-hover icon;
-  timestamps = relative ("3m ago") with absolute ISO on `title`; numeric and
-  time values use tabular numerals and align right where comparison benefits.
-- At 641–1024px, keep the full semantic table inside a locally bounded
-  horizontal scroller. Checkbox and identity columns stay sticky; the page
-  itself never gains horizontal overflow.
-- At 640px and below, primary tables become continuous adaptive rows, never
-  cards. Each 64px-or-taller row presents identity plus mono ID, status plus
-  the task-critical metric or age, and a disclosure affordance. Secondary
-  fields remain available in the row detail surface.
-- The footer sits outside the horizontal scroller. Cursor pagination uses a
-  "Load more" ghost button plus shown-count and freshness in faint text;
-  never use page numbers.
-- Mobile filtering uses one 44px search field plus a Filters button. The
-  bottom sheet owns less-common controls; active filters remain visible as
-  dismissible chips below the search row.
-- Drawer mini-tables become continuous key/value records below 640px. They
-  retain dividers and table density rather than becoming elevated cards.
+- `--radius-sm 6px`: inputs, nav items, buttons-as-controls, tables/wrappers, small blocks.
+- `--radius-md 12px`: surfaces, dialogs, message bubbles.
+- `--radius-lg 14px`: reserved large blocks.
+- `--radius-pill 9999px`: buttons, status pills, count/tab badges, environment chips.
 
-### Badges & pills
+### Elevation
 
-- Status pill: 12px/500 label, 8px dot, `rgba(255,255,255,0.04)` bg, 9999px radius, 2px 8px padding. Dot carries the status color; text stays secondary.
-- Count badge: mono 11px, recessed bg, 4px radius (e.g. queue depth on nav).
+| Token | Value | Use |
+| --- | --- | --- |
+| `--elev-flat` | `none` | Base panels, cards, tables |
+| `--elev-ring` | `0 0 0 1px var(--border)` | Hairline containment |
+| `--elev-raised` | `0 5px 15px rgba(0,0,0,0.2)` | Floating: inspectors, dialogs |
+| `--focus-ring` | `0 0 0 2px rgba(250,249,246,0.5)` | Keyboard `:focus-visible` on every interactive element |
 
-### Forms & inputs
+Base content uses luminance stepping and borders, never shadow. The focus ring
+is a parchment (not chromatic) 2px halo applied only on `:focus-visible`;
+inputs additionally brighten their border to `--border-strong` on focus.
 
-- Input: Recessed bg, subtle border, 6px radius, 13px text, padding 7px 10px. Focus increases border brightness without a colored ring. Error: muted-red border + 12px error text below.
-- Selects and filters render as ghost buttons with a chevron; active filters become dismissible pills in a filter bar above tables.
+## 5. Component Stylings
 
-### Cards (Overview; metric cards on Queue, Webhooks, and Groups)
+### Buttons (`.ui-v2-button`)
 
-- Panel bg, default border, 8px radius, 16px padding.
-- Metric card: 11px uppercase label → 26px tabular value → 12px faint delta/context line.
+- **Ghost (default)**: `color-mix(in oklab, var(--fg) 3%, transparent)` bg, `1px solid var(--border-subtle)`, primary text, pill radius, 13px/500, `6px 12px` padding, `min-height 36px`. Hover raises border to `--border-strong` and bg to `fg 7%`.
+- **Primary** (`--primary`): Earth Gray (`--accent`) bg, Warm Parchment text, `--accent-edge` border. Hover brightens to `--accent-hover`. One per view maximum.
+- **Danger** (`--danger`): ghost shape with `--failed` text and a `danger 42%` border; solid red only inside typed-confirmation dialogs.
+- Disabled: 40% opacity, no hover. On phone and coarse pointers buttons grow to `min-height 44px`.
 
-### Overview command surface
+### Inputs (`.ui-v2-input`)
 
-- Scan order is fixed: compact split-health posture → six comparable persisted metrics → action-required state → bounded live-event state.
-- Health uses a quiet bordered strip with dot + label states. Platform API and aggregate projection health stay separate; per-instance connection, projection, and throttling reads are visibly grouped under an accessible instance identifier.
-- The six metric cards share equal visual weight and dense spacing. They wrap from six to three, two, then one column, but values and labels remain directly comparable. Missing values render `Not reported`, never zero.
-- Action required is the primary follow-up column. Until the public API exposes a consolidated action read, it renders a neutral unavailable state and routes operators to resource panels without inferring an empty queue.
-- Live events is secondary. Because the browser does not open the admin-key WebSocket, Overview renders an explicit polling-only state and directs operators to durable instance event history.
+- Recessed bg, `--border-subtle`, 6px radius, `min-height 40px`, `8px 10px` padding, 13px text. Hover raises the border to `--border`; focus adds the parchment focus ring.
+- Invalid state (`aria-invalid="true"`) uses a `danger 56%` border; error text renders below in faint color.
+- Selects and filters render as ghost controls with a chevron; active filters become dismissible pills in the toolbar above tables.
 
-### Drawers & dialogs
+### Tables (workhorse — `.ui-v2-table`)
 
-- Detail views open as right-side drawers: 420–480px, Elevated bg, strong left border; header = title + mono ID + close.
-- Dialogs: 480px max, Elevated bg, overlay `rgba(0,0,0,0.7)`. Destructive dialogs require typing the resource name; the confirm button stays disabled until it matches.
+- Wrapper (`.ui-v2-table-wrap`): `overflow: auto`, `--border-subtle`, 6px radius — the locally bounded horizontal scroller. The page itself never gains horizontal overflow.
+- Table: `table-layout: fixed`, `min-width: 620px` on desktop so wide semantic tables scroll inside the wrapper.
+- Header + body cells share a 44px row height and `8px 12px` padding. Headers are 11px/400 uppercase Stone Gray with `1.4px` tracking and a subtle bottom border; body cells are 13px Warm Parchment. Row hover is a restrained `fg 4%` veil.
+- Cells: status = dot + label; IDs = mono 12px with copy affordance; timestamps = relative ("3m ago") with absolute ISO on `title`; numeric and time values use tabular numerals and align right where comparison benefits.
+- At ≤640px the header row is hidden and each cell becomes a `label / value` grid (a 104px `data-label` column in 10px uppercase muted + the value) — continuous adaptive rows, never cards.
+- Cursor pagination uses a "Load more" ghost button plus shown-count and freshness in faint text; never page numbers.
+
+### Metric grid (`.ui-v2-metric-grid` — Overview, Groups, workbenches)
+
+- A single bordered contiguous grid, not a set of floating cards: hairline `--border-subtle` cell separators, `min-height 96px` cells, `12px` padding.
+- Each cell is a 10px uppercase muted label (`1.2px` tracking) above a **24px mono** value. Cells share equal visual weight so values stay directly comparable.
+- The grid wraps down to 2 then 1 column at tablet/phone widths without changing metric hierarchy. Missing values render `Not reported`, never zero.
+
+### Status (`.ui-v2-status`)
+
+- Inline `8px dot + 12px label`, gap `8px`, label in secondary text. The dot carries the tone color; the label always carries the meaning. This is the product's core visual language — apply it before styling anything else.
+
+### Tabs (`.ui-v2-tabs`)
+
+- Underline tabs: `min-height 40px`, 12px labels, a 2px transparent bottom border that becomes `--fg` when `aria-selected`. Optional trailing count badge is a mono 10px pill. Used for the Events stream ⇄ audit mode switch.
+
+### Inspectors (detail views — `.ui-v2-inspector`)
+
+- Detail views open as a right-anchored inspector inside a fixed overlay layer (`.ui-v2-inspector-layer`) with a warm scrim (`color-mix(in oklab, var(--bg) 74%, transparent)`).
+- Inspector: `width: min(440px, 100%)`, full viewport height, Panel bg, `--border` left edge, `--elev-raised`. Header is a `min-height 104px` cluster (title `h2` 16px/500 + subtitle + close) on Canvas bg; body scrolls.
+- At ≤640px the layer anchors to the bottom and the inspector becomes a full-width bottom sheet with rounded top corners. Closed via ✕ or Esc.
+
+### Dialogs (`.ui-v2-dialog`)
+
+- `width: min(520px, 100%)`, `--border-strong`, 12px radius, Panel bg, `--elev-raised`, centered in a scrimmed layer (same `bg 74%` overlay). At ≤640px it becomes a bottom sheet.
+- Destructive dialogs require typing the resource name; the confirm button stays disabled until it matches, and only then may use a solid red confirm.
 
 ### Toasts
 
 - Bottom-right, Elevated bg, status-colored 3px left edge, title 13px/500 + detail 12px, and **always** the mono `requestId` when the toast reports an API error.
 - Toasts are reserved for transient command feedback or user-triggered errors whose originating surface has closed. Background reads never create toasts.
 - Accepted commands use pending semantics and the word `accepted`; they never claim completion. Accepted toasts dismiss after six seconds, while error toasts remain until dismissed or replaced by `dedupeKey`.
-- Persistent transport, session, permission, and storage conditions use the same feedback anatomy as an in-flow notice or workspace banner. They remain visible until their condition resolves.
+- Persistent transport, session, permission, and storage conditions use the same feedback anatomy as an in-flow notice or workspace banner and remain visible until resolved.
 - The complete lifecycle, placement, deduplication, and accessibility policy lives in `docs/FEEDBACK.md`.
 
-### Connect entry surface
+### Connect entry surface (`ConnectPageV2`)
 
-- Connect is the only full-screen surface without the application sidebar.
-  It uses a compact brand masthead, a platform-access explanation, and one
-  bounded connection form. The three connection checks live inside the form
-  so operational context stays attached to the action it describes.
-- The form owns only an HTTP(S) API origin and a masked API key. Credentials
-  remain in memory only and are cleared on reload or sign-out. The connect
-  action remains disabled until both values are valid and uses an explicit
-  `Connecting…` busy state after submission.
-- Connection status follows the public OmniWA GO contract: validate origin →
-  verify the key with `GET /instance/all` → on HTTP 401/403 detect scoped access
-  with `GET /instance/status`. The probe times out after 15 seconds. Errors
-  render category, message, and `requestId` when present. The key is never
-  rendered after a session is created.
-- While connecting, the check strip distinguishes completed and current steps
-  without changing its compact geometry. Credential failures use a human title
-  plus an actionable detail while retaining the normalized category and request
-  ID. Disabled primary actions remain visibly quieter than enabled actions.
-- At tablet widths the explanation precedes the form in one flow. At phone
-  widths the form comes first, the explanatory content follows, and the compact
-  connection-check strip is hidden. Every primary input/action remains at
-  least 44px tall. The key reveal control retains the same compact pill shape
-  on desktop, tablet, and phone layouts.
+- Connect is the only full-screen surface without the application shell. It uses a compact 64px brand masthead, a platform-access explanation, and one bounded connection form. The connection checks live inside the form so operational context stays attached to the action it describes. This is the one surface that centers content (`--container-max`) and permits the large headline exception in §3.
+- The form owns only an HTTP(S) API origin and a masked API key. Credentials remain in memory only and are cleared on reload or sign-out. The connect action stays disabled until both values are valid and uses an explicit `Connecting…` busy state after submission.
+- Connection status follows the public OmniWA GO contract: validate origin → verify the key with `GET /instance/all` → on HTTP 401/403 detect scoped access with `GET /instance/status`. The probe times out after 15 seconds. Errors render category, message, and `requestId` when present. The key is never rendered after a session is created.
+- At tablet widths the explanation precedes the form in one flow; at phone widths the form comes first and the compact check strip is hidden. Every primary input/action stays ≥44px tall.
 
-### QR pairing panel
+## 6. Shell & Navigation
 
-- QR renders on a white 12px-radius well (QR needs light background) inside a Recessed container, 240×240px, with expiry countdown (mono, amber when <10s) and a "Refresh QR" ghost button. Pairing state machine renders as dot+label steps: `waiting → scanned → paired`.
+The shell (`ShellV2`) is a two-column grid: a **224px** Panel-Canvas rail with a
+subtle right border, plus a fluid, independently scrolling content area. Only
+the rail's nav scrolls internally; the main area owns page scroll.
 
-### Instances lifecycle surface
+### Rail anatomy (top → bottom)
 
-- The lifecycle table is always the primary surface. It combines search, active filters, freshness, dense status scanning, right-aligned message counts, and cursor pagination without switching to device cards.
-- Opening an instance marks the row with both a restrained edge and a text label, then presents a 440px right slide-over without a backdrop or reserved table column. Below 900px, the slide-over becomes a full-width in-flow panel.
-- Drawer hierarchy is fixed: identity + status → compact facts → QR pairing → lifecycle controls → sessions → provider capabilities.
-- Recovery actions are separated from destructive actions. Disconnect and Destroy only launch the typed-confirmation pattern; confirmation is never rendered inline in the drawer.
-- QR remains on a light well with a visible expiry and numbered `waiting for scan → scanned → paired` progression. The UI must not imply that pairing completed before the lifecycle state confirms it.
+1. **Brand block** (`.ui-v2-shell__brand`, `min-height 72px`): the OmniWA logomark beside the app name (`OmniWA Console`, 13px/500) and the connected base URL (mono 10px, muted, truncated with a `title`).
+2. **Context block** (`.ui-v2-shell__context`): the environment chip (Production / Staging / Self-hosted, colored border only), the key scope label (Admin / Instance / Unknown scope), a capability-discovery `<Status>` line, and the `GO {version}` mono line when known.
+3. **Nav** (`.ui-v2-shell__nav`): scope-aware labeled sections (see below). Items are icon + label rows, `min-height 40px`, `10px` gap, 6px radius, secondary text; hover lifts to `fg 3%`; the active item takes Panel bg with a `--border-subtle` edge and primary text.
+4. **Session footer** (`.ui-v2-shell__session`): a `Connected` status, an `In-memory credential` mono note, and the Sign-out action.
 
-### Queue and Jobs operational workbench
+### Scope-aware navigation
 
-- Queue posture uses four directly comparable metric cards for depth, in-flight work, retries, and dead-lettered jobs. The grid wraps from four to two to one column without changing metric hierarchy.
-- The jobs table is the primary surface. Search, active filters, result count, freshness, cursor state, and pagination remain attached to the table so operators can scan and refine one continuous work queue.
-- Table semantics are explicit: include a caption and scoped column headers, keep attempt counts right-aligned with tabular numerals, and show selection with both a leading edge and a restrained surface change.
-- Opening a job presents a 400–440px right slide-over without a backdrop or reserved table column. Below 900px, it becomes a full-width in-flow panel while table overflow remains locally bounded.
-- Drawer hierarchy is fixed: job type + ID + terminal status → compact facts → safe payload representation → reverse-chronological attempts → actions.
-- Dead-lettered work is emphasized through identity, status text, and selection structure rather than a saturated alert surface. Redrive remains separate from destructive discard, and discard only opens a dedicated confirmation flow; confirmation is never rendered inline.
+Navigation is derived from the session key kind (`navigationForKeyKind`), not a
+fixed list. There is **no global Settings item and no persistent Queue/Webhooks
+entry** in the v2 shell.
 
-### Webhooks delivery operations surface
+- **Admin scope** → section **Platform**: Overview · Recovery *(only when the server advertises the `projection_failure_operations` capability)* · Instances.
+- **Instance (API) scope** → **Runtime**: Overview · **Messaging**: Conversations, Groups, Campaigns · **Observability**: Events.
+- **Unknown scope** → **Runtime**: Overview only.
 
-- Endpoint posture uses four comparable metrics for registered, active, suspended, and failed-delivery counts. The grid wraps from four to two to one column while preserving direct comparison.
-- The endpoint table is the primary surface. Search, status filters, result count, freshness, and cursor metadata stay attached to it; selected rows expose endpoint health and recovery without replacing the operational list.
-- Endpoint rows include semantic captions and scoped headers, bounded horizontal overflow, visible keyboard focus, restrained selection, and right-aligned tabular success rates.
-- Selecting a webhook opens a 400–440px right slide-over without a backdrop or reserved table column. Below 900px, it becomes a full-width in-flow panel.
-- Drawer hierarchy is fixed: webhook identity + ID + status → endpoint health → subscribed events → lifecycle actions → recent deliveries → bulk recovery.
-- Suspended endpoints remain structurally prominent without saturated alert surfaces. Single-delivery and bulk redrive actions are recovery controls scoped to the selected webhook; retirement stays separate and only opens a dedicated typed-confirmation dialog.
+### Page header
 
-### Events observability workbench
+Each content page opens with a shared header (`.ui-v2-page-header`): an optional
+10px uppercase eyebrow, the 22px/400 title, and optional supporting copy on the
+left; connection state and at most one primary action on the right. Refresh and
+pause are restrained secondary controls, not header actions. At ≤640px the
+header stacks to a single column, context before actions, with 44px targets.
+Workspace-style pages apply the same hierarchy to their internal thread header
+instead of adding a global header.
 
-- Event stream and Audit records are sibling modes of one table-first workbench. The mode switch uses tab semantics and keeps the active dataset, columns, and empty state explicit.
-- A compact observability strip communicates stream state, newest-first ordering, the bounded 200-row presentation buffer, and freshness without competing with the page header.
-- Search, active filters, result count, freshness, and cursor metadata remain attached to the event table. Event and audit tables use captions, scoped headers, visible keyboard focus, and locally bounded horizontal overflow.
-- Selecting an event opens a 400–420px read-only right inspector without a backdrop or reserved table column. Below 900px, it becomes a full-width in-flow panel.
-- Inspector hierarchy is fixed: event identity + occurrence → normalized facts → correlation identifiers → safe normalized payload → stream provenance. Event facts never expose recovery or destructive actions.
-- Live-tail language must remain precise: new events prepend into a bounded presentation buffer, Pause pauses presentation only, and Load older pages backward through `listEvents` cursors. Streamed facts must not imply direct cache mutation.
-- Audit mode reuses the workbench with actor, action, outcome, and request columns from `listAuditRecords`; when no fixtures are available, show an honest empty state rather than fabricated records.
+### Responsive behavior
 
-### Live indicator
+Primary target is desktop ≥1280px; the shell stays operable narrower without
+changing information hierarchy.
 
-- Header-right: 8px dot + 12px label. `live` emerald pulsing dot, `reconnecting` amber, `polling` uses the §2 info/muted hue, `offline` red. Clicking opens connection detail popover.
+| Range | Behavior |
+| --- | --- |
+| ≥901px | Full 224px rail; inspectors overlay content with a scrim |
+| 641–900px | Rail collapses to a 64px icon-only column; every link keeps `title` + `aria-label`; scope status and sign-out stay reachable |
+| 641–1024px | Metric grid wraps; tables scroll locally inside their wrapper |
+| ≤640px | Brand + session move to a sticky top bar; nav becomes a fixed **bottom bar** with icon+label items; primary tables become continuous adaptive rows; inspectors/dialogs become bottom sheets |
 
-### Workspace (primary surface)
+Navigation touch targets are at least 44px; mobile controls use 44px where density permits.
 
-The messaging workspace is the console's center of gravity; everything in
-this subsection binds to it.
+## 7. Product Surfaces (v2)
 
-- At 900px and below, replace the simultaneous three-pane layout with a deliberate single-pane switcher. The selected thread is the default pane; Conversations and Context remain one action away and all mobile controls meet 44px targets.
-- **Three-pane layout**: conversation list (300px, Panel bg) · conversation
-  timeline (fluid, Canvas bg) · context panel (320px, Panel bg, collapsible).
-  The workspace fills the viewport; only the timeline scrolls vertically.
-- **Conversation list item**: 56px, two lines — name (13px/500) + last
-  activity (12px faint) — with unread count badge (mono, Frosted Veil bg) and
-  label chips. Selected item = slightly brighter Frosted Veil. List
-  header holds the instance selector (dot + name + chevron) and search.
-- **Message bubbles**: max-width 68%, radius 10px, 13px text, timestamp +
-  status footer (11px). Inbound = Elevated bg, left-aligned. Outbound =
-  Frosted Veil bg with Mist Border, right-aligned. Failed outbound adds a
-  3px muted-red left edge. Media bubbles show a purposeful Recessed
-  placeholder with media identity when a preview is unavailable. Clicking a
-  bubble opens its delivery timeline in the context panel; selected-message
-  actions live only in that panel and are never duplicated inside the bubble.
-- **Bubble status vocabulary** (footer, dot + label): `accepted` /
-  `queued` amber · `delivered` emerald · `failed` red · `canceled` gray.
-  Never a bare double-check mark — words, not glyphs.
-- **System lines**: centered 12px muted text for non-message facts
-  ("instance disconnected · 12:40"), never bubbles.
-- **Day separators**: centered 11px uppercase muted label on a subtle rule.
-- **Composer**: Recessed bg bar with textarea (auto-grow to 5 lines),
-  attach ghost icon-button, Send primary. Send remains disabled until the
-  trimmed message contains content. When the instance is not
-  connected the composer is replaced by an amber warning bar with a
-  "Reconnect" ghost action. Microcopy under composer: sends are
-  *accepted*, delivery shows on the bubble.
-- **Context panel** (right): contact card (verified name, mono id,
-  read-only label chips); when a bubble is selected it shows that
-  message's delivery timeline with `requestId` and retry affordance.
-  The workspace serves direct chats only — groups are a management
-  table, not a conversation surface.
+These are the surfaces the v2 shell routes to today. Each follows the
+table-first / inspector-detail pattern above unless noted.
 
-### Groups operational workbench
+### Overview (`platform-v2/OverviewPageV2`)
 
-- Four directly comparable metric cards summarize synced groups, Named List coverage, administrator access, and stale activity. They follow the same hierarchy and responsive wrapping as Queue & Jobs metrics.
-- The group table is the primary surface. Search, active filters, result count, freshness, bulk selection, and cursor pagination remain attached to one continuous workbench.
-- Every row exposes selection, group identity, member count, operator role, local state, Named List membership, and last activity. Status always uses a semantic dot plus a text label.
-- The historical **Add to Named List** bulk action is not part of the current
-  implementation contract. Do not create local Named Lists in browser state.
-- Selecting a group opens the shared 440px on-demand overlay drawer used by
-  Webhooks. The table never reflows; closing the drawer restores focus to
-  the selected row. Below 900px the drawer becomes a full-width in-flow
-  panel.
-- Drawer hierarchy is fixed: identity and local state → compact facts → invite link → local-state controls → member management → one-off text command. Member and send commands render acceptance, never synchronous completion.
-- Named Lists management reuses the right-panel mode and supports the `?list=nl_*` deep link. It remains explicitly local operator organization, separate from provider-side membership.
+- The landing page for every scope. Scan order is fixed: health posture → six comparable persisted metrics → action-required state → bounded live-event state.
+- Health uses a quiet bordered strip of dot + label states; platform and aggregate projection health stay separate from per-instance reads.
+- The six comparable persisted metrics render in the bordered metric grid (§5) with URL-backed windows; missing values render `Not reported`, never zero. Action-required routes operators to resource panels and renders a neutral unavailable state rather than inferring an empty queue when no consolidated read exists.
+- Live events render an explicit polling-only state (the browser does not open the admin-key WebSocket) and direct operators to durable instance event history.
 
-### Management page template (Groups; reuse for Instances, Webhooks, Queue)
+### Recovery (`platform-v2/RecoveryPageV2`, admin + capability-gated)
 
-- **Layout**: the table is full-width by default — nothing reserves
-  horizontal space. Detail views and panel modes open **on demand as a
-  400px slide-over** fixed to the right viewport edge (Panel bg, left
-  border, own scroll, `-16px 0 40px` shadow, **no backdrop** so the table
-  underneath stays visible and interactive); closed via ✕ or Esc. Never
-  render detail views as floating cards beside the table, and never dock
-  a permanently-open panel on management pages (the docked context panel
-  is a workspace-page pattern only).
-- **Metric cards** above the filter row: use the same `.metrics > .card`
-  component as Queue & Jobs (uppercase label, 26px tabular value, faint
-  context line). Management pages must not introduce a second summary style.
-- **Page header**: title + instance picker together on the left (context
-  before actions); header-right holds only the live indicator and at most
-  one panel-level action. Refresh actions live in the **table footer**
-  next to the sync-freshness text, not in the header.
-- **Filter ⇄ selection bar**: one row below the header. With no selection
-  it holds search + filter chips; with ≥1 row checked it swaps in place to
-  "N selected · [primary bulk action] · Clear selection" — no extra strip,
-  no layout jump.
-- **Checkbox column**: 36px, native checkboxes with `accent-color`
-  emerald; header checkbox = select all (indeterminate when partial).
-- **Row state semantics** (two independent states, may combine):
-  `checked` → Frosted Veil background only; `open` (detail panel showing
-  this row) → stronger Mist Border inset edge only. Never one style for both.
-- **Column discipline**: name and tag-like columns flex; numeric and
-  time columns right-align (`tnum`); everything else sizes to content.
-- Row click (outside the checkbox) opens the detail panel; the checkbox
-  never does.
+- Appears only when the server advertises `projection_failure_operations`. A table-first surface for projection-failure operations; recovery actions stay separate from destructive actions and destructive actions use the typed-confirmation dialog.
 
-### Dropdowns and quick-action menus
+### Instances (`instances-v2`)
 
-- A dropdown trigger is a 36px ghost control with a subtle border, 6px
-  radius, compact label/value stack, and trailing chevron. The open trigger
-  uses the strong border and Elevated background; it never resembles a text
-  input.
-- The anchored menu opens 6px below the trigger on Elevated background with
-  default border, 8px radius, floating shadow, and 6px inner padding. It is at
-  least as wide as its trigger and no narrower than 240px.
-- Single-select options are 40px minimum rows with a reserved 20px selection
-  column. The selected option uses Frosted Veil plus a visible checkmark;
-  hover never changes selection. Supporting descriptions and right-aligned
-  counts are optional and remain secondary.
-- Menus may include an uppercase context header, search, section labels, a
-  subtle divider, or an inline create row. Quick actions reuse the same menu
-  shell but use `role="menu"` and action glyphs instead of selected state.
-- Keyboard contract: Enter/Space opens and selects, Up/Down moves active
-  option, Home/End jumps, Escape closes and restores trigger focus. Clicking
-  outside closes. Active filters still become dismissible pills in the table
-  toolbar.
+- The lifecycle table is the primary surface: search, active filters, freshness, dense status scanning, right-aligned message counts, and cursor pagination.
+- Opening an instance marks the row (restrained edge + text label) and presents the right-anchored inspector. Drawer hierarchy is fixed: identity + status → compact facts → QR pairing → lifecycle controls → sessions → provider capabilities.
+- **QR pairing**: rendered on a white 12px-radius well (QR needs a light background) inside a Recessed container, with an expiry countdown (mono, muted amber under 10s) and a "Refresh QR" ghost button. Pairing renders as numbered dot + label steps `waiting → scanned → paired`; the UI never implies pairing completed before the lifecycle state confirms it.
+- Recovery actions are separated from destructive actions; Disconnect and Destroy only launch the typed-confirmation pattern, never inline confirmation.
 
-### Named Lists panel mode (historical exploration)
+### Conversations (`conversations-v2` — the messaging workspace)
 
-- This pattern is retained only as visual research. OmniWA GO exposes no Named
-  Lists API, so production Groups must not enable it. The original concept: a
-  "Named Lists" header button (and any "In lists" chip) switches the
-  docked detail panel into list-management mode — never a modal, so the
-  table stays visible and selectable. Deep link `?list=nl_*`.
-- Panel anatomy top-to-bottom: mode header with close; list picker
-  (Frosted Veil active item; each row shows name, mono id, group count,
-  and "used by N campaigns") with an inline create input; selected-list
-  section with Rename/Delete (guarded), a **selection strip**
-  (Frosted Veil band: "N groups selected on the table → Add to this
-  list") whenever table rows are checked, a member search input, and the
-  member list with per-row Remove.
+The workspace is the console's center of gravity and is full-bleed (no 24px page padding).
 
-### Campaign components (backend available; console pending — see docs/CAMPAIGNS.md)
+- **Three-pane layout on desktop**: conversation list (Panel bg) · conversation timeline (Canvas bg) · context panel (Panel bg, collapsible). The workspace fills the viewport; only the timeline scrolls vertically.
+- At ≤900px it becomes a single-pane switcher: the selected thread is the default pane, with a back control to the directory; all mobile controls meet 44px.
+- **Message bubbles** (`.ui-v2-message-list`): `width: min(76%, 640px)`, 12px radius, Recessed bg for inbound (left), an Earth-Gray-tinted Recessed bg for outbound (right). Selected bubble takes a `--border-strong` inset edge. Footer (11–12px, muted) shows timestamp + delivery status. Clicking a bubble opens its delivery timeline in the context panel; message actions live only there, never duplicated in the bubble.
+- **Bubble status vocabulary** (dot + label): `accepted` / `queued` pending · `delivered` healthy · `failed` failed · `canceled` inactive. Never a bare double-check — words, not glyphs.
+- **Composer**: Recessed bar with an auto-growing textarea, an attach ghost icon-button, and a Send primary that stays disabled until the trimmed message has content. When the instance is not connected the composer is replaced by a warning bar with a "Reconnect" action. Microcopy: sends are *accepted*; delivery shows on the bubble.
+- The workspace serves direct chats only — groups are a management table, not a conversation surface.
 
-- **Progress bar**: 6px track (Recessed), segments colored by outcome —
-  delivered emerald, accepted and queued as distinct amber steps, failed
-  red, and canceled gray — with aligned mono counts under it. Never a
-  single undifferentiated bar and never merge accepted into queued or
-  delivered: every lifecycle outcome stays explicit.
-- **Campaign status vocabulary**: `draft` gray · `scheduled` sky ·
-  `running` amber (pulsing dot) · `paused` orange · `completed` emerald ·
-  `aborted` red.
-- **Wizard steps**: numbered dot + label row (Audience → Message → Review),
-  current step uses an Earth Gray pill, completed steps use muted healthy status, future muted. One primary
-  action per step, always bottom-right; Back is ghost.
-- **Campaign workbench**: search, active filters, result count, freshness,
-  cursor pagination, and segmented lifecycle accounting stay attached to
-  the six-column table. Campaign detail follows the Webhooks master-detail
-  pattern: an on-demand 440px overlay drawer that closes without reflowing
-  the table, and becomes an in-flow panel below 900px.
-- **Audience input:** the implemented campaign flow must follow the public API's
-  per-recipient JID and opt-in evidence contract. The historical Named Lists
-  interaction is not a substitute for backend consent enforcement.
+### Groups (`groups-v2`)
 
-### Settings command surface
+- A bordered metric grid summarizing the group population, then a table-first workbench: search, active filters, result count, freshness, bulk selection, and cursor pagination on one continuous list.
+- Every row exposes selection, group identity, member count, operator role, local state, and last activity, with status as dot + label.
+- Selecting a group opens the shared right inspector; the table never reflows and closing restores focus to the selected row. Drawer hierarchy: identity + local state → compact facts → invite link → local-state controls → member management → one-off text command. Member and send commands render acceptance, never synchronous completion.
 
-- Runtime configuration begins with a compact active-revision strip, then
-  separates read-only active values from the validated draft command flow.
-  Activation is the single primary action and must describe an atomic
-  revision replacement, never an in-place field save.
-- Draft payload, pending field changes, validation state, and the validation
-  `requestId` remain visible together so operators can review evidence before
-  activation.
-- Console session facts are local browser state and stay visually separate
-  from platform settings. Only the masked key fingerprint may be rendered;
-  disconnect explains that it clears browser storage, not platform work.
-- The admin-only API key inventory is a full-width table. Provision and
-  rotation use a show-once secret dialog; revocation uses typed confirmation
-  and never reveals the current secret.
+### Campaigns (`campaigns-v2`, route `/messages`)
 
-## 5. Layout Principles
+- A table-first campaign workbench with search, active filters, result count, freshness, cursor pagination, and segmented lifecycle accounting; campaign detail opens in the shared inspector (`CampaignInspectorV2`).
+- **Create flow** (`CreateCampaignV2`) enforces the public API's per-recipient JID and opt-in evidence contract (`consent.ts`); audience input is bound to backend consent enforcement, not to any local list concept.
+- **Progress**: segments colored by outcome — delivered healthy, accepted and queued as distinct pending steps, failed, canceled inactive — with aligned mono counts. Never a single undifferentiated bar and never merge accepted into queued or delivered.
+- **Campaign status vocabulary**: `draft` inactive · `scheduled` info · `running` pending (pulsing) · `paused` degraded · `completed` healthy · `aborted` failed.
 
-- **Shell**: sticky 224px warm near-black sidebar (subtle right border) + fluid content area, 24px content padding (workspace pages: 0 — the three panes are full-bleed).
-- **Sidebar anatomy**: 64px-tall logo block (32px mark on Earth Gray — beside the app name 14px/500 and base URL in mono 10px); nav items (13px/400, 6px radius, 10px gap) each carry a 17px stroke icon + label + optional mono count badge; active = Warm Parchment text on Frosted Veil with a subtle Mist edge. Settings stays pinned above the session footer as a 52px contained utility row with a recessed 28px icon well, "Workspace preferences" context, and a quiet disclosure mark. On the compact rail and mobile bar it returns to the standard navigation-item treatment.
-- **Nav hierarchy**: **Overview** sits alone at the top (the landing page,
-  spanning both concerns). Then two labeled sections — **Operations**:
-  Instances (the foundational resource first), Queue & Jobs, Webhooks,
-  Events (message-pipeline order); **Messaging**: Chats (direct
-  conversations only), Groups (management table + Named Lists modal),
-  Messages (campaigns). **Settings** is pinned at the sidebar bottom above
-  the key/disconnect footer, separated by a border. There is no separate
-  directory panel: contact/label lookup lives in the Chats search and
-  filters.
-- **Page header**: a 64px shared contract on desktop with a subtle bottom border. The left context cluster contains an optional 10px uppercase section label or breadcrumb, the 18px/400 title, and compact contextual metadata such as an instance selector or contract badge. The right action cluster contains connection state and at most one primary action; refresh and pause remain restrained secondary controls. At ≤640px the header becomes a single-column stack with context before actions and 44px action targets. Workspace pages apply the same hierarchy to their internal thread header instead of adding a global header.
-- **Grid**: 8px base unit. Vertical rhythm 16px between related blocks, 24px between sections.
-- **Density**: tables full-width; Overview metric cards use a dense six/three/two/one responsive grid with a 160px minimum; never center-constrain content below 1440px.
-- **Instance-scoped pages** show a breadcrumb: `Instances / {name}` with mono ID, and a horizontal tab row (Chats · Contacts · Labels · Groups · Messages) under the header.
-- Empty states: centered in the table container, 14px secondary text + one ghost action; never illustrations.
+### Events (`events-v2`)
 
-## 6. Depth & Elevation
+- Event stream and Audit records are sibling modes of one table-first workbench, switched with the underline tabs (§5), keeping the active dataset, columns, and empty state explicit.
+- A compact observability strip communicates stream state, newest-first ordering, the bounded 200-row presentation buffer, and freshness without competing with the header.
+- Selecting an event opens a read-only right inspector; hierarchy is fixed: event identity + occurrence → normalized facts → correlation identifiers → safe normalized payload → stream provenance. Event facts never expose recovery or destructive actions.
+- Live-tail language stays precise: new events prepend into the bounded buffer, Pause pauses presentation only, and Load older pages backward through `listEvents` cursors. Audit mode reuses the workbench with actor / action / outcome / request columns and shows an honest empty state when no records exist.
 
-| Level | Treatment | Use |
-| --- | --- | --- |
-| 0 Canvas | `#161412`, no gradient | Page background |
-| 1 Panel | `#1f1d1b` + Frosted Veil | Tables, cards, sidebar |
-| 2 Elevated | `color-mix(in oklab, var(--surface), var(--fg) 4%)` + Mist Border | Hover rows, drawers, dropdowns |
-| 2b Recessed | `color-mix(in oklab, var(--bg), black 12%)` + subtle border | Inputs, code wells, QR container |
-| 3 Overlay | Elevated + `rgba(0,0,0,0.7)` backdrop | Dialogs, command palette |
-
-Base content uses luminance stepping and borders. Regular cards have no shadow;
-only floating elements may use `0 5px 15px rgba(0,0,0,0.2)`. There is no glow
-or backdrop blur.
-
-## 7. Do's and Don'ts
+## 8. Do's and Don'ts
 
 ### Do
 
-- Render every status as dot + label using the frozen vocabulary in §2.
-- Put every ID in mono with copy affordance; surface `requestId` on every error.
-- Use tabular numerals on all metrics and counts.
+- Render every status as dot + label using the frozen vocabulary in §2 (via the `<Status>` primitive).
+- Put every ID in mono with a copy affordance; surface `requestId` on every error.
+- Use tabular numerals on all metrics and counts; render metric values in mono.
 - Keep exactly one restrained Earth Gray primary action per view.
 - Show async-accepted states honestly: "Accepted", "Queued" — never "Sent" until the delivery history says so.
 - Reflect filters/cursors into the URL; every view is a shareable deep link.
+- Derive navigation from the session scope; never hardcode a nav list that ignores key kind.
 
 ### Don't
 
 - Don't use decorative gradients or glow.
 - Don't use cold blue-tinted dark backgrounds.
 - Don't signal with color alone, and don't invent status colors outside §2.
-- Don't use weight 700+, display sizes, or letter-spacing tricks.
-- Don't use shadows for elevation on dark surfaces (luminance steps instead).
-- Don't center-max-width the app like a document; this is a full-bleed tool.
-- Don't render WhatsApp-green (`#25D366`) UI chrome. Muted green is reserved for healthy/live/delivered status only.
-
-## 8. Responsive Behavior
-
-Primary target is desktop ≥1280px. The shell remains operable across narrower
-viewports without changing its information hierarchy:
-
-| Range | Behavior |
-| --- | --- |
-| ≥1280px | Full shell, drawers overlay content |
-| 641–900px | Sidebar collapses to a 64px icon rail; every link retains `title` and `aria-label`, and session status/disconnect remain available |
-| 641–1024px | Metric grid wraps; full tables use local horizontal scroll with sticky identity columns and a stationary footer |
-| ≤640px | Navigation becomes a fixed bottom bar; primary tables become continuous adaptive rows and filters move into a bottom sheet |
-
-Navigation touch targets are at least 44px; mobile controls use 44px where density permits.
+- Don't use weight 700+ or the unused display type scale; product type tops out at the 22px page title.
+- Don't use shadows for elevation on base surfaces (luminance steps instead); reserve `--elev-raised` for floating inspectors and dialogs.
+- Don't center-max-width product pages; they are full-bleed (Connect and the `/__ui-v2` gallery are the only centered surfaces).
+- Don't render WhatsApp-green (`#25D366`) UI chrome. Muted green (`--ok`) is reserved for healthy/live/delivered status only.
 
 ## 9. Agent Prompt Guide
 
@@ -488,21 +357,45 @@ Navigation touch targets are at least 44px; mobile controls use 44px where densi
 
 - Canvas `#161412` · Panel `#1f1d1b` · Elevated `color-mix(in oklab, var(--surface), var(--fg) 4%)` · Recessed `color-mix(in oklab, var(--bg), black 12%)`
 - Text `#faf9f6` / `#afaeac` / `#868584` / `#666469`
-- Controls `#353534`; no saturated brand accent
-- Status: muted semantic hues only; never reused as chrome
-- Border `rgba(226,226,226,0.35)` default, `0.12` subtle, `0.50` strong
-- Matter Regular 13px is the default; mono = Matter Mono / Geist Mono 12px; max weight 500
-- Radius: 6px inputs, 12px blocks, 9999px buttons and pills
+- Controls Earth Gray `#353534`; no saturated brand accent
+- Status: muted semantic tokens `--ok/--pending/--degraded/--failed/--info/--inactive`; never reused as chrome
+- Border `--border` `rgba(226,226,226,0.35)`; `--border-subtle` for dividers, `--border-strong` for focus/active edges
+- Matter Regular 14px root / 13px controls; mono = Geist Mono / Matter Mono 12px; metric values 24px mono; max weight 500
+- Radius: 6px inputs/nav/tables, 12px surfaces/dialogs/bubbles, 9999px buttons and pills
+- Detail = right inspector `min(440px)` with a warm scrim; dialog = `min(520px)` centered; both become bottom sheets ≤640px
 
 ### Example component prompts
 
-- "Build an instance table on a 4% white veil with a 35%-alpha Mist Border and 12px radius. Sticky 44px header row: 11px/400 uppercase Stone Gray with 2.4px tracking. Desktop rows are 42px with 13px Warm Parchment; mobile rows become continuous 64px-or-taller summaries. Status remains muted semantic dot + label."
-- "Metric block: Frosted Veil surface, Mist Border, 12px radius, 16px padding, no shadow. Label 11px/400 uppercase Stone Gray, value 26px/400 Warm Parchment with tabular numerals, context line 12px Purple-Tint Gray."
-- "QR pairing block: `color-mix(in oklab, var(--bg), black 12%)` recessed container, inside it a 240px white well holding the QR, expiry countdown in Matter Mono 12px turning muted amber under 10s, Earth Gray pill button below."
+- "Build an instance table inside a `.ui-v2-table-wrap` scroller: `table-layout: fixed`, `min-width 620px`, 44px rows with `8px 12px` padding. Sticky 11px/400 uppercase Stone Gray headers with `1.4px` tracking; 13px Warm Parchment cells; `fg 4%` hover; status as muted dot + label. Collapse to label/value rows at ≤640px."
+- "Metric grid cell: bordered contiguous grid on `--border-subtle`, `min-height 96px`, 12px padding. Label 10px/400 uppercase Stone Gray with `1.2px` tracking; value 24px/400 mono Warm Parchment with tabular numerals."
+- "QR pairing block: Recessed container holding a 240px white well for the QR, expiry countdown in mono 12px turning muted amber under 10s, Earth Gray pill button below; numbered `waiting → scanned → paired` steps."
 
 ### Iteration guide
 
-1. Start every screen from the shell (sidebar + content header) — panels never float alone.
-2. Reach for a table before a card grid; cards are Overview-only.
+1. Start every screen from the shell (scope-aware rail + page header) — panels never float alone.
+2. Reach for a table before a card grid; the bordered metric grid is the only card-like surface.
 3. Apply the status vocabulary before styling anything else — it is the product's core language.
 4. Check honesty last: accepted ≠ delivered, sample data labeled as sample, `requestId` visible on errors.
+
+## Appendix A — Legacy v1 surfaces (not in the v2 shell)
+
+The following surfaces exist in v1 feature code and/or the static prototypes in
+`design/prototypes/` but are **not routed by the v2 shell** and are not part of
+the current v2 contract. They are retained here as historical/reference designs.
+Do not treat them as built v2 surfaces; if any is promoted into v2, move its
+section into §7 and reconcile it with the shell and inspector patterns first.
+
+- **Queue & Jobs workbench** — four-metric posture (depth, in-flight, retries, dead-lettered) over a jobs table with redrive/discard recovery. No v2 route or nav entry.
+- **Webhooks delivery operations** — endpoint posture metrics + endpoint table with single/bulk redrive and typed-confirmation retirement. No v2 route or nav entry.
+- **Settings command surface** — active-revision strip, read-only active values vs. validated draft activation, and the console-session (in-memory credential) panel. In v2 the in-memory credential and disconnect live in the shell session footer instead; there is no Settings route.
+- **Admin API-key inventory** (`features/api-keys`) — full-width key table with show-once provision/rotation dialogs and typed-confirmation revocation. No v2 route.
+- **Named Lists panel mode** — local operator grouping over Groups via a `?list=nl_*` deep link. OmniWA GO exposes no Named Lists API; production Groups must not create local lists. Retained only as visual research.
+- **Instance-scoped tab template** — the historical breadcrumb + horizontal tab row (`Chats · Contacts · Labels · Groups · Messages`) under a page header. The v2 shell uses scope-aware global nav instead.
+
+## Appendix B — Token reference
+
+Canonical source: `src/styles/tokens.css`. Product code should reference tokens,
+never raw literals. Base tokens (`--bg`, `--success`, `--space-4`, …) feed the
+aliases (`--canvas`, `--ok`, …) that surfaces consume. The `--text-2xl …
+--text-4xl` display scale is inherited from Warp and intentionally unused by the
+console; do not introduce it into product surfaces.
