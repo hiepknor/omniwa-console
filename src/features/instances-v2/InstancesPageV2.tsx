@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { Button, Field, Inspector, PageGuard, PageHeader, Select, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, Field, Inspector, PageGuard, PageHeader, Select, StateNotice, Status, Surface, Table } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
@@ -60,7 +60,7 @@ export function InstancesPageV2() {
         {state.isError ? <FailureNotice error={state.error} stale={state.isStaleError} onRetry={() => list.refetch()} /> : null}
         {list.data && instances.length === 0 ? <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The authoritative metadata list contains no instances. This is not a representative credential-health workload." /> : null}
         {instances.length > 0 && filtered.length === 0 ? <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="No loaded instance matches the URL-backed filters." /> : null}
-        {filtered.length > 0 ? <div className="ui-v2-table-wrap" tabIndex={0} aria-label="Instance metadata table"><table className="ui-v2-table ui-v2-instances-table"><caption className="ui-v2-visually-hidden">Instance metadata</caption><thead><tr><th>Name</th><th>Instance ID</th><th>Status</th><th>Credential</th><th>Created</th></tr></thead><tbody>{filtered.map((instance) => <tr key={instance.id} data-selected={instance.id === instanceId || undefined}><td data-label="Name"><button className="ui-v2-row-link" type="button" onClick={() => openInstance(instance.id)}>{instance.displayName ?? 'Unnamed instance'}</button></td><td data-label="Instance ID" className="ui-v2-mono">{instance.id}</td><td data-label="Status"><Status tone={instance.connected ? 'healthy' : 'failed'}>{humanizeToken(instance.status)}</Status></td><td data-label="Credential" className="ui-v2-mono">{instance.credentialVersion ? `v${instance.credentialVersion}` : 'Not reported'}</td><td data-label="Created" title={instance.createdAt}>{relativeTime(instance.createdAt) || 'Not reported'}</td></tr>)}</tbody></table></div> : null}
+        {filtered.length > 0 ? <Table ariaLabel="Instance metadata table" caption="Instance metadata" className="ui-v2-instances-table" rows={filtered} rowKey={(instance) => instance.id} selectedKey={instanceId} columns={[{ header: 'Name', cell: (instance) => <button className="ui-v2-row-link" type="button" onClick={() => openInstance(instance.id)}>{instance.displayName ?? 'Unnamed instance'}</button> }, { header: 'Instance ID', className: 'ui-v2-mono', cell: (instance) => instance.id }, { header: 'Status', cell: (instance) => <Status tone={instance.connected ? 'healthy' : 'failed'}>{humanizeToken(instance.status)}</Status> }, { header: 'Credential', className: 'ui-v2-mono', cell: (instance) => instance.credentialVersion ? `v${instance.credentialVersion}` : 'Not reported' }, { header: 'Created', title: (instance) => instance.createdAt, cell: (instance) => relativeTime(instance.createdAt) || 'Not reported' }]} /> : null}
         <p className="ui-v2-generated-note">{filtered.length} of {instances.length} loaded instances. Polling every 15 seconds while this route is open.</p>
       </Surface>
     </div>
