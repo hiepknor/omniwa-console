@@ -43,6 +43,8 @@ then open the document that covers your task below.
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Immutable image build, generation isolation, and promotion gates |
 | [UI_V2_ROLLOUT_EVIDENCE.md](UI_V2_ROLLOUT_EVIDENCE.md) | Generation-isolated v2 artifact promotion record |
 | [CREDENTIAL_ROLLOUT_EVIDENCE.md](CREDENTIAL_ROLLOUT_EVIDENCE.md) | C2–C4 credential migration observation and approvals |
+| [LEGACY_RETIREMENT_PLAN.md](LEGACY_RETIREMENT_PLAN.md) | Governance-gated plan to converge onto v2 and delete legacy |
+| [CUTOVER_READINESS.md](CUTOVER_READINESS.md) | Promotion-gate status overlay for legacy retirement |
 
 ## Documentation conventions
 
