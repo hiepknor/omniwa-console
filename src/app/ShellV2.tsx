@@ -1,7 +1,7 @@
 import { Suspense, type ReactNode } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { Button, Status, UiV2Boundary } from '@/components/v2';
+import { Button, Logo, Status, UiV2Boundary } from '@/components/v2';
 import { environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { ConsoleSession, KeyKind } from '@/lib/session';
@@ -101,7 +101,7 @@ export function ShellV2({ session, onDisconnect }: { session: ConsoleSession; on
         <a className="ui-v2-skip-link" href="#ui-v2-main">Skip to main content</a>
         <aside className="ui-v2-shell__rail" aria-label="OmniWA primary navigation">
           <div className="ui-v2-shell__brand">
-            <span className="ui-v2-shell__mark" aria-hidden="true">OW</span>
+            <Logo className="ui-v2-shell__mark" />
             <span>
               <strong>OmniWA Console</strong>
               <span title={session.baseUrl}>{session.baseUrl}</span>

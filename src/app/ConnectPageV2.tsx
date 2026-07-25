@@ -1,4 +1,4 @@
-import { Button, Field, StateNotice, Status, Surface, UiV2Boundary } from '@/components/v2';
+import { Button, Field, Logo, StateNotice, Status, Surface, UiV2Boundary } from '@/components/v2';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { UiState } from '@/components/v2/state-model';
 import type { ConsoleSession } from '@/lib/session';
@@ -48,7 +48,7 @@ export function ConnectPageV2({
     <UiV2Boundary className="ui-v2-connect">
       <header className="ui-v2-connect__masthead">
         <a className="ui-v2-brand" href="/connect" aria-label="OmniWA Console connect">
-          <span aria-hidden="true">OW</span>
+          <Logo />
           <strong>OmniWA Console</strong>
         </a>
         <Status tone="neutral">No active session</Status>
