@@ -1,8 +1,8 @@
 # Campaign Integration Contract
 
-Status: backend and console integration available.
+**Status:** backend and Console integration available.
 
-Campaign execution belongs entirely to OmniWA GO. The SPA creates, schedules,
+Campaign execution belongs entirely to OmniWA GO. The Console creates, schedules,
 controls, and observes campaigns through the public API. It never loops over
 recipients, implements pacing, retries sends, or persists campaign state in the
 browser.
@@ -53,7 +53,7 @@ Each recipient requires explicit opt-in evidence:
 ```
 
 The backend hashes the evidence reference before persistence and never echoes
-it. The console does not cache or display the original reference after submit.
+it. The Console does not cache or display the original reference after submit.
 
 ## State machines
 
@@ -88,7 +88,7 @@ backoff, deterministic message IDs, pause/resume/abort, audit history, and
 opt-in enforcement. When paused, a recipient already leased by a worker may
 finish; only new claims stop.
 
-Therefore the console:
+Therefore the Console:
 
 - never performs optimistic lifecycle changes;
 - disables duplicate command submission;

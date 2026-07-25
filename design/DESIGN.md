@@ -4,10 +4,16 @@
 > WhatsApp platform operations console using the Open Design Warp system.
 > Source: `od://design-systems/warp/DESIGN.md`.
 
-This is the brand contract for `omniwa-console`. Prototypes in
-`design/prototypes/` and all implemented panels bind to it. Where this file
-is silent, follow the dense-operational defaults of the `frontend-design`
-craft rules; where they conflict, this file wins.
+This is the brand contract for `omniwa-console`. Production tokens and shared
+components are the implementation source of truth. During the v2 migration,
+legacy prototypes in `design/prototypes/` may illustrate existing journeys but
+must import canonical tokens and may not own or duplicate runtime component
+geometry. Where this file is silent, follow the dense-operational defaults of
+the `frontend-design` craft rules; where they conflict, this file wins.
+
+The production component gallery at `/__ui-v2` is available only in local
+development and renders the same primitives used by v2 routes. New foundation
+states are reviewed there instead of being built as parallel static HTML/CSS.
 
 ## 1. Visual Theme & Atmosphere
 
@@ -163,11 +169,11 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
 
 ### Overview command surface
 
-- Scan order is fixed: compact system-health posture → five comparable metrics → action-required work queue → bounded live-event stream.
-- Health uses a quiet bordered strip with dot + label states; degraded services remain visible without becoming a saturated alert banner.
-- The five metric cards share equal visual weight and dense spacing. They may wrap from five to three, two, then one column, but values and labels remain directly comparable.
-- Action required is the primary content column. Its semantic table keeps status, resource ID/name, age, and a contextual row action aligned; horizontal overflow stays inside the table container.
-- Live events is secondary and uses a bounded, keyboard-reachable stream with monospaced event/resource fields and right-aligned age.
+- Scan order is fixed: compact split-health posture → six comparable persisted metrics → action-required state → bounded live-event state.
+- Health uses a quiet bordered strip with dot + label states. Platform API and aggregate projection health stay separate; per-instance connection, projection, and throttling reads are visibly grouped under an accessible instance identifier.
+- The six metric cards share equal visual weight and dense spacing. They wrap from six to three, two, then one column, but values and labels remain directly comparable. Missing values render `Not reported`, never zero.
+- Action required is the primary follow-up column. Until the public API exposes a consolidated action read, it renders a neutral unavailable state and routes operators to resource panels without inferring an empty queue.
+- Live events is secondary. Because the browser does not open the admin-key WebSocket, Overview renders an explicit polling-only state and directs operators to durable instance event history.
 
 ### Drawers & dialogs
 
@@ -188,18 +194,24 @@ Status renders as an 8px dot + 12px label. Color-only signaling is forbidden
   It uses a compact brand masthead, a platform-access explanation, and one
   bounded connection form. The three connection checks live inside the form
   so operational context stays attached to the action it describes.
-- The form owns only API origin, masked API key, and the explicit
-  remember-device choice. Remembering reveals an inline trusted-device
-  warning before submission; session-only storage remains the default. The
-  connect action remains disabled until both credentials are valid and uses
-  an explicit `Connecting…` busy state after submission.
-- Connection status follows the contract: validate origin → probe
-  `getHealth` → detect admin scope with `listApiKeys`. Errors render category,
-  message, and `requestId` when present. The key is never rendered after a
-  session is created.
+- The form owns only an HTTP(S) API origin and a masked API key. Credentials
+  remain in memory only and are cleared on reload or sign-out. The connect
+  action remains disabled until both values are valid and uses an explicit
+  `Connecting…` busy state after submission.
+- Connection status follows the public OmniWA GO contract: validate origin →
+  verify the key with `GET /instance/all` → on HTTP 401/403 detect scoped access
+  with `GET /instance/status`. The probe times out after 15 seconds. Errors
+  render category, message, and `requestId` when present. The key is never
+  rendered after a session is created.
+- While connecting, the check strip distinguishes completed and current steps
+  without changing its compact geometry. Credential failures use a human title
+  plus an actionable detail while retaining the normalized category and request
+  ID. Disabled primary actions remain visibly quieter than enabled actions.
 - At tablet widths the explanation precedes the form in one flow. At phone
-  widths the checks remain a compact three-column strip and every primary
-  input/action remains at least 44px tall.
+  widths the form comes first, the explanatory content follows, and the compact
+  connection-check strip is hidden. Every primary input/action remains at
+  least 44px tall. The key reveal control retains the same compact pill shape
+  on desktop, tablet, and phone layouts.
 
 ### QR pairing panel
 
@@ -417,7 +429,7 @@ this subsection binds to it.
   filters.
 - **Page header**: a 64px shared contract on desktop with a subtle bottom border. The left context cluster contains an optional 10px uppercase section label or breadcrumb, the 18px/400 title, and compact contextual metadata such as an instance selector or contract badge. The right action cluster contains connection state and at most one primary action; refresh and pause remain restrained secondary controls. At ≤640px the header becomes a single-column stack with context before actions and 44px action targets. Workspace pages apply the same hierarchy to their internal thread header instead of adding a global header.
 - **Grid**: 8px base unit. Vertical rhythm 16px between related blocks, 24px between sections.
-- **Density**: tables full-width; Overview metric cards in `repeat(auto-fit, minmax(200px, 1fr))` grid; never center-constrain content below 1440px.
+- **Density**: tables full-width; Overview metric cards use a dense six/three/two/one responsive grid with a 160px minimum; never center-constrain content below 1440px.
 - **Instance-scoped pages** show a breadcrumb: `Instances / {name}` with mono ID, and a horizontal tab row (Chats · Contacts · Labels · Groups · Messages) under the header.
 - Empty states: centered in the table container, 14px secondary text + one ghost action; never illustrations.
 

@@ -9,6 +9,7 @@ import {
   disconnectInstance,
   getAdvancedSettings,
   getInstance,
+  getInstanceCredentialHealth,
   getInstanceQr,
   getInstanceStatus,
   listInstances,
@@ -52,10 +53,20 @@ export function useInstance(instanceId: string | undefined) {
   const metadata = useServerCapability('instance_metadata_views');
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: [...queryKeys.instance(instanceId ?? ''), { metadata }] as const,
+    queryKey: queryKeys.instanceMetadata(instanceId ?? '', metadata),
     queryFn: () => getInstance(client, instanceId ?? '', metadata),
     enabled: instanceId !== undefined,
     refetchInterval,
+  });
+}
+
+export function useInstanceCredentialHealth(enabled: boolean) {
+  const client = useApi();
+  return useQuery({
+    queryKey: queryKeys.instanceCredentialHealth,
+    queryFn: () => getInstanceCredentialHealth(client),
+    enabled,
+    staleTime: 60_000,
   });
 }
 
@@ -63,7 +74,7 @@ export function useInstanceStatus(instanceId: string, token: string | undefined)
   const tokenClient = useInstanceClient(token);
   const refetchInterval = useRealtimeRefetchInterval();
   return useQuery({
-    queryKey: [...queryKeys.instance(instanceId), 'status'],
+    queryKey: queryKeys.instanceStatus(instanceId),
     queryFn: () => getInstanceStatus(tokenClient as ApiClient),
     enabled: tokenClient !== undefined,
     refetchInterval,
@@ -73,7 +84,7 @@ export function useInstanceStatus(instanceId: string, token: string | undefined)
 export function useInstanceQr(instanceId: string, token: string | undefined, enabled: boolean) {
   const tokenClient = useInstanceClient(token);
   return useQuery({
-    queryKey: [...queryKeys.instance(instanceId), 'qr'],
+    queryKey: queryKeys.instanceQr(instanceId),
     queryFn: () => getInstanceQr(tokenClient as ApiClient),
     enabled: enabled && tokenClient !== undefined,
     // QR rotates while pairing; poll only during that short window (and only when
@@ -160,7 +171,7 @@ export function useLogoutInstance(instanceId: string, token: string | undefined)
 export function useInstanceAdvancedSettings(instanceId: string, token: string | undefined) {
   const tokenClient = useInstanceClient(token);
   return useQuery({
-    queryKey: [...queryKeys.instance(instanceId), 'advanced-settings'],
+    queryKey: queryKeys.instanceAdvancedSettings(instanceId),
     queryFn: () => getAdvancedSettings(tokenClient as ApiClient, instanceId),
     enabled: tokenClient !== undefined,
   });
@@ -171,6 +182,6 @@ export function useUpdateAdvancedSettings(instanceId: string, token: string | un
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: InstanceAdvancedSettings) => updateAdvancedSettings(tokenClient as ApiClient, instanceId, body),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...queryKeys.instance(instanceId), 'advanced-settings'] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.instanceAdvancedSettings(instanceId) }),
   });
 }

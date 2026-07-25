@@ -1,6 +1,18 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-type WorkspaceEnvironment = 'platform' | 'mock';
+export type WorkspaceEnvironment = 'production' | 'staging' | 'platform' | 'mock';
+
+export function environmentForApiOrigin(baseUrl: string): WorkspaceEnvironment {
+  try {
+    const hostname = new URL(baseUrl).hostname.toLowerCase();
+    if (hostname === 'api.onio.cc') return 'production';
+    if (hostname === 'staging-api.onio.cc') return 'staging';
+  } catch {
+    // A connected session is already origin-validated; retain a safe generic
+    // label if this helper is reused with malformed input.
+  }
+  return 'platform';
+}
 
 type WorkspaceEnvironmentContextValue = {
   environment: WorkspaceEnvironment;
@@ -51,16 +63,35 @@ export function EnvironmentBadge({
 }) {
   const { environment, drawerCount } = useWorkspaceEnvironment();
 
-  if (environment !== 'mock' || (placement === 'page' && drawerCount > 0)) return null;
+  if (placement === 'page' && drawerCount > 0) return null;
+
+  const presentation = {
+    production: {
+      label: 'Production',
+      description: 'Production API environment.',
+    },
+    staging: {
+      label: 'Staging',
+      description: 'Staging API environment.',
+    },
+    platform: {
+      label: 'Platform',
+      description: 'Operator-supplied OmniWA GO API environment.',
+    },
+    mock: {
+      label: 'Mock data',
+      description: 'Mock environment. Deterministic local fixture data; no platform requests are sent.',
+    },
+  }[environment];
 
   return (
     <span
       data-badge="environment"
       className={`inline-flex min-h-[22px] shrink-0 items-center rounded-[var(--radius-sm)] border border-[var(--border-subtle)] bg-[color-mix(in_oklab,var(--fg)_3%,transparent)] font-[var(--ui)] text-[10px] font-medium uppercase leading-4 tracking-[0.6px] text-[var(--muted)] ${className}`}
-      aria-label="Mock environment. Deterministic local fixture data; no platform requests are sent."
-      title="Deterministic local fixture data; no platform requests are sent."
+      aria-label={presentation.description}
+      title={presentation.description}
     >
-      <span className="!px-2">Mock data</span>
+      <span className="!px-2">{presentation.label}</span>
     </span>
   );
 }

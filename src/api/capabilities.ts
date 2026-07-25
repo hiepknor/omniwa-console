@@ -14,6 +14,7 @@ export const capabilityNames = [
   'events_projection',
   'outbound_rate_limit',
   'campaign_orchestration',
+  'projection_failure_operations',
   'instance_metadata_views',
   'instance_token_rotation',
   'instance_credential_health',
@@ -23,6 +24,7 @@ export type CapabilityName = (typeof capabilityNames)[number];
 
 export type CapabilitySnapshot = {
   version?: string;
+  revision?: string;
   /** Unknown values are preserved so a newer server remains forward-compatible. */
   capabilities: readonly string[];
 };
@@ -31,6 +33,7 @@ export async function getCapabilities(client: ApiClient): Promise<CapabilitySnap
   const data = unwrap<CapabilitiesData>(await client.GET('/server/capabilities'));
   return {
     version: data?.version || undefined,
+    revision: data?.revision || undefined,
     capabilities: [...new Set(data?.capabilities ?? [])].sort(),
   };
 }

@@ -1,0 +1,2 @@
+/* Unlayered reset required only by the separately built legacy rollback artifact. */
+.ui-legacy-root,.ui-legacy-root *{box-sizing:border-box;margin:0;padding:0}

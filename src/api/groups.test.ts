@@ -89,4 +89,10 @@ describe('group projection adapter', () => {
     expect(result.resource?.id).toBe(projectedGroup.JID);
     expect(result.meta?.syncStatus).toBe('syncing');
   });
+
+  it('drops malformed rows without a stable group identity', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [{ Name: 'Missing JID' }, projectedGroup], meta: { syncStatus: 'ready' } }));
+    const result = await listInstanceGroups({ GET } as unknown as ApiClient);
+    expect(result.resource?.items.map((group) => group.id)).toEqual([projectedGroup.JID]);
+  });
 });

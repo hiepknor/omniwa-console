@@ -11,15 +11,15 @@ cookie, refresh token, or JWT flow.
 | Instance token | One WhatsApp account | Scoped client for groups, contacts, labels, chats, messages, sends, and other instance resources |
 
 Route middleware and the OpenAPI contract remain authoritative for exact scope.
-The console does not broaden a token by proxying through the admin client.
+The Console does not broaden a token by proxying through the admin client.
 
 ## Connect screen
 
 `/connect` accepts:
 
-- API origin, default `http://localhost:4000`;
-- API key, entered as a password value;
-- optional persistence on the current device.
+- HTTP(S) API origin, default `http://localhost:4000`;
+- API key, trimmed after paste and entered as a password value with
+  autocomplete, autocorrect, capitalization, and spellcheck disabled.
 
 `ConnectPage` classifies the key without exposing it:
 
@@ -29,10 +29,15 @@ The console does not broaden a token by proxying through the admin client.
 4. success there means instance-token scope;
 5. failure renders the normalized API error.
 
+The probe has a 15-second timeout. Origin and credential fields are locked
+while it is active so the visible values cannot diverge from the in-flight
+request. Local development connects directly to the OmniWA GO API origin; the
+Console origin is not an API proxy for these root-level operations.
+
 After connection, the shell calls `GET /server/capabilities`. Projection panels
 repeat capability negotiation with their selected instance token.
 
-## Session storage
+## Session lifetime
 
 ```ts
 interface ConsoleSession {
@@ -43,11 +48,11 @@ interface ConsoleSession {
 }
 ```
 
-- Default storage is `sessionStorage` and ends with the tab session.
-- “Remember on this device” opts into `localStorage` with an explicit warning.
-- Connecting clears any older session before saving the new one.
-- Disconnect and authentication failure clear both storage locations and the
-  TanStack Query cache.
+- The active admin key or instance token is held in React memory only.
+- Reload, sign-out, and authentication failure discard the active session and
+  clear the TanStack Query cache.
+- Application startup removes credentials left in `sessionStorage` or
+  `localStorage` by older Console builds; current builds never write them.
 - The UI may show a masked fingerprint; it never renders the complete key.
 
 ## Secret-handling rules
@@ -55,8 +60,7 @@ interface ConsoleSession {
 - Never put the global key or instance token in a URL, query key, log, error,
   analytics event, screenshot fixture, or committed file.
 - Query caches are scoped by stable instance ID, never by credential value.
-- The login credential follows the operator's configured session persistence;
-  one-time instance credentials use runtime memory only.
+- Login and one-time instance credentials use runtime memory only.
 - Ordinary instance list/detail resources never contain bearer tokens, even
   when the old-backend fallback response includes them.
 - Instance-token rotation must refresh the scoped client without persisting the
@@ -64,7 +68,7 @@ interface ConsoleSession {
 - An admin may attach an existing instance token to the in-memory vault after a
   reload. The value is cleared on reload, sign-out, or explicit forget; it is
   never added to instance resources or query caches.
-- The SPA does not open `/ws`, because doing so would expose the global admin
+- The Console does not open `/ws`, because doing so would expose the global admin
   key to browser code. See `docs/REALTIME.md`.
 
 ## Failure handling
@@ -81,6 +85,6 @@ interface ConsoleSession {
 Any browser credential is accessible to code running in that origin. A global
 admin key can administer every instance and is substantially more powerful than
 an instance token. Operators should use the least-privileged token that supports
-their workflow, a trusted machine, and a trusted console origin. A future BFF
+their workflow, a trusted machine, and a trusted Console origin. A future BFF
 could replace browser-held admin credentials, but this repository remains a
 client-only SPA.

@@ -54,6 +54,15 @@ export type MessagePage = {
 
 export type MessageReadResult<T> = { resource: T; meta?: ProjectionMeta };
 
+export type MediaType = 'image' | 'video' | 'audio' | 'document';
+
+export type SendMediaInput = {
+  url: string;
+  mediaType: MediaType;
+  caption?: string;
+  filename?: string;
+};
+
 function nonEmpty(value: string | undefined): string | undefined {
   return value?.trim() || undefined;
 }
@@ -145,9 +154,7 @@ export async function listMessageReceipts(client: ApiClient, messageId: string):
   };
 }
 
-export async function sendTextMessage(client: ApiClient, chatId: string, text: string): Promise<CommandResult> {
-  // Swaggo marks all request fields optional; the handler requires number/text.
-  const result = unwrapCommand(await client.POST('/send/text', { body: { number: chatId, text } as never }));
+function safeSendAcknowledgement(result: CommandResult): CommandResult {
   const payload = result.data !== null && typeof result.data === 'object' && !Array.isArray(result.data)
     ? result.data as Record<string, unknown>
     : undefined;
@@ -164,4 +171,29 @@ export async function sendTextMessage(client: ApiClient, chatId: string, text: s
       acknowledgedAt: typeof payload?.Timestamp === 'string' ? payload.Timestamp : typeof info?.Timestamp === 'string' ? info.Timestamp : undefined,
     },
   };
+}
+
+export async function sendTextMessage(client: ApiClient, chatId: string, text: string): Promise<CommandResult> {
+  // Swaggo marks all request fields optional; the handler requires number/text.
+  return safeSendAcknowledgement(unwrapCommand(await client.POST('/send/text', {
+    body: { number: chatId, text } as never,
+  })));
+}
+
+export async function sendMediaMessage(
+  client: ApiClient,
+  chatId: string,
+  input: SendMediaInput,
+): Promise<CommandResult> {
+  // The JSON branch requires number/url/type at runtime. Keep binary and
+  // base64 media outside browser state; this adapter accepts HTTP(S) URLs only.
+  return safeSendAcknowledgement(unwrapCommand(await client.POST('/send/media', {
+    body: {
+      number: chatId,
+      url: input.url,
+      type: input.mediaType,
+      ...(input.caption ? { caption: input.caption } : {}),
+      ...(input.filename ? { filename: input.filename } : {}),
+    } as never,
+  })));
 }

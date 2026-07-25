@@ -10,7 +10,7 @@ export function useEventInstances() {
   const client = useApi();
   const metadata = useServerCapability('instance_metadata_views');
   return useQuery({
-    queryKey: [...queryKeys.instances({ metadata }), 'events-picker'] as const,
+    queryKey: queryKeys.instances({ metadata }),
     queryFn: () => listInstances(client, { limit: 50, metadata }),
     staleTime: 30_000,
     refetchInterval: 60_000,

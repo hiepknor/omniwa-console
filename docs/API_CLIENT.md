@@ -19,7 +19,7 @@ src/api/generated/schema.d.ts
 src/api/client.ts (openapi-fetch)
 ```
 
-The contract and generated schema are committed so the console builds offline.
+The contract and generated schema are committed so the Console builds offline.
 Only the orchestrator runs contract sync. Generated files are never edited by
 hand. `pnpm contract:check` verifies schema freshness, every typed `METHOD
 /path` call against the vendored contract, and feature ownership against
@@ -27,7 +27,7 @@ hand. `pnpm contract:check` verifies schema freshness, every typed `METHOD
 
 Swaggo occasionally describes whatsmeow runtime values inaccurately. Any
 runtime narrowing required for those endpoints stays quarantined in `src/api/`
-with an explanatory comment; features still receive stable console types.
+with an explanatory comment; features still receive stable Console types.
 
 ## Client scopes
 
@@ -166,6 +166,13 @@ Keys mirror resource and credential scope:
 
 Mutations wait for server acknowledgement, then invalidate the narrowest keys
 that cover changed projections. Do not clear the full cache for a local change.
+List key factories omit the parameter object when called without parameters;
+that shorter key is the canonical invalidation prefix. Concrete reads append
+their normalized filter/cursor object. Do not manufacture an empty parameter
+object in mutation invalidation, because it would miss cached filtered or
+paginated variants. The literal `session` scope is the non-secret cache scope
+for v2 panels whose active API client already represents one operator session;
+credentials never enter a key.
 
 Resource adapters stay split by backend domain. Chat projection DTOs live in
 `src/api/chats.ts`; Message, receipt, and verified send contracts live in
@@ -180,10 +187,14 @@ completed request does not prove WhatsApp delivery, message read state, or
 campaign recipient completion.
 
 Do not offer one-click retry after an uncertain send failure. A transport/5xx
-failure can occur after WhatsApp accepted the message, and `/send/text` has no
-Console-owned idempotency contract. Operators must inspect projected history
-before submitting again. Rate-limit cooldown handling remains visible but does
-not auto-resubmit a send.
+failure can occur after WhatsApp accepted the message, and neither `/send/text`
+nor `/send/media` has a Console-owned idempotency contract. Operators must
+inspect projected history before submitting again. Rate-limit cooldown handling
+remains visible but does not auto-resubmit a send.
+
+Media sends use the JSON URL branch with an explicit supported media type. The
+Console does not retain binary uploads or base64 media in component, mutation,
+or query state.
 
 The Composer requires both `messages_projection` and `outbound_rate_limit`.
 Projection readiness makes the write-through result observable; outbound
@@ -202,3 +213,9 @@ The app disables refetch-on-window-focus to avoid request storms. Queries may
 retry once only for retryable transient 5xx failures. Rate limits and permanent
 service conditions are never automatically retried. Projection polling must be
 bounded and must not reach WhatsApp live.
+
+V2 read cadences come from `src/lib/query-policy.ts`: fleet reads poll every 15
+seconds, platform and campaign reads every 30 seconds, ordinary persisted
+projections every 60 seconds, and QR reads every 20 seconds only while the
+pairing surface is active. A disabled route or missing scoped credential must
+return `false` from its polling policy rather than leave a background timer.

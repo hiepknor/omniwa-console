@@ -11,7 +11,8 @@ import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { useFeedback } from '@/components/feedback/FeedbackProvider';
 import { relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
-import { keyFingerprint, loadSession } from '@/lib/session';
+import { keyFingerprint } from '@/lib/session';
+import { useApiSession } from '@/api/ApiProvider';
 import { isTransportError } from '@/components/feedback/feedback-policy';
 import { useActivateSettings, useSettings, useValidateSettings } from './hooks';
 
@@ -239,7 +240,7 @@ function DraftRevision({ settings }: { settings: SettingsResource }) {
 }
 
 function ConsoleSessionAside() {
-  const session = loadSession();
+  const session = useApiSession();
   const [expanded, setExpanded] = useState(() => !window.matchMedia('(max-width: 640px)').matches);
 
   useEffect(() => {
@@ -263,8 +264,8 @@ function ConsoleSessionAside() {
           <div><dt>Key kind</dt><dd><CategoryPill>{session.keyKind}</CategoryPill></dd></div>
           <div><dt>Connected</dt><dd className="ts" title={session.connectedAt}>{relativeTime(session.connectedAt) || absoluteTime(session.connectedAt)}</dd></div>
         </dl>
-        <div className="settings-session-note"><span className="eyebrow">Credential boundary</span><p>The API key is masked after entry and never appears in URLs or logs.</p></div>
-        <div className="settings-session-actions"><p className="help">Use Sign out from workspace navigation to clear this browser session.</p></div>
+        <div className="settings-session-note"><span className="eyebrow">Credential boundary</span><p>The API key remains in memory only, is masked after entry, and never appears in URLs or logs.</p></div>
+        <div className="settings-session-actions"><p className="help">Reload or use Sign out from workspace navigation to clear this browser session.</p></div>
         {session.keyKind === 'admin' && <div className="settings-session-link"><Link className="flex min-h-11 items-center justify-between gap-4" to="/settings/api-keys"><span>API key inventory</span><span aria-hidden="true">→</span></Link></div>}
       </div>
     </aside>

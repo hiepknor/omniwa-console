@@ -135,7 +135,7 @@ export async function listInstanceGroups(
   const nextCursor = projection.meta?.nextCursor ?? null;
   return {
     resource: {
-      items: (projection.resource ?? []).map(toGroup),
+      items: (projection.resource ?? []).map(toGroup).filter((group) => group.id !== ''),
       pagination: { nextCursor, hasMore: nextCursor !== null },
     },
     meta: projection.meta,

@@ -78,14 +78,19 @@ export async function listInstances(
   const data = params.metadata
     ? unwrap<MetadataInstance[]>(await client.GET('/instance/metadata'))
     : unwrap<GoInstance[]>(await client.GET('/instance/all'));
-  return { resource: { items: (data ?? []).map(toInstance), pagination: NO_PAGINATION } };
+  return {
+    resource: {
+      items: (data ?? []).filter((instance) => Boolean(instance.id?.trim())).map(toInstance),
+      pagination: NO_PAGINATION,
+    },
+  };
 }
 
 export async function getInstance(client: ApiClient, instanceId: string, metadata = false): Promise<ReadResult<InstanceResource>> {
   const data = metadata
     ? unwrap<MetadataInstance>(await client.GET('/instance/metadata/{instanceId}', { params: { path: { instanceId } } }))
     : unwrap<GoInstance>(await client.GET('/instance/info/{instanceId}', { params: { path: { instanceId } } }));
-  return { resource: data ? toInstance(data) : undefined };
+  return { resource: data?.id?.trim() ? toInstance(data) : undefined };
 }
 
 export async function createInstance(client: ApiClient, body: InstanceCreateRequest): Promise<CommandResult & { instanceId: string; token: string }> {

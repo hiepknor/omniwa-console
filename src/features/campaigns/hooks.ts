@@ -24,7 +24,7 @@ export function useCampaignInstances() {
   const client = useApi();
   const metadata = useServerCapability("instance_metadata_views");
   return useQuery({
-    queryKey: [...queryKeys.instances({ metadata }), "campaign-picker"] as const,
+    queryKey: queryKeys.instances({ metadata }),
     queryFn: () => listInstances(client, { limit: 50, metadata }),
     staleTime: 30_000,
   });

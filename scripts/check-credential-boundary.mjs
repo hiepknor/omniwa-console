@@ -27,6 +27,27 @@ if (/localStorage|sessionStorage/.test(provider)) {
   failures.push('the instance credential vault must not use browser storage');
 }
 
+const session = await read('src/lib/session.ts');
+const connectPage = await read('src/app/ConnectPage.tsx');
+const app = await read('src/app/App.tsx');
+if (/\.setItem\s*\(/.test(session) || /saveSession|loadSession/.test(session)) {
+  failures.push('the admin API session must remain memory-only');
+}
+if (/Remember on this device|\bremember\b/.test(connectPage)) {
+  failures.push('the connect screen must not offer persistent credential storage');
+}
+if (!connectPage.includes('autoComplete="off"')) {
+  failures.push('the connect API key input must disable password autocomplete');
+}
+if (!app.includes('clearSession();') || !app.includes('return null;')) {
+  failures.push('application startup must clear legacy stored sessions');
+}
+
+const credentialHealthPanel = await read('src/features/instances/CredentialHealthPanel.tsx');
+if (!credentialHealthPanel.includes('No representative workload') || !credentialHealthPanel.includes('never derives a safe-to-remove decision')) {
+  failures.push('credential health must reject a 0/0 adoption verdict and avoid a safety decision');
+}
+
 const keys = await read('src/api/keys.ts');
 if (/queryKey[^\n]*token|\[[^\n]*token[^\n]*\]\s+as const/i.test(keys)) {
   failures.push('query keys must be scoped by identity, never credential value');

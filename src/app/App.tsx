@@ -1,53 +1,34 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { lazy, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { ApiProvider } from '@/api/ApiProvider';
 import { CapabilitiesProvider } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { RealtimeProvider } from '@/api/RealtimeProvider';
-import { clearSession, loadSession, type ConsoleSession } from '@/lib/session';
+import { clearSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
-import { ConnectPage } from './ConnectPage';
-import { Shell } from './Shell';
+import { ActiveConnectPage, ActiveShell, authenticatedRoutes } from '@generation';
 
 type ConnectNotice = 'session-invalid' | undefined;
 
-const OverviewPage = lazy(() =>
-  import('@/features/overview/OverviewPage').then((module) => ({ default: module.OverviewPage })),
-);
-const InstancesPage = lazy(() =>
-  import('@/features/instances/InstancesPage').then((module) => ({ default: module.InstancesPage })),
-);
-const ChatsPage = lazy(() =>
-  import('@/features/chats/ChatsPage').then((module) => ({ default: module.ChatsPage })),
-);
-const GroupsPage = lazy(() =>
-  import('@/features/groups/GroupsPage').then((module) => ({ default: module.GroupsPage })),
-);
-const QueuePage = lazy(() =>
-  import('@/features/queue/QueuePage').then((module) => ({ default: module.QueuePage })),
-);
-const WebhooksPage = lazy(() =>
-  import('@/features/webhooks/WebhooksPage').then((module) => ({ default: module.WebhooksPage })),
-);
-const EventsPage = lazy(() =>
-  import('@/features/events/EventsPage').then((module) => ({ default: module.EventsPage })),
-);
-const CampaignsPage = lazy(() =>
-  import('@/features/campaigns/CampaignsPage').then((module) => ({ default: module.CampaignsPage })),
-);
-const SettingsPage = lazy(() =>
-  import('@/features/settings/SettingsPage').then((module) => ({ default: module.SettingsPage })),
-);
-const ApiKeysPage = lazy(() =>
-  import('@/features/api-keys/ApiKeysPage').then((module) => ({ default: module.ApiKeysPage })),
-);
+const developmentRoutes = import.meta.env.DEV
+  ? [{
+      path: '/__ui-v2',
+      lazy: async () => {
+        const { UiV2Gallery } = await import('./UiV2Gallery');
+        return { Component: UiV2Gallery };
+      },
+    }]
+  : [];
 
 function AppRuntime() {
   const feedback = useFeedback();
   const feedbackRef = useRef(feedback);
   feedbackRef.current = feedback;
-  const [session, setSession] = useState<ConsoleSession | null>(() => loadSession());
+  const [session, setSession] = useState<ConsoleSession | null>(() => {
+    clearSession();
+    return null;
+  });
   const [connectNotice, setConnectNotice] = useState<ConnectNotice>();
   const connectNoticeRef = useRef(connectNotice);
   connectNoticeRef.current = connectNotice;
@@ -107,6 +88,7 @@ function AppRuntime() {
       createBrowserRouter(
         session
           ? [
+              ...developmentRoutes,
               {
                 element: (
                   <ApiProvider session={session}>
@@ -115,7 +97,7 @@ function AppRuntime() {
                         session={session}
                         onAuthError={() => disconnectRef.current('session-invalid')}
                       >
-                        <Shell session={session} onDisconnect={() => disconnectRef.current()} />
+                        <ActiveShell session={session} onDisconnect={() => disconnectRef.current()} />
                       </RealtimeProvider>
                     </CapabilitiesProvider>
                   </ApiProvider>
@@ -123,31 +105,16 @@ function AppRuntime() {
                 children: [
                   { path: '/connect', element: <Navigate to="/overview" replace /> },
                   { path: '/', element: <Navigate to="/overview" replace /> },
-                  { path: '/chats', element: <ChatsPage /> },
-                  { path: '/chats/:instanceId', element: <ChatsPage /> },
-                  { path: '/chats/:instanceId/:chatId', element: <ChatsPage /> },
-                  { path: '/groups', element: <GroupsPage /> },
-                  { path: '/groups/:instanceId', element: <GroupsPage /> },
-                  { path: '/messages', element: <CampaignsPage /> },
-                  { path: '/messages/new', element: <CampaignsPage /> },
-                  { path: '/overview', element: <OverviewPage /> },
-                  { path: '/instances', element: <InstancesPage /> },
-                  { path: '/instances/:instanceId', element: <InstancesPage /> },
-                  { path: '/queue', element: <QueuePage /> },
-                  { path: '/webhooks', element: <WebhooksPage /> },
-                  { path: '/webhooks/:webhookId', element: <WebhooksPage /> },
-                  { path: '/events', element: <EventsPage /> },
-                  { path: '/settings', element: <SettingsPage /> },
-                  { path: '/settings/api-keys', element: <ApiKeysPage /> },
-                  { path: '*', element: <Navigate to="/overview" replace /> },
+                  ...authenticatedRoutes,
                 ],
               },
             ]
           : [
+              ...developmentRoutes,
               {
                 path: '/connect',
                 element: (
-                  <ConnectPage
+                  <ActiveConnectPage
                     notice={connectNoticeRef.current}
                     onConnected={(nextSession) => onConnectedRef.current(nextSession)}
                   />

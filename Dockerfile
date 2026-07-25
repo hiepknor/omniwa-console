@@ -1,5 +1,8 @@
 FROM node:22.17-alpine AS build
 
+ARG VITE_CONSOLE_UI_GENERATION=legacy
+ENV VITE_CONSOLE_UI_GENERATION=$VITE_CONSOLE_UI_GENERATION
+
 WORKDIR /workspace
 RUN corepack enable && corepack prepare pnpm@10.12.4 --activate
 
@@ -11,13 +14,15 @@ RUN pnpm check && pnpm test
 
 FROM nginxinc/nginx-unprivileged:1.29-alpine
 
+ARG VITE_CONSOLE_UI_GENERATION=legacy
 ARG OCI_REVISION=unknown
 ARG OCI_VERSION=dev
 LABEL org.opencontainers.image.title="OmniWA Console" \
       org.opencontainers.image.description="Operations console for OmniWA GO" \
       org.opencontainers.image.revision="$OCI_REVISION" \
       org.opencontainers.image.version="$OCI_VERSION" \
-      org.opencontainers.image.source="https://github.com/hiepknor/omniwa-console"
+      org.opencontainers.image.source="https://github.com/hiepknor/omniwa-console" \
+      cc.onio.console.ui-generation="$VITE_CONSOLE_UI_GENERATION"
 
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /workspace/dist /usr/share/nginx/html

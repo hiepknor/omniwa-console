@@ -35,13 +35,13 @@ Completed:
 
 Not yet integrated:
 
-- media send and additional chat/message action commands;
+- binary media upload and additional chat/message action commands;
 - a browser-safe realtime bridge, unless a separately authorized backend/BFF
   becomes available.
 
 ## Phase 1 — Groups projection (implemented)
 
-Goal: make Groups the first complete projection consumer.
+**Goal:** make Groups the first complete projection consumer.
 
 - Call instance-scoped capabilities when the selected instance changes.
 - Use `groups_projection` as the initial-readiness signal without interpreting
@@ -55,14 +55,14 @@ Goal: make Groups the first complete projection consumer.
 - Remove comments and polling behavior that describe group reads as live
   WhatsApp queries.
 
-Exit achieved: Groups performs no live-read fallback, scopes cache keys by
+**Exit achieved:** Groups performs no live-read fallback, scopes cache keys by
 instance, preserves projection freshness, and uses server prefix search with
 opaque cursor pagination. Adapter and shared projection-state tests cover the
 contract boundary.
 
 ## Phase 2 — Contacts and Labels
 
-Goal: supply directory context for the Chats workspace.
+**Goal:** supply directory context for the Chats workspace.
 
 Contacts and Labels slices implemented: the Chats workspace now uses
 instance-scoped projection list/search/detail reads, keeps directory scope in
@@ -77,14 +77,14 @@ the documented bare-array list while detail reads retain freshness metadata.
 - Keep `/label/list` on its documented legacy bare-array adapter.
 - Integrate label detail and projected associations needed by Chats.
 
-Exit achieved: contact and label reads are capability-gated, authoritative, and
+**Exit achieved:** contact and label reads are capability-gated, authoritative, and
 deep-linkable; no browser identity cache or provider-payload reconstruction
 exists. Label associations remain dependent on future public Chat/Message DTO
 fields rather than a Console-invented endpoint.
 
 ## Phase 3 — Chats, Messages, and delivery
 
-Goal: replace the Chats workspace stubs with persisted projections.
+**Goal:** replace the Chats workspace stubs with persisted projections.
 
 Chats slice implemented: list/detail reads are instance-token scoped,
 capability-gated, and normalized from the OmniWA GO projection contract. The
@@ -93,35 +93,36 @@ by resetting to the first page.
 
 Messages slice implemented: history/detail/receipt reads are chat- and
 instance-scoped, independently capability-gated, and retain normalized content,
-media metadata, lifecycle, provenance, and retention fields. Text send uses the
-existing action endpoint and invalidates only the affected Chat/Message keys;
-its acknowledgement is never rendered as delivery. Unsupported retry, cancel,
-reconnect, and media controls are not exposed. An uncertain send failure has no
-one-click retry because the current endpoint has no Console-owned idempotency
-contract.
+media metadata, lifecycle, provenance, and retention fields. Text and URL media
+sends use existing action endpoints and invalidate only the affected
+Chat/Message keys; acknowledgements are never rendered as delivery. Unsupported
+retry, cancel, reconnect, binary upload, and additional message actions are not
+exposed. An uncertain send failure has no one-click retry because the endpoints
+have no Console-owned idempotency contract.
 
 - Implement chat list/detail and keyset pagination.
 - Implement message list/detail and delivery/read receipt history.
 - Preserve message direction, sender/recipient, content summary, media metadata,
   provenance, lifecycle, and retention state.
 - Keep media binary outside the projection cache.
-- Wire text send through the existing public command, then refresh the affected
-  Chat/Message projections. Integrate media only after its backend request and
-  storage-reference contract is verified independently.
+- Wire text and URL media send through the existing public commands, then
+  refresh the affected Chat/Message projections. Keep binary upload outside the
+  browser until its client-side memory and size constraints are specified.
 - Never interpret send acknowledgement as `sent`, `delivered`, or `read`.
 - Consume label associations only when OmniWA GO adds them to the public
   Chat/Message DTO; do not reconstruct persisted associations in the browser.
 - Verify new messages do not shift already-loaded cursor pages.
 
-Exit status: persisted browsing, receipt inspection, and text send are achieved
-without client-side message accumulation. Media/action ownership remains a
-separate slice and is not represented by placeholders.
+**Exit status:** persisted browsing, receipt inspection, text send, and URL media
+send are achieved without client-side message accumulation. Binary upload and
+additional action ownership remain separate slices and are not represented by
+placeholders.
 
 ## Phase 4 — Durable Events, Overview, and Health
 
-Status: implemented.
+**Status:** implemented.
 
-Goal: replace operations stubs and weak liveness assumptions.
+**Goal:** replace operations stubs and weak liveness assumptions.
 
 - Implement `/events` exact-type filter and opaque cursor history.
 - Use durable history for event audit and future reconnect recovery.
@@ -131,14 +132,14 @@ Goal: replace operations stubs and weak liveness assumptions.
 - Show circuit-breaker `openUntil` and `retryAfterSeconds` without probing.
 - Remove any use of `/server/ok` as connection/readiness state.
 
-Exit achieved: operators can inspect durable event history and distinguish API
+**Exit achieved:** operators can inspect durable event history and distinguish API
 health, instance connection, projection freshness, and rate-limit posture.
 
 ## Phase 5 — Campaign orchestration
 
-Status: implemented.
+**Status:** implemented.
 
-Goal: provide consent-aware campaign creation and monitoring without moving
+**Goal:** provide consent-aware campaign creation and monitoring without moving
 worker logic into the browser.
 
 - Gate with `campaign_orchestration` and `outbound_rate_limit`.
@@ -150,16 +151,16 @@ worker logic into the browser.
 - Explain that leased work may finish after pause.
 - Handle HTTP 409 transitions and outbound 429 without automatic mutation retry.
 
-Exit: campaigns can be created, controlled, and audited entirely through
+**Exit:** campaigns can be created, controlled, and audited entirely through
 OmniWA GO. See `docs/CAMPAIGNS.md`.
 
 ## Phase 6 — Polling and integration hardening
 
-Status: implemented in code; immutable deployment and the separately approved
+**Status:** implemented in code; immutable deployment and the separately approved
 credential observation window remain operational rollout work.
-Track that rollout in [CREDENTIAL_ROLLOUT_EVIDENCE.md](./CREDENTIAL_ROLLOUT_EVIDENCE.md).
+Track that rollout in [CREDENTIAL_ROLLOUT_EVIDENCE.md](CREDENTIAL_ROLLOUT_EVIDENCE.md).
 
-Goal: remove migration scaffolding and prove production safety.
+**Goal:** remove migration scaffolding and prove production safety.
 
 - Remove obsolete legacy adapters, copy, and operation assumptions.
 - Audit every query interval; projection polling is bounded and unsupported/live
@@ -171,7 +172,7 @@ Goal: remove migration scaffolding and prove production safety.
   exists; otherwise retain REST + durable Events posture.
 - Keep unsupported Queue/Webhooks/Global Settings/Admin Keys routes explicit.
 
-Exit: docs, panel ownership, code, generated contract, and navigation describe
+**Exit:** docs, panel ownership, code, generated contract, and navigation describe
 the same shipped product.
 
 ## Phase sequencing
@@ -188,7 +189,7 @@ Foundation (done)
 
 Groups comes first because it exercises every shared projection concern with a
 small existing panel. Campaigns come after message/delivery visibility so the
-console can observe outcomes rather than merely submit work.
+Console can observe outcomes rather than merely submit work.
 
 ## Verification for every phase
 

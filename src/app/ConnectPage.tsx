@@ -1,42 +1,7 @@
-import { useRef, useState, type FormEvent } from 'react';
-import { createApiClient, DEFAULT_BASE_URL } from '@/api/client';
-import { ApiFailure } from '@/api/envelopes';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
-import { saveSession, type ConsoleSession, type KeyKind } from '@/lib/session';
-
-type ConnectError = {
-  category: string;
-  message: string;
-  requestId?: string;
-};
-
-/**
- * Validate the pasted apikey against omniwa-go and classify it. The global admin
- * key can list every instance (`GET /instance/all`); a per-instance token cannot,
- * but can read its own status (`GET /instance/status`). A 401 on both means the
- * key is invalid.
- */
-async function probeKey(client: ReturnType<typeof createApiClient>): Promise<KeyKind> {
-  const admin = await client.GET('/instance/all');
-  if (admin.data !== undefined) return 'admin';
-  if (admin.response.status !== 401 && admin.response.status !== 403) {
-    throw new ApiFailure(admin.error, admin.response.status, admin.response.headers);
-  }
-
-  const scoped = await client.GET('/instance/status');
-  if (scoped.data !== undefined) return 'api';
-  throw new ApiFailure(scoped.error, scoped.response.status, scoped.response.headers);
-}
-
-function isValidOrigin(value: string) {
-  try {
-    const url = new URL(value);
-    return url.origin === value.replace(/\/$/, '');
-  } catch {
-    return false;
-  }
-}
+import type { ConsoleSession } from '@/lib/session';
+import { useConnectFlow } from './connect-flow';
 
 export function ConnectPage({
   notice,
@@ -46,60 +11,25 @@ export function ConnectPage({
   onConnected: (session: ConsoleSession) => void;
 }) {
   useDocumentTitle('Connect');
-  const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
-  const [apiKey, setApiKey] = useState('');
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [remember, setRemember] = useState(false);
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<ConnectError | null>(null);
-  const baseUrlInput = useRef<HTMLInputElement>(null);
-  const apiKeyInput = useRef<HTMLInputElement>(null);
-
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
-    setError(null);
-
-    if (!isValidOrigin(baseUrl)) {
-      setError({
-        category: 'validation',
-        message: 'API base URL must be a valid URL, e.g. http://localhost:3000',
-      });
-      baseUrlInput.current?.focus();
-      return;
-    }
-
-    const origin = new URL(baseUrl).origin;
-    setPending(true);
-    try {
-      const client = createApiClient({ baseUrl: origin, apiKey });
-      const session: ConsoleSession = {
-        baseUrl: origin,
-        apiKey,
-        keyKind: await probeKey(client),
-        connectedAt: new Date().toISOString(),
-      };
-      saveSession(session, remember);
-      onConnected(session);
-    } catch (err) {
-      if (err instanceof ApiFailure) {
-        setError({ category: err.category, message: err.message, requestId: err.requestId });
-      } else {
-        setError({
-          category: 'network',
-          message: 'Could not reach the OmniWA API at that address.',
-        });
-      }
-    } finally {
-      setPending(false);
-    }
-  };
-
-  const canSubmit = isValidOrigin(baseUrl) && apiKey.trim().length > 0 && !pending;
-  const baseUrlError = error?.category === 'validation' ? error : undefined;
-  const connectionError = error?.category !== 'validation' ? error : undefined;
+  const {
+    apiKey,
+    apiKeyInput,
+    baseUrl,
+    baseUrlError,
+    baseUrlInput,
+    canSubmit,
+    connectionError,
+    pending,
+    probeStage,
+    setApiKey,
+    setBaseUrl,
+    setShowApiKey,
+    showApiKey,
+    submit,
+  } = useConnectFlow(onConnected);
 
   return (
-    <main className="connect-screen">
+    <main className="connect-screen ui-legacy-root">
       <header className="connect-masthead">
         <div className="connect-brand">
           <span className="mark" aria-hidden="true">
@@ -157,16 +87,16 @@ export function ConnectPage({
 
           <form className="connect-form" onSubmit={submit}>
             <ol className="connect-sequence max-[640px]:!hidden" aria-label="Connection checks">
-              <li>
-                <span className="connect-sequence-index num !text-[var(--fg-2)]">01</span>
+              <li data-state={pending ? 'complete' : undefined} aria-label={pending ? 'Validate origin, complete' : undefined}>
+                <span className="connect-sequence-index num">01</span>
                 <strong>Validate origin</strong>
               </li>
-              <li>
-                <span className="connect-sequence-index num !text-[var(--fg-2)]">02</span>
-                <strong>Probe health</strong>
+              <li data-state={probeStage === 'verify-key' ? 'active' : probeStage === 'detect-scope' ? 'complete' : undefined} aria-current={probeStage === 'verify-key' ? 'step' : undefined}>
+                <span className="connect-sequence-index num">02</span>
+                <strong>Verify key</strong>
               </li>
-              <li>
-                <span className="connect-sequence-index num !text-[var(--fg-2)]">03</span>
+              <li data-state={probeStage === 'detect-scope' ? 'active' : undefined} aria-current={probeStage === 'detect-scope' ? 'step' : undefined}>
+                <span className="connect-sequence-index num">03</span>
                 <strong>Detect scope</strong>
               </li>
             </ol>
@@ -185,13 +115,16 @@ export function ConnectPage({
                 value={baseUrl}
                 required
                 autoComplete="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={pending}
                 aria-describedby={`connect-base-url-help${baseUrlError ? ' connect-base-url-error' : ''}`}
                 aria-invalid={baseUrlError ? 'true' : undefined}
                 onChange={(event) => setBaseUrl(event.target.value)}
               />
               <p id="connect-base-url-help">
-                In local development, use the console origin to route requests through the Vite
-                proxy.
+                Enter the OmniWA GO API origin directly. Local development defaults to port 4000.
               </p>
               {baseUrlError && <p id="connect-base-url-error" className="help error" role="alert">{baseUrlError.message}</p>}
             </div>
@@ -204,6 +137,7 @@ export function ConnectPage({
                   type="button"
                   aria-controls="connect-api-key"
                   aria-pressed={showApiKey}
+                  disabled={pending}
                   onClick={() => {
                     setShowApiKey((shown) => !shown);
                     apiKeyInput.current?.focus();
@@ -221,6 +155,10 @@ export function ConnectPage({
                 placeholder="Paste API key"
                 required
                 autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={pending}
                 aria-describedby="connect-api-key-help"
                 value={apiKey}
                 onChange={(event) => setApiKey(event.target.value)}
@@ -228,33 +166,21 @@ export function ConnectPage({
               <p id="connect-api-key-help">Never displayed again after entry.</p>
             </div>
 
-            <label className="connect-remember">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(event) => setRemember(event.target.checked)}
-              />
-              <span>
-                <strong>Remember on this device</strong>
-                <small>Unchecked sessions end when this tab closes.</small>
-              </span>
-            </label>
-
-            {remember && (
-              <SurfaceNotice
-                kind="warning"
-                label="Storage"
-                title="Persistent browser storage"
-                detail="This stores the API key in this browser. Use only on a trusted device."
-                className="connect-storage-warning"
-              />
-            )}
+            <SurfaceNotice
+              kind="info"
+              label="Session"
+              title="Memory-only credential"
+              detail="The API key is cleared on reload or sign-out and is never written to browser storage."
+              className="connect-storage-warning"
+            />
 
             {connectionError && (
               <SurfaceNotice
                 kind="error"
                 label={connectionError.category}
                 title={connectionError.message}
+                detail={connectionError.detail}
+                requestId={connectionError.requestId}
                 className="connect-error"
                 announcement="assertive"
               />

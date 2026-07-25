@@ -15,9 +15,13 @@ concurrency:
 
 jobs:
   console:
-    name: check / test / image smoke
+    name: check / test / image smoke (${{ matrix.generation }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        generation: [legacy, v2]
     steps:
       - name: Checkout source
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -26,19 +30,23 @@ jobs:
 
       - name: Build tested image
         env:
+          GENERATION: ${{ matrix.generation }}
           SOURCE_SHA: ${{ github.sha }}
         run: >-
           docker build
+          --build-arg VITE_CONSOLE_UI_GENERATION="$GENERATION"
           --build-arg OCI_REVISION="$SOURCE_SHA"
           --build-arg OCI_VERSION="sha-$SOURCE_SHA"
-          --tag omniwa-console:ci
+          --tag "omniwa-console:ci-$GENERATION"
           .
 
       - name: Smoke test image
         env:
+          GENERATION: ${{ matrix.generation }}
           SOURCE_SHA: ${{ github.sha }}
         run: |
-          container_id="$(docker run --detach --rm --publish 127.0.0.1::8080 omniwa-console:ci)"
+          image="omniwa-console:ci-$GENERATION"
+          container_id="$(docker run --detach --rm --publish 127.0.0.1::8080 "$image")"
           trap 'docker stop "$container_id" >/dev/null 2>&1 || true' EXIT
           host_port="$(docker port "$container_id" 8080/tcp | awk -F: '{ print $NF }')"
           for attempt in $(seq 1 20); do
@@ -48,12 +56,24 @@ jobs:
             sleep 1
           done
           test "$(curl --silent "http://127.0.0.1:$host_port/healthz")" = ok
-          curl --silent --fail "http://127.0.0.1:$host_port/events" | grep -F '<div id="root"></div>'
+          routes='/connect /events'
+          if [ "$GENERATION" = v2 ]; then
+            routes="$routes /recovery /instances /chats /groups /campaigns"
+          else
+            routes="$routes /queue /webhooks /settings /settings/api-keys"
+          fi
+          for route in $routes; do
+            curl --silent --fail "http://127.0.0.1:$host_port$route" | grep -F '<div id="root"></div>'
+          done
+          entrypoint="$(curl --silent --fail "http://127.0.0.1:$host_port/" | sed -n 's/.*src="\([^"]*\.js\)".*/\1/p')"
+          test -n "$entrypoint"
+          curl --silent --fail "http://127.0.0.1:$host_port$entrypoint" >/dev/null
           test "$(docker exec "$container_id" id -u)" = 101
-          test "$(docker image inspect omniwa-console:ci --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$SOURCE_SHA"
+          test "$(docker image inspect "$image" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$SOURCE_SHA"
+          test "$(docker image inspect "$image" --format '{{ index .Config.Labels "cc.onio.console.ui-generation" }}')" = "$GENERATION"
 
   publish:
-    name: publish immutable image
+    name: publish immutable image (${{ matrix.generation }})
     needs: console
     if: >-
       github.event_name == 'push' &&
@@ -61,6 +81,14 @@ jobs:
       github.repository == 'hiepknor/omniwa-console'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - generation: legacy
+            tag_suffix: ''
+          - generation: v2
+            tag_suffix: '-v2'
     permissions:
       contents: read
       packages: write
@@ -97,27 +125,32 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}${{ matrix.tag_suffix }}
+          cache-from: type=gha,scope=console-${{ matrix.generation }}
+          cache-to: type=gha,mode=max,scope=console-${{ matrix.generation }}
           sbom: true
           provenance: mode=max
           build-args: |
+            VITE_CONSOLE_UI_GENERATION=${{ matrix.generation }}
             OCI_REVISION=${{ github.sha }}
             OCI_VERSION=sha-${{ github.sha }}
 
       - name: Resolve and verify immutable digest
         env:
+          GENERATION: ${{ matrix.generation }}
           SOURCE_SHA: ${{ github.sha }}
+          TAG_SUFFIX: ${{ matrix.tag_suffix }}
         run: |
-          image_ref="$IMAGE_NAME:sha-$SOURCE_SHA"
+          image_ref="$IMAGE_NAME:sha-$SOURCE_SHA$TAG_SUFFIX"
           digest="$(docker buildx imagetools inspect "$image_ref" | awk '$1 == "Digest:" { print $2; exit }')"
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
           docker pull --quiet --platform linux/amd64 "$IMAGE_NAME@$digest"
           test "$(docker image inspect "$IMAGE_NAME@$digest" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$SOURCE_SHA"
+          test "$(docker image inspect "$IMAGE_NAME@$digest" --format '{{ index .Config.Labels "cc.onio.console.ui-generation" }}')" = "$GENERATION"
           test "$(docker image inspect "$IMAGE_NAME@$digest" --format '{{ .Config.User }}')" = 101
           {
-            echo "### Immutable Console image"
+            echo "### Immutable Console image ($GENERATION)"
             printf '%c%s@%s%c\n' 96 "$IMAGE_NAME" "$digest" 96
             printf 'Source revision: %c%s%c\n' 96 "$SOURCE_SHA" 96
+            printf 'UI generation: %c%s%c\n' 96 "$GENERATION" 96
           } >> "$GITHUB_STEP_SUMMARY"

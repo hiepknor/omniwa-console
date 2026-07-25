@@ -2,7 +2,7 @@
 
 ## Current browser posture
 
-The client-only console does not open OmniWA GO's `/ws` connection. That socket
+The client-only Console does not open OmniWA GO's `/ws` connection. That socket
 uses the global admin key; exposing it to browser code would give every operator
 session full instance-administration authority.
 
@@ -33,7 +33,7 @@ A browser-safe live channel requires a trusted BFF or a new scoped backend
 transport. The bridge would hold/administer server credentials, authenticate the
 browser separately, and emit safe normalized events.
 
-When available, the console should:
+When available, the Console should:
 
 1. consume live events for low-latency notification;
 2. invalidate targeted TanStack Query keys instead of writing provider payloads

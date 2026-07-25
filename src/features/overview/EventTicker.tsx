@@ -7,7 +7,7 @@ export type OverviewEvent = {
   updatedAt?: string;
 };
 
-export type EventConnectionState = 'connecting' | 'connected' | 'disconnected' | 'error';
+export type EventConnectionState = 'connecting' | 'connected' | 'disconnected' | 'polling' | 'error';
 
 function eventDot(type: string): string {
   if (type.endsWith('delivered') || type.endsWith('connected')) return 'dot-ok';
@@ -30,7 +30,12 @@ const connectionCopy: Record<EventConnectionState, { label: string; title: strin
   disconnected: {
     label: 'Not connected',
     title: 'Realtime event stream is not connected.',
-    detail: 'No live events are shown. Page-level metrics continue to refresh every 15 seconds; this surface does not populate through polling.',
+    detail: 'No live events are shown. Page-level metrics continue to refresh every 30 seconds; this surface does not populate through polling.',
+  },
+  polling: {
+    label: 'Polling only',
+    title: 'Browser-safe live events are unavailable.',
+    detail: 'Overview reads refresh every 30 seconds. Use the Events panel for durable instance history; this console does not open the admin-key WebSocket.',
   },
   error: {
     label: 'Connection failed',

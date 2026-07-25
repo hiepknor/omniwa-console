@@ -1,4 +1,5 @@
-/* Synced from design/prototypes/console.css lines 1–89 — do not restyle here; re-sync from the prototype. */
+/* Canonical OmniWA Console tokens. Runtime and design previews import this file. */
+@layer theme {
 :root {
   /* ─── Surface ───────────────────────────────────────────────────── */
   --bg: #161412;
@@ -79,20 +80,7 @@
   --accent-ring:color-mix(in oklab,var(--fg) 16%,transparent);--accent-edge:color-mix(in oklab,var(--fg) 42%,transparent);
   --block-shadow:var(--elev-flat);--float-shadow:var(--elev-raised);--ui:var(--font-body);--mono:var(--font-mono);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--canvas)}
-body{background:var(--canvas);color:var(--text-1);font:400 14px/1.5 var(--ui)}
-b,strong{font-weight:500}
-a,button,input,select,textarea{transition:border-color var(--motion-fast) var(--ease-standard),background-color var(--motion-fast) var(--ease-standard),color var(--motion-fast) var(--ease-standard),opacity var(--motion-fast) var(--ease-standard)}
-::selection{background:rgba(250,249,246,.18);color:var(--text-1)}
-*{scrollbar-color:rgba(255,255,255,.18) transparent;scrollbar-width:thin}
-.num{font-feature-settings:"tnum"}
-.mono{font-family:var(--mono);font-size:12px;color:var(--text-2)}
-
-/* App-only additions (not in design/prototypes/console.css) */
-:root { color-scheme: dark; }
-body { min-width: 320px; min-height: 100vh; }
-
 @media (hover: none) and (pointer: coarse) {
   :root { --control-font-size: 16px; }
+}
 }

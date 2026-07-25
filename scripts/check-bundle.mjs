@@ -14,7 +14,7 @@ for (const name of javascript) {
   }
 }
 
-const routeChunks = javascript.filter((name) => /Page-[\w-]+\.js$/.test(name));
+const routeChunks = javascript.filter((name) => /Page(?:V2)?-[\w-]+\.js$/.test(name));
 if (routeChunks.length < 5) {
   failures.push(`expected at least 5 lazy page chunks, found ${routeChunks.length}`);
 }
