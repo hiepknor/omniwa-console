@@ -3,6 +3,7 @@ export { ApiFailureNotice } from './ApiFailureNotice';
 export { CommandAck } from './CommandAck';
 export { CursorPagination } from './CursorPagination';
 export { Fact, RelativeTime } from './detail';
+export { Logo } from './Logo';
 export { PageGuard } from './PageGuard';
 export { PagedSection } from './PagedSection';
 export { ProjectionStatus } from './ProjectionStatus';
