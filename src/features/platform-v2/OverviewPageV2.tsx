@@ -4,7 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
-import { Button, PageHeader, RelativeTime, Select, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, PageHeader, RelativeTime, Select, StateNotice, Status, Surface, Table } from '@/components/v2';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
@@ -85,22 +85,7 @@ export function OverviewPageV2() {
             {health.data.instances.length === 0 ? (
               <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The health snapshot contains no instances; this is not evidence of a representative workload." />
             ) : (
-              <div className="ui-v2-table-wrap" tabIndex={0} aria-label="Instance health table">
-                <table className="ui-v2-table ui-v2-platform-table">
-                  <caption className="ui-v2-visually-hidden">Independent instance health dimensions</caption>
-                  <thead><tr><th>Instance</th><th>Connection</th><th>Projection</th><th>Throttling</th></tr></thead>
-                  <tbody>
-                    {health.data.instances.map((instance) => (
-                      <tr key={instance.instanceId}>
-                        <td data-label="Instance" className="ui-v2-mono">{instance.instanceId}</td>
-                        <td data-label="Connection"><Status tone={instance.connection.connected ? 'healthy' : 'failed'}>{humanizeToken(instance.connection.status)}</Status></td>
-                        <td data-label="Projection"><Status tone={instance.projection.status === 'healthy' || instance.projection.status === 'ready' ? 'healthy' : 'degraded'}>{humanizeToken(instance.projection.status)}</Status></td>
-                        <td data-label="Throttling"><Status tone={instance.throttling.observed ? 'degraded' : 'neutral'}>{humanizeToken(instance.throttling.status)}</Status></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <Table ariaLabel="Instance health table" caption="Independent instance health dimensions" className="ui-v2-platform-table" rows={health.data.instances} rowKey={(instance) => instance.instanceId} columns={[{ header: 'Instance', className: 'ui-v2-mono', cell: (instance) => instance.instanceId }, { header: 'Connection', cell: (instance) => <Status tone={instance.connection.connected ? 'healthy' : 'failed'}>{humanizeToken(instance.connection.status)}</Status> }, { header: 'Projection', cell: (instance) => <Status tone={instance.projection.status === 'healthy' || instance.projection.status === 'ready' ? 'healthy' : 'degraded'}>{humanizeToken(instance.projection.status)}</Status> }, { header: 'Throttling', cell: (instance) => <Status tone={instance.throttling.observed ? 'degraded' : 'neutral'}>{humanizeToken(instance.throttling.status)}</Status> }]} />
             )}
           </Surface>
         ) : null}
@@ -138,24 +123,7 @@ export function OverviewPageV2() {
             {projection.data.resources.length === 0 ? (
               <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The server reported no projection resources in this snapshot." />
             ) : (
-              <div className="ui-v2-table-wrap" tabIndex={0} aria-label="Projection health table">
-                <table className="ui-v2-table ui-v2-platform-table">
-                  <caption className="ui-v2-visually-hidden">Projection resource health</caption>
-                  <thead><tr><th>Resource</th><th>Instance</th><th>Sync state</th><th>Pending</th><th>Dead letters</th><th>Event lag</th></tr></thead>
-                  <tbody>
-                    {projection.data.resources.map((resource, index) => (
-                      <tr key={`${resource.instanceId ?? 'server'}-${resource.resource}-${index}`}>
-                        <td data-label="Resource">{humanizeToken(resource.resource)}</td>
-                        <td data-label="Instance" className="ui-v2-mono">{resource.instanceId ?? 'Server'}</td>
-                        <td data-label="Sync state"><Status tone={resource.syncStatus === 'ready' ? 'healthy' : resource.syncStatus === 'failed' ? 'failed' : 'degraded'}>{humanizeToken(resource.syncStatus)}</Status></td>
-                        <td data-label="Pending" className="ui-v2-mono">{formatCount(resource.pendingEvents)}</td>
-                        <td data-label="Dead letters" className="ui-v2-mono">{formatCount(resource.deadLetterEvents)}</td>
-                        <td data-label="Event lag" className="ui-v2-mono">{resource.eventLagSeconds === undefined ? '—' : `${resource.eventLagSeconds}s`}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <Table ariaLabel="Projection health table" caption="Projection resource health" className="ui-v2-platform-table" rows={projection.data.resources} rowKey={(resource, index) => `${resource.instanceId ?? 'server'}-${resource.resource}-${index}`} columns={[{ header: 'Resource', cell: (resource) => humanizeToken(resource.resource) }, { header: 'Instance', className: 'ui-v2-mono', cell: (resource) => resource.instanceId ?? 'Server' }, { header: 'Sync state', cell: (resource) => <Status tone={resource.syncStatus === 'ready' ? 'healthy' : resource.syncStatus === 'failed' ? 'failed' : 'degraded'}>{humanizeToken(resource.syncStatus)}</Status> }, { header: 'Pending', className: 'ui-v2-mono', cell: (resource) => formatCount(resource.pendingEvents) }, { header: 'Dead letters', className: 'ui-v2-mono', cell: (resource) => formatCount(resource.deadLetterEvents) }, { header: 'Event lag', className: 'ui-v2-mono', cell: (resource) => resource.eventLagSeconds === undefined ? '—' : `${resource.eventLagSeconds}s` }]} />
             )}
           </Surface>
         ) : null}

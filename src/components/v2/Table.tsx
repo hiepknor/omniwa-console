@@ -31,7 +31,7 @@ export function Table<T>({
 }: {
   columns: Array<Column<T>>;
   rows: readonly T[];
-  rowKey: (item: T) => string;
+  rowKey: (item: T, index: number) => string;
   caption: string;
   ariaLabel: string;
   className?: string;
@@ -45,8 +45,8 @@ export function Table<T>({
           <tr>{columns.map((column, index) => <th key={index}>{column.header}</th>)}</tr>
         </thead>
         <tbody>
-          {rows.map((row) => {
-            const key = rowKey(row);
+          {rows.map((row, index) => {
+            const key = rowKey(row, index);
             return (
               <tr key={key} data-selected={(selectedKey !== undefined && key === selectedKey) || undefined}>
                 {columns.map((column, index) => <td key={index} data-label={column.label ?? column.header} className={column.className} title={column.title?.(row)}>{column.cell(row)}</td>)}
