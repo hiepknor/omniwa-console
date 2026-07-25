@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { CampaignStatus } from '@/api/campaigns';
-import { ApiFailureNotice, Button, CursorPagination, Dialog, Fact, Inspector, PagedSection, StateNotice, Status, Table, Tabs } from '@/components/v2';
+import { ApiFailureNotice, Button, CommandAck, CursorPagination, Dialog, Fact, Inspector, PagedSection, StateNotice, Status, Table, Tabs } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useCampaignAuditV2, useCampaignRecipientsV2, useCampaignTransitionV2, useCampaignV2 } from './hooks';
 import { campaignRouteState, setCampaignParam, type CampaignTabV2 } from './route-state';
@@ -49,7 +49,7 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
   return <>
     <Inspector titleId="campaign-v2-title" eyebrow="Campaign" title={campaign?.name ?? 'Campaign detail'} subtitle={<span className="ui-v2-mono">{campaignId}</span>} status={campaign ? <Status tone={tone(campaign.status)}>{humanizeToken(campaign.status)}</Status> : undefined} modal onClose={onClose}>
       {detail.isPending ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} /> : detail.error || !detail.data || !campaign ? <ApiFailureNotice error={detail.error ?? new Error('Campaign detail unavailable.')} onRetry={() => detail.refetch()} /> : <div className="ui-v2-stack">
-        {ack ? <StateNotice value={{ axis: 'command', state: 'acknowledged' }} detail={`${humanizeToken(ack)} was acknowledged by the server. Refreshed campaign, recipient, and audit reads remain authoritative; this does not prove recipient delivery or completion.`} /> : null}
+        {ack ? <CommandAck action={humanizeToken(ack)} note="Refreshed campaign, recipient, and audit reads remain authoritative; this does not prove recipient delivery or completion." /> : null}
         {transition.error ? <ApiFailureNotice error={transition.error} command /> : null}
         <Tabs label="Campaign detail" selectedId={route.tab} onSelect={(id) => selectTab(id as CampaignTabV2)} items={[{ id: 'overview', label: 'Overview' }, { id: 'recipients', label: 'Recipients', count: detail.data.recipientCount }, { id: 'audit', label: 'Audit' }]} />
         {route.tab === 'overview' ? <div id="overview-panel" role="tabpanel" aria-labelledby="overview-tab" className="ui-v2-stack">

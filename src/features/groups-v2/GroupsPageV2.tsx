@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { ApiFailureNotice, Button, CursorPagination, Field, PageGuard, PageHeader, ProjectionStatus, StateNotice, Status, Surface, Table } from '@/components/v2';
+import { ApiFailureNotice, Button, CommandAck, CursorPagination, Field, PageGuard, PageHeader, ProjectionStatus, StateNotice, Status, Surface, Table } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { CreateGroupV2 } from './CreateGroupV2';
@@ -42,7 +42,7 @@ export function GroupsPageV2() {
   return <div className="ui-v2-page">
     <PageHeader eyebrow="Messaging" title="Groups" description="Projection-backed group directory and explicit provider commands in the active instance scope." actions={<><Button disabled={list.isFetching} onClick={() => list.refetch()}>{list.isFetching ? 'Refreshing…' : 'Refresh'}</Button><Button variant="primary" onClick={() => { create.reset(); setParam('create', '1'); }}>New group</Button></>} />
     <div className="ui-v2-page__content">
-      {ack ? <StateNotice value={{ axis: 'command', state: 'acknowledged' }} detail={`${ack} was acknowledged by the server. The refreshed group projection remains authoritative.`} /> : null}
+      {ack ? <CommandAck action={ack} note="The refreshed group projection remains authoritative." /> : null}
       {list.data && groups.length > 0 ? <div className="ui-v2-metric-grid ui-v2-groups-metrics"><div><span>Loaded groups</span><strong>{groups.length}</strong></div><div><span>Members</span><strong>{groups.reduce((sum, group) => sum + (group.memberCount ?? 0), 0)}</strong></div><div><span>Known admins</span><strong>{groups.reduce((sum, group) => sum + (group.adminCount ?? 0), 0)}</strong></div><div><span>Announcement only</span><strong>{groups.filter((group) => group.announce).length}</strong></div></div> : null}
       <Surface title="Group directory" description="Applied prefix search, opaque cursor, and selected group remain URL-addressable.">
         <form className="ui-v2-group-filters" onSubmit={(event) => { event.preventDefault(); applySearch(); }}><Field label="Prefix search" type="search" value={searchDraft} placeholder="Group name or JID prefix" onChange={(event) => setSearchDraft(event.target.value)} /><Button type="submit" disabled={searchDraft.trim() === route.search || list.isFetching}>Apply search</Button></form>
