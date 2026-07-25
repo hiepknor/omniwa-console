@@ -4,7 +4,7 @@ import { useInstanceCredential, useSetInstanceCredential } from '@/api/ApiProvid
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
-import { Button, Dialog, Field, Inspector, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, CommandAck, Dialog, Field, Inspector, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import {
   useAdvancedSettingsV2,
@@ -31,7 +31,7 @@ const settings: Array<{ key: keyof InstanceAdvancedSettings; label: string; hint
 ];
 
 function Ack({ action }: { action: string }) {
-  return <StateNotice value={{ axis: 'command', state: 'acknowledged' }} detail={`${action} was acknowledged by the server. Refreshed status remains authoritative; acknowledgement does not prove final connectivity or pairing.`} />;
+  return <CommandAck action={action} note="Refreshed status remains authoritative; acknowledgement does not prove final connectivity or pairing." />;
 }
 
 function AdvancedSettingsV2({ instanceId, token }: { instanceId: string; token: string }) {

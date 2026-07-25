@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { GroupMemberResource, GroupResource, GroupSetting } from '@/api/groups';
-import { ApiFailureNotice, Button, Dialog, Field, Inspector, ProjectionStatus, StateNotice, Status, Surface } from '@/components/v2';
+import { ApiFailureNotice, Button, CommandAck, Dialog, Field, Inspector, ProjectionStatus, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import {
   useAddGroupMemberV2, useDemoteGroupMemberV2, useGroupInviteV2, useGroupV2,
@@ -16,7 +16,7 @@ const settings: Array<{ key: GroupSetting; label: string; hint: string }> = [
   { key: 'adminsOnlyAdd', label: 'Admin member add', hint: 'Only admins can add members.' },
 ];
 
-function Ack({ action }: { action: string }) { return <StateNotice value={{ axis: 'command', state: 'acknowledged' }} detail={`${action} was acknowledged by the server. The refreshed group projection remains authoritative; acknowledgement does not prove provider completion.`} />; }
+function Ack({ action }: { action: string }) { return <CommandAck action={action} note="The refreshed group projection remains authoritative; acknowledgement does not prove provider completion." />; }
 
 export function GroupWorkspaceV2({ groupId, enabled, outboundEnabled, onClose, onLeft }: { groupId: string; enabled: boolean; outboundEnabled: boolean; onClose: () => void; onLeft: () => void }) {
   const query = useGroupV2(groupId, enabled);
