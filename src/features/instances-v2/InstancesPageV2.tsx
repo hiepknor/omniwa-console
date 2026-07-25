@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { Button, Field, Inspector, PageGuard, PageHeader, Select, StateNotice, Status, Surface, Table } from '@/components/v2';
+import { Button, CommandAck, Field, Inspector, PageGuard, PageHeader, Select, StateNotice, Status, Surface, Table } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
@@ -52,7 +52,7 @@ export function InstancesPageV2() {
   return <div className="ui-v2-page">
     <PageHeader eyebrow="Platform" title="Instances" description="Secret-free fleet metadata with explicit instance-scoped credential attachment." actions={<><Button disabled={list.isFetching} onClick={() => list.refetch()}>{list.isFetching ? 'Refreshing…' : 'Refresh'}</Button><Button variant="primary" onClick={() => { create.reset(); setParam('create', '1'); }}>New instance</Button></>} />
     <div className="ui-v2-page__content">
-      {destroyAck ? <StateNotice value={{ axis: 'command', state: 'acknowledged' }} detail="Destroy was acknowledged by the server. The refreshed metadata list remains authoritative." /> : null}
+      {destroyAck ? <CommandAck action="Destroy" note="The refreshed metadata list remains authoritative." /> : null}
       <CredentialHealthV2 />
       <Surface title="Fleet metadata" description="List and detail use /instance/metadata only; tokens never enter view models or query keys.">
         <div className="ui-v2-instance-filters"><Field label="Search" type="search" value={search} placeholder="Name or instance ID" onChange={(event) => setParam('search', event.target.value)} /><Select label="Status" value={status} onChange={(value) => setParam('status', value)} options={[{ value: '', label: 'All statuses' }, { value: 'connected', label: 'Connected' }, { value: 'disconnected', label: 'Disconnected' }]} /></div>
