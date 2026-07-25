@@ -1,4 +1,4 @@
-# UI v2 implementation guide
+# UI v2 Implementation Guide
 
 This is the canonical implementation and review contract for the v2 Console.
 The contract matrix decides which public operations belong in Console,

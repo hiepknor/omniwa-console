@@ -1,6 +1,6 @@
 # Feedback and State Presentation
 
-The console uses one shared feedback system. Features report outcomes and
+The Console uses one shared feedback system. Features report outcomes and
 conditions; centralized components decide whether they appear as a toast,
 surface notice, projection notice, or workspace banner.
 
