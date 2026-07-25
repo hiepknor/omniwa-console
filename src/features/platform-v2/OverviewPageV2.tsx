@@ -4,7 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
-import { Button, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, PageHeader, Select, StateNotice, Status, Surface } from '@/components/v2';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
@@ -61,12 +61,7 @@ export function OverviewPageV2() {
         description="Persisted server, instance, projection, and message facts. Missing values remain unreported."
         actions={(
           <>
-            <label className="ui-v2-inline-select">
-              <span>Metric window</span>
-              <select value={window} onChange={(event) => setWindow(event.target.value)}>
-                {overviewWindowOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
-            </label>
+            <Select label="Metric window" value={window} onChange={setWindow} options={overviewWindowOptions.map((option) => ({ value: option.value, label: option.label }))} />
             <Button onClick={refresh} disabled={refreshing} aria-busy={refreshing || undefined}>
               {refreshing ? 'Refreshing…' : 'Refresh'}
             </Button>
