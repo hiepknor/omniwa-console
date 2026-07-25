@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { CampaignStatus } from '@/api/campaigns';
-import { ApiFailureNotice, Button, CursorPagination, Dialog, Inspector, StateNotice, Status, Tabs } from '@/components/v2';
+import { ApiFailureNotice, Button, CursorPagination, Dialog, Fact, Inspector, StateNotice, Status, Tabs } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useCampaignAuditV2, useCampaignRecipientsV2, useCampaignTransitionV2, useCampaignV2 } from './hooks';
 import { campaignRouteState, setCampaignParam, type CampaignTabV2 } from './route-state';
@@ -69,6 +69,4 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
     </Dialog> : null}
   </>;
 }
-
-function Fact({ label, value }: { label: string; value: string }) { return <div><dt>{label}</dt><dd>{value}</dd></div>; }
 function PagedRead({ pending, error, retry, children }: { pending: boolean; error: unknown; retry: () => unknown; children: React.ReactNode }) { if (pending) return <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} />; if (error) return <ApiFailureNotice error={error} onRetry={retry} />; return children; }
