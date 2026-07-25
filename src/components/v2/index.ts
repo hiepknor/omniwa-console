@@ -1,5 +1,7 @@
 export { Button, Field, PageHeader, Status, Surface, UiV2Boundary } from './primitives';
 export { ApiFailureNotice } from './ApiFailureNotice';
+export { CursorPagination } from './CursorPagination';
+export { PageGuard } from './PageGuard';
 export { ProjectionStatus } from './ProjectionStatus';
 export { Select } from './Select';
 export type { SelectOption } from './Select';
