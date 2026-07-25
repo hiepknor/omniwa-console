@@ -128,6 +128,8 @@ export function ShellV2({ session, onDisconnect }: { session: ConsoleSession; on
                     key={item.to}
                     to={item.to}
                     end={item.end}
+                    title={item.label}
+                    aria-label={item.label}
                     className={({ isActive }) => (isActive ? 'is-active' : undefined)}
                   >
                     <ShellIcon name={item.icon} />
@@ -142,7 +144,10 @@ export function ShellV2({ session, onDisconnect }: { session: ConsoleSession; on
               <Status tone="healthy">Connected</Status>
               <span className="ui-v2-mono">In-memory credential</span>
             </div>
-            <Button onClick={onDisconnect}>Sign out</Button>
+            <Button onClick={onDisconnect} aria-label="Sign out" title="Sign out">
+              <svg className="ui-v2-shell__signout" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8l4 4-4 4M18 12H8M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h2" /></svg>
+              <span>Sign out</span>
+            </Button>
           </footer>
         </aside>
         <main id="ui-v2-main" className="ui-v2-shell__main" tabIndex={-1}>
