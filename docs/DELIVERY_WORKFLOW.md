@@ -22,7 +22,7 @@ how to apply them from intake through merge and post-merge verification.
 4. **Safe states are product behavior.** Loading, empty, stale, syncing,
    unavailable, rate-limited, and error states are part of the implementation,
    not follow-up polish.
-5. **Server authority is preserved.** The console presents server state and
+5. **Server authority is preserved.** The Console presents server state and
    submits commands. It does not recreate backend orchestration, authorization,
    pagination, retries, or business rules in the browser.
 6. **Review the delivered diff.** Self-review compares the branch with its base,

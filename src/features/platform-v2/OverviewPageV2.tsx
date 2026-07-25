@@ -4,17 +4,13 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
-import { Button, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, PageHeader, RelativeTime, Select, StateNotice, Status, Surface } from '@/components/v2';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
 import { failureDetail, failureRequestId, readFailureState } from './state';
 import { usePlatformHealth, usePlatformOverview, usePlatformProjectionHealth } from './hooks';
 import { overviewWindowFromSearch, overviewWindowOptions } from './route-state';
-
-function Timestamp({ value }: { value?: string }) {
-  return value ? <time dateTime={value} title={value}>{relativeTime(value) || value}</time> : <>Not reported</>;
-}
 
 function QueryNotice({ query, state }: { query: { error: unknown; refetch: () => unknown }; state: ReturnType<typeof useResilientReadState> }) {
   if (!state.isError) return null;
@@ -61,12 +57,7 @@ export function OverviewPageV2() {
         description="Persisted server, instance, projection, and message facts. Missing values remain unreported."
         actions={(
           <>
-            <label className="ui-v2-inline-select">
-              <span>Metric window</span>
-              <select value={window} onChange={(event) => setWindow(event.target.value)}>
-                {overviewWindowOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-              </select>
-            </label>
+            <Select label="Metric window" value={window} onChange={setWindow} options={overviewWindowOptions.map((option) => ({ value: option.value, label: option.label }))} />
             <Button onClick={refresh} disabled={refreshing} aria-busy={refreshing || undefined}>
               {refreshing ? 'Refreshing…' : 'Refresh'}
             </Button>
@@ -179,7 +170,7 @@ export function OverviewPageV2() {
           )}
         </Surface>
 
-        <p className="ui-v2-generated-note">Latest available snapshots: overview <Timestamp value={overview.data?.generatedAt} />, health <Timestamp value={health.data?.generatedAt} />, projections <Timestamp value={projection.data?.generatedAt} />.</p>
+        <p className="ui-v2-generated-note">Latest available snapshots: overview <RelativeTime value={overview.data?.generatedAt} />, health <RelativeTime value={health.data?.generatedAt} />, projections <RelativeTime value={projection.data?.generatedAt} />.</p>
       </div>
     </div>
   );
