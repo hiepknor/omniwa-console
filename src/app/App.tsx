@@ -1,24 +1,59 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useMemo, useRef, useState } from 'react';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { lazy, useMemo, useRef, useState } from 'react';
+import { createBrowserRouter, Navigate, type RouteObject, RouterProvider } from 'react-router-dom';
 import { ApiProvider } from '@/api/ApiProvider';
 import { CapabilitiesProvider } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { clearSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
-import { ActiveConnectPage, ActiveShell, authenticatedRoutes } from '@generation';
+import { ConnectPageV2 as ActiveConnectPage } from './ConnectPageV2';
+import { ShellV2 as ActiveShell } from './ShellV2';
+
+const OverviewPage = lazy(() => import('@/features/platform-v2/OverviewPageV2').then((m) => ({ default: m.OverviewPageV2 })));
+const RecoveryPage = lazy(() => import('@/features/platform-v2/RecoveryPageV2').then((m) => ({ default: m.RecoveryPageV2 })));
+const InstancesPage = lazy(() => import('@/features/instances-v2/InstancesPageV2').then((m) => ({ default: m.InstancesPageV2 })));
+const ConversationsPage = lazy(() => import('@/features/conversations-v2/ConversationsPageV2').then((m) => ({ default: m.ConversationsPageV2 })));
+const GroupsPage = lazy(() => import('@/features/groups-v2/GroupsPageV2').then((m) => ({ default: m.GroupsPageV2 })));
+const CampaignsPage = lazy(() => import('@/features/campaigns-v2/CampaignsPageV2').then((m) => ({ default: m.CampaignsPageV2 })));
+const CreateCampaignPage = lazy(() => import('@/features/campaigns-v2/CreateCampaignV2').then((m) => ({ default: m.CreateCampaignV2 })));
+const EventsPage = lazy(() => import('@/features/events-v2/EventsPageV2').then((m) => ({ default: m.EventsPageV2 })));
+
+const authenticatedRoutes: RouteObject[] = [
+  { path: '/chats', element: <ConversationsPage /> },
+  { path: '/chats/:chatId', element: <ConversationsPage /> },
+  { path: '/groups', element: <GroupsPage /> },
+  { path: '/groups/:groupId', element: <GroupsPage /> },
+  { path: '/messages', element: <CampaignsPage /> },
+  { path: '/messages/new', element: <CreateCampaignPage /> },
+  { path: '/messages/:campaignId', element: <CampaignsPage /> },
+  { path: '/overview', element: <OverviewPage /> },
+  { path: '/recovery', element: <RecoveryPage /> },
+  { path: '/instances', element: <InstancesPage /> },
+  { path: '/instances/:instanceId', element: <InstancesPage /> },
+  { path: '/events', element: <EventsPage /> },
+  { path: '*', element: <Navigate to="/overview" replace /> },
+];
 
 type ConnectNotice = 'session-invalid' | undefined;
 
 const developmentRoutes = import.meta.env.DEV
-  ? [{
-      path: '/__ui-v2',
-      lazy: async () => {
-        const { UiV2Gallery } = await import('./UiV2Gallery');
-        return { Component: UiV2Gallery };
+  ? [
+      {
+        path: '/__ui',
+        lazy: async () => {
+          const { UiGallery } = await import('./UiGallery');
+          return { Component: UiGallery };
+        },
       },
-    }]
+      {
+        path: '/__ui-v2',
+        lazy: async () => {
+          const { UiV2Gallery } = await import('./UiV2Gallery');
+          return { Component: UiV2Gallery };
+        },
+      },
+    ]
   : [];
 
 function AppRuntime() {
