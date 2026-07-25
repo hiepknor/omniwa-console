@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { Button, Field, Inspector, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, Field, Inspector, PageGuard, PageHeader, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
@@ -12,6 +12,8 @@ import { useCreateInstanceV2, useInstanceV2, useInstancesV2 } from './hooks';
 import { InstanceWorkspaceV2 } from './InstanceWorkspaceV2';
 import { filterInstancesV2, instanceFiltersFromSearch } from './route-state';
 import { FailureNotice } from './ui';
+
+function Blocked({ detail, state }: { detail?: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Platform" title="Instances" description="Fleet metadata, pairing, lifecycle, settings, and credential posture." state={state} detail={detail} />; }
 
 export function InstancesPageV2() {
   const session = useApiSession();
@@ -43,9 +45,9 @@ export function InstancesPageV2() {
   const openInstance = (id: string) => navigate(withSearchParams(`/instances/${encodeURIComponent(id)}`, routeParams));
   const closeCreate = () => { create.reset(); setParam('create'); };
 
-  if (session.keyKind !== 'admin') return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Instances" description="Fleet metadata, pairing, lifecycle, settings, and credential posture." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'session', state: 'invalid' }} detail="Instance fleet management requires an admin credential. No fleet request was sent." /></div></div>;
-  if (capabilities.isPending) return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Instances" description="Fleet metadata, pairing, lifecycle, settings, and credential posture." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'capability', state: 'discovering' }} /></div></div>;
-  if (!metadataAvailable) return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Instances" description="Fleet metadata, pairing, lifecycle, settings, and credential posture." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'capability', state: 'unsupported' }} detail={capabilities.isError ? 'Capability discovery failed; fleet metadata remains disabled.' : 'The backend does not advertise instance_metadata_views. V2 does not fall back to credential-bearing legacy instance reads.'} /></div></div>;
+  if (session.keyKind !== 'admin') return <Blocked state="invalid" detail="Instance fleet management requires an admin credential. No fleet request was sent." />;
+  if (capabilities.isPending) return <Blocked state="discovering" />;
+  if (!metadataAvailable) return <Blocked state="unsupported" detail={capabilities.isError ? 'Capability discovery failed; fleet metadata remains disabled.' : 'The backend does not advertise instance_metadata_views. V2 does not fall back to credential-bearing legacy instance reads.'} />;
 
   return <div className="ui-v2-page">
     <PageHeader eyebrow="Platform" title="Instances" description="Secret-free fleet metadata with explicit instance-scoped credential attachment." actions={<><Button disabled={list.isFetching} onClick={() => list.refetch()}>{list.isFetching ? 'Refreshing…' : 'Refresh'}</Button><Button variant="primary" onClick={() => { create.reset(); setParam('create', '1'); }}>New instance</Button></>} />
