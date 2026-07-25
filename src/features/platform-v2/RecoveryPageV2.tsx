@@ -4,7 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { ProjectionFailure } from '@/api/recovery';
 import { ApiFailure } from '@/api/envelopes';
-import { Button, CursorPagination, Dialog, Field, Inspector, PageGuard, PageHeader, RelativeTime, Select, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, CursorPagination, Dialog, Field, Inspector, PageGuard, PageHeader, RelativeTime, Select, StateNotice, Status, Surface, Table } from '@/components/v2';
 import { humanizeToken } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
@@ -139,22 +139,7 @@ export function RecoveryPageV2() {
           {state.isInitialLoading ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} detail="Reading projection failures." /> : null}
           {query.data?.items.length === 0 ? <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The server returned no terminal failures for this exact filter and cursor. This does not summarize other pages or scopes." /> : null}
           {query.data && query.data.items.length > 0 ? (
-            <div className="ui-v2-table-wrap" tabIndex={0} aria-label="Projection failure table">
-              <table className="ui-v2-table ui-v2-recovery-table">
-                <caption className="ui-v2-visually-hidden">Terminal projection failures</caption>
-                <thead><tr><th>Event</th><th>Instance</th><th>Resource</th><th>Failure</th><th>Attempts</th><th>Dead-lettered</th></tr></thead>
-                <tbody>{query.data.items.map((failure) => (
-                  <tr key={failureIdentity(failure)} data-selected={failure === selected || undefined}>
-                    <td data-label="Event"><button className="ui-v2-row-link ui-v2-mono" type="button" onClick={() => selectFailure(failure)}>{failure.eventKey}</button></td>
-                    <td data-label="Instance" className="ui-v2-mono">{failure.instanceId}</td>
-                    <td data-label="Resource">{humanizeToken(failure.resource)}</td>
-                    <td data-label="Failure">{humanizeToken(failure.lastErrorCode ?? failure.failureClass)}</td>
-                    <td data-label="Attempts" className="ui-v2-mono">{failure.retryCount ?? '—'} / {failure.maxAttempts ?? '—'}</td>
-                    <td data-label="Dead-lettered"><RelativeTime value={failure.deadLetteredAt} /></td>
-                  </tr>
-                ))}</tbody>
-              </table>
-            </div>
+            <Table ariaLabel="Projection failure table" caption="Terminal projection failures" className="ui-v2-recovery-table" rows={query.data.items} rowKey={(failure) => failureIdentity(failure)} selectedKey={selected ? failureIdentity(selected) : undefined} columns={[{ header: 'Event', cell: (failure) => <button className="ui-v2-row-link ui-v2-mono" type="button" onClick={() => selectFailure(failure)}>{failure.eventKey}</button> }, { header: 'Instance', className: 'ui-v2-mono', cell: (failure) => failure.instanceId }, { header: 'Resource', cell: (failure) => humanizeToken(failure.resource) }, { header: 'Failure', cell: (failure) => humanizeToken(failure.lastErrorCode ?? failure.failureClass) }, { header: 'Attempts', className: 'ui-v2-mono', cell: (failure) => <>{failure.retryCount ?? '—'} / {failure.maxAttempts ?? '—'}</> }, { header: 'Dead-lettered', cell: (failure) => <RelativeTime value={failure.deadLetteredAt} /> }]} />
           ) : null}
           <CursorPagination
             cursor={filters.cursor}
