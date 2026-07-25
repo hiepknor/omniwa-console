@@ -4,7 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { ProjectionFailure } from '@/api/recovery';
 import { ApiFailure } from '@/api/envelopes';
-import { Button, Dialog, Field, Inspector, PageHeader, RelativeTime, StateNotice, Status, Surface } from '@/components/v2';
+import { Button, CursorPagination, Dialog, Field, Inspector, PageGuard, PageHeader, RelativeTime, Select, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
@@ -17,6 +17,8 @@ type RecoveryAction = 'replay' | 'discard';
 function failureIdentity(failure: ProjectionFailure): string {
   return JSON.stringify([failure.instanceId, failure.resource, failure.eventKey]);
 }
+
+function Blocked({ detail, state }: { detail?: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." state={state} detail={detail} />; }
 
 export function RecoveryPageV2() {
   const session = useApiSession();
@@ -91,13 +93,13 @@ export function RecoveryPageV2() {
   };
 
   if (session.keyKind !== 'admin') {
-    return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'session', state: 'invalid' }} detail="Projection recovery requires an admin credential. No recovery request was sent." /></div></div>;
+    return <Blocked state="invalid" detail="Projection recovery requires an admin credential. No recovery request was sent." />;
   }
   if (capabilities.isPending) {
-    return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'capability', state: 'discovering' }} detail="Waiting for server capability discovery before reading failures." /></div></div>;
+    return <Blocked state="discovering" detail="Waiting for server capability discovery before reading failures." />;
   }
   if (!capabilityReady) {
-    return <div className="ui-v2-page"><PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." /><div className="ui-v2-page__content"><StateNotice value={{ axis: 'capability', state: 'unsupported' }} detail={capabilities.isError ? 'Capability discovery failed; recovery remains disabled.' : 'The server does not advertise projection_failure_operations.'} /></div></div>;
+    return <Blocked state="unsupported" detail={capabilities.isError ? 'Capability discovery failed; recovery remains disabled.' : 'The server does not advertise projection_failure_operations.'} />;
   }
 
   return (
@@ -130,7 +132,7 @@ export function RecoveryPageV2() {
           <form className="ui-v2-recovery-filters" onSubmit={applyFilters}>
             <Field label="Instance ID" value={instanceDraft} placeholder="All instances" onChange={(event) => setInstanceDraft(event.target.value)} />
             <Field label="Resource" value={resourceDraft} placeholder="All resources" onChange={(event) => setResourceDraft(event.target.value)} />
-            <label className="ui-v2-field"><span className="ui-v2-field__label">Page size</span><select className="ui-v2-input" value={filters.limit} onChange={(event) => updateFilters({ limit: event.target.value === '50' ? undefined : event.target.value })}>{[25, 50, 100, 200].map((limit) => <option key={limit} value={limit}>{limit}</option>)}</select></label>
+            <Select label="Page size" value={String(filters.limit)} onChange={(value) => updateFilters({ limit: value === '50' ? undefined : value })} options={[25, 50, 100, 200].map((limit) => ({ value: String(limit), label: String(limit) }))} />
             <Button variant="primary" type="submit">Apply filters</Button>
           </form>
 
@@ -154,13 +156,12 @@ export function RecoveryPageV2() {
               </table>
             </div>
           ) : null}
-          <div className="ui-v2-pagination">
-            <span>{filters.cursor ? 'Opaque cursor page' : 'First page'}</span>
-            <div>
-              {filters.cursor ? <Button onClick={() => updateFilters({ cursor: undefined, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }, false)}>First page</Button> : null}
-              <Button disabled={!query.data?.nextCursor} onClick={() => updateFilters({ cursor: query.data?.nextCursor, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }, false)}>Next page</Button>
-            </div>
-          </div>
+          <CursorPagination
+            cursor={filters.cursor}
+            nextCursor={query.data?.nextCursor}
+            resetLabel="First page"
+            onCursor={(value) => updateFilters({ cursor: value, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }, false)}
+          />
         </Surface>
       </div>
 

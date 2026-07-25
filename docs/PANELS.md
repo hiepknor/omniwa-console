@@ -1,6 +1,6 @@
 # Panel Contracts
 
-This file assigns public OmniWA GO `METHOD /path` operations to console panels
+This file assigns public OmniWA GO `METHOD /path` operations to Console panels
 and distinguishes backend availability from frontend integration status.
 
 Rules:
@@ -8,7 +8,7 @@ Rules:
 - A feature may call only operations owned by its panel below.
 - Shared app/API infrastructure may call operations listed under Shared.
 - When a panel needs another operation, update this document in the same PR.
-- “Backend available” does not mean the console has integrated the endpoint.
+- “Backend available” does not mean the Console has integrated the endpoint.
 - Unsupported surfaces remain explicit unavailable routes; they are not
   emulated with browser business logic.
 
@@ -47,7 +47,7 @@ preserved.
 
 ## Instances — `/instances`, `/instances/:instanceId`
 
-Status: integrated in legacy and v2. V2 uses only the metadata reads approved
+**Status:** integrated in legacy and v2. V2 uses only the metadata reads approved
 for redesign and does not fall back to credential-bearing legacy fleet reads.
 
 ```text
@@ -79,7 +79,7 @@ as non-representative, and never derives a plaintext-removal decision.
 
 ## Groups — `/groups/:groupId?` (v2), `/groups/:instanceId?` (legacy)
 
-Status: projection list/info/search and mutations integrated in legacy and v2.
+**Status:** projection list/info/search and mutations integrated in legacy and v2.
 V2 uses the active instance credential as its scope and never calls the admin
 fleet list. Reads remain available from persisted projection data while the
 WhatsApp instance is offline; live mutations still require provider
@@ -119,7 +119,7 @@ to a live WhatsApp read.
 
 ## Chats workspace — `/chats/:chatId?` (v2), `/chats/:instanceId?/:chatId?` (legacy)
 
-Status: Chat and Message list/detail, delivery receipts, Contacts
+**Status:** Chat and Message list/detail, delivery receipts, Contacts
 list/search/detail, Labels list/detail, and bounded text/media sends are
 integrated in legacy and v2. V2 uses the active instance credential as its
 scope and never calls the admin fleet list.
@@ -190,7 +190,7 @@ POST /chat/unpin
 
 ## Campaigns — `/messages`, `/messages/new`, `/messages/:campaignId` (v2)
 
-Status: integrated in the current Console and approved for route-level v2
+**Status:** integrated in the current Console and approved for route-level v2
 redesign. Full behavior is in `docs/CAMPAIGNS.md`.
 
 All operations in this section use the instance credential. V2 uses the active
@@ -215,7 +215,7 @@ OmniWA GO.
 
 ## Events — `/events`
 
-Status: durable history integrated in the current Console and approved for
+**Status:** durable history integrated in the current Console and approved for
 route-level v2 redesign.
 
 ```text
@@ -229,7 +229,7 @@ does not open the admin-key WebSocket.
 
 ## Overview — `/overview`
 
-Status: integrated in legacy and v2 with persisted metrics, split health,
+**Status:** integrated in legacy and v2 with persisted metrics, split health,
 URL-backed windows, explicit unavailable action state, and polling-only
 realtime posture.
 
@@ -248,7 +248,7 @@ Instance health dimensions are grouped by the server-provided instance ID.
 
 ## Projection Recovery — `/recovery`
 
-Status: integrated behind the v2 generation boundary. The route appears in v2
+**Status:** integrated behind the v2 generation boundary. The route appears in v2
 navigation only for an admin session when capability discovery advertises
 `projection_failure_operations`.
 

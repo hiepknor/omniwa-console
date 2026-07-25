@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Dialog, Field, Inspector, PageHeader, ScopeSelector, StateNotice, Status, Surface, Tabs, UiV2Boundary } from '@/components/v2';
+import { Button, Dialog, Field, Inspector, PageHeader, ScopeSelector, Select, StateNotice, Status, Surface, Tabs, UiV2Boundary } from '@/components/v2';
 
 const statuses = [
   ['healthy', 'Connected'],
@@ -13,6 +13,7 @@ export function UiV2Gallery() {
   const [tab, setTab] = useState('ready');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [status, setStatus] = useState('scheduled');
   return (
     <UiV2Boundary className="ui-v2-gallery">
       <main className="ui-v2-gallery__main">
@@ -36,6 +37,16 @@ export function UiV2Gallery() {
             <div className="ui-v2-form-grid">
               <Field label="API origin" defaultValue="https://staging-api.onio.cc" hint="Origin only; no path or credential." />
               <Field label="Instance ID" defaultValue="314a151c-5e40-4b0a-9268-4c3087e936e7" error="Example validation state" />
+              <Select
+                label="Campaign status"
+                value={status}
+                onChange={setStatus}
+                options={[
+                  { value: 'scheduled', label: 'Scheduled', description: 'Starts at a future time', meta: '3' },
+                  { value: 'running', label: 'Running', description: 'Actively delivering recipients', meta: '1' },
+                  { value: 'paused', label: 'Paused', description: 'Leased work may still finish', meta: '0' },
+                ]}
+              />
             </div>
           </Surface>
 
