@@ -1,8 +1,9 @@
 import { useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { OverlayCloseButton } from './OverlayCloseButton';
 import { useModalFocus } from './useModalFocus';
 
-/** Centered modal over a scrim. Square, flat, strong 1px border. */
+/** Framed command surface centered on desktop and docked on narrow viewports. */
 export function Dialog({
   open,
   onClose,
@@ -25,7 +26,7 @@ export function Dialog({
   if (!open) return null;
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 max-sm:items-end max-sm:p-0 bg-black/60"
+      className="fixed inset-y-0 left-0 z-50 flex h-dvh w-dvw items-center justify-center bg-black/60 p-4 max-sm:items-end max-sm:p-0"
       onClick={() => { if (!closeDisabled) onClose(); }}
     >
       <div
@@ -36,13 +37,24 @@ export function Dialog({
         ref={dialogRef}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="flex w-[min(520px,100%)] max-h-[calc(100dvh-2rem)] flex-col bg-elevated border border-line-strong"
+        className={[
+          'relative flex max-h-[calc(100dvh-2rem)] w-[min(560px,100%)] flex-col',
+          'border border-line-strong bg-surface',
+          'max-sm:max-h-[90dvh] max-sm:w-full max-sm:border-x-0 max-sm:border-b-0',
+        ].join(' ')}
       >
-        <header className="p-4 border-b border-line">
-          <h2 id={titleId} className="text-sm font-semibold text-fg">{title}</h2>
+        <header className="grid min-h-11 grid-cols-[minmax(0,1fr)_2.25rem] items-stretch border-b border-line-strong bg-surface max-sm:grid-cols-[minmax(0,1fr)_2.5rem]">
+          <div className="flex min-w-0 items-center px-4 py-3">
+            <h2 id={titleId} className="truncate text-sm font-semibold leading-tight text-fg">{title}</h2>
+          </div>
+          <OverlayCloseButton label="Close dialog" onClick={onClose} disabled={closeDisabled} />
         </header>
-        <div className="flex-1 min-h-0 overflow-y-auto p-4">{children}</div>
-        {footer ? <footer className="flex justify-end gap-2 p-4 border-t border-line">{footer}</footer> : null}
+        <div className="min-h-0 flex-1 overflow-y-auto bg-surface p-4">{children}</div>
+        {footer ? (
+          <footer className="flex flex-wrap justify-end gap-2 border-t border-line-strong bg-elevated p-3 max-sm:[&>*]:min-w-[calc(50%_-_0.25rem)] max-sm:[&>*]:flex-1">
+            {footer}
+          </footer>
+        ) : null}
       </div>
     </div>,
     document.body,

@@ -9,6 +9,7 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 const modalStack: symbol[] = [];
+let previousBodyOverflow = '';
 
 export function useModalFocus(
   open: boolean,
@@ -27,6 +28,10 @@ export function useModalFocus(
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
     const container = containerRef.current;
     const modalId = modalIdRef.current;
+    if (modalStack.length === 0) {
+      previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
     modalStack.push(modalId);
     const focusable = () => Array.from(container?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []);
     const initial = focusable().find((element) => element.hasAttribute('autofocus')) ?? focusable()[0] ?? container;
@@ -58,6 +63,7 @@ export function useModalFocus(
       window.removeEventListener('keydown', onKey);
       const index = modalStack.lastIndexOf(modalId);
       if (index !== -1) modalStack.splice(index, 1);
+      if (modalStack.length === 0) document.body.style.overflow = previousBodyOverflow;
       previous?.focus();
     };
   }, [containerRef, open]);

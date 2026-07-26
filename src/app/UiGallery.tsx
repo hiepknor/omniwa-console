@@ -218,7 +218,7 @@ export function UiGallery() {
       <Drawer open={drawer} onClose={() => setDrawer(false)} title="inst_01" subtitle="inst_01HZX9Q…">
         <div className="grid gap-3">
           <Status tone="ok">connected</Status>
-          <p className="text-sm text-fg-2">Right-side inspector. Square, flat, 1px left border, over a scrim.</p>
+          <p className="text-sm text-fg-2">Framed right-side inspector with a strong header, scroll-safe body, and responsive bottom-sheet treatment.</p>
         </div>
       </Drawer>
 
@@ -233,7 +233,7 @@ export function UiGallery() {
           </>
         }
       >
-        <p className="text-sm text-fg-2">Centered modal dialog. Destructive actions require typed confirmation.</p>
+        <p className="text-sm text-fg-2">Framed command surface with explicit dismissal, bounded scrolling, and a stable action footer.</p>
       </Dialog>
     </div>
   );

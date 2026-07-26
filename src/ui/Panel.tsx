@@ -18,17 +18,17 @@ export function Panel({
   bodyClassName?: string;
 }) {
   return (
-    <section className={cn('border border-line-strong bg-surface', className)}>
+    <section className={cn('min-w-0 border border-line-strong bg-surface', className)}>
       {title || actions ? (
-        <header className="flex items-start justify-between gap-4 p-4 border-b border-line">
+        <header className="flex min-w-0 items-start justify-between gap-4 p-4 border-b border-line">
           <div className="grid gap-1 min-w-0">
             {title ? <h2 className="text-sm font-semibold text-fg">{title}</h2> : null}
             {description ? <p className="text-xs text-fg-3">{description}</p> : null}
           </div>
-          {actions ? <div className="flex items-center gap-2 shrink-0">{actions}</div> : null}
+          {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
         </header>
       ) : null}
-      <div className={cn('p-4', bodyClassName)}>{children}</div>
+      <div className={cn('min-w-0 p-4', bodyClassName)}>{children}</div>
     </section>
   );
 }
