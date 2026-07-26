@@ -113,39 +113,36 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
                 )}
               </Field>
 
-              <Field label="API key">
-                {(id) => (
-                  <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
-                    <Input
-                      ref={flow.apiKeyInput}
-                      id={id}
-                      name="apiKey"
-                      type={flow.showApiKey ? 'text' : 'password'}
-                      value={flow.apiKey}
-                      placeholder="Paste API key"
-                      required
-                      autoComplete="off"
-                      autoCapitalize="none"
-                      autoCorrect="off"
-                      spellCheck={false}
-                      disabled={flow.pending}
-                      onChange={(e) => flow.setApiKey(e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      disabled={flow.pending}
-                      aria-controls={id}
-                      aria-pressed={flow.showApiKey}
-                      onClick={() => {
-                        flow.setShowApiKey((s) => !s);
-                        flow.apiKeyInput.current?.focus();
-                      }}
-                    >
-                      {flow.showApiKey ? 'Hide' : 'Show'}
-                    </Button>
-                  </div>
-                )}
-              </Field>
+              <div className="grid gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <label htmlFor="connect-api-key" className="text-[11px] font-medium uppercase tracking-wider text-fg-3">API key</label>
+                  <button
+                    type="button"
+                    disabled={flow.pending}
+                    aria-controls="connect-api-key"
+                    aria-pressed={flow.showApiKey}
+                    onClick={() => { flow.setShowApiKey((s) => !s); flow.apiKeyInput.current?.focus(); }}
+                    className="text-[11px] font-medium text-fg-2 hover:text-fg underline underline-offset-2 disabled:opacity-40"
+                  >
+                    {flow.showApiKey ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+                <Input
+                  ref={flow.apiKeyInput}
+                  id="connect-api-key"
+                  name="apiKey"
+                  type={flow.showApiKey ? 'text' : 'password'}
+                  value={flow.apiKey}
+                  placeholder="Paste API key"
+                  required
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  disabled={flow.pending}
+                  onChange={(e) => flow.setApiKey(e.target.value)}
+                />
+              </div>
 
               <div className="grid gap-1">
                 <Status tone="neutral">Memory-only credential</Status>
