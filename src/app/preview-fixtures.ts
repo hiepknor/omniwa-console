@@ -1,6 +1,7 @@
 /* Dev-only sample data for rendering v3 surfaces without a backend (/__preview). */
 import type { InstanceResource } from '@/api/instances';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
+import type { ProjectionFailure } from '@/api/recovery';
 
 const now = Date.now();
 const ago = (s: number) => new Date(now - s * 1000).toISOString();
@@ -35,6 +36,12 @@ export const instancesFixture: InstanceResource[] = [
   { id: 'inst_07TMR3B9', displayName: 'Marketing blast', status: 'disconnected', connected: false, credentialVersion: 2, createdAt: ago(86_400 * 30), jid: undefined },
   { id: 'inst_09WLK1C6', displayName: 'Onboarding', status: 'disconnected', connected: false, createdAt: ago(3600), jid: undefined },
 ] as unknown as InstanceResource[];
+
+export const failuresFixture: ProjectionFailure[] = [
+  { instanceId: 'inst_07TMR3B9', resource: 'events', eventKey: 'evt_9f21c7a4', eventType: 'message.received', failureClass: 'deserialize_error', lastErrorCode: 'schema_mismatch', retryCount: 5, maxAttempts: 5, occurredAt: ago(900), lastAttemptAt: ago(120), deadLetteredAt: ago(90) },
+  { instanceId: 'inst_02KQP7M4', resource: 'chats', eventKey: 'evt_4b0e1d92', eventType: 'chat.updated', failureClass: 'constraint_violation', lastErrorCode: 'fk_missing', retryCount: 3, maxAttempts: 5, occurredAt: ago(3600), lastAttemptAt: ago(1800), deadLetteredAt: ago(1700) },
+  { instanceId: 'inst_02KQP7M4', resource: 'groups', eventKey: 'evt_77aa02fe', eventType: 'group.member.added', failureClass: 'timeout', lastErrorCode: 'downstream_timeout', retryCount: 5, maxAttempts: 5, occurredAt: ago(7200), lastAttemptAt: ago(600), deadLetteredAt: ago(540) },
+] as unknown as ProjectionFailure[];
 
 export const healthFixture: ServerHealthResource = {
   generatedAt: ago(30),

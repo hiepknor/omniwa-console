@@ -12,4 +12,5 @@ export { Drawer } from './Drawer';
 export { Dialog } from './Dialog';
 export { Panel } from './Panel';
 export { StateNotice } from './StateNotice';
+export { CursorPagination } from './CursorPagination';
 export { Logo } from './Logo';
