@@ -26,8 +26,8 @@ describe('credential-safe instance adapter', () => {
 
   it('discards tokens from the old-backend list and detail fallback', async () => {
     const GET = vi.fn()
-      .mockResolvedValueOnce(ok({ message: 'success', data: [{ id: 'instance-1', token: 'legacy-secret' }] }))
-      .mockResolvedValueOnce(ok({ message: 'success', data: { id: 'instance-1', token: 'legacy-secret' } }));
+      .mockResolvedValueOnce(ok({ message: 'success', data: [{ id: 'instance-1', token: 'retired-secret' }] }))
+      .mockResolvedValueOnce(ok({ message: 'success', data: { id: 'instance-1', token: 'retired-secret' } }));
     const client = { GET } as unknown as ApiClient;
     const list = await listInstances(client, { metadata: false });
     const detail = await getInstance(client, 'instance-1', false);

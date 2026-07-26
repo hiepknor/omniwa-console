@@ -27,24 +27,19 @@ then open the document that covers your task below.
 | [AUTH_AND_SESSION.md](AUTH_AND_SESSION.md) | Runtime key entry, credential scope, and session storage |
 | [FEEDBACK.md](FEEDBACK.md) | Feedback and projection-state presentation |
 
-## Delivery and roadmap
+## Delivery and UI
 
 | Document | Purpose |
 | --- | --- |
 | [DELIVERY_WORKFLOW.md](DELIVERY_WORKFLOW.md) | Required delivery lifecycle from intake through merge |
-| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Ordered OmniWA GO integration phases |
-| [REDESIGN_BRIEF.md](REDESIGN_BRIEF.md) | Contract-first UI redesign architecture, migration order, and cutover gates |
-| [UI_V2_GUIDE.md](UI_V2_GUIDE.md) | Canonical v2 foundation, state model, route behavior, and review contract |
+| [UI_GUIDE.md](UI_GUIDE.md) | Design foundation, state model, route behavior, and review contract |
 
 ## Deployment and rollout evidence
 
 | Document | Purpose |
 | --- | --- |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Immutable image build, generation isolation, and promotion gates |
-| [UI_V2_ROLLOUT_EVIDENCE.md](UI_V2_ROLLOUT_EVIDENCE.md) | Generation-isolated v2 artifact promotion record |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Immutable image build, promotion, and rollback gates |
 | [CREDENTIAL_ROLLOUT_EVIDENCE.md](CREDENTIAL_ROLLOUT_EVIDENCE.md) | C2–C4 credential migration observation and approvals |
-| [LEGACY_RETIREMENT_PLAN.md](LEGACY_RETIREMENT_PLAN.md) | Governance-gated plan to converge onto v2 and delete legacy |
-| [CUTOVER_READINESS.md](CUTOVER_READINESS.md) | Promotion-gate status overlay for legacy retirement |
 
 ## Documentation conventions
 
@@ -53,8 +48,7 @@ These conventions keep the documentation consistent and are enforced in review:
 - **Product names.** Use **Console** as the product proper noun in prose and
   **OmniWA GO** for the backend product. Use code font for repositories,
   packages, and paths (`omniwa-console`, `omniwa-go`, `src/api/`), and for
-  identifiers and labels (`cc.onio.console.ui-generation`). The build flag value
-  `v2` stays lowercase everywhere, including titles.
+  identifiers.
 - **Titles.** Every document opens with a single Title Case `#` heading; section
   headings use sentence case.
 - **Purpose first.** The first paragraph states what the document governs. A

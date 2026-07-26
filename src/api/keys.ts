@@ -3,17 +3,11 @@ export const SESSION_QUERY_SCOPE = 'session' as const;
 export const queryKeys = {
   capabilities: (scope: string) => ['capabilities', scope] as const,
   health: ['health'] as const,
-  healthReadiness: ['health', 'readiness'] as const,
   projectionHealth: ['health', 'projection'] as const,
   overview: (window: string) => ['overview', window] as const,
   projectionFailuresRoot: ['projection-failures'] as const,
   projectionFailures: (params: { instanceId?: string; resource?: string; limit: number; cursor?: string }) =>
     ['projection-failures', params] as const,
-  queueMetrics: ['metrics', 'queue'] as const,
-  messageMetrics: ['metrics', 'messages'] as const,
-  webhookMetrics: ['metrics', 'webhooks'] as const,
-  mediaMetrics: ['metrics', 'media'] as const,
-  actionRequired: ['action-required'] as const,
   instances: (params?: { initialCursor?: string; metadata?: boolean }) => ['instances', params ?? {}] as const,
   instanceCredentialHealth: ['instances', 'credential-health'] as const,
   instance: (instanceId: string) => ['instances', instanceId] as const,
@@ -23,7 +17,6 @@ export const queryKeys = {
   instanceQr: (instanceId: string) => ['instances', instanceId, 'qr'] as const,
   instanceAdvancedSettings: (instanceId: string) =>
     ['instances', instanceId, 'advanced-settings'] as const,
-  instanceSessions: (instanceId: string) => ['instances', instanceId, 'sessions'] as const,
   instanceChats: (instanceId: string, params?: Record<string, unknown>) =>
     params === undefined
       ? ['instances', instanceId, 'chats'] as const
@@ -48,10 +41,6 @@ export const queryKeys = {
   contact: (instanceId: string, contactId: string) => ['instances', instanceId, 'contact', contactId] as const,
   instanceLabels: (instanceId: string) => ['instances', instanceId, 'labels'] as const,
   label: (instanceId: string, labelId: string) => ['instances', instanceId, 'label', labelId] as const,
-  media: (mediaId: string) => ['media', mediaId] as const,
-  providerCapabilities: ['provider', 'capabilities'] as const,
-  queueStatus: ['queue', 'status'] as const,
-  jobs: (params?: Record<string, unknown>) => ['jobs', params ?? {}] as const,
   instanceCampaigns: (instanceId: string, params?: Record<string, unknown>) =>
     params === undefined
       ? ['instances', instanceId, 'campaigns'] as const
@@ -65,62 +54,14 @@ export const queryKeys = {
     params === undefined
       ? ['instances', instanceId, 'campaigns', campaignId, 'audit'] as const
       : ['instances', instanceId, 'campaigns', campaignId, 'audit', params] as const,
-  job: (jobId: string) => ['jobs', jobId] as const,
-  webhooks: (params?: Record<string, unknown>) => ['webhooks', params ?? {}] as const,
-  webhook: (webhookId: string) => ['webhooks', webhookId] as const,
-  webhookDeliveries: (params?: Record<string, unknown>) =>
-    ['webhook-deliveries', params ?? {}] as const,
-  webhookDeliveryHistory: (deliveryId: string) =>
-    ['webhook-deliveries', deliveryId, 'history'] as const,
   instanceEvents: (instanceId: string, params?: Record<string, unknown>) =>
     params === undefined
       ? ['instances', instanceId, 'events'] as const
       : ['instances', instanceId, 'events', params] as const,
   groupInvite: (instanceId: string, groupId: string) =>
     ['instances', instanceId, 'group', groupId, 'invite-link'] as const,
-  auditRecords: (params?: Record<string, unknown>) => ['audit-records', params ?? {}] as const,
-  settings: ['settings'] as const,
-  apiKeys: (params?: Record<string, unknown>) => ['api-keys', params ?? {}] as const,
 };
-
-export const overviewKeys = [
-  queryKeys.health,
-  queryKeys.healthReadiness,
-  queryKeys.projectionHealth,
-  queryKeys.overview('24h'),
-  queryKeys.queueMetrics,
-  queryKeys.messageMetrics,
-  queryKeys.webhookMetrics,
-  queryKeys.mediaMetrics,
-  queryKeys.actionRequired,
-] as const;
 
 export const instanceKeys = {
   root: ['instances'] as const,
-  provider: ['provider', 'capabilities'] as const,
 };
-
-export const messageKeys = {
-  root: ['messages'] as const,
-  chats: ['chats'] as const,
-  contacts: ['contacts'] as const,
-};
-
-export const opsKeys = {
-  groups: ['groups'] as const,
-  settings: ['settings'] as const,
-  apiKeys: ['api-keys'] as const,
-  queue: ['queue'] as const,
-  jobs: ['jobs'] as const,
-  webhooks: ['webhooks'] as const,
-  webhookDeliveries: ['webhook-deliveries'] as const,
-  events: ['events'] as const,
-  auditRecords: ['audit-records'] as const,
-};
-
-export const realtimeGapKeys = [
-  ...overviewKeys,
-  instanceKeys.root,
-  queryKeys.providerCapabilities,
-  opsKeys.events,
-] as const;

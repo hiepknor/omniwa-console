@@ -1,6 +1,7 @@
-import { useEffect, type ReactNode } from 'react';
+import { useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from './cn';
+import { useModalFocus } from './useModalFocus';
 
 /** Right-side inspector over a scrim. Square, flat, 1px left border. */
 export function Drawer({
@@ -16,12 +17,9 @@ export function Drawer({
   subtitle?: ReactNode;
   children: ReactNode;
 }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  const titleId = useId();
+  const drawerRef = useRef<HTMLElement>(null);
+  useModalFocus(open, drawerRef, onClose, false);
 
   if (!open) return null;
   return createPortal(
@@ -29,6 +27,9 @@ export function Drawer({
       <aside
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
+        ref={drawerRef}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         className={cn(
           'flex w-[min(440px,100%)] max-sm:w-full max-sm:mt-auto max-sm:h-[85dvh]',
@@ -37,7 +38,7 @@ export function Drawer({
       >
         <header className="flex items-start justify-between gap-3 p-4 border-b border-line">
           <div className="grid gap-1 min-w-0">
-            <h2 className="text-sm font-semibold text-fg truncate">{title}</h2>
+            <h2 id={titleId} className="text-sm font-semibold text-fg truncate">{title}</h2>
             {subtitle ? <div className="font-mono text-xs text-fg-3 truncate">{subtitle}</div> : null}
           </div>
           <button

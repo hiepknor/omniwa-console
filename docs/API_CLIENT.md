@@ -89,7 +89,7 @@ Use:
 - `unwrapCommand` for server-acknowledged mutations.
 
 Known bare-response endpoints must remain explicit. In particular,
-`GET /label/list` returns a legacy bare array, so readiness comes from the
+`GET /label/list` returns a historical bare array, so readiness comes from the
 instance `labels_projection` capability and not from response metadata. The
 Groups adapters continue to accept the historical raw list during compatibility
 rollout, but current projection responses preserve their success envelope and
@@ -120,6 +120,9 @@ Runtime errors are normalized to `ApiFailure` with:
 - `retryAfterSeconds` and absolute `retryAt` for rate limits;
 - optional request ID for forward compatibility (current OmniWA GO responses do
   not provide one).
+- local credential scope (`session` or `instance`) so an invalid attached
+  instance token cannot invalidate an otherwise valid admin session. This scope
+  is browser-only metadata and is never sent over the network.
 
 The adapter recognizes the codes documented in
 `docs/OMNIWA_GO_CONTRACT.md`. It reads `Retry-After` before the body fallback and
@@ -171,7 +174,7 @@ that shorter key is the canonical invalidation prefix. Concrete reads append
 their normalized filter/cursor object. Do not manufacture an empty parameter
 object in mutation invalidation, because it would miss cached filtered or
 paginated variants. The literal `session` scope is the non-secret cache scope
-for v2 panels whose active API client already represents one operator session;
+for panels whose active API client already represents one operator session;
 credentials never enter a key.
 
 Resource adapters stay split by backend domain. Chat projection DTOs live in
@@ -214,7 +217,7 @@ retry once only for retryable transient 5xx failures. Rate limits and permanent
 service conditions are never automatically retried. Projection polling must be
 bounded and must not reach WhatsApp live.
 
-V2 read cadences come from `src/lib/query-policy.ts`: fleet reads poll every 15
+Read cadences come from `src/lib/query-policy.ts`: fleet reads poll every 15
 seconds, platform and campaign reads every 30 seconds, ordinary persisted
 projections every 60 seconds, and QR reads every 20 seconds only while the
 pairing surface is active. A disabled route or missing scoped credential must

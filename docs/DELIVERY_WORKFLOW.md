@@ -200,7 +200,7 @@ Also verify behavior proportional to risk:
   and instance/filter changes.
 - **Responsive UI:** keyboard flow, focus restoration, narrow viewport,
   truncation, and accessible status text.
-- **Contract changes:** generated-schema freshness, operation ownership, legacy
+- **Contract changes:** generated-schema freshness, operation ownership, historical
   response exceptions, and forward-compatible unknown fields.
 
 If a required check cannot run, do not describe the task as fully verified.

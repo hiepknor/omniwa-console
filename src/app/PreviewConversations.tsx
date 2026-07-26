@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChatList, MessageTimeline } from '@/features/conversations-v2/ConversationsView';
+import { ChatList, MessageTimeline } from '@/features/conversations/ConversationsView';
 import { Button, Field, Input, PageHeader, Status, Tabs } from '@/ui';
 import { chatsFixture, messagesFixture } from './preview-fixtures';
 

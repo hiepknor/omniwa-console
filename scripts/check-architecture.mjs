@@ -20,6 +20,14 @@ for (const path of await sourceFiles(sourceRoot)) {
   const file = relative(root, path);
   const source = await readFile(path, 'utf8');
 
+  if (/(?:^|\/)features\/[^/]*-v2(?:\/|$)|(?:^|\/)\w*V2\.(?:ts|tsx)$/.test(file)) {
+    failures.push(`${file}: feature paths and files must use canonical names`);
+  }
+
+  if (!file.startsWith('src/api/generated/') && /['"][^'"]*features\/[^'"]*-v2[^'"]*['"]|\b[A-Za-z_$][\w$]*V2\b/.test(source)) {
+    failures.push(`${file}: feature imports and identifiers must use canonical names`);
+  }
+
   if (!file.startsWith('src/api/') && /\bfetch\s*\(/.test(source)) {
     failures.push(`${file}: network access must stay inside src/api/`);
   }
@@ -52,12 +60,12 @@ for (const path of await sourceFiles(sourceRoot)) {
     failures.push(`${file}: session query scope must use the canonical API key constant`);
   }
 
-  if (file.includes('-v2/') && !file.includes('.test.') && /new\s+URLSearchParams\s*\(/.test(source)) {
-    failures.push(`${file}: v2 URL state must use the shared src/lib/url-search-state.ts helpers`);
+  if (file.startsWith('src/features/') && !file.includes('.test.') && /new\s+URLSearchParams\s*\(/.test(source)) {
+    failures.push(`${file}: URL state must use the shared src/lib/url-search-state.ts helpers`);
   }
 
-  if (file.includes('-v2/') && file.endsWith('/hooks.ts') && /(?:staleTime|refetchInterval):\s*\d/.test(source)) {
-    failures.push(`${file}: v2 read timing must use the shared src/lib/query-policy.ts values`);
+  if (file.startsWith('src/features/') && file.endsWith('/hooks.ts') && /(?:staleTime|refetchInterval):\s*\d/.test(source)) {
+    failures.push(`${file}: read timing must use the shared src/lib/query-policy.ts values`);
   }
 }
 

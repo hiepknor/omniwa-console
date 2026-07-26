@@ -19,7 +19,7 @@ if (!provider.includes('InstanceCredentialsContext')) {
   failures.push('the in-memory instance credential vault is missing');
 }
 
-const instanceDrawer = await read('src/features/instances-v2/InstanceWorkspaceV2.tsx');
+const instanceDrawer = await read('src/features/instances/InstanceWorkspace.tsx');
 if (!instanceDrawer.includes('useSetInstanceCredential') || !instanceDrawer.includes('Use for this session')) {
   failures.push('existing instance tokens must be attachable to the in-memory vault after reload');
 }
@@ -40,10 +40,10 @@ if (!connectPage.includes('autoComplete="off"')) {
   failures.push('the connect API key input must disable password autocomplete');
 }
 if (!app.includes('clearSession();') || !app.includes('return null;')) {
-  failures.push('application startup must clear legacy stored sessions');
+  failures.push('application startup must clear retired stored sessions');
 }
 
-const credentialHealthPanel = await read('src/features/instances-v2/CredentialHealthV2.tsx');
+const credentialHealthPanel = await read('src/features/instances/CredentialHealth.tsx');
 if (!credentialHealthPanel.includes('not adoption evidence') || !credentialHealthPanel.includes('never derives safeToRemove')) {
   failures.push('credential health must reject a 0/0 adoption verdict and avoid a safety decision');
 }
@@ -53,12 +53,22 @@ if (/queryKey[^\n]*token|\[[^\n]*token[^\n]*\]\s+as const/i.test(keys)) {
   failures.push('query keys must be scoped by identity, never credential value');
 }
 
+const createCampaign = await read('src/features/campaigns/CreateCampaign.tsx');
+if (!createCampaign.includes("session.keyKind === 'api'") || !createCampaign.includes("includes('campaign_orchestration')")) {
+  failures.push('campaign creation must gate direct routes by instance scope and campaign_orchestration');
+}
+
+const apiClient = await read('src/api/client.ts');
+if (!apiClient.includes("CredentialScope = 'session' | 'instance'") || !apiClient.includes('responseCredentialScopes')) {
+  failures.push('API failures must retain local credential scope without sending it over the network');
+}
+
 for (const path of [
-  'src/features/campaigns-v2/CampaignsPageV2.tsx',
-  'src/features/conversations-v2/ConversationsPageV2.tsx',
-  'src/features/events-v2/EventsPageV2.tsx',
-  'src/features/groups-v2/GroupsPageV2.tsx',
-  'src/features/instances-v2/InstanceWorkspaceV2.tsx',
+  'src/features/campaigns/CampaignsPage.tsx',
+  'src/features/conversations/ConversationsPage.tsx',
+  'src/features/events/EventsPage.tsx',
+  'src/features/groups/GroupsPage.tsx',
+  'src/features/instances/InstanceWorkspace.tsx',
 ]) {
   const source = await read(path);
   if (/\b(?:instance|selectedInstance|selected)\??\.token\b/.test(source)) {

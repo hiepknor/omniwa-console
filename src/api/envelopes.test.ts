@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ApiFailure, notImplemented, unwrap, unwrapCommand, unwrapProjection } from './envelopes';
+import { ApiFailure, unwrap, unwrapCommand, unwrapProjection } from './envelopes';
 
 function response(status: number): Response {
   return new Response(null, { status });
@@ -84,15 +84,10 @@ describe('ApiFailure', () => {
   it('never carries a request id', () => {
     expect(new ApiFailure({ error: 'x' }, 400).requestId).toBeUndefined();
   });
-});
 
-describe('notImplemented', () => {
-  it('is a 501 not_implemented ApiFailure naming the resource', () => {
-    const failure = notImplemented('Webhooks');
-    expect(failure).toBeInstanceOf(ApiFailure);
-    expect(failure.httpStatus).toBe(501);
-    expect(failure.category).toBe('not_implemented');
-    expect(failure.message).toContain('Webhooks');
+  it('defaults to session scope and preserves an explicit instance scope', () => {
+    expect(new ApiFailure({ error: 'x' }, 401).credentialScope).toBe('session');
+    expect(new ApiFailure({ error: 'x' }, 401, undefined, 'instance').credentialScope).toBe('instance');
   });
 });
 

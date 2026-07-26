@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CampaignsView } from '@/features/campaigns-v2/CampaignsView';
+import { CampaignsView } from '@/features/campaigns/CampaignsView';
 import { Button, Drawer, Status, Tabs } from '@/ui';
 import { campaignDetailFixture, campaignsFixture } from './preview-fixtures';
 

@@ -4,7 +4,7 @@ import { clearSession, keyFingerprint } from './session';
 describe('memory-only Console session', () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it('removes credentials left by legacy storage-backed builds', () => {
+  it('removes credentials left by retired storage-backed builds', () => {
     const sessionStorage = { removeItem: vi.fn() };
     const localStorage = { removeItem: vi.fn() };
     vi.stubGlobal('window', { sessionStorage, localStorage });

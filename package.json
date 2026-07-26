@@ -13,11 +13,12 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "docs:check": "node scripts/check-docs.mjs",
+    "design:check": "node scripts/check-design.mjs",
     "contract:check": "node scripts/check-contract-compatibility.mjs",
     "architecture:check": "node scripts/check-architecture.mjs",
     "credential:check": "node scripts/check-credential-boundary.mjs",
     "bundle:check": "node scripts/check-bundle.mjs",
-    "check": "pnpm typecheck && pnpm docs:check && pnpm contract:check && pnpm architecture:check && pnpm credential:check && pnpm build && pnpm bundle:check && pnpm test",
+    "check": "pnpm typecheck && pnpm docs:check && pnpm design:check && pnpm contract:check && pnpm architecture:check && pnpm credential:check && pnpm build && pnpm bundle:check && pnpm test",
     "contract:sync": "node scripts/sync-omniwa-go-contract.mjs",
     "api:generate": "openapi-typescript contracts/omniwa-go.openapi.json -o src/api/generated/schema.d.ts"
   },

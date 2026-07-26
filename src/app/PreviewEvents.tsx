@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { EventsView } from '@/features/events-v2/EventsView';
-import { EventInspectorV2 } from '@/features/events-v2/EventsPageV2';
+import { EventsView } from '@/features/events/EventsView';
+import { EventInspector } from '@/features/events/EventsPage';
 import { eventDetailFixture, eventsFixture } from './preview-fixtures';
 
 /** Dev-only: Events history + an open event inspector with sample data. */
@@ -26,7 +26,7 @@ export function PreviewEvents() {
         onCursor={() => {}}
         generatedInfo="Generated just now"
       />
-      {open ? <EventInspectorV2 event={eventDetailFixture} onClose={() => setOpen(false)} /> : null}
+      {open ? <EventInspector event={eventDetailFixture} onClose={() => setOpen(false)} /> : null}
     </div>
   );
 }

@@ -4,10 +4,9 @@
 OmniWA GO REST API. It is a client-only SPA: it contains no backend, database,
 WhatsApp provider integration, campaign worker, or domain orchestration.
 
-The Console is being migrated panel by panel onto OmniWA GO's persisted
-projections and operational APIs. Implemented surfaces remain usable while
-pending and unsupported surfaces render explicit states instead of simulated
-data.
+The Console consumes OmniWA GO's persisted projections and operational APIs.
+Unsupported backend surfaces remain explicit instead of being simulated in the
+browser.
 
 ## Product role
 
@@ -61,8 +60,8 @@ frequently used documents are:
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | SPA layers, state ownership, and safety boundaries |
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
 | [docs/PANELS.md](docs/PANELS.md) | Panel ownership and integration status by `METHOD /path` |
-| [docs/UI_V2_GUIDE.md](docs/UI_V2_GUIDE.md) | Canonical v2 foundation, state model, route behavior, and review contract |
-| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Immutable image build, generation isolation, and promotion gates |
+| [docs/UI_GUIDE.md](docs/UI_GUIDE.md) | Design foundation, state model, route behavior, and review contract |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Immutable image build, promotion, and rollback gates |
 
 ## Development
 

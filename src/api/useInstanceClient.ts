@@ -9,7 +9,7 @@ import { createApiClient, type ApiClient } from './client';
 export function useInstanceClient(token: string | undefined): ApiClient | undefined {
   const session = useApiSession();
   return useMemo(
-    () => (token ? createApiClient({ baseUrl: session.baseUrl, apiKey: token }) : undefined),
+    () => (token ? createApiClient({ baseUrl: session.baseUrl, apiKey: token }, 'instance') : undefined),
     [session.baseUrl, token],
   );
 }

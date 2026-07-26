@@ -7,7 +7,7 @@ function ok(data: unknown) {
 }
 
 describe('labels projection adapter', () => {
-  it('normalizes the legacy bare-array list without inventing metadata', async () => {
+  it('normalizes the historical bare-array list without inventing metadata', async () => {
     const GET = vi.fn().mockResolvedValue(ok([{
       id: 'database-id-that-must-not-own-identity',
       instance_id: 'instance-secret-scope',
