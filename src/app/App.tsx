@@ -7,8 +7,8 @@ import { ApiFailure } from '@/api/envelopes';
 import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { clearSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
-import { ConnectPageV2 as ActiveConnectPage } from './ConnectPageV2';
-import { ShellV2 as ActiveShell } from './ShellV2';
+import { ConnectPage as ActiveConnectPage } from './ConnectPage';
+import { Shell as ActiveShell } from './Shell';
 
 const OverviewPage = lazy(() => import('@/features/platform-v2/OverviewPageV2').then((m) => ({ default: m.OverviewPageV2 })));
 const RecoveryPage = lazy(() => import('@/features/platform-v2/RecoveryPageV2').then((m) => ({ default: m.RecoveryPageV2 })));

@@ -1,20 +1,23 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
-import { useId } from 'react';
+import { forwardRef, useId } from 'react';
 import { cn } from './cn';
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      className={cn(
-        'w-full h-9 px-2.5 text-[13px] bg-recessed text-fg border border-line placeholder:text-fg-3',
-        'hover:border-line-strong focus-visible:outline-none focus-visible:border-line-strong',
-        'aria-[invalid=true]:border-danger',
-        className,
-      )}
-      {...props}
-    />
-  );
-}
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  function Input({ className, ...props }, ref) {
+    return (
+      <input
+        ref={ref}
+        className={cn(
+          'w-full h-9 px-2.5 text-[13px] bg-recessed text-fg border border-line placeholder:text-fg-3',
+          'hover:border-line-strong focus-visible:outline-none focus-visible:border-line-strong',
+          'aria-[invalid=true]:border-line-strong',
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
 
 export function Field({
   label,
