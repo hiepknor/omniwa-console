@@ -40,6 +40,17 @@ describe('custom Select', () => {
     expect(html).toContain('w-48');
   });
 
+  it('keeps the popup anchor fitted to the trigger inside stretched field grids', () => {
+    const html = renderToStaticMarkup(
+      <Select value="running">
+        <option value="running">Running</option>
+      </Select>,
+    );
+
+    expect(html).toContain('relative inline-grid min-w-32 self-start text-left');
+    expect(html).toContain('top-[calc(100%+4px)]');
+  });
+
   it('uses the field label for both the trigger and popup', () => {
     const html = renderToStaticMarkup(
       <Select aria-labelledby="status-label" value="running">

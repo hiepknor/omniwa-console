@@ -279,7 +279,7 @@ export function Select({
   };
 
   return (
-    <div ref={rootRef} className={cn('relative inline-grid min-w-32 text-left', className)} data-disabled={disabled || undefined}>
+    <div ref={rootRef} className={cn('relative inline-grid min-w-32 self-start text-left', className)} data-disabled={disabled || undefined}>
       {name ? <input type="hidden" name={name} value={selectedValue} /> : null}
       <button
         ref={triggerRef}
