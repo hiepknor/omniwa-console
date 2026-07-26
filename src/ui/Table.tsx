@@ -4,7 +4,7 @@ import { cn } from './cn';
 /** Dense table workhorse. Square container, hairline dividers, horizontal scroll bounded locally. */
 export function Table({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('w-full overflow-x-auto border border-line bg-surface', className)}>
+    <div className={cn('w-full overflow-x-auto border border-line-strong bg-surface', className)}>
       <table className="w-full border-collapse text-[13px]">{children}</table>
     </div>
   );

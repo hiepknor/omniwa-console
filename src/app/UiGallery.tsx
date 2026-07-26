@@ -29,18 +29,18 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 const tones: Tone[] = ['ok', 'pending', 'degraded', 'failed', 'info', 'neutral'];
 const surfaces = [
-  ['bg', '#0a0a0a'],
-  ['surface', '#141414'],
-  ['elevated', '#1c1c1c'],
-  ['recessed', '#050505'],
-  ['line', '#262626'],
-  ['line-strong', '#3d3d3d'],
+  ['bg', '#ffffff'],
+  ['surface', '#ffffff'],
+  ['elevated', '#f2f2f2'],
+  ['recessed', '#f6f6f6'],
+  ['line', '#e2e2e2'],
+  ['line-strong', '#111111'],
 ];
-const accents = [
-  ['accent', '#0a84ff'],
-  ['ok', '#30d158'],
-  ['warn', '#ffcc00'],
-  ['danger', '#ff3b30'],
+const inkRamp = [
+  ['fg', '#111111'],
+  ['fg-2', '#565656'],
+  ['fg-3', '#8c8c8c'],
+  ['line', '#e2e2e2'],
 ];
 
 export function UiGallery() {
@@ -54,7 +54,7 @@ export function UiGallery() {
         <PageHeader
           eyebrow="Design system v3"
           title="UI Gallery"
-          description="Editorial-minimal · dark · dense · square · comic accents."
+          description="Manga · ink on white paper · dense · square · screentone status."
           actions={<Button variant="primary">Primary action</Button>}
         />
 
@@ -70,9 +70,9 @@ export function UiGallery() {
           </div>
         </Section>
 
-        <Section title="Comic accents">
+        <Section title="Ink ramp">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-line border border-line">
-            {accents.map(([name, hex]) => (
+            {inkRamp.map(([name, hex]) => (
               <div key={name} className="p-3 bg-surface">
                 <div className="h-10" style={{ background: hex }} />
                 <div className="mt-2 text-xs text-fg">{name}</div>

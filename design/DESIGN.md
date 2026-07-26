@@ -7,12 +7,13 @@
 
 ## 0. One-paragraph brief
 
-A **dark-only, dense operational console** with an **editorial, typography-led**
-character and a **comic** streak. Everything is **square** — no rounded corners
+A **manga-inspired, dense operational console** — **black ink on white paper**,
+editorial and typography-led. Everything is **square** — no rounded corners
 anywhere. Surfaces are **flat**: hairline 1px borders, no shadows, no gradients,
-no blur; depth comes from stepping the grayscale background. The palette is
-**grayscale plus a few bold comic accents** used only for meaning (primary action
-and status). Built **Tailwind-first**.
+no blur; depth comes from stepping light grays. The palette is **pure monochrome**
+— ink, paper, and gray **screentone**, with **no chroma at all**. Meaning is
+carried by ink weight, fill, and screentone pattern, never by hue. Built
+**Tailwind-first**.
 
 ## 1. Principles
 
@@ -20,10 +21,10 @@ and status). Built **Tailwind-first**.
    pills, no rounded avatars, no soft cards. Corners are hard.
 2. **Flat, not floating.** 1px borders (`--color-line`) and background steps carry
    elevation. No `box-shadow`, no gradients, no backdrop blur.
-3. **Grayscale first.** The interface is near-black → near-white. Color is a
-   signal, never decoration.
-4. **Comic accents, sparingly.** Bold, saturated, flat fills — one primary accent
-   plus the status hues. Never blend, tint, or gradient them.
+3. **Ink on paper.** White paper, black ink, gray screentone for tone. A light
+   surface, not dark.
+4. **No chroma.** There are no colors — only ink, paper, and gray. Emphasis is an
+   inverted ink block; status is screentone. Never introduce a hue.
 5. **Typography leads.** Hierarchy comes from size/weight/letter-spacing and the
    sans/mono contrast — not from boxes and color.
 6. **Dense.** Optimized for scanning tables and tracing state under pressure. Tight
@@ -33,44 +34,48 @@ and status). Built **Tailwind-first**.
 
 ## 2. Color (`@theme` in `src/styles/index.css`)
 
-### Grayscale surfaces (dark)
+### Paper surfaces (light)
 
 | Token | Value | Role |
 | --- | --- | --- |
-| `--color-bg` | `#0a0a0a` | Canvas / page background |
-| `--color-surface` | `#141414` | Panels, tables, rail |
-| `--color-elevated` | `#1c1c1c` | Hover rows, drawers, dialogs, menus |
-| `--color-recessed` | `#050505` | Inputs, code/QR wells |
-| `--color-line` | `#262626` | Default hairline border / divider |
-| `--color-line-strong` | `#3d3d3d` | Focus, active/selected edges |
+| `--color-bg` | `#ffffff` | Paper / page background |
+| `--color-surface` | `#ffffff` | Panels, tables, rail |
+| `--color-elevated` | `#f2f2f2` | Hover rows, drawers, dialogs, menus |
+| `--color-recessed` | `#f6f6f6` | Inputs, code/QR wells |
+| `--color-line` | `#e2e2e2` | Default hairline divider (inner rows) |
+| `--color-line-strong` | `#111111` | Ink frame of panels, focus, active edges |
 
-### Text tiers
-
-| Token | Value | Role |
-| --- | --- | --- |
-| `--color-fg` | `#f5f5f5` | Primary — headings, cell values |
-| `--color-fg-2` | `#a3a3a3` | Secondary — body, descriptions |
-| `--color-fg-3` | `#6b6b6b` | Muted — labels, metadata, placeholders |
-
-### Comic accents (meaning only)
+### Ink tiers
 
 | Token | Value | Role |
 | --- | --- | --- |
-| `--color-accent` | `#0a84ff` | Primary action, links, `info`/streaming |
-| `--color-ok` | `#30d158` | ok / connected / delivered / active |
-| `--color-warn` | `#ffcc00` | pending / pairing / queued / degraded |
-| `--color-danger` | `#ff3b30` | failed / disconnected / dead / destructive |
+| `--color-fg` | `#111111` | Primary ink — headings, cell values |
+| `--color-fg-2` | `#565656` | Secondary — body, descriptions |
+| `--color-fg-3` | `#8c8c8c` | Muted — labels, metadata, placeholders |
 
-Accents render as **flat fills at full saturation** (comic ink), on the accent's
-own ink (`--color-accent-ink: #fff`) or straight on the dark canvas. Never mix a
-grayscale surface with a tinted accent surface — a colored element is either the
-accent color or it is grayscale.
+### No accent color
+
+The interface has no chroma. `--color-accent` is ink `#111111` and the primary
+action is an **inverted ink block** (`--color-accent-ink: #ffffff` text on ink).
+The status tokens (`--color-ok / --warn / --danger`) all resolve to ink `#111111`;
+they exist only so status code reads semantically — **status is distinguished by
+screentone pattern, never by hue** (see `src/ui/Status.tsx`).
 
 ### Status vocabulary (the frozen set)
 
-`ok` green · `pending` yellow · `degraded` yellow · `failed` red · `info`/`live`
-blue · `neutral`/`retired` grayscale. A status is a **6px square mark + label**.
-Color-only signaling is forbidden.
+A status is an **8px screentone mark + label**. The fill pattern carries the
+meaning:
+
+| Status | Screentone |
+| --- | --- |
+| `ok` / `active` / `delivered`, `info` / `live` | solid ink |
+| `pending` / `pairing` / `queued` | halftone dots |
+| `degraded` / `retrying` | diagonal hatch |
+| `failed` / `disconnected` / `dead` | ink block with a white slash (cancelled) |
+| `neutral` / `retired` / `unknown` | hollow outline |
+
+Pattern-only or color-only signaling is forbidden — the label always states the
+status in words.
 
 ## 3. Typography
 
@@ -106,11 +111,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 
 - **Button** — square, 1px border, 13px/500, `h-9` dense. `primary` = flat
   `--color-accent` fill + white ink; `ghost` = transparent + `--color-line` border,
-  hover lifts to `--color-elevated` + `--color-line-strong`; `danger` = red text +
-  red border, filled red only inside typed-confirmation dialogs. One primary per view.
+  hover lifts to `--color-elevated` + `--color-line-strong`; `danger` = a diagonal
+  hazard-hatch fill that inverts to a solid ink block on hover (no hue). One primary per view.
 - **Status** — 6px square mark + label; tones map to §2. `<Status tone>`.
 - **Input / Field** — recessed bg, 1px border, square, 13px; focus → strong border.
-  Invalid → red border + 12px red message. Labels are 11px uppercase muted.
+  Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted.
 - **Select** — ghost control with a chevron; active filters become dismissible
   square chips in the toolbar.
 - **Table** — the workhorse. `--color-surface` container, 1px border, no radius.
@@ -127,7 +132,7 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Dialog** — `min(520px,100%)`, `--color-elevated`, 1px `--color-line-strong`
   border, centered over a scrim. Destructive dialogs require typing the resource
   name; confirm stays disabled until it matches.
-- **Toast** — bottom-right, `--color-elevated`, a 2px status-colored left edge,
+- **Toast** — bottom-right, `--color-elevated`, a 2px ink left edge,
   13px/500 title + 12px detail, and **always** the mono `requestId` on API errors.
   Accepted commands say `accepted` and auto-dismiss (6s); errors persist.
 - **Badge** — square count chip, mono 11px, `--color-recessed` bg.
@@ -157,17 +162,16 @@ mono; use tabular numerals on data; keep one primary action per view; say
 `accepted`/`queued` honestly; reflect filters/cursors into the URL; derive nav from
 scope.
 
-**Don't:** add any `border-radius`, shadow, gradient, or blur; tint or blend accent
-colors; signal with color alone; introduce a status color outside §2; use weight
-700+; center-max-width product pages; render WhatsApp-green chrome (green is the
-`ok` status only).
+**Don't:** add any `border-radius`, shadow, gradient, or blur; introduce any hue or
+chroma (the palette is ink + paper + gray only); signal with pattern or color alone
+(always label); use weight 700+; center-max-width product pages.
 
 ## 8. Agent quick reference
 
-- Surfaces `#0a0a0a / #141414 / #1c1c1c / #050505`; lines `#262626` / `#3d3d3d`.
-- Text `#f5f5f5 / #a3a3a3 / #6b6b6b`.
-- Accent `#0a84ff`; status `#30d158 / #ffcc00 / #ff3b30`.
-- Everything square (radius 0), flat (1px borders, no shadow), dense.
+- Paper `#ffffff` / `#f2f2f2` / `#f6f6f6`; lines `#e2e2e2` (inner) / `#111111` (ink frame).
+- Ink `#111111 / #565656 / #8c8c8c`. No chroma.
+- Primary = inverted ink block; status = screentone (§2), never hue.
+- Everything square (radius 0), flat (1px borders, no shadow), dense, light.
 - Sans 13–14px UI, mono 12px IDs + 24px metrics; labels 11px uppercase.
 - Build with Tailwind utilities against the `@theme` tokens; compose `src/ui/`
   primitives before writing bespoke markup.
