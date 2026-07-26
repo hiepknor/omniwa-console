@@ -24,6 +24,13 @@ describe('Button', () => {
     expect(html).toContain('aria-busy="true"');
     expect(html).toContain('animate-spin');
   });
+
+  it('clears the danger screentone and transitions the hover lift', () => {
+    const html = renderToStaticMarkup(<Button variant="danger">Destroy</Button>);
+
+    expect(html).toContain('hover:bg-none');
+    expect(html).toContain('transition-[color,background-color,border-color,box-shadow,translate]');
+  });
 });
 
 describe('ButtonLink', () => {

@@ -49,6 +49,24 @@ export function getMenuPosition({
   };
 }
 
+export function selectChevronClassName(open: boolean): string {
+  return cn(
+    'grid h-full place-items-center border-l transition-colors',
+    open
+      ? 'border-fg bg-fg text-bg group-hover:border-fg group-hover:text-bg'
+      : 'border-line text-fg-3 group-hover:border-line-strong group-hover:text-fg',
+  );
+}
+
+export function optionMarkerClassName(active: boolean, selected: boolean): string {
+  return cn(
+    'size-2 border',
+    active
+      ? selected ? 'border-bg bg-bg' : 'border-bg bg-transparent'
+      : selected ? 'border-fg bg-fg' : 'border-fg-3 bg-transparent',
+  );
+}
+
 export type SelectProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   'children' | 'defaultValue' | 'onChange' | 'value'
@@ -290,11 +308,7 @@ export function Select({
         </span>
         <span
           aria-hidden
-          className={cn(
-            'grid h-full place-items-center border-l border-line text-fg-3 transition-colors',
-            'group-hover:border-line-strong group-hover:text-fg',
-            open && 'border-fg bg-fg text-bg',
-          )}
+          className={selectChevronClassName(open)}
         >
           <svg
             viewBox="0 0 16 16"
@@ -350,12 +364,7 @@ export function Select({
             >
               <span
                 aria-hidden
-                className={cn(
-                  'size-2 border border-fg-3',
-                  optionSelected && 'border-fg bg-fg',
-                  active && 'border-bg',
-                  active && optionSelected && 'bg-bg',
-                )}
+                className={optionMarkerClassName(active, optionSelected)}
               />
               <span className="min-w-0 truncate">{option.label}</span>
             </div>
