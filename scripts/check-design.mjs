@@ -15,6 +15,11 @@ for (const marker of ['useModalFocus', 'aria-labelledby']) {
   if (!drawer.includes(marker)) failures.push(`src/ui/Drawer.tsx: missing ${marker}`);
 }
 
+const button = await read('src/ui/Button.tsx');
+for (const marker of ['data-variant', 'active:translate-x-px', 'focus-visible:outline-2', 'disabled:pointer-events-none', 'ButtonLink']) {
+  if (!button.includes(marker)) failures.push(`src/ui/Button.tsx: action contract is missing ${marker}`);
+}
+
 const table = await read('src/ui/Table.tsx');
 for (const marker of ['onKeyDown', 'tabIndex', 'aria-selected']) {
   if (!table.includes(marker)) failures.push(`src/ui/Table.tsx: interactive rows are missing ${marker}`);
