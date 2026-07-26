@@ -17,7 +17,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        'flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between py-5 border-b border-line',
+        'flex min-w-0 w-full flex-col gap-3 py-5 border-b border-line sm:flex-row sm:items-end sm:justify-between',
         className,
       )}
     >
@@ -28,7 +28,7 @@ export function PageHeader({
         <h1 className="text-[22px] font-semibold leading-tight tracking-tight text-fg">{title}</h1>
         {description ? <p className="max-w-prose text-sm text-fg-2">{description}</p> : null}
       </div>
-      {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+      {actions ? <div className="flex min-w-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </header>
   );
 }

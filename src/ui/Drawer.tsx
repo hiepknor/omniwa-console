@@ -1,58 +1,56 @@
 import { useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from './cn';
+import { OverlayCloseButton } from './OverlayCloseButton';
 import { useModalFocus } from './useModalFocus';
 
-/** Right-side inspector over a scrim. Square, flat, 1px left border. */
+/** Right-side inspector that becomes a bottom sheet on narrow viewports. */
 export function Drawer({
   open,
   onClose,
   title,
   subtitle,
   children,
+  closeDisabled = false,
 }: {
   open: boolean;
   onClose: () => void;
   title: ReactNode;
   subtitle?: ReactNode;
   children: ReactNode;
+  closeDisabled?: boolean;
 }) {
   const titleId = useId();
   const drawerRef = useRef<HTMLElement>(null);
-  useModalFocus(open, drawerRef, onClose, false);
+  useModalFocus(open, drawerRef, onClose, closeDisabled);
 
   if (!open) return null;
   return createPortal(
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/60" onClick={onClose}>
+    <div
+      className="fixed inset-y-0 left-0 z-50 flex h-dvh w-dvw justify-end bg-black/60 max-sm:items-end"
+      onClick={() => { if (!closeDisabled) onClose(); }}
+    >
       <aside
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-busy={closeDisabled || undefined}
         ref={drawerRef}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          'flex w-[min(440px,100%)] max-sm:w-full max-sm:mt-auto max-sm:h-[85dvh]',
-          'flex-col h-dvh bg-surface border-l border-line',
+          'relative flex h-dvh min-w-0 w-[min(440px,100%)] max-w-full flex-col border-l border-line-strong bg-surface',
+          'max-sm:mt-auto max-sm:h-[85dvh] max-sm:w-full max-sm:border-l-0 max-sm:border-t',
         )}
       >
-        <header className="flex items-start justify-between gap-3 p-4 border-b border-line">
-          <div className="grid gap-1 min-w-0">
-            <h2 id={titleId} className="text-sm font-semibold text-fg truncate">{title}</h2>
-            {subtitle ? <div className="font-mono text-xs text-fg-3 truncate">{subtitle}</div> : null}
+        <header className="grid min-h-14 grid-cols-[minmax(0,1fr)_2.25rem] items-stretch border-b border-line-strong bg-surface max-sm:grid-cols-[minmax(0,1fr)_2.5rem]">
+          <div className="grid min-w-0 content-center gap-1 px-4 py-3">
+            <h2 id={titleId} className="truncate text-sm font-semibold leading-tight text-fg">{title}</h2>
+            {subtitle ? <div className="truncate font-mono text-xs text-fg-2">{subtitle}</div> : null}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="shrink-0 size-7 inline-flex items-center justify-center text-fg-3 hover:text-fg hover:bg-elevated border border-transparent hover:border-line"
-          >
-            <svg viewBox="0 0 16 16" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="m4 4 8 8M12 4l-8 8" />
-            </svg>
-          </button>
+          <OverlayCloseButton label="Close drawer" onClick={onClose} disabled={closeDisabled} />
         </header>
-        <div className="flex-1 min-h-0 overflow-y-auto p-4">{children}</div>
+        <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-surface p-4">{children}</div>
       </aside>
     </div>,
     document.body,

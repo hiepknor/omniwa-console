@@ -58,8 +58,9 @@ resource models, or rendered diagnostics.
 
 ## Interaction contract
 
-- Dialogs and drawers trap focus, restore focus on close, have an accessible
-  name, and declare whether pending commands can close.
+- Dialogs and drawers use the shared framed overlay treatment, lock background
+  scrolling, trap and restore focus, have an accessible name, and declare
+  whether pending commands can close.
 - Interactive table rows support keyboard activation and expose selection.
 - Custom selectors follow the ARIA combobox/listbox pattern, retain an active
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.

@@ -6,13 +6,18 @@ const read = (path) => readFile(resolve(root, path), 'utf8');
 const failures = [];
 
 const dialog = await read('src/ui/Dialog.tsx');
-for (const marker of ['useModalFocus', 'aria-labelledby', 'closeDisabled']) {
+for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDisabled', 'OverlayCloseButton']) {
   if (!dialog.includes(marker)) failures.push(`src/ui/Dialog.tsx: missing ${marker}`);
 }
 
 const drawer = await read('src/ui/Drawer.tsx');
-for (const marker of ['useModalFocus', 'aria-labelledby']) {
+for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDisabled', 'OverlayCloseButton']) {
   if (!drawer.includes(marker)) failures.push(`src/ui/Drawer.tsx: missing ${marker}`);
+}
+
+const modalFocus = await read('src/ui/useModalFocus.ts');
+for (const marker of ["document.body.style.overflow = 'hidden'", 'modalStack.length === 0']) {
+  if (!modalFocus.includes(marker)) failures.push(`src/ui/useModalFocus.ts: modal scroll lock is missing ${marker}`);
 }
 
 const button = await read('src/ui/Button.tsx');
