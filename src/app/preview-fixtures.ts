@@ -1,4 +1,5 @@
 /* Dev-only sample data for rendering v3 surfaces without a backend (/__preview). */
+import type { Campaign } from '@/api/campaigns';
 import type { ChatResource } from '@/api/chats';
 import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
@@ -78,6 +79,20 @@ export const groupDetailFixture = {
     { id: 'm2', memberRef: '15551230003@s.whatsapp.net', displayName: 'David Tran', role: 'member' },
   ],
 } as unknown as GroupResource;
+
+export const campaignsFixture: Campaign[] = [
+  { id: 'cmp_01HB', name: 'July promo blast', status: 'running', startsAt: ago(3600), updatedAt: ago(120), version: 4 },
+  { id: 'cmp_02KC', name: 'Cart abandonment', status: 'scheduled', startsAt: ago(-7200), updatedAt: ago(600), version: 1 },
+  { id: 'cmp_03QD', name: 'Welcome series', status: 'completed', startsAt: ago(86_400 * 3), updatedAt: ago(86_400 * 2), version: 7 },
+  { id: 'cmp_04TE', name: 'Flash sale', status: 'aborted', startsAt: ago(86_400), updatedAt: ago(80_000), version: 2 },
+  { id: 'cmp_05WF', name: 'Feedback request', status: 'draft', startsAt: undefined, updatedAt: ago(300), version: 1 },
+] as unknown as Campaign[];
+
+export const campaignDetailFixture = {
+  campaign: { id: 'cmp_01HB', name: 'July promo blast', status: 'running', contentType: 'text', text: 'Hi {{name}}! Our July sale is live — 25% off everything through Sunday. Reply STOP to opt out.', startsAt: ago(3600), finishedAt: undefined, version: 4 },
+  recipientCount: 1284,
+  byStatus: { delivered: 918, processing: 240, queued: 84, failed: 30, skipped: 12 },
+};
 
 export const healthFixture: ServerHealthResource = {
   generatedAt: ago(30),
