@@ -24,8 +24,8 @@ Rules:
 | Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
 | Labels | Projection available | Directory list/detail integrated in Chats workspace |
 | Events | Durable history available | Integrated with retention and no-backfill metadata |
-| Overview and Health | Persisted/split APIs available | Integrated in legacy and v2 |
-| Projection Recovery | Admin failure operations available | Integrated in v2 |
+| Overview and Health | Persisted/split APIs available | Integrated |
+| Projection Recovery | Admin failure operations available | Integrated when capability is advertised |
 | Campaigns (`/messages`) | Orchestration available | Integrated |
 | Queue/jobs | No generic management API | Unsupported |
 | Webhook administration | No management API | Unsupported |
@@ -47,8 +47,8 @@ preserved.
 
 ## Instances — `/instances`, `/instances/:instanceId`
 
-**Status:** integrated in legacy and v2. V2 uses only the metadata reads approved
-for redesign and does not fall back to credential-bearing legacy fleet reads.
+**Status:** integrated. Fleet views use credential-free metadata reads when the
+server advertises `instance_metadata_views`.
 
 ```text
 GET    /instance/all
@@ -70,18 +70,19 @@ PUT    /instance/{instanceId}/advanced-settings
 ```
 
 Admin operations use the memory-only session client; connection/QR/logout
-operations use the instance token. In v2, metadata reads are required when
+operations use the instance token. Metadata reads are required when
 `instance_metadata_views` is advertised; `/instance/all` and
-`/instance/info/{instanceId}` remain legacy-only and are never a v2 fallback.
+`/instance/info/{instanceId}` remain compatible with servers that do not yet
+advertise metadata views.
 Credential Health renders factual C3 migration signals, treats zero instances
 as non-representative, and never derives a plaintext-removal decision.
 `/server/ok` is not connection state.
 
-## Groups — `/groups/:groupId?` (v2), `/groups/:instanceId?` (legacy)
+## Groups — `/groups/:groupId?`
 
-**Status:** projection list/info/search and mutations integrated in legacy and v2.
-V2 uses the active instance credential as its scope and never calls the admin
-fleet list. Reads remain available from persisted projection data while the
+**Status:** projection list/info/search and mutations integrated. The route uses
+the active instance credential as its scope and never calls the admin fleet
+list. Reads remain available from persisted projection data while the
 WhatsApp instance is offline; live mutations still require provider
 connectivity.
 
@@ -92,12 +93,6 @@ GET  /group/list
 GET  /group/search?q=&limit=&cursor=
 POST /group/info
 POST /group/invitelink        # reset:false is projection/cache read
-```
-
-Legacy-only instance picker ownership:
-
-```text
-GET /instance/all
 ```
 
 Mutations:
@@ -117,12 +112,12 @@ Search is prefix-based and cursor-scoped to instance and normalized query.
 Changing either resets the cursor. The panel never decodes cursors or falls back
 to a live WhatsApp read.
 
-## Chats workspace — `/chats/:chatId?` (v2), `/chats/:instanceId?/:chatId?` (legacy)
+## Chats workspace — `/chats/:chatId?`
 
 **Status:** Chat and Message list/detail, delivery receipts, Contacts
 list/search/detail, Labels list/detail, and bounded text/media sends are
-integrated in legacy and v2. V2 uses the active instance credential as its
-scope and never calls the admin fleet list.
+integrated. The route uses the active instance credential as its scope and never
+calls the admin fleet list.
 
 Core projection ownership:
 
@@ -139,20 +134,14 @@ GET /label/list
 GET /label/info/{labelId}
 ```
 
-Legacy-only instance picker ownership:
-
-```text
-GET /instance/all
-```
-
 Contacts use server prefix search and opaque cursors. Labels intentionally keep
-the backend's legacy bare-array list; capability readiness distinguishes a valid
+the backend's historical bare-array list; capability readiness distinguishes a valid
 empty label projection from an unavailable one. Label assignments are consumed
 from future Chat/Message projection fields rather than reconstructed in the
 browser.
 
-Legacy Chat pagination is accumulated intentionally. V2 keeps the current Chat
-and Message cursors in the URL, renders one bounded page, and uses browser
+The current Chat and Message cursors stay in the URL. Each view renders one
+bounded page and uses browser
 history or “Start over” rather than decoding a cursor. An invalid opaque cursor
 resets its own query to the first page. The public Chat DTO currently has no
 label association field, so the Console does not show or infer chat-label
@@ -188,12 +177,11 @@ POST /chat/pin
 POST /chat/unpin
 ```
 
-## Campaigns — `/messages`, `/messages/new`, `/messages/:campaignId` (v2)
+## Campaigns — `/messages`, `/messages/new`, `/messages/:campaignId`
 
-**Status:** integrated in the current Console and approved for route-level v2
-redesign. Full behavior is in `docs/CAMPAIGNS.md`.
+**Status:** integrated. Full behavior is in `docs/CAMPAIGNS.md`.
 
-All operations in this section use the instance credential. V2 uses the active
+All operations in this section use the instance credential. The route uses the active
 instance session directly and never calls the admin fleet list. Pagination
 defaults to 50 and is capped at 100.
 
@@ -215,21 +203,20 @@ OmniWA GO.
 
 ## Events — `/events`
 
-**Status:** durable history integrated in the current Console and approved for
-route-level v2 redesign.
+**Status:** durable history integrated in the current Console.
 
 ```text
 GET /events?type=&limit=&cursor=
 ```
 
-The endpoint uses the instance credential. V2 uses the active instance session
+The endpoint uses the instance credential. The route uses the active instance session
 directly and never calls the admin fleet list. The panel owns history,
 filtering, cursor pagination, reconnect recovery, and safe event summaries. It
 does not open the admin-key WebSocket.
 
 ## Overview — `/overview`
 
-**Status:** integrated in legacy and v2 with persisted metrics, split health,
+**Status:** integrated with persisted metrics, split health,
 URL-backed windows, explicit unavailable action state, and polling-only
 realtime posture.
 
@@ -248,8 +235,8 @@ Instance health dimensions are grouped by the server-provided instance ID.
 
 ## Projection Recovery — `/recovery`
 
-**Status:** integrated behind the v2 generation boundary. The route appears in v2
-navigation only for an admin session when capability discovery advertises
+**Status:** integrated. The route appears in navigation only for an admin
+session when capability discovery advertises
 `projection_failure_operations`.
 
 ```text
@@ -282,6 +269,6 @@ Operations classified as `deferred-product-workflow`,
 `deferred-backend-risk`, or `external-client` have no Console panel owner.
 Their accountable decision unit and exit criteria live in
 `docs/CONTRACT_BACKLOG.md`. Moving one into Console requires changing its
-classification in `scripts/contract-ui-policy.mjs`, assigning it to a panel in
-this file, and shipping the complete operator workflow in the same approved
-delivery sequence. Mere backend availability does not assign panel ownership.
+classification in `CONTRACT_UI_MATRIX.md`, assigning it to a panel in this file,
+and shipping the complete operator workflow in the same approved delivery
+sequence. Mere backend availability does not assign panel ownership.

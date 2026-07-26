@@ -33,11 +33,11 @@ Do not start C3 until every supported Console environment is recorded here.
 
 The development and Staging containers are pinned directly to multi-platform
 registry digests and run as UID 101. Development passed `/healthz`, `/events`
-deep-link, SPA fallback, and Content-Security-Policy checks. Staging runs the v2
+deep-link, SPA fallback, and Content-Security-Policy checks. Staging runs the
 digest recorded above and passed equivalent deploy smoke, but its 0/0
-credential-health sample is non-representative. CI published both artifacts
-only after image smoke and attached SBOM/provenance attestations. Production
-remains pending.
+credential-health sample is non-representative. CI published the artifact only
+after image smoke and attached SBOM/provenance attestations. Production remains
+pending.
 
 ## Observation baseline
 
@@ -53,7 +53,7 @@ This is evidence that C3 has **not started**, not evidence that plaintext
 removal is safe.
 
 After enabling the HMAC configuration, startup backfill brought two rows to the
-current digest. One deliberate authentication against the remaining legacy key
+current digest. One deliberate authentication against the remaining previous key
 version exercised self-healing at 2026-07-23 01:39:52 UTC. This was before the
 Console deployment above and produced the current cumulative fallback count of
 one. The resulting baseline is three of three instances on key version 1, with
@@ -68,7 +68,7 @@ fallback first observed after deployment restarts the approved quiet window.
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
 | 2026-07-23 01:48:13 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Superseded local-artifact baseline |
 | 2026-07-23 02:08:35 | Development | 3 | 3 | 0 | 0 | 1 | 2026-07-23 01:39:52 | API and throttling healthy; all three instances disconnected; one fixture projection degraded by existing dead letters | Authenticated sample after registry-digest deployment |
-| 2026-07-23 14:52:49 | Staging | 0 | 0 | 0 | 0 | 0 | — | API healthy; no instances; projection and throttling dimensions unreported | [Non-representative deploy smoke](UI_V2_ROLLOUT_EVIDENCE.md) |
+| 2026-07-23 14:52:49 | Staging | 0 | 0 | 0 | 0 | 0 | — | API healthy; no instances; projection and throttling dimensions unreported | Non-representative deploy smoke |
 | Pending | Development | — | — | — | — | — | — | — | Next quiet-window sample |
 
 ## Recovery exercises

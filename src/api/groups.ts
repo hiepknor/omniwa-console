@@ -1,12 +1,10 @@
 import type { ApiClient } from './client';
 import {
-  notImplemented,
   unwrap,
   unwrapCommand,
   unwrapProjection,
   type CommandResult,
   type ProjectionMeta,
-  type UnavailableRead,
 } from './envelopes';
 
 // omniwa-go's /group/* routes are token-scoped (act on the instance whose token
@@ -84,13 +82,12 @@ const GROUP_SETTING_ACTIONS: Record<GroupSetting, { on: GroupSettingAction; off:
 };
 
 export type GroupMetadataRequest = { subject?: string; description?: string };
-export type GroupLocalStateRequest = { muted?: boolean; pinned?: boolean; archived?: boolean };
 export type GroupMemberRequest = { jid: string };
 export type GroupTextMessageRequest = { text: string };
 export type GroupCreateRequest = { name: string; participants: string[] };
 
 export type GroupPagination = { nextCursor?: string | null; hasMore?: boolean };
-export type ReadResult<T> = { resource?: T; meta?: ProjectionMeta; unavailable?: UnavailableRead };
+export type ReadResult<T> = { resource?: T; meta?: ProjectionMeta };
 export type GroupListPage = { items: GroupResource[]; pagination: GroupPagination };
 
 function toMember(raw: GoParticipant): GroupMemberResource {
@@ -160,15 +157,6 @@ export async function updateGroup(
     result = unwrapCommand(await client.POST('/group/description', { body: { groupJid, description: body.description } }));
   }
   return result;
-}
-
-export async function updateGroupLocalState(
-  _client: ApiClient,
-  _groupJid: string,
-  _body: GroupLocalStateRequest,
-): Promise<CommandResult> {
-  // omniwa-go does not expose chat-local mute/pin/archive state.
-  throw notImplemented('Group local state');
 }
 
 export async function getGroupInviteLink(client: ApiClient, groupJid: string): Promise<string | undefined> {

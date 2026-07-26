@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { InstancesView } from '@/features/instances-v2/InstancesView';
+import { InstancesView } from '@/features/instances/InstancesView';
 import { Button, Drawer, Field, Input, Panel, Status } from '@/ui';
 import { instancesFixture } from './preview-fixtures';
 

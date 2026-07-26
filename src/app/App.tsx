@@ -7,18 +7,18 @@ import { ApiFailure } from '@/api/envelopes';
 import { RealtimeProvider } from '@/api/RealtimeProvider';
 import { clearSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
-import { ConnectPage as ActiveConnectPage } from './ConnectPage';
-import { Shell as ActiveShell } from './Shell';
+import { ConnectPage } from './ConnectPage';
+import { Shell } from './Shell';
 import { shouldInvalidateSession } from './session-error';
 
-const OverviewPage = lazy(() => import('@/features/platform-v2/OverviewPageV2').then((m) => ({ default: m.OverviewPageV2 })));
-const RecoveryPage = lazy(() => import('@/features/platform-v2/RecoveryPageV2').then((m) => ({ default: m.RecoveryPageV2 })));
-const InstancesPage = lazy(() => import('@/features/instances-v2/InstancesPageV2').then((m) => ({ default: m.InstancesPageV2 })));
-const ConversationsPage = lazy(() => import('@/features/conversations-v2/ConversationsPageV2').then((m) => ({ default: m.ConversationsPageV2 })));
-const GroupsPage = lazy(() => import('@/features/groups-v2/GroupsPageV2').then((m) => ({ default: m.GroupsPageV2 })));
-const CampaignsPage = lazy(() => import('@/features/campaigns-v2/CampaignsPageV2').then((m) => ({ default: m.CampaignsPageV2 })));
-const CreateCampaignPage = lazy(() => import('@/features/campaigns-v2/CreateCampaignV2').then((m) => ({ default: m.CreateCampaignV2 })));
-const EventsPage = lazy(() => import('@/features/events-v2/EventsPageV2').then((m) => ({ default: m.EventsPageV2 })));
+const OverviewPage = lazy(() => import('@/features/platform/OverviewPage').then((m) => ({ default: m.OverviewPage })));
+const RecoveryPage = lazy(() => import('@/features/platform/RecoveryPage').then((m) => ({ default: m.RecoveryPage })));
+const InstancesPage = lazy(() => import('@/features/instances/InstancesPage').then((m) => ({ default: m.InstancesPage })));
+const ConversationsPage = lazy(() => import('@/features/conversations/ConversationsPage').then((m) => ({ default: m.ConversationsPage })));
+const GroupsPage = lazy(() => import('@/features/groups/GroupsPage').then((m) => ({ default: m.GroupsPage })));
+const CampaignsPage = lazy(() => import('@/features/campaigns/CampaignsPage').then((m) => ({ default: m.CampaignsPage })));
+const CreateCampaignPage = lazy(() => import('@/features/campaigns/CreateCampaign').then((m) => ({ default: m.CreateCampaign })));
+const EventsPage = lazy(() => import('@/features/events/EventsPage').then((m) => ({ default: m.EventsPage })));
 
 const authenticatedRoutes: RouteObject[] = [
   { path: '/chats', element: <ConversationsPage /> },
@@ -177,7 +177,7 @@ function AppRuntime() {
                         session={session}
                         onAuthError={() => disconnectRef.current('session-invalid')}
                       >
-                        <ActiveShell session={session} onDisconnect={() => disconnectRef.current()} />
+                        <Shell session={session} onDisconnect={() => disconnectRef.current()} />
                       </RealtimeProvider>
                     </CapabilitiesProvider>
                   </ApiProvider>
@@ -194,7 +194,7 @@ function AppRuntime() {
               {
                 path: '/connect',
                 element: (
-                  <ActiveConnectPage
+                  <ConnectPage
                     notice={connectNoticeRef.current}
                     onConnected={(nextSession) => onConnectedRef.current(nextSession)}
                   />

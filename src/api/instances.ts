@@ -1,6 +1,6 @@
 import type { ApiClient } from './client';
 import type { components } from './generated/schema';
-import { unwrap, unwrapCommand, type CommandResult, type UnavailableRead } from './envelopes';
+import { unwrap, unwrapCommand, type CommandResult } from './envelopes';
 
 type GoInstance = components['schemas']['pkg_instance_handler.InstanceView'];
 type MetadataInstance = components['schemas']['pkg_instance_handler.InstanceMetadataView'];
@@ -50,7 +50,7 @@ export type InstanceCredentialHealth = {
 };
 
 export type InstancePagination = { nextCursor?: string | null; hasMore?: boolean };
-export type ReadResult<T> = { resource?: T; unavailable?: UnavailableRead };
+export type ReadResult<T> = { resource?: T };
 export type InstanceListPage = { items: InstanceResource[]; pagination: InstancePagination };
 
 const NO_PAGINATION: InstancePagination = { nextCursor: null, hasMore: false };

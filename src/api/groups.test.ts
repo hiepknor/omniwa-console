@@ -66,7 +66,7 @@ describe('group projection adapter', () => {
     });
   });
 
-  it('keeps the legacy raw list response compatible without inventing readiness', async () => {
+  it('keeps the historical raw list response compatible without inventing readiness', async () => {
     const GET = vi.fn().mockResolvedValue(ok([projectedGroup]));
 
     const result = await listInstanceGroups({ GET } as unknown as ApiClient, 'instance-a');

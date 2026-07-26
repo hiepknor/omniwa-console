@@ -1,7 +1,7 @@
 # Contract Decision Register
 
 This register groups every public operation that is intentionally outside the
-approved v2 Console panels. It complements the complete per-operation inventory
+approved Console panels. It complements the complete per-operation inventory
 in [CONTRACT_UI_MATRIX.md](CONTRACT_UI_MATRIX.md) and the implemented ownership
 map in [PANELS.md](PANELS.md).
 
@@ -94,7 +94,7 @@ Exit: Approve community, group-join, and group-photo journeys including confirma
 
 ### `product-instance-fleet`
 
-Exit: Approve any remaining admin fleet journey without restoring credential-bearing legacy reads or bypassing metadata views.
+Exit: Approve any remaining admin fleet journey without restoring credential-bearing historical reads or bypassing metadata views.
 
 - `DELETE /instance/proxy/{instanceId}`
 - `GET /instance/all`

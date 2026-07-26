@@ -21,13 +21,13 @@ for (const marker of ['onKeyDown', 'tabIndex', 'aria-selected']) {
 }
 
 for (const path of [
-  'src/features/campaigns-v2/CampaignInspectorV2.tsx',
-  'src/features/conversations-v2/ComposerV2.tsx',
-  'src/features/groups-v2/CreateGroupV2.tsx',
-  'src/features/groups-v2/GroupWorkspaceV2.tsx',
-  'src/features/instances-v2/CreateInstanceV2.tsx',
-  'src/features/instances-v2/InstanceWorkspaceV2.tsx',
-  'src/features/platform-v2/RecoveryPageV2.tsx',
+  'src/features/campaigns/CampaignInspector.tsx',
+  'src/features/conversations/Composer.tsx',
+  'src/features/groups/CreateGroup.tsx',
+  'src/features/groups/GroupWorkspace.tsx',
+  'src/features/instances/CreateInstance.tsx',
+  'src/features/instances/InstanceWorkspace.tsx',
+  'src/features/platform/RecoveryPage.tsx',
 ]) {
   const source = await read(path);
   if (source.includes('<Dialog') && !source.includes('closeDisabled=')) {

@@ -1,14 +1,11 @@
 /*
- * OmniWA Console — v3 design system entry.
+ * OmniWA Console design system entry.
  * Editorial-minimal, dark-only, dense, square (no radius), flat.
  * Grayscale base + a few bold comic accents. Tailwind v4 @theme.
- *
- * NOTE: the legacy @imports below are TRANSITIONAL. They keep not-yet-rebuilt
- * surfaces styled during the v3 rebuild and are removed in the cleanup phase.
  */
 @import 'tailwindcss';
 
-/* ── v3 theme tokens ───────────────────────────────────────────────────── */
+/* ── Theme tokens ──────────────────────────────────────────────────────── */
 @theme {
   /* Manga: black ink on white paper. Pure monochrome, screentone for tone. */
   --color-bg: #ffffff;
@@ -47,9 +44,9 @@
   --radius-full: 0px;
 }
 
-/* ── v3 base ───────────────────────────────────────────────────────────── */
+/* ── Base ──────────────────────────────────────────────────────────────── */
 @layer base {
-  /* Absolute square: neutralizes any rounding, including transitional legacy. */
+  /* Absolute square: neutralizes component and browser-default rounding. */
   *,
   ::before,
   ::after {

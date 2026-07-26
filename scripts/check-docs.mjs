@@ -21,6 +21,10 @@ const markdownFiles = [
 
 for (const file of markdownFiles) {
   const source = readFileSync(file, 'utf8');
+  const path = relative(root, file);
+  if (/\b(?:legacy|v2)\b/i.test(path) || /\b(?:legacy|v2)\b/i.test(source)) {
+    failures.push(`${path} uses retired presentation-generation terminology`);
+  }
   for (const match of source.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
     const target = match[1].replace(/^<|>$/g, '').split('#')[0];
     if (!target || /^[a-z]+:/i.test(target)) continue;
@@ -41,14 +45,6 @@ const retiredDocuments = [
   'RATE_LIMIT_PROPOSAL.md',
   'WEB_DASHBOARD_PROFILE_PROPOSAL.md',
   'UI_STATE_MODEL.md',
-  'UI_V2_CAMPAIGNS_EVENTS.md',
-  'UI_V2_CONVERSATIONS.md',
-  'UI_V2_CUTOVER_READINESS.md',
-  'UI_V2_FOUNDATION.md',
-  'UI_V2_GROUPS.md',
-  'UI_V2_INSTANCES.md',
-  'UI_V2_PLATFORM_RECOVERY.md',
-  'UI_V2_SHELL_CONNECT.md',
 ];
 const referenceFiles = [
   ...markdownFiles,

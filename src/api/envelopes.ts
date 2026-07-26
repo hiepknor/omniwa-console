@@ -1,17 +1,5 @@
 import type { components } from './generated/schema';
-import type { components as platformComponents } from './generated/platform-schema';
 import { credentialScopeForResponse, type CredentialScope } from './client';
-
-/**
- * Frozen omniwa Platform types, kept only so the panels that omniwa-go has no
- * backend for (webhooks, queue, settings, overview, events, chats) keep
- * type-checking while their data calls throw `notImplemented`. Do not use these
- * for new omniwa-go code.
- */
-export type PublicData = platformComponents['schemas']['PublicData'];
-export type OperationData = platformComponents['schemas']['OperationData'];
-export type CollectionEnvelope = platformComponents['schemas']['CollectionEnvelope'];
-export type UnavailableRead = { readStatus: 'unavailable'; reasonCode?: string };
 
 export type ProjectionSyncStatus = 'not_started' | 'syncing' | 'ready' | 'stale' | 'failed';
 export type ProjectionMeta = {
@@ -51,15 +39,12 @@ export type ErrorCategory =
 
 /**
  * Command results are always synchronous on omniwa-go (no async 202 / operation
- * ids). `requestId` and `operation` stay on the type as always-undefined
- * compatibility fields so feature code that referenced them keeps compiling.
+ * ids). The acknowledgement therefore represents API acceptance only.
  */
 export type CommandResult = {
   disposition: 'completed';
   data: unknown;
   message?: string;
-  requestId?: string;
-  operation?: OperationData;
 };
 
 function categoryForStatus(status: number): ErrorCategory {
@@ -178,19 +163,6 @@ export class ApiFailure extends Error {
     this.retryable = !rateLimited && !permanentServiceCondition && (httpStatus >= 500 && httpStatus !== 501);
   }
 }
-
-/** A failure for console command paths that omniwa-go provides no backend for. */
-export function notImplemented(resource: string): ApiFailure {
-  const failure = new ApiFailure({ error: `${resource} is not available on the OmniWA GO API.` }, 501);
-  return failure;
-}
-
-/**
- * Neutral "unavailable" marker for reads that omniwa-go has no backend for.
- * Read stubs return this (rather than throwing) so panels render their calm
- * unavailable state instead of a red error surface.
- */
-export const NOT_IMPLEMENTED_READ: UnavailableRead = { readStatus: 'unavailable', reasonCode: 'not_implemented' };
 
 /**
  * openapi-fetch result. Typed loosely as `unknown` data because several

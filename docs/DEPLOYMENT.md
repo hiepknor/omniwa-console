@@ -1,114 +1,51 @@
-# Immutable Console Deployment
+# Deployment
 
-The Console ships as a non-root static OCI image. Runtime API origin and
-credential selection remain operator input; no backend secret is baked into
-the image.
+OmniWA Console ships as one immutable SPA image. A build contains one route
+manifest and one stylesheet; there is no presentation-generation switch.
 
-Build only from a reviewed commit with a clean worktree:
+## Build and image identity
 
-```bash
-revision=$(git rev-parse HEAD)
-docker build \
-  --build-arg VITE_CONSOLE_UI_GENERATION="legacy" \
-  --build-arg OCI_REVISION="$revision" \
-  --build-arg OCI_VERSION="sha-$revision" \
-  --tag "omniwa-console:sha-$revision" \
-  .
+Build the production artifact offline with:
+
+```sh
+pnpm build
 ```
 
-The UI generation is selected at build time and defaults closed to `legacy`.
-Use `--build-arg VITE_CONSOLE_UI_GENERATION=v2` only for a reviewed v2 artifact.
-Promotion must use the exact digest, and rollback redeploys the reviewed
-legacy-generation digest.
+The container build accepts `VITE_DEFAULT_API_BASE_URL` for the default API
+origin. Runtime operators may still connect to another allowed origin from the
+memory-only connect flow.
 
-## Generation and build-graph boundary
+Published images must be identified by source revision and immutable digest.
+Tags are discovery handles only; staging and production compose definitions pin
+the digest that was reviewed. Do not rebuild an image during promotion.
 
-Vite resolves the complete route manifest and stylesheet entrypoint before
-Rollup constructs the graph:
+## Verification gates
 
-```text
-VITE_CONSOLE_UI_GENERATION=v2
-  → generation-v2.tsx
-  → index-v2.css
+Before publishing or promoting an image:
 
-missing, invalid, or legacy value
-  → generation-legacy.tsx
-  → index-legacy.css
-```
+1. run `git diff --check`, `pnpm test`, and `pnpm check`;
+2. confirm the container starts as its non-root user and `/healthz` succeeds;
+3. smoke `/`, `/overview`, and representative direct routes through the real
+   reverse proxy to verify SPA fallback and security headers;
+4. confirm the deployed revision and digest match the reviewed candidate;
+5. exercise the credential boundary relevant to the target environment and
+   record any credential-migration evidence in
+   [CREDENTIAL_ROLLOUT_EVIDENCE.md](CREDENTIAL_ROLLOUT_EVIDENCE.md).
 
-The v2 artifact owns Overview, Recovery, Instances, Conversations, Groups,
-Campaigns, and Events. It contains no legacy panels, compatibility CSS, or
-unsupported Queue, Webhooks, Global Settings, and Admin Keys runtime. Both
-generations import the same audited memory-only credential flow; presentation
-rollback never changes credential lifetime or API behavior.
+A zero-instance environment is deployment smoke evidence only. It cannot prove
+credential adoption, projection readiness, rate-limit behavior, or operator
+journeys that require representative data.
 
-CI builds, smoke-tests, and publishes both isolated generations from every
-merged `main` revision. The legacy compatibility tag remains
-`sha-<revision>`; the reviewed v2 candidate is tagged
-`sha-<revision>-v2`. These tags are discovery handles only: rollout records
-must resolve and promote the repository digest. Both images carry the
-`cc.onio.console.ui-generation` label, which must match the intended target
-before deployment.
+## Promotion
 
-Before building OCI images, verify both isolated presentation graphs:
+Promote the same digest from staging to production after the relevant route,
+scope, accessibility, responsive, and failure-state checks pass. Record the
+revision, digest, target, verification time, and approver in the deployment
+system of record.
 
-```bash
-pnpm build:v2
-pnpm build:legacy
-```
+## Rollback
 
-V2 must not contain legacy route chunks or presentation CSS; the rollback
-artifact must retain both. `scripts/check-generation-artifact.mjs` enforces
-that isolation and verifies that every v2 route chunk is present.
-
-Record the resulting repository digest, not only the mutable local tag. Promote
-the exact digest across environments. The image listens on port `8080` and
-serves `GET /healthz` without authentication. The bundled Nginx configuration
-provides SPA route fallback, immutable caching for hashed assets, no-store for
-the entry document, and browser security headers.
-
-Example development deployment:
-
-```bash
-docker run --detach \
-  --name omniwa-console \
-  --publish 4173:8080 \
-  "omniwa-console:sha-$revision"
-curl --fail http://localhost:4173/healthz
-```
-
-After deployment, verify a deep link such as `/events`, inspect the OCI revision
-label, and complete the credential rollout record. Never infer C3 completion
-from container health alone.
-
-## Promotion gates
-
-Staging may run the reviewed v2 digest for evidence collection. Production
-remains on the reviewed legacy digest until all of the following are recorded:
-
-1. representative non-empty workloads and authoritative empty results;
-2. stale, syncing, not-ready, normalized failure, and rate-limit exercises;
-3. destructive-command, uncertain-command, and one-time-secret exercises;
-4. keyboard and 360/768/1024/1440 responsive evidence for every route;
-5. immutable revision, digest, generation label, health, deep-link, and
-   rollback verification;
-6. named Product, Console, Backend, Security, and Operations approvals.
-
-The credential C3 observation and approvals remain separately recorded in
-[CREDENTIAL_ROLLOUT_EVIDENCE.md](CREDENTIAL_ROLLOUT_EVIDENCE.md). A zero-instance
-backend is not representative workload and does not start a quiet window.
-UI-generation promotion evidence, unresolved exercises, and named cutover
-approvals are recorded in
-[UI_V2_ROLLOUT_EVIDENCE.md](UI_V2_ROLLOUT_EVIDENCE.md).
-
-## Rollback and post-cutover deletion
-
-Rollback redeploys the previously reviewed immutable legacy digest. Do not
-rebuild from a moving branch, switch credential behavior, or treat container
-health as application verification. Recheck `/healthz`, a direct SPA route,
-the OCI revision, and the `cc.onio.console.ui-generation` label after rollback.
-
-Legacy source, compatibility CSS, and static prototype presentation are deleted
-only in a later PR after Production v2 is verified and all five approvals are
-recorded. That cleanup removes the generation switch and adopts canonical names;
-it is not part of promotion itself.
+Rollback redeploys the last reviewed healthy image digest. Never rebuild an old
+revision or restore removed source code. After rollback, verify `/healthz`, SPA
+deep links, the reported revision, and the pinned digest before declaring the
+service recovered.

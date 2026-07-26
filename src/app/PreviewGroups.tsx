@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { GroupsView } from '@/features/groups-v2/GroupsView';
+import { GroupsView } from '@/features/groups/GroupsView';
 import { Button, Drawer, Field, Input, Panel, Status } from '@/ui';
 import { groupDetailFixture, groupsFixture } from './preview-fixtures';
 

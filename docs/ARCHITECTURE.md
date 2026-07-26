@@ -31,9 +31,10 @@ Dependencies point downward only:
 
 | Layer | Path | Owns | May import |
 | --- | --- | --- | --- |
-| App shell | `src/app/` | Router, providers, layout, navigation, connect flow | features, components, api, lib |
-| Features | `src/features/<panel>/` | Page, panel-specific components, TanStack Query hooks | components, api, lib |
-| Shared components | `src/components/` | Tables, drawers, dialogs, feedback, projection notices | api types, lib |
+| App shell | `src/app/` | Router, providers, layout, navigation, connect flow | features, ui, components, api, lib |
+| Features | `src/features/<panel>/` | Page, panel-specific components, TanStack Query hooks | ui, components, api, lib |
+| Shared UI | `src/ui/` | Tables, drawers, dialogs, feedback, projection notices | api types, lib |
+| Shared app components | `src/components/` | Environment and workspace-wide feedback surfaces | api types, lib |
 | API boundary | `src/api/` | Client factory, generated types, adapters, resource calls, query keys | lib |
 | Utilities | `src/lib/` | Session storage, formatting, small framework-independent helpers | no higher layer |
 
@@ -43,11 +44,11 @@ Rules enforced by `pnpm architecture:check`:
 - no feature-to-feature imports;
 - no feature-owned application `main` landmark;
 - no ad hoc feature query-key arrays or duplicated session-scope constants;
-- no panel-local URLSearchParams mutation in v2 production code;
-- no panel-local numeric polling/staleness policy in v2 query hooks;
+- no panel-local URLSearchParams mutation in production feature code;
+- no panel-local numeric polling/staleness policy in feature query hooks;
 - generated API files remain machine-owned.
 
-Shared behavior moves down into components, API, or lib. It is not copied
+Shared behavior moves down into UI, API, or lib. It is not copied
 between features.
 
 ## Contract boundary

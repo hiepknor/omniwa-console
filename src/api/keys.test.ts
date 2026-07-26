@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { queryKeys, SESSION_QUERY_SCOPE } from './keys';
 
 describe('query key ownership', () => {
-  it('uses an explicit non-secret scope for session-scoped v2 projections', () => {
+  it('uses an explicit non-secret scope for session-scoped projections', () => {
     expect(SESSION_QUERY_SCOPE).toBe('session');
     expect(queryKeys.instanceChats(SESSION_QUERY_SCOPE)).toEqual([
       'instances',

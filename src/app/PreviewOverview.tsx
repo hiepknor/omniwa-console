@@ -1,4 +1,4 @@
-import { OverviewView } from '@/features/platform-v2/OverviewView';
+import { OverviewView } from '@/features/platform/OverviewView';
 import { healthFixture, overviewFixture, projectionFixture } from './preview-fixtures';
 
 /** Dev-only: render the Overview surface with sample data, no backend. */

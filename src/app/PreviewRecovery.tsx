@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RecoveryView, failureIdentity } from '@/features/platform-v2/RecoveryView';
+import { RecoveryView, failureIdentity } from '@/features/platform/RecoveryView';
 import { failuresFixture } from './preview-fixtures';
 
 /** Dev-only: Projection recovery queue with sample data. */
