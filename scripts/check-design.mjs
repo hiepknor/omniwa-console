@@ -164,6 +164,18 @@ for (const marker of ['title="Instance"', '<ConnectionAndPairing', '<Status']) {
   if (!pairingPage.includes(marker)) failures.push(`src/features/instances/PairingPage.tsx: direct pairing route is missing ${marker}`);
 }
 
+for (const path of [
+  'src/app/App.tsx',
+  'src/app/navigation.tsx',
+  'src/features/campaigns/CampaignsPage.tsx',
+  'src/features/campaigns/CreateCampaign.tsx',
+]) {
+  const source = await read(path);
+  if (source.includes("'/messages") || source.includes('"/messages')) {
+    failures.push(`${path}: Campaigns must use the canonical /campaigns browser route`);
+  }
+}
+
 for (const [path, owner] of Object.entries({
   'src/app/PreviewOverview.tsx': 'OverviewView',
   'src/app/PreviewInstances.tsx': 'InstancesView',

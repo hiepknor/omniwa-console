@@ -26,7 +26,7 @@ Rules:
 | Events | Durable history available | Integrated with retention and no-backfill metadata |
 | Overview and Health | Persisted/split APIs available | Integrated |
 | Projection Recovery | Admin failure operations available | Integrated when capability is advertised |
-| Campaigns (`/messages`) | Orchestration available | Integrated |
+| Campaigns (`/campaigns`) | Orchestration available | Integrated |
 | Queue/jobs | No generic management API | Unsupported |
 | Webhook administration | No management API | Unsupported |
 | Global Settings | No global settings API | Unsupported |
@@ -191,7 +191,7 @@ POST /chat/pin
 POST /chat/unpin
 ```
 
-## Campaigns — `/messages`, `/messages/new`, `/messages/:campaignId`
+## Campaigns — `/campaigns`, `/campaigns/new`, `/campaigns/:campaignId`
 
 **Status:** integrated. Full behavior is in `docs/CAMPAIGNS.md`.
 

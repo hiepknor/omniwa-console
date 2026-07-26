@@ -39,8 +39,8 @@ export function CampaignsPage() {
   const items = useMemo(() => campaigns.data?.items ?? [], [campaigns.data]);
   const setParam = (key: string, value?: string) => setSearchParams(setCampaignParam(searchParams, key, value), { replace: true });
   const listParams = omitSearchParams(searchParams, ['created', 'tab', 'recipientCursor', 'auditCursor']);
-  const listUrl = withSearchParams('/messages', listParams);
-  const openCampaign = (id: string) => navigate(`/messages/${encodeURIComponent(id)}${searchParams.size ? `?${searchParams}` : ''}`);
+  const listUrl = withSearchParams('/campaigns', listParams);
+  const openCampaign = (id: string) => navigate(`/campaigns/${encodeURIComponent(id)}${searchParams.size ? `?${searchParams}` : ''}`);
   useInvalidCursorReset(campaigns.error, route.cursor, () => setParam('cursor'));
 
   if (!instanceScope) return <Blocked title="Instance credential required" detail="Campaign orchestration requires an instance credential. Admin scope cannot operate token-scoped campaigns, and no campaign request was sent." />;
@@ -53,7 +53,7 @@ export function CampaignsPage() {
       <CampaignsView
         refreshing={campaigns.isFetching}
         onRefresh={() => campaigns.refetch()}
-        newHref={orchestration ? '/messages/new' : undefined}
+        newHref={orchestration ? '/campaigns/new' : undefined}
         notices={
           <div className="grid gap-2">
             {searchParams.get('created') === '1' ? <StateNotice kind="info" title="Draft creation accepted" detail="Recipient and audit reads remain authoritative; creation does not prove delivery or campaign completion." /> : null}
