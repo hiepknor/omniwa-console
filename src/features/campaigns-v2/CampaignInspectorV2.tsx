@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ApiFailure } from '@/api/envelopes';
 import type { CampaignStatus } from '@/api/campaigns';
 import { humanizeToken, relativeTime } from '@/lib/format';
+import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, CursorPagination, Dialog, Drawer, StateNotice, Status, Table, Tabs, Td, Th, Tr } from '@/ui';
 import { useCampaignAuditV2, useCampaignRecipientsV2, useCampaignTransitionV2, useCampaignV2 } from './hooks';
 import { campaignRouteState, setCampaignParam, type CampaignTabV2 } from './route-state';
@@ -20,18 +21,20 @@ function Fact({ label, value }: { label: string; value: string }) {
   return <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0"><dt className="text-xs text-fg-3">{label}</dt><dd className="text-[13px] text-fg">{value}</dd></div>;
 }
 
-export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: string; onClose: () => void }) {
+export function CampaignInspectorV2({ campaignId, commandsEnabled = true, onClose }: { campaignId: string; commandsEnabled?: boolean; onClose: () => void }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const route = campaignRouteState(searchParams);
-  const detail = useCampaignV2(campaignId, true);
-  const recipients = useCampaignRecipientsV2(campaignId, route.recipientCursor, route.tab === 'recipients');
-  const audit = useCampaignAuditV2(campaignId, route.auditCursor, route.tab === 'audit');
+  const detail = useCampaignV2(campaignId, commandsEnabled);
+  const recipients = useCampaignRecipientsV2(campaignId, route.recipientCursor, commandsEnabled && route.tab === 'recipients');
+  const audit = useCampaignAuditV2(campaignId, route.auditCursor, commandsEnabled && route.tab === 'audit');
   const transition = useCampaignTransitionV2(campaignId);
   const [command, setCommand] = useState<'schedule' | 'start' | 'pause' | 'resume' | 'abort'>();
   const [startsAt, setStartsAt] = useState('');
   const [ack, setAck] = useState<string>();
   const campaign = detail.data?.campaign;
   const setParam = (key: string, value?: string) => setSearchParams(setCampaignParam(searchParams, key, value), { replace: true });
+  useInvalidCursorReset(recipients.error, route.recipientCursor, () => setParam('recipientCursor'));
+  useInvalidCursorReset(audit.error, route.auditCursor, () => setParam('auditCursor'));
   const selectTab = (tab: CampaignTabV2) => setParam('tab', tab === 'overview' ? undefined : tab);
   const submitCommand = async () => {
     if (!command) return;
@@ -47,7 +50,9 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
   return (
     <>
       <Drawer open onClose={onClose} title={campaign?.name ?? 'Campaign detail'} subtitle={campaignId}>
-        {detail.isPending ? (
+        {!commandsEnabled && !detail.data ? (
+          <StateNotice kind="empty" title="Campaign detail unavailable" detail="Capability discovery no longer advertises campaign_orchestration and no cached detail is available." />
+        ) : detail.isPending ? (
           <StateNotice kind="loading" title="Loading campaign" />
         ) : detail.error || !detail.data || !campaign ? (
           <Fail error={detail.error ?? new Error('Campaign detail unavailable.')} onRetry={() => detail.refetch()} />
@@ -56,6 +61,7 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
             <Status tone={campaignTone(campaign.status)}>{humanizeToken(campaign.status)}</Status>
             {ack ? <StateNotice kind="info" title={`${humanizeToken(ack)} accepted`} detail="Refreshed campaign, recipient, and audit reads remain authoritative; this does not prove recipient delivery or completion." /> : null}
             {transition.error ? <Fail error={transition.error} command /> : null}
+            {!commandsEnabled ? <StateNotice kind="empty" title="Commands unavailable" detail="The last usable campaign snapshot remains visible, but capability discovery no longer advertises campaign_orchestration." /> : null}
 
             <Tabs
               active={route.tab}
@@ -86,7 +92,7 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {allowedActions[campaign.status].map((action) => (
+                  {(commandsEnabled ? allowedActions[campaign.status] : []).map((action) => (
                     <Button key={action} variant={action === 'abort' ? 'danger' : action === 'start' || action === 'resume' ? 'primary' : 'ghost'} disabled={transition.isPending} onClick={() => { transition.reset(); setCommand(action); }}>{humanizeToken(action)}</Button>
                   ))}
                 </div>
@@ -94,7 +100,7 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
             ) : null}
 
             {route.tab === 'recipients' ? (
-              recipients.isPending ? <StateNotice kind="loading" title="Loading recipients" /> : recipients.error && !recipients.data ? <Fail error={recipients.error} onRetry={() => recipients.refetch()} /> : recipients.data ? (
+              !commandsEnabled && !recipients.data ? <StateNotice kind="empty" title="Recipients unavailable" detail="No cached recipient page is available while campaign_orchestration is absent." /> : recipients.isPending ? <StateNotice kind="loading" title="Loading recipients" /> : recipients.error && !recipients.data ? <Fail error={recipients.error} onRetry={() => recipients.refetch()} /> : recipients.data ? (
                 <div className="grid gap-3">
                   <Table>
                     <thead><tr><Th>Recipient</Th><Th>Status</Th><Th className="text-right">Attempts</Th><Th>Updated</Th></tr></thead>
@@ -116,7 +122,7 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
             ) : null}
 
             {route.tab === 'audit' ? (
-              audit.isPending ? <StateNotice kind="loading" title="Loading audit" /> : audit.error && !audit.data ? <Fail error={audit.error} onRetry={() => audit.refetch()} /> : audit.data ? (
+              !commandsEnabled && !audit.data ? <StateNotice kind="empty" title="Audit unavailable" detail="No cached audit page is available while campaign_orchestration is absent." /> : audit.isPending ? <StateNotice kind="loading" title="Loading audit" /> : audit.error && !audit.data ? <Fail error={audit.error} onRetry={() => audit.refetch()} /> : audit.data ? (
                 <div className="grid gap-3">
                   <ol className="grid">
                     {audit.data.items.map((item) => (
@@ -141,6 +147,7 @@ export function CampaignInspectorV2({ campaignId, onClose }: { campaignId: strin
       <Dialog
         open={Boolean(command)}
         onClose={() => setCommand(undefined)}
+        closeDisabled={transition.isPending}
         title={command ? `${humanizeToken(command)} campaign` : ''}
         footer={<><Button disabled={transition.isPending} onClick={() => setCommand(undefined)}>Cancel</Button><Button variant={command === 'abort' ? 'danger' : 'primary'} disabled={transition.isPending || (command === 'schedule' && Number.isNaN(Date.parse(startsAt)))} onClick={() => void submitCommand()}>{transition.isPending ? 'Submitting…' : `Confirm ${command}`}</Button></>}
       >

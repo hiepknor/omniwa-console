@@ -7,6 +7,7 @@ export type GroupsViewProps = {
   refreshing: boolean;
   onRefresh: () => void;
   onNew: () => void;
+  commandsEnabled?: boolean;
   ack?: ReactNode;
   metrics?: { loaded: number; members: number; admins: number; announce: number };
   searchDraft: string;
@@ -36,7 +37,7 @@ export function GroupsView(props: GroupsViewProps) {
         actions={
           <>
             <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>
-            <Button variant="primary" onClick={props.onNew}>New group</Button>
+            <Button variant="primary" disabled={props.commandsEnabled === false} onClick={props.onNew}>New group</Button>
           </>
         }
       />
@@ -72,7 +73,7 @@ export function GroupsView(props: GroupsViewProps) {
             </thead>
             <tbody>
               {props.groups.map((g) => (
-                <Tr key={g.id} selected={g.id === props.selectedId} onClick={() => props.onOpen(g.id)}>
+                <Tr key={g.id} selected={g.id === props.selectedId} onClick={props.commandsEnabled === false ? undefined : () => props.onOpen(g.id)}>
                   <Td>
                     <div className="grid gap-0.5">
                       <span className="font-medium">{g.subject ?? g.id}</span>

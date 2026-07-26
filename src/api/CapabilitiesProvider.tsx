@@ -36,7 +36,7 @@ export function useServerCapability(capability: CapabilityName): boolean {
 export function useInstanceCapabilities(instanceId: string | undefined, token: string | undefined) {
   const session = useApiSession();
   const client = useMemo(
-    () => (token ? createApiClient({ baseUrl: session.baseUrl, apiKey: token }) : undefined),
+    () => (token ? createApiClient({ baseUrl: session.baseUrl, apiKey: token }, 'instance') : undefined),
     [session.baseUrl, token],
   );
 

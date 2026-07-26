@@ -1,4 +1,4 @@
-import type { ReactNode, ThHTMLAttributes, TdHTMLAttributes } from 'react';
+import type { KeyboardEvent, ReactNode, ThHTMLAttributes, TdHTMLAttributes } from 'react';
 import { cn } from './cn';
 
 /** Dense table workhorse. Square container, hairline dividers, horizontal scroll bounded locally. */
@@ -37,12 +37,20 @@ export function Tr({
   onClick?: () => void;
   selected?: boolean;
 }) {
+  const onKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
+    if (!onClick || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    onClick();
+  };
   return (
     <tr
       onClick={onClick}
+      onKeyDown={onKeyDown}
+      tabIndex={onClick ? 0 : undefined}
+      aria-selected={selected}
       className={cn(
         'last:[&>td]:border-b-0',
-        onClick && 'cursor-pointer',
+        onClick && 'cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
         selected ? 'bg-elevated' : 'hover:bg-elevated',
         className,
       )}

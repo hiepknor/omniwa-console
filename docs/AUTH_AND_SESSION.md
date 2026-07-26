@@ -75,7 +75,8 @@ interface ConsoleSession {
 
 | Failure | Behavior |
 | --- | --- |
-| 401 authentication | Clear session/cache and return to `/connect` with a session-invalid notice |
+| 401 from the active session credential | Clear session/cache and return to `/connect` with a session-invalid notice |
+| 401 from an attached instance token under admin scope | Render in place and require token replacement; keep the valid admin session |
 | 403 authorization | Render in place; keep the session so other permitted panels remain usable |
 | Browser transport failure | Keep the session and show one workspace condition |
 | Instance token absent | Do not issue scoped calls; render an explicit scope/not-ready state |

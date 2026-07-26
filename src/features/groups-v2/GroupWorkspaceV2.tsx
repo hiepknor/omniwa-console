@@ -178,6 +178,7 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
       <Dialog
         open={Boolean(confirm)}
         onClose={closeConfirm}
+        closeDisabled={confirmPending}
         title={confirm?.action === 'remove' ? 'Remove member?' : confirm?.action === 'leave' ? 'Leave group?' : 'Reset invite link?'}
         footer={<><Button disabled={confirmPending} onClick={closeConfirm}>Cancel</Button><Button variant="danger" disabled={confirmPending || (confirm?.action !== 'reset-invite' && confirmText !== (confirm?.action === 'leave' ? group.id : confirm?.member.memberRef ?? confirm?.member.id))} onClick={submitConfirm}>{confirmPending ? 'Submitting…' : 'Confirm command'}</Button></>}
       >
@@ -191,6 +192,7 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
       <Dialog
         open={sendOpen}
         onClose={() => setSendOpen(false)}
+        closeDisabled={send.isPending}
         title="Send text to group"
         footer={send.data ? <Button variant="primary" onClick={() => setSendOpen(false)}>Close acknowledgement</Button> : <><Button disabled={send.isPending} onClick={() => setSendOpen(false)}>Cancel</Button><Button variant="primary" disabled={!sendText.trim() || send.isPending} onClick={() => send.mutate(sendText.trim())}>{send.isPending ? 'Submitting…' : 'Send text'}</Button></>}
       >

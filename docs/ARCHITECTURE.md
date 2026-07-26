@@ -117,20 +117,20 @@ the resource-state authority.
 
 ### Tables
 
-List panels use `src/components/data-table/`. The shared system owns responsive
+List panels use `src/ui/Table.tsx`. The shared system owns responsive
 geometry, sticky columns, loading/error/empty rows, mobile summaries, selection
 semantics, and overflow cues. Features own typed columns, filters, rows, and URL
 state. Panel-specific table breakpoints or duplicate shells are not allowed.
 
 ### Drawers
 
-Resource inspectors use `src/components/drawer/DetailDrawer`. The shared shell
+Resource inspectors use `src/ui/Drawer.tsx`. The shared shell
 owns overlay behavior, focus trap/restoration, Escape, responsive placement,
 header identity, and state geometry. Features own resource facts and commands.
 
 ### Dialogs
 
-Forms and confirmations use `src/components/dialog/ModalDialog` and shared
+Forms and confirmations use `src/ui/Dialog.tsx` and shared
 confirmation components. Destructive or high-impact actions require explicit
 confirmation proportional to risk. Pending actions cannot be submitted twice.
 

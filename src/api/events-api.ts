@@ -1,5 +1,6 @@
 import type { ApiClient } from './client';
 import { ApiFailure } from './envelopes';
+import { credentialScopeForResponse } from './client';
 import type { components } from './generated/schema';
 
 type EventPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryItem'];
@@ -61,7 +62,7 @@ export async function listEvents(
     params: { query: { cursor: params.cursor, limit: params.limit ?? 100, type: nonEmpty(params.type) } },
   });
   if (result.data === undefined) {
-    throw new ApiFailure(result.error, result.response.status, result.response.headers);
+    throw new ApiFailure(result.error, result.response.status, result.response.headers, credentialScopeForResponse(result.response));
   }
   const envelope = result.data as EventEnvelope;
   const nextCursor = nonEmpty(envelope.meta?.nextCursor) ?? null;

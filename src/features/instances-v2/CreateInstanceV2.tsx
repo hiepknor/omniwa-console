@@ -18,6 +18,7 @@ export function CreateInstanceV2({ open, pending, error, created, onCreate, onCl
     <Dialog
       open={open}
       onClose={onClose}
+      closeDisabled={pending}
       title={created ? 'Store the instance token now' : 'Create instance'}
       footer={created
         ? <Button variant="primary" onClick={onClose}>I stored the token</Button>

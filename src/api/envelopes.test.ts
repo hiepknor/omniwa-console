@@ -84,6 +84,11 @@ describe('ApiFailure', () => {
   it('never carries a request id', () => {
     expect(new ApiFailure({ error: 'x' }, 400).requestId).toBeUndefined();
   });
+
+  it('defaults to session scope and preserves an explicit instance scope', () => {
+    expect(new ApiFailure({ error: 'x' }, 401).credentialScope).toBe('session');
+    expect(new ApiFailure({ error: 'x' }, 401, undefined, 'instance').credentialScope).toBe('instance');
+  });
 });
 
 describe('notImplemented', () => {

@@ -16,7 +16,7 @@ export function campaignTone(status: string): Tone {
 export type CampaignsViewProps = {
   refreshing: boolean;
   onRefresh: () => void;
-  newHref: string;
+  newHref?: string;
   notices?: ReactNode;
   status: string;
   onStatus: (v?: string) => void;
@@ -43,7 +43,7 @@ export function CampaignsView(props: CampaignsViewProps) {
         actions={
           <>
             <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>
-            <a href={props.newHref} className="inline-flex items-center h-9 px-3 text-[13px] font-medium bg-fg text-bg border border-fg hover:bg-fg-2">New campaign</a>
+            {props.newHref ? <a href={props.newHref} className="inline-flex items-center h-9 px-3 text-[13px] font-medium bg-fg text-bg border border-fg hover:bg-fg-2">New campaign</a> : null}
           </>
         }
       />

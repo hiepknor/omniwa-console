@@ -7,6 +7,7 @@ import { ApiFailure } from '@/api/envelopes';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
+import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, Dialog, Drawer, Field, Input, PageHeader, StateNotice, Status } from '@/ui';
 import { failureDetail, failureRequestId } from './state';
 import { useDiscardProjectionFailure, useProjectionFailures, useReplayProjectionFailure } from './hooks';
@@ -81,6 +82,7 @@ export function RecoveryPageV2() {
       { onSuccess: () => { setAction(undefined); selectFailure(undefined); } },
     );
   };
+  useInvalidCursorReset(query.error, filters.cursor, () => updateFilters({ cursor: undefined, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }));
 
   if (session.keyKind !== 'admin') return <Blocked title="Admin credential required" detail="Projection recovery requires an admin credential. No recovery request was sent." />;
   if (capabilities.isPending) return <Blocked title="Discovering capabilities" detail="Waiting for server capability discovery before reading failures." />;
@@ -145,6 +147,7 @@ export function RecoveryPageV2() {
       <Dialog
         open={Boolean(selected && action)}
         onClose={() => setAction(undefined)}
+        closeDisabled={pending}
         title={action === 'replay' ? 'Replay this failure?' : 'Discard this failure?'}
         footer={
           <>

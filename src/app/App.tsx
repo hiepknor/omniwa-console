@@ -9,6 +9,7 @@ import { clearSession, type ConsoleSession } from '@/lib/session';
 import { FeedbackProvider, useFeedback } from '@/components/feedback/FeedbackProvider';
 import { ConnectPage as ActiveConnectPage } from './ConnectPage';
 import { Shell as ActiveShell } from './Shell';
+import { shouldInvalidateSession } from './session-error';
 
 const OverviewPage = lazy(() => import('@/features/platform-v2/OverviewPageV2').then((m) => ({ default: m.OverviewPageV2 })));
 const RecoveryPage = lazy(() => import('@/features/platform-v2/RecoveryPageV2').then((m) => ({ default: m.RecoveryPageV2 })));
@@ -117,7 +118,9 @@ function AppRuntime() {
       const handleError = (error: Error) => {
         if (error instanceof ApiFailure) {
           feedbackRef.current.reportTransportSuccess();
-          if (error.category === 'authentication') disconnectRef.current('session-invalid');
+          if (shouldInvalidateSession(error)) {
+            disconnectRef.current('session-invalid');
+          }
           return;
         }
         feedbackRef.current.reportTransportFailure(error);

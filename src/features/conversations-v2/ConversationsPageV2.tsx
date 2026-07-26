@@ -4,6 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken } from '@/lib/format';
 import { createSearchParams, omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
+import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, CursorPagination, Field, Input, PageHeader, StateNotice, Status, Tabs } from '@/ui';
 import { cn } from '@/ui/cn';
 import { ComposerV2 } from './ComposerV2';
@@ -52,6 +53,8 @@ export function ConversationsPageV2() {
   const filteredLabels = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedLabels.filter((i) => !term || i.id.toLocaleLowerCase().includes(term) || i.name?.toLocaleLowerCase().includes(term)); }, [loadedLabels, route.search]);
   const loadedMessages = useMemo(() => [...(messages.data?.resource.items ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages.data]);
   const selectedChat = chat.data?.resource;
+  const chatsSupported = chatsReady || chats.data !== undefined || chat.data !== undefined;
+  const messagesSupported = messagesReady || messages.data !== undefined;
 
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
   const switchView = (view: ConversationViewV2) => navigate(withSearchParams('/chats', createSearchParams({ view: view === 'chats' ? undefined : view })));
@@ -63,12 +66,15 @@ export function ConversationsPageV2() {
   const currentAuthoritative = currentMeta?.syncStatus === undefined || currentMeta.syncStatus === 'ready';
   const routeRefreshing = currentQuery.isFetching || (Boolean(activeChatId) && (chat.isFetching || messages.isFetching));
   const refresh = () => { void currentQuery.refetch(); if (activeChatId) { void chat.refetch(); if (messagesReady) void messages.refetch(); } };
+  useInvalidCursorReset(currentQuery.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined }, ['selected'])));
+  useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
 
   if (!instanceScope) return <BlockedPage title="Instance credential required" detail="Conversations requires an instance credential. Admin scope cannot read token-scoped projections, and no request was sent." />;
   if (capabilities.isPending) return <BlockedPage title="Discovering capabilities" detail="Discovering instance capabilities before enabling projection reads." />;
-  if (capabilities.isError) return <BlockedPage title="Unsupported" detail="Capability discovery failed. Conversation projections remain disabled; no fallback read was sent." />;
+  if (capabilities.isError && currentQuery.data === undefined) return <BlockedPage title="Unsupported" detail="Capability discovery failed. Conversation projections remain disabled; no fallback read was sent." />;
 
-  const viewSupported = route.view === 'chats' ? chatsReady : route.view === 'contacts' ? contactsReady : labelsReady;
+  const advertised = route.view === 'chats' ? chatsReady : route.view === 'contacts' ? contactsReady : labelsReady;
+  const viewSupported = advertised || currentQuery.data !== undefined;
   const hasChat = Boolean(activeChatId);
   const emptyDirectory = viewSupported && currentQuery.data && currentAuthoritative && ((route.view === 'chats' && filteredChats.length === 0) || (route.view === 'contacts' && (contacts.data?.resource.items.length ?? 0) === 0) || (route.view === 'labels' && filteredLabels.length === 0));
 
@@ -101,7 +107,8 @@ export function ConversationsPageV2() {
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto">
-            {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Unsupported" detail={`The backend does not advertise ${route.view === 'chats' ? 'chats_projection' : route.view === 'contacts' ? 'contacts_projection' : 'labels_projection'}.`} /></div> : null}
+            {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail={`The backend does not currently advertise ${route.view === 'chats' ? 'chats_projection' : route.view === 'contacts' ? 'contacts_projection' : 'labels_projection'}; capability polling continues because the projection may be unsupported or waiting for readiness.`} /></div> : null}
+            {viewSupported && !advertised ? <div className="p-3"><StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable projection snapshot visible while capability discovery no longer advertises this resource." /></div> : null}
             {viewSupported && currentQuery.isPending ? <div className="p-3"><StateNotice kind="loading" title="Loading" /></div> : null}
             {viewSupported && currentQuery.error && !currentQuery.data ? <div className="p-3"><FailureNoticeV2 error={currentQuery.error} onRetry={refresh} /></div> : null}
             {viewSupported && currentQuery.data ? (
@@ -136,7 +143,7 @@ export function ConversationsPageV2() {
           <div className="flex-1 min-h-0 overflow-y-auto">
             {!activeChatId ? (
               <div className="p-4"><StateNotice kind="empty" title="No chat selected" detail="Select a chat from the projected directory." /></div>
-            ) : !chatsReady ? (
+            ) : !chatsSupported ? (
               <div className="p-4"><StateNotice kind="empty" title="Unsupported" /></div>
             ) : chat.isPending ? (
               <div className="p-4"><StateNotice kind="loading" title="Reading chat" /></div>
@@ -150,7 +157,7 @@ export function ConversationsPageV2() {
                   <span>{humanizeToken(selectedChat.type)}</span>
                   <span className="font-mono text-fg-2">{selectedChat.id}</span>
                 </div>
-                {!messagesReady ? (
+                {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>
                 ) : messages.isPending ? (
                   <div className="p-4"><StateNotice kind="loading" title="Reading messages" /></div>
@@ -173,7 +180,7 @@ export function ConversationsPageV2() {
         </section>
       </div>
 
-      {route.message && activeChatId && messagesReady ? <MessageInspectorV2 messageId={route.message} loadedChat={selectedChat} enabled onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
+      {route.message && activeChatId && messagesSupported ? <MessageInspectorV2 messageId={route.message} loadedChat={selectedChat} enabled={messagesReady} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
       {route.selected && route.view !== 'chats' && viewSupported ? <DirectoryInspectorV2 contact={contact.data?.resource} label={label.data?.resource} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
     </div>
   );

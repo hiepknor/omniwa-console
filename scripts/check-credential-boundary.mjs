@@ -53,6 +53,16 @@ if (/queryKey[^\n]*token|\[[^\n]*token[^\n]*\]\s+as const/i.test(keys)) {
   failures.push('query keys must be scoped by identity, never credential value');
 }
 
+const createCampaign = await read('src/features/campaigns-v2/CreateCampaignV2.tsx');
+if (!createCampaign.includes("session.keyKind === 'api'") || !createCampaign.includes("includes('campaign_orchestration')")) {
+  failures.push('campaign creation must gate direct routes by instance scope and campaign_orchestration');
+}
+
+const apiClient = await read('src/api/client.ts');
+if (!apiClient.includes("CredentialScope = 'session' | 'instance'") || !apiClient.includes('responseCredentialScopes')) {
+  failures.push('API failures must retain local credential scope without sending it over the network');
+}
+
 for (const path of [
   'src/features/campaigns-v2/CampaignsPageV2.tsx',
   'src/features/conversations-v2/ConversationsPageV2.tsx',

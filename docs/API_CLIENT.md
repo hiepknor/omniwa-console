@@ -120,6 +120,9 @@ Runtime errors are normalized to `ApiFailure` with:
 - `retryAfterSeconds` and absolute `retryAt` for rate limits;
 - optional request ID for forward compatibility (current OmniWA GO responses do
   not provide one).
+- local credential scope (`session` or `instance`) so an invalid attached
+  instance token cannot invalidate an otherwise valid admin session. This scope
+  is browser-only metadata and is never sent over the network.
 
 The adapter recognizes the codes documented in
 `docs/OMNIWA_GO_CONTRACT.md`. It reads `Retry-After` before the body fallback and

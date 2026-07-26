@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useApiSession } from '@/api/ApiProvider';
+import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { Button, Field, Input, PageHeader, Panel, StateNotice } from '@/ui';
 import { useCreateCampaignV2 } from './hooks';
@@ -8,6 +10,8 @@ import { parseConsentRows } from './consent';
 const textarea = 'w-full px-2.5 py-2 text-[13px] bg-recessed text-fg border border-line placeholder:text-fg-3 focus-visible:outline-none focus-visible:border-line-strong resize-y';
 
 export function CreateCampaignV2() {
+  const session = useApiSession();
+  const capabilities = useServerCapabilities();
   const create = useCreateCampaignV2();
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -27,6 +31,24 @@ export function CreateCampaignV2() {
     } catch { /* rendered below */ }
   };
   const failure = create.error instanceof ApiFailure ? create.error : undefined;
+  const instanceScope = session.keyKind === 'api';
+  const orchestration = capabilities.data?.capabilities.includes('campaign_orchestration') ?? false;
+
+  if (!instanceScope || capabilities.isPending || capabilities.isError || !orchestration) {
+    const detail = !instanceScope
+      ? 'Campaign creation requires an instance credential. No campaign request was sent.'
+      : capabilities.isPending
+        ? 'Discovering instance capabilities before enabling campaign creation.'
+        : capabilities.isError
+          ? 'Capability discovery failed. Campaign creation remains disabled.'
+          : 'The backend does not advertise campaign_orchestration. The Console does not emulate campaign execution.';
+    return (
+      <div className="grid gap-6 p-6 max-sm:p-4 max-w-3xl">
+        <PageHeader eyebrow="Messaging / Campaigns" title="Create campaign draft" description="Submit consent evidence once; execution remains in OmniWA GO." />
+        <StateNotice kind="empty" title={!instanceScope ? 'Instance credential required' : capabilities.isPending ? 'Discovering capabilities' : 'Unsupported'} detail={detail} action={<Link to="/messages" className="underline">Return to campaigns</Link>} />
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 p-6 max-sm:p-4 max-w-3xl">

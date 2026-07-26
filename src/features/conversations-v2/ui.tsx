@@ -5,14 +5,15 @@ import { Button, StateNotice, Status, type Tone } from '@/ui';
 
 export function FailureNoticeV2({ error, stale, command, onRetry }: { error: unknown; stale?: boolean; command?: boolean; onRetry?: () => void }) {
   const failure = error instanceof ApiFailure ? error : undefined;
-  const title = command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed';
+  const notReady = !command && failure?.code === 'projection_not_ready';
+  const title = command ? 'Command failed' : notReady ? 'Projection not ready' : stale ? 'Showing last known data' : 'Read failed';
   return (
     <StateNotice
-      kind="error"
+      kind={notReady ? 'empty' : 'error'}
       title={title}
       detail={failure?.message ?? 'An unexpected error occurred.'}
       requestId={failure?.requestId}
-      action={onRetry ? <Button onClick={onRetry}>Retry</Button> : undefined}
+      action={onRetry && !notReady ? <Button onClick={onRetry}>Retry</Button> : undefined}
     />
   );
 }

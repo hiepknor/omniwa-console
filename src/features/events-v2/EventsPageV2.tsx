@@ -4,8 +4,8 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import type { EventResource } from '@/api/events-api';
-import { cursorRecoveryAction } from '@/lib/cursor-recovery';
 import { humanizeToken, relativeTime } from '@/lib/format';
+import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, Drawer, PageHeader, StateNotice, Status } from '@/ui';
 import { EventsView } from './EventsView';
 import { useEventsV2 } from './hooks';
@@ -22,7 +22,8 @@ function Blocked({ detail, title }: { detail: string; title: string }) {
 
 function Fail({ error, stale, onRetry }: { error: unknown; stale?: boolean; onRetry: () => void }) {
   const f = error instanceof ApiFailure ? error : undefined;
-  return <StateNotice kind="error" title={stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={<Button onClick={onRetry}>Retry</Button>} />;
+  const notReady = f?.code === 'projection_not_ready';
+  return <StateNotice kind={notReady ? 'empty' : 'error'} title={notReady ? 'Projection not ready' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={notReady ? undefined : <Button onClick={onRetry}>Retry</Button>} />;
 }
 
 function summaryValue(value: unknown) {
@@ -73,15 +74,14 @@ export function EventsPageV2() {
   const selected = items.find((item) => item.id === route.event);
   const setParam = (key: string, value?: string) => setSearchParams(setEventParam(searchParams, key, value), { replace: true });
 
-  useEffect(() => {
-    if (!(events.error instanceof ApiFailure) || cursorRecoveryAction(events.error.code, route.cursor) !== 'reset') return;
+  useInvalidCursorReset(events.error, route.cursor, () => {
     setSearchParams(setEventParam(searchParams, 'cursor'), { replace: true });
-  }, [events.error, route.cursor, searchParams, setSearchParams]);
+  });
 
   if (!instanceScope) return <Blocked title="Instance credential required" detail="Durable event history requires an instance credential. Admin scope does not open a browser WebSocket or query token-scoped history." />;
   if (capabilities.isPending) return <Blocked title="Discovering capabilities" detail="Discovering instance capabilities before reading durable event history." />;
-  if (capabilities.isError) return <Blocked title="Unsupported" detail="Capability discovery failed. No event-history request or WebSocket fallback was sent." />;
-  if (!enabled) return <Blocked title="Unsupported" detail="The backend does not advertise events_projection. Toast history and live provider payloads are not used as substitutes." />;
+  if (capabilities.isError && !events.data) return <Blocked title="Unsupported" detail="Capability discovery failed. No event-history request or WebSocket fallback was sent." />;
+  if (!enabled && !events.data) return <Blocked title="Projection unavailable" detail="The backend does not currently advertise events_projection, which may be unsupported or waiting for readiness. Capability polling continues; no WebSocket or provider fallback is used." />;
 
   return (
     <>
@@ -93,7 +93,7 @@ export function EventsPageV2() {
         onTypeDraft={setTypeDraft}
         onApply={(e) => { e.preventDefault(); setParam('type', typeDraft.trim() || undefined); }}
         applyDisabled={events.isFetching || typeDraft.trim() === route.type}
-        errorSlot={events.error && !events.data ? <Fail error={events.error} onRetry={() => events.refetch()} /> : events.error ? <Fail error={events.error} stale onRetry={() => events.refetch()} /> : undefined}
+        errorSlot={!enabled && events.data || events.error ? <div className="grid gap-2">{!enabled && events.data ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable durable event snapshot visible while events_projection is absent." /> : null}{events.error && !events.data ? <Fail error={events.error} onRetry={() => events.refetch()} /> : events.error ? <Fail error={events.error} stale onRetry={() => events.refetch()} /> : null}</div> : undefined}
         initialLoading={events.isPending}
         empty={Boolean(events.data) && items.length === 0}
         emptyDetail={route.type ? `No durable events have the exact type “${route.type}”.` : 'No durable event history has been retained yet.'}

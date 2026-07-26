@@ -59,6 +59,7 @@ export function ComposerV2({ chatId, chatName, enabled }: { chatId: string; chat
       <Dialog
         open={mediaOpen}
         onClose={closeMedia}
+        closeDisabled={sendMedia.isPending}
         title="Send media from URL"
         footer={sendMedia.data
           ? <Button variant="primary" onClick={closeMedia}>Close acknowledgement</Button>

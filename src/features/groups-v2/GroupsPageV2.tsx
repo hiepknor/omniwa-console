@@ -4,6 +4,7 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure, type ProjectionMeta } from '@/api/envelopes';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
+import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, PageHeader, StateNotice, Status, type Tone } from '@/ui';
 import { CreateGroupV2 } from './CreateGroupV2';
 import { GroupsView } from './GroupsView';
@@ -28,7 +29,8 @@ function ProjectionStatus({ meta }: { meta?: ProjectionMeta }) {
 
 function Fail({ error, stale, onRetry }: { error: unknown; stale?: boolean; onRetry: () => void }) {
   const f = error instanceof ApiFailure ? error : undefined;
-  return <StateNotice kind="error" title={stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={<Button onClick={onRetry}>Retry</Button>} />;
+  const notReady = f?.code === 'projection_not_ready';
+  return <StateNotice kind={notReady ? 'empty' : 'error'} title={notReady ? 'Projection not ready' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={notReady ? undefined : <Button onClick={onRetry}>Retry</Button>} />;
 }
 
 export function GroupsPageV2() {
@@ -54,11 +56,12 @@ export function GroupsPageV2() {
   const applySearch = () => setParam('search', searchDraft.trim());
   const openGroup = (id: string) => navigate(withSearchParams(`/groups/${encodeURIComponent(id)}`, listParams));
   const closeCreate = () => { create.reset(); setParam('create'); };
+  useInvalidCursorReset(list.error, route.cursor, () => setParam('cursor'));
 
   if (!instanceScope) return <Blocked title="Instance credential required" detail="Groups requires an instance credential. Admin scope cannot read token-scoped group projections, and no request was sent." />;
   if (capabilities.isPending) return <Blocked title="Discovering capabilities" detail="Discovering instance capabilities before enabling group projection reads." />;
-  if (capabilities.isError) return <Blocked title="Unsupported" detail="Capability discovery failed. Groups remains disabled and no live fallback was sent." />;
-  if (!groupsReady) return <Blocked title="Unsupported" detail="The backend does not advertise groups_projection. No live WhatsApp group lookup is used as a fallback." />;
+  if (capabilities.isError && !list.data) return <Blocked title="Unsupported" detail="Capability discovery failed. Groups remains disabled and no live fallback was sent." />;
+  if (!groupsReady && !list.data) return <Blocked title="Projection unavailable" detail="The backend does not currently advertise groups_projection, which may be unsupported or waiting for readiness. Capability polling continues; no live WhatsApp lookup is used." />;
 
   return (
     <>
@@ -66,6 +69,7 @@ export function GroupsPageV2() {
         refreshing={list.isFetching}
         onRefresh={() => list.refetch()}
         onNew={() => { create.reset(); setParam('create', '1'); }}
+        commandsEnabled={groupsReady}
         ack={ack ? <StateNotice kind="info" title={`${ack} accepted`} detail="The refreshed group projection remains authoritative." /> : undefined}
         metrics={list.data && groups.length > 0 ? {
           loaded: groups.length,
@@ -77,7 +81,7 @@ export function GroupsPageV2() {
         onSearchDraft={setSearchDraft}
         onApply={(e) => { e.preventDefault(); applySearch(); }}
         applyDisabled={searchDraft.trim() === route.search || list.isFetching}
-        projectionStatus={list.data ? <ProjectionStatus meta={list.data.meta} /> : undefined}
+        projectionStatus={list.data ? <><ProjectionStatus meta={list.data.meta} />{!groupsReady ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable group projection visible while capability discovery no longer advertises groups_projection." /> : null}</> : undefined}
         notices={list.error && !list.data ? <Fail error={list.error} onRetry={() => list.refetch()} /> : list.error ? <Fail error={list.error} stale onRetry={() => list.refetch()} /> : undefined}
         initialLoading={list.isPending}
         empty={Boolean(list.data) && groups.length === 0 && authoritative}
@@ -90,8 +94,8 @@ export function GroupsPageV2() {
         onCursor={(v) => setParam('cursor', v)}
       />
 
-      {groupId ? <GroupWorkspaceV2 groupId={groupId} enabled={groupsReady} outboundEnabled={outboundReady} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
-      <CreateGroupV2 open={route.create} pending={create.isPending} error={create.error} onClose={closeCreate} onCreate={(body) => create.mutate(body, { onSuccess: () => { setAck('Create group'); closeCreate(); } })} />
+      {groupId && groupsReady ? <GroupWorkspaceV2 groupId={groupId} enabled outboundEnabled={outboundReady} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
+      <CreateGroupV2 open={route.create && groupsReady} pending={create.isPending} error={create.error} onClose={closeCreate} onCreate={(body) => create.mutate(body, { onSuccess: () => { setAck('Create group'); closeCreate(); } })} />
     </>
   );
 }

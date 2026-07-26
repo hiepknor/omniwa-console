@@ -1,5 +1,6 @@
 import type { components } from './generated/schema';
 import type { components as platformComponents } from './generated/platform-schema';
+import { credentialScopeForResponse, type CredentialScope } from './client';
 
 /**
  * Frozen omniwa Platform types, kept only so the panels that omniwa-go has no
@@ -144,8 +145,9 @@ export class ApiFailure extends Error {
   readonly retryAt: number | undefined;
   /** omniwa-go never returns a request id; kept for surface compatibility. */
   readonly requestId: string | undefined = undefined;
+  readonly credentialScope: CredentialScope;
 
-  constructor(errorBody: unknown, httpStatus: number, headers?: Headers) {
+  constructor(errorBody: unknown, httpStatus: number, headers?: Headers, credentialScope: CredentialScope = 'session') {
     const body = recordOf(errorBody);
     const message =
       typeof body?.error === 'string'
@@ -154,6 +156,7 @@ export class ApiFailure extends Error {
     super(message);
     this.name = 'ApiFailure';
     this.httpStatus = httpStatus;
+    this.credentialScope = credentialScope;
     this.code = typeof body?.code === 'string' ? body.code : undefined;
     // omniwa-go surfaces WhatsApp throttling as a 500 whose body carries the
     // upstream 429 (e.g. "info query returned status 429: rate-overlimit").
@@ -225,7 +228,7 @@ export function unwrap<T>(result: FetchResult): T {
     const body = result.data;
     return isEnvelope(body) ? (body.data as T) : (body as T);
   }
-  throw new ApiFailure(result.error, result.response.status, result.response.headers);
+  throw new ApiFailure(result.error, result.response.status, result.response.headers, credentialScopeForResponse(result.response));
 }
 
 /** Unwrap projection data while preserving its freshness and opaque cursor metadata. */
@@ -237,7 +240,7 @@ export function unwrapProjection<T>(result: FetchResult): ProjectionResult<T> {
     }
     return { resource: body as T };
   }
-  throw new ApiFailure(result.error, result.response.status, result.response.headers);
+  throw new ApiFailure(result.error, result.response.status, result.response.headers, credentialScopeForResponse(result.response));
 }
 
 /** Command variant: preserves the envelope message alongside the completed disposition. */
@@ -250,5 +253,5 @@ export function unwrapCommand(result: FetchResult): CommandResult {
       message: isEnvelope(body) ? body.message : undefined,
     };
   }
-  throw new ApiFailure(result.error, result.response.status, result.response.headers);
+  throw new ApiFailure(result.error, result.response.status, result.response.headers, credentialScopeForResponse(result.response));
 }

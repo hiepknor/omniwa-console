@@ -14,6 +14,7 @@ export function CreateGroupV2({ open, pending, error, onCreate, onClose }: { ope
     <Dialog
       open={open}
       onClose={onClose}
+      closeDisabled={pending}
       title="Create group"
       footer={<><Button disabled={pending} onClick={onClose}>Cancel</Button><Button variant="primary" disabled={!name.trim() || !parsed.length || pending} onClick={submit}>{pending ? 'Submitting…' : 'Create group'}</Button></>}
     >

@@ -228,6 +228,7 @@ export function InstanceWorkspaceV2({ instance, refreshError, onRetry, onClose, 
       <Dialog
         open={Boolean(confirm)}
         onClose={closeConfirm}
+        closeDisabled={confirmMutation.isPending}
         title={`${confirm === 'destroy' ? 'Destroy' : confirm === 'logout' ? 'Log out' : 'Disconnect'} instance?`}
         footer={
           <>
@@ -248,6 +249,7 @@ export function InstanceWorkspaceV2({ instance, refreshError, onRetry, onClose, 
       <Dialog
         open={rotationOpen}
         onClose={() => setRotationOpen(false)}
+        closeDisabled={rotate.isPending}
         title={rotate.data ? 'Store the replacement token' : 'Rotate instance token?'}
         footer={
           rotate.data ? (
