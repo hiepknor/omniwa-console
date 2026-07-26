@@ -1,7 +1,7 @@
 /*
  * OmniWA Console design system entry.
- * Editorial-minimal, dark-only, dense, square (no radius), flat.
- * Grayscale base + a few bold comic accents. Tailwind v4 @theme.
+ * Manga-inspired ink on paper: light, monochrome, dense, and square.
+ * Canonical tokens for the locked visual contract in design/DESIGN.md.
  */
 @import 'tailwindcss';
 

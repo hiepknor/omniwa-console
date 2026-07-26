@@ -1,0 +1,137 @@
+import { readFile, readdir } from 'node:fs/promises';
+import { relative, resolve } from 'node:path';
+
+const root = resolve(new URL('..', import.meta.url).pathname);
+const read = (path) => readFile(resolve(root, path), 'utf8');
+const failures = [];
+
+async function sourceFiles(directory) {
+  const absolute = resolve(root, directory);
+  const entries = await readdir(absolute, { withFileTypes: true, recursive: true });
+  return entries
+    .filter((entry) => entry.isFile() && /\.(?:css|ts|tsx)$/.test(entry.name))
+    .map((entry) => relative(root, resolve(entry.parentPath, entry.name)));
+}
+
+const styles = await read('src/styles/index.css');
+const lockedTokens = new Map([
+  ['--color-bg', '#ffffff'],
+  ['--color-surface', '#ffffff'],
+  ['--color-elevated', '#f2f2f2'],
+  ['--color-recessed', '#f6f6f6'],
+  ['--color-line', '#e2e2e2'],
+  ['--color-line-strong', '#111111'],
+  ['--color-fg', '#111111'],
+  ['--color-fg-2', '#565656'],
+  ['--color-fg-3', '#8c8c8c'],
+  ['--color-accent', '#111111'],
+  ['--color-accent-ink', '#ffffff'],
+  ['--color-ok', '#111111'],
+  ['--color-warn', '#111111'],
+  ['--color-danger', '#111111'],
+  ['--font-sans', "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"],
+  ['--font-mono', "'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace"],
+  ['--radius-none', '0px'],
+  ['--radius-sm', '0px'],
+  ['--radius-md', '0px'],
+  ['--radius-lg', '0px'],
+  ['--radius-xl', '0px'],
+  ['--radius-2xl', '0px'],
+  ['--radius-3xl', '0px'],
+  ['--radius-full', '0px'],
+]);
+
+for (const [token, value] of lockedTokens) {
+  if (!styles.includes(`${token}: ${value};`)) {
+    failures.push(`src/styles/index.css: locked token ${token} must remain ${value}`);
+  }
+}
+
+const allowedHex = new Set([
+  '#ffffff', '#f2f2f2', '#f6f6f6', '#e2e2e2', '#111111', '#565656', '#8c8c8c',
+  '#fff', '#111',
+]);
+
+// Frozen exceptions from design/DESIGN.md: semantic screentones, the danger
+// hatch, a connection-state mark, and the deterministic QR preview fixture.
+const gradientAllowlist = new Set([
+  'src/ui/Status.tsx',
+  'src/ui/StateNotice.tsx',
+  'src/components/feedback/FeedbackContent.tsx',
+  'src/ui/Button.tsx',
+  'src/app/ConnectPage.tsx',
+  'src/app/PreviewInstances.tsx',
+]);
+
+const hardcodedHexAllowlist = new Set([
+  'src/styles/index.css',
+  'src/app/UiGallery.tsx',
+  ...gradientAllowlist,
+]);
+
+// Hard zero-blur lift is reserved for action buttons and the open select menu.
+const shadowAllowlist = new Set(['src/ui/Button.tsx', 'src/ui/Select.tsx']);
+const chromaUtility = /\b(?:red|blue|green|yellow|orange|purple|pink|cyan|teal|indigo|violet|lime|amber|emerald|sky|rose|fuchsia)-\d+/g;
+
+for (const path of await sourceFiles('src')) {
+  const source = await read(path);
+  const code = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+
+  if (/(?:^|[\s"'`])rounded(?:-\[[^\]]+\]|-[\w-]+)?(?=$|[\s"'`])/.test(code)) {
+    failures.push(`${path}: rounded utilities violate the square geometry lock`);
+  }
+  if (/backdrop-blur|["'\s]blur-(?!none\b)/.test(code)) {
+    failures.push(`${path}: blur utilities violate the flat overlay lock`);
+  }
+  if (/\bfont-(?:bold|extrabold|black)\b/.test(code)) {
+    failures.push(`${path}: typography weights above 600 violate the hierarchy lock`);
+  }
+
+  for (const match of source.matchAll(/#[\da-fA-F]{3,8}\b/g)) {
+    if (!allowedHex.has(match[0].toLowerCase())) {
+      failures.push(`${path}: non-canonical color ${match[0]} violates the monochrome token lock`);
+    } else if (!hardcodedHexAllowlist.has(path)) {
+      failures.push(`${path}: hardcoded ${match[0]} bypasses canonical theme tokens`);
+    }
+  }
+  if (/\b(?:rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color)\(/.test(code)) {
+    failures.push(`${path}: direct color function bypasses the monochrome token lock`);
+  }
+  for (const match of source.matchAll(chromaUtility)) {
+    failures.push(`${path}: chromatic utility ${match[0]} violates the monochrome token lock`);
+  }
+
+  if (source.includes('gradient') && !gradientAllowlist.has(path)) {
+    failures.push(`${path}: gradient is not an allowlisted semantic screentone or fixture`);
+  }
+  if ((source.includes('shadow-[') || /\bshadow-(?:sm|md|lg|xl|2xl)\b/.test(source)) && !shadowAllowlist.has(path)) {
+    failures.push(`${path}: shadow is not an allowlisted hard action/menu lift`);
+  }
+  if (/\bbox-shadow\s*:|\bdrop-shadow(?:-|\[)/.test(code)) {
+    failures.push(`${path}: direct or drop shadow violates the zero-blur lift lock`);
+  }
+}
+
+const contract = await read('design/DESIGN.md');
+for (const marker of [
+  'Status: frozen visual contract',
+  '## 7. Frozen interaction states',
+  '## 8. Change control',
+  'scripts/check-design.mjs',
+  'scripts/check-visual-language.mjs',
+  'Chrome DevTools evidence',
+]) {
+  if (!contract.includes(marker)) failures.push(`design/DESIGN.md: visual lock is missing ${marker}`);
+}
+
+const gallery = await read('src/app/UiGallery.tsx');
+for (const marker of ['Locked design system', 'hard lift only', '<Button', '<Select', '<Drawer', '<Dialog']) {
+  if (!gallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: locked review surface is missing ${marker}`);
+}
+
+if (failures.length) {
+  console.error(`Visual language violations:\n- ${failures.join('\n- ')}`);
+  process.exitCode = 1;
+} else {
+  console.log(`Visual language is locked (${lockedTokens.size} tokens, ${gradientAllowlist.size} pattern exceptions, ${shadowAllowlist.size} lift exceptions).`);
+}

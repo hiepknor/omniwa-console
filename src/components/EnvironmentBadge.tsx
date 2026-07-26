@@ -87,7 +87,7 @@ export function EnvironmentBadge({
   return (
     <span
       data-badge="environment"
-      className={`inline-flex min-h-[22px] shrink-0 items-center rounded-[var(--radius-sm)] border border-[var(--border-subtle)] bg-[color-mix(in_oklab,var(--fg)_3%,transparent)] font-[var(--ui)] text-[10px] font-medium uppercase leading-4 tracking-[0.6px] text-[var(--muted)] ${className}`}
+      className={`inline-flex min-h-[22px] shrink-0 items-center border border-line bg-recessed font-sans text-[10px] font-medium uppercase leading-4 tracking-[0.6px] text-fg-2 ${className}`}
       aria-label={presentation.description}
       title={presentation.description}
     >

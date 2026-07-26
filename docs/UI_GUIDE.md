@@ -18,6 +18,11 @@ Use the established monochrome, square, dense visual language. Compose Tailwind
 utilities in components; do not add feature CSS files. Extend a shared primitive
 when behavior is repeated across routes.
 
+The frozen token, geometry, elevation, state, exception, and change-control
+rules live in [`../design/DESIGN.md`](../design/DESIGN.md). Every intentional
+visual-language change updates that contract, `/__ui`, regression coverage, and
+Chrome desktop/mobile evidence in the same pull request.
+
 ## State model
 
 Resource panels represent independent state axes instead of collapsing them into
@@ -82,5 +87,9 @@ Before delivery, verify:
 4. Commands prevent duplicates and describe acknowledgement accurately.
 5. Keyboard, focus, labeling, responsive layout, and reduced-motion behavior
    remain usable.
-6. `docs/PANELS.md` lists every operation called by the feature.
-7. `git diff --check`, `pnpm test`, and `pnpm check` pass.
+6. Hover/open/selected states keep labels and icons visible and do not depend on
+   conflicting utility order.
+7. No unapproved radius, chroma, blur, soft shadow, decorative gradient, or
+   feature-local visual primitive was introduced.
+8. `docs/PANELS.md` lists every operation called by the feature.
+9. `git diff --check`, `pnpm test`, and `pnpm check` pass.

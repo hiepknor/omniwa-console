@@ -52,9 +52,9 @@ export function UiGallery() {
     <div className="min-h-dvh overflow-x-clip bg-bg text-fg">
       <div className="mx-auto max-w-[1100px] px-4 sm:px-8">
         <PageHeader
-          eyebrow="Design system v3"
+          eyebrow="Locked design system"
           title="UI Gallery"
-          description="Manga · ink on white paper · dense · square · screentone status."
+          description="Manga · ink on white paper · dense · square · semantic screentone · hard lift only."
           actions={<Button variant="primary">Primary action</Button>}
         />
 

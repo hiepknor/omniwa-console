@@ -9,6 +9,10 @@ API-client-only: it consumes the public REST contract and contains no
 backend or business logic. Read `README.md` first, then the doc that covers
 your task in `docs/`.
 
+For UI, UX, or visual work, also read `design/DESIGN.md`. It is the frozen
+visual contract; an intentional language change updates that document,
+`/__ui`, regression coverage, and Chrome desktop/mobile evidence together.
+
 ## Hard boundaries
 
 - Never import backend source from `omniwa-go`. The only artifact that crosses
@@ -50,6 +54,9 @@ your task in `docs/`.
   delivery or campaign completion (see `docs/API_CLIENT.md`).
 - Tailwind for styling; compose utilities in components rather than
   writing CSS files.
+- Preserve the locked monochrome, square, dense language and its explicit
+  allowlists. `pnpm design:check` rejects unapproved radius, chroma, blur, soft
+  shadow, decorative gradient, and typography drift.
 
 ## Git and pull-request workflow
 

@@ -61,6 +61,7 @@ frequently used documents are:
 | [docs/API_CLIENT.md](docs/API_CLIENT.md) | Generated client, envelopes, errors, cursors, and query keys |
 | [docs/PANELS.md](docs/PANELS.md) | Panel ownership and integration status by `METHOD /path` |
 | [docs/UI_GUIDE.md](docs/UI_GUIDE.md) | Design foundation, state model, route behavior, and review contract |
+| [design/DESIGN.md](design/DESIGN.md) | Frozen visual tokens, states, exceptions, and change control |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Immutable image build, promotion, and rollback gates |
 
 ## Development

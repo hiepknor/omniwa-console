@@ -33,6 +33,7 @@ then open the document that covers your task below.
 | --- | --- |
 | [DELIVERY_WORKFLOW.md](DELIVERY_WORKFLOW.md) | Required delivery lifecycle from intake through merge |
 | [UI_GUIDE.md](UI_GUIDE.md) | Design foundation, state model, route behavior, and review contract |
+| [DESIGN.md](../design/DESIGN.md) | Frozen visual tokens, geometry, states, exceptions, and change control |
 
 ## Deployment and rollout evidence
 
