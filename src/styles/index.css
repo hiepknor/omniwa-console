@@ -8,11 +8,6 @@
  */
 @import 'tailwindcss';
 
-/* ── transitional legacy styles (removed in cleanup phase) ─────────────── */
-@import './tokens.css';
-@import './base.css';
-@import './ui-v2.css';
-
 /* ── v3 theme tokens ───────────────────────────────────────────────────── */
 @theme {
   /* Manga: black ink on white paper. Pure monochrome, screentone for tone. */

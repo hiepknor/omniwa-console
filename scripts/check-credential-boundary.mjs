@@ -19,7 +19,7 @@ if (!provider.includes('InstanceCredentialsContext')) {
   failures.push('the in-memory instance credential vault is missing');
 }
 
-const instanceDrawer = await read('src/features/instances/InstanceDrawer.tsx');
+const instanceDrawer = await read('src/features/instances-v2/InstanceWorkspaceV2.tsx');
 if (!instanceDrawer.includes('useSetInstanceCredential') || !instanceDrawer.includes('Use for this session')) {
   failures.push('existing instance tokens must be attachable to the in-memory vault after reload');
 }
@@ -43,8 +43,8 @@ if (!app.includes('clearSession();') || !app.includes('return null;')) {
   failures.push('application startup must clear legacy stored sessions');
 }
 
-const credentialHealthPanel = await read('src/features/instances/CredentialHealthPanel.tsx');
-if (!credentialHealthPanel.includes('No representative workload') || !credentialHealthPanel.includes('never derives a safe-to-remove decision')) {
+const credentialHealthPanel = await read('src/features/instances-v2/CredentialHealthV2.tsx');
+if (!credentialHealthPanel.includes('not adoption evidence') || !credentialHealthPanel.includes('never derives safeToRemove')) {
   failures.push('credential health must reject a 0/0 adoption verdict and avoid a safety decision');
 }
 
@@ -54,12 +54,11 @@ if (/queryKey[^\n]*token|\[[^\n]*token[^\n]*\]\s+as const/i.test(keys)) {
 }
 
 for (const path of [
-  'src/features/campaigns/CampaignsPage.tsx',
-  'src/features/chats/ChatsPage.tsx',
-  'src/features/chats/ConversationList.tsx',
-  'src/features/events/EventsPage.tsx',
-  'src/features/groups/GroupsPage.tsx',
-  'src/features/instances/InstanceDrawer.tsx',
+  'src/features/campaigns-v2/CampaignsPageV2.tsx',
+  'src/features/conversations-v2/ConversationsPageV2.tsx',
+  'src/features/events-v2/EventsPageV2.tsx',
+  'src/features/groups-v2/GroupsPageV2.tsx',
+  'src/features/instances-v2/InstanceWorkspaceV2.tsx',
 ]) {
   const source = await read(path);
   if (/\b(?:instance|selectedInstance|selected)\??\.token\b/.test(source)) {

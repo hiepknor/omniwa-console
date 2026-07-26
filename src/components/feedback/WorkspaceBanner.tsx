@@ -11,7 +11,7 @@ export function WorkspaceBanner() {
   if (transport.status === 'online' || !hasCanonicalWorkspaceBanner(location.pathname)) return null;
 
   return (
-    <div className="workspace-banner">
+    <div className="p-4">
       <SurfaceNotice
         kind="error"
         label="Connection"

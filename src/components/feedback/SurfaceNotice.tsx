@@ -22,17 +22,10 @@ export function SurfaceNotice({
 }) {
   return (
     <div
-      className={`feedback-notice feedback-tone-${kind}${className ? ` ${className}` : ''}`}
+      className={`bg-elevated border border-line border-l-2 border-l-fg${className ? ` ${className}` : ''}`}
       role={announcement === 'assertive' ? 'alert' : announcement === 'polite' ? 'status' : undefined}
     >
-      <FeedbackContent
-        kind={kind}
-        label={label}
-        title={title}
-        detail={detail}
-        requestId={requestId}
-        action={action}
-      />
+      <FeedbackContent kind={kind} label={label} title={title} detail={detail} requestId={requestId} action={action} />
     </div>
   );
 }
