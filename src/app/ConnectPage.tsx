@@ -29,16 +29,19 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
   ];
 
   return (
-    <div className="min-h-dvh bg-bg">
-      <header className="flex items-center justify-between gap-4 min-h-16 px-8 border-b border-line-strong max-sm:px-4">
-        <span className="flex items-center gap-3">
-          <Logo />
-          <strong className="text-[13px] font-semibold text-fg">OmniWA Console</strong>
-        </span>
-        <Status tone="neutral">No active session</Status>
+    <div className="flex min-h-dvh flex-col bg-bg">
+      <header className="border-b border-line-strong">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 min-h-16 px-8 max-sm:px-4">
+          <span className="flex items-center gap-3">
+            <Logo />
+            <strong className="text-[13px] font-semibold text-fg">OmniWA Console</strong>
+          </span>
+          <Status tone="neutral">No active session</Status>
+        </div>
       </header>
 
-      <main className="mx-auto grid max-w-5xl grid-cols-2 items-start gap-12 px-8 py-16 max-[900px]:grid-cols-1 max-[900px]:gap-8 max-sm:px-4 max-sm:py-10">
+      <main className="flex-1 grid place-items-center px-8 py-12 max-sm:px-4 max-sm:py-8">
+        <div className="grid w-full max-w-5xl grid-cols-2 items-center gap-12 max-[900px]:grid-cols-1 max-[900px]:gap-8">
         <section className="grid gap-5 min-w-0">
           <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Self-hosted platform access</span>
           <h1 className="max-w-[14ch] text-4xl font-semibold leading-tight tracking-tight text-fg">Connect to an OmniWA runtime.</h1>
@@ -162,6 +165,7 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
               </Button>
             </form>
           </div>
+        </div>
         </div>
       </main>
     </div>
