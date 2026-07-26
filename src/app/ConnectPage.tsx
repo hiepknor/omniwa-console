@@ -42,7 +42,7 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
 
       <main className="flex-1 grid place-items-center px-8 py-12 max-sm:px-4 max-sm:py-8">
         <div className="grid w-full max-w-5xl grid-cols-2 items-center gap-12 max-[900px]:grid-cols-1 max-[900px]:gap-8">
-        <section className="grid gap-5 min-w-0">
+        <section className="grid gap-5 min-w-0 order-1 max-[900px]:order-2">
           <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Self-hosted platform access</span>
           <h1 className="max-w-[14ch] text-4xl font-semibold leading-tight tracking-tight text-fg">Connect to an OmniWA runtime.</h1>
           <p className="max-w-[48ch] text-sm text-fg-2">
@@ -52,18 +52,17 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
           <dl className="grid gap-px border border-line-strong bg-line text-sm">
             {[
               ['Transport', 'Direct browser → OmniWA GO'],
-              ['Credential', 'Memory only; cleared on reload or sign-out'],
-              ['Default local API', 'http://localhost:4000'],
+              ['Probe timeout', '15 seconds'],
             ].map(([dt, dd]) => (
               <div key={dt} className="flex items-center justify-between gap-4 bg-surface px-3 py-2">
                 <dt className="text-fg-3">{dt}</dt>
-                <dd className={cn('text-fg', dt === 'Default local API' && 'font-mono text-xs')}>{dd}</dd>
+                <dd className="text-fg">{dd}</dd>
               </div>
             ))}
           </dl>
         </section>
 
-        <div className="grid gap-4 min-w-0">
+        <div className="grid gap-4 min-w-0 order-2 max-[900px]:order-1">
           {notice === 'session-invalid' ? (
             <Notice
               title="Session cleared"
@@ -77,21 +76,24 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
               <p className="mt-1 text-xs text-fg-3">Origin and credential are validated directly against the selected runtime.</p>
             </div>
             <form className="grid gap-4 p-4" onSubmit={flow.submit}>
-              <ol className="grid grid-cols-3 border border-line" aria-label="Connection checks">
-                {steps.map((step, i) => (
-                  <li
-                    key={step.id}
-                    aria-current={step.active ? 'step' : undefined}
-                    className={cn(
-                      'grid gap-0.5 p-2 border-r border-line last:border-r-0',
-                      step.active ? 'bg-fg text-bg' : 'text-fg-2',
-                    )}
-                  >
-                    <span className="font-mono text-[11px] opacity-70">0{i + 1}</span>
-                    <strong className="text-[11px] font-medium">{step.label}</strong>
-                  </li>
-                ))}
-              </ol>
+              <div className="grid gap-1.5">
+                <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Checks · run on connect</span>
+                <ol className="grid grid-cols-3 border border-line" aria-label="Connection checks">
+                  {steps.map((step, i) => (
+                    <li
+                      key={step.id}
+                      aria-current={step.active ? 'step' : undefined}
+                      className={cn(
+                        'grid gap-0.5 p-2 border-r border-line last:border-r-0',
+                        step.active ? 'bg-fg text-bg' : 'text-fg-3',
+                      )}
+                    >
+                      <span className="font-mono text-[11px] opacity-70">0{i + 1}</span>
+                      <strong className="text-[11px] font-medium">{step.label}</strong>
+                    </li>
+                  ))}
+                </ol>
+              </div>
 
               <Field label="API origin" error={flow.baseUrlError?.message}>
                 {(id) => (
