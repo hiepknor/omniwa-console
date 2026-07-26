@@ -54,6 +54,13 @@ const developmentRoutes = import.meta.env.DEV
         },
       },
       {
+        path: '/__preview/instances',
+        lazy: async () => {
+          const { PreviewInstances } = await import('./PreviewInstances');
+          return { Component: PreviewInstances };
+        },
+      },
+      {
         path: '/__ui-v2',
         lazy: async () => {
           const { UiV2Gallery } = await import('./UiV2Gallery');

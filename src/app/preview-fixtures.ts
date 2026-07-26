@@ -1,4 +1,5 @@
 /* Dev-only sample data for rendering v3 surfaces without a backend (/__preview). */
+import type { InstanceResource } from '@/api/instances';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
 
 const now = Date.now();
@@ -27,6 +28,13 @@ export const projectionFixture: ProjectionHealthResource = {
     { resource: 'messages', instanceId: 'inst_07TMR', syncStatus: 'ready', pendingEvents: 0, deadLetterEvents: 0, eventLagSeconds: 3 },
   ],
 };
+
+export const instancesFixture: InstanceResource[] = [
+  { id: 'inst_01HZX9Q2', displayName: 'Sales bot', status: 'connected', connected: true, credentialVersion: 3, createdAt: ago(86_400 * 12), jid: '15551230001@s.whatsapp.net' },
+  { id: 'inst_02KQP7M4', displayName: 'Support line', status: 'connected', connected: true, credentialVersion: 1, createdAt: ago(86_400 * 5), jid: '15551230002@s.whatsapp.net' },
+  { id: 'inst_07TMR3B9', displayName: 'Marketing blast', status: 'disconnected', connected: false, credentialVersion: 2, createdAt: ago(86_400 * 30), jid: undefined },
+  { id: 'inst_09WLK1C6', displayName: 'Onboarding', status: 'disconnected', connected: false, createdAt: ago(3600), jid: undefined },
+] as unknown as InstanceResource[];
 
 export const healthFixture: ServerHealthResource = {
   generatedAt: ago(30),
