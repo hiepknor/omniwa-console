@@ -59,6 +59,8 @@ The connected credential determines the available navigation and API scope:
   campaigns, and events;
 - instance-scoped live commands require an in-memory instance token where the
   active session does not already provide that scope.
+- instance scope never invents or requests the configured admin Instance Name;
+  a non-empty status name is presented as WhatsApp name only after login.
 
 Never persist credentials or place credential values in URLs, query keys, logs,
 resource models, or rendered diagnostics.

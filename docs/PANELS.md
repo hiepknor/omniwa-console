@@ -90,7 +90,10 @@ POST /instance/reconnect
 The QR cache is cleared before every connect/restart attempt and whenever live
 status is not connected or is already paired. QR polling runs only while the
 pairing surface is mounted, connected, unpaired, and not submitting a command.
-An acknowledgement never substitutes for refreshed status.
+An acknowledgement never substitutes for refreshed status. Instance scope does
+not expose or infer the configured admin Instance Name. The status `Name` is
+rendered as WhatsApp name only after authoritative status reports `LoggedIn` and
+the value is non-empty.
 
 ## Groups — `/groups/:groupId?`
 
