@@ -6,10 +6,6 @@ import { DescriptionItem, DescriptionList, Drawer, Panel, StateNotice, Status, t
 import { useMessage, useReceipts } from './hooks';
 import { FailureNotice, ProjectionStatus } from './ui';
 
-function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
-}
-
 function receiptTone(type: string): Tone {
   return type === 'read' || type === 'delivered' ? 'ok' : 'pending';
 }
@@ -25,21 +21,21 @@ export function DirectoryInspector({ contact, label, error, loading, onRetry, on
       ) : contact ? (
         <Panel title="Normalized identity" description="Read-only projection; phone identity is redacted by the backend." bodyClassName="pt-2">
           <DescriptionList>
-            <Fact label="JID" value={contact.id} mono />
-            <Fact label="Username" value={contact.username ?? 'Not reported'} />
-            <Fact label="Phone" value={contact.redactedPhone ?? 'Not reported'} />
-            <Fact label="Business" value={contact.businessName ?? 'Not reported'} />
-            <Fact label="About" value={contact.about ?? 'Not reported'} />
-            <Fact label="Known" value={contact.found ? 'Yes' : 'No'} />
+            <DescriptionItem label="JID" mono>{contact.id}</DescriptionItem>
+            <DescriptionItem label="Username">{contact.username ?? 'Not reported'}</DescriptionItem>
+            <DescriptionItem label="Phone">{contact.redactedPhone ?? 'Not reported'}</DescriptionItem>
+            <DescriptionItem label="Business">{contact.businessName ?? 'Not reported'}</DescriptionItem>
+            <DescriptionItem label="About">{contact.about ?? 'Not reported'}</DescriptionItem>
+            <DescriptionItem label="Known">{contact.found ? 'Yes' : 'No'}</DescriptionItem>
           </DescriptionList>
         </Panel>
       ) : label ? (
         <Panel title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments." bodyClassName="pt-2">
           <DescriptionList>
-            <Fact label="Label ID" value={label.id} mono />
-            <Fact label="Name" value={label.name ?? 'Not reported'} />
-            <Fact label="Color" value={label.color ?? 'Not reported'} />
-            <Fact label="Predefined ID" value={label.predefinedId ?? 'Not reported'} />
+            <DescriptionItem label="Label ID" mono>{label.id}</DescriptionItem>
+            <DescriptionItem label="Name">{label.name ?? 'Not reported'}</DescriptionItem>
+            <DescriptionItem label="Color">{label.color ?? 'Not reported'}</DescriptionItem>
+            <DescriptionItem label="Predefined ID">{label.predefinedId ?? 'Not reported'}</DescriptionItem>
           </DescriptionList>
         </Panel>
       ) : (
@@ -72,13 +68,13 @@ export function MessageInspector({ messageId, loadedChat, enabled, onClose }: { 
             <ProjectionStatus meta={message.data?.meta} />
             <Panel title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyClassName="pt-2">
               <DescriptionList>
-                <Fact label="Chat" value={resource.chatId} mono />
-                <Fact label="Direction" value={humanizeToken(resource.direction)} />
-                <Fact label="Type" value={humanizeToken(resource.type)} />
-                <Fact label="Provenance" value={humanizeToken(resource.provenance)} />
-                <Fact label="Created" value={relativeTime(resource.createdAt) || resource.createdAt} />
-                <Fact label="Delivered" value={resource.deliveredAt ? (relativeTime(resource.deliveredAt) || 'Not reported') : 'Not reported'} />
-                <Fact label="Read" value={resource.readAt ? (relativeTime(resource.readAt) || 'Not reported') : 'Not reported'} />
+                <DescriptionItem label="Chat" mono>{resource.chatId}</DescriptionItem>
+                <DescriptionItem label="Direction">{humanizeToken(resource.direction)}</DescriptionItem>
+                <DescriptionItem label="Type">{humanizeToken(resource.type)}</DescriptionItem>
+                <DescriptionItem label="Provenance">{humanizeToken(resource.provenance)}</DescriptionItem>
+                <DescriptionItem label="Created">{relativeTime(resource.createdAt) || resource.createdAt}</DescriptionItem>
+                <DescriptionItem label="Delivered">{resource.deliveredAt ? (relativeTime(resource.deliveredAt) || 'Not reported') : 'Not reported'}</DescriptionItem>
+                <DescriptionItem label="Read">{resource.readAt ? (relativeTime(resource.readAt) || 'Not reported') : 'Not reported'}</DescriptionItem>
               </DescriptionList>
             </Panel>
           </>

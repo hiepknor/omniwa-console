@@ -17,10 +17,6 @@ function Fail({ error, command, stale, onRetry }: { error: unknown; command?: bo
   const f = error instanceof ApiFailure ? error : undefined;
   return <StateNotice kind="error" title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={onRetry ? <Button onClick={onRetry}>Retry</Button> : undefined} />;
 }
-function Fact({ label, value }: { label: string; value: string }) {
-  return <DescriptionItem label={label}>{value}</DescriptionItem>;
-}
-
 export function CampaignInspector({ campaignId, commandsEnabled = true, onClose }: { campaignId: string; commandsEnabled?: boolean; onClose: () => void }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const route = campaignRouteState(searchParams);
@@ -72,12 +68,12 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
             {route.tab === 'overview' ? (
               <div className="grid gap-4">
                 <DescriptionList>
-                  <Fact label="Status" value={humanizeToken(campaign.status)} />
-                  <Fact label="Recipients" value={String(detail.data.recipientCount)} />
-                  <Fact label="Content" value={campaign.contentType} />
-                  <Fact label="Starts" value={relativeTime(campaign.startsAt) || 'Not scheduled'} />
-                  <Fact label="Finished" value={relativeTime(campaign.finishedAt) || 'Not finished'} />
-                  <Fact label="Version" value={String(campaign.version)} />
+                  <DescriptionItem label="Status">{humanizeToken(campaign.status)}</DescriptionItem>
+                  <DescriptionItem label="Recipients">{String(detail.data.recipientCount)}</DescriptionItem>
+                  <DescriptionItem label="Content">{campaign.contentType}</DescriptionItem>
+                  <DescriptionItem label="Starts">{relativeTime(campaign.startsAt) || 'Not scheduled'}</DescriptionItem>
+                  <DescriptionItem label="Finished">{relativeTime(campaign.finishedAt) || 'Not finished'}</DescriptionItem>
+                  <DescriptionItem label="Version">{String(campaign.version)}</DescriptionItem>
                 </DescriptionList>
                 <div className="grid gap-1">
                   <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message content</span>

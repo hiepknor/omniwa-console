@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 232" role="img" aria-labelledby="title description">
+  <title id="title">Pairing QR sample</title>
+  <desc id="description">Deterministic monochrome QR-like fixture for interface review only.</desc>
+  <defs>
+    <pattern id="modules" width="16" height="16" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#111"/>
+      <rect x="8" y="8" width="8" height="8" fill="#111"/>
+    </pattern>
+  </defs>
+  <rect width="232" height="232" fill="#fff"/>
+  <rect x="16" y="16" width="200" height="200" fill="url(#modules)"/>
+  <g fill="#fff" stroke="#111" stroke-width="8">
+    <rect x="24" y="24" width="56" height="56"/>
+    <rect x="152" y="24" width="56" height="56"/>
+    <rect x="24" y="152" width="56" height="56"/>
+  </g>
+  <g fill="#111">
+    <rect x="40" y="40" width="24" height="24"/>
+    <rect x="168" y="40" width="24" height="24"/>
+    <rect x="40" y="168" width="24" height="24"/>
+  </g>
+</svg>

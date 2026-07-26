@@ -25,10 +25,6 @@ function Blocked({ detail, title }: { detail: string; title: string }) {
   );
 }
 
-function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
-}
-
 export function RecoveryPage() {
   const session = useApiSession();
   const capabilities = useServerCapabilities();
@@ -123,13 +119,13 @@ export function RecoveryPage() {
           <div className="grid gap-4">
             <Status tone="failed">{humanizeToken(selected.failureClass, 'Failed')}</Status>
             <DescriptionList>
-              <Fact label="Instance" value={selected.instanceId} mono />
-              <Fact label="Event type" value={humanizeToken(selected.eventType)} />
-              <Fact label="Error code" value={selected.lastErrorCode ?? 'Not reported'} mono />
-              <Fact label="Attempts" value={`${selected.retryCount ?? '—'} of ${selected.maxAttempts ?? '—'}`} />
-              <Fact label="Occurred" value={relativeTime(selected.occurredAt) || 'Not reported'} />
-              <Fact label="Last attempt" value={relativeTime(selected.lastAttemptAt) || 'Not reported'} />
-              <Fact label="Dead-lettered" value={relativeTime(selected.deadLetteredAt) || 'Not reported'} />
+              <DescriptionItem label="Instance" mono>{selected.instanceId}</DescriptionItem>
+              <DescriptionItem label="Event type">{humanizeToken(selected.eventType)}</DescriptionItem>
+              <DescriptionItem label="Error code" mono>{selected.lastErrorCode ?? 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Attempts">{`${selected.retryCount ?? '—'} of ${selected.maxAttempts ?? '—'}`}</DescriptionItem>
+              <DescriptionItem label="Occurred">{relativeTime(selected.occurredAt) || 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Last attempt">{relativeTime(selected.lastAttemptAt) || 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Dead-lettered">{relativeTime(selected.deadLetteredAt) || 'Not reported'}</DescriptionItem>
             </DescriptionList>
             <div className="flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => openCommand('replay')}>Replay…</Button>

@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import type { GroupResource } from '@/api/groups';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, CursorPagination, Field, Input, MetricGrid, PageHeader, Panel, Status, Table, Td, Th, Tr } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Input, MetricGrid, PageHeader, Panel, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
 
 export type GroupsViewProps = {
   refreshing: boolean;
@@ -57,14 +57,14 @@ export function GroupsView(props: GroupsViewProps) {
       ) : null}
 
       <Panel title="Group directory" description="Applied prefix search, opaque cursor, and selected group remain URL-addressable." bodyClassName="p-0">
-        <form className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 p-4 border-b border-line max-sm:grid-cols-1" onSubmit={props.onApply}>
-          <Field label="Prefix search">{(id) => <Input id={id} type="search" value={props.searchDraft} placeholder="Group name or JID prefix" onChange={(e) => props.onSearchDraft(e.target.value)} />}</Field>
+        <FilterToolbar as="form" onSubmit={props.onApply}>
+          <Field label="Prefix search" className="min-w-56 flex-1">{(id) => <Input id={id} type="search" value={props.searchDraft} placeholder="Group name or JID prefix" onChange={(e) => props.onSearchDraft(e.target.value)} />}</Field>
           <div className="flex items-end"><Button type="submit" disabled={props.applyDisabled}>Apply search</Button></div>
-        </form>
+        </FilterToolbar>
 
         {props.projectionStatus ? <div className="px-4">{props.projectionStatus}</div> : null}
         {props.notices ? <div className="p-4">{props.notices}</div> : null}
-        {props.initialLoading ? <div className="p-4"><Status tone="pending">Loading groups…</Status></div> : null}
+        {props.initialLoading ? <div className="p-4"><StateNotice kind="loading" title="Loading groups" /></div> : null}
 
         {props.groups.length > 0 ? (
           <Table className="border-0">
@@ -89,7 +89,7 @@ export function GroupsView(props: GroupsViewProps) {
             </tbody>
           </Table>
         ) : props.empty ? (
-          <div className="p-4"><Status tone="neutral">{props.emptyDetail ?? 'No groups.'}</Status></div>
+          <div className="p-4"><StateNotice kind="empty" title="No groups" detail={props.emptyDetail ?? 'The ready group projection contains no groups.'} /></div>
         ) : null}
 
         <CursorPagination cursor={props.cursor} nextCursor={props.nextCursor} onCursor={props.onCursor} info={props.cursor ? 'Opaque cursor page' : `${props.groups.length} groups on first page`} />

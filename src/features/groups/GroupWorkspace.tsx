@@ -23,9 +23,6 @@ function Fail({ error, command, stale, onRetry }: { error: unknown; command?: bo
   return <StateNotice kind="error" title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={onRetry ? <Button onClick={onRetry}>Retry</Button> : undefined} />;
 }
 function Ack({ action }: { action: string }) { return <StateNotice kind="info" title={`${action} accepted`} detail="The refreshed group projection remains authoritative; acknowledgement does not prove provider completion." />; }
-function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
-}
 function ProjectionLine({ meta }: { meta?: ProjectionMeta }) {
   if (!meta?.syncStatus) return null;
   const tone: Tone = meta.syncStatus === 'ready' ? 'ok' : meta.syncStatus === 'failed' ? 'failed' : meta.syncStatus === 'stale' ? 'degraded' : 'pending';
@@ -96,11 +93,11 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
 
       <Panel title="Group facts" description="Persisted group and membership facts." bodyClassName="pt-2">
         <DescriptionList>
-          <Fact label="Group JID" value={group.id} mono />
-          <Fact label="Status" value={humanizeToken(group.status ?? 'unreported')} />
-          <Fact label="Members" value={String(group.memberCount ?? 'Not reported')} />
-          <Fact label="Admins" value={String(group.adminCount ?? 'Not reported')} />
-          <Fact label="Updated" value={relativeTime(group.updatedAt) || 'Not reported'} />
+          <DescriptionItem label="Group JID" mono>{group.id}</DescriptionItem>
+          <DescriptionItem label="Status">{humanizeToken(group.status ?? 'unreported')}</DescriptionItem>
+          <DescriptionItem label="Members">{String(group.memberCount ?? 'Not reported')}</DescriptionItem>
+          <DescriptionItem label="Admins">{String(group.adminCount ?? 'Not reported')}</DescriptionItem>
+          <DescriptionItem label="Updated">{relativeTime(group.updatedAt) || 'Not reported'}</DescriptionItem>
         </DescriptionList>
       </Panel>
 

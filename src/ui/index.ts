@@ -23,4 +23,5 @@ export { Dialog } from './Dialog';
 export { Panel } from './Panel';
 export { StateNotice } from './StateNotice';
 export { CursorPagination } from './CursorPagination';
+export { SplitWorkspace, WorkspacePaneHeader } from './SplitWorkspace';
 export { Logo } from './Logo';

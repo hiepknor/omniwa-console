@@ -106,8 +106,42 @@ for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', 'max-[900px]:grid-cols-1', "chat ? 'max-[900px]:hidden'", "chat ? '' : 'max-[900px]:hidden'", '>Back</Button>']) {
+for (const marker of ['<main', '<SplitWorkspace', 'detailOpen={Boolean(chat)}', '<WorkspacePaneHeader', '>Back</Button>']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
+}
+
+const splitWorkspace = await read('src/ui/SplitWorkspace.tsx');
+for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-1', "detailOpen && 'max-[900px]:hidden'", "!detailOpen && 'max-[900px]:hidden'", 'WorkspacePaneHeader']) {
+  if (!splitWorkspace.includes(marker)) failures.push(`src/ui/SplitWorkspace.tsx: split-workspace recipe is missing ${marker}`);
+}
+
+const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
+for (const marker of ['<SplitWorkspace', '<WorkspacePaneHeader', '>Back</Button>']) {
+  if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
+}
+
+const groupsView = await read('src/features/groups/GroupsView.tsx');
+for (const marker of ['<FilterToolbar as="form"', '<StateNotice kind="loading"', '<StateNotice kind="empty"']) {
+  if (!groupsView.includes(marker)) failures.push(`src/features/groups/GroupsView.tsx: list recipe is missing ${marker}`);
+}
+
+const instancesPreview = await read('src/app/PreviewInstances.tsx');
+if (!instancesPreview.includes('<Image src="/ui-qr-sample.svg"')) {
+  failures.push('src/app/PreviewInstances.tsx: QR fixture must use the canonical Image primitive');
+}
+
+for (const [path, owner] of Object.entries({
+  'src/app/PreviewOverview.tsx': 'OverviewView',
+  'src/app/PreviewInstances.tsx': 'InstancesView',
+  'src/app/PreviewRecovery.tsx': 'RecoveryView',
+  'src/app/PreviewGroups.tsx': 'GroupsView',
+  'src/app/PreviewCampaigns.tsx': 'CampaignsView',
+  'src/app/PreviewEvents.tsx': 'EventsView',
+})) {
+  const source = await read(path);
+  if (!source.includes(`import { ${owner}`) || !source.includes(`<${owner}`)) {
+    failures.push(`${path}: deterministic preview must render its production ${owner}`);
+  }
 }
 
 const table = await read('src/ui/Table.tsx');

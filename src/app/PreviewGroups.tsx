@@ -3,10 +3,6 @@ import { GroupsView } from '@/features/groups/GroupsView';
 import { Button, DescriptionItem, DescriptionList, Drawer, Field, Input, Panel, Status, Switch } from '@/ui';
 import { groupDetailFixture, groupsFixture } from './preview-fixtures';
 
-function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
-}
-
 /** Dev-only: Groups workbench + an open group drawer with sample data. */
 export function PreviewGroups() {
   const [open, setOpen] = useState(true);
@@ -37,10 +33,10 @@ export function PreviewGroups() {
           <Status tone="ok">Active</Status>
           <Panel title="Group facts" bodyClassName="pt-2">
             <DescriptionList>
-              <Fact label="Group JID" value={g.id} mono />
-              <Fact label="Members" value="42" />
-              <Fact label="Admins" value="4" />
-              <Fact label="Updated" value="30m ago" />
+              <DescriptionItem label="Group JID" mono>{g.id}</DescriptionItem>
+              <DescriptionItem label="Members">42</DescriptionItem>
+              <DescriptionItem label="Admins">4</DescriptionItem>
+              <DescriptionItem label="Updated">30m ago</DescriptionItem>
             </DescriptionList>
           </Panel>
           <Panel title="Group settings" description="Each switch submits one explicit paired group-setting action.">

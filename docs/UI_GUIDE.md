@@ -74,8 +74,11 @@ resource models, or rendered diagnostics.
 - Destructive commands state their exact target and require explicit intent.
 - Loading and refresh behavior uses `src/lib/query-policy.ts`; routes do not own
   numeric polling intervals.
-- Preview routes under `/__preview/*` are development-only and use production
-  components with deterministic fixtures.
+- Preview routes under `/__preview/*` are development-only integration
+  fixtures. They reuse the corresponding production view and shared
+  composition primitives; they are not an independent prototype or a source
+  of visual rules. Fixture-only content may exercise deterministic states, but
+  shared frames and interactions stay owned by `src/ui/`.
 
 ## Review checklist
 

@@ -76,7 +76,6 @@ const gradientAllowlist = new Set([
   'src/ui/Button.tsx',
   'src/ui/ProgressBar.tsx',
   'src/app/ConnectPage.tsx',
-  'src/app/PreviewInstances.tsx',
 ]);
 
 const hardcodedHexAllowlist = new Set([
@@ -147,6 +146,9 @@ for (const path of await sourceFiles('src')) {
   if (!path.endsWith('.test.tsx') && path !== 'src/ui/DescriptionList.tsx' && /<(?:dl|dt|dd)\b/.test(code)) {
     failures.push(`${path}: repeated definition data must use DescriptionList and DescriptionItem`);
   }
+  if (path !== 'src/ui/DescriptionList.tsx' && /function\s+Fact\s*\(/.test(code)) {
+    failures.push(`${path}: local fact-row helpers compete with DescriptionItem`);
+  }
   if (!path.endsWith('.test.tsx') && path !== 'src/ui/Icon.tsx' && path !== 'src/ui/Logo.tsx' && /<svg\b/.test(code)) {
     failures.push(`${path}: interface glyphs must use the canonical Icon primitive`);
   }
@@ -171,7 +173,7 @@ for (const marker of [
 }
 
 const gallery = await read('src/app/UiGallery.tsx');
-for (const marker of ['Locked design system', 'hard lift only', '<Logo', '<Icon', '<Button', '<ButtonLink', '<CloseButton', '<Textarea', '<Checkbox', '<Radio', '<Switch', '<DateTimeInput', '<Select', '<FilterToolbar', '<FilterChip', '<DescriptionList', '<Panel', '<StateNotice', '<CursorPagination', '<ProgressBar', '<Image', '<Drawer', '<Dialog', '<SurfaceNotice', '<ToastViewport', '<ShellAnatomy']) {
+for (const marker of ['Locked design system', 'hard lift only', '<Logo', '<Icon', '<Button', '<ButtonLink', '<CloseButton', '<Textarea', '<Checkbox', '<Radio', '<Switch', '<DateTimeInput', '<Select', '<FilterToolbar', '<FilterChip', '<DescriptionList', '<Panel', '<StateNotice', '<CursorPagination', '<ProgressBar', '<Image', '<SplitWorkspace', '<WorkspacePaneHeader', '<Drawer', '<Dialog', '<SurfaceNotice', '<ToastViewport', '<ShellAnatomy']) {
   if (!gallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: locked review surface is missing ${marker}`);
 }
 
