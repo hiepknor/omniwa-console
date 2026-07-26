@@ -2,13 +2,34 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { ApiFailureNotice, Button, CommandAck, CursorPagination, Field, PageGuard, PageHeader, ProjectionStatus, StateNotice, Status, Surface, Table } from '@/components/v2';
-import { humanizeToken, relativeTime } from '@/lib/format';
+import { ApiFailure, type ProjectionMeta } from '@/api/envelopes';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
+import { Button, PageHeader, StateNotice, Status, type Tone } from '@/ui';
 import { CreateGroupV2 } from './CreateGroupV2';
+import { GroupsView } from './GroupsView';
 import { GroupWorkspaceV2 } from './GroupWorkspaceV2';
 import { useCreateGroupV2, useGroupsV2 } from './hooks';
 import { groupRouteState } from './route-state';
+
+function Blocked({ detail, title }: { detail: string; title: string }) {
+  return (
+    <div className="grid gap-6 p-6 max-sm:p-4">
+      <PageHeader eyebrow="Messaging" title="Groups" description="Projection-backed group directory and explicit provider commands." />
+      <StateNotice kind="empty" title={title} detail={detail} />
+    </div>
+  );
+}
+
+function ProjectionStatus({ meta }: { meta?: ProjectionMeta }) {
+  if (!meta?.syncStatus) return null;
+  const tone: Tone = meta.syncStatus === 'ready' ? 'ok' : meta.syncStatus === 'failed' ? 'failed' : meta.syncStatus === 'stale' ? 'degraded' : 'pending';
+  return <div className="py-2"><Status tone={tone}>Projection {meta.syncStatus.replace('_', ' ')}</Status></div>;
+}
+
+function Fail({ error, stale, onRetry }: { error: unknown; stale?: boolean; onRetry: () => void }) {
+  const f = error instanceof ApiFailure ? error : undefined;
+  return <StateNotice kind="error" title={stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={<Button onClick={onRetry}>Retry</Button>} />;
+}
 
 export function GroupsPageV2() {
   const session = useApiSession();
@@ -34,24 +55,43 @@ export function GroupsPageV2() {
   const openGroup = (id: string) => navigate(withSearchParams(`/groups/${encodeURIComponent(id)}`, listParams));
   const closeCreate = () => { create.reset(); setParam('create'); };
 
-  if (!instanceScope) return <Blocked detail="Groups requires an instance credential. Admin scope cannot read token-scoped group projections, and no request was sent." state="invalid" />;
-  if (capabilities.isPending) return <Blocked detail="Discovering instance capabilities before enabling group projection reads." state="discovering" />;
-  if (capabilities.isError) return <Blocked detail="Capability discovery failed. Groups remains disabled and no live fallback was sent." state="unsupported" />;
-  if (!groupsReady) return <Blocked detail="The backend does not advertise groups_projection. No live WhatsApp group lookup is used as a fallback." state="unsupported" />;
+  if (!instanceScope) return <Blocked title="Instance credential required" detail="Groups requires an instance credential. Admin scope cannot read token-scoped group projections, and no request was sent." />;
+  if (capabilities.isPending) return <Blocked title="Discovering capabilities" detail="Discovering instance capabilities before enabling group projection reads." />;
+  if (capabilities.isError) return <Blocked title="Unsupported" detail="Capability discovery failed. Groups remains disabled and no live fallback was sent." />;
+  if (!groupsReady) return <Blocked title="Unsupported" detail="The backend does not advertise groups_projection. No live WhatsApp group lookup is used as a fallback." />;
 
-  return <div className="ui-v2-page">
-    <PageHeader eyebrow="Messaging" title="Groups" description="Projection-backed group directory and explicit provider commands in the active instance scope." actions={<><Button disabled={list.isFetching} onClick={() => list.refetch()}>{list.isFetching ? 'Refreshing…' : 'Refresh'}</Button><Button variant="primary" onClick={() => { create.reset(); setParam('create', '1'); }}>New group</Button></>} />
-    <div className="ui-v2-page__content">
-      {ack ? <CommandAck action={ack} note="The refreshed group projection remains authoritative." /> : null}
-      {list.data && groups.length > 0 ? <div className="ui-v2-metric-grid ui-v2-groups-metrics"><div><span>Loaded groups</span><strong>{groups.length}</strong></div><div><span>Members</span><strong>{groups.reduce((sum, group) => sum + (group.memberCount ?? 0), 0)}</strong></div><div><span>Known admins</span><strong>{groups.reduce((sum, group) => sum + (group.adminCount ?? 0), 0)}</strong></div><div><span>Announcement only</span><strong>{groups.filter((group) => group.announce).length}</strong></div></div> : null}
-      <Surface title="Group directory" description="Applied prefix search, opaque cursor, and selected group remain URL-addressable.">
-        <form className="ui-v2-group-filters" onSubmit={(event) => { event.preventDefault(); applySearch(); }}><Field label="Prefix search" type="search" value={searchDraft} placeholder="Group name or JID prefix" onChange={(event) => setSearchDraft(event.target.value)} /><Button type="submit" disabled={searchDraft.trim() === route.search || list.isFetching}>Apply search</Button></form>
-        {list.isPending ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} /> : list.error && !list.data ? <ApiFailureNotice error={list.error} onRetry={() => list.refetch()} /> : list.data ? <><ProjectionStatus meta={list.data.meta} />{list.error ? <ApiFailureNotice error={list.error} stale onRetry={() => list.refetch()} /> : null}{groups.length ? <Table ariaLabel="Projected group table" caption="Projected groups" className="ui-v2-groups-table" rows={groups} rowKey={(group) => group.id} selectedKey={groupId} columns={[{ header: 'Group', cell: (group) => <><button className="ui-v2-row-link" type="button" onClick={() => openGroup(group.id)}>{group.subject ?? group.id}</button><small className="ui-v2-mono">{group.id}</small></> }, { header: 'Status', cell: (group) => <Status tone={group.status === 'active' ? 'healthy' : 'degraded'}>{humanizeToken(group.status ?? 'unreported')}</Status> }, { header: 'Members', cell: (group) => group.memberCount ?? 'Not reported' }, { header: 'Admins', cell: (group) => group.adminCount ?? 'Not reported' }, { header: 'Updated', title: (group) => group.updatedAt, cell: (group) => relativeTime(group.updatedAt) || 'Not reported' }]} /> : authoritative ? <StateNotice value={{ axis: 'resource', state: 'empty' }} detail={route.search ? 'No projected group matches this prefix.' : 'The ready group projection contains no groups.'} /> : null}<CursorPagination cursor={route.cursor} nextCursor={list.data.resource?.pagination.nextCursor} onCursor={(value) => setParam('cursor', value)} label={route.cursor ? 'Opaque cursor page' : `${groups.length} groups on first page`} /></> : null}
-      </Surface>
-    </div>
-    {groupId ? <GroupWorkspaceV2 groupId={groupId} enabled={groupsReady} outboundEnabled={outboundReady} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
-    <CreateGroupV2 open={route.create} pending={create.isPending} error={create.error} onClose={closeCreate} onCreate={(body) => create.mutate(body, { onSuccess: () => { setAck('Create group'); closeCreate(); } })} />
-  </div>;
+  return (
+    <>
+      <GroupsView
+        refreshing={list.isFetching}
+        onRefresh={() => list.refetch()}
+        onNew={() => { create.reset(); setParam('create', '1'); }}
+        ack={ack ? <StateNotice kind="info" title={`${ack} accepted`} detail="The refreshed group projection remains authoritative." /> : undefined}
+        metrics={list.data && groups.length > 0 ? {
+          loaded: groups.length,
+          members: groups.reduce((s, g) => s + (g.memberCount ?? 0), 0),
+          admins: groups.reduce((s, g) => s + (g.adminCount ?? 0), 0),
+          announce: groups.filter((g) => g.announce).length,
+        } : undefined}
+        searchDraft={searchDraft}
+        onSearchDraft={setSearchDraft}
+        onApply={(e) => { e.preventDefault(); applySearch(); }}
+        applyDisabled={searchDraft.trim() === route.search || list.isFetching}
+        projectionStatus={list.data ? <ProjectionStatus meta={list.data.meta} /> : undefined}
+        notices={list.error && !list.data ? <Fail error={list.error} onRetry={() => list.refetch()} /> : list.error ? <Fail error={list.error} stale onRetry={() => list.refetch()} /> : undefined}
+        initialLoading={list.isPending}
+        empty={Boolean(list.data) && groups.length === 0 && authoritative}
+        emptyDetail={route.search ? 'No projected group matches this prefix.' : 'The ready group projection contains no groups.'}
+        groups={groups}
+        selectedId={groupId}
+        onOpen={openGroup}
+        cursor={route.cursor}
+        nextCursor={list.data?.resource?.pagination.nextCursor ?? undefined}
+        onCursor={(v) => setParam('cursor', v)}
+      />
+
+      {groupId ? <GroupWorkspaceV2 groupId={groupId} enabled={groupsReady} outboundEnabled={outboundReady} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
+      <CreateGroupV2 open={route.create} pending={create.isPending} error={create.error} onClose={closeCreate} onCreate={(body) => create.mutate(body, { onSuccess: () => { setAck('Create group'); closeCreate(); } })} />
+    </>
+  );
 }
-
-function Blocked({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Messaging" title="Groups" description="Projection-backed group directory and explicit provider commands." state={state} detail={detail} />; }

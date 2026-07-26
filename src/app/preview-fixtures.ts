@@ -1,5 +1,6 @@
 /* Dev-only sample data for rendering v3 surfaces without a backend (/__preview). */
 import type { ChatResource } from '@/api/chats';
+import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
 import type { MessageResource } from '@/api/messages';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
@@ -58,6 +59,25 @@ export const messagesFixture: MessageResource[] = [
   { id: 'msg_3', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'text', status: 'read', contentText: 'Perfect, thank you!', createdAt: ago(1800), provenance: 'whatsapp' },
   { id: 'msg_4', chatId: '15551230001@s.whatsapp.net', direction: 'outgoing', type: 'text', status: 'failed', contentText: 'Let me know if you need anything else.', createdAt: ago(300), provenance: 'console' },
 ] as unknown as MessageResource[];
+
+export const groupsFixture: GroupResource[] = [
+  { id: '120363001@g.us', subject: 'Support escalations', status: 'active', memberCount: 42, adminCount: 4, updatedAt: ago(1800), announce: true, members: [] },
+  { id: '120363002@g.us', subject: 'Order fulfilment', status: 'active', memberCount: 12, adminCount: 2, updatedAt: ago(86_400), announce: false, members: [] },
+  { id: '120363003@g.us', subject: 'VIP customers', status: 'inactive', memberCount: 8, adminCount: 1, updatedAt: ago(86_400 * 7), announce: true, members: [] },
+] as unknown as GroupResource[];
+
+export const groupDetailFixture = {
+  id: '120363001@g.us',
+  subject: 'Support escalations',
+  status: 'active',
+  memberCount: 42,
+  adminCount: 4,
+  updatedAt: ago(1800),
+  members: [
+    { id: 'm1', memberRef: '15551230001@s.whatsapp.net', displayName: 'Anna Nguyen', role: 'admin' },
+    { id: 'm2', memberRef: '15551230003@s.whatsapp.net', displayName: 'David Tran', role: 'member' },
+  ],
+} as unknown as GroupResource;
 
 export const healthFixture: ServerHealthResource = {
   generatedAt: ago(30),

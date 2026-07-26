@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { ApiFailure } from '@/api/envelopes';
 import type { GroupMemberResource, GroupResource, GroupSetting } from '@/api/groups';
-import { ApiFailureNotice, Button, CommandAck, Dialog, Field, Inspector, ProjectionStatus, StateNotice, Status, Surface } from '@/components/v2';
+import type { ProjectionMeta } from '@/api/envelopes';
 import { humanizeToken, relativeTime } from '@/lib/format';
+import { Button, Dialog, Drawer, Field, Input, Panel, StateNotice, Status, type Tone } from '@/ui';
 import {
   useAddGroupMemberV2, useDemoteGroupMemberV2, useGroupInviteV2, useGroupV2,
   useLeaveGroupV2, usePromoteGroupMemberV2, useRemoveGroupMemberV2,
@@ -16,14 +18,44 @@ const settings: Array<{ key: GroupSetting; label: string; hint: string }> = [
   { key: 'adminsOnlyAdd', label: 'Admin member add', hint: 'Only admins can add members.' },
 ];
 
-function Ack({ action }: { action: string }) { return <CommandAck action={action} note="The refreshed group projection remains authoritative; acknowledgement does not prove provider completion." />; }
+function Fail({ error, command, stale, onRetry }: { error: unknown; command?: boolean; stale?: boolean; onRetry?: () => void }) {
+  const f = error instanceof ApiFailure ? error : undefined;
+  return <StateNotice kind="error" title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={onRetry ? <Button onClick={onRetry}>Retry</Button> : undefined} />;
+}
+function Ack({ action }: { action: string }) { return <StateNotice kind="info" title={`${action} accepted`} detail="The refreshed group projection remains authoritative; acknowledgement does not prove provider completion." />; }
+function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0"><dt className="text-xs text-fg-3">{label}</dt><dd className={mono ? 'font-mono text-xs text-fg' : 'text-[13px] text-fg'}>{value}</dd></div>;
+}
+function ProjectionLine({ meta }: { meta?: ProjectionMeta }) {
+  if (!meta?.syncStatus) return null;
+  const tone: Tone = meta.syncStatus === 'ready' ? 'ok' : meta.syncStatus === 'failed' ? 'failed' : meta.syncStatus === 'stale' ? 'degraded' : 'pending';
+  return <Status tone={tone}>Projection {meta.syncStatus.replace('_', ' ')}</Status>;
+}
+const textarea = 'w-full px-2.5 py-2 text-[13px] bg-recessed text-fg border border-line hover:border-line-strong focus-visible:outline-none focus-visible:border-line-strong resize-y';
 
 export function GroupWorkspaceV2({ groupId, enabled, outboundEnabled, onClose, onLeft }: { groupId: string; enabled: boolean; outboundEnabled: boolean; onClose: () => void; onLeft: () => void }) {
   const query = useGroupV2(groupId, enabled);
   const group = query.data?.resource;
-  return <Inspector titleId="group-v2-details" eyebrow="Group workspace" title={group?.subject ?? 'Group details'} subtitle={<span className="ui-v2-mono">{groupId}</span>} status={group ? <Status tone={group.status === 'active' ? 'healthy' : 'degraded'}>{humanizeToken(group.status ?? 'unreported')}</Status> : undefined} modal onClose={onClose}>
-    {query.isPending ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} /> : query.error && !group ? <ApiFailureNotice error={query.error} onRetry={() => query.refetch()} /> : group ? <><ProjectionStatus meta={query.data?.meta} />{query.error ? <ApiFailureNotice error={query.error} stale onRetry={() => query.refetch()} /> : null}<GroupWorkspaceContent group={group} outboundEnabled={outboundEnabled} onLeft={onLeft} /></> : <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The projected group detail was not returned." />}
-  </Inspector>;
+  return (
+    <Drawer open onClose={onClose} title={group?.subject ?? 'Group details'} subtitle={groupId}>
+      {query.isPending ? (
+        <StateNotice kind="loading" title="Loading group" />
+      ) : query.error && !group ? (
+        <Fail error={query.error} onRetry={() => query.refetch()} />
+      ) : group ? (
+        <div className="grid gap-4">
+          <div className="flex items-center justify-between gap-3">
+            <Status tone={group.status === 'active' ? 'ok' : 'degraded'}>{humanizeToken(group.status ?? 'unreported')}</Status>
+            <ProjectionLine meta={query.data?.meta} />
+          </div>
+          {query.error ? <Fail error={query.error} stale onRetry={() => query.refetch()} /> : null}
+          <GroupWorkspaceContent group={group} outboundEnabled={outboundEnabled} onLeft={onLeft} />
+        </div>
+      ) : (
+        <StateNotice kind="empty" title="Not returned" detail="The projected group detail was not returned." />
+      )}
+    </Drawer>
+  );
 }
 
 function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: GroupResource; outboundEnabled: boolean; onLeft: () => void }) {
@@ -60,17 +92,115 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
   const confirmPending = confirm?.action === 'remove' ? remove.isPending : confirm?.action === 'leave' ? leave.isPending : resetInvite.isPending;
   const confirmError = confirm?.action === 'remove' ? remove.error : confirm?.action === 'leave' ? leave.error : resetInvite.error;
 
-  return <div className="ui-v2-stack">
-    {lastAck ? <Ack action={lastAck} /> : null}
-    <Surface title="Group facts" description="Persisted group and membership facts."><dl className="ui-v2-detail-list"><div><dt>Group JID</dt><dd className="ui-v2-mono">{group.id}</dd></div><div><dt>Status</dt><dd>{humanizeToken(group.status ?? 'unreported')}</dd></div><div><dt>Members</dt><dd>{group.memberCount ?? 'Not reported'}</dd></div><div><dt>Admins</dt><dd>{group.adminCount ?? 'Not reported'}</dd></div><div><dt>Updated</dt><dd title={group.updatedAt}>{relativeTime(group.updatedAt) || 'Not reported'}</dd></div></dl></Surface>
-    <Surface title="Metadata" description="Only changed fields are submitted; a partial failure is not automatically retried."><div className="ui-v2-stack"><Field label="Subject" value={subject} disabled={update.isPending} onChange={(event) => setSubject(event.target.value)} /><label className="ui-v2-field"><span className="ui-v2-field__label">Description</span><textarea className="ui-v2-input ui-v2-textarea" rows={3} value={description} disabled={update.isPending} onChange={(event) => setDescription(event.target.value)} /></label><Button disabled={!metadataDirty || update.isPending} onClick={() => update.mutate({ ...(subject !== (group.subject ?? '') ? { subject } : {}), ...(description !== (group.description ?? '') ? { description } : {}) })}>{update.isPending ? 'Submitting…' : 'Update metadata'}</Button>{update.error ? <><ApiFailureNotice error={update.error} command /><p className="ui-v2-generated-note">If both fields changed, one command may have completed before the failure. Inspect the refreshed projection before another submission.</p></> : null}</div></Surface>
-    <Surface title="Group settings" description="Each switch submits one explicit paired group-setting action."><div className="ui-v2-settings-list">{settings.map(({ key, label, hint }) => { const checked = Boolean(group[key]); return <label className="ui-v2-setting" key={key}><span><strong>{label}</strong><small>{hint}</small></span><input type="checkbox" checked={checked} disabled={setting.isPending} onChange={() => setting.mutate({ setting: key, enabled: !checked })} /></label>; })}{setting.error ? <ApiFailureNotice error={setting.error} command /> : null}</div></Surface>
-    <Surface title="Invite link" description="Reading uses the projection/cache path. Reset revokes the previous link and requires confirmation."><div className="ui-v2-stack">{invite.isPending ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} /> : invite.error && !invite.data ? <ApiFailureNotice error={invite.error} onRetry={() => invite.refetch()} /> : <><code className="ui-v2-code-block">{invite.data ?? 'No invite link reported'}</code>{invite.error ? <ApiFailureNotice error={invite.error} stale onRetry={() => invite.refetch()} /> : null}</>}<Button variant="danger" onClick={() => setConfirm({ action: 'reset-invite' })}>Reset invite link…</Button></div></Surface>
-    <Surface title="Members" description="Member commands act on the linked provider; refreshed projection remains authoritative."><form className="ui-v2-inline-form" onSubmit={(event) => { event.preventDefault(); if (memberJid.trim() && !memberPending) add.mutate(memberJid.trim(), { onSuccess: () => setMemberJid('') }); }}><Field label="Phone or JID" value={memberJid} disabled={memberPending} onChange={(event) => setMemberJid(event.target.value)} /><Button type="submit" disabled={!memberJid.trim() || memberPending}>{add.isPending ? 'Adding…' : 'Add member'}</Button></form>{memberError ? <ApiFailureNotice error={memberError} command /> : null}{group.members.length ? <ul className="ui-v2-member-list">{group.members.map((member) => { const ref = member.memberRef ?? member.id; return <li key={member.id}><span><strong>{member.displayName ?? ref}</strong><small className="ui-v2-mono">{ref}</small></span><Status tone={member.role === 'member' ? 'neutral' : 'healthy'}>{humanizeToken(member.role)}</Status><div>{member.role === 'member' ? <Button disabled={memberPending} onClick={() => promote.mutate(ref)}>Promote</Button> : <Button disabled={memberPending} onClick={() => demote.mutate(ref)}>Demote</Button>}<Button variant="danger" disabled={memberPending} onClick={() => setConfirm({ action: 'remove', member })}>Remove…</Button></div></li>; })}</ul> : <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="No members are present in the projected detail." />}</Surface>
-    <Surface title="Send text" description="Requires outbound-rate-limit support; acknowledgement is not delivery."><Button disabled={!outboundEnabled} onClick={() => { send.reset(); setSendText(''); setSendOpen(true); }}>Send group text…</Button>{!outboundEnabled ? <StateNotice value={{ axis: 'capability', state: 'unsupported' }} detail="The backend does not advertise outbound_rate_limit; group sends remain disabled." /> : null}</Surface>
-    <Surface title="Danger zone" description="Leaving removes the active account from this group and requires the exact group JID."><Button variant="danger" onClick={() => setConfirm({ action: 'leave' })}>Leave group…</Button></Surface>
+  return (
+    <div className="grid gap-4">
+      {lastAck ? <Ack action={lastAck} /> : null}
 
-    {confirm ? <Dialog titleId="group-v2-confirm" eyebrow="Group command" title={confirm.action === 'remove' ? 'Remove member?' : confirm.action === 'leave' ? 'Leave group?' : 'Reset invite link?'} description={confirm.action === 'reset-invite' ? 'The existing link will be revoked. Server acknowledgement is not refreshed projection state.' : 'Type the exact identifier to confirm. This command is not automatically retried.'} canClose={!confirmPending} onClose={closeConfirm} actions={<><Button disabled={confirmPending} onClick={closeConfirm}>Cancel</Button><Button variant="danger" disabled={confirmPending || (confirm.action !== 'reset-invite' && confirmText !== (confirm.action === 'leave' ? group.id : confirm.member.memberRef ?? confirm.member.id))} onClick={submitConfirm}>{confirmPending ? 'Submitting…' : 'Confirm command'}</Button></>}>{confirm.action !== 'reset-invite' ? <Field label={confirm.action === 'leave' ? 'Group JID' : 'Member reference'} value={confirmText} autoComplete="off" autoFocus disabled={confirmPending} onChange={(event) => setConfirmText(event.target.value)} /> : null}{confirmError ? <ApiFailureNotice error={confirmError} command /> : null}</Dialog> : null}
-    {sendOpen ? <Dialog titleId="group-v2-send" eyebrow="Bounded send" title="Send text to group" description="Acknowledgement does not prove WhatsApp delivery. Inspect projected conversation history before retrying an uncertain outcome." canClose={!send.isPending} onClose={() => setSendOpen(false)} actions={send.data ? <Button variant="primary" onClick={() => setSendOpen(false)}>Close acknowledgement</Button> : <><Button disabled={send.isPending} onClick={() => setSendOpen(false)}>Cancel</Button><Button variant="primary" disabled={!sendText.trim() || send.isPending} onClick={() => send.mutate(sendText.trim())}>{send.isPending ? 'Submitting…' : 'Send text'}</Button></>}><label className="ui-v2-field"><span className="ui-v2-field__label">Message</span><textarea className="ui-v2-input ui-v2-textarea" rows={4} value={sendText} maxLength={10_000} disabled={send.isPending || Boolean(send.data)} onChange={(event) => setSendText(event.target.value)} /></label>{send.data ? <Ack action="Group text send" /> : null}{send.error ? <><ApiFailureNotice error={send.error} command /><p className="ui-v2-generated-note">Outcome may be uncertain. No one-click retry is offered.</p></> : null}</Dialog> : null}
-  </div>;
+      <Panel title="Group facts" description="Persisted group and membership facts." bodyClassName="pt-2">
+        <dl>
+          <Fact label="Group JID" value={group.id} mono />
+          <Fact label="Status" value={humanizeToken(group.status ?? 'unreported')} />
+          <Fact label="Members" value={String(group.memberCount ?? 'Not reported')} />
+          <Fact label="Admins" value={String(group.adminCount ?? 'Not reported')} />
+          <Fact label="Updated" value={relativeTime(group.updatedAt) || 'Not reported'} />
+        </dl>
+      </Panel>
+
+      <Panel title="Metadata" description="Only changed fields are submitted; a partial failure is not automatically retried.">
+        <div className="grid gap-3">
+          <Field label="Subject">{(id) => <Input id={id} value={subject} disabled={update.isPending} onChange={(e) => setSubject(e.target.value)} />}</Field>
+          <label className="grid gap-1.5"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Description</span><textarea rows={3} className={textarea} value={description} disabled={update.isPending} onChange={(e) => setDescription(e.target.value)} /></label>
+          <Button disabled={!metadataDirty || update.isPending} onClick={() => update.mutate({ ...(subject !== (group.subject ?? '') ? { subject } : {}), ...(description !== (group.description ?? '') ? { description } : {}) })}>{update.isPending ? 'Submitting…' : 'Update metadata'}</Button>
+          {update.error ? <Fail error={update.error} command /> : null}
+        </div>
+      </Panel>
+
+      <Panel title="Group settings" description="Each switch submits one explicit paired group-setting action.">
+        <div>
+          {settings.map(({ key, label, hint }) => {
+            const checked = Boolean(group[key]);
+            return (
+              <label key={key} className="flex items-start justify-between gap-4 py-2 border-b border-line last:border-b-0">
+                <span className="grid gap-0.5"><strong className="text-[13px] font-medium text-fg">{label}</strong><small className="text-xs text-fg-3">{hint}</small></span>
+                <input type="checkbox" className="mt-1 size-4 accent-fg" checked={checked} disabled={setting.isPending} onChange={() => setting.mutate({ setting: key, enabled: !checked })} />
+              </label>
+            );
+          })}
+          {setting.error ? <div className="pt-3"><Fail error={setting.error} command /></div> : null}
+        </div>
+      </Panel>
+
+      <Panel title="Invite link" description="Reading uses the projection/cache path. Reset revokes the previous link and requires confirmation.">
+        <div className="grid gap-3">
+          {invite.isPending ? <StateNotice kind="loading" title="Loading invite" /> : invite.error && !invite.data ? <Fail error={invite.error} onRetry={() => invite.refetch()} /> : <code className="block p-2 font-mono text-xs text-fg bg-recessed border border-line break-all">{invite.data ?? 'No invite link reported'}</code>}
+          <Button variant="danger" onClick={() => setConfirm({ action: 'reset-invite' })}>Reset invite link…</Button>
+        </div>
+      </Panel>
+
+      <Panel title="Members" description="Member commands act on the linked provider; refreshed projection remains authoritative.">
+        <div className="grid gap-3">
+          <form className="grid grid-cols-[minmax(0,1fr)_auto] gap-2" onSubmit={(e) => { e.preventDefault(); if (memberJid.trim() && !memberPending) add.mutate(memberJid.trim(), { onSuccess: () => setMemberJid('') }); }}>
+            <Field label="Phone or JID">{(id) => <Input id={id} value={memberJid} disabled={memberPending} onChange={(e) => setMemberJid(e.target.value)} />}</Field>
+            <div className="flex items-end"><Button type="submit" disabled={!memberJid.trim() || memberPending}>{add.isPending ? 'Adding…' : 'Add member'}</Button></div>
+          </form>
+          {memberError ? <Fail error={memberError} command /> : null}
+          {group.members.length ? (
+            <ul className="grid">
+              {group.members.map((member) => {
+                const ref = member.memberRef ?? member.id;
+                return (
+                  <li key={member.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 py-2 border-b border-line last:border-b-0">
+                    <span className="grid min-w-0"><strong className="truncate text-[13px] font-medium text-fg">{member.displayName ?? ref}</strong><small className="truncate font-mono text-xs text-fg-3">{ref}</small></span>
+                    <Status tone={member.role === 'member' ? 'neutral' : 'ok'}>{humanizeToken(member.role)}</Status>
+                    <div className="col-span-2 flex gap-2">
+                      {member.role === 'member' ? <Button disabled={memberPending} onClick={() => promote.mutate(ref)}>Promote</Button> : <Button disabled={memberPending} onClick={() => demote.mutate(ref)}>Demote</Button>}
+                      <Button variant="danger" disabled={memberPending} onClick={() => setConfirm({ action: 'remove', member })}>Remove…</Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : <StateNotice kind="empty" title="No members" detail="No members are present in the projected detail." />}
+        </div>
+      </Panel>
+
+      <Panel title="Send text" description="Requires outbound-rate-limit support; acknowledgement is not delivery.">
+        <div className="grid gap-3">
+          <Button disabled={!outboundEnabled} onClick={() => { send.reset(); setSendText(''); setSendOpen(true); }}>Send group text…</Button>
+          {!outboundEnabled ? <StateNotice kind="empty" title="Sending unavailable" detail="The backend does not advertise outbound_rate_limit; group sends remain disabled." /> : null}
+        </div>
+      </Panel>
+
+      <Panel title="Danger zone" description="Leaving removes the active account from this group and requires the exact group JID.">
+        <Button variant="danger" onClick={() => setConfirm({ action: 'leave' })}>Leave group…</Button>
+      </Panel>
+
+      <Dialog
+        open={Boolean(confirm)}
+        onClose={closeConfirm}
+        title={confirm?.action === 'remove' ? 'Remove member?' : confirm?.action === 'leave' ? 'Leave group?' : 'Reset invite link?'}
+        footer={<><Button disabled={confirmPending} onClick={closeConfirm}>Cancel</Button><Button variant="danger" disabled={confirmPending || (confirm?.action !== 'reset-invite' && confirmText !== (confirm?.action === 'leave' ? group.id : confirm?.member.memberRef ?? confirm?.member.id))} onClick={submitConfirm}>{confirmPending ? 'Submitting…' : 'Confirm command'}</Button></>}
+      >
+        <div className="grid gap-3">
+          <p className="text-sm text-fg-2">{confirm?.action === 'reset-invite' ? 'The existing link will be revoked. Server acknowledgement is not refreshed projection state.' : 'Type the exact identifier to confirm. This command is not automatically retried.'}</p>
+          {confirm && confirm.action !== 'reset-invite' ? <Field label={confirm.action === 'leave' ? 'Group JID' : 'Member reference'}>{(id) => <Input id={id} value={confirmText} autoComplete="off" autoFocus disabled={confirmPending} onChange={(e) => setConfirmText(e.target.value)} />}</Field> : null}
+          {confirmError ? <Fail error={confirmError} command /> : null}
+        </div>
+      </Dialog>
+
+      <Dialog
+        open={sendOpen}
+        onClose={() => setSendOpen(false)}
+        title="Send text to group"
+        footer={send.data ? <Button variant="primary" onClick={() => setSendOpen(false)}>Close acknowledgement</Button> : <><Button disabled={send.isPending} onClick={() => setSendOpen(false)}>Cancel</Button><Button variant="primary" disabled={!sendText.trim() || send.isPending} onClick={() => send.mutate(sendText.trim())}>{send.isPending ? 'Submitting…' : 'Send text'}</Button></>}
+      >
+        <div className="grid gap-3">
+          <p className="text-sm text-fg-2">Acknowledgement does not prove WhatsApp delivery. Inspect projected conversation history before retrying an uncertain outcome.</p>
+          <label className="grid gap-1.5"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message</span><textarea rows={4} className={textarea} value={sendText} maxLength={10_000} disabled={send.isPending || Boolean(send.data)} onChange={(e) => setSendText(e.target.value)} /></label>
+          {send.data ? <Ack action="Group text send" /> : null}
+          {send.error ? <Fail error={send.error} command /> : null}
+        </div>
+      </Dialog>
+    </div>
+  );
 }
