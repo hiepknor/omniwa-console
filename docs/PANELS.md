@@ -93,7 +93,8 @@ pairing surface is mounted, connected, unpaired, and not submitting a command.
 An acknowledgement never substitutes for refreshed status. Instance scope does
 not expose or infer the configured admin Instance Name. The status `Name` is
 rendered as WhatsApp name only after authoritative status reports `LoggedIn` and
-the value is non-empty.
+the value is non-empty; `Connected` does not gate it. During a failed refresh,
+cached identity may remain visible only with the standard stale-data notice.
 
 ## Groups — `/groups/:groupId?`
 

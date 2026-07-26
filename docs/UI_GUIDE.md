@@ -59,8 +59,27 @@ The connected credential determines the available navigation and API scope:
   campaigns, and events;
 - instance-scoped live commands require an in-memory instance token where the
   active session does not already provide that scope.
-- instance scope never invents or requests the configured admin Instance Name;
-  a non-empty status name is presented as WhatsApp name only after login.
+- instance scope never invents or requests the configured admin Instance Name.
+
+### Instance-scope WhatsApp identity
+
+The active Instance destination may present `Name` from `GET /instance/status`
+only as **WhatsApp name**. Treat it as provider identity, not configured instance
+metadata, and apply these rules consistently:
+
+- render the row only when the latest available status reports `LoggedIn = true`
+  and `Name`, after trimming, is non-empty;
+- do not gate the name on `Connected`: a linked WhatsApp session may remain the
+  last authoritative identity while its transport is temporarily disconnected;
+- during the initial status read, pairing, logged-out states, or when `Name` is
+  empty, omit the entire row without a placeholder;
+- retain the last known name during background refresh to prevent flicker;
+- when refresh fails with cached status, retain the name only alongside the
+  standard **Showing last known data** notice;
+- hide the name as soon as a newer successful status reports `LoggedIn = false`.
+
+Commands and acknowledgements never establish or clear this identity. A
+refreshed status remains authoritative.
 
 Never persist credentials or place credential values in URLs, query keys, logs,
 resource models, or rendered diagnostics.
