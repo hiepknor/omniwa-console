@@ -138,10 +138,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Textarea / DateTimeInput** — use the same surface, border, focus, invalid,
   disabled, and mobile target language as Input. Textarea resizes vertically;
   DateTimeInput standardizes the browser's local date-time field surface.
-- **Checkbox / Switch** — native checkbox semantics with fully custom square
-  visuals. Checkbox uses a framed 16px ink mark. Switch uses a 36×20px square
-  track with an ink/paper thumb and `role="switch"`. Both include visible labels,
-  keyboard focus, disabled treatment, and at least a 36/40px labeled hit area.
+- **Checkbox / Radio / Switch** — native choice semantics with fully custom
+  square visuals. Checkbox and radio use a framed 16px ink mark; radio remains
+  square by design. Switch uses a 36×20px square track with an ink/paper thumb
+  and `role="switch"`. All include visible labels, keyboard focus, disabled
+  treatment, and at least a 36/40px labeled hit area.
 - **Select** — custom ARIA combobox/listbox, never the browser-native visual.
   Closed hover uses recessed paper + strong border without movement. Open state
   inverts the chevron cell. The active option is ink with a white label; selected
@@ -167,6 +168,18 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   13px/500 title + 12px detail, and **always** the mono `requestId` on API errors.
   Accepted commands say `accepted` and auto-dismiss (6s); errors persist.
 - **Badge** — square count chip, mono 11px, `--color-recessed` bg.
+- **DescriptionList / DescriptionItem** — the only repeated key/value facts
+  treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
+  values on wide screens, stacks them at ≤640px, wraps long content, and uses
+  mono explicitly for identifiers. Features do not clone fact-row helpers.
+- **FilterToolbar / FilterChip** — the canonical list-filter frame and removable
+  active-filter token. Toolbars wrap without horizontal page overflow; chips
+  stay square, show label and value, and expose an explicit remove name. Filter
+  controls and chips reflect URL state in product panels.
+- **Panel / StateNotice / CursorPagination** — the standard composition layer
+  for framed sections, honest loading/empty/stale/error state, and cursor-based
+  list progression. API errors include normalized detail and `requestId` when
+  present; pagination never suggests an unavailable page.
 
 ## 6. Shell & navigation
 
@@ -200,14 +213,37 @@ or `border-*` utilities and rely on generated CSS order.
 | Select option | rest, active/hover, selected, active + selected, disabled |
 | Input | rest, hover, keyboard focus, populated, invalid, disabled |
 | Textarea / DateTimeInput | rest, populated, keyboard focus, invalid, disabled |
-| Checkbox / Switch | off, on, hover, keyboard focus, disabled |
+| Checkbox / Radio / Switch | off, on, hover, keyboard focus, disabled |
+| Filter chip | rest, hover, keyboard focus, removed |
 | Table row | rest, hover, keyboard focus, selected |
+| StateNotice | info/stale, loading, empty/not-ready, error + requestId, action |
+| CursorPagination | first page, next cursor, final page, responsive stacking |
 | Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close |
 
 Hover never hides a label or icon. Inverted surfaces always use paper-colored
 foregrounds. Motion may reinforce state, but color/border/fill must communicate
 the same state when reduced motion is enabled. Touch devices do not depend on
 hover to expose meaning or actions.
+
+### Implementation recipes
+
+`/__ui` is the executable reference for four complete compositions, not merely
+a parts bin:
+
+1. **List:** filter toolbar → active chips → honest projection state → table →
+   cursor pagination. Loading, empty, stale/syncing, not-ready, error, and ready
+   are mutually exclusive render paths in product panels.
+2. **Inspector:** selection → Drawer → identity/status → DescriptionList → only
+   the narrow actions owned by that panel. Long content remains body-scrollable.
+3. **Command:** consequence notice → required fields/confirmation → stable
+   footer. Duplicate submission is disabled; pending commands lock dismissal;
+   acknowledgement never claims downstream delivery.
+4. **Recovery:** normalized error with request ID → explicit review → danger
+   intent → refreshed narrow projection. It never infers success from aggregate
+   health.
+
+Production work should start from one of these recipes and delete inapplicable
+pieces, rather than inventing new local frames or interaction language.
 
 ## 8. Change control
 

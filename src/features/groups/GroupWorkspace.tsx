@@ -3,7 +3,7 @@ import { ApiFailure } from '@/api/envelopes';
 import type { GroupMemberResource, GroupResource, GroupSetting } from '@/api/groups';
 import type { ProjectionMeta } from '@/api/envelopes';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, Dialog, Drawer, Field, Input, Panel, StateNotice, Status, Switch, Textarea, type Tone } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Drawer, Field, Input, Panel, StateNotice, Status, Switch, Textarea, type Tone } from '@/ui';
 import {
   useAddGroupMember, useDemoteGroupMember, useGroupInvite, useGroup,
   useLeaveGroup, usePromoteGroupMember, useRemoveGroupMember,
@@ -24,7 +24,7 @@ function Fail({ error, command, stale, onRetry }: { error: unknown; command?: bo
 }
 function Ack({ action }: { action: string }) { return <StateNotice kind="info" title={`${action} accepted`} detail="The refreshed group projection remains authoritative; acknowledgement does not prove provider completion." />; }
 function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0"><dt className="text-xs text-fg-3">{label}</dt><dd className={mono ? 'font-mono text-xs text-fg' : 'text-[13px] text-fg'}>{value}</dd></div>;
+  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
 }
 function ProjectionLine({ meta }: { meta?: ProjectionMeta }) {
   if (!meta?.syncStatus) return null;
@@ -95,13 +95,13 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
       {lastAck ? <Ack action={lastAck} /> : null}
 
       <Panel title="Group facts" description="Persisted group and membership facts." bodyClassName="pt-2">
-        <dl>
+        <DescriptionList>
           <Fact label="Group JID" value={group.id} mono />
           <Fact label="Status" value={humanizeToken(group.status ?? 'unreported')} />
           <Fact label="Members" value={String(group.memberCount ?? 'Not reported')} />
           <Fact label="Admins" value={String(group.adminCount ?? 'Not reported')} />
           <Fact label="Updated" value={relativeTime(group.updatedAt) || 'Not reported'} />
-        </dl>
+        </DescriptionList>
       </Panel>
 
       <Panel title="Metadata" description="Only changed fields are submitted; a partial failure is not automatically retried.">

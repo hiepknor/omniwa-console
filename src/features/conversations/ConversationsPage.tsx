@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken } from '@/lib/format';
 import { createSearchParams, omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, CursorPagination, Field, Input, PageHeader, StateNotice, Status, Tabs } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, StateNotice, Status, Tabs } from '@/ui';
 import { cn } from '@/ui/cn';
 import { Composer } from './Composer';
 import { ChatList, ContactList, LabelList, MessageTimeline } from './ConversationsView';
@@ -98,12 +98,12 @@ export function ConversationsPage() {
               onChange={(id) => switchView(id as ConversationView)}
               tabs={[{ id: 'chats', label: 'Chats' }, { id: 'contacts', label: 'Contacts' }, { id: 'labels', label: 'Labels' }]}
             />
-            <form className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 p-3" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
-              <Field label="Search">
+            <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
+              <Field label="Search" className="min-w-48 flex-1">
                 {(id) => <Input id={id} type="search" value={searchDraft} placeholder={route.view === 'contacts' ? 'Server prefix search' : 'Filter loaded page'} onChange={(e) => setSearchDraft(e.target.value)} />}
               </Field>
               <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
-            </form>
+            </FilterToolbar>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto">

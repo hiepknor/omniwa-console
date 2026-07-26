@@ -6,7 +6,7 @@ import { ApiFailure } from '@/api/envelopes';
 import type { EventResource } from '@/api/events-api';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, Drawer, PageHeader, StateNotice, Status } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Drawer, PageHeader, StateNotice, Status } from '@/ui';
 import { EventsView } from './EventsView';
 import { useEvents } from './hooks';
 import { eventRouteState, setEventParam } from './route-state';
@@ -38,21 +38,18 @@ export function EventInspector({ event, onClose }: { event: EventResource; onClo
     <Drawer open onClose={onClose} title={event.type} subtitle={event.id}>
       <div className="grid gap-4">
         <Status tone="neutral">Normalized</Status>
-        <dl>
-          <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line"><dt className="text-xs text-fg-3">Occurred</dt><dd className="text-[13px] text-fg">{event.occurredAt ?? 'Not reported'}</dd></div>
-          <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line"><dt className="text-xs text-fg-3">Ingested</dt><dd className="text-[13px] text-fg">{event.ingestedAt ?? 'Not reported'}</dd></div>
-        </dl>
+        <DescriptionList>
+          <DescriptionItem label="Occurred">{event.occurredAt ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Ingested">{event.ingestedAt ?? 'Not reported'}</DescriptionItem>
+        </DescriptionList>
         <div className="grid gap-2">
           <h3 className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Safe summary</h3>
           {summary.length ? (
-            <dl>
+            <DescriptionList>
               {summary.map(([key, value]) => (
-                <div key={key} className="flex items-start justify-between gap-4 py-1.5 border-b border-line last:border-b-0">
-                  <dt className="text-xs text-fg-3">{humanizeToken(key)}</dt>
-                  <dd className="font-mono text-xs text-fg text-right break-all">{summaryValue(value)}</dd>
-                </div>
+                <DescriptionItem key={key} label={humanizeToken(key)} mono valueClassName="break-all">{summaryValue(value)}</DescriptionItem>
               ))}
-            </dl>
+            </DescriptionList>
           ) : <StateNotice kind="empty" title="No summary" detail="This event contains no normalized summary fields." />}
         </div>
       </div>

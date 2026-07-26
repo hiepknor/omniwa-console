@@ -41,8 +41,18 @@ for (const marker of ['fieldControlClassName', 'resize-y', 'min-h-20']) {
 }
 
 const choices = await read('src/ui/ChoiceControls.tsx');
-for (const marker of ['appearance-none', 'role="switch"', 'peer-focus-visible:outline-2', 'max-sm:min-h-10']) {
+for (const marker of ['appearance-none', 'type="radio"', 'role="switch"', 'peer-focus-visible:outline-2', 'max-sm:min-h-10']) {
   if (!choices.includes(marker)) failures.push(`src/ui/ChoiceControls.tsx: choice-control contract is missing ${marker}`);
+}
+
+const descriptionList = await read('src/ui/DescriptionList.tsx');
+for (const marker of ['<dl', '<dt', '<dd', 'max-sm:grid-cols-1', 'break-words']) {
+  if (!descriptionList.includes(marker)) failures.push(`src/ui/DescriptionList.tsx: semantic fact contract is missing ${marker}`);
+}
+
+const filters = await read('src/ui/Filters.tsx');
+for (const marker of ['FilterToolbar', 'FilterChip', 'Remove ${label} filter', 'focus-visible:outline-2']) {
+  if (!filters.includes(marker)) failures.push(`src/ui/Filters.tsx: filter contract is missing ${marker}`);
 }
 
 const dateTime = await read('src/ui/DateTimeInput.tsx');

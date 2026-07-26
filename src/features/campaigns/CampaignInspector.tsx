@@ -4,7 +4,7 @@ import { ApiFailure } from '@/api/envelopes';
 import type { CampaignStatus } from '@/api/campaigns';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, CursorPagination, DateTimeInput, Dialog, Drawer, Field, StateNotice, Status, Table, Tabs, Td, Th, Tr } from '@/ui';
+import { Button, CursorPagination, DateTimeInput, DescriptionItem, DescriptionList, Dialog, Drawer, Field, StateNotice, Status, Table, Tabs, Td, Th, Tr } from '@/ui';
 import { useCampaignAudit, useCampaignRecipients, useCampaignTransition, useCampaign } from './hooks';
 import { campaignRouteState, setCampaignParam, type CampaignTab } from './route-state';
 import { campaignTone } from './CampaignsView';
@@ -18,7 +18,7 @@ function Fail({ error, command, stale, onRetry }: { error: unknown; command?: bo
   return <StateNotice kind="error" title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={onRetry ? <Button onClick={onRetry}>Retry</Button> : undefined} />;
 }
 function Fact({ label, value }: { label: string; value: string }) {
-  return <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0"><dt className="text-xs text-fg-3">{label}</dt><dd className="text-[13px] text-fg">{value}</dd></div>;
+  return <DescriptionItem label={label}>{value}</DescriptionItem>;
 }
 
 export function CampaignInspector({ campaignId, commandsEnabled = true, onClose }: { campaignId: string; commandsEnabled?: boolean; onClose: () => void }) {
@@ -71,14 +71,14 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
 
             {route.tab === 'overview' ? (
               <div className="grid gap-4">
-                <dl>
+                <DescriptionList>
                   <Fact label="Status" value={humanizeToken(campaign.status)} />
                   <Fact label="Recipients" value={String(detail.data.recipientCount)} />
                   <Fact label="Content" value={campaign.contentType} />
                   <Fact label="Starts" value={relativeTime(campaign.startsAt) || 'Not scheduled'} />
                   <Fact label="Finished" value={relativeTime(campaign.finishedAt) || 'Not finished'} />
                   <Fact label="Version" value={String(campaign.version)} />
-                </dl>
+                </DescriptionList>
                 <div className="grid gap-1">
                   <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message content</span>
                   <p className="p-3 text-[13px] text-fg bg-recessed border border-line whitespace-pre-wrap">{campaign.text || 'No text reported.'}</p>

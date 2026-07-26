@@ -139,8 +139,14 @@ for (const path of await sourceFiles('src')) {
   if (!path.endsWith('.test.tsx') && path !== 'src/ui/ChoiceControls.tsx' && /<input\b[^>]*type=["']checkbox["']/.test(code)) {
     failures.push(`${path}: checkbox and switch controls must use canonical choice primitives`);
   }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/ChoiceControls.tsx' && /<input\b[^>]*type=["']radio["']/.test(code)) {
+    failures.push(`${path}: radio controls must use the canonical Radio primitive`);
+  }
   if (!path.endsWith('.test.tsx') && path !== 'src/ui/DateTimeInput.tsx' && /<input\b[^>]*type=["']datetime-local["']/.test(code)) {
     failures.push(`${path}: local date-time controls must use DateTimeInput`);
+  }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/DescriptionList.tsx' && /<(?:dl|dt|dd)\b/.test(code)) {
+    failures.push(`${path}: repeated definition data must use DescriptionList and DescriptionItem`);
   }
 }
 
@@ -157,7 +163,7 @@ for (const marker of [
 }
 
 const gallery = await read('src/app/UiGallery.tsx');
-for (const marker of ['Locked design system', 'hard lift only', '<Button', '<CloseButton', '<Textarea', '<Checkbox', '<Switch', '<DateTimeInput', '<Select', '<Drawer', '<Dialog']) {
+for (const marker of ['Locked design system', 'hard lift only', '<Button', '<ButtonLink', '<CloseButton', '<Textarea', '<Checkbox', '<Radio', '<Switch', '<DateTimeInput', '<Select', '<FilterToolbar', '<FilterChip', '<DescriptionList', '<Panel', '<StateNotice', '<CursorPagination', '<Drawer', '<Dialog', '<FeedbackContent']) {
   if (!gallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: locked review surface is missing ${marker}`);
 }
 

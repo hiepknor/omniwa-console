@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, Dialog, Field, Input, Panel, StateNotice, Status, Switch } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Field, Input, Panel, StateNotice, Status, Switch } from '@/ui';
 import { Drawer } from '@/ui';
 import {
   useAdvancedSettings,
@@ -80,12 +80,7 @@ function AdvancedSettings({ instanceId, token }: { instanceId: string; token: st
 }
 
 function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0">
-      <dt className="text-xs text-fg-3">{label}</dt>
-      <dd className={mono ? 'font-mono text-xs text-fg' : 'text-[13px] text-fg'}>{value}</dd>
-    </div>
-  );
+  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
 }
 
 export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, onDestroyed }: { instance: InstanceResource; refreshError?: unknown; onRetry: () => void; onClose: () => void; onDestroyed: () => void }) {
@@ -145,7 +140,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
           {refreshError ? <FailureNotice error={refreshError} stale onRetry={onRetry} /> : null}
 
           <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyClassName="pt-2">
-            <dl>
+            <DescriptionList>
               <Fact label="Metadata status" value={humanizeToken(instance.status)} />
               <Fact label="Metadata connection" value={instance.connected ? 'Connected' : 'Disconnected'} />
               <Fact label="Live connection" value={statusReady ? (connected ? 'Connected' : 'Disconnected') : 'Not read'} />
@@ -153,7 +148,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
               <Fact label="WhatsApp ID" value={instance.jid ?? 'Not reported'} mono />
               <Fact label="Credential version" value={String(instance.credentialVersion ?? 'Not reported')} />
               <Fact label="Created" value={relativeTime(instance.createdAt) || 'Not reported'} />
-            </dl>
+            </DescriptionList>
           </Panel>
 
           {!token ? (

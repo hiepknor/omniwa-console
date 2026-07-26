@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import type { EventResource } from '@/api/events-api';
 import { relativeTime } from '@/lib/format';
-import { Button, CursorPagination, Field, Input, PageHeader, Panel, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, Panel, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
 
 export function retentionLabel(seconds?: number) {
   if (!seconds) return 'Retention unreported';
@@ -47,10 +47,10 @@ export function EventsView(props: EventsViewProps) {
       </div>
 
       <Panel title="Event history" description="Exact type filter, opaque cursor, and selected event remain URL-addressable." bodyClassName="p-0">
-        <form className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 p-4 border-b border-line max-sm:grid-cols-1" onSubmit={props.onApply}>
-          <Field label="Exact event type">{(id) => <Input id={id} type="search" maxLength={64} value={props.typeDraft} placeholder="Message" onChange={(e) => props.onTypeDraft(e.target.value)} />}</Field>
+        <FilterToolbar as="form" onSubmit={props.onApply}>
+          <Field label="Exact event type" className="min-w-56 flex-1">{(id) => <Input id={id} type="search" maxLength={64} value={props.typeDraft} placeholder="Message" onChange={(e) => props.onTypeDraft(e.target.value)} />}</Field>
           <div className="flex items-end"><Button type="submit" disabled={props.applyDisabled}>Apply filter</Button></div>
-        </form>
+        </FilterToolbar>
 
         {props.errorSlot ? <div className="p-4">{props.errorSlot}</div> : null}
         {props.initialLoading ? <div className="p-4"><StateNotice kind="loading" title="Loading events" /></div> : null}

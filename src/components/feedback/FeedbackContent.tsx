@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from 'react';
+import { Button } from '@/ui/Button';
 import { CloseButton } from '@/ui/CloseButton';
 import type { FeedbackAction, FeedbackKind } from './feedback-types';
 
@@ -49,10 +50,10 @@ export function FeedbackContent({
         {requestId && (
           <div className="flex items-center gap-2 mt-0.5">
             <span className="font-mono text-xs text-fg-3 truncate" title={requestId}>{requestId}</span>
-            <button type="button" className="shrink-0 h-6 px-2 text-[11px] border border-line hover:bg-elevated hover:border-line-strong" onClick={() => { void copyRequestId(); }}>{copied ? 'Copied' : 'Copy'}</button>
+            <Button className="h-6 shrink-0 text-[11px] max-sm:h-8" onClick={() => { void copyRequestId(); }}>{copied ? 'Copied' : 'Copy'}</Button>
           </div>
         )}
-        {action && <button type="button" className="justify-self-start mt-1 h-8 px-2.5 text-xs border border-line hover:bg-elevated hover:border-line-strong" onClick={action.run}>{action.label}</button>}
+        {action && <Button className="mt-1 h-8 justify-self-start text-xs" onClick={action.run}>{action.label}</Button>}
       </div>
       {onDismiss && <CloseButton label="Dismiss notification" onClick={onDismiss} />}
     </div>

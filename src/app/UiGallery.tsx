@@ -1,17 +1,27 @@
 import { useState } from 'react';
+import { FeedbackContent } from '@/components/feedback/FeedbackContent';
 import {
   Badge,
   Button,
+  ButtonLink,
   Checkbox,
   CloseButton,
+  CursorPagination,
   DateTimeInput,
+  DescriptionItem,
+  DescriptionList,
   Dialog,
   Drawer,
   Field,
+  FilterChip,
+  FilterToolbar,
   Input,
   MetricGrid,
   PageHeader,
+  Panel,
+  Radio,
   Select,
+  StateNotice,
   Status,
   Switch,
   Table,
@@ -51,8 +61,12 @@ const inkRamp = [
 export function UiGallery() {
   const [tab, setTab] = useState('stream');
   const [drawer, setDrawer] = useState(false);
-  const [dialog, setDialog] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'ready' | 'pending'>();
   const [switchEnabled, setSwitchEnabled] = useState(true);
+  const [deliveryMode, setDeliveryMode] = useState('safe');
+  const [filterVisible, setFilterVisible] = useState(true);
+  const [notificationVisible, setNotificationVisible] = useState(true);
+  const [cursor, setCursor] = useState<string>();
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-bg text-fg">
@@ -107,9 +121,11 @@ export function UiGallery() {
             <Button variant="danger">Danger</Button>
             <Button disabled>Disabled</Button>
             <Button aria-busy>Working…</Button>
+            <ButtonLink to="/__ui">Button link</ButtonLink>
             <CloseButton label="Close example" onClick={() => undefined} />
             <Button onClick={() => setDrawer(true)}>Open drawer</Button>
-            <Button onClick={() => setDialog(true)}>Open dialog</Button>
+            <Button onClick={() => setDialogMode('ready')}>Open dialog</Button>
+            <Button onClick={() => setDialogMode('pending')}>Pending dialog</Button>
           </div>
         </Section>
 
@@ -138,9 +154,63 @@ export function UiGallery() {
             </Field>
             <div className="grid content-start gap-1 border border-line p-3">
               <Checkbox label="Include archived records" description="Applies only to the loaded projection." defaultChecked />
+              <Radio name="delivery-mode" label="Safe delivery" description="Respect the server-defined pacing window." value="safe" checked={deliveryMode === 'safe'} onChange={(event) => setDeliveryMode(event.target.value)} />
+              <Radio name="delivery-mode" label="Manual review" value="review" checked={deliveryMode === 'review'} onChange={(event) => setDeliveryMode(event.target.value)} />
               <Switch label="Always online" description="Submits one explicit settings command." checked={switchEnabled} onChange={(event) => setSwitchEnabled(event.target.checked)} />
               <Switch label="Unavailable setting" description="Disabled by capability discovery." disabled />
             </div>
+          </div>
+        </Section>
+
+        <Section title="Filters">
+          <div className="border border-line-strong bg-surface">
+            <FilterToolbar>
+              <Field label="Search" className="min-w-56 flex-1">{(id) => <Input id={id} defaultValue="inst_01" />}</Field>
+              <Field label="Status" className="min-w-48">
+                {(id, labelId) => (
+                  <Select id={id} aria-labelledby={labelId} defaultValue="connected">
+                    <option value="">All statuses</option>
+                    <option value="connected">Connected</option>
+                    <option value="disconnected">Disconnected</option>
+                  </Select>
+                )}
+              </Field>
+              <Button variant="primary">Apply filters</Button>
+            </FilterToolbar>
+            <div className="flex min-h-14 flex-wrap items-center gap-2 p-3">
+              {filterVisible ? <FilterChip label="Status" value="connected" onRemove={() => setFilterVisible(false)} /> : <span className="text-xs text-fg-3">No active filters.</span>}
+            </div>
+          </div>
+        </Section>
+
+        <Section title="Panels + data description">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Panel title="Instance identity" description="Canonical key/value presentation for inspectors." actions={<Badge>3</Badge>}>
+              <DescriptionList>
+                <DescriptionItem label="Instance ID" mono>inst_01HZX9Q42</DescriptionItem>
+                <DescriptionItem label="Display name">Primary sender with a deliberately long value that wraps safely inside the panel</DescriptionItem>
+                <DescriptionItem label="Connection"><Status tone="ok">connected</Status></DescriptionItem>
+              </DescriptionList>
+            </Panel>
+            <Panel title="Command boundary" description="Server acknowledgement does not imply delivery.">
+              <StateNotice kind="info" title="Command accepted" detail="Track projected state for completion." requestId="req_01J2F2X9" />
+            </Panel>
+          </div>
+        </Section>
+
+        <Section title="Feedback states">
+          <div className="grid gap-3 md:grid-cols-2">
+            <StateNotice kind="loading" title="Loading projection" detail="Waiting for the first authoritative response." />
+            <StateNotice kind="empty" title="No instances" detail="The loaded page contains no matching records." />
+            <StateNotice kind="error" title="Projection unavailable" detail="The request failed without changing server state." requestId="req_01J2F2X9" action={<Button>Retry</Button>} />
+            <StateNotice kind="info" title="Projection is stale" detail="Showing the last successful response while refreshing." />
+          </div>
+          <div className="min-h-28 border border-dashed border-line p-3">
+            {notificationVisible ? (
+              <div className="ml-auto max-w-md border border-line-strong border-l-2 bg-elevated">
+                <FeedbackContent kind="error" title="Command failed" detail="No delivery outcome was inferred." requestId="req_01J2F2X9" action={{ label: 'Retry command', run: () => undefined }} onDismiss={() => setNotificationVisible(false)} />
+              </div>
+            ) : <Button onClick={() => setNotificationVisible(true)}>Restore notification</Button>}
           </div>
         </Section>
 
@@ -194,7 +264,7 @@ export function UiGallery() {
           />
         </Section>
 
-        <Section title="Tabs + table">
+        <Section title="List recipe">
           <Tabs
             active={tab}
             onChange={setTab}
@@ -231,6 +301,21 @@ export function UiGallery() {
               ))}
             </tbody>
           </Table>
+          <CursorPagination cursor={cursor} nextCursor={cursor ? undefined : 'cursor_02'} onCursor={setCursor} info={cursor ? 'Showing the next cursor page.' : 'Showing 3 of 18 instances.'} />
+        </Section>
+
+        <Section title="Implementation recipes">
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Panel title="List" description="Filter → state → rows → cursor." actions={<Button>Refresh</Button>}>
+              <p className="text-sm text-fg-2">Use the complete list recipe above for every paginated projection.</p>
+            </Panel>
+            <Panel title="Inspector" description="Selection opens a bounded detail surface." actions={<Button onClick={() => setDrawer(true)}>Inspect</Button>}>
+              <p className="text-sm text-fg-2">Keep identity, status, facts, and narrow actions together.</p>
+            </Panel>
+            <Panel title="Command / recovery" description="Explain impact before explicit intent." actions={<Button variant="danger" onClick={() => setDialogMode('ready')}>Review command</Button>}>
+              <p className="text-sm text-fg-2">Lock dismissal while pending and render acknowledgement honestly.</p>
+            </Panel>
+          </div>
         </Section>
       </main>
 
@@ -238,21 +323,31 @@ export function UiGallery() {
         <div className="grid gap-3">
           <Status tone="ok">connected</Status>
           <p className="text-sm text-fg-2">Framed right-side inspector with a strong header, scroll-safe body, and responsive bottom-sheet treatment.</p>
+          <DescriptionList>
+            <DescriptionItem label="Phone" mono>84901234567</DescriptionItem>
+            <DescriptionItem label="Queue depth" mono>1,284</DescriptionItem>
+            <DescriptionItem label="Last seen">3 minutes ago</DescriptionItem>
+          </DescriptionList>
+          {Array.from({ length: 16 }, (_, index) => <p key={index} className="border-t border-line pt-3 text-sm text-fg-2">Bounded inspector content row {index + 1}.</p>)}
         </div>
       </Drawer>
 
       <Dialog
-        open={dialog}
-        onClose={() => setDialog(false)}
+        open={dialogMode !== undefined}
+        onClose={() => setDialogMode(undefined)}
         title="Destroy instance"
+        closeDisabled={dialogMode === 'pending'}
         footer={
           <>
-            <Button onClick={() => setDialog(false)}>Cancel</Button>
-            <Button variant="danger">Destroy</Button>
+            <Button disabled={dialogMode === 'pending'} onClick={() => setDialogMode(undefined)}>Cancel</Button>
+            <Button variant="danger" aria-busy={dialogMode === 'pending'}>{dialogMode === 'pending' ? 'Destroying…' : 'Destroy'}</Button>
           </>
         }
       >
-        <p className="text-sm text-fg-2">Framed command surface with explicit dismissal, bounded scrolling, and a stable action footer.</p>
+        <div className="grid gap-3">
+          <StateNotice kind={dialogMode === 'pending' ? 'loading' : 'error'} title={dialogMode === 'pending' ? 'Command pending' : 'Destructive command'} detail={dialogMode === 'pending' ? 'Dismissal is locked until the request settles.' : 'This command retires the selected instance. It does not imply message delivery outcomes.'} />
+          <Field label="Confirmation" description="Enter the instance ID before enabling the command.">{(id) => <Input id={id} defaultValue="inst_01" disabled={dialogMode === 'pending'} />}</Field>
+        </div>
       </Dialog>
     </div>
   );

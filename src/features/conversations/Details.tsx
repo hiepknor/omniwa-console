@@ -2,17 +2,12 @@ import type { ChatResource } from '@/api/chats';
 import type { ContactResource } from '@/api/contacts';
 import type { LabelResource } from '@/api/labels';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Drawer, Panel, StateNotice, Status, type Tone } from '@/ui';
+import { DescriptionItem, DescriptionList, Drawer, Panel, StateNotice, Status, type Tone } from '@/ui';
 import { useMessage, useReceipts } from './hooks';
 import { FailureNotice, ProjectionStatus } from './ui';
 
 function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0">
-      <dt className="text-xs text-fg-3">{label}</dt>
-      <dd className={mono ? 'font-mono text-xs text-fg' : 'text-[13px] text-fg'}>{value}</dd>
-    </div>
-  );
+  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
 }
 
 function receiptTone(type: string): Tone {
@@ -29,23 +24,23 @@ export function DirectoryInspector({ contact, label, error, loading, onRetry, on
         <FailureNotice error={error} onRetry={onRetry} />
       ) : contact ? (
         <Panel title="Normalized identity" description="Read-only projection; phone identity is redacted by the backend." bodyClassName="pt-2">
-          <dl>
+          <DescriptionList>
             <Fact label="JID" value={contact.id} mono />
             <Fact label="Username" value={contact.username ?? 'Not reported'} />
             <Fact label="Phone" value={contact.redactedPhone ?? 'Not reported'} />
             <Fact label="Business" value={contact.businessName ?? 'Not reported'} />
             <Fact label="About" value={contact.about ?? 'Not reported'} />
             <Fact label="Known" value={contact.found ? 'Yes' : 'No'} />
-          </dl>
+          </DescriptionList>
         </Panel>
       ) : label ? (
         <Panel title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments." bodyClassName="pt-2">
-          <dl>
+          <DescriptionList>
             <Fact label="Label ID" value={label.id} mono />
             <Fact label="Name" value={label.name ?? 'Not reported'} />
             <Fact label="Color" value={label.color ?? 'Not reported'} />
             <Fact label="Predefined ID" value={label.predefinedId ?? 'Not reported'} />
-          </dl>
+          </DescriptionList>
         </Panel>
       ) : (
         <StateNotice kind="empty" title="Not found" detail="The selected projected definition was not returned." />
@@ -76,7 +71,7 @@ export function MessageInspector({ messageId, loadedChat, enabled, onClose }: { 
           <>
             <ProjectionStatus meta={message.data?.meta} />
             <Panel title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyClassName="pt-2">
-              <dl>
+              <DescriptionList>
                 <Fact label="Chat" value={resource.chatId} mono />
                 <Fact label="Direction" value={humanizeToken(resource.direction)} />
                 <Fact label="Type" value={humanizeToken(resource.type)} />
@@ -84,7 +79,7 @@ export function MessageInspector({ messageId, loadedChat, enabled, onClose }: { 
                 <Fact label="Created" value={relativeTime(resource.createdAt) || resource.createdAt} />
                 <Fact label="Delivered" value={resource.deliveredAt ? (relativeTime(resource.deliveredAt) || 'Not reported') : 'Not reported'} />
                 <Fact label="Read" value={resource.readAt ? (relativeTime(resource.readAt) || 'Not reported') : 'Not reported'} />
-              </dl>
+              </DescriptionList>
             </Panel>
           </>
         ) : (

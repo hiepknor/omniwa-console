@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import type { ProjectionFailure } from '@/api/recovery';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, CursorPagination, Field, Input, PageHeader, Panel, Select, StateNotice, Table, Td, Th, Tr } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, Panel, Select, StateNotice, Table, Td, Th, Tr } from '@/ui';
 
 export function failureIdentity(failure: ProjectionFailure): string {
   return JSON.stringify([failure.instanceId, failure.resource, failure.eventKey]);
@@ -45,16 +45,16 @@ export function RecoveryView(props: RecoveryViewProps) {
         description="Filters and the opaque cursor stay in the URL; changing a filter resets pagination and selection."
         bodyClassName="p-0"
       >
-        <form className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] gap-3 p-4 border-b border-line max-[900px]:grid-cols-1" onSubmit={props.onApply}>
-          <Field label="Instance ID">{(id) => <Input id={id} value={props.instanceDraft} placeholder="All instances" onChange={(e) => props.onInstanceDraft(e.target.value)} />}</Field>
-          <Field label="Resource">{(id) => <Input id={id} value={props.resourceDraft} placeholder="All resources" onChange={(e) => props.onResourceDraft(e.target.value)} />}</Field>
+        <FilterToolbar as="form" onSubmit={props.onApply}>
+          <Field label="Instance ID" className="min-w-56 flex-1">{(id) => <Input id={id} value={props.instanceDraft} placeholder="All instances" onChange={(e) => props.onInstanceDraft(e.target.value)} />}</Field>
+          <Field label="Resource" className="min-w-56 flex-1">{(id) => <Input id={id} value={props.resourceDraft} placeholder="All resources" onChange={(e) => props.onResourceDraft(e.target.value)} />}</Field>
           <Field label="Page size">{(id, labelId) => (
             <Select id={id} aria-labelledby={labelId} value={String(props.limit)} onValueChange={props.onLimit}>
               {[25, 50, 100, 200].map((n) => <option key={n} value={String(n)}>{n}</option>)}
             </Select>
           )}</Field>
           <div className="flex items-end"><Button variant="primary" type="submit" className="w-full">Apply filters</Button></div>
-        </form>
+        </FilterToolbar>
 
         {props.initialLoading ? <div className="p-4"><StateNotice kind="loading" title="Reading projection failures" /></div> : null}
         {props.empty ? <div className="p-4"><StateNotice kind="empty" title="No terminal failures" detail="The server returned no terminal failures for this exact filter and cursor. This does not summarize other pages or scopes." /></div> : null}

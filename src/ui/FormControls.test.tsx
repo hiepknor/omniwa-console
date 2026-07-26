@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { Checkbox, Switch } from './ChoiceControls';
+import { Checkbox, Radio, Switch } from './ChoiceControls';
 import { DateTimeInput } from './DateTimeInput';
 import { Field, Input } from './Input';
 import { Textarea } from './Textarea';
@@ -40,5 +40,12 @@ describe('form controls', () => {
     expect(toggle).toContain('aria-describedby=');
     expect(toggle).toContain('checked=""');
     expect(toggle).toContain('peer-checked:after:translate-x-4');
+  });
+
+  it('renders a square native radio option', () => {
+    const radio = renderToStaticMarkup(<Radio name="scope" value="admin" label="Admin" defaultChecked />);
+    expect(radio).toContain('type="radio"');
+    expect(radio).toContain('appearance-none');
+    expect(radio).toContain('checked=""');
   });
 });

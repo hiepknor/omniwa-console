@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
-import { Button, Field, Input, PageHeader, Panel, StateNotice, Textarea } from '@/ui';
+import { Button, ButtonLink, Field, Input, PageHeader, Panel, StateNotice, Textarea } from '@/ui';
 import { useCreateCampaign } from './hooks';
 import { parseConsentRows } from './consent';
 
@@ -54,7 +54,7 @@ export function CreateCampaign() {
         eyebrow="Messaging / Campaigns"
         title="Create campaign draft"
         description="Submit consent evidence once; execution, pacing, leases, and recipient retry remain in OmniWA GO."
-        actions={<Link to="/messages" className="inline-flex items-center h-9 px-3 text-[13px] font-medium border border-line hover:bg-elevated hover:border-line-strong">Cancel</Link>}
+        actions={<ButtonLink to="/messages">Cancel</ButtonLink>}
       />
 
       <StateNotice kind="info" title="Consent evidence" detail="Raw evidence references are sent to the backend and are not retained by the Console after successful submission." />
