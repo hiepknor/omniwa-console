@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
+import { StaticRouter } from 'react-router-dom/server';
 import { describe, expect, it } from 'vitest';
 import { Button, ButtonLink } from './Button';
 
@@ -8,7 +9,7 @@ describe('Button', () => {
     expect(html).toContain('<button');
     expect(html).toContain('type="button"');
     expect(html).toContain('data-variant="ghost"');
-    expect(html).toContain('aria-hidden="true"');
+    expect(html).not.toContain('aria-busy=');
   });
 
   it('forwards submit, disabled, busy, and variant semantics', () => {
@@ -21,13 +22,16 @@ describe('Button', () => {
     expect(html).toContain('data-variant="danger"');
     expect(html).toContain('disabled=""');
     expect(html).toContain('aria-busy="true"');
+    expect(html).toContain('animate-spin');
   });
 });
 
 describe('ButtonLink', () => {
   it('uses the same action treatment without changing link semantics', () => {
     const html = renderToStaticMarkup(
-      <ButtonLink href="/messages/new" variant="primary">New campaign</ButtonLink>,
+      <StaticRouter location="/campaigns">
+        <ButtonLink to="/messages/new" variant="primary">New campaign</ButtonLink>
+      </StaticRouter>,
     );
     expect(html).toContain('<a');
     expect(html).toContain('href="/messages/new"');

@@ -20,7 +20,7 @@ import {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="grid gap-4 py-8 border-b border-line">
+    <section className="grid min-w-0 gap-4 py-8 border-b border-line">
       <h2 className="text-[11px] font-medium uppercase tracking-wider text-fg-3">{title}</h2>
       {children}
     </section>
@@ -49,8 +49,8 @@ export function UiGallery() {
   const [dialog, setDialog] = useState(false);
 
   return (
-    <div className="min-h-dvh bg-bg text-fg">
-      <div className="mx-auto max-w-[1100px] px-8">
+    <div className="min-h-dvh overflow-x-clip bg-bg text-fg">
+      <div className="mx-auto max-w-[1100px] px-4 sm:px-8">
         <PageHeader
           eyebrow="Design system v3"
           title="UI Gallery"
@@ -59,21 +59,21 @@ export function UiGallery() {
         />
 
         <Section title="Surfaces">
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-px bg-line border border-line">
+          <div className="grid min-w-0 grid-cols-2 gap-px border border-line bg-line sm:grid-cols-3 lg:grid-cols-6">
             {surfaces.map(([name, hex]) => (
-              <div key={name} className="p-3 bg-surface">
+              <div key={name} className="min-w-0 bg-surface p-3">
                 <div className="h-10 border border-line" style={{ background: hex }} />
-                <div className="mt-2 text-xs text-fg">{name}</div>
-                <div className="font-mono text-[11px] text-fg-3">{hex}</div>
+                <div className="mt-2 truncate text-xs text-fg">{name}</div>
+                <div className="truncate font-mono text-[11px] text-fg-3">{hex}</div>
               </div>
             ))}
           </div>
         </Section>
 
         <Section title="Ink ramp">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-line border border-line">
+          <div className="grid min-w-0 grid-cols-2 gap-px border border-line bg-line sm:grid-cols-4">
             {inkRamp.map(([name, hex]) => (
-              <div key={name} className="p-3 bg-surface">
+              <div key={name} className="min-w-0 bg-surface p-3">
                 <div className="h-10" style={{ background: hex }} />
                 <div className="mt-2 text-xs text-fg">{name}</div>
                 <div className="font-mono text-[11px] text-fg-3">{hex}</div>
@@ -128,16 +128,16 @@ export function UiGallery() {
         <Section title="Selectors">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl">
             <Field label="Scope">
-              {(id) => (
-                <Select id={id} defaultValue="instance">
+              {(id, labelId) => (
+                <Select id={id} aria-labelledby={labelId} defaultValue="instance">
                   <option value="admin">Admin</option>
                   <option value="instance">Instance</option>
                 </Select>
               )}
             </Field>
             <Field label="Status filter">
-              {(id) => (
-                <Select id={id} defaultValue="">
+              {(id, labelId) => (
+                <Select id={id} aria-labelledby={labelId} defaultValue="">
                   <option value="">All statuses</option>
                   <option value="connected">Connected</option>
                   <option value="disconnected">Disconnected</option>
@@ -145,8 +145,8 @@ export function UiGallery() {
               )}
             </Field>
             <Field label="Invalid selection" error="Choose an available scope">
-              {(id) => (
-                <Select id={id} aria-invalid defaultValue="">
+              {(id, labelId) => (
+                <Select id={id} aria-labelledby={labelId} aria-invalid defaultValue="">
                   <option value="">Select scope</option>
                   <option value="admin">Admin</option>
                   <option value="instance">Instance</option>
@@ -154,8 +154,8 @@ export function UiGallery() {
               )}
             </Field>
             <Field label="Unavailable">
-              {(id) => (
-                <Select id={id} disabled>
+              {(id, labelId) => (
+                <Select id={id} aria-labelledby={labelId} disabled>
                   <option>Not available</option>
                 </Select>
               )}

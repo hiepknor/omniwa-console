@@ -7,6 +7,7 @@ import {
   type ReactNode,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -19,6 +20,34 @@ type Option = {
   text: string;
   disabled: boolean;
 };
+
+type MenuPosition = {
+  vertical: 'down' | 'up';
+  horizontal: 'left' | 'right';
+};
+
+export function getMenuPosition({
+  root,
+  menu,
+  viewport,
+  inset = 16,
+  gap = 4,
+}: {
+  root: { top: number; right: number; bottom: number; left: number };
+  menu: { width: number; height: number };
+  viewport: { width: number; height: number };
+  inset?: number;
+  gap?: number;
+}): MenuPosition {
+  const spaceBelow = viewport.height - root.bottom - gap - inset;
+  const spaceAbove = root.top - gap - inset;
+  const spaceRight = viewport.width - root.left - inset;
+  const spaceLeft = root.right - inset;
+  return {
+    vertical: spaceBelow >= menu.height || spaceBelow >= spaceAbove ? 'down' : 'up',
+    horizontal: spaceRight >= menu.width || spaceRight >= spaceLeft ? 'left' : 'right',
+  };
+}
 
 export type SelectProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
@@ -91,8 +120,10 @@ export function Select({
   const selected = options[selectedIndex];
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(selectedIndex >= 0 ? selectedIndex : firstEnabledIndex(options));
+  const [menuPosition, setMenuPosition] = useState<MenuPosition>({ vertical: 'down', horizontal: 'left' });
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const listboxRef = useRef<HTMLDivElement>(null);
   const optionRefs = useRef(new Map<number, HTMLDivElement>());
   const typeahead = useRef({ text: '', at: 0 });
   const generatedId = useId();
@@ -108,6 +139,36 @@ export function Select({
     document.addEventListener('pointerdown', closeOutside);
     return () => document.removeEventListener('pointerdown', closeOutside);
   }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+
+    const positionMenu = () => {
+      const root = rootRef.current;
+      const listbox = listboxRef.current;
+      if (!root || !listbox) return;
+
+      const rootRect = root.getBoundingClientRect();
+      const listboxRect = listbox.getBoundingClientRect();
+      const next = getMenuPosition({
+        root: rootRect,
+        menu: listboxRect,
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+      });
+
+      setMenuPosition((current) => current.vertical === next.vertical && current.horizontal === next.horizontal
+        ? current
+        : next);
+    };
+
+    positionMenu();
+    window.addEventListener('resize', positionMenu);
+    window.addEventListener('scroll', positionMenu, true);
+    return () => {
+      window.removeEventListener('resize', positionMenu);
+      window.removeEventListener('scroll', positionMenu, true);
+    };
+  }, [open, options.length]);
 
   useEffect(() => {
     if (open && activeIndex >= 0) optionRefs.current.get(activeIndex)?.scrollIntoView({ block: 'nearest' });
@@ -214,7 +275,7 @@ export function Select({
         aria-activedescendant={open ? activeId : undefined}
         disabled={disabled}
         className={cn(
-          'group grid h-9 w-full grid-cols-[minmax(0,1fr)_2.25rem] border border-line bg-surface text-left',
+          'group grid h-9 w-full grid-cols-[minmax(0,1fr)_2.25rem] border border-line bg-surface text-left max-sm:h-10',
           'cursor-pointer text-[13px] font-medium leading-none text-fg transition-colors',
           'hover:border-line-strong hover:bg-recessed',
           'focus-visible:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
@@ -250,12 +311,17 @@ export function Select({
       </button>
 
       <div
+        ref={listboxRef}
         id={listboxId}
         role="listbox"
         aria-label={typeof buttonProps['aria-label'] === 'string' ? buttonProps['aria-label'] : undefined}
-        aria-labelledby={buttonProps['aria-label'] ? undefined : triggerId}
+        aria-labelledby={buttonProps['aria-label'] ? undefined : buttonProps['aria-labelledby']}
         hidden={!open}
-        className="absolute left-0 top-[calc(100%+4px)] z-50 max-h-60 min-w-full w-max max-w-[min(24rem,calc(100vw-2rem))] overflow-y-auto border border-line-strong bg-surface p-1 shadow-[4px_4px_0_var(--color-fg)]"
+        className={cn(
+          'absolute z-50 max-h-60 min-w-full w-max max-w-[min(24rem,calc(100vw-2rem))] overflow-y-auto border border-line-strong bg-surface p-1 shadow-[4px_4px_0_var(--color-fg)]',
+          menuPosition.vertical === 'down' ? 'top-[calc(100%+4px)]' : 'bottom-[calc(100%+4px)]',
+          menuPosition.horizontal === 'left' ? 'left-0' : 'right-0',
+        )}
       >
         {options.map((option, index) => {
           const active = index === activeIndex;
@@ -272,9 +338,9 @@ export function Select({
               aria-disabled={option.disabled || undefined}
               aria-selected={optionSelected}
               className={cn(
-                'grid min-h-8 grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 px-2 py-1.5 text-[13px]',
-                'cursor-pointer select-none text-fg',
-                active && 'bg-fg text-bg',
+                'grid min-h-8 grid-cols-[1rem_minmax(0,1fr)] items-center gap-2 px-2 py-1.5 text-[13px] max-sm:min-h-10',
+                'cursor-pointer select-none',
+                active ? 'bg-fg text-bg' : 'text-fg',
                 optionSelected && 'font-semibold',
                 option.disabled && 'pointer-events-none cursor-not-allowed text-fg-3 opacity-50',
               )}

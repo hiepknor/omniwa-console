@@ -43,7 +43,7 @@ export function CampaignsView(props: CampaignsViewProps) {
         actions={
           <>
             <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>
-            {props.newHref ? <ButtonLink href={props.newHref} variant="primary">New campaign</ButtonLink> : null}
+            {props.newHref ? <ButtonLink to={props.newHref} variant="primary">New campaign</ButtonLink> : null}
           </>
         }
       />
@@ -53,8 +53,8 @@ export function CampaignsView(props: CampaignsViewProps) {
       <Panel title="Campaign directory" description="Status filter, opaque cursor, and selected campaign remain URL-addressable." bodyClassName="p-0">
         <div className="flex items-end justify-between gap-3 p-4 border-b border-line max-sm:flex-col max-sm:items-stretch">
           <Field label="Status" className="w-full max-w-56">
-            {(id) => (
-              <Select id={id} value={props.status} onValueChange={(value) => props.onStatus(value || undefined)}>
+            {(id, labelId) => (
+              <Select id={id} aria-labelledby={labelId} value={props.status} onValueChange={(value) => props.onStatus(value || undefined)}>
                 <option value="">All statuses</option>
                 {statuses.map((s) => <option key={s} value={s}>{humanizeToken(s)}</option>)}
               </Select>

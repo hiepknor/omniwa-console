@@ -48,8 +48,8 @@ export function RecoveryView(props: RecoveryViewProps) {
         <form className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] gap-3 p-4 border-b border-line max-[900px]:grid-cols-1" onSubmit={props.onApply}>
           <Field label="Instance ID">{(id) => <Input id={id} value={props.instanceDraft} placeholder="All instances" onChange={(e) => props.onInstanceDraft(e.target.value)} />}</Field>
           <Field label="Resource">{(id) => <Input id={id} value={props.resourceDraft} placeholder="All resources" onChange={(e) => props.onResourceDraft(e.target.value)} />}</Field>
-          <Field label="Page size">{(id) => (
-            <Select id={id} value={String(props.limit)} onValueChange={props.onLimit}>
+          <Field label="Page size">{(id, labelId) => (
+            <Select id={id} aria-labelledby={labelId} value={String(props.limit)} onValueChange={props.onLimit}>
               {[25, 50, 100, 200].map((n) => <option key={n} value={String(n)}>{n}</option>)}
             </Select>
           )}</Field>

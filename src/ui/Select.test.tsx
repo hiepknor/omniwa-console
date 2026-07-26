@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { findNextEnabledIndex, Select } from './Select';
+import { findNextEnabledIndex, getMenuPosition, Select } from './Select';
 
 describe('custom Select', () => {
   it('renders a custom combobox and listbox without a native select', () => {
@@ -34,6 +34,27 @@ describe('custom Select', () => {
     expect(html).toContain('w-48');
   });
 
+  it('uses the field label for both the trigger and popup', () => {
+    const html = renderToStaticMarkup(
+      <Select aria-labelledby="status-label" value="running">
+        <option value="running">Running</option>
+      </Select>,
+    );
+
+    expect(html.match(/aria-labelledby="status-label"/g)).toHaveLength(2);
+  });
+
+  it('keeps active option foreground and background classes unambiguous', () => {
+    const html = renderToStaticMarkup(
+      <Select value="running">
+        <option value="running">Running</option>
+      </Select>,
+    );
+
+    expect(html).toContain('cursor-pointer select-none bg-fg text-bg');
+    expect(html).not.toContain('cursor-pointer select-none text-fg bg-fg text-bg');
+  });
+
   it('flattens mapped option children used by feature filters', () => {
     const values = ['draft', 'running'];
     const html = renderToStaticMarkup(
@@ -53,5 +74,19 @@ describe('custom Select', () => {
     expect(findNextEnabledIndex(options, 2, 1)).toBe(0);
     expect(findNextEnabledIndex(options, 0, -1)).toBe(2);
     expect(findNextEnabledIndex([{ disabled: true }], 0, 1)).toBe(-1);
+  });
+
+  it('flips and right-aligns the menu near viewport edges', () => {
+    expect(getMenuPosition({
+      root: { top: 700, right: 980, bottom: 736, left: 820 },
+      menu: { width: 240, height: 220 },
+      viewport: { width: 1_000, height: 800 },
+    })).toEqual({ vertical: 'up', horizontal: 'right' });
+
+    expect(getMenuPosition({
+      root: { top: 40, right: 220, bottom: 76, left: 40 },
+      menu: { width: 240, height: 220 },
+      viewport: { width: 1_000, height: 800 },
+    })).toEqual({ vertical: 'down', horizontal: 'left' });
   });
 });

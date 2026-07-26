@@ -75,8 +75,8 @@ export function Composer({ chatId, chatName, enabled }: { chatId: string; chatNa
                 {(id) => <Input id={id} type="url" value={mediaUrl} autoComplete="off" spellCheck={false} onChange={(e) => setMediaUrl(e.target.value)} />}
               </Field>
               <Field label="Media type">
-                {(id) => (
-                  <Select id={id} value={mediaType} onValueChange={(value) => setMediaType(value as MediaType)}>
+                {(id, labelId) => (
+                  <Select id={id} aria-labelledby={labelId} value={mediaType} onValueChange={(value) => setMediaType(value as MediaType)}>
                     <option value="image">Image</option>
                     <option value="video">Video</option>
                     <option value="audio">Audio</option>
