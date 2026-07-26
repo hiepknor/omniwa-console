@@ -33,6 +33,11 @@ const credentialCache = await read('src/features/instances/credential-cache.ts')
 for (const marker of ['instance:', 'instanceStatus', 'instanceQr', 'instanceAdvancedSettings', 'removeQueries']) {
   if (!credentialCache.includes(marker)) failures.push(`replaceable instance-token cache cleanup is missing ${marker}`);
 }
+
+const pairingPage = await read('src/features/instances/PairingPage.tsx');
+for (const marker of ["session.keyKind === 'api'", 'session.apiKey', 'SESSION_QUERY_SCOPE', '<ConnectionAndPairing']) {
+  if (!pairingPage.includes(marker)) failures.push(`instance-scope pairing boundary is missing ${marker}`);
+}
 if (/localStorage|sessionStorage/.test(provider)) {
   failures.push('the instance credential vault must not use browser storage');
 }

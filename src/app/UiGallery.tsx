@@ -88,6 +88,7 @@ const navigationItems = [
   ['groups', 'Groups'],
   ['campaigns', 'Campaigns'],
   ['events', 'Events'],
+  ['signout', 'Sign out'],
 ] as const;
 
 function ShellAnatomy() {

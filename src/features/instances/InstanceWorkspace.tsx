@@ -4,22 +4,19 @@ import { useInstanceCredential, useSetInstanceCredential } from '@/api/ApiProvid
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, DescriptionItem, DescriptionList, Dialog, Field, Image, Input, Panel, StateNotice, Status, Switch } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Field, Input, Panel, StateNotice, Status, Switch } from '@/ui';
 import { Drawer } from '@/ui';
 import {
   useAdvancedSettings,
-  useConnectInstance,
   useDestroyInstance,
   useDisconnectInstance,
-  useInstanceQr,
-  useInstanceStatus,
   useLogoutInstance,
-  useReconnectInstance,
   useRotateInstanceToken,
   useUpdateAdvancedSettings,
 } from './hooks';
 import { FailureNotice } from './ui';
 import { clearInstanceCredentialCache } from './credential-cache';
+import { ConnectionAndPairing, useInstancePairing } from './ConnectionAndPairing';
 
 type ConfirmAction = 'disconnect' | 'logout' | 'destroy';
 
@@ -89,30 +86,22 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
   const [confirmText, setConfirmText] = useState('');
   const [rotationOpen, setRotationOpen] = useState(false);
   const [rotationReason, setRotationReason] = useState('');
-  const status = useInstanceStatus(instance.id, token);
-  const statusReady = status.data !== undefined;
-  const connected = status.data?.connected ?? false;
-  const loggedIn = status.data?.loggedIn ?? false;
-  const pairing = Boolean(token && statusReady && !loggedIn);
-  const qr = useInstanceQr(instance.id, token, pairing && connected);
-  const connect = useConnectInstance(instance.id, token);
-  const reconnect = useReconnectInstance(instance.id, token);
+  const pairing = useInstancePairing(instance.id, token);
+  const { connected, loggedIn, statusReady } = pairing;
   const disconnect = useDisconnectInstance(instance.id, token);
   const logout = useLogoutInstance(instance.id, token);
   const destroy = useDestroyInstance(instance.id);
   const rotate = useRotateInstanceToken(instance.id);
   const rotationAvailable = capabilities.data?.capabilities.includes('instance_token_rotation') && (instance.credentialVersion ?? 0) > 0;
-  const lifecyclePending = connect.isPending || reconnect.isPending || disconnect.isPending || logout.isPending;
   const confirmMutation = confirm === 'disconnect' ? disconnect : confirm === 'logout' ? logout : destroy;
-  const lastAck = connect.data ? 'Connect' : reconnect.data ? 'Reconnect' : disconnect.data ? 'Disconnect' : logout.data ? 'Logout' : undefined;
-  const commandError = connect.error ?? reconnect.error ?? disconnect.error ?? logout.error;
+  const lastAck = disconnect.data ? 'Disconnect' : logout.data ? 'Logout' : undefined;
+  const commandError = disconnect.error ?? logout.error;
 
   const closeConfirm = () => { setConfirm(undefined); setConfirmText(''); disconnect.reset(); logout.reset(); destroy.reset(); };
   const submitConfirm = () => {
     if (!confirm || confirmText !== instance.id || confirmMutation.isPending) return;
     confirmMutation.mutate(undefined, { onSuccess: () => { if (confirm === 'destroy') onDestroyed(); closeConfirm(); } });
   };
-  const runPairing = () => (connected ? reconnect : connect).mutate();
   const updateCredential = (nextToken: string | undefined) => {
     clearInstanceCredentialCache(queryClient, instance.id);
     setCredential(instance.id, nextToken);
@@ -159,31 +148,11 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
           )}
 
           {token ? (
-            <Panel title="Connection and pairing" description="Connected and paired are different server facts.">
-              <div className="grid gap-3">
-                {status.isPending ? <StateNotice kind="loading" title="Reading status" detail="Reading instance status." /> : status.error ? <FailureNotice error={status.error} stale={status.data !== undefined} onRetry={() => status.refetch()} /> : null}
-                {lastAck ? <Ack action={lastAck} /> : null}
-                {commandError ? <FailureNotice error={commandError} command /> : null}
-                {pairing ? (
-                  <div className="grid gap-2">
-                    {qr.error ? (
-                      <FailureNotice error={qr.error} onRetry={() => qr.refetch()} />
-                    ) : qr.data?.qrcode ? (
-                      <Image src={qr.data.qrcode} alt="QR code to pair this OmniWA instance" aspect="square" fit="contain" className="w-52 justify-self-start" imageClassName="bg-surface p-3" />
-                    ) : connected ? (
-                      <StateNotice kind="loading" title="Waiting for QR" detail="Waiting for the rotating pairing QR." />
-                    ) : (
-                      <StateNotice kind="empty" title="No QR yet" detail="Start a connection to request a QR." />
-                    )}
-                    <p className="text-xs text-fg-3">WhatsApp → Linked Devices → Link a Device. Pairing is complete only when status reports loggedIn.</p>
-                  </div>
-                ) : null}
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="primary" disabled={lifecyclePending || loggedIn} onClick={runPairing}>{connected ? 'Restart pairing' : 'Connect'}</Button>
-                  <Button disabled={lifecyclePending || !loggedIn} onClick={() => reconnect.mutate()}>Reconnect</Button>
-                </div>
-              </div>
-            </Panel>
+            <>
+              <ConnectionAndPairing controller={pairing} />
+              {lastAck ? <Ack action={lastAck} /> : null}
+              {commandError ? <FailureNotice error={commandError} command /> : null}
+            </>
           ) : null}
 
           {token && loggedIn ? <AdvancedSettings instanceId={instance.id} token={token} /> : null}

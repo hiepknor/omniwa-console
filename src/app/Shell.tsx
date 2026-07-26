@@ -4,7 +4,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { ConsoleSession } from '@/lib/session';
-import { Button, Logo, NavigationItemContent, navigationItemClassName, Status } from '@/ui';
+import { Button, Icon, Logo, NavigationItemContent, navigationItemClassName, Status } from '@/ui';
 import { navigationForKeyKind, scopeLabelForKeyKind } from './navigation';
 
 function environmentLabel(env: string): string {
@@ -93,6 +93,16 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
                 ))}
               </div>
             ))}
+            <button
+              type="button"
+              aria-label="Sign out"
+              title="Sign out"
+              onClick={onDisconnect}
+              className={navigationItemClassName(false, 'hidden max-[900px]:flex max-[640px]:sticky max-[640px]:right-0 max-[640px]:z-10 max-[640px]:bg-surface')}
+            >
+              <Icon name="signout" size="nav" />
+              <span className="max-[900px]:hidden max-[640px]:inline max-[640px]:text-[10px]">Sign out</span>
+            </button>
           </nav>
 
           {/* Session footer */}

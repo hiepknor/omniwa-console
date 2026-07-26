@@ -23,7 +23,7 @@ export function navigationForKeyKind(keyKind: KeyKind, recoveryAvailable = false
   }
   if (keyKind === 'api') {
     return [
-      { label: 'Runtime', items: [overview] },
+      { label: 'Runtime', items: [overview, { to: '/connection', label: 'Connection', icon: 'instances' }] },
       {
         label: 'Messaging',
         items: [
