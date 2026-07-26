@@ -20,6 +20,11 @@ for (const marker of ['onKeyDown', 'tabIndex', 'aria-selected']) {
   if (!table.includes(marker)) failures.push(`src/ui/Table.tsx: interactive rows are missing ${marker}`);
 }
 
+const select = await read('src/ui/Select.tsx');
+for (const marker of ['role="combobox"', 'role="listbox"', 'role="option"', 'aria-activedescendant', 'handleKeyDown', 'closeOutside']) {
+  if (!select.includes(marker)) failures.push(`src/ui/Select.tsx: custom selector is missing ${marker}`);
+}
+
 for (const path of [
   'src/features/campaigns/CampaignInspector.tsx',
   'src/features/conversations/Composer.tsx',
