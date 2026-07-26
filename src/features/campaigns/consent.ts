@@ -1,13 +1,43 @@
 import type { CampaignRecipientConsent } from '@/api/campaigns';
 
-export function parseConsentRows(value: string): CampaignRecipientConsent[] {
-  const rows = value.split('\n').map((line) => line.trim()).filter(Boolean);
-  if (!rows.length) throw new Error('At least one consent-backed recipient is required.');
-  return rows.map((line, index) => {
-    const [jid, optInSource, optInEvidenceReference, optedInAt, ...extra] = line.split('|').map((part) => part.trim());
-    if (extra.length || !jid || !optInSource || !optInEvidenceReference || !optedInAt || Number.isNaN(Date.parse(optedInAt))) {
-      throw new Error(`Recipient line ${index + 1} must contain JID | source | evidence reference | ISO opt-in time.`);
+export type ConsentRowIssue = { line: number; message: string };
+export type ConsentInspection = {
+  issues: ConsentRowIssue[];
+  recipients: CampaignRecipientConsent[];
+  rowCount: number;
+};
+
+export function inspectConsentRows(value: string): ConsentInspection {
+  const rows = value
+    .split('\n')
+    .map((raw, index) => ({ line: index + 1, value: raw.trim() }))
+    .filter((row) => row.value.length > 0);
+  const issues: ConsentRowIssue[] = [];
+  const recipients: CampaignRecipientConsent[] = [];
+
+  for (const row of rows) {
+    const parts = row.value.split('|').map((part) => part.trim());
+    if (parts.length !== 4) {
+      issues.push({ line: row.line, message: `Recipient line ${row.line} must contain exactly JID | source | evidence reference | ISO opt-in time.` });
+      continue;
     }
-    return { jid, optInSource, optInEvidenceReference, optedInAt: new Date(optedInAt).toISOString() };
-  });
+    const [jid, optInSource, optInEvidenceReference, optedInAt] = parts;
+    const missing = [
+      !jid && 'JID',
+      !optInSource && 'source',
+      !optInEvidenceReference && 'evidence reference',
+      !optedInAt && 'opt-in time',
+    ].filter(Boolean);
+    if (missing.length) {
+      issues.push({ line: row.line, message: `Recipient line ${row.line} is missing ${missing.join(', ')}.` });
+      continue;
+    }
+    if (Number.isNaN(Date.parse(optedInAt))) {
+      issues.push({ line: row.line, message: `Recipient line ${row.line} has an invalid ISO opt-in time.` });
+      continue;
+    }
+    recipients.push({ jid, optInSource, optInEvidenceReference, optedInAt: new Date(optedInAt).toISOString() });
+  }
+
+  return { issues, recipients, rowCount: rows.length };
 }

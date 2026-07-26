@@ -104,3 +104,10 @@ The `/campaigns` route is the campaign list and monitoring surface.
 `/campaigns/new` is a consent-aware creation flow. A campaign drawer owns
 lifecycle commands, recipient pagination, and audit history. The route and all
 filters/cursors remain deep-linkable.
+
+Campaign creation uses the full-width Console layout: content and consent are
+separate responsive panels that stack on narrower viewports. The consent source
+editor validates every non-empty line, reports original line numbers, previews
+normalized recipients without duplicating raw evidence references, and enables
+draft creation only when every row is valid. All fields and the sole Cancel
+action are disabled while creation is pending.
