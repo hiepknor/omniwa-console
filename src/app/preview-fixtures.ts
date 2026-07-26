@@ -1,5 +1,7 @@
 /* Dev-only sample data for rendering v3 surfaces without a backend (/__preview). */
+import type { ChatResource } from '@/api/chats';
 import type { InstanceResource } from '@/api/instances';
+import type { MessageResource } from '@/api/messages';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
 import type { ProjectionFailure } from '@/api/recovery';
 
@@ -42,6 +44,20 @@ export const failuresFixture: ProjectionFailure[] = [
   { instanceId: 'inst_02KQP7M4', resource: 'chats', eventKey: 'evt_4b0e1d92', eventType: 'chat.updated', failureClass: 'constraint_violation', lastErrorCode: 'fk_missing', retryCount: 3, maxAttempts: 5, occurredAt: ago(3600), lastAttemptAt: ago(1800), deadLetteredAt: ago(1700) },
   { instanceId: 'inst_02KQP7M4', resource: 'groups', eventKey: 'evt_77aa02fe', eventType: 'group.member.added', failureClass: 'timeout', lastErrorCode: 'downstream_timeout', retryCount: 5, maxAttempts: 5, occurredAt: ago(7200), lastAttemptAt: ago(600), deadLetteredAt: ago(540) },
 ] as unknown as ProjectionFailure[];
+
+export const chatsFixture: ChatResource[] = [
+  { id: '15551230001@s.whatsapp.net', displayName: 'Anna Nguyen', type: 'individual', unreadCount: 2, lastActivityAt: ago(300) },
+  { id: '15551230002@s.whatsapp.net', displayName: 'Support escalations', type: 'group', unreadCount: 0, lastActivityAt: ago(3600) },
+  { id: '15551230003@s.whatsapp.net', displayName: 'David Tran', type: 'individual', unreadCount: 5, lastActivityAt: ago(120) },
+  { id: '15551230004@s.whatsapp.net', displayName: 'Orders', type: 'group', unreadCount: 0, lastActivityAt: ago(86_400) },
+] as unknown as ChatResource[];
+
+export const messagesFixture: MessageResource[] = [
+  { id: 'msg_1', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'text', status: 'read', contentText: 'Hi! Is my order shipped yet?', createdAt: ago(3000), provenance: 'whatsapp' },
+  { id: 'msg_2', chatId: '15551230001@s.whatsapp.net', direction: 'outgoing', type: 'text', status: 'delivered', contentText: 'Hello Anna — yes, it shipped this morning. Tracking is on the way.', createdAt: ago(2400), provenance: 'console' },
+  { id: 'msg_3', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'text', status: 'read', contentText: 'Perfect, thank you!', createdAt: ago(1800), provenance: 'whatsapp' },
+  { id: 'msg_4', chatId: '15551230001@s.whatsapp.net', direction: 'outgoing', type: 'text', status: 'failed', contentText: 'Let me know if you need anything else.', createdAt: ago(300), provenance: 'console' },
+] as unknown as MessageResource[];
 
 export const healthFixture: ServerHealthResource = {
   generatedAt: ago(30),
