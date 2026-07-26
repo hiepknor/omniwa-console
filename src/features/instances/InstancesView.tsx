@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { InstanceResource } from '@/api/instances';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, Field, Input, Panel, PageHeader, Select, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
+import { Button, Field, FilterToolbar, Input, Panel, PageHeader, Select, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
 
 export type InstancesViewProps = {
   search: string;
@@ -46,8 +46,8 @@ export function InstancesView(props: InstancesViewProps) {
         description="List and detail use /instance/metadata only; tokens never enter view models or query keys."
         bodyClassName="p-0"
       >
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 p-4 border-b border-line max-sm:grid-cols-1">
-          <Field label="Search">
+        <FilterToolbar>
+          <Field label="Search" className="min-w-56 flex-1">
             {(id) => (
               <Input
                 id={id}
@@ -58,7 +58,7 @@ export function InstancesView(props: InstancesViewProps) {
               />
             )}
           </Field>
-          <Field label="Status">
+          <Field label="Status" className="min-w-48">
             {(id, labelId) => (
               <Select id={id} aria-labelledby={labelId} value={props.status} onValueChange={props.onStatus}>
                 <option value="">All statuses</option>
@@ -67,7 +67,7 @@ export function InstancesView(props: InstancesViewProps) {
               </Select>
             )}
           </Field>
-        </div>
+        </FilterToolbar>
 
         {props.initialLoading ? (
           <div className="p-4"><StateNotice kind="loading" title="Loading instance metadata" detail="Reading instance metadata." /></div>

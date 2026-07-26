@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
-import { Button, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { Button, ButtonLink, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
 
 function projectionTone(status: string): Tone {
   if (status === 'healthy' || status === 'ready') return 'ok';
@@ -157,9 +156,9 @@ export function OverviewView(props: OverviewViewProps) {
         {props.recovery === 'pending' ? (
           <StateNotice kind="loading" title="Discovering capabilities" detail="Waiting for capability discovery before enabling Recovery." />
         ) : props.recovery === 'available' ? (
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-stretch">
             <p className="text-sm text-fg-2">Review dead letters without inferring recovery from aggregate health.</p>
-            <Link to="/recovery" className="inline-flex items-center h-9 px-3 text-[13px] font-medium border border-line hover:bg-elevated hover:border-line-strong">Open recovery</Link>
+            <ButtonLink to="/recovery">Open recovery</ButtonLink>
           </div>
         ) : (
           <StateNotice kind="empty" title="Recovery unavailable" detail="Recovery requires admin scope and the projection_failure_operations capability." />

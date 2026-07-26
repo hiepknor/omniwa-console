@@ -54,7 +54,7 @@ monochrome** — ink, paper, and gray, with **no chroma at all**. Built
 | --- | --- | --- |
 | `--color-fg` | `#111111` | Primary ink — headings, cell values |
 | `--color-fg-2` | `#565656` | Secondary — body, descriptions |
-| `--color-fg-3` | `#8c8c8c` | Muted — labels, metadata, placeholders |
+| `--color-fg-3` | `#6b6b6b` | Muted — AA-safe small labels, metadata, placeholders |
 
 ### No accent color
 
@@ -66,12 +66,18 @@ screentone pattern, never by hue** (see `src/ui/Status.tsx`).
 
 ### Status vocabulary (the frozen set)
 
-A status is an **8px screentone mark + label**. The fill pattern carries the
+A status is a **24px minimum-height framed ink stamp**: a 20px recessed marker
+cell, 10px screentone mark, and an explicit 11px/500 label. Atomic status labels
+stay on one line so responsive tables scroll inside their own frame instead of
+breaking words. Prose-like labels outside tables opt into `wrap`; those wrap
+within their container. The frame keeps status visually stable in tables,
+headers, inspectors, and dense trailing content. The fill pattern carries the
 meaning:
 
 | Status | Screentone |
 | --- | --- |
-| `ok` / `active` / `delivered`, `info` / `live` | solid ink |
+| `ok` / `active` / `delivered` | solid ink |
+| `info` / `live` | split horizontal ink |
 | `pending` / `pairing` / `queued` | halftone dots |
 | `degraded` / `retrying` | diagonal hatch |
 | `failed` / `disconnected` / `dead` | ink block with a white slash (cancelled) |
@@ -107,8 +113,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   2–3px zero-blur offset shadow. Open selectors may use a 4px zero-blur offset
   shadow. Panels, drawers, dialogs, tables, and notices remain shadowless.
 - **Patterns:** gradients are not decorative backgrounds. They are restricted to
-  screentone status marks, the danger button at rest, and deterministic QR/sample
-  fixtures. Danger hover clears the hatch and becomes solid ink.
+  screentone status marks, progress indeterminate/failure tracks, the danger
+  button at rest, and deterministic QR/sample fixtures. Danger hover clears the
+  hatch and becomes solid ink.
 - **Motion:** interaction transitions are 150ms, limited to color, border,
   shadow, and the property that actually moves (`translate`/`rotate`). All motion
   has a `motion-reduce` fallback.
@@ -125,21 +132,43 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   `primary` = ink fill + white label; `ghost` = paper + strong border; `danger` =
   diagonal hazard hatch at rest and a solid ink block on hover. Enabled buttons
   lift 1px with a hard offset shadow; active returns to the baseline. Busy is
-  visibly marked and natively disabled. One primary action per view.
+  visibly marked and natively disabled. Button labels never shrink or clip;
+  responsive action rows wrap or stack around their intrinsic width. One primary
+  action per view.
 - **CloseButton** — the only icon-only X/dismiss control. It is a fully framed
   square: 36×36px desktop and 40×40px mobile, with a 14px stroked X. Rest is
   the ghost Button treatment and it inherits the same hover lift, hard shadow,
   active return, keyboard focus, and disabled behavior. It never rounds or
   stretches to match its container. Dialogs, drawers, and notifications all use
   this primitive with an explicit non-visual accessible label.
-- **Status** — 8px square mark + label; tones map to §2. `<Status tone>`.
+- **Logo / Icon** — brand identity remains in `Logo`; every interface glyph is
+  drawn by `Icon`. Icons use the canonical 12/14/18px sizes, 1.75px square-cap
+  monochrome stroke, no emoji, text glyph, filled icon library, or feature-local
+  SVG. Icons are decorative and never replace a visible label; icon-only actions
+  require an explicit accessible name. Navigation uses `NavigationItemContent`
+  so full rail, compact rail, and mobile bottom nav cannot drift independently.
+- **Status** — the canonical framed ink stamp from §2. All usages share the
+  screentone registry in `statusMarks.ts`; notices and feedback map their state
+  vocabulary into the same marks instead of copying gradients. Failed status
+  receives the strong frame; other tones use the default hairline frame.
+  `<Status tone>` is single-line; `<Status tone wrap>` is reserved for explicit
+  long state descriptions outside dense tables.
 - **Input / Field** — recessed bg, 1px border, square, 13px; focus → strong border.
-  Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted.
+  Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted. Field descriptions and errors are linked with `aria-describedby`; errors set `aria-invalid`, and required state remains explicit.
+- **Textarea / DateTimeInput** — use the same surface, border, focus, invalid,
+  disabled, and mobile target language as Input. Textarea resizes vertically;
+  DateTimeInput standardizes the browser's local date-time field surface.
+- **Checkbox / Radio / Switch** — native choice semantics with fully custom
+  square visuals. Checkbox and radio use a framed 16px ink mark; radio remains
+  square by design. Switch uses a 36×20px square track with an ink/paper thumb
+  and `role="switch"`. All include visible labels, keyboard focus, disabled
+  treatment, and at least a 36/40px labeled hit area.
 - **Select** — custom ARIA combobox/listbox, never the browser-native visual.
   Closed hover uses recessed paper + strong border without movement. Open state
   inverts the chevron cell. The active option is ink with a white label; selected
   state has a square marker that also inverts when active. Trigger and options are
-  40px tall on mobile. Menus flip/align at viewport edges.
+  40px tall on mobile. Menus remain 4px from the trigger and flip/align at
+  viewport edges; parent grid stretching must not change that gap.
 - **Table** — the workhorse. `--color-surface` container, 1px border, no radius.
   Sticky 11px uppercase muted headers; 13px cells; hairline row dividers; row hover
   = `--color-elevated`. IDs mono; timestamps relative with ISO `title`; numeric
@@ -160,6 +189,27 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   13px/500 title + 12px detail, and **always** the mono `requestId` on API errors.
   Accepted commands say `accepted` and auto-dismiss (6s); errors persist.
 - **Badge** — square count chip, mono 11px, `--color-recessed` bg.
+- **DescriptionList / DescriptionItem** — the only repeated key/value facts
+  treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
+  values on wide screens, stacks them at ≤640px, wraps long content, and uses
+  mono explicitly for identifiers. Features do not clone fact-row helpers.
+- **FilterToolbar / FilterChip** — the canonical list-filter frame and removable
+  active-filter token. Toolbars wrap without horizontal page overflow; chips
+  stay square, show label and value, and expose an explicit remove name. Filter
+  controls and chips reflect URL state in product panels.
+- **Panel / StateNotice / CursorPagination** — the standard composition layer
+  for framed sections, honest loading/empty/stale/error state, and cursor-based
+  list progression. API errors include normalized detail and `requestId` when
+  present; pagination never suggests an unavailable page.
+- **ProgressBar** — an 8px square framed track with an ink fill and explicit
+  text label. Determinate progress exposes its bounded numeric value;
+  indeterminate progress uses the allowlisted diagonal operational screentone
+  and says “In progress”; failure freezes at the last known value and uses the
+  failure hatch. Never turn command acknowledgement into fake completion.
+- **Image** — the only product-image frame. It owns square framing, aspect ratio
+  (`square`, `video`, `wide`, or intrinsic), `cover`/`contain`, alt text, caption,
+  deterministic loading, and unavailable/error fallback. QR pairing uses
+  `contain` and a paper quiet zone. Features do not render raw `<img>` elements.
 
 ## 6. Shell & navigation
 
@@ -177,8 +227,16 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Page header:** an optional 11px uppercase eyebrow, the page title, connection
   state on the right, at most one primary action. ≤640px stacks to one column.
 - **Responsive:** ≥901px full rail; 641–900px icon-only rail; ≤640px a fixed
-  bottom nav bar. Dense form/action controls are at least 40px on mobile; primary
+  bottom nav bar with icon + visible 10px label while the main viewport reserves
+  its height. Dense form/action controls are at least 40px on mobile; primary
   navigation targets remain at least 44px.
+- **Split workspaces:** directory + detail use two panes only above 900px. At
+  tablet/mobile widths the selected detail replaces the directory and exposes a
+  full `Back` action; neither pane may remain positioned outside the viewport.
+- **Feedback placement:** `SurfaceNotice` is the framed inline/workspace banner;
+  `ToastViewport` is fixed bottom-right and becomes full inset-width on mobile.
+  Its inline placement exists only for deterministic `/__ui` review. Toast
+  timers pause on hover, focus, or hidden documents; errors persist.
 
 ## 7. Frozen interaction states
 
@@ -192,13 +250,43 @@ or `border-*` utilities and rely on generated CSS order.
 | Select trigger | rest, hover, open, open + hover, keyboard focus, invalid, disabled |
 | Select option | rest, active/hover, selected, active + selected, disabled |
 | Input | rest, hover, keyboard focus, populated, invalid, disabled |
+| Textarea / DateTimeInput | rest, populated, keyboard focus, invalid, disabled |
+| Checkbox / Radio / Switch | off, on, hover, keyboard focus, disabled |
+| Filter chip | rest, hover, keyboard focus, removed |
 | Table row | rest, hover, keyboard focus, selected |
+| StateNotice | info/stale, loading, empty/not-ready, error + requestId, action |
+| CursorPagination | first page, next cursor, final page, responsive stacking |
+| ProgressBar | 0–99%, indeterminate, complete, failed at last known value |
+| Image | loading, ready, contain/cover, long caption, missing/error fallback |
+| Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav |
+| Split workspace | two panes >900px, directory or detail + Back ≤900px |
+| Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close |
 
 Hover never hides a label or icon. Inverted surfaces always use paper-colored
 foregrounds. Motion may reinforce state, but color/border/fill must communicate
 the same state when reduced motion is enabled. Touch devices do not depend on
 hover to expose meaning or actions.
+
+### Implementation recipes
+
+`/__ui` is the executable reference for four complete compositions, not merely
+a parts bin:
+
+1. **List:** filter toolbar → active chips → honest projection state → table →
+   cursor pagination. Loading, empty, stale/syncing, not-ready, error, and ready
+   are mutually exclusive render paths in product panels.
+2. **Inspector:** selection → Drawer → identity/status → DescriptionList → only
+   the narrow actions owned by that panel. Long content remains body-scrollable.
+3. **Command:** consequence notice → required fields/confirmation → stable
+   footer. Duplicate submission is disabled; pending commands lock dismissal;
+   acknowledgement never claims downstream delivery.
+4. **Recovery:** normalized error with request ID → explicit review → danger
+   intent → refreshed narrow projection. It never infers success from aggregate
+   health.
+
+Production work should start from one of these recipes and delete inapplicable
+pieces, rather than inventing new local frames or interaction language.
 
 ## 8. Change control
 
@@ -235,7 +323,7 @@ with pattern or color alone; stack conflicting state-color utilities; use weight
 ## 10. Agent quick reference
 
 - Paper `#ffffff` / `#f2f2f2` / `#f6f6f6`; lines `#e2e2e2` (inner) / `#111111` (ink frame).
-- Ink `#111111 / #565656 / #8c8c8c`. No chroma.
+- Ink `#111111 / #565656 / #6b6b6b`. No chroma; small muted text remains AA-safe.
 - Primary = inverted ink block; status = screentone (§2), never hue.
 - Everything square, dense, light, and framed with 1px borders. Only buttons and
   open menus receive hard zero-blur lift; overlays remain flat.

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Campaign, CampaignStatus } from '@/api/campaigns';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, ButtonLink, CursorPagination, Field, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { Button, ButtonLink, CursorPagination, Field, FilterToolbar, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
 
 const statuses: CampaignStatus[] = ['draft', 'scheduled', 'running', 'paused', 'completed', 'aborted', 'failed'];
 
@@ -51,7 +51,7 @@ export function CampaignsView(props: CampaignsViewProps) {
       {props.notices}
 
       <Panel title="Campaign directory" description="Status filter, opaque cursor, and selected campaign remain URL-addressable." bodyClassName="p-0">
-        <div className="flex items-end justify-between gap-3 p-4 border-b border-line max-sm:flex-col max-sm:items-stretch">
+        <FilterToolbar className="justify-between max-sm:items-stretch">
           <Field label="Status" className="w-full max-w-56">
             {(id, labelId) => (
               <Select id={id} aria-labelledby={labelId} value={props.status} onValueChange={(value) => props.onStatus(value || undefined)}>
@@ -61,7 +61,7 @@ export function CampaignsView(props: CampaignsViewProps) {
             )}
           </Field>
           <span className="text-xs text-fg-3">{props.count} campaigns on this page</span>
-        </div>
+        </FilterToolbar>
 
         {props.errorSlot ? <div className="p-4">{props.errorSlot}</div> : null}
         {props.initialLoading ? <div className="p-4"><StateNotice kind="loading" title="Loading campaigns" /></div> : null}

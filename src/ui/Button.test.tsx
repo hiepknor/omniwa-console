@@ -9,6 +9,7 @@ describe('Button', () => {
     expect(html).toContain('<button');
     expect(html).toContain('type="button"');
     expect(html).toContain('data-variant="ghost"');
+    expect(html).toContain('shrink-0');
     expect(html).not.toContain('aria-busy=');
   });
 

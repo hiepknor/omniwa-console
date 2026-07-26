@@ -8,7 +8,7 @@ import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, Dialog, Drawer, Field, Input, PageHeader, StateNotice, Status } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Drawer, Field, Input, PageHeader, StateNotice, Status } from '@/ui';
 import { failureDetail, failureRequestId } from './state';
 import { useDiscardProjectionFailure, useProjectionFailures, useReplayProjectionFailure } from './hooks';
 import { recoveryFiltersFromSearch } from './route-state';
@@ -26,12 +26,7 @@ function Blocked({ detail, title }: { detail: string; title: string }) {
 }
 
 function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0">
-      <dt className="text-xs text-fg-3">{label}</dt>
-      <dd className={mono ? 'font-mono text-xs text-fg' : 'text-[13px] text-fg'}>{value}</dd>
-    </div>
-  );
+  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
 }
 
 export function RecoveryPage() {
@@ -127,7 +122,7 @@ export function RecoveryPage() {
         <Drawer open onClose={() => selectFailure(undefined)} title={humanizeToken(selected.resource)} subtitle={selected.eventKey}>
           <div className="grid gap-4">
             <Status tone="failed">{humanizeToken(selected.failureClass, 'Failed')}</Status>
-            <dl>
+            <DescriptionList>
               <Fact label="Instance" value={selected.instanceId} mono />
               <Fact label="Event type" value={humanizeToken(selected.eventType)} />
               <Fact label="Error code" value={selected.lastErrorCode ?? 'Not reported'} mono />
@@ -135,7 +130,7 @@ export function RecoveryPage() {
               <Fact label="Occurred" value={relativeTime(selected.occurredAt) || 'Not reported'} />
               <Fact label="Last attempt" value={relativeTime(selected.lastAttemptAt) || 'Not reported'} />
               <Fact label="Dead-lettered" value={relativeTime(selected.deadLetteredAt) || 'Not reported'} />
-            </dl>
+            </DescriptionList>
             <div className="flex flex-wrap gap-2">
               <Button variant="primary" onClick={() => openCommand('replay')}>Replay…</Button>
               <Button variant="danger" onClick={() => openCommand('discard')}>Discard…</Button>

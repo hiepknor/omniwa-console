@@ -13,6 +13,7 @@ import {
   useState,
 } from 'react';
 import { cn } from './cn';
+import { Icon } from './Icon';
 
 type Option = {
   value: string;
@@ -279,7 +280,7 @@ export function Select({
   };
 
   return (
-    <div ref={rootRef} className={cn('relative inline-grid min-w-32 text-left', className)} data-disabled={disabled || undefined}>
+    <div ref={rootRef} className={cn('relative inline-grid min-w-32 self-start text-left', className)} data-disabled={disabled || undefined}>
       {name ? <input type="hidden" name={name} value={selectedValue} /> : null}
       <button
         ref={triggerRef}
@@ -310,17 +311,7 @@ export function Select({
           aria-hidden
           className={selectChevronClassName(open)}
         >
-          <svg
-            viewBox="0 0 16 16"
-            className={cn('size-3.5 transition-transform', open && 'rotate-180')}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.75"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-          >
-            <path d="m3.5 5.5 4.5 5 4.5-5" />
-          </svg>
+          <Icon name="chevron-down" className={cn('transition-transform', open && 'rotate-180')} />
         </span>
       </button>
 

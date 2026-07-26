@@ -3,7 +3,7 @@ import { ApiFailure } from '@/api/envelopes';
 import type { GroupMemberResource, GroupResource, GroupSetting } from '@/api/groups';
 import type { ProjectionMeta } from '@/api/envelopes';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, Dialog, Drawer, Field, Input, Panel, StateNotice, Status, type Tone } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Drawer, Field, Input, Panel, StateNotice, Status, Switch, Textarea, type Tone } from '@/ui';
 import {
   useAddGroupMember, useDemoteGroupMember, useGroupInvite, useGroup,
   useLeaveGroup, usePromoteGroupMember, useRemoveGroupMember,
@@ -24,15 +24,13 @@ function Fail({ error, command, stale, onRetry }: { error: unknown; command?: bo
 }
 function Ack({ action }: { action: string }) { return <StateNotice kind="info" title={`${action} accepted`} detail="The refreshed group projection remains authoritative; acknowledgement does not prove provider completion." />; }
 function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0"><dt className="text-xs text-fg-3">{label}</dt><dd className={mono ? 'font-mono text-xs text-fg' : 'text-[13px] text-fg'}>{value}</dd></div>;
+  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
 }
 function ProjectionLine({ meta }: { meta?: ProjectionMeta }) {
   if (!meta?.syncStatus) return null;
   const tone: Tone = meta.syncStatus === 'ready' ? 'ok' : meta.syncStatus === 'failed' ? 'failed' : meta.syncStatus === 'stale' ? 'degraded' : 'pending';
   return <Status tone={tone}>Projection {meta.syncStatus.replace('_', ' ')}</Status>;
 }
-const textarea = 'w-full px-2.5 py-2 text-[13px] bg-recessed text-fg border border-line hover:border-line-strong focus-visible:outline-none focus-visible:border-line-strong resize-y';
-
 export function GroupWorkspace({ groupId, enabled, outboundEnabled, onClose, onLeft }: { groupId: string; enabled: boolean; outboundEnabled: boolean; onClose: () => void; onLeft: () => void }) {
   const query = useGroup(groupId, enabled);
   const group = query.data?.resource;
@@ -97,19 +95,19 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
       {lastAck ? <Ack action={lastAck} /> : null}
 
       <Panel title="Group facts" description="Persisted group and membership facts." bodyClassName="pt-2">
-        <dl>
+        <DescriptionList>
           <Fact label="Group JID" value={group.id} mono />
           <Fact label="Status" value={humanizeToken(group.status ?? 'unreported')} />
           <Fact label="Members" value={String(group.memberCount ?? 'Not reported')} />
           <Fact label="Admins" value={String(group.adminCount ?? 'Not reported')} />
           <Fact label="Updated" value={relativeTime(group.updatedAt) || 'Not reported'} />
-        </dl>
+        </DescriptionList>
       </Panel>
 
       <Panel title="Metadata" description="Only changed fields are submitted; a partial failure is not automatically retried.">
         <div className="grid gap-3">
           <Field label="Subject">{(id) => <Input id={id} value={subject} disabled={update.isPending} onChange={(e) => setSubject(e.target.value)} />}</Field>
-          <label className="grid gap-1.5"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Description</span><textarea rows={3} className={textarea} value={description} disabled={update.isPending} onChange={(e) => setDescription(e.target.value)} /></label>
+          <Field label="Description">{(id) => <Textarea id={id} rows={3} value={description} disabled={update.isPending} onChange={(e) => setDescription(e.target.value)} />}</Field>
           <Button disabled={!metadataDirty || update.isPending} onClick={() => update.mutate({ ...(subject !== (group.subject ?? '') ? { subject } : {}), ...(description !== (group.description ?? '') ? { description } : {}) })}>{update.isPending ? 'Submitting…' : 'Update metadata'}</Button>
           {update.error ? <Fail error={update.error} command /> : null}
         </div>
@@ -120,10 +118,7 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
           {settings.map(({ key, label, hint }) => {
             const checked = Boolean(group[key]);
             return (
-              <label key={key} className="flex items-start justify-between gap-4 py-2 border-b border-line last:border-b-0">
-                <span className="grid gap-0.5"><strong className="text-[13px] font-medium text-fg">{label}</strong><small className="text-xs text-fg-3">{hint}</small></span>
-                <input type="checkbox" className="mt-1 size-4 accent-fg" checked={checked} disabled={setting.isPending} onChange={() => setting.mutate({ setting: key, enabled: !checked })} />
-              </label>
+              <Switch key={key} className="border-b border-line last:border-b-0" label={label} description={hint} checked={checked} disabled={setting.isPending} onChange={() => setting.mutate({ setting: key, enabled: !checked })} />
             );
           })}
           {setting.error ? <div className="pt-3"><Fail error={setting.error} command /></div> : null}
@@ -198,7 +193,7 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
       >
         <div className="grid gap-3">
           <p className="text-sm text-fg-2">Acknowledgement does not prove WhatsApp delivery. Inspect projected conversation history before retrying an uncertain outcome.</p>
-          <label className="grid gap-1.5"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message</span><textarea rows={4} className={textarea} value={sendText} maxLength={10_000} disabled={send.isPending || Boolean(send.data)} onChange={(e) => setSendText(e.target.value)} /></label>
+          <Field label="Message">{(id) => <Textarea id={id} rows={4} value={sendText} maxLength={10_000} disabled={send.isPending || Boolean(send.data)} onChange={(e) => setSendText(e.target.value)} />}</Field>
           {send.data ? <Ack action="Group text send" /> : null}
           {send.error ? <Fail error={send.error} command /> : null}
         </div>

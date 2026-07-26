@@ -1,6 +1,6 @@
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { ConsoleSession } from '@/lib/session';
-import { Button, Field, Input, Logo, Status } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Field, Input, Logo, Status } from '@/ui';
 import { cn } from '@/ui/cn';
 import { useConnectFlow } from './connect-flow';
 
@@ -49,17 +49,14 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
             Enter the API origin and one runtime credential. Console validates the origin, verifies the key, and identifies
             its contract scope before opening the workspace.
           </p>
-          <dl className="grid gap-px border border-line-strong bg-line text-sm">
+          <DescriptionList className="gap-px border border-line-strong bg-line text-sm">
             {[
               ['Transport', 'Direct browser → OmniWA GO'],
               ['Probe timeout', '15 seconds'],
             ].map(([dt, dd]) => (
-              <div key={dt} className="flex items-center justify-between gap-4 bg-surface px-3 py-2">
-                <dt className="text-fg-3">{dt}</dt>
-                <dd className="text-fg">{dd}</dd>
-              </div>
+              <DescriptionItem key={dt} label={dt} className="border-0 bg-surface px-3 py-2">{dd}</DescriptionItem>
             ))}
-          </dl>
+          </DescriptionList>
         </section>
 
         <div className="grid gap-4 min-w-0 order-2 max-[900px]:order-1">

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { MediaType } from '@/api/messages';
-import { Button, Dialog, Field, Input, Select, StateNotice } from '@/ui';
+import { Button, Dialog, Field, Input, Select, StateNotice, Textarea } from '@/ui';
 import { useSendMedia, useSendText } from './hooks';
 import { FailureNotice } from './ui';
 
@@ -39,17 +39,16 @@ export function Composer({ chatId, chatName, enabled }: { chatId: string; chatNa
       {!enabled ? <StateNotice kind="empty" title="Sending unavailable" detail="Sending requires both messages_projection and outbound_rate_limit. No send request is available." /> : null}
 
       <form className="grid gap-2" onSubmit={(e) => { e.preventDefault(); submitText(); }}>
-        <label className="grid gap-1.5">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message {chatName}</span>
-          <textarea
+        <Field label={`Message ${chatName}`}>
+          {(id) => <Textarea
+            id={id}
             rows={3}
             value={text}
             disabled={!enabled || pending}
             maxLength={10_000}
             onChange={(e) => setText(e.target.value)}
-            className="w-full px-2.5 py-2 text-[13px] bg-recessed text-fg border border-line placeholder:text-fg-3 hover:border-line-strong focus-visible:outline-none focus-visible:border-line-strong resize-y"
-          />
-        </label>
+          />}
+        </Field>
         <div className="flex justify-end gap-2">
           <Button disabled={!enabled || pending} onClick={() => { sendMedia.reset(); setMediaOpen(true); }}>Media URL…</Button>
           <Button variant="primary" type="submit" disabled={!enabled || !text.trim() || pending}>{sendText.isPending ? 'Submitting…' : 'Send text'}</Button>

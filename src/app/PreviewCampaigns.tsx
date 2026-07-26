@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CampaignsView } from '@/features/campaigns/CampaignsView';
-import { Button, Drawer, Status, Tabs } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Drawer, Status, Tabs } from '@/ui';
 import { campaignDetailFixture, campaignsFixture } from './preview-fixtures';
 
 /** Dev-only: Campaigns directory + an open campaign inspector (overview tab). */
@@ -30,11 +30,11 @@ export function PreviewCampaigns() {
         <div className="grid gap-4">
           <Status tone="ok">Running</Status>
           <Tabs active="overview" onChange={() => {}} tabs={[{ id: 'overview', label: 'Overview' }, { id: 'recipients', label: 'Recipients', count: d.recipientCount }, { id: 'audit', label: 'Audit' }]} />
-          <dl>
+          <DescriptionList>
             {[['Status', 'Running'], ['Recipients', '1284'], ['Content', 'text'], ['Starts', '1h ago'], ['Version', '4']].map(([k, v]) => (
-              <div key={k} className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0"><dt className="text-xs text-fg-3">{k}</dt><dd className="text-[13px] text-fg">{v}</dd></div>
+              <DescriptionItem key={k} label={k}>{v}</DescriptionItem>
             ))}
-          </dl>
+          </DescriptionList>
           <div className="grid gap-1">
             <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message content</span>
             <p className="p-3 text-[13px] text-fg bg-recessed border border-line whitespace-pre-wrap">{d.campaign.text}</p>

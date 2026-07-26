@@ -11,7 +11,7 @@ type SharedProps = {
 };
 
 const base = cn(
-  'group relative isolate inline-flex h-9 items-center justify-center overflow-hidden border max-sm:h-10',
+  'group relative isolate inline-flex h-9 shrink-0 items-center justify-center overflow-hidden border max-sm:h-10',
   'whitespace-nowrap text-[13px] font-semibold leading-none select-none',
   'transition-[color,background-color,border-color,box-shadow,translate] duration-150 motion-reduce:transition-none',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',

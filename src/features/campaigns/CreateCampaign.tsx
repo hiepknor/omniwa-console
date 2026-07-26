@@ -3,11 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
-import { Button, Field, Input, PageHeader, Panel, StateNotice } from '@/ui';
+import { Button, ButtonLink, Field, Input, PageHeader, Panel, StateNotice, Textarea } from '@/ui';
 import { useCreateCampaign } from './hooks';
 import { parseConsentRows } from './consent';
-
-const textarea = 'w-full px-2.5 py-2 text-[13px] bg-recessed text-fg border border-line placeholder:text-fg-3 focus-visible:outline-none focus-visible:border-line-strong resize-y';
 
 export function CreateCampaign() {
   const session = useApiSession();
@@ -56,7 +54,7 @@ export function CreateCampaign() {
         eyebrow="Messaging / Campaigns"
         title="Create campaign draft"
         description="Submit consent evidence once; execution, pacing, leases, and recipient retry remain in OmniWA GO."
-        actions={<Link to="/messages" className="inline-flex items-center h-9 px-3 text-[13px] font-medium border border-line hover:bg-elevated hover:border-line-strong">Cancel</Link>}
+        actions={<ButtonLink to="/messages">Cancel</ButtonLink>}
       />
 
       <StateNotice kind="info" title="Consent evidence" detail="Raw evidence references are sent to the backend and are not retained by the Console after successful submission." />
@@ -64,15 +62,10 @@ export function CreateCampaign() {
       <Panel title="Campaign definition" description="Text campaigns only. Every recipient must carry explicit opt-in evidence.">
         <form className="grid gap-4" onSubmit={(e) => void submit(e)}>
           <Field label="Campaign name">{(id) => <Input id={id} required maxLength={255} value={name} onChange={(e) => setName(e.target.value)} />}</Field>
-          <label className="grid gap-1.5">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message text</span>
-            <textarea rows={4} required className={textarea} value={text} onChange={(e) => setText(e.target.value)} />
-          </label>
-          <label className="grid gap-1.5">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Consent-backed recipients</span>
-            <textarea rows={8} required className={textarea} value={rows} placeholder="84901234567@s.whatsapp.net | checkout | consent-record-id | 2026-07-22T08:00:00Z" onChange={(e) => setRows(e.target.value)} />
-            <span className={validation ? 'text-xs text-danger' : 'text-xs text-fg-3'}>{validation ?? 'One recipient per line: JID | opt-in source | evidence reference | ISO opt-in time.'}</span>
-          </label>
+          <Field label="Message text" required>{(id) => <Textarea id={id} rows={4} required value={text} onChange={(e) => setText(e.target.value)} />}</Field>
+          <Field label="Consent-backed recipients" required description={validation ? undefined : 'One recipient per line: JID | opt-in source | evidence reference | ISO opt-in time.'} error={validation}>
+            {(id) => <Textarea id={id} rows={8} required value={rows} placeholder="84901234567@s.whatsapp.net | checkout | consent-record-id | 2026-07-22T08:00:00Z" onChange={(e) => setRows(e.target.value)} />}
+          </Field>
           {failure ? <StateNotice kind="error" title="Command failed" detail={failure.message} requestId={failure.requestId} /> : null}
           <div className="flex justify-end gap-2">
             <Button disabled={create.isPending} onClick={() => navigate('/messages')}>Cancel</Button>

@@ -1,8 +1,17 @@
 export { cn } from './cn';
 export { Button, ButtonLink, type ButtonVariant } from './Button';
 export { CloseButton } from './CloseButton';
+export { Icon, type IconName, type IconSize, type NavigationIconName } from './Icon';
+export { Image, type ImageAspect, type ImageFit, type ImageState } from './Image';
+export { ProgressBar, type ProgressStatus } from './ProgressBar';
+export { NavigationItemContent, navigationItemClassName } from './NavigationItem';
 export { Status, type Tone } from './Status';
 export { Input, Field } from './Input';
+export { Textarea } from './Textarea';
+export { DateTimeInput } from './DateTimeInput';
+export { Checkbox, Radio, Switch } from './ChoiceControls';
+export { DescriptionList, DescriptionItem } from './DescriptionList';
+export { FilterToolbar, FilterChip } from './Filters';
 export { Select } from './Select';
 export { Badge } from './Badge';
 export { Table, Th, Td, Tr } from './Table';

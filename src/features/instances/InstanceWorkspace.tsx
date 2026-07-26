@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, Dialog, Field, Input, Panel, StateNotice, Status } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Field, Image, Input, Panel, StateNotice, Status, Switch } from '@/ui';
 import { Drawer } from '@/ui';
 import {
   useAdvancedSettings,
@@ -42,15 +42,7 @@ function Ack({ action }: { action: string }) {
 }
 
 function Toggle({ label, hint, checked, disabled, onChange }: { label: string; hint: string; checked: boolean; disabled?: boolean; onChange: () => void }) {
-  return (
-    <label className="flex items-start justify-between gap-4 py-2 border-b border-line last:border-b-0">
-      <span className="grid gap-0.5">
-        <strong className="text-[13px] font-medium text-fg">{label}</strong>
-        <small className="text-xs text-fg-3">{hint}</small>
-      </span>
-      <input type="checkbox" className="mt-1 size-4 accent-fg" checked={checked} disabled={disabled} onChange={onChange} />
-    </label>
-  );
+  return <Switch className="border-b border-line last:border-b-0" label={label} description={hint} checked={checked} disabled={disabled} onChange={onChange} />;
 }
 
 function AdvancedSettings({ instanceId, token }: { instanceId: string; token: string }) {
@@ -88,12 +80,7 @@ function AdvancedSettings({ instanceId, token }: { instanceId: string; token: st
 }
 
 function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0">
-      <dt className="text-xs text-fg-3">{label}</dt>
-      <dd className={mono ? 'font-mono text-xs text-fg' : 'text-[13px] text-fg'}>{value}</dd>
-    </div>
-  );
+  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
 }
 
 export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, onDestroyed }: { instance: InstanceResource; refreshError?: unknown; onRetry: () => void; onClose: () => void; onDestroyed: () => void }) {
@@ -153,7 +140,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
           {refreshError ? <FailureNotice error={refreshError} stale onRetry={onRetry} /> : null}
 
           <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyClassName="pt-2">
-            <dl>
+            <DescriptionList>
               <Fact label="Metadata status" value={humanizeToken(instance.status)} />
               <Fact label="Metadata connection" value={instance.connected ? 'Connected' : 'Disconnected'} />
               <Fact label="Live connection" value={statusReady ? (connected ? 'Connected' : 'Disconnected') : 'Not read'} />
@@ -161,7 +148,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
               <Fact label="WhatsApp ID" value={instance.jid ?? 'Not reported'} mono />
               <Fact label="Credential version" value={String(instance.credentialVersion ?? 'Not reported')} />
               <Fact label="Created" value={relativeTime(instance.createdAt) || 'Not reported'} />
-            </dl>
+            </DescriptionList>
           </Panel>
 
           {!token ? (
@@ -188,9 +175,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
                     {qr.error ? (
                       <FailureNotice error={qr.error} onRetry={() => qr.refetch()} />
                     ) : qr.data?.qrcode ? (
-                      <div className="justify-self-start bg-white p-3 border border-line-strong">
-                        <img src={qr.data.qrcode} alt="QR code to pair this OmniWA instance" className="size-52" />
-                      </div>
+                      <Image src={qr.data.qrcode} alt="QR code to pair this OmniWA instance" aspect="square" fit="contain" className="w-52 justify-self-start" imageClassName="bg-surface p-3" />
                     ) : connected ? (
                       <StateNotice kind="loading" title="Waiting for QR" detail="Waiting for the rotating pairing QR." />
                     ) : (
