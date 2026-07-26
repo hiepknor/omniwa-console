@@ -2,7 +2,9 @@ import { useState } from 'react';
 import {
   Badge,
   Button,
+  Checkbox,
   CloseButton,
+  DateTimeInput,
   Dialog,
   Drawer,
   Field,
@@ -11,10 +13,12 @@ import {
   PageHeader,
   Select,
   Status,
+  Switch,
   Table,
   Tabs,
   Td,
   Th,
+  Textarea,
   Tr,
   type Tone,
 } from '@/ui';
@@ -40,7 +44,7 @@ const surfaces = [
 const inkRamp = [
   ['fg', '#111111'],
   ['fg-2', '#565656'],
-  ['fg-3', '#8c8c8c'],
+  ['fg-3', '#6b6b6b'],
   ['line', '#e2e2e2'],
 ];
 
@@ -48,10 +52,11 @@ export function UiGallery() {
   const [tab, setTab] = useState('stream');
   const [drawer, setDrawer] = useState(false);
   const [dialog, setDialog] = useState(false);
+  const [switchEnabled, setSwitchEnabled] = useState(true);
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-bg text-fg">
-      <div className="mx-auto max-w-[1100px] px-4 sm:px-8">
+      <main className="mx-auto max-w-[1100px] px-4 sm:px-8">
         <PageHeader
           eyebrow="Locked design system"
           title="UI Gallery"
@@ -118,12 +123,24 @@ export function UiGallery() {
           </div>
         </Section>
 
-        <Section title="Inputs">
-          <div className="grid sm:grid-cols-2 gap-4 max-w-xl">
-            <Field label="API origin">{(id) => <Input id={id} placeholder="https://…" />}</Field>
-            <Field label="Invalid" error="Required">
-              {(id) => <Input id={id} aria-invalid placeholder="bad" />}
+        <Section title="Form controls">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="API origin" description="Public HTTPS endpoint used by this browser session." required>
+              {(id) => <Input id={id} required defaultValue="https://api.example.test" />}
             </Field>
+            <Field label="Invalid" error="Enter an available HTTPS origin.">
+              {(id) => <Input id={id} defaultValue="bad" />}
+            </Field>
+            <Field label="Unavailable">{(id) => <Input id={id} disabled value="Managed by server" readOnly />}</Field>
+            <Field label="Schedule start">{(id) => <DateTimeInput id={id} defaultValue="2026-07-26T09:30" />}</Field>
+            <Field label="Message" description="Vertical resizing is allowed; horizontal resizing is not.">
+              {(id) => <Textarea id={id} defaultValue="Projected delivery remains authoritative." />}
+            </Field>
+            <div className="grid content-start gap-1 border border-line p-3">
+              <Checkbox label="Include archived records" description="Applies only to the loaded projection." defaultChecked />
+              <Switch label="Always online" description="Submits one explicit settings command." checked={switchEnabled} onChange={(event) => setSwitchEnabled(event.target.checked)} />
+              <Switch label="Unavailable setting" description="Disabled by capability discovery." disabled />
+            </div>
           </div>
         </Section>
 
@@ -197,10 +214,10 @@ export function UiGallery() {
             </thead>
             <tbody>
               {[
-                ['inst_01', 'ok', '12,004', '3m ago'],
-                ['inst_02', 'pending', '842', '1m ago'],
-                ['inst_03', 'failed', '0', '2h ago'],
-              ].map(([id, tone, msgs, seen]) => (
+                ['inst_01', 'ok', '12,004', '3m ago', '6'],
+                ['inst_02', 'pending', '842', '1m ago', '3'],
+                ['inst_03', 'failed', '0', '2h ago', '1'],
+              ].map(([id, tone, msgs, seen, count]) => (
                 <Tr key={id} onClick={() => setDrawer(true)}>
                   <Td className="font-mono text-xs text-fg-2">{id}</Td>
                   <Td>
@@ -208,14 +225,14 @@ export function UiGallery() {
                   </Td>
                   <Td className="text-right tabular-nums">{msgs}</Td>
                   <Td className="text-fg-2">
-                    {seen} <Badge>{Math.floor(Math.random() * 9)}</Badge>
+                    {seen} <Badge>{count}</Badge>
                   </Td>
                 </Tr>
               ))}
             </tbody>
           </Table>
         </Section>
-      </div>
+      </main>
 
       <Drawer open={drawer} onClose={() => setDrawer(false)} title="inst_01" subtitle="inst_01HZX9Q…">
         <div className="grid gap-3">

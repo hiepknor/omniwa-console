@@ -54,7 +54,7 @@ monochrome** — ink, paper, and gray, with **no chroma at all**. Built
 | --- | --- | --- |
 | `--color-fg` | `#111111` | Primary ink — headings, cell values |
 | `--color-fg-2` | `#565656` | Secondary — body, descriptions |
-| `--color-fg-3` | `#8c8c8c` | Muted — labels, metadata, placeholders |
+| `--color-fg-3` | `#6b6b6b` | Muted — AA-safe small labels, metadata, placeholders |
 
 ### No accent color
 
@@ -134,7 +134,14 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   this primitive with an explicit non-visual accessible label.
 - **Status** — 8px square mark + label; tones map to §2. `<Status tone>`.
 - **Input / Field** — recessed bg, 1px border, square, 13px; focus → strong border.
-  Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted.
+  Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted. Field descriptions and errors are linked with `aria-describedby`; errors set `aria-invalid`, and required state remains explicit.
+- **Textarea / DateTimeInput** — use the same surface, border, focus, invalid,
+  disabled, and mobile target language as Input. Textarea resizes vertically;
+  DateTimeInput standardizes the browser's local date-time field surface.
+- **Checkbox / Switch** — native checkbox semantics with fully custom square
+  visuals. Checkbox uses a framed 16px ink mark. Switch uses a 36×20px square
+  track with an ink/paper thumb and `role="switch"`. Both include visible labels,
+  keyboard focus, disabled treatment, and at least a 36/40px labeled hit area.
 - **Select** — custom ARIA combobox/listbox, never the browser-native visual.
   Closed hover uses recessed paper + strong border without movement. Open state
   inverts the chevron cell. The active option is ink with a white label; selected
@@ -192,6 +199,8 @@ or `border-*` utilities and rely on generated CSS order.
 | Select trigger | rest, hover, open, open + hover, keyboard focus, invalid, disabled |
 | Select option | rest, active/hover, selected, active + selected, disabled |
 | Input | rest, hover, keyboard focus, populated, invalid, disabled |
+| Textarea / DateTimeInput | rest, populated, keyboard focus, invalid, disabled |
+| Checkbox / Switch | off, on, hover, keyboard focus, disabled |
 | Table row | rest, hover, keyboard focus, selected |
 | Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close |
 
@@ -235,7 +244,7 @@ with pattern or color alone; stack conflicting state-color utilities; use weight
 ## 10. Agent quick reference
 
 - Paper `#ffffff` / `#f2f2f2` / `#f6f6f6`; lines `#e2e2e2` (inner) / `#111111` (ink frame).
-- Ink `#111111 / #565656 / #8c8c8c`. No chroma.
+- Ink `#111111 / #565656 / #6b6b6b`. No chroma; small muted text remains AA-safe.
 - Primary = inverted ink block; status = screentone (§2), never hue.
 - Everything square, dense, light, and framed with 1px borders. Only buttons and
   open menus receive hard zero-blur lift; overlays remain flat.

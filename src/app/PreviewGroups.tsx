@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { GroupsView } from '@/features/groups/GroupsView';
-import { Button, Drawer, Field, Input, Panel, Status } from '@/ui';
+import { Button, Drawer, Field, Input, Panel, Status, Switch } from '@/ui';
 import { groupDetailFixture, groupsFixture } from './preview-fixtures';
 
 function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
@@ -46,10 +46,7 @@ export function PreviewGroups() {
           <Panel title="Group settings" description="Each switch submits one explicit paired group-setting action.">
             <div>
               {['Announcement only', 'Locked metadata', 'Join approval'].map((s, i) => (
-                <label key={s} className="flex items-start justify-between gap-4 py-2 border-b border-line last:border-b-0">
-                  <span className="grid gap-0.5"><strong className="text-[13px] font-medium text-fg">{s}</strong></span>
-                  <input type="checkbox" defaultChecked={i === 0} className="mt-1 size-4 accent-fg" />
-                </label>
+                <Switch key={s} className="border-b border-line last:border-b-0" label={s} defaultChecked={i === 0} />
               ))}
             </div>
           </Panel>

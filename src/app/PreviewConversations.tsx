@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChatList, MessageTimeline } from '@/features/conversations/ConversationsView';
-import { Button, Field, Input, PageHeader, Status, Tabs } from '@/ui';
+import { Button, Field, Input, PageHeader, Status, Tabs, Textarea } from '@/ui';
 import { chatsFixture, messagesFixture } from './preview-fixtures';
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
@@ -43,10 +43,7 @@ export function PreviewConversations() {
             <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} />
           </div>
           <div className="shrink-0 grid gap-2 p-4 border-t border-line bg-surface">
-            <label className="grid gap-1.5">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message {chat.displayName}</span>
-              <textarea rows={3} className="w-full px-2.5 py-2 text-[13px] bg-recessed text-fg border border-line resize-y" placeholder="Type a message…" />
-            </label>
+            <Field label={`Message ${chat.displayName}`}>{(id) => <Textarea id={id} rows={3} placeholder="Type a message…" />}</Field>
             <div className="flex justify-end gap-2">
               <Button>Media URL…</Button>
               <Button variant="primary">Send text</Button>

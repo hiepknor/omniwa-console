@@ -23,7 +23,7 @@ const lockedTokens = new Map([
   ['--color-line-strong', '#111111'],
   ['--color-fg', '#111111'],
   ['--color-fg-2', '#565656'],
-  ['--color-fg-3', '#8c8c8c'],
+  ['--color-fg-3', '#6b6b6b'],
   ['--color-accent', '#111111'],
   ['--color-accent-ink', '#ffffff'],
   ['--color-ok', '#111111'],
@@ -47,8 +47,25 @@ for (const [token, value] of lockedTokens) {
   }
 }
 
+function luminance(hex) {
+  const channels = [1, 3, 5]
+    .map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16) / 255)
+    .map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+function contrastRatio(foreground, background) {
+  const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  return (values[0] + 0.05) / (values[1] + 0.05);
+}
+
+for (const surface of ['--color-bg', '--color-elevated', '--color-recessed']) {
+  const ratio = contrastRatio(lockedTokens.get('--color-fg-3'), lockedTokens.get(surface));
+  if (ratio < 4.5) failures.push(`src/styles/index.css: muted small text contrast against ${surface} is ${ratio.toFixed(2)}:1; expected at least 4.5:1`);
+}
+
 const allowedHex = new Set([
-  '#ffffff', '#f2f2f2', '#f6f6f6', '#e2e2e2', '#111111', '#565656', '#8c8c8c',
+  '#ffffff', '#f2f2f2', '#f6f6f6', '#e2e2e2', '#111111', '#565656', '#6b6b6b',
   '#fff', '#111',
 ]);
 
@@ -116,6 +133,15 @@ for (const path of await sourceFiles('src')) {
   if (code.includes('OverlayCloseButton') || /[✕×]/.test(code)) {
     failures.push(`${path}: legacy or text-glyph close controls violate the CloseButton lock`);
   }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/Textarea.tsx' && /<textarea\b/.test(code)) {
+    failures.push(`${path}: text areas must use the canonical Textarea primitive`);
+  }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/ChoiceControls.tsx' && /<input\b[^>]*type=["']checkbox["']/.test(code)) {
+    failures.push(`${path}: checkbox and switch controls must use canonical choice primitives`);
+  }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/DateTimeInput.tsx' && /<input\b[^>]*type=["']datetime-local["']/.test(code)) {
+    failures.push(`${path}: local date-time controls must use DateTimeInput`);
+  }
 }
 
 const contract = await read('design/DESIGN.md');
@@ -131,7 +157,7 @@ for (const marker of [
 }
 
 const gallery = await read('src/app/UiGallery.tsx');
-for (const marker of ['Locked design system', 'hard lift only', '<Button', '<CloseButton', '<Select', '<Drawer', '<Dialog']) {
+for (const marker of ['Locked design system', 'hard lift only', '<Button', '<CloseButton', '<Textarea', '<Checkbox', '<Switch', '<DateTimeInput', '<Select', '<Drawer', '<Dialog']) {
   if (!gallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: locked review surface is missing ${marker}`);
 }
 

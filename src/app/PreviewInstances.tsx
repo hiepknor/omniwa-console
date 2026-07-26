@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { InstancesView } from '@/features/instances/InstancesView';
-import { Button, Drawer, Field, Input, Panel, Status } from '@/ui';
+import { Button, Drawer, Field, Input, Panel, Status, Switch } from '@/ui';
 import { instancesFixture } from './preview-fixtures';
 
 function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
@@ -63,10 +63,7 @@ export function PreviewInstances() {
           <Panel title="Advanced settings" description="Instance-scoped live configuration. Saving does not imply provider delivery.">
             <div className="grid gap-3">
               {['Always online', 'Read receipts', 'Reject calls'].map((s, i) => (
-                <label key={s} className="flex items-start justify-between gap-4 py-2 border-b border-line last:border-b-0">
-                  <span className="grid gap-0.5"><strong className="text-[13px] font-medium text-fg">{s}</strong></span>
-                  <input type="checkbox" defaultChecked={i === 0} className="mt-1 size-4 accent-fg" />
-                </label>
+                <Switch key={s} className="border-b border-line last:border-b-0" label={s} defaultChecked={i === 0} />
               ))}
               <Field label="Call rejection message">{(id) => <Input id={id} defaultValue="Sorry, calls are not accepted." />}</Field>
               <Button>Save settings</Button>

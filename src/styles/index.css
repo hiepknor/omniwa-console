@@ -18,7 +18,7 @@
   /* Ink tiers (dark on light) */
   --color-fg: #111111;
   --color-fg-2: #565656;
-  --color-fg-3: #8c8c8c;
+  --color-fg-3: #6b6b6b;
 
   /* No chroma. Accent = black ink; primary inverts to a solid black block.
      Status tokens stay ink-black and are differentiated by screentone

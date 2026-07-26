@@ -4,7 +4,7 @@ import { ApiFailure } from '@/api/envelopes';
 import type { CampaignStatus } from '@/api/campaigns';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, CursorPagination, Dialog, Drawer, StateNotice, Status, Table, Tabs, Td, Th, Tr } from '@/ui';
+import { Button, CursorPagination, DateTimeInput, Dialog, Drawer, Field, StateNotice, Status, Table, Tabs, Td, Th, Tr } from '@/ui';
 import { useCampaignAudit, useCampaignRecipients, useCampaignTransition, useCampaign } from './hooks';
 import { campaignRouteState, setCampaignParam, type CampaignTab } from './route-state';
 import { campaignTone } from './CampaignsView';
@@ -154,10 +154,7 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
         <div className="grid gap-3">
           <p className="text-sm text-fg-2">{command === 'abort' ? 'Abort is terminal. Pending recipients become aborted and the campaign cannot restart.' : command === 'pause' ? 'An already-leased recipient may finish; only new worker claims stop.' : 'The server validates the lifecycle transition and remains authoritative.'}</p>
           {command === 'schedule' ? (
-            <label className="grid gap-1.5">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Start time</span>
-              <input type="datetime-local" required value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="h-9 px-2.5 text-[13px] bg-recessed text-fg border border-line focus-visible:outline-none focus-visible:border-line-strong" />
-            </label>
+            <Field label="Start time" required>{(id) => <DateTimeInput id={id} required value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />}</Field>
           ) : null}
           {transition.error ? <Fail error={transition.error} command /> : null}
           <p className="text-xs text-fg-3">No one-click retry is offered after an uncertain command result. Refresh authoritative campaign and audit state before deciding to submit again.</p>

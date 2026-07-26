@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, Dialog, Field, Input, Panel, StateNotice, Status } from '@/ui';
+import { Button, Dialog, Field, Input, Panel, StateNotice, Status, Switch } from '@/ui';
 import { Drawer } from '@/ui';
 import {
   useAdvancedSettings,
@@ -42,15 +42,7 @@ function Ack({ action }: { action: string }) {
 }
 
 function Toggle({ label, hint, checked, disabled, onChange }: { label: string; hint: string; checked: boolean; disabled?: boolean; onChange: () => void }) {
-  return (
-    <label className="flex items-start justify-between gap-4 py-2 border-b border-line last:border-b-0">
-      <span className="grid gap-0.5">
-        <strong className="text-[13px] font-medium text-fg">{label}</strong>
-        <small className="text-xs text-fg-3">{hint}</small>
-      </span>
-      <input type="checkbox" className="mt-1 size-4 accent-fg" checked={checked} disabled={disabled} onChange={onChange} />
-    </label>
-  );
+  return <Switch className="border-b border-line last:border-b-0" label={label} description={hint} checked={checked} disabled={disabled} onChange={onChange} />;
 }
 
 function AdvancedSettings({ instanceId, token }: { instanceId: string; token: string }) {

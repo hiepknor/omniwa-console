@@ -30,6 +30,26 @@ for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10']) {
   if (!closeButton.includes(marker)) failures.push(`src/ui/CloseButton.tsx: close-control contract is missing ${marker}`);
 }
 
+const input = await read('src/ui/Input.tsx');
+for (const marker of ['aria-describedby', 'aria-invalid', 'aria-required', 'max-sm:h-10']) {
+  if (!input.includes(marker)) failures.push(`src/ui/Input.tsx: accessible field contract is missing ${marker}`);
+}
+
+const textarea = await read('src/ui/Textarea.tsx');
+for (const marker of ['fieldControlClassName', 'resize-y', 'min-h-20']) {
+  if (!textarea.includes(marker)) failures.push(`src/ui/Textarea.tsx: textarea contract is missing ${marker}`);
+}
+
+const choices = await read('src/ui/ChoiceControls.tsx');
+for (const marker of ['appearance-none', 'role="switch"', 'peer-focus-visible:outline-2', 'max-sm:min-h-10']) {
+  if (!choices.includes(marker)) failures.push(`src/ui/ChoiceControls.tsx: choice-control contract is missing ${marker}`);
+}
+
+const dateTime = await read('src/ui/DateTimeInput.tsx');
+if (!dateTime.includes('type="datetime-local"')) {
+  failures.push('src/ui/DateTimeInput.tsx: local date-time semantics are missing');
+}
+
 const feedbackContent = await read('src/components/feedback/FeedbackContent.tsx');
 if (!feedbackContent.includes('<CloseButton')) {
   failures.push('src/components/feedback/FeedbackContent.tsx: notification dismiss must use CloseButton');
