@@ -67,6 +67,19 @@ Campaign status:
 - `aborted`
 - `failed`
 
+Scheduling is optional. A newly created draft supports either path:
+
+```text
+draft ── start ──────────────> running
+  └──── schedule ─> scheduled ── start ─> running
+```
+
+The Console offers `schedule`, `start`, and `abort` for a draft; `start` and
+`abort` for a scheduled campaign; `pause` and `abort` while running; and
+`resume` and `abort` while paused. Completed, aborted, and failed campaigns are
+terminal in the Console. The server still validates every transition and a
+conflict response remains authoritative.
+
 Recipient status:
 
 - `pending`
@@ -92,9 +105,11 @@ Therefore the Console:
 
 - never performs optimistic lifecycle changes;
 - disables duplicate command submission;
-- refreshes campaign detail, recipients, and audit after acknowledgement;
+- refreshes the campaign list and detail after acknowledgement;
 - explains that pause may allow already-processing recipients to finish;
 - uses recipient and audit reads as authority instead of toast history;
+- loads recipients and audit when their respective drawer tabs are opened, and
+  successful commands invalidate both reads for their next use;
 - applies the shared rate-limit behavior without retrying commands
   automatically.
 
