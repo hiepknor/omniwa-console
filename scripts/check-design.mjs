@@ -67,6 +67,9 @@ if (!uiGallery.includes('<ApiFailureNotice error={galleryRateLimit}')) {
 if (!uiGallery.includes("['signout', 'Sign out']")) {
   failures.push('src/app/UiGallery.tsx: locked iconography registry must include Sign out');
 }
+if (!uiGallery.includes('const sessionUtilityItems') || !uiGallery.includes('Mobile navigation example')) {
+  failures.push('src/app/UiGallery.tsx: compact session utilities must remain separate from navigation fixtures');
+}
 
 const input = await read('src/ui/Input.tsx');
 for (const marker of ['aria-describedby', 'aria-invalid', 'aria-required', 'max-sm:h-10']) {
@@ -119,8 +122,11 @@ for (const marker of ['placement', 'onMouseEnter', 'onFocusCapture', 'visibility
 }
 
 const shell = await read('src/app/Shell.tsx');
-for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', '<NavigationItemContent', 'aria-label="Sign out"', 'hidden max-[900px]:flex']) {
+for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', 'max-[640px]:flex-row', '<NavigationItemContent', 'Compact session utility', 'aria-label="Sign out"']) {
   if (!shell.includes(marker)) failures.push(`src/app/Shell.tsx: responsive shell contract is missing ${marker}`);
+}
+if (shell.indexOf('Compact session utility') < shell.indexOf('</nav>')) {
+  failures.push('src/app/Shell.tsx: compact Sign out utility must remain outside primary navigation');
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
@@ -149,12 +155,12 @@ if (!instancesPreview.includes('<Image src="/ui-qr-sample.svg"')) {
 }
 
 const pairingSurface = await read('src/features/instances/ConnectionAndPairing.tsx');
-for (const marker of ['clearPairingQrCache', 'shouldShowPairingQr', 'shouldPollPairingQr', '<Image', 'No active QR']) {
+for (const marker of ['clearPairingQrCache', 'shouldShowPairingQr', 'shouldPollPairingQr', 'title="Connection & pairing"', '<Image', 'No active QR']) {
   if (!pairingSurface.includes(marker)) failures.push(`src/features/instances/ConnectionAndPairing.tsx: pairing contract is missing ${marker}`);
 }
 
 const pairingPage = await read('src/features/instances/PairingPage.tsx');
-for (const marker of ['title="Connection & pairing"', '<ConnectionAndPairing', '<Status']) {
+for (const marker of ['title="Instance"', '<ConnectionAndPairing', '<Status']) {
   if (!pairingPage.includes(marker)) failures.push(`src/features/instances/PairingPage.tsx: direct pairing route is missing ${marker}`);
 }
 

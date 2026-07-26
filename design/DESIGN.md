@@ -226,15 +226,18 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   session key kind, not hardcoded.
   - **Admin** → *Platform*: Overview · Recovery (only when the server advertises
     `projection_failure_operations`) · Instances.
-  - **API** → *Runtime*: Overview · *Messaging*: Conversations, Groups, Campaigns ·
-    *Observability*: Events.
+  - **API** → *Runtime*: Overview, Instance · *Messaging*: Conversations, Groups,
+    Campaigns · *Observability*: Events. Instance is the stable destination for
+    active-runtime identity and lifecycle; connection and pairing are sections,
+    not navigation categories.
   - **Unknown** → *Runtime*: Overview.
 - **Page header:** an optional 11px uppercase eyebrow, the page title, connection
   state on the right, at most one primary action. ≤640px stacks to one column.
 - **Responsive:** ≥901px full rail; 641–900px icon-only rail; ≤640px a fixed
   bottom nav bar with icon + visible 10px label while the main viewport reserves
-  its height. Dense form/action controls are at least 40px on mobile; primary
-  navigation targets remain at least 44px.
+  its height. At compact widths Sign out is a separately framed session utility,
+  never a navigation destination. Dense form/action controls are at least 40px
+  on mobile; primary navigation targets remain at least 44px.
 - **Split workspaces:** directory + detail use two panes only above 900px. At
   tablet/mobile widths the selected detail replaces the directory and exposes a
   full `Back` action; neither pane may remain positioned outside the viewport.

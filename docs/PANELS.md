@@ -74,10 +74,11 @@ Credential Health renders factual C3 migration signals, treats zero instances
 as non-representative, and never derives a plaintext-removal decision.
 `/server/ok` is not connection state.
 
-## Connection & pairing — `/connection`, embedded in `/instances/:instanceId`
+## Active Instance — `/connection`, embedded in `/instances/:instanceId`
 
-**Status:** integrated. Instance-scoped sessions reach the route directly;
-admin sessions use the same surface after attaching the selected instance token.
+**Status:** integrated. Instance-scoped sessions reach the Instance destination
+directly; admin sessions use the same surface after attaching the selected
+instance token.
 
 ```text
 GET  /instance/status

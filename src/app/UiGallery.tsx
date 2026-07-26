@@ -83,11 +83,13 @@ const inkRamp = [
 ];
 const navigationItems = [
   ['overview', 'Overview'],
-  ['instances', 'Instances'],
+  ['instances', 'Instance'],
   ['chats', 'Conversations'],
   ['groups', 'Groups'],
   ['campaigns', 'Campaigns'],
   ['events', 'Events'],
+] as const;
+const sessionUtilityItems = [
   ['signout', 'Sign out'],
 ] as const;
 
@@ -108,17 +110,23 @@ function ShellAnatomy() {
         <div className="min-w-0 p-4"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Content viewport</span><div className="mt-3 h-28 border border-line-strong bg-surface" /></div>
       </div>
       <div className="grid gap-4">
-        <div className="grid h-44 grid-cols-[64px_minmax(0,1fr)] overflow-hidden border border-line-strong">
-          <nav aria-label="Compact rail example" className="grid content-start gap-0.5 border-r border-line-strong bg-surface p-3">
-            {navigationItems.slice(0, 3).map(([icon, label], index) => <div key={icon} title={label} className={navigationItemClassName(index === 0, 'justify-center px-0')}><Icon name={icon} size="nav" /><span className="sr-only">{label}</span></div>)}
-          </nav>
+        <div className="grid h-56 grid-cols-[64px_minmax(0,1fr)] overflow-hidden border border-line-strong">
+          <aside className="flex min-h-0 flex-col border-r border-line-strong bg-surface">
+            <nav aria-label="Compact rail example" className="grid flex-1 content-start gap-0.5 p-3">
+              {navigationItems.slice(0, 3).map(([icon, label], index) => <div key={icon} title={label} className={navigationItemClassName(index === 0, 'justify-center px-0')}><Icon name={icon} size="nav" /><span className="sr-only">{label}</span></div>)}
+            </nav>
+            <div className="grid place-items-center border-t border-line p-3"><Button aria-label="Sign out" title="Sign out" className="size-9"><Icon name="signout" size="nav" /></Button></div>
+          </aside>
           <div className="bg-bg p-3 text-[11px] uppercase tracking-wider text-fg-3">64px rail</div>
         </div>
         <div className="grid overflow-hidden border border-line-strong bg-bg">
           <div className="h-20 p-3 text-[11px] uppercase tracking-wider text-fg-3">Mobile content reserves bottom-nav space</div>
-          <nav aria-label="Mobile navigation example" className="flex overflow-x-auto border-t border-line-strong bg-surface p-2">
-            {navigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0, 'min-h-11 min-w-[72px] flex-col justify-center gap-0.5 px-2')}><Icon name={icon} size="nav" /><span className="text-[10px]">{label}</span></div>)}
-          </nav>
+          <div className="flex border-t border-line-strong bg-surface">
+            <nav aria-label="Mobile navigation example" className="flex min-w-0 flex-1 overflow-x-auto p-2">
+              {navigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0, 'min-h-11 min-w-[72px] flex-col justify-center gap-0.5 px-2')}><Icon name={icon} size="nav" /><span className="text-[10px]">{label}</span></div>)}
+            </nav>
+            <div className="grid shrink-0 place-items-center border-l border-line p-2"><Button aria-label="Sign out" title="Sign out" className="size-10"><Icon name="signout" size="nav" /></Button></div>
+          </div>
         </div>
       </div>
     </div>
@@ -186,7 +194,7 @@ export function UiGallery() {
         <Section title="Brand + iconography">
           <div className="flex flex-wrap items-center gap-5">
             <div className="flex items-center gap-3 border border-line-strong p-3"><Logo className="size-8" /><span className="text-sm font-semibold">OmniWA Console</span></div>
-            {navigationItems.map(([name, label]) => <div key={name} className="grid min-w-20 justify-items-center gap-1 border border-line p-3"><Icon name={name} size="nav" /><span className="text-[11px] text-fg-3">{label}</span></div>)}
+            {[...navigationItems, ...sessionUtilityItems].map(([name, label]) => <div key={name} className="grid min-w-20 justify-items-center gap-1 border border-line p-3"><Icon name={name} size="nav" /><span className="text-[11px] text-fg-3">{label}</span></div>)}
             <div className="grid min-w-20 justify-items-center gap-1 border border-line p-3"><Icon name="close" /><span className="text-[11px] text-fg-3">Close</span></div>
             <div className="grid min-w-20 justify-items-center gap-1 border border-line p-3"><Icon name="chevron-down" /><span className="text-[11px] text-fg-3">Disclosure</span></div>
           </div>

@@ -41,7 +41,7 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
 
         <aside
           aria-label="OmniWA primary navigation"
-          className="flex min-w-0 flex-col h-dvh border-r border-line-strong bg-surface max-[640px]:fixed max-[640px]:inset-x-0 max-[640px]:bottom-0 max-[640px]:z-40 max-[640px]:h-auto max-[640px]:border-r-0 max-[640px]:border-t max-[640px]:border-b-0"
+          className="flex min-w-0 flex-col h-dvh border-r border-line-strong bg-surface max-[640px]:fixed max-[640px]:inset-x-0 max-[640px]:bottom-0 max-[640px]:z-40 max-[640px]:h-auto max-[640px]:flex-row max-[640px]:border-r-0 max-[640px]:border-t max-[640px]:border-b-0"
         >
           {/* Brand */}
           <div className="flex items-center gap-3 min-h-[57px] px-4 border-b border-line max-[900px]:justify-center max-[900px]:px-0 max-[640px]:hidden">
@@ -93,17 +93,14 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
                 ))}
               </div>
             ))}
-            <button
-              type="button"
-              aria-label="Sign out"
-              title="Sign out"
-              onClick={onDisconnect}
-              className={navigationItemClassName(false, 'hidden max-[900px]:flex max-[640px]:sticky max-[640px]:right-0 max-[640px]:z-10 max-[640px]:bg-surface')}
-            >
-              <Icon name="signout" size="nav" />
-              <span className="max-[900px]:hidden max-[640px]:inline max-[640px]:text-[10px]">Sign out</span>
-            </button>
           </nav>
+
+          {/* Compact session utility — separate from navigation destinations. */}
+          <div className="hidden shrink-0 items-center justify-center border-t border-line p-3 max-[900px]:flex max-[640px]:border-t-0 max-[640px]:border-l max-[640px]:p-2">
+            <Button onClick={onDisconnect} aria-label="Sign out" title="Sign out" className="size-9 max-sm:size-10">
+              <Icon name="signout" size="nav" />
+            </Button>
+          </div>
 
           {/* Session footer */}
           <footer className="grid gap-3 p-3 border-t border-line max-[900px]:hidden">

@@ -54,7 +54,8 @@ The connected credential determines the available navigation and API scope:
 
 - admin keys expose platform overview, recovery when advertised, and instance
   fleet management;
-- instance API keys expose connection/pairing, conversations, groups,
+- instance API keys expose the active Instance destination (including
+  connection/pairing), conversations, groups,
   campaigns, and events;
 - instance-scoped live commands require an in-memory instance token where the
   active session does not already provide that scope.

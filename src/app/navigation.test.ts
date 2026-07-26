@@ -3,9 +3,11 @@ import { navigationForKeyKind } from './navigation';
 
 describe('scope navigation', () => {
   it('makes connection and pairing reachable for an instance credential', () => {
-    const routes = navigationForKeyKind('api').flatMap((section) => section.items.map((item) => item.to));
+    const items = navigationForKeyKind('api').flatMap((section) => section.items);
+    const routes = items.map((item) => item.to);
     expect(routes).toContain('/connection');
     expect(routes).not.toContain('/instances');
+    expect(items.find((item) => item.to === '/connection')?.label).toBe('Instance');
   });
 
   it('keeps fleet management in admin scope', () => {

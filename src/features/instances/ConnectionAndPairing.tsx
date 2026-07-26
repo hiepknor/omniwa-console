@@ -107,7 +107,7 @@ export function ConnectionAndPairing({ controller }: { controller: InstancePairi
   });
 
   return (
-    <Panel title="Connection and pairing" description="Connected and paired are different server facts.">
+    <Panel title="Connection & pairing" description="Connected and paired are different server facts.">
       <div className="grid gap-3">
         {controller.status.isPending ? <StateNotice kind="loading" title="Reading status" detail="Reading instance status." /> : controller.status.error ? <FailureNotice error={controller.status.error} stale={controller.status.data !== undefined} onRetry={() => controller.status.refetch()} /> : null}
         {controller.lastAcknowledgement ? <Acknowledgement action={controller.lastAcknowledgement} /> : null}

@@ -11,7 +11,7 @@ export function PairingPage() {
   if (!token) {
     return (
       <div className="grid gap-6 p-6 max-sm:p-4">
-        <PageHeader eyebrow="Runtime" title="Connection & pairing" description="Connect and pair the active instance credential." />
+        <PageHeader eyebrow="Runtime" title="Instance" description="Inspect and manage the active instance credential." />
         <StateNotice kind="empty" title="Instance credential required" detail="Connection and pairing uses the active instance credential. No provider request was sent." />
       </div>
     );
@@ -29,8 +29,8 @@ export function PairingPage() {
     <div className="grid gap-6 p-6 max-sm:p-4">
       <PageHeader
         eyebrow="Runtime"
-        title="Connection & pairing"
-        description="Generate the active WhatsApp pairing QR without requiring admin fleet access."
+        title="Instance"
+        description="Inspect connection state and manage WhatsApp pairing for the active runtime."
       />
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <Panel title="Active instance" description="Live token-scoped status; server facts remain authoritative.">
