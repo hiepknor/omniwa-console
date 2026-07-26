@@ -26,8 +26,13 @@ for (const marker of ['data-variant', 'active:translate-x-px', 'focus-visible:ou
 }
 
 const closeButton = await read('src/ui/CloseButton.tsx');
-for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10']) {
+for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10', '<Icon name="close"']) {
   if (!closeButton.includes(marker)) failures.push(`src/ui/CloseButton.tsx: close-control contract is missing ${marker}`);
+}
+
+const icon = await read('src/ui/Icon.tsx');
+for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 'strokeWidth="1.75"', 'aria-hidden']) {
+  if (!icon.includes(marker)) failures.push(`src/ui/Icon.tsx: iconography contract is missing ${marker}`);
 }
 
 const input = await read('src/ui/Input.tsx');
@@ -51,8 +56,18 @@ for (const marker of ['<dl', '<dt', '<dd', 'max-sm:grid-cols-1', 'break-words'])
 }
 
 const filters = await read('src/ui/Filters.tsx');
-for (const marker of ['FilterToolbar', 'FilterChip', 'Remove ${label} filter', 'focus-visible:outline-2']) {
+for (const marker of ['FilterToolbar', 'FilterChip', 'Remove filter', 'sr-only', 'focus-visible:outline-2']) {
   if (!filters.includes(marker)) failures.push(`src/ui/Filters.tsx: filter contract is missing ${marker}`);
+}
+
+const progress = await read('src/ui/ProgressBar.tsx');
+for (const marker of ['role="progressbar"', 'aria-valuenow', 'aria-valuetext', 'In progress', 'status === \'failed\'']) {
+  if (!progress.includes(marker)) failures.push(`src/ui/ProgressBar.tsx: progress contract is missing ${marker}`);
+}
+
+const image = await read('src/ui/Image.tsx');
+for (const marker of ['alt: string', '<img', 'Loading image…', 'Image unavailable', '<figcaption']) {
+  if (!image.includes(marker)) failures.push(`src/ui/Image.tsx: image contract is missing ${marker}`);
 }
 
 const dateTime = await read('src/ui/DateTimeInput.tsx');
@@ -63,6 +78,16 @@ if (!dateTime.includes('type="datetime-local"')) {
 const feedbackContent = await read('src/components/feedback/FeedbackContent.tsx');
 if (!feedbackContent.includes('<CloseButton')) {
   failures.push('src/components/feedback/FeedbackContent.tsx: notification dismiss must use CloseButton');
+}
+
+const toastViewport = await read('src/components/feedback/ToastViewport.tsx');
+for (const marker of ['placement', 'onMouseEnter', 'onFocusCapture', 'visibilitychange', 'aria-label="Notifications"']) {
+  if (!toastViewport.includes(marker)) failures.push(`src/components/feedback/ToastViewport.tsx: feedback placement contract is missing ${marker}`);
+}
+
+const shell = await read('src/app/Shell.tsx');
+for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', '<NavigationItemContent']) {
+  if (!shell.includes(marker)) failures.push(`src/app/Shell.tsx: responsive shell contract is missing ${marker}`);
 }
 
 const table = await read('src/ui/Table.tsx');

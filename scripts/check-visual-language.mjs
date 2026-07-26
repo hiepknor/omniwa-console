@@ -69,13 +69,14 @@ const allowedHex = new Set([
   '#fff', '#111',
 ]);
 
-// Frozen exceptions from design/DESIGN.md: semantic screentones, the danger
-// hatch, a connection-state mark, and the deterministic QR preview fixture.
+// Frozen exceptions from design/DESIGN.md: semantic/progress screentones, the
+// danger hatch, a connection-state mark, and the deterministic QR fixture.
 const gradientAllowlist = new Set([
   'src/ui/Status.tsx',
   'src/ui/StateNotice.tsx',
   'src/components/feedback/FeedbackContent.tsx',
   'src/ui/Button.tsx',
+  'src/ui/ProgressBar.tsx',
   'src/app/ConnectPage.tsx',
   'src/app/PreviewInstances.tsx',
 ]);
@@ -148,6 +149,15 @@ for (const path of await sourceFiles('src')) {
   if (!path.endsWith('.test.tsx') && path !== 'src/ui/DescriptionList.tsx' && /<(?:dl|dt|dd)\b/.test(code)) {
     failures.push(`${path}: repeated definition data must use DescriptionList and DescriptionItem`);
   }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/Icon.tsx' && path !== 'src/ui/Logo.tsx' && /<svg\b/.test(code)) {
+    failures.push(`${path}: interface glyphs must use the canonical Icon primitive`);
+  }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/Image.tsx' && /<img\b/.test(code)) {
+    failures.push(`${path}: product images must use the canonical Image primitive`);
+  }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/ProgressBar.tsx' && (/<progress\b/.test(code) || /role=["']progressbar["']/.test(code))) {
+    failures.push(`${path}: progress indicators must use the canonical ProgressBar primitive`);
+  }
 }
 
 const contract = await read('design/DESIGN.md');
@@ -163,7 +173,7 @@ for (const marker of [
 }
 
 const gallery = await read('src/app/UiGallery.tsx');
-for (const marker of ['Locked design system', 'hard lift only', '<Button', '<ButtonLink', '<CloseButton', '<Textarea', '<Checkbox', '<Radio', '<Switch', '<DateTimeInput', '<Select', '<FilterToolbar', '<FilterChip', '<DescriptionList', '<Panel', '<StateNotice', '<CursorPagination', '<Drawer', '<Dialog', '<FeedbackContent']) {
+for (const marker of ['Locked design system', 'hard lift only', '<Logo', '<Icon', '<Button', '<ButtonLink', '<CloseButton', '<Textarea', '<Checkbox', '<Radio', '<Switch', '<DateTimeInput', '<Select', '<FilterToolbar', '<FilterChip', '<DescriptionList', '<Panel', '<StateNotice', '<CursorPagination', '<ProgressBar', '<Image', '<Drawer', '<Dialog', '<SurfaceNotice', '<ToastViewport', '<ShellAnatomy']) {
   if (!gallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: locked review surface is missing ${marker}`);
 }
 

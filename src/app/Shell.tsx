@@ -4,9 +4,8 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { ConsoleSession } from '@/lib/session';
-import { Button, Logo, Status } from '@/ui';
-import { cn } from '@/ui/cn';
-import { navigationForKeyKind, NavIconSvg, scopeLabelForKeyKind } from './navigation';
+import { Button, Logo, NavigationItemContent, navigationItemClassName, Status } from '@/ui';
+import { navigationForKeyKind, scopeLabelForKeyKind } from './navigation';
 
 function environmentLabel(env: string): string {
   if (env === 'production') return 'Production';
@@ -42,10 +41,10 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
 
         <aside
           aria-label="OmniWA primary navigation"
-          className="flex min-w-0 flex-col h-dvh border-r border-line-strong bg-surface max-[640px]:h-auto max-[640px]:border-r-0 max-[640px]:border-b"
+          className="flex min-w-0 flex-col h-dvh border-r border-line-strong bg-surface max-[640px]:fixed max-[640px]:inset-x-0 max-[640px]:bottom-0 max-[640px]:z-40 max-[640px]:h-auto max-[640px]:border-r-0 max-[640px]:border-t max-[640px]:border-b-0"
         >
           {/* Brand */}
-          <div className="flex items-center gap-3 min-h-[57px] px-4 border-b border-line max-[900px]:justify-center max-[900px]:px-0">
+          <div className="flex items-center gap-3 min-h-[57px] px-4 border-b border-line max-[900px]:justify-center max-[900px]:px-0 max-[640px]:hidden">
             <Logo />
             <span className="grid min-w-0 max-[900px]:hidden">
               <strong className="text-[13px] font-semibold text-fg">OmniWA Console</strong>
@@ -86,14 +85,10 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
                     title={item.label}
                     aria-label={item.label}
                     className={({ isActive }) =>
-                      cn(
-                        'flex items-center gap-2.5 min-h-[36px] px-2.5 text-[13px] border border-transparent max-[900px]:justify-center max-[900px]:px-0',
-                        isActive ? 'bg-fg text-bg' : 'text-fg-2 hover:bg-elevated hover:text-fg',
-                      )
+                      navigationItemClassName(isActive)
                     }
                   >
-                    <NavIconSvg name={item.icon} />
-                    <span className="max-[900px]:hidden">{item.label}</span>
+                    <NavigationItemContent icon={item.icon} label={item.label} />
                   </NavLink>
                 ))}
               </div>
@@ -112,7 +107,7 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
           </footer>
         </aside>
 
-        <main id="main" tabIndex={-1} className="min-w-0 h-dvh overflow-auto max-[640px]:h-auto">
+        <main id="main" tabIndex={-1} className="min-w-0 h-dvh overflow-auto max-[640px]:pb-[61px]">
           <Suspense fallback={<div role="status" className="p-6 text-sm text-fg-3">Loading panel…</div>}>
             <Outlet />
           </Suspense>

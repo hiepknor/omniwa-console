@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
 import { queryKeys } from '@/api/keys';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, DescriptionItem, DescriptionList, Dialog, Field, Input, Panel, StateNotice, Status, Switch } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Field, Image, Input, Panel, StateNotice, Status, Switch } from '@/ui';
 import { Drawer } from '@/ui';
 import {
   useAdvancedSettings,
@@ -175,9 +175,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
                     {qr.error ? (
                       <FailureNotice error={qr.error} onRetry={() => qr.refetch()} />
                     ) : qr.data?.qrcode ? (
-                      <div className="justify-self-start bg-white p-3 border border-line-strong">
-                        <img src={qr.data.qrcode} alt="QR code to pair this OmniWA instance" className="size-52" />
-                      </div>
+                      <Image src={qr.data.qrcode} alt="QR code to pair this OmniWA instance" aspect="square" fit="contain" className="w-52 justify-self-start" imageClassName="bg-surface p-3" />
                     ) : connected ? (
                       <StateNotice kind="loading" title="Waiting for QR" detail="Waiting for the rotating pairing QR." />
                     ) : (

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FeedbackContent } from '@/components/feedback/FeedbackContent';
+import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
+import { ToastViewport } from '@/components/feedback/ToastViewport';
 import {
   Badge,
   Button,
@@ -15,10 +16,16 @@ import {
   Field,
   FilterChip,
   FilterToolbar,
+  Icon,
+  Image,
   Input,
+  Logo,
   MetricGrid,
+  NavigationItemContent,
+  navigationItemClassName,
   PageHeader,
   Panel,
+  ProgressBar,
   Radio,
   Select,
   StateNotice,
@@ -57,6 +64,48 @@ const inkRamp = [
   ['fg-3', '#6b6b6b'],
   ['line', '#e2e2e2'],
 ];
+const navigationItems = [
+  ['overview', 'Overview'],
+  ['instances', 'Instances'],
+  ['chats', 'Conversations'],
+  ['groups', 'Groups'],
+  ['campaigns', 'Campaigns'],
+  ['events', 'Events'],
+] as const;
+
+function ShellAnatomy() {
+  return (
+    <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+      <div className="grid h-80 grid-cols-[224px_minmax(0,1fr)] overflow-hidden border border-line-strong bg-bg">
+        <aside className="flex min-w-0 flex-col border-r border-line-strong bg-surface">
+          <div className="flex min-h-[57px] items-center gap-3 border-b border-line px-4">
+            <Logo />
+            <span className="grid min-w-0"><strong className="text-[13px] font-semibold">OmniWA Console</strong><span className="truncate font-mono text-[10px] text-fg-3">https://api.example.test</span></span>
+          </div>
+          <div className="grid gap-2 border-b border-line p-4"><Status tone="ok">12 capabilities</Status><span className="font-mono text-[10px] text-fg-3">GO 1.8.0</span></div>
+          <nav aria-label="Full rail example" className="grid gap-0.5 p-3">
+            {navigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0)}><NavigationItemContent icon={icon} label={label} /></div>)}
+          </nav>
+        </aside>
+        <div className="min-w-0 p-4"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Content viewport</span><div className="mt-3 h-28 border border-line-strong bg-surface" /></div>
+      </div>
+      <div className="grid gap-4">
+        <div className="grid h-44 grid-cols-[64px_minmax(0,1fr)] overflow-hidden border border-line-strong">
+          <nav aria-label="Compact rail example" className="grid content-start gap-0.5 border-r border-line-strong bg-surface p-3">
+            {navigationItems.slice(0, 3).map(([icon, label], index) => <div key={icon} title={label} className={navigationItemClassName(index === 0, 'justify-center px-0')}><Icon name={icon} size="nav" /><span className="sr-only">{label}</span></div>)}
+          </nav>
+          <div className="bg-bg p-3 text-[11px] uppercase tracking-wider text-fg-3">64px rail</div>
+        </div>
+        <div className="grid overflow-hidden border border-line-strong bg-bg">
+          <div className="h-20 p-3 text-[11px] uppercase tracking-wider text-fg-3">Mobile content reserves bottom-nav space</div>
+          <nav aria-label="Mobile navigation example" className="flex overflow-x-auto border-t border-line-strong bg-surface p-2">
+            {navigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0, 'min-h-11 min-w-[72px] flex-col justify-center gap-0.5 px-2')}><Icon name={icon} size="nav" /><span className="text-[10px]">{label}</span></div>)}
+          </nav>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function UiGallery() {
   const [tab, setTab] = useState('stream');
@@ -114,6 +163,19 @@ export function UiGallery() {
           </div>
         </Section>
 
+        <Section title="Brand + iconography">
+          <div className="flex flex-wrap items-center gap-5">
+            <div className="flex items-center gap-3 border border-line-strong p-3"><Logo className="size-8" /><span className="text-sm font-semibold">OmniWA Console</span></div>
+            {navigationItems.map(([name, label]) => <div key={name} className="grid min-w-20 justify-items-center gap-1 border border-line p-3"><Icon name={name} size="nav" /><span className="text-[11px] text-fg-3">{label}</span></div>)}
+            <div className="grid min-w-20 justify-items-center gap-1 border border-line p-3"><Icon name="close" /><span className="text-[11px] text-fg-3">Close</span></div>
+            <div className="grid min-w-20 justify-items-center gap-1 border border-line p-3"><Icon name="chevron-down" /><span className="text-[11px] text-fg-3">Disclosure</span></div>
+          </div>
+        </Section>
+
+        <Section title="Shell + navigation">
+          <ShellAnatomy />
+        </Section>
+
         <Section title="Buttons">
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="primary">Primary</Button>
@@ -136,6 +198,23 @@ export function UiGallery() {
                 {t}
               </Status>
             ))}
+          </div>
+        </Section>
+
+        <Section title="Progress">
+          <div className="grid gap-4 md:grid-cols-2">
+            <ProgressBar label="Projection replay" value={38} />
+            <ProgressBar label="Unknown-duration synchronization" />
+            <ProgressBar label="Completed import" value={100} status="complete" />
+            <ProgressBar label="Failed delivery batch" value={64} status="failed" />
+          </div>
+        </Section>
+
+        <Section title="Images">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Image src="/ui-image-sample.svg" alt="Monochrome OmniWA operations sample" caption="Ready · video ratio · cover" />
+            <Image src="/ui-image-sample.svg" alt="Loading operations sample" state="loading" fit="contain" caption="Loading · contained media" />
+            <Image alt="Unavailable operations sample" state="error" caption="Error / missing source fallback" />
           </div>
         </Section>
 
@@ -207,11 +286,10 @@ export function UiGallery() {
           </div>
           <div className="min-h-28 border border-dashed border-line p-3">
             {notificationVisible ? (
-              <div className="ml-auto max-w-md border border-line-strong border-l-2 bg-elevated">
-                <FeedbackContent kind="error" title="Command failed" detail="No delivery outcome was inferred." requestId="req_01J2F2X9" action={{ label: 'Retry command', run: () => undefined }} onDismiss={() => setNotificationVisible(false)} />
-              </div>
+              <ToastViewport placement="inline" toasts={[{ id: 'gallery-error', createdAt: 0, kind: 'error', title: 'Command failed', detail: 'No delivery outcome was inferred.', requestId: 'req_01J2F2X9', action: { label: 'Retry command', run: () => undefined } }]} onDismiss={() => setNotificationVisible(false)} />
             ) : <Button onClick={() => setNotificationVisible(true)}>Restore notification</Button>}
           </div>
+          <SurfaceNotice kind="error" label="Connection" title="OmniWA API is unreachable" detail="Workspace banner placement uses this production notice primitive." action={{ label: 'Retry active reads', run: () => undefined }} announcement="polite" />
         </Section>
 
         <Section title="Selectors">

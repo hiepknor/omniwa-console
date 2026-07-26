@@ -1,6 +1,10 @@
 export { cn } from './cn';
 export { Button, ButtonLink, type ButtonVariant } from './Button';
 export { CloseButton } from './CloseButton';
+export { Icon, type IconName, type IconSize, type NavigationIconName } from './Icon';
+export { Image, type ImageAspect, type ImageFit, type ImageState } from './Image';
+export { ProgressBar, type ProgressStatus } from './ProgressBar';
+export { NavigationItemContent, navigationItemClassName } from './NavigationItem';
 export { Status, type Tone } from './Status';
 export { Input, Field } from './Input';
 export { Textarea } from './Textarea';

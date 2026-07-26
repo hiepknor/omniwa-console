@@ -26,7 +26,8 @@ describe('composite primitives', () => {
     );
 
     expect(html).toContain('<form');
-    expect(html).toContain('Remove Status filter');
+    expect(html).toContain('Remove filter');
+    expect(html).not.toContain('aria-label=');
     expect(html).toContain('connected');
     expect(html).toContain('focus-visible:outline-2');
   });

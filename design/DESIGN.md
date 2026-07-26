@@ -107,8 +107,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   2–3px zero-blur offset shadow. Open selectors may use a 4px zero-blur offset
   shadow. Panels, drawers, dialogs, tables, and notices remain shadowless.
 - **Patterns:** gradients are not decorative backgrounds. They are restricted to
-  screentone status marks, the danger button at rest, and deterministic QR/sample
-  fixtures. Danger hover clears the hatch and becomes solid ink.
+  screentone status marks, progress indeterminate/failure tracks, the danger
+  button at rest, and deterministic QR/sample fixtures. Danger hover clears the
+  hatch and becomes solid ink.
 - **Motion:** interaction transitions are 150ms, limited to color, border,
   shadow, and the property that actually moves (`translate`/`rotate`). All motion
   has a `motion-reduce` fallback.
@@ -132,6 +133,12 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   active return, keyboard focus, and disabled behavior. It never rounds or
   stretches to match its container. Dialogs, drawers, and notifications all use
   this primitive with an explicit non-visual accessible label.
+- **Logo / Icon** — brand identity remains in `Logo`; every interface glyph is
+  drawn by `Icon`. Icons use the canonical 12/14/18px sizes, 1.75px square-cap
+  monochrome stroke, no emoji, text glyph, filled icon library, or feature-local
+  SVG. Icons are decorative and never replace a visible label; icon-only actions
+  require an explicit accessible name. Navigation uses `NavigationItemContent`
+  so full rail, compact rail, and mobile bottom nav cannot drift independently.
 - **Status** — 8px square mark + label; tones map to §2. `<Status tone>`.
 - **Input / Field** — recessed bg, 1px border, square, 13px; focus → strong border.
   Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted. Field descriptions and errors are linked with `aria-describedby`; errors set `aria-invalid`, and required state remains explicit.
@@ -181,6 +188,15 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   for framed sections, honest loading/empty/stale/error state, and cursor-based
   list progression. API errors include normalized detail and `requestId` when
   present; pagination never suggests an unavailable page.
+- **ProgressBar** — an 8px square framed track with an ink fill and explicit
+  text label. Determinate progress exposes its bounded numeric value;
+  indeterminate progress uses the allowlisted diagonal operational screentone
+  and says “In progress”; failure freezes at the last known value and uses the
+  failure hatch. Never turn command acknowledgement into fake completion.
+- **Image** — the only product-image frame. It owns square framing, aspect ratio
+  (`square`, `video`, `wide`, or intrinsic), `cover`/`contain`, alt text, caption,
+  deterministic loading, and unavailable/error fallback. QR pairing uses
+  `contain` and a paper quiet zone. Features do not render raw `<img>` elements.
 
 ## 6. Shell & navigation
 
@@ -198,8 +214,13 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Page header:** an optional 11px uppercase eyebrow, the page title, connection
   state on the right, at most one primary action. ≤640px stacks to one column.
 - **Responsive:** ≥901px full rail; 641–900px icon-only rail; ≤640px a fixed
-  bottom nav bar. Dense form/action controls are at least 40px on mobile; primary
+  bottom nav bar with icon + visible 10px label while the main viewport reserves
+  its height. Dense form/action controls are at least 40px on mobile; primary
   navigation targets remain at least 44px.
+- **Feedback placement:** `SurfaceNotice` is the framed inline/workspace banner;
+  `ToastViewport` is fixed bottom-right and becomes full inset-width on mobile.
+  Its inline placement exists only for deterministic `/__ui` review. Toast
+  timers pause on hover, focus, or hidden documents; errors persist.
 
 ## 7. Frozen interaction states
 
@@ -219,6 +240,10 @@ or `border-*` utilities and rely on generated CSS order.
 | Table row | rest, hover, keyboard focus, selected |
 | StateNotice | info/stale, loading, empty/not-ready, error + requestId, action |
 | CursorPagination | first page, next cursor, final page, responsive stacking |
+| ProgressBar | 0–99%, indeterminate, complete, failed at last known value |
+| Image | loading, ready, contain/cover, long caption, missing/error fallback |
+| Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav |
+| Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close |
 
 Hover never hides a label or icon. Inverted surfaces always use paper-colored

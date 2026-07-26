@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title description">
+  <title id="title">OmniWA operations sample</title>
+  <desc id="description">Monochrome framed sample with operational metrics and event lines.</desc>
+  <rect width="960" height="540" fill="#f6f6f6"/>
+  <path d="M0 72h960M0 468h960M72 0v540M888 0v540" stroke="#e2e2e2" stroke-width="2"/>
+  <rect x="96" y="96" width="768" height="348" fill="#fff" stroke="#111" stroke-width="4"/>
+  <path d="M96 160h768M352 160v284M608 160v284" stroke="#e2e2e2" stroke-width="3"/>
+  <g fill="#111">
+    <rect x="128" y="124" width="144" height="12"/>
+    <rect x="384" y="124" width="112" height="12"/>
+    <rect x="640" y="124" width="128" height="12"/>
+    <rect x="128" y="200" width="104" height="48"/>
+    <rect x="384" y="200" width="152" height="48"/>
+    <rect x="640" y="200" width="80" height="48"/>
+  </g>
+  <g stroke="#111" stroke-width="4" fill="none">
+    <path d="M128 316h32l24-40 32 96 32-72 24 16h48"/>
+    <path d="M384 348h40v-40h40v-56h40v32h72"/>
+    <path d="M640 364l32-32 32 16 40-72 40 48 48-88"/>
+  </g>
+</svg>
