@@ -1,5 +1,6 @@
 export { cn } from './cn';
 export { Button, ButtonLink, type ButtonVariant } from './Button';
+export { CloseButton } from './CloseButton';
 export { Status, type Tone } from './Status';
 export { Input, Field } from './Input';
 export { Select } from './Select';

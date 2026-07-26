@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   Badge,
   Button,
+  CloseButton,
   Dialog,
   Drawer,
   Field,
@@ -101,6 +102,7 @@ export function UiGallery() {
             <Button variant="danger">Danger</Button>
             <Button disabled>Disabled</Button>
             <Button aria-busy>Working…</Button>
+            <CloseButton label="Close example" onClick={() => undefined} />
             <Button onClick={() => setDrawer(true)}>Open drawer</Button>
             <Button onClick={() => setDialog(true)}>Open dialog</Button>
           </div>

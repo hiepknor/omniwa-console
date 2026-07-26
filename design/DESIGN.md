@@ -126,6 +126,12 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   diagonal hazard hatch at rest and a solid ink block on hover. Enabled buttons
   lift 1px with a hard offset shadow; active returns to the baseline. Busy is
   visibly marked and natively disabled. One primary action per view.
+- **CloseButton** — the only icon-only X/dismiss control. It is a fully framed
+  square: 36×36px desktop and 40×40px mobile, with a 14px stroked X. Rest is
+  the ghost Button treatment and it inherits the same hover lift, hard shadow,
+  active return, keyboard focus, and disabled behavior. It never rounds or
+  stretches to match its container. Dialogs, drawers, and notifications all use
+  this primitive with an explicit non-visual accessible label.
 - **Status** — 8px square mark + label; tones map to §2. `<Status tone>`.
 - **Input / Field** — recessed bg, 1px border, square, 13px; focus → strong border.
   Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted.

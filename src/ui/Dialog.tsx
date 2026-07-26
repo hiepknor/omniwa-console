@@ -1,6 +1,6 @@
 import { useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { OverlayCloseButton } from './OverlayCloseButton';
+import { CloseButton } from './CloseButton';
 import { useModalFocus } from './useModalFocus';
 
 /** Framed command surface centered on desktop and docked on narrow viewports. */
@@ -43,11 +43,13 @@ export function Dialog({
           'max-sm:max-h-[90dvh] max-sm:w-full max-sm:border-x-0 max-sm:border-b-0',
         ].join(' ')}
       >
-        <header className="grid min-h-11 grid-cols-[minmax(0,1fr)_2.25rem] items-stretch border-b border-line-strong bg-surface max-sm:grid-cols-[minmax(0,1fr)_2.5rem]">
+        <header className="grid min-h-11 grid-cols-[minmax(0,1fr)_2.75rem] items-stretch border-b border-line-strong bg-surface max-sm:grid-cols-[minmax(0,1fr)_3rem]">
           <div className="flex min-w-0 items-center px-4 py-3">
             <h2 id={titleId} className="truncate text-sm font-semibold leading-tight text-fg">{title}</h2>
           </div>
-          <OverlayCloseButton label="Close dialog" onClick={onClose} disabled={closeDisabled} />
+          <div className="grid place-items-center">
+            <CloseButton label="Close dialog" onClick={onClose} disabled={closeDisabled} />
+          </div>
         </header>
         <div className="min-h-0 flex-1 overflow-y-auto bg-surface p-4">{children}</div>
         {footer ? (
