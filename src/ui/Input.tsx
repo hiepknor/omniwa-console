@@ -27,19 +27,21 @@ export function Field({
 }: {
   label: string;
   error?: ReactNode;
-  children: (id: string) => ReactNode;
+  children: (id: string, labelId: string) => ReactNode;
   className?: string;
 }) {
   const id = useId();
+  const labelId = `${id}-label`;
   return (
     <div className={cn('grid gap-1.5', className)}>
       <label
+        id={labelId}
         htmlFor={id}
         className="text-[11px] font-medium uppercase tracking-wider text-fg-3"
       >
         {label}
       </label>
-      {children(id)}
+      {children(id, labelId)}
       {error ? <p className="text-xs text-danger">{error}</p> : null}
     </div>
   );
