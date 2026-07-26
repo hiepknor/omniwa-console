@@ -38,11 +38,11 @@ describe('ButtonLink', () => {
   it('uses the same action treatment without changing link semantics', () => {
     const html = renderToStaticMarkup(
       <StaticRouter location="/campaigns">
-        <ButtonLink to="/messages/new" variant="primary">New campaign</ButtonLink>
+        <ButtonLink to="/campaigns/new" variant="primary">New campaign</ButtonLink>
       </StaticRouter>,
     );
     expect(html).toContain('<a');
-    expect(html).toContain('href="/messages/new"');
+    expect(html).toContain('href="/campaigns/new"');
     expect(html).toContain('data-variant="primary"');
     expect(html).not.toContain('<button');
   });

@@ -100,7 +100,7 @@ Therefore the Console:
 
 ## Integrated UI
 
-The `/messages` route is the campaign list and monitoring surface.
-`/messages/new` is a consent-aware creation flow. A campaign drawer owns
+The `/campaigns` route is the campaign list and monitoring surface.
+`/campaigns/new` is a consent-aware creation flow. A campaign drawer owns
 lifecycle commands, recipient pagination, and audit history. The route and all
 filters/cursors remain deep-linkable.

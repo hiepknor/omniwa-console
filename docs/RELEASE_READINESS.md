@@ -36,7 +36,8 @@ representative projection and mutation staging acceptance remains required.**
 - Chrome Lighthouse on `/connect`: Accessibility 100 and Best Practices 100.
 - The locally built `dist/` ran under the production nginx base as UID 101.
   `/healthz` and `/connect`, `/overview`, `/instances`, `/recovery`, `/chats`,
-  `/groups`, `/messages`, and `/events` all returned HTTP 200 with SPA fallback.
+  `/groups`, the then-current Campaigns route, and `/events` all returned HTTP
+  200 with SPA fallback.
   CSP, frame denial, no-sniff, referrer, permissions, and no-store headers were
   present.
 - The previous `main` image workflow for `460cdf6` completed successfully with
@@ -72,8 +73,9 @@ therefore still required on a non-production runtime with representative data:
    against production data.
 4. Attach, rotate, forget, and destroy a disposable instance credential while
    observing cache cleanup and query refresh behavior.
-5. Promote the exact CI-produced digest, then repeat `/healthz`, direct-route,
-   security-header, revision, and rollback checks through the real reverse proxy.
+5. Promote the exact CI-produced digest, then repeat `/healthz`, `/campaigns`,
+   direct-route, security-header, revision, and rollback checks through the real
+   reverse proxy.
 
 Production approval remains separate from the credential-migration approvals in
 [`CREDENTIAL_ROLLOUT_EVIDENCE.md`](CREDENTIAL_ROLLOUT_EVIDENCE.md).

@@ -171,14 +171,19 @@ into caches. See `docs/REALTIME.md`.
 /instances/:instanceId?
 /groups/:instanceId?
 /chats/:instanceId?/:chatId?
-/messages
-/messages/new
+/campaigns
+/campaigns/new
 /events
 /queue
 /webhooks/:webhookId?
 /settings
 /settings/api-keys
 ```
+
+Browser routes resolve on the Console origin; REST operations resolve on the
+operator-selected API origin. The supported deployment topology keeps those
+origins distinct, so the browser route `/campaigns` and API operation
+`GET /campaigns` do not compete for the same request namespace.
 
 `docs/PANELS.md` is authoritative for whether a route is wired, pending, or
 unsupported. Unsupported routes remain explicit unavailable surfaces until a

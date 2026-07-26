@@ -26,7 +26,7 @@ export function CreateCampaign() {
     try {
       const result = await create.mutateAsync({ name: name.trim(), text, recipients });
       setRows('');
-      navigate(`/messages/${encodeURIComponent(result.campaign.id)}?created=1`, { replace: true });
+      navigate(`/campaigns/${encodeURIComponent(result.campaign.id)}?created=1`, { replace: true });
     } catch { /* rendered below */ }
   };
   const failure = create.error instanceof ApiFailure ? create.error : undefined;
@@ -44,7 +44,7 @@ export function CreateCampaign() {
     return (
       <div className="grid gap-6 p-6 max-sm:p-4 max-w-3xl">
         <PageHeader eyebrow="Messaging / Campaigns" title="Create campaign draft" description="Submit consent evidence once; execution remains in OmniWA GO." />
-        <StateNotice kind="empty" title={!instanceScope ? 'Instance credential required' : capabilities.isPending ? 'Discovering capabilities' : 'Unsupported'} detail={detail} action={<Link to="/messages" className="underline">Return to campaigns</Link>} />
+        <StateNotice kind="empty" title={!instanceScope ? 'Instance credential required' : capabilities.isPending ? 'Discovering capabilities' : 'Unsupported'} detail={detail} action={<Link to="/campaigns" className="underline">Return to campaigns</Link>} />
       </div>
     );
   }
@@ -55,7 +55,7 @@ export function CreateCampaign() {
         eyebrow="Messaging / Campaigns"
         title="Create campaign draft"
         description="Submit consent evidence once; execution, pacing, leases, and recipient retry remain in OmniWA GO."
-        actions={<ButtonLink to="/messages">Cancel</ButtonLink>}
+        actions={<ButtonLink to="/campaigns">Cancel</ButtonLink>}
       />
 
       <StateNotice kind="info" title="Consent evidence" detail="Raw evidence references are sent to the backend and are not retained by the Console after successful submission." />
@@ -69,7 +69,7 @@ export function CreateCampaign() {
           </Field>
           {failure ? <ApiFailureNotice error={failure} title="Command failed" /> : null}
           <div className="flex justify-end gap-2">
-            <Button disabled={create.isPending} onClick={() => navigate('/messages')}>Cancel</Button>
+            <Button disabled={create.isPending} onClick={() => navigate('/campaigns')}>Cancel</Button>
             <Button variant="primary" type="submit" disabled={create.isPending || !name.trim() || !text.trim() || !rows.trim()}>{create.isPending ? 'Creating draft…' : 'Create draft'}</Button>
           </div>
         </form>
