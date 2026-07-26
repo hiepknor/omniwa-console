@@ -6,7 +6,7 @@ import { useConnectFlow } from './connect-flow';
 
 type ConnectNotice = 'session-invalid' | undefined;
 
-function Notice({ title, detail, requestId }: { title: string; detail?: string; requestId?: string }) {
+function Notice({ title, detail, diagnostic, requestId }: { title: string; detail?: string; diagnostic?: string; requestId?: string }) {
   return (
     <div className="border border-line-strong bg-elevated p-3 text-sm">
       <div className="flex items-center gap-2">
@@ -14,6 +14,7 @@ function Notice({ title, detail, requestId }: { title: string; detail?: string; 
         <strong className="font-semibold text-fg">{title}</strong>
       </div>
       {detail ? <p className="mt-1 text-fg-2">{detail}</p> : null}
+      {diagnostic ? <p className="mt-1 font-mono text-xs text-fg-3">{diagnostic}</p> : null}
       {requestId ? <p className="mt-1 font-mono text-xs text-fg-3">requestId: {requestId}</p> : null}
     </div>
   );
@@ -85,7 +86,7 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
                         step.active ? 'bg-fg text-bg' : 'text-fg-3',
                       )}
                     >
-                      <span className="font-mono text-[11px] opacity-70">0{i + 1}</span>
+                      <span className="font-mono text-[11px]">0{i + 1}</span>
                       <strong className="text-[11px] font-medium">{step.label}</strong>
                     </li>
                   ))}
@@ -152,6 +153,7 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
                 <Notice
                   title={flow.connectionError.message}
                   detail={flow.connectionError.detail}
+                  diagnostic={flow.connectionError.diagnostic}
                   requestId={flow.connectionError.requestId}
                 />
               ) : null}

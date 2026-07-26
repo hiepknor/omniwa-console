@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useInstanceCredential, useSetInstanceCredential } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
-import { queryKeys } from '@/api/keys';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { Button, DescriptionItem, DescriptionList, Dialog, Field, Image, Input, Panel, StateNotice, Status, Switch } from '@/ui';
 import { Drawer } from '@/ui';
@@ -20,6 +19,7 @@ import {
   useUpdateAdvancedSettings,
 } from './hooks';
 import { FailureNotice } from './ui';
+import { clearInstanceCredentialCache } from './credential-cache';
 
 type ConfirmAction = 'disconnect' | 'logout' | 'destroy';
 
@@ -114,9 +114,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
   };
   const runPairing = () => (connected ? reconnect : connect).mutate();
   const updateCredential = (nextToken: string | undefined) => {
-    for (const queryKey of [queryKeys.instanceStatus(instance.id), queryKeys.instanceQr(instance.id), queryKeys.instanceAdvancedSettings(instance.id)]) {
-      queryClient.removeQueries({ queryKey, exact: true });
-    }
+    clearInstanceCredentialCache(queryClient, instance.id);
     setCredential(instance.id, nextToken);
   };
 

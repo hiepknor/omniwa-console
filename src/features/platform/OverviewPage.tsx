@@ -2,28 +2,17 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { ApiFailure } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
-import { Button, StateNotice } from '@/ui';
-import { failureDetail, failureRequestId } from './state';
 import { usePlatformHealth, usePlatformOverview, usePlatformProjectionHealth } from './hooks';
 import { overviewWindowFromSearch, overviewWindowOptions } from './route-state';
 import { OverviewView } from './OverviewView';
 
 function QueryNotice({ label, query, state }: { label: string; query: { error: unknown; refetch: () => unknown }; state: ReturnType<typeof useResilientReadState> }) {
   if (!state.isError) return null;
-  const rateLimited = state.error instanceof ApiFailure && state.error.category === 'rate_limited';
-  return (
-    <StateNotice
-      kind="error"
-      title={`${label} read failed`}
-      detail={`${failureDetail(state.error)}${rateLimited ? ' Automatic retries are disabled.' : ''}`}
-      requestId={failureRequestId(state.error)}
-      action={rateLimited ? undefined : <Button onClick={() => query.refetch()}>Retry</Button>}
-    />
-  );
+  return <ApiFailureNotice error={state.error} title={`${label} read failed`} onRetry={() => query.refetch()} />;
 }
 
 export function OverviewPage() {

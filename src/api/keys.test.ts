@@ -17,7 +17,7 @@ describe('query key ownership', () => {
     expect(queryKeys.instanceMessages('instance-1', 'chat-1')).toEqual([
       'instances',
       'instance-1',
-      'chats',
+      'chat',
       'chat-1',
       'messages',
     ]);

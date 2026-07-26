@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { ApiFailure } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { ToastViewport } from '@/components/feedback/ToastViewport';
 import {
@@ -50,6 +52,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+
+const galleryRateLimit = new ApiFailure(
+  { error: 'The read budget is cooling down.', code: 'rate_limited', retryAfter: 3_600 },
+  429,
+  new Headers({ 'X-Request-ID': 'req_01RATE_LIMIT' }),
+);
 
 const statusExamples: { tone: Tone; label: string; use: string }[] = [
   { tone: 'ok', label: 'Connected', use: 'healthy / delivered' },
@@ -299,6 +307,7 @@ export function UiGallery() {
             <StateNotice kind="empty" title="No instances" detail="The loaded page contains no matching records." />
             <StateNotice kind="error" title="Projection unavailable" detail="The request failed without changing server state." requestId="req_01J2F2X9" action={<Button>Retry</Button>} />
             <StateNotice kind="info" title="Projection is stale" detail="Showing the last successful response while refreshing." />
+            <ApiFailureNotice error={galleryRateLimit} title="Read rate limited" onRetry={() => undefined} />
           </div>
           <div className="min-h-28 border border-dashed border-line p-3">
             {notificationVisible ? (

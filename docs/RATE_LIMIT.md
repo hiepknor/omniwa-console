@@ -55,6 +55,10 @@ Outbound responses use the same shape with `outbound_rate_limited`.
 7. Do not turn known 429 responses into generic transport or internal errors.
 8. Do not poll WhatsApp-live endpoints in response to rate limiting.
 
+`ApiFailureNotice` is the single feature-facing renderer for these failures.
+It owns countdown cleanup, withholds retry until cooldown expiry, and schedules
+the one manual retry with 250–1000ms jitter while disabling duplicate clicks.
+
 TanStack Query's global retry policy permits one retry only for retryable
 transient 5xx failures. `rate_limited` and `projection_not_ready` are explicitly
 excluded.
@@ -62,6 +66,7 @@ excluded.
 ## Verification
 
 Regression tests cover header precedence, body fallback, error categorization,
-countdown termination, jitter bounds, and duplicate scheduling. A feature that
+countdown presentation, jitter bounds, retry eligibility, and duplicate
+scheduling. A feature that
 adds a new mutation must confirm that its query/mutation configuration does not
 enable automatic retry.

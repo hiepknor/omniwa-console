@@ -2,11 +2,11 @@ import { useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { ApiFailure } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { humanizeToken } from '@/lib/format';
 import { omitSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, PageHeader, StateNotice } from '@/ui';
+import { PageHeader, StateNotice } from '@/ui';
 import { CampaignInspector } from './CampaignInspector';
 import { CampaignsView } from './CampaignsView';
 import { useCampaigns } from './hooks';
@@ -22,8 +22,7 @@ function Blocked({ detail, title }: { detail: string; title: string }) {
 }
 
 function Fail({ error, stale, onRetry }: { error: unknown; stale?: boolean; onRetry: () => void }) {
-  const f = error instanceof ApiFailure ? error : undefined;
-  return <StateNotice kind="error" title={stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={<Button onClick={onRetry}>Retry</Button>} />;
+  return <ApiFailureNotice error={error} title={stale ? 'Showing last known data' : 'Read failed'} onRetry={onRetry} />;
 }
 
 export function CampaignsPage() {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ApiFailure, unwrap, unwrapCommand, unwrapProjection } from './envelopes';
+import { ApiFailure, apiFailureDetail, unwrap, unwrapCommand, unwrapProjection } from './envelopes';
 
 function response(status: number): Response {
   return new Response(null, { status });
@@ -81,13 +81,25 @@ describe('ApiFailure', () => {
     ).retryable).toBe(false);
   });
 
-  it('never carries a request id', () => {
+  it('prefers the exposed request-id header and falls back to the error body', () => {
+    expect(new ApiFailure(
+      { error: 'x', requestId: 'body-id' },
+      400,
+      new Headers({ 'X-Request-ID': 'header-id' }),
+    ).requestId).toBe('header-id');
+    expect(new ApiFailure({ error: 'x', requestId: 'body-id' }, 400).requestId).toBe('body-id');
     expect(new ApiFailure({ error: 'x' }, 400).requestId).toBeUndefined();
   });
 
   it('defaults to session scope and preserves an explicit instance scope', () => {
     expect(new ApiFailure({ error: 'x' }, 401).credentialScope).toBe('session');
     expect(new ApiFailure({ error: 'x' }, 401, undefined, 'instance').credentialScope).toBe('instance');
+  });
+
+  it('builds product-safe detail with a code or category', () => {
+    expect(apiFailureDetail(new ApiFailure({ error: 'Wait', code: 'projection_not_ready' }, 503))).toBe('projection_not_ready · Wait');
+    expect(apiFailureDetail(new ApiFailure({ error: 'Denied' }, 403))).toBe('authorization · Denied');
+    expect(apiFailureDetail(new Error('offline'))).toBe('offline');
   });
 });
 

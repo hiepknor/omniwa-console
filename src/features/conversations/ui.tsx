@@ -1,21 +1,14 @@
 import type { ProjectionMeta } from '@/api/envelopes';
 import { ApiFailure } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { relativeTime } from '@/lib/format';
-import { Button, StateNotice, Status, type Tone } from '@/ui';
+import { Status, type Tone } from '@/ui';
 
 export function FailureNotice({ error, stale, command, onRetry }: { error: unknown; stale?: boolean; command?: boolean; onRetry?: () => void }) {
   const failure = error instanceof ApiFailure ? error : undefined;
   const notReady = !command && failure?.code === 'projection_not_ready';
   const title = command ? 'Command failed' : notReady ? 'Projection not ready' : stale ? 'Showing last known data' : 'Read failed';
-  return (
-    <StateNotice
-      kind={notReady ? 'empty' : 'error'}
-      title={title}
-      detail={failure?.message ?? 'An unexpected error occurred.'}
-      requestId={failure?.requestId}
-      action={onRetry && !notReady ? <Button onClick={onRetry}>Retry</Button> : undefined}
-    />
-  );
+  return <ApiFailureNotice error={error} kind={notReady ? 'empty' : 'error'} title={title} onRetry={notReady ? undefined : onRetry} />;
 }
 
 export function ProjectionStatus({ meta }: { meta?: ProjectionMeta }) {

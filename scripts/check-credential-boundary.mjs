@@ -23,6 +23,16 @@ const instanceDrawer = await read('src/features/instances/InstanceWorkspace.tsx'
 if (!instanceDrawer.includes('useSetInstanceCredential') || !instanceDrawer.includes('Use for this session')) {
   failures.push('existing instance tokens must be attachable to the in-memory vault after reload');
 }
+
+const fleetPage = await read('src/features/instances/InstancesPage.tsx');
+for (const marker of ['fleetReadMode', "readMode === 'metadata'", "readMode === 'compatibility'", 'Compatibility fleet read']) {
+  if (!fleetPage.includes(marker)) failures.push(`fleet compatibility boundary is missing ${marker}`);
+}
+
+const credentialCache = await read('src/features/instances/credential-cache.ts');
+for (const marker of ['instance:', 'instanceStatus', 'instanceQr', 'instanceAdvancedSettings', 'removeQueries']) {
+  if (!credentialCache.includes(marker)) failures.push(`replaceable instance-token cache cleanup is missing ${marker}`);
+}
 if (/localStorage|sessionStorage/.test(provider)) {
   failures.push('the instance credential vault must not use browser storage');
 }

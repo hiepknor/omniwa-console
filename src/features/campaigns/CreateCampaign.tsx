@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { Button, ButtonLink, Field, Input, PageHeader, Panel, StateNotice, Textarea } from '@/ui';
 import { useCreateCampaign } from './hooks';
 import { parseConsentRows } from './consent';
@@ -66,7 +67,7 @@ export function CreateCampaign() {
           <Field label="Consent-backed recipients" required description={validation ? undefined : 'One recipient per line: JID | opt-in source | evidence reference | ISO opt-in time.'} error={validation}>
             {(id) => <Textarea id={id} rows={8} required value={rows} placeholder="84901234567@s.whatsapp.net | checkout | consent-record-id | 2026-07-22T08:00:00Z" onChange={(e) => setRows(e.target.value)} />}
           </Field>
-          {failure ? <StateNotice kind="error" title="Command failed" detail={failure.message} requestId={failure.requestId} /> : null}
+          {failure ? <ApiFailureNotice error={failure} title="Command failed" /> : null}
           <div className="flex justify-end gap-2">
             <Button disabled={create.isPending} onClick={() => navigate('/messages')}>Cancel</Button>
             <Button variant="primary" type="submit" disabled={create.isPending || !name.trim() || !text.trim() || !rows.trim()}>{create.isPending ? 'Creating draft…' : 'Create draft'}</Button>
