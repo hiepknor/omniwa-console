@@ -76,7 +76,7 @@ export function Composer({ chatId, chatName, enabled }: { chatId: string; chatNa
               </Field>
               <Field label="Media type">
                 {(id) => (
-                  <Select id={id} value={mediaType} onChange={(e) => setMediaType(e.target.value as MediaType)}>
+                  <Select id={id} value={mediaType} onValueChange={(value) => setMediaType(value as MediaType)}>
                     <option value="image">Image</option>
                     <option value="video">Video</option>
                     <option value="audio">Audio</option>

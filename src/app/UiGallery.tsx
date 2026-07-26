@@ -116,16 +116,46 @@ export function UiGallery() {
         </Section>
 
         <Section title="Inputs">
-          <div className="grid sm:grid-cols-3 gap-4 max-w-2xl">
+          <div className="grid sm:grid-cols-2 gap-4 max-w-xl">
             <Field label="API origin">{(id) => <Input id={id} placeholder="https://…" />}</Field>
             <Field label="Invalid" error="Required">
               {(id) => <Input id={id} aria-invalid placeholder="bad" />}
             </Field>
+          </div>
+        </Section>
+
+        <Section title="Selectors">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl">
             <Field label="Scope">
               {(id) => (
-                <Select id={id}>
-                  <option>Admin</option>
-                  <option>Instance</option>
+                <Select id={id} defaultValue="instance">
+                  <option value="admin">Admin</option>
+                  <option value="instance">Instance</option>
+                </Select>
+              )}
+            </Field>
+            <Field label="Status filter">
+              {(id) => (
+                <Select id={id} defaultValue="">
+                  <option value="">All statuses</option>
+                  <option value="connected">Connected</option>
+                  <option value="disconnected">Disconnected</option>
+                </Select>
+              )}
+            </Field>
+            <Field label="Invalid selection" error="Choose an available scope">
+              {(id) => (
+                <Select id={id} aria-invalid defaultValue="">
+                  <option value="">Select scope</option>
+                  <option value="admin">Admin</option>
+                  <option value="instance">Instance</option>
+                </Select>
+              )}
+            </Field>
+            <Field label="Unavailable">
+              {(id) => (
+                <Select id={id} disabled>
+                  <option>Not available</option>
                 </Select>
               )}
             </Field>

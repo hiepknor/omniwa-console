@@ -61,6 +61,8 @@ resource models, or rendered diagnostics.
 - Dialogs and drawers trap focus, restore focus on close, have an accessible
   name, and declare whether pending commands can close.
 - Interactive table rows support keyboard activation and expose selection.
+- Custom selectors follow the ARIA combobox/listbox pattern, retain an active
+  option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.
 - Destructive commands state their exact target and require explicit intent.
 - Loading and refresh behavior uses `src/lib/query-policy.ts`; routes do not own
   numeric polling intervals.

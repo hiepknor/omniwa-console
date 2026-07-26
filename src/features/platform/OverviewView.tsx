@@ -34,7 +34,7 @@ export function OverviewView(props: OverviewViewProps) {
         description="Persisted server, instance, projection, and message facts. Missing values remain unreported."
         actions={
           <>
-            <Select value={props.window} onChange={(e) => props.onWindowChange(e.target.value)} aria-label="Metric window">
+            <Select value={props.window} onValueChange={props.onWindowChange} aria-label="Metric window">
               {props.windowOptions.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}

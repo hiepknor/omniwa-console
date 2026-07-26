@@ -60,7 +60,7 @@ export function InstancesView(props: InstancesViewProps) {
           </Field>
           <Field label="Status">
             {(id) => (
-              <Select id={id} value={props.status} onChange={(e) => props.onStatus(e.target.value)}>
+              <Select id={id} value={props.status} onValueChange={props.onStatus}>
                 <option value="">All statuses</option>
                 <option value="connected">Connected</option>
                 <option value="disconnected">Disconnected</option>

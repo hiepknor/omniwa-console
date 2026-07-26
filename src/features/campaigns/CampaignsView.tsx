@@ -54,7 +54,7 @@ export function CampaignsView(props: CampaignsViewProps) {
         <div className="flex items-end justify-between gap-3 p-4 border-b border-line max-sm:flex-col max-sm:items-stretch">
           <Field label="Status" className="w-full max-w-56">
             {(id) => (
-              <Select id={id} value={props.status} onChange={(e) => props.onStatus(e.target.value || undefined)}>
+              <Select id={id} value={props.status} onValueChange={(value) => props.onStatus(value || undefined)}>
                 <option value="">All statuses</option>
                 {statuses.map((s) => <option key={s} value={s}>{humanizeToken(s)}</option>)}
               </Select>

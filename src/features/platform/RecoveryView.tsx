@@ -49,7 +49,7 @@ export function RecoveryView(props: RecoveryViewProps) {
           <Field label="Instance ID">{(id) => <Input id={id} value={props.instanceDraft} placeholder="All instances" onChange={(e) => props.onInstanceDraft(e.target.value)} />}</Field>
           <Field label="Resource">{(id) => <Input id={id} value={props.resourceDraft} placeholder="All resources" onChange={(e) => props.onResourceDraft(e.target.value)} />}</Field>
           <Field label="Page size">{(id) => (
-            <Select id={id} value={String(props.limit)} onChange={(e) => props.onLimit(e.target.value)}>
+            <Select id={id} value={String(props.limit)} onValueChange={props.onLimit}>
               {[25, 50, 100, 200].map((n) => <option key={n} value={String(n)}>{n}</option>)}
             </Select>
           )}</Field>
