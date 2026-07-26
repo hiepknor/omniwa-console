@@ -1,26 +1,27 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
 import { queryKeys } from '@/api/keys';
-import { Button, PageHeader, RelativeTime, Select, StateNotice, Status, Surface, Table } from '@/components/v2';
-import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
-import { failureDetail, failureRequestId, readFailureState } from './state';
+import { Button, StateNotice } from '@/ui';
+import { failureDetail, failureRequestId } from './state';
 import { usePlatformHealth, usePlatformOverview, usePlatformProjectionHealth } from './hooks';
 import { overviewWindowFromSearch, overviewWindowOptions } from './route-state';
+import { OverviewView } from './OverviewView';
 
-function QueryNotice({ query, state }: { query: { error: unknown; refetch: () => unknown }; state: ReturnType<typeof useResilientReadState> }) {
+function QueryNotice({ label, query, state }: { label: string; query: { error: unknown; refetch: () => unknown }; state: ReturnType<typeof useResilientReadState> }) {
   if (!state.isError) return null;
   const rateLimited = state.error instanceof ApiFailure && state.error.category === 'rate_limited';
   return (
     <StateNotice
-      value={readFailureState(state.error, state.isStaleError)}
+      kind="error"
+      title={`${label} read failed`}
       detail={`${failureDetail(state.error)}${rateLimited ? ' Automatic retries are disabled.' : ''}`}
       requestId={failureRequestId(state.error)}
-      action={rateLimited ? undefined : <Button onClick={() => query.refetch()}>Retry read</Button>}
+      action={rateLimited ? undefined : <Button onClick={() => query.refetch()}>Retry</Button>}
     />
   );
 }
@@ -40,106 +41,40 @@ export function OverviewPageV2() {
   const recoveryAvailable = capabilities.data?.capabilities.includes('projection_failure_operations') ?? false;
   const refreshing = overview.isFetching || health.isFetching || projection.isFetching;
 
-  const setWindow = (value: string) => {
+  const onWindowChange = (value: string) => {
     setSearchParams(updateSearchParams(searchParams, { window: value === '24h' ? undefined : value }), { replace: true });
   };
-  const refresh = () => {
+  const onRefresh = () => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.overview(window) });
     void queryClient.invalidateQueries({ queryKey: queryKeys.health });
     void queryClient.invalidateQueries({ queryKey: queryKeys.projectionHealth });
   };
 
+  const recovery = capabilities.isPending
+    ? ('pending' as const)
+    : session.keyKind === 'admin' && recoveryAvailable
+      ? ('available' as const)
+      : ('unsupported' as const);
+
   return (
-    <div className="ui-v2-page">
-      <PageHeader
-        eyebrow="Platform"
-        title="Operational overview"
-        description="Persisted server, instance, projection, and message facts. Missing values remain unreported."
-        actions={(
-          <>
-            <Select label="Metric window" value={window} onChange={setWindow} options={overviewWindowOptions.map((option) => ({ value: option.value, label: option.label }))} />
-            <Button onClick={refresh} disabled={refreshing} aria-busy={refreshing || undefined}>
-              {refreshing ? 'Refreshing…' : 'Refresh'}
-            </Button>
-          </>
-        )}
-      />
-
-      <div className="ui-v2-page__content">
-        <div className="ui-v2-state-list">
-          <QueryNotice query={health} state={healthState} />
-          <QueryNotice query={overview} state={overviewState} />
-          <QueryNotice query={projection} state={projectionState} />
+    <OverviewView
+      window={window}
+      windowOptions={overviewWindowOptions.map((o) => ({ value: o.value, label: o.label }))}
+      onWindowChange={onWindowChange}
+      onRefresh={onRefresh}
+      refreshing={refreshing}
+      initialLoading={healthState.isInitialLoading || overviewState.isInitialLoading || projectionState.isInitialLoading}
+      notices={
+        <div className="grid gap-2">
+          <QueryNotice label="Health" query={health} state={healthState} />
+          <QueryNotice label="Overview" query={overview} state={overviewState} />
+          <QueryNotice label="Projection" query={projection} state={projectionState} />
         </div>
-
-        {healthState.isInitialLoading || overviewState.isInitialLoading || projectionState.isInitialLoading ? (
-          <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} detail="Reading the persisted platform snapshots." />
-        ) : null}
-
-        {health.data ? (
-          <Surface
-            title="Control plane and instance health"
-            description={`Generated ${relativeTime(health.data.generatedAt) || 'at an unreported time'}. Connection, projection, and throttling remain independent.`}
-            actions={<Status tone={health.data.api.status === 'healthy' ? 'healthy' : 'degraded'}>{humanizeToken(health.data.api.status)}</Status>}
-          >
-            {health.data.instances.length === 0 ? (
-              <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The health snapshot contains no instances; this is not evidence of a representative workload." />
-            ) : (
-              <Table ariaLabel="Instance health table" caption="Independent instance health dimensions" className="ui-v2-platform-table" rows={health.data.instances} rowKey={(instance) => instance.instanceId} columns={[{ header: 'Instance', className: 'ui-v2-mono', cell: (instance) => instance.instanceId }, { header: 'Connection', cell: (instance) => <Status tone={instance.connection.connected ? 'healthy' : 'failed'}>{humanizeToken(instance.connection.status)}</Status> }, { header: 'Projection', cell: (instance) => <Status tone={instance.projection.status === 'healthy' || instance.projection.status === 'ready' ? 'healthy' : 'degraded'}>{humanizeToken(instance.projection.status)}</Status> }, { header: 'Throttling', cell: (instance) => <Status tone={instance.throttling.observed ? 'degraded' : 'neutral'}>{humanizeToken(instance.throttling.status)}</Status> }]} />
-            )}
-          </Surface>
-        ) : null}
-
-        {overview.data ? (
-          <Surface
-            title="Persisted metrics"
-            description={`${humanizeToken(overview.data.scope.type)} scope · ${window} · generated ${relativeTime(overview.data.generatedAt) || 'at an unreported time'}`}
-          >
-            <div className="ui-v2-metric-grid">
-              {[
-                ['Instances', overview.data.instances.total],
-                ['Connected', overview.data.instances.connected],
-                ['Disconnected', overview.data.instances.disconnected],
-                ['Messages', overview.data.messages.total],
-                ['Incoming', overview.data.messages.incoming],
-                ['Outgoing', overview.data.messages.outgoing],
-                ['Chats', overview.data.projections.chats],
-                ['Groups', overview.data.projections.groups],
-                ['Contacts', overview.data.projections.contacts],
-                ['Events', overview.data.projections.events],
-              ].map(([label, value]) => (
-                <div key={label as string}><span>{label}</span><strong>{formatCount(value as number | undefined)}</strong></div>
-              ))}
-            </div>
-          </Surface>
-        ) : null}
-
-        {projection.data ? (
-          <Surface
-            title="Projection posture"
-            description={`Aggregate snapshot generated ${relativeTime(projection.data.generatedAt) || 'at an unreported time'}.`}
-            actions={<Status tone={projection.data.status === 'healthy' || projection.data.status === 'ready' ? 'healthy' : 'degraded'}>{humanizeToken(projection.data.status)}</Status>}
-          >
-            {projection.data.resources.length === 0 ? (
-              <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The server reported no projection resources in this snapshot." />
-            ) : (
-              <Table ariaLabel="Projection health table" caption="Projection resource health" className="ui-v2-platform-table" rows={projection.data.resources} rowKey={(resource, index) => `${resource.instanceId ?? 'server'}-${resource.resource}-${index}`} columns={[{ header: 'Resource', cell: (resource) => humanizeToken(resource.resource) }, { header: 'Instance', className: 'ui-v2-mono', cell: (resource) => resource.instanceId ?? 'Server' }, { header: 'Sync state', cell: (resource) => <Status tone={resource.syncStatus === 'ready' ? 'healthy' : resource.syncStatus === 'failed' ? 'failed' : 'degraded'}>{humanizeToken(resource.syncStatus)}</Status> }, { header: 'Pending', className: 'ui-v2-mono', cell: (resource) => formatCount(resource.pendingEvents) }, { header: 'Dead letters', className: 'ui-v2-mono', cell: (resource) => formatCount(resource.deadLetterEvents) }, { header: 'Event lag', className: 'ui-v2-mono', cell: (resource) => resource.eventLagSeconds === undefined ? '—' : `${resource.eventLagSeconds}s` }]} />
-            )}
-          </Surface>
-        ) : null}
-
-        <Surface title="Recovery" description="Terminal projection failures require an explicit audited operator command.">
-          {capabilities.isPending ? (
-            <StateNotice value={{ axis: 'capability', state: 'discovering' }} detail="Waiting for capability discovery before enabling Recovery." />
-          ) : session.keyKind === 'admin' && recoveryAvailable ? (
-            <div className="ui-v2-empty-action"><p>Review dead letters without inferring recovery from aggregate health.</p><Link className="ui-v2-button ui-v2-button--secondary" to="/recovery">Open recovery</Link></div>
-          ) : (
-            <StateNotice value={{ axis: 'capability', state: 'unsupported' }} detail="Recovery requires admin scope and the projection_failure_operations capability." />
-          )}
-        </Surface>
-
-        <p className="ui-v2-generated-note">Latest available snapshots: overview <RelativeTime value={overview.data?.generatedAt} />, health <RelativeTime value={health.data?.generatedAt} />, projections <RelativeTime value={projection.data?.generatedAt} />.</p>
-      </div>
-    </div>
+      }
+      health={health.data}
+      overview={overview.data}
+      projection={projection.data}
+      recovery={recovery}
+    />
   );
 }

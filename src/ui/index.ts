@@ -10,4 +10,6 @@ export { PageHeader } from './PageHeader';
 export { Tabs, type Tab } from './Tabs';
 export { Drawer } from './Drawer';
 export { Dialog } from './Dialog';
+export { Panel } from './Panel';
+export { StateNotice } from './StateNotice';
 export { Logo } from './Logo';
