@@ -59,24 +59,38 @@ GET    /instance/credential-health
 POST   /instance/create
 POST   /instance/rotate-token/{instanceId}
 DELETE /instance/delete/{instanceId}
-GET    /instance/status
-GET    /instance/qr
-POST   /instance/connect
 POST   /instance/disconnect
-POST   /instance/reconnect
 DELETE /instance/logout
 GET    /instance/{instanceId}/advanced-settings
 PUT    /instance/{instanceId}/advanced-settings
 ```
 
-Admin operations use the memory-only session client; connection/QR/logout
-operations use the instance token. Metadata reads are required when
+Admin operations use the memory-only session client; disconnect/logout and
+advanced settings use the explicitly attached instance token. Metadata reads are required when
 `instance_metadata_views` is advertised; `/instance/all` and
 `/instance/info/{instanceId}` remain compatible with servers that do not yet
 advertise metadata views.
 Credential Health renders factual C3 migration signals, treats zero instances
 as non-representative, and never derives a plaintext-removal decision.
 `/server/ok` is not connection state.
+
+## Active Instance — `/connection`, embedded in `/instances/:instanceId`
+
+**Status:** integrated. Instance-scoped sessions reach the Instance destination
+directly; admin sessions use the same surface after attaching the selected
+instance token.
+
+```text
+GET  /instance/status
+GET  /instance/qr
+POST /instance/connect
+POST /instance/reconnect
+```
+
+The QR cache is cleared before every connect/restart attempt and whenever live
+status is not connected or is already paired. QR polling runs only while the
+pairing surface is mounted, connected, unpaired, and not submitting a command.
+An acknowledgement never substitutes for refreshed status.
 
 ## Groups — `/groups/:groupId?`
 

@@ -167,6 +167,7 @@ into caches. See `docs/REALTIME.md`.
 ```text
 /connect
 /overview
+/connection
 /instances/:instanceId?
 /groups/:instanceId?
 /chats/:instanceId?/:chatId?

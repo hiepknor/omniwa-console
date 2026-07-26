@@ -38,7 +38,7 @@ export function PreviewInstances() {
             </DescriptionList>
           </Panel>
 
-          <Panel title="Connection and pairing" description="Connected and paired are different server facts.">
+          <Panel title="Connection & pairing" description="Connected and paired are different server facts.">
             <div className="grid gap-3">
               <Image src="/ui-qr-sample.svg" alt="Sample QR code for the pairing preview" aspect="square" fit="contain" className="w-52 justify-self-start" imageClassName="bg-surface p-3" />
               <p className="text-xs text-fg-3">WhatsApp → Linked Devices → Link a Device. Pairing is complete only when status reports loggedIn.</p>

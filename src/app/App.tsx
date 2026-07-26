@@ -14,6 +14,7 @@ import { shouldInvalidateSession } from './session-error';
 const OverviewPage = lazy(() => import('@/features/platform/OverviewPage').then((m) => ({ default: m.OverviewPage })));
 const RecoveryPage = lazy(() => import('@/features/platform/RecoveryPage').then((m) => ({ default: m.RecoveryPage })));
 const InstancesPage = lazy(() => import('@/features/instances/InstancesPage').then((m) => ({ default: m.InstancesPage })));
+const PairingPage = lazy(() => import('@/features/instances/PairingPage').then((m) => ({ default: m.PairingPage })));
 const ConversationsPage = lazy(() => import('@/features/conversations/ConversationsPage').then((m) => ({ default: m.ConversationsPage })));
 const GroupsPage = lazy(() => import('@/features/groups/GroupsPage').then((m) => ({ default: m.GroupsPage })));
 const CampaignsPage = lazy(() => import('@/features/campaigns/CampaignsPage').then((m) => ({ default: m.CampaignsPage })));
@@ -32,6 +33,7 @@ const authenticatedRoutes: RouteObject[] = [
   { path: '/recovery', element: <RecoveryPage /> },
   { path: '/instances', element: <InstancesPage /> },
   { path: '/instances/:instanceId', element: <InstancesPage /> },
+  { path: '/connection', element: <PairingPage /> },
   { path: '/events', element: <EventsPage /> },
   { path: '*', element: <Navigate to="/overview" replace /> },
 ];

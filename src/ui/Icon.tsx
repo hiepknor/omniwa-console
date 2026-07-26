@@ -1,7 +1,7 @@
 import type { ReactNode, SVGProps } from 'react';
 import { cn } from './cn';
 
-export type NavigationIconName = 'overview' | 'recovery' | 'instances' | 'chats' | 'groups' | 'campaigns' | 'events';
+export type NavigationIconName = 'overview' | 'recovery' | 'instances' | 'chats' | 'groups' | 'campaigns' | 'events' | 'signout';
 export type IconName = NavigationIconName | 'close' | 'chevron-down';
 export type IconSize = 'sm' | 'md' | 'nav';
 
@@ -15,6 +15,7 @@ const paths: Record<IconName, ReactNode> = {
   groups: <><circle cx="9" cy="8" r="4" /><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2M16 4a4 4 0 0 1 0 8M18 15a5 5 0 0 1 4 4.9V21" /></>,
   campaigns: <><path d="m22 2-7 20-4-9-9-4z" /><path d="M22 2 11 13" /></>,
   events: <path d="M3 12h4l3 8 4-16 3 8h4" />,
+  signout: <><path d="M10 4H4v16h6" /><path d="M14 8l4 4-4 4M8 12h10" /></>,
 };
 
 const viewBox: Record<IconName, string> = {
@@ -27,6 +28,7 @@ const viewBox: Record<IconName, string> = {
   groups: '0 0 24 24',
   campaigns: '0 0 24 24',
   events: '0 0 24 24',
+  signout: '0 0 24 24',
 };
 
 const sizes: Record<IconSize, string> = { sm: 'size-3', md: 'size-3.5', nav: 'size-[18px]' };
