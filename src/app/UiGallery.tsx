@@ -116,7 +116,7 @@ export function UiGallery() {
         </Section>
 
         <Section title="Inputs">
-          <div className="grid sm:grid-cols-3 gap-4 max-w-2xl">
+          <div className="grid sm:grid-cols-4 gap-4 max-w-4xl">
             <Field label="API origin">{(id) => <Input id={id} placeholder="https://…" />}</Field>
             <Field label="Invalid" error="Required">
               {(id) => <Input id={id} aria-invalid placeholder="bad" />}
@@ -126,6 +126,13 @@ export function UiGallery() {
                 <Select id={id}>
                   <option>Admin</option>
                   <option>Instance</option>
+                </Select>
+              )}
+            </Field>
+            <Field label="Unavailable">
+              {(id) => (
+                <Select id={id} disabled>
+                  <option>Not available</option>
                 </Select>
               )}
             </Field>
