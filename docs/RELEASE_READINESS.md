@@ -5,7 +5,8 @@ Console candidate. It separates reproducible local/CI evidence from live
 authenticated environment evidence; passing the former does not authorize a
 production promotion without the latter.
 
-**Status: conditionally ready; authenticated staging acceptance remains required.**
+**Status: conditionally ready; authenticated dev read acceptance passed, while
+representative projection and mutation staging acceptance remains required.**
 
 ## Findings resolved
 
@@ -39,25 +40,38 @@ production promotion without the latter.
   CSP, frame denial, no-sniff, referrer, permissions, and no-store headers were
   present.
 - The previous `main` image workflow for `460cdf6` completed successfully with
-  immutable-image publication. The pull request for this candidate must repeat
-  the repository CI image smoke before merge.
+  immutable-image publication, establishing the deployment baseline used by
+  this audit.
+- An explicitly supplied admin credential was used only in the browser
+  memory-only session against `localhost:4000`. Overview, health, projection
+  health, metadata fleet list/detail, credential health, and the recovery queue
+  loaded successfully. No destructive recovery or instance command was sent.
+- An explicitly supplied instance credential was then detected as instance
+  scope. Overview and status loaded; Conversations and Groups rendered their
+  capability-unavailable states without fallback requests; Campaigns and Events
+  rendered authoritative empty states, and the exact Events filter produced a
+  URL-backed 200 read.
+- Reload cleared the admin session, explicit sign-out cleared the instance
+  session, browser storage remained empty, credentials did not enter URLs, and
+  the final Connect form contained no credential value.
+- Pull request CI built and smoke-tested the candidate image successfully.
 
-## Required live acceptance before promotion
+## Remaining live acceptance before promotion
 
-No admin key or representative instance token was supplied to this workspace.
-The following evidence is therefore **not verified** and must be completed on a
-non-production runtime with representative data before promotion:
+The supplied instance was disconnected and did not advertise every projection,
+and no disposable mutation target was identified. The following evidence is
+therefore still required on a non-production runtime with representative data:
 
-1. Admin session: Overview/Health, metadata and compatibility fleet mode as applicable,
-   instance detail, credential health, and capability-gated recovery.
-2. Instance session: Chats/Messages/Contacts/Labels, Groups, Campaigns, and Events
+1. Exercise compatibility fleet mode against a runtime that does not advertise
+   `instance_metadata_views`; the current runtime advertised metadata views.
+2. Exercise Chats/Messages/Contacts/Labels, Groups, Campaigns, and Events
    across ready, empty, syncing/stale/not-ready, rate-limited, and error states.
 3. Commands: pending lock, duplicate-submit prevention, server acknowledgement,
    targeted projection refresh, uncertain-failure handling, and destructive
    confirmation. Use disposable targets; do not exercise destructive commands
    against production data.
-4. Reload and sign-out: active and attached credentials disappear, queries clear,
-   and deep links return to Connect.
+4. Attach, rotate, forget, and destroy a disposable instance credential while
+   observing cache cleanup and query refresh behavior.
 5. Promote the exact CI-produced digest, then repeat `/healthz`, direct-route,
    security-header, revision, and rollback checks through the real reverse proxy.
 
