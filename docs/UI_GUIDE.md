@@ -63,6 +63,8 @@ resource models, or rendered diagnostics.
 - Interactive table rows support keyboard activation and expose selection.
 - Custom selectors follow the ARIA combobox/listbox pattern, retain an active
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.
+- Buttons preserve a clear ghost/primary/danger hierarchy, expose pressed and
+  keyboard-focus feedback, and use `ButtonLink` for navigation styled as an action.
 - Destructive commands state their exact target and require explicit intent.
 - Loading and refresh behavior uses `src/lib/query-policy.ts`; routes do not own
   numeric polling intervals.

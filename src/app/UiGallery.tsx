@@ -100,6 +100,7 @@ export function UiGallery() {
             <Button>Ghost</Button>
             <Button variant="danger">Danger</Button>
             <Button disabled>Disabled</Button>
+            <Button aria-busy>Working…</Button>
             <Button onClick={() => setDrawer(true)}>Open drawer</Button>
             <Button onClick={() => setDialog(true)}>Open dialog</Button>
           </div>

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Campaign, CampaignStatus } from '@/api/campaigns';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, CursorPagination, Field, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { Button, ButtonLink, CursorPagination, Field, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
 
 const statuses: CampaignStatus[] = ['draft', 'scheduled', 'running', 'paused', 'completed', 'aborted', 'failed'];
 
@@ -43,7 +43,7 @@ export function CampaignsView(props: CampaignsViewProps) {
         actions={
           <>
             <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>
-            {props.newHref ? <a href={props.newHref} className="inline-flex items-center h-9 px-3 text-[13px] font-medium bg-fg text-bg border border-fg hover:bg-fg-2">New campaign</a> : null}
+            {props.newHref ? <ButtonLink href={props.newHref} variant="primary">New campaign</ButtonLink> : null}
           </>
         }
       />
