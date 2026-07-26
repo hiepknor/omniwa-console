@@ -5,8 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken } from '@/lib/format';
 import { createSearchParams, omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, StateNotice, Status, Tabs } from '@/ui';
-import { cn } from '@/ui/cn';
+import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Status, Tabs, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
 import { ChatList, ContactList, LabelList, MessageTimeline } from './ConversationsView';
 import { DirectoryInspector, MessageInspector } from './Details';
@@ -89,10 +88,13 @@ export function ConversationsPage() {
         />
       </div>
 
-      <div className="flex-1 min-h-0 grid grid-cols-[320px_minmax(0,1fr)] border-t border-line max-[900px]:grid-cols-1">
-        {/* Directory pane */}
-        <section className={cn('flex flex-col min-h-0 border-r border-line', hasChat && 'max-[900px]:hidden')}>
-          <div className="shrink-0 border-b border-line">
+      <SplitWorkspace
+        detailOpen={hasChat}
+        directoryLabel={`${route.view} directory`}
+        detailLabel="Message timeline"
+        directory={
+          <>
+            <div className="sticky top-0 z-10 border-b border-line bg-surface">
             <Tabs
               active={route.view}
               onChange={(id) => switchView(id as ConversationView)}
@@ -104,9 +106,7 @@ export function ConversationsPage() {
               </Field>
               <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
             </FilterToolbar>
-          </div>
-
-          <div className="flex-1 min-h-0 overflow-y-auto">
+            </div>
             {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail={`The backend does not currently advertise ${route.view === 'chats' ? 'chats_projection' : route.view === 'contacts' ? 'contacts_projection' : 'labels_projection'}; capability polling continues because the projection may be unsupported or waiting for readiness.`} /></div> : null}
             {viewSupported && !advertised ? <div className="p-3"><StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable projection snapshot visible while capability discovery no longer advertises this resource." /></div> : null}
             {viewSupported && currentQuery.isPending ? <div className="p-3"><StateNotice kind="loading" title="Loading" /></div> : null}
@@ -121,26 +121,18 @@ export function ConversationsPage() {
                 {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected item matches the URL-backed search.' : 'The ready projection contains no items.'} /></div> : null}
               </>
             ) : null}
-          </div>
-
-          {route.view !== 'labels' && viewSupported && currentQuery.data ? (
-            <div className="shrink-0">
-              <CursorPagination cursor={route.cursor} nextCursor={(route.view === 'chats' ? chats.data?.resource.pagination.nextCursor : contacts.data?.resource.pagination.nextCursor) ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }, ['selected']))} />
-            </div>
-          ) : null}
-        </section>
-
-        {/* Thread pane */}
-        <section className={cn('flex flex-col min-h-0', !hasChat && 'max-[900px]:hidden')}>
-          <header className="shrink-0 flex items-center justify-between gap-3 min-h-[57px] px-4 border-b border-line">
-            <div className="grid min-w-0">
-              <strong className="truncate text-sm font-semibold text-fg">{selectedChat?.displayName ?? selectedChat?.id ?? 'Message timeline'}</strong>
-              <span className="text-xs text-fg-3">{activeChatId ? 'Persisted projection history' : 'Select a projected chat to inspect its history'}</span>
-            </div>
-            {activeChatId ? <Button className="hidden max-[900px]:inline-flex" onClick={closeChat}>Back</Button> : null}
-          </header>
-
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          </>
+        }
+        directoryFooter={route.view !== 'labels' && viewSupported && currentQuery.data ? (
+          <CursorPagination cursor={route.cursor} nextCursor={(route.view === 'chats' ? chats.data?.resource.pagination.nextCursor : contacts.data?.resource.pagination.nextCursor) ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }, ['selected']))} />
+        ) : undefined}
+        detail={
+          <>
+            <WorkspacePaneHeader
+              title={selectedChat?.displayName ?? selectedChat?.id ?? 'Message timeline'}
+              description={activeChatId ? 'Persisted projection history' : 'Select a projected chat to inspect its history'}
+              actions={activeChatId ? <Button className="hidden max-[900px]:inline-flex" onClick={closeChat}>Back</Button> : undefined}
+            />
             {!activeChatId ? (
               <div className="p-4"><StateNotice kind="empty" title="No chat selected" detail="Select a chat from the projected directory." /></div>
             ) : !chatsSupported ? (
@@ -174,11 +166,10 @@ export function ConversationsPage() {
             ) : (
               <div className="p-4"><StateNotice kind="empty" title="Not returned" detail="The projected chat detail was not returned." /></div>
             )}
-          </div>
-
-          {selectedChat ? <div className="shrink-0"><Composer chatId={selectedChat.id} chatName={selectedChat.displayName ?? selectedChat.id} enabled={messagesReady && outboundReady} /></div> : null}
-        </section>
-      </div>
+          </>
+        }
+        detailFooter={selectedChat ? <Composer chatId={selectedChat.id} chatName={selectedChat.displayName ?? selectedChat.id} enabled={messagesReady && outboundReady} /> : undefined}
+      />
 
       {route.message && activeChatId && messagesSupported ? <MessageInspector messageId={route.message} loadedChat={selectedChat} enabled={messagesReady} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
       {route.selected && route.view !== 'chats' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}

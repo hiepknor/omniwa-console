@@ -210,6 +210,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   (`square`, `video`, `wide`, or intrinsic), `cover`/`contain`, alt text, caption,
   deterministic loading, and unavailable/error fallback. QR pairing uses
   `contain` and a paper quiet zone. Features do not render raw `<img>` elements.
+- **SplitWorkspace / WorkspacePaneHeader** — the only directory-detail frame.
+  It owns the 320px directory column, internal pane scrolling, the 900px
+  single-pane breakpoint, and the sticky pane header. Production and preview
+  routes use the same primitive; detail mode on tablet/mobile must expose a
+  visible Back action supplied by the feature.
 
 ## 6. Shell & navigation
 
@@ -270,7 +275,7 @@ hover to expose meaning or actions.
 
 ### Implementation recipes
 
-`/__ui` is the executable reference for four complete compositions, not merely
+`/__ui` is the executable reference for five complete compositions, not merely
 a parts bin:
 
 1. **List:** filter toolbar → active chips → honest projection state → table →
@@ -284,9 +289,18 @@ a parts bin:
 4. **Recovery:** normalized error with request ID → explicit review → danger
    intent → refreshed narrow projection. It never infers success from aggregate
    health.
+5. **Split workspace:** directory → selection → detail with sticky identity →
+   narrow footer action. Above 900px both panes remain visible; at tablet/mobile
+   the detail replaces the directory and exposes Back.
 
 Production work should start from one of these recipes and delete inapplicable
 pieces, rather than inventing new local frames or interaction language.
+
+Preview routes are deterministic integration fixtures, not a second design
+source. They must render the production route view and shared composition
+primitives. Fixture-only inspector content may model server states without
+network hooks, but it may not recreate a shared frame, filter toolbar, state
+notice, image treatment, split workspace, drawer, or dialog visual language.
 
 ## 8. Change control
 

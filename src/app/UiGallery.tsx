@@ -28,6 +28,7 @@ import {
   ProgressBar,
   Radio,
   Select,
+  SplitWorkspace,
   StateNotice,
   Status,
   Switch,
@@ -37,6 +38,7 @@ import {
   Th,
   Textarea,
   Tr,
+  WorkspacePaneHeader,
   type Tone,
 } from '@/ui';
 
@@ -121,8 +123,10 @@ export function UiGallery() {
   const [switchEnabled, setSwitchEnabled] = useState(true);
   const [deliveryMode, setDeliveryMode] = useState('safe');
   const [filterVisible, setFilterVisible] = useState(true);
+  const [listFilterVisible, setListFilterVisible] = useState(true);
   const [notificationVisible, setNotificationVisible] = useState(true);
   const [cursor, setCursor] = useState<string>();
+  const [workspaceDetail, setWorkspaceDetail] = useState(true);
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-bg text-fg">
@@ -363,6 +367,14 @@ export function UiGallery() {
               { id: 'audit', label: 'Audit', count: 42 },
             ]}
           />
+          <FilterToolbar>
+            <Field label="Status" className="min-w-48 flex-1">
+              {(id, labelId) => <Select id={id} aria-labelledby={labelId} defaultValue=""><option value="">All statuses</option><option value="ok">Healthy</option><option value="failed">Failed</option></Select>}
+            </Field>
+            {listFilterVisible ? <FilterChip label="Status" value="connected" onRemove={() => setListFilterVisible(false)} /> : null}
+            <Button>Apply filters</Button>
+          </FilterToolbar>
+          <div className="p-3"><StateNotice kind="info" title="Projection ready" detail="Rows below are authoritative for this cursor page." /></div>
           <Table>
             <thead>
               <tr>
@@ -394,8 +406,32 @@ export function UiGallery() {
           <CursorPagination cursor={cursor} nextCursor={cursor ? undefined : 'cursor_02'} onCursor={setCursor} info={cursor ? 'Showing the next cursor page.' : 'Showing 3 of 18 instances.'} />
         </Section>
 
+        <Section title="Split workspace recipe">
+          <div className="flex h-80 min-h-0 flex-col overflow-hidden border border-line-strong">
+            <SplitWorkspace
+              className="border-t-0"
+              detailOpen={workspaceDetail}
+              directoryLabel="Sample directory"
+              detailLabel="Sample detail"
+              directory={
+                <>
+                  <WorkspacePaneHeader title="Directory" description="Select a projected resource" />
+                  {['chat_01', 'chat_02', 'chat_03'].map((id) => <button key={id} type="button" className="flex min-h-14 w-full items-center border-b border-line px-3 text-left text-[13px] hover:bg-elevated" onClick={() => setWorkspaceDetail(true)}><span className="font-mono">{id}</span></button>)}
+                </>
+              }
+              detail={
+                <>
+                  <WorkspacePaneHeader title="chat_01" description="Projected detail" actions={<Button className="hidden max-[900px]:inline-flex" onClick={() => setWorkspaceDetail(false)}>Back</Button>} />
+                  <div className="grid gap-3 p-4"><Status tone="ok">Ready</Status><DescriptionList><DescriptionItem label="Identifier" mono>chat_01</DescriptionItem><DescriptionItem label="Updated">Just now</DescriptionItem></DescriptionList></div>
+                </>
+              }
+              detailFooter={<div className="flex justify-end border-t border-line p-3"><Button variant="primary">Narrow action</Button></div>}
+            />
+          </div>
+        </Section>
+
         <Section title="Implementation recipes">
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Panel title="List" description="Filter → state → rows → cursor." actions={<Button>Refresh</Button>}>
               <p className="text-sm text-fg-2">Use the complete list recipe above for every paginated projection.</p>
             </Panel>
@@ -404,6 +440,9 @@ export function UiGallery() {
             </Panel>
             <Panel title="Command / recovery" description="Explain impact before explicit intent." actions={<Button variant="danger" onClick={() => setDialogMode('ready')}>Review command</Button>}>
               <p className="text-sm text-fg-2">Lock dismissal while pending and render acknowledgement honestly.</p>
+            </Panel>
+            <Panel title="Split workspace" description="Directory and detail share one responsive frame." actions={<Button onClick={() => setWorkspaceDetail(true)}>Open detail</Button>}>
+              <p className="text-sm text-fg-2">At tablet and mobile widths, detail replaces the directory and always exposes Back.</p>
             </Panel>
           </div>
         </Section>

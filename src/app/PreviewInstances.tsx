@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { InstancesView } from '@/features/instances/InstancesView';
-import { Button, DescriptionItem, DescriptionList, Drawer, Field, Input, Panel, Status, Switch } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Drawer, Field, Image, Input, Panel, Status, Switch } from '@/ui';
 import { instancesFixture } from './preview-fixtures';
-
-function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
-}
 
 /** Dev-only: Instances table + an open workspace drawer, with sample data. */
 export function PreviewInstances() {
@@ -33,20 +29,18 @@ export function PreviewInstances() {
 
           <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyClassName="pt-2">
             <DescriptionList>
-              <Fact label="Metadata status" value="Connected" />
-              <Fact label="Live connection" value="Connected" />
-              <Fact label="Paired" value="Yes" />
-              <Fact label="WhatsApp ID" value={instance.jid ?? 'Not reported'} mono />
-              <Fact label="Credential version" value={String(instance.credentialVersion)} />
-              <Fact label="Created" value="12 days ago" />
+              <DescriptionItem label="Metadata status">Connected</DescriptionItem>
+              <DescriptionItem label="Live connection">Connected</DescriptionItem>
+              <DescriptionItem label="Paired">Yes</DescriptionItem>
+              <DescriptionItem label="WhatsApp ID" mono>{instance.jid ?? 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Credential version">{String(instance.credentialVersion)}</DescriptionItem>
+              <DescriptionItem label="Created">12 days ago</DescriptionItem>
             </DescriptionList>
           </Panel>
 
           <Panel title="Connection and pairing" description="Connected and paired are different server facts.">
             <div className="grid gap-3">
-              <div className="justify-self-start bg-white p-3 border border-line-strong">
-                <div className="size-52 bg-[repeating-conic-gradient(#111_0_25%,#fff_0_50%)] bg-[length:16px_16px]" aria-hidden />
-              </div>
+              <Image src="/ui-qr-sample.svg" alt="Sample QR code for the pairing preview" aspect="square" fit="contain" className="w-52 justify-self-start" imageClassName="bg-surface p-3" />
               <p className="text-xs text-fg-3">WhatsApp → Linked Devices → Link a Device. Pairing is complete only when status reports loggedIn.</p>
               <div className="flex flex-wrap gap-2">
                 <Button variant="primary">Restart pairing</Button>

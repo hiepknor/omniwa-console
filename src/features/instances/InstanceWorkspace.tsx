@@ -79,10 +79,6 @@ function AdvancedSettings({ instanceId, token }: { instanceId: string; token: st
   );
 }
 
-function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return <DescriptionItem label={label} mono={mono}>{value}</DescriptionItem>;
-}
-
 export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, onDestroyed }: { instance: InstanceResource; refreshError?: unknown; onRetry: () => void; onClose: () => void; onDestroyed: () => void }) {
   const token = useInstanceCredential(instance.id);
   const setCredential = useSetInstanceCredential();
@@ -141,13 +137,13 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
 
           <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyClassName="pt-2">
             <DescriptionList>
-              <Fact label="Metadata status" value={humanizeToken(instance.status)} />
-              <Fact label="Metadata connection" value={instance.connected ? 'Connected' : 'Disconnected'} />
-              <Fact label="Live connection" value={statusReady ? (connected ? 'Connected' : 'Disconnected') : 'Not read'} />
-              <Fact label="Paired" value={statusReady ? (loggedIn ? 'Yes' : 'No') : 'Not read'} />
-              <Fact label="WhatsApp ID" value={instance.jid ?? 'Not reported'} mono />
-              <Fact label="Credential version" value={String(instance.credentialVersion ?? 'Not reported')} />
-              <Fact label="Created" value={relativeTime(instance.createdAt) || 'Not reported'} />
+              <DescriptionItem label="Metadata status">{humanizeToken(instance.status)}</DescriptionItem>
+              <DescriptionItem label="Metadata connection">{instance.connected ? 'Connected' : 'Disconnected'}</DescriptionItem>
+              <DescriptionItem label="Live connection">{statusReady ? (connected ? 'Connected' : 'Disconnected') : 'Not read'}</DescriptionItem>
+              <DescriptionItem label="Paired">{statusReady ? (loggedIn ? 'Yes' : 'No') : 'Not read'}</DescriptionItem>
+              <DescriptionItem label="WhatsApp ID" mono>{instance.jid ?? 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Credential version">{String(instance.credentialVersion ?? 'Not reported')}</DescriptionItem>
+              <DescriptionItem label="Created">{relativeTime(instance.createdAt) || 'Not reported'}</DescriptionItem>
             </DescriptionList>
           </Panel>
 
