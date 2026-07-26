@@ -13,7 +13,7 @@ type SharedProps = {
 const base = cn(
   'group relative isolate inline-flex h-9 items-center justify-center overflow-hidden border max-sm:h-10',
   'whitespace-nowrap text-[13px] font-semibold leading-none select-none',
-  'transition-[color,background-color,border-color,box-shadow,transform] duration-150 motion-reduce:transition-none',
+  'transition-[color,background-color,border-color,box-shadow,translate] duration-150 motion-reduce:transition-none',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
   'active:translate-x-px active:translate-y-px active:shadow-none',
   'disabled:pointer-events-none disabled:translate-x-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none',
@@ -31,7 +31,7 @@ const variants: Record<ButtonVariant, string> = {
   ),
   danger: cn(
     'border-fg bg-[repeating-linear-gradient(45deg,var(--color-surface)_0_6px,var(--color-elevated)_6px_8px)] text-fg shadow-[2px_2px_0_var(--color-fg)]',
-    'hover:-translate-x-px hover:-translate-y-px hover:bg-fg hover:text-bg hover:shadow-[3px_3px_0_var(--color-fg-3)]',
+    'hover:-translate-x-px hover:-translate-y-px hover:bg-none hover:bg-fg hover:text-bg hover:shadow-[3px_3px_0_var(--color-fg-3)]',
   ),
 };
 

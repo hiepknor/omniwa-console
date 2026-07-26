@@ -1,6 +1,12 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { findNextEnabledIndex, getMenuPosition, Select } from './Select';
+import {
+  findNextEnabledIndex,
+  getMenuPosition,
+  optionMarkerClassName,
+  Select,
+  selectChevronClassName,
+} from './Select';
 
 describe('custom Select', () => {
   it('renders a custom combobox and listbox without a native select', () => {
@@ -53,6 +59,20 @@ describe('custom Select', () => {
 
     expect(html).toContain('cursor-pointer select-none bg-fg text-bg');
     expect(html).not.toContain('cursor-pointer select-none text-fg bg-fg text-bg');
+  });
+
+  it('keeps open-chevron hover colors on the ink treatment', () => {
+    const classes = selectChevronClassName(true);
+    expect(classes).toContain('bg-fg text-bg');
+    expect(classes).toContain('group-hover:text-bg');
+    expect(classes).not.toContain('group-hover:text-fg');
+  });
+
+  it('uses mutually exclusive marker colors for active and selected states', () => {
+    expect(optionMarkerClassName(true, true)).toContain('border-bg bg-bg');
+    expect(optionMarkerClassName(true, false)).toContain('border-bg bg-transparent');
+    expect(optionMarkerClassName(false, true)).toContain('border-fg bg-fg');
+    expect(optionMarkerClassName(false, false)).toContain('border-fg-3 bg-transparent');
   });
 
   it('flattens mapped option children used by feature filters', () => {
