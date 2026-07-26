@@ -9,9 +9,17 @@ describe('Status', () => {
     expect(html).toContain('data-tone="failed"');
     expect(html).toContain('grid-cols-[20px_minmax(0,1fr)]');
     expect(html).toContain('justify-self-start');
+    expect(html).toContain('whitespace-nowrap');
     expect(html).toContain('border-line-strong');
     expect(html).toContain('size-2.5');
     expect(html).toContain('Disconnected');
+  });
+
+  it('only wraps long prose-like state when explicitly requested', () => {
+    const html = renderToStaticMarkup(<Status tone="degraded" wrap>Projection syncing with a longer explicit label</Status>);
+    expect(html).toContain('whitespace-normal');
+    expect(html).toContain('break-words');
+    expect(html).toContain('max-w-full');
   });
 
   it('keeps every semantic tone visually distinct without chroma', () => {

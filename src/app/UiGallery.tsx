@@ -209,7 +209,7 @@ export function UiGallery() {
           </div>
           <div className="flex max-w-sm items-center justify-between gap-3 border border-line p-3">
             <span className="text-xs text-fg-3">Constrained operational row</span>
-            <Status tone="degraded">Projection syncing with a longer explicit label</Status>
+            <Status tone="degraded" wrap>Projection syncing with a longer explicit label</Status>
           </div>
         </Section>
 

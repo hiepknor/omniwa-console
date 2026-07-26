@@ -67,10 +67,12 @@ screentone pattern, never by hue** (see `src/ui/Status.tsx`).
 ### Status vocabulary (the frozen set)
 
 A status is a **24px minimum-height framed ink stamp**: a 20px recessed marker
-cell, 10px screentone mark, and an explicit 11px/500 label. The frame keeps
-status visually stable in tables, headers, inspectors, and dense trailing
-content; long labels wrap instead of escaping their container. The fill pattern
-carries the meaning:
+cell, 10px screentone mark, and an explicit 11px/500 label. Atomic status labels
+stay on one line so responsive tables scroll inside their own frame instead of
+breaking words. Prose-like labels outside tables opt into `wrap`; those wrap
+within their container. The frame keeps status visually stable in tables,
+headers, inspectors, and dense trailing content. The fill pattern carries the
+meaning:
 
 | Status | Screentone |
 | --- | --- |
@@ -147,7 +149,8 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   screentone registry in `statusMarks.ts`; notices and feedback map their state
   vocabulary into the same marks instead of copying gradients. Failed status
   receives the strong frame; other tones use the default hairline frame.
-  `<Status tone>`.
+  `<Status tone>` is single-line; `<Status tone wrap>` is reserved for explicit
+  long state descriptions outside dense tables.
 - **Input / Field** — recessed bg, 1px border, square, 13px; focus → strong border.
   Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted. Field descriptions and errors are linked with `aria-describedby`; errors set `aria-invalid`, and required state remains explicit.
 - **Textarea / DateTimeInput** — use the same surface, border, focus, invalid,

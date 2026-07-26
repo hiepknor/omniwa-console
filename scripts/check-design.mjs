@@ -36,7 +36,7 @@ for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 's
 }
 
 const status = await read('src/ui/Status.tsx');
-for (const marker of ['data-tone={tone}', 'grid-cols-[20px_minmax(0,1fr)]', 'justify-self-start', 'size-2.5', "tone === 'failed'", 'statusMarkStyle[tone]']) {
+for (const marker of ['data-tone={tone}', 'grid-cols-[20px_minmax(0,1fr)]', 'justify-self-start', "wrap ? 'w-auto max-w-full' : 'w-max'", "wrap ? 'whitespace-normal break-words' : 'whitespace-nowrap'", 'size-2.5', "tone === 'failed'", 'statusMarkStyle[tone]']) {
   if (!status.includes(marker)) failures.push(`src/ui/Status.tsx: status stamp contract is missing ${marker}`);
 }
 
