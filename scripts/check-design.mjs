@@ -21,7 +21,7 @@ for (const marker of ["document.body.style.overflow = 'hidden'", 'modalStack.len
 }
 
 const button = await read('src/ui/Button.tsx');
-for (const marker of ['data-variant', 'active:translate-x-px', 'focus-visible:outline-2', 'disabled:pointer-events-none', 'ButtonLink']) {
+for (const marker of ['data-variant', 'shrink-0', 'active:translate-x-px', 'focus-visible:outline-2', 'disabled:pointer-events-none', 'ButtonLink']) {
   if (!button.includes(marker)) failures.push(`src/ui/Button.tsx: action contract is missing ${marker}`);
 }
 
@@ -103,6 +103,11 @@ for (const marker of ['placement', 'onMouseEnter', 'onFocusCapture', 'visibility
 const shell = await read('src/app/Shell.tsx');
 for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', '<NavigationItemContent']) {
   if (!shell.includes(marker)) failures.push(`src/app/Shell.tsx: responsive shell contract is missing ${marker}`);
+}
+
+const conversationsPreview = await read('src/app/PreviewConversations.tsx');
+for (const marker of ['<main', 'max-[900px]:grid-cols-1', "chat ? 'max-[900px]:hidden'", "chat ? '' : 'max-[900px]:hidden'", '>Back</Button>']) {
+  if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
 const table = await read('src/ui/Table.tsx');

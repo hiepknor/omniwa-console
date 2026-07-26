@@ -132,7 +132,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   `primary` = ink fill + white label; `ghost` = paper + strong border; `danger` =
   diagonal hazard hatch at rest and a solid ink block on hover. Enabled buttons
   lift 1px with a hard offset shadow; active returns to the baseline. Busy is
-  visibly marked and natively disabled. One primary action per view.
+  visibly marked and natively disabled. Button labels never shrink or clip;
+  responsive action rows wrap or stack around their intrinsic width. One primary
+  action per view.
 - **CloseButton** — the only icon-only X/dismiss control. It is a fully framed
   square: 36×36px desktop and 40×40px mobile, with a 14px stroked X. Rest is
   the ghost Button treatment and it inherits the same hover lift, hard shadow,
@@ -228,6 +230,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   bottom nav bar with icon + visible 10px label while the main viewport reserves
   its height. Dense form/action controls are at least 40px on mobile; primary
   navigation targets remain at least 44px.
+- **Split workspaces:** directory + detail use two panes only above 900px. At
+  tablet/mobile widths the selected detail replaces the directory and exposes a
+  full `Back` action; neither pane may remain positioned outside the viewport.
 - **Feedback placement:** `SurfaceNotice` is the framed inline/workspace banner;
   `ToastViewport` is fixed bottom-right and becomes full inset-width on mobile.
   Its inline placement exists only for deterministic `/__ui` review. Toast
@@ -254,6 +259,7 @@ or `border-*` utilities and rely on generated CSS order.
 | ProgressBar | 0–99%, indeterminate, complete, failed at last known value |
 | Image | loading, ready, contain/cover, long caption, missing/error fallback |
 | Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav |
+| Split workspace | two panes >900px, directory or detail + Back ≤900px |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close |
 

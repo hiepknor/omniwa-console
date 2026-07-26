@@ -156,7 +156,7 @@ export function OverviewView(props: OverviewViewProps) {
         {props.recovery === 'pending' ? (
           <StateNotice kind="loading" title="Discovering capabilities" detail="Waiting for capability discovery before enabling Recovery." />
         ) : props.recovery === 'available' ? (
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-stretch">
             <p className="text-sm text-fg-2">Review dead letters without inferring recovery from aggregate health.</p>
             <ButtonLink to="/recovery">Open recovery</ButtonLink>
           </div>
