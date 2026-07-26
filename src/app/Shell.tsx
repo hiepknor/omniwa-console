@@ -1,391 +1,122 @@
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { IconButton } from '@/components/IconButton';
-import { Logo } from '@/components/Logo';
-import { EnvironmentBadge, environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
+import { useServerCapabilities } from '@/api/CapabilitiesProvider';
+import { environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
-import { useModalDialog } from '@/components/useModalDialog';
-import { keyFingerprint, type ConsoleSession } from '@/lib/session';
+import type { ConsoleSession } from '@/lib/session';
+import { Button, Logo, Status } from '@/ui';
+import { cn } from '@/ui/cn';
+import { navigationForKeyKind, NavIconSvg, scopeLabelForKeyKind } from './navigation';
 
-type IconName =
-  | 'overview'
-  | 'instances'
-  | 'queue'
-  | 'webhooks'
-  | 'events'
-  | 'chats'
-  | 'groups'
-  | 'messages'
-  | 'settings'
-  | 'keys'
-  | 'more';
-
-type NavItem = {
-  to: string;
-  label: string;
-  icon: IconName;
-  adminOnly?: boolean;
-};
-
-const OVERVIEW_ITEM: NavItem = { to: '/overview', label: 'Overview', icon: 'overview' };
-
-const OPERATION_ITEMS: NavItem[] = [
-  { to: '/instances', label: 'Instances', icon: 'instances' },
-  { to: '/queue', label: 'Queue & Jobs', icon: 'queue' },
-  { to: '/webhooks', label: 'Webhooks', icon: 'webhooks' },
-  { to: '/events', label: 'Events', icon: 'events' },
-];
-
-const MESSAGING_ITEMS: NavItem[] = [
-  { to: '/chats', label: 'Chats', icon: 'chats' },
-  { to: '/groups', label: 'Groups', icon: 'groups' },
-];
-
-const SYSTEM_ITEMS: NavItem[] = [
-  { to: '/settings', label: 'Settings', icon: 'settings' },
-  { to: '/settings/api-keys', label: 'API Keys', icon: 'keys', adminOnly: true },
-];
-
-const MOBILE_PRIMARY_ITEMS: NavItem[] = [
-  OVERVIEW_ITEM,
-  OPERATION_ITEMS[0],
-  { ...OPERATION_ITEMS[1], label: 'Queue' },
-  MESSAGING_ITEMS[0],
-];
-
-const TABLET_RAIL_STORAGE_KEY = 'omniwa-console:tablet-rail-expanded';
-
-function NavIcon({ name }: { name: IconName }) {
-  const content = {
-    overview: (
-      <>
-        <path d="M3 10.5 12 3l9 7.5" />
-        <path d="M5 9.5V21h14V9.5" />
-      </>
-    ),
-    instances: (
-      <>
-        <rect x="3" y="4" width="18" height="7" rx="1.5" />
-        <rect x="3" y="13" width="18" height="7" rx="1.5" />
-        <path d="M7 7.5h.01M7 16.5h.01" />
-      </>
-    ),
-    queue: <path d="M4 6h16M4 12h16M4 18h10" />,
-    webhooks: (
-      <>
-        <path d="M10 14 21 3M15 3h6v6" />
-        <path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" />
-      </>
-    ),
-    events: <path d="M3 12h4l3 8 4-16 3 8h4" />,
-    chats: <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
-    groups: (
-      <>
-        <path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9.5" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.9" />
-        <path d="M15.5 3.1a4 4 0 0 1 0 7.8" />
-      </>
-    ),
-    messages: (
-      <>
-        <path d="m22 2-7 20-4-9-9-4z" />
-        <path d="M22 2 11 13" />
-      </>
-    ),
-    settings: (
-      <>
-        <circle cx="12" cy="12" r="3" />
-        <path d="M12 2v2.5M12 19.5V22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M2 12h2.5M19.5 12H22M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8" />
-      </>
-    ),
-    keys: (
-      <>
-        <circle cx="8" cy="15" r="4" />
-        <path d="m11 12 8-8M15 8l2 2M17 6l2 2" />
-      </>
-    ),
-    more: (
-      <>
-        <circle cx="5" cy="12" r="1" />
-        <circle cx="12" cy="12" r="1" />
-        <circle cx="19" cy="12" r="1" />
-      </>
-    ),
-  }[name];
-
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      {content}
-    </svg>
-  );
+function environmentLabel(env: string): string {
+  if (env === 'production') return 'Production';
+  if (env === 'staging') return 'Staging';
+  return 'Self-hosted';
 }
 
-function NavigationLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
-  return (
-    <NavLink
-      to={item.to}
-      end={item.to === '/settings'}
-      title={item.label}
-      aria-label={item.label}
-      className={({ isActive }) => (isActive ? 'active' : undefined)}
-      onClick={onClick}
-    >
-      <NavIcon name={item.icon} />
-      <span className="lbl">{item.label}</span>
-    </NavLink>
-  );
-}
-
-export function Shell({
-  session,
-  onDisconnect,
-}: {
-  session: ConsoleSession;
-  onDisconnect: () => void;
-}) {
-  const systemItems = SYSTEM_ITEMS.filter(
-    (item) => !item.adminOnly || session.keyKind === 'admin',
-  );
-  const moreItems = [
-    OPERATION_ITEMS[2],
-    OPERATION_ITEMS[3],
-    MESSAGING_ITEMS[1],
-    ...systemItems,
-  ];
-  const fingerprint = keyFingerprint(session.apiKey);
-  // omniwa-go has no local mock workspace; the console always talks to a live API.
-  const mockSession = false;
+export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDisconnect: () => void }) {
   const location = useLocation();
-  const [tabletExpanded, setTabletExpanded] = useState(() => {
-    try {
-      return window.localStorage.getItem(TABLET_RAIL_STORAGE_KEY) === 'true';
-    } catch {
-      return false;
-    }
-  });
-  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
-  const moreTriggerRef = useRef<HTMLButtonElement>(null);
-  const moreDialogRef = useModalDialog<HTMLDivElement>({ onClose: () => setMobileMoreOpen(false), active: mobileMoreOpen, returnFocusRef: moreTriggerRef });
-  const moreActive = moreItems.some(
-    (item) =>
-      location.pathname === item.to || location.pathname.startsWith(`${item.to}/`),
-  );
-  const pageTitle = location.pathname.startsWith('/settings/api-keys')
-    ? 'API Keys'
-    : location.pathname.startsWith('/settings')
-      ? 'Settings'
-      : location.pathname.startsWith('/instances')
-        ? 'Instances'
-        : location.pathname.startsWith('/queue')
-          ? 'Queue & Jobs'
-          : location.pathname.startsWith('/webhooks')
-            ? 'Webhooks'
-            : location.pathname.startsWith('/events')
-              ? 'Events'
-              : location.pathname.startsWith('/chats')
-                ? 'Chats'
-                : location.pathname.startsWith('/groups')
-                  ? 'Groups'
-                  : location.pathname.startsWith('/messages')
-                    ? 'Messages'
-                    : 'Overview';
-  useDocumentTitle(pageTitle);
+  const capabilities = useServerCapabilities();
+  const recoveryAvailable = capabilities.data?.capabilities.includes('projection_failure_operations') ?? false;
+  const sections = navigationForKeyKind(session.keyKind, recoveryAvailable);
+  const items = sections.flatMap((s) => s.items);
+  const active = items.find((i) => location.pathname === i.to || (!i.end && location.pathname.startsWith(`${i.to}/`)));
+  useDocumentTitle(active?.label ?? 'OmniWA Console');
+  const environment = environmentForApiOrigin(session.baseUrl);
 
-  useEffect(() => {
-    setMobileMoreOpen(false);
-  }, [location.pathname]);
-
-  const toggleTabletRail = () => {
-    setTabletExpanded((expanded) => {
-      const next = !expanded;
-      try {
-        window.localStorage.setItem(TABLET_RAIL_STORAGE_KEY, String(next));
-      } catch {
-        // The preference remains in memory when browser storage is unavailable.
-      }
-      return next;
-    });
-  };
+  const capabilityStatus = capabilities.isPending
+    ? { tone: 'pending' as const, label: 'Discovering capabilities' }
+    : capabilities.isError
+      ? { tone: 'failed' as const, label: 'Capability discovery failed' }
+      : { tone: 'ok' as const, label: `${capabilities.data.capabilities.length} capabilities` };
 
   return (
-    <WorkspaceEnvironmentProvider environment={mockSession ? 'mock' : environmentForApiOrigin(session.baseUrl)}>
-      <div className="shell ui-legacy-root">
-      <a className="fixed top-2 left-2 z-50 -translate-y-20 rounded-sm bg-[var(--fg)] px-3 py-2 text-sm text-[var(--bg)] transition-transform focus:translate-y-0 focus:outline-none" href="#main-content">Skip to main content</a>
-      <aside
-        className={`sidebar${tabletExpanded ? ' is-expanded' : ''}`}
-        aria-label="OmniWA primary navigation"
-      >
-        <div className="logo">
-          <Logo size={32} />
-          <div>
-            <b>OmniWA Console</b>
-            <span className="env" title={`API endpoint: ${session.baseUrl}`}>
-              {session.baseUrl}
-            </span>
-          </div>
-        </div>
-
-        <nav className="desktop-nav" aria-label="Primary">
-          <NavigationLink item={OVERVIEW_ITEM} />
-          <span className="navlabel">Operations</span>
-          {OPERATION_ITEMS.map((item) => (
-            <NavigationLink key={item.to} item={item} />
-          ))}
-          <span className="navlabel">Messaging</span>
-          {MESSAGING_ITEMS.map((item) => (
-            <NavigationLink key={item.to} item={item} />
-          ))}
-        </nav>
-
-        <div className="navfoot desktop-utility">
-          <button
-            type="button"
-            className="rail-toggle"
-            onClick={toggleTabletRail}
-            aria-label={tabletExpanded ? 'Collapse navigation' : 'Expand navigation'}
-            aria-expanded={tabletExpanded}
-            title={tabletExpanded ? 'Collapse navigation' : 'Expand navigation'}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-            <span className="lbl">{tabletExpanded ? 'Collapse' : 'Expand'}</span>
-          </button>
-          {systemItems.map((item) => (
-            <NavigationLink key={item.to} item={item} />
-          ))}
-        </div>
-
-        <nav className="mobile-nav" aria-label="Mobile primary navigation">
-          {MOBILE_PRIMARY_ITEMS.map((item) => (
-            <NavigationLink key={item.to} item={item} />
-          ))}
-          <button
-            ref={moreTriggerRef}
-            type="button"
-            className={moreActive ? 'active' : undefined}
-            onClick={() => setMobileMoreOpen(true)}
-            aria-label="More navigation"
-            aria-haspopup="dialog"
-            aria-expanded={mobileMoreOpen}
-            aria-controls="mobile-more-navigation"
-          >
-            <NavIcon name="more" />
-            <span className="lbl">More</span>
-          </button>
-        </nav>
-
-        <div className="side-foot">
-          <div
-            className="session"
-            aria-label={mockSession ? 'Mock workspace using local fixture data.' : `Connected session. API key ${fingerprint}.`}
-            title={mockSession ? 'Mock workspace · fixture data' : `Connected · API key ${fingerprint}`}
-          >
-            <span
-              className="dot"
-              style={{ background: mockSession ? 'var(--info)' : 'var(--ok)' }}
-              aria-hidden="true"
-            />
-            <span className="session-copy">
-              <strong>{mockSession ? 'Mock workspace' : 'Connected'}</strong>
-              <span className="key">{mockSession ? 'Fixture data · local' : `API key · ${fingerprint}`}</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => onDisconnect()}
-              className="out"
-              aria-label="Sign out of API session"
-              title="Sign out of API session"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M14 8l4 4-4 4" />
-                <path d="M18 12H8" />
-                <path d="M10 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
-              </svg>
-              <span>Sign out</span>
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {mobileMoreOpen ? (
-        <div
-          className="mobile-more-backdrop"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setMobileMoreOpen(false);
-          }}
+    <WorkspaceEnvironmentProvider environment={environment}>
+      <div className="grid h-dvh grid-cols-[224px_minmax(0,1fr)] max-[900px]:grid-cols-[64px_minmax(0,1fr)] max-[640px]:block">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:bg-fg focus:px-3 focus:py-2 focus:text-bg"
         >
-          <div
-            ref={moreDialogRef}
-            id="mobile-more-navigation"
-            className="mobile-more-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="mobile-more-title"
-          >
-            <header>
-              <div>
-                <span className="flex items-center gap-2"><span className="eyebrow">Navigation</span><EnvironmentBadge /></span>
-                <h2 id="mobile-more-title">More</h2>
-              </div>
-              <IconButton
-                compact
-                className="mobile-more-close"
-                onClick={() => setMobileMoreOpen(false)}
-                label="Close navigation"
-                title="Close"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M6 6l12 12M18 6 6 18" />
-                </svg>
-              </IconButton>
-            </header>
-            <nav aria-label="More destinations">
-              {moreItems.map((item) => (
-                <NavigationLink
-                  key={item.to}
-                  item={item}
-                  onClick={() => setMobileMoreOpen(false)}
-                />
-              ))}
-            </nav>
-            <footer className="mobile-more-session" aria-label={mockSession ? 'Mock workspace session' : 'Connected API session'}>
-              <span
-                className="dot"
-                style={{ background: mockSession ? 'var(--info)' : 'var(--ok)' }}
-                aria-hidden="true"
-              />
-              <span className="mobile-more-session-copy">
-                <strong>{mockSession ? 'Mock workspace' : 'Connected'}</strong>
-                <span className="mono" title={session.baseUrl}>{session.baseUrl}</span>
-              </span>
-              <button
-                type="button"
-                className="mobile-more-signout"
-                onClick={() => {
-                  setMobileMoreOpen(false);
-                  onDisconnect();
-                }}
-                aria-label={mockSession ? 'Exit mock workspace' : 'Sign out of API session'}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M14 8l4 4-4 4" />
-                  <path d="M18 12H8" />
-                  <path d="M10 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
-                </svg>
-                <span>{mockSession ? 'Exit mock workspace' : 'Sign out'}</span>
-              </button>
-            </footer>
-          </div>
-        </div>
-      ) : null}
+          Skip to main content
+        </a>
 
-      <main id="main-content" className="min-[1280px]:has-[.detail-drawer]:!pr-[464px]" tabIndex={-1}>
-        <Suspense fallback={<div className="route-loading" aria-live="polite">Loading panel…</div>}>
-          <Outlet />
-        </Suspense>
-      </main>
+        <aside
+          aria-label="OmniWA primary navigation"
+          className="flex min-w-0 flex-col h-dvh border-r border-line-strong bg-surface max-[640px]:h-auto max-[640px]:border-r-0 max-[640px]:border-b"
+        >
+          {/* Brand */}
+          <div className="flex items-center gap-3 min-h-[57px] px-4 border-b border-line max-[900px]:justify-center max-[900px]:px-0">
+            <Logo />
+            <span className="grid min-w-0 max-[900px]:hidden">
+              <strong className="text-[13px] font-semibold text-fg">OmniWA Console</strong>
+              <span className="truncate font-mono text-[10px] text-fg-3" title={session.baseUrl}>
+                {session.baseUrl}
+              </span>
+            </span>
+          </div>
+
+          {/* Context */}
+          <div className="grid gap-2 p-4 border-b border-line max-[900px]:hidden">
+            <div className="flex items-center justify-between gap-2 text-[11px] text-fg-3">
+              <span className="inline-flex items-center border border-line-strong px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
+                {environmentLabel(environment)}
+              </span>
+              <span>{scopeLabelForKeyKind(session.keyKind)}</span>
+            </div>
+            <Status tone={capabilityStatus.tone}>{capabilityStatus.label}</Status>
+            {capabilities.data?.version ? (
+              <span className="font-mono text-[10px] text-fg-3" title={capabilities.data.revision}>
+                GO {capabilities.data.version}
+              </span>
+            ) : null}
+          </div>
+
+          {/* Nav */}
+          <nav aria-label="Primary" className="flex-1 min-h-0 overflow-y-auto p-3 max-[640px]:flex max-[640px]:overflow-x-auto max-[640px]:p-2">
+            {sections.map((section) => (
+              <div key={section.label} className="mb-4 grid gap-0.5 max-[640px]:mb-0 max-[640px]:flex">
+                <span className="px-2.5 pb-1 text-[9px] font-medium uppercase tracking-[0.14em] text-fg-3 max-[900px]:hidden">
+                  {section.label}
+                </span>
+                {section.items.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end}
+                    title={item.label}
+                    aria-label={item.label}
+                    className={({ isActive }) =>
+                      cn(
+                        'flex items-center gap-2.5 min-h-[36px] px-2.5 text-[13px] border border-transparent max-[900px]:justify-center max-[900px]:px-0',
+                        isActive ? 'bg-fg text-bg' : 'text-fg-2 hover:bg-elevated hover:text-fg',
+                      )
+                    }
+                  >
+                    <NavIconSvg name={item.icon} />
+                    <span className="max-[900px]:hidden">{item.label}</span>
+                  </NavLink>
+                ))}
+              </div>
+            ))}
+          </nav>
+
+          {/* Session footer */}
+          <footer className="grid gap-3 p-3 border-t border-line max-[900px]:hidden">
+            <div className="grid gap-0.5">
+              <Status tone="ok">Connected</Status>
+              <span className="font-mono text-[10px] text-fg-3">In-memory credential</span>
+            </div>
+            <Button onClick={onDisconnect} aria-label="Sign out" title="Sign out" className="w-full">
+              Sign out
+            </Button>
+          </footer>
+        </aside>
+
+        <main id="main" tabIndex={-1} className="min-w-0 h-dvh overflow-auto max-[640px]:h-auto">
+          <Suspense fallback={<div role="status" className="p-6 text-sm text-fg-3">Loading panel…</div>}>
+            <Outlet />
+          </Suspense>
+        </main>
       </div>
     </WorkspaceEnvironmentProvider>
   );

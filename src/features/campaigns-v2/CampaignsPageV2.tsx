@@ -1,17 +1,29 @@
 import { useMemo } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import type { CampaignStatus } from '@/api/campaigns';
-import { ApiFailureNotice, Button, CursorPagination, PageGuard, PageHeader, Select, StateNotice, Status, Surface, Table } from '@/components/v2';
-import { humanizeToken, relativeTime } from '@/lib/format';
+import { ApiFailure } from '@/api/envelopes';
+import { humanizeToken } from '@/lib/format';
 import { omitSearchParams, withSearchParams } from '@/lib/url-search-state';
+import { Button, PageHeader, StateNotice } from '@/ui';
 import { CampaignInspectorV2 } from './CampaignInspectorV2';
+import { CampaignsView } from './CampaignsView';
 import { useCampaignsV2 } from './hooks';
 import { campaignRouteState, setCampaignParam } from './route-state';
 
-const statuses: CampaignStatus[] = ['draft', 'scheduled', 'running', 'paused', 'completed', 'aborted', 'failed'];
-function tone(status: CampaignStatus) { return status === 'running' || status === 'completed' ? 'healthy' as const : status === 'failed' || status === 'aborted' ? 'failed' as const : status === 'scheduled' ? 'pending' as const : status === 'paused' ? 'degraded' as const : 'neutral' as const; }
+function Blocked({ detail, title }: { detail: string; title: string }) {
+  return (
+    <div className="grid gap-6 p-6 max-sm:p-4">
+      <PageHeader eyebrow="Messaging" title="Campaigns" description="Server-owned campaign orchestration and durable recipient outcomes." />
+      <StateNotice kind="empty" title={title} detail={detail} />
+    </div>
+  );
+}
+
+function Fail({ error, stale, onRetry }: { error: unknown; stale?: boolean; onRetry: () => void }) {
+  const f = error instanceof ApiFailure ? error : undefined;
+  return <StateNotice kind="error" title={stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={<Button onClick={onRetry}>Retry</Button>} />;
+}
 
 export function CampaignsPageV2() {
   const session = useApiSession();
@@ -28,24 +40,40 @@ export function CampaignsPageV2() {
   const setParam = (key: string, value?: string) => setSearchParams(setCampaignParam(searchParams, key, value), { replace: true });
   const listParams = omitSearchParams(searchParams, ['created', 'tab', 'recipientCursor', 'auditCursor']);
   const listUrl = withSearchParams('/messages', listParams);
+  const openCampaign = (id: string) => navigate(`/messages/${encodeURIComponent(id)}${searchParams.size ? `?${searchParams}` : ''}`);
 
-  if (!instanceScope) return <Blocked detail="Campaign orchestration requires an instance credential. Admin scope cannot operate token-scoped campaigns, and no campaign request was sent." state="invalid" />;
-  if (capabilities.isPending) return <Blocked detail="Discovering instance capabilities before enabling campaign orchestration." state="discovering" />;
-  if (capabilities.isError) return <Blocked detail="Capability discovery failed. Campaign operations remain disabled." state="unsupported" />;
-  if (!orchestration) return <Blocked detail="The backend does not advertise campaign_orchestration. The Console does not emulate recipient loops, pacing, or retry in the browser." state="unsupported" />;
+  if (!instanceScope) return <Blocked title="Instance credential required" detail="Campaign orchestration requires an instance credential. Admin scope cannot operate token-scoped campaigns, and no campaign request was sent." />;
+  if (capabilities.isPending) return <Blocked title="Discovering capabilities" detail="Discovering instance capabilities before enabling campaign orchestration." />;
+  if (capabilities.isError) return <Blocked title="Unsupported" detail="Capability discovery failed. Campaign operations remain disabled." />;
+  if (!orchestration) return <Blocked title="Unsupported" detail="The backend does not advertise campaign_orchestration. The Console does not emulate recipient loops, pacing, or retry in the browser." />;
 
-  return <div className="ui-v2-page">
-    <PageHeader eyebrow="Messaging" title="Campaigns" description="Server-owned campaign orchestration with explicit consent, factual recipient outcomes, and durable audit history." actions={<><Button disabled={campaigns.isFetching} onClick={() => campaigns.refetch()}>{campaigns.isFetching ? 'Refreshing…' : 'Refresh'}</Button><Link className="ui-v2-button ui-v2-button--primary" to="/messages/new">New campaign</Link></>} />
-    <div className="ui-v2-page__content">
-      {searchParams.get('created') === '1' ? <StateNotice value={{ axis: 'command', state: 'acknowledged' }} detail="Campaign draft creation was acknowledged. Recipient and audit reads remain authoritative; creation does not prove delivery or campaign completion." /> : null}
-      {!ratePosture ? <StateNotice value={{ axis: 'capability', state: 'unsupported' }} detail="outbound_rate_limit is not advertised. Campaign state remains readable, but confirm backend pacing posture before starting outbound work." /> : null}
-      <Surface title="Campaign directory" description="Status filter, opaque cursor, and selected campaign remain URL-addressable.">
-        <div className="ui-v2-campaign-filters"><Select label="Status" value={route.status ?? ''} onChange={(value) => setParam('status', value || undefined)} options={[{ value: '', label: 'All statuses' }, ...statuses.map((status) => ({ value: status, label: humanizeToken(status) }))]} /><span>{items.length} campaigns on this page</span></div>
-        {campaigns.isPending ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} /> : campaigns.error && !campaigns.data ? <ApiFailureNotice error={campaigns.error} onRetry={() => campaigns.refetch()} /> : campaigns.data ? <>{campaigns.error ? <ApiFailureNotice error={campaigns.error} stale onRetry={() => campaigns.refetch()} /> : null}{items.length ? <Table ariaLabel="Campaign table" caption="Campaigns" className="ui-v2-campaign-table" rows={items} rowKey={(campaign) => campaign.id} selectedKey={campaignId} columns={[{ header: 'Campaign', cell: (campaign) => <><button className="ui-v2-row-link" type="button" onClick={() => navigate(`/messages/${encodeURIComponent(campaign.id)}${searchParams.size ? `?${searchParams}` : ''}`)}>{campaign.name}</button><small className="ui-v2-mono">{campaign.id}</small></> }, { header: 'Status', cell: (campaign) => <Status tone={tone(campaign.status)}>{humanizeToken(campaign.status)}</Status> }, { header: 'Starts', cell: (campaign) => relativeTime(campaign.startsAt) || 'Not scheduled' }, { header: 'Updated', cell: (campaign) => relativeTime(campaign.updatedAt) || 'Not reported' }, { header: 'Version', cell: (campaign) => campaign.version }]} /> : <StateNotice value={{ axis: 'resource', state: 'empty' }} detail={route.status ? `No ${humanizeToken(route.status)} campaigns were returned.` : 'No campaigns exist in this instance scope.'} />}<CursorPagination cursor={route.cursor} nextCursor={campaigns.data.nextCursor} onCursor={(value) => setParam('cursor', value)} /></> : null}
-      </Surface>
-    </div>
-    {campaignId ? <CampaignInspectorV2 campaignId={campaignId} onClose={() => navigate(listUrl)} /> : null}
-  </div>;
+  return (
+    <>
+      <CampaignsView
+        refreshing={campaigns.isFetching}
+        onRefresh={() => campaigns.refetch()}
+        newHref="/messages/new"
+        notices={
+          <div className="grid gap-2">
+            {searchParams.get('created') === '1' ? <StateNotice kind="info" title="Draft creation accepted" detail="Recipient and audit reads remain authoritative; creation does not prove delivery or campaign completion." /> : null}
+            {!ratePosture ? <StateNotice kind="empty" title="Rate posture unknown" detail="outbound_rate_limit is not advertised. Campaign state remains readable, but confirm backend pacing posture before starting outbound work." /> : null}
+          </div>
+        }
+        status={route.status ?? ''}
+        onStatus={(v) => setParam('status', v)}
+        count={items.length}
+        initialLoading={campaigns.isPending}
+        empty={Boolean(campaigns.data) && items.length === 0}
+        emptyDetail={route.status ? `No ${humanizeToken(route.status)} campaigns were returned.` : 'No campaigns exist in this instance scope.'}
+        errorSlot={campaigns.error && !campaigns.data ? <Fail error={campaigns.error} onRetry={() => campaigns.refetch()} /> : campaigns.error ? <Fail error={campaigns.error} stale onRetry={() => campaigns.refetch()} /> : undefined}
+        items={items}
+        selectedId={campaignId}
+        onOpen={openCampaign}
+        cursor={route.cursor}
+        nextCursor={campaigns.data?.nextCursor ?? undefined}
+        onCursor={(v) => setParam('cursor', v)}
+      />
+      {campaignId ? <CampaignInspectorV2 campaignId={campaignId} onClose={() => navigate(listUrl)} /> : null}
+    </>
+  );
 }
-
-function Blocked({ detail, state }: { detail: string; state: 'invalid' | 'discovering' | 'unsupported' }) { return <PageGuard eyebrow="Messaging" title="Campaigns" description="Server-owned campaign orchestration and durable recipient outcomes." state={state} detail={detail} />; }

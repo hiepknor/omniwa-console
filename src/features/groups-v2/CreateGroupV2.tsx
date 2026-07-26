@@ -1,17 +1,32 @@
 import { useEffect, useState } from 'react';
+import { ApiFailure } from '@/api/envelopes';
 import type { GroupCreateRequest } from '@/api/groups';
-import { ApiFailureNotice, Button, Dialog, Field } from '@/components/v2';
+import { Button, Dialog, Field, Input, StateNotice } from '@/ui';
 
 export function CreateGroupV2({ open, pending, error, onCreate, onClose }: { open: boolean; pending: boolean; error: unknown; onCreate: (body: GroupCreateRequest) => void; onClose: () => void }) {
   const [name, setName] = useState('');
   const [participants, setParticipants] = useState('');
   useEffect(() => { if (!open) { setName(''); setParticipants(''); } }, [open]);
-  if (!open) return null;
-  const parsed = participants.split(/[\n,]/u).map((value) => value.trim()).filter(Boolean);
+  const parsed = participants.split(/[\n,]/u).map((v) => v.trim()).filter(Boolean);
   const submit = () => { if (name.trim() && parsed.length && !pending) onCreate({ name: name.trim(), participants: parsed }); };
-  return <Dialog titleId="create-group-v2" eyebrow="Group command" title="Create group" description="Create a group with its initial participants. The refreshed projection remains authoritative." canClose={!pending} onClose={onClose} actions={<><Button disabled={pending} onClick={onClose}>Cancel</Button><Button variant="primary" disabled={!name.trim() || !parsed.length || pending} onClick={submit}>{pending ? 'Submitting…' : 'Create group'}</Button></>}>
-    <Field label="Group name" value={name} autoComplete="off" autoFocus disabled={pending} onChange={(event) => setName(event.target.value)} />
-    <label className="ui-v2-field"><span className="ui-v2-field__label">Initial participants</span><textarea className="ui-v2-input ui-v2-textarea" rows={4} value={participants} disabled={pending} placeholder="One phone or JID per line" onChange={(event) => setParticipants(event.target.value)} /><span className="ui-v2-field__hint">{parsed.length} participant{parsed.length === 1 ? '' : 's'}. Comma-separated values are also accepted.</span></label>
-    {error ? <ApiFailureNotice error={error} command /> : null}
-  </Dialog>;
+  const failure = error instanceof ApiFailure ? error : undefined;
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Create group"
+      footer={<><Button disabled={pending} onClick={onClose}>Cancel</Button><Button variant="primary" disabled={!name.trim() || !parsed.length || pending} onClick={submit}>{pending ? 'Submitting…' : 'Create group'}</Button></>}
+    >
+      <div className="grid gap-3">
+        <p className="text-sm text-fg-2">Create a group with its initial participants. The refreshed projection remains authoritative.</p>
+        <Field label="Group name">{(id) => <Input id={id} value={name} autoComplete="off" autoFocus disabled={pending} onChange={(e) => setName(e.target.value)} />}</Field>
+        <label className="grid gap-1.5">
+          <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Initial participants</span>
+          <textarea rows={4} className="w-full px-2.5 py-2 text-[13px] bg-recessed text-fg border border-line resize-y focus-visible:outline-none focus-visible:border-line-strong" value={participants} disabled={pending} placeholder="One phone or JID per line" onChange={(e) => setParticipants(e.target.value)} />
+          <span className="text-xs text-fg-3">{parsed.length} participant{parsed.length === 1 ? '' : 's'}. Comma-separated values are also accepted.</span>
+        </label>
+        {failure ? <StateNotice kind="error" title="Command failed" detail={failure.message} requestId={failure.requestId} /> : null}
+      </div>
+    </Dialog>
+  );
 }

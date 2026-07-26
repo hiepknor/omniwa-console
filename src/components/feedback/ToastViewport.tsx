@@ -33,7 +33,7 @@ function ToastItem({ toast, onDismiss }: { toast: FeedbackToast; onDismiss: (id:
 
   return (
     <div
-      className={`feedback-toast feedback-tone-${toast.kind}`}
+      className="w-[min(380px,calc(100vw-2rem))] bg-elevated border border-line border-l-2 border-l-fg shadow-none"
       role={toast.kind === 'error' ? 'alert' : 'status'}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -49,7 +49,7 @@ function ToastItem({ toast, onDismiss }: { toast: FeedbackToast; onDismiss: (id:
 
 export function ToastViewport({ toasts, onDismiss }: { toasts: FeedbackToast[]; onDismiss: (id: string) => void }) {
   return (
-    <section className="feedback-toast-viewport" aria-label="Notifications">
+    <section className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-sm:left-4 max-sm:right-4" aria-label="Notifications">
       {toasts.map((toast) => <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />)}
     </section>
   );

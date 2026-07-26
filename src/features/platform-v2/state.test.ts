@@ -1,17 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { ApiFailure } from '@/api/envelopes';
-import { commandFailureState, readFailureState } from './state';
+import { failureDetail, failureRequestId } from './state';
 
-describe('platform v2 state mapping', () => {
-  it('keeps background refresh failures non-blocking', () => {
-    expect(readFailureState(new Error('offline'), true)).toEqual({ axis: 'resource', state: 'refresh-failed' });
+describe('platform v2 failure helpers', () => {
+  it('reads a human message from an Error', () => {
+    expect(failureDetail(new Error('offline'))).toBe('offline');
   });
 
-  it('preserves rate-limit semantics', () => {
-    expect(readFailureState(new ApiFailure({ error: 'too many requests' }, 429))).toEqual({ axis: 'transport', state: 'rate-limited' });
+  it('falls back when the failure has no readable message', () => {
+    expect(failureDetail('not an error')).toBe('The request failed without a readable message.');
   });
 
-  it('treats an unclassified command transport failure as uncertain', () => {
-    expect(commandFailureState(new TypeError('Failed to fetch'))).toEqual({ axis: 'command', state: 'uncertain' });
+  it('returns no requestId for a plain Error', () => {
+    expect(failureRequestId(new Error('boom'))).toBeUndefined();
   });
 });

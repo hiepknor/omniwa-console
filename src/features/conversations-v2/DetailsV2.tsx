@@ -1,16 +1,57 @@
 import type { ChatResource } from '@/api/chats';
 import type { ContactResource } from '@/api/contacts';
 import type { LabelResource } from '@/api/labels';
-import { Button, Inspector, StateNotice, Status, Surface } from '@/components/v2';
 import { humanizeToken, relativeTime } from '@/lib/format';
+import { Drawer, Panel, StateNotice, Status, type Tone } from '@/ui';
 import { useMessageV2, useReceiptsV2 } from './hooks';
 import { FailureNoticeV2, ProjectionStatusV2 } from './ui';
 
+function Fact({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-1.5 border-b border-line last:border-b-0">
+      <dt className="text-xs text-fg-3">{label}</dt>
+      <dd className={mono ? 'font-mono text-xs text-fg' : 'text-[13px] text-fg'}>{value}</dd>
+    </div>
+  );
+}
+
+function receiptTone(type: string): Tone {
+  return type === 'read' || type === 'delivered' ? 'ok' : 'pending';
+}
+
 export function DirectoryInspectorV2({ contact, label, error, loading, onRetry, onClose }: { contact?: ContactResource; label?: LabelResource; error?: unknown; loading: boolean; onRetry: () => void; onClose: () => void }) {
   const title = contact?.displayName ?? label?.name ?? (contact ? contact.id : label?.id) ?? 'Directory details';
-  return <Inspector titleId="directory-v2-details" eyebrow={contact ? 'Projected contact' : 'Projected label'} title={title} modal onClose={onClose}>
-    {loading ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} /> : error && !contact && !label ? <FailureNoticeV2 error={error} onRetry={onRetry} /> : contact ? <Surface title="Normalized identity" description="Read-only projection; phone identity is redacted by the backend."><dl className="ui-v2-detail-list"><div><dt>JID</dt><dd className="ui-v2-mono">{contact.id}</dd></div><div><dt>Username</dt><dd>{contact.username ?? 'Not reported'}</dd></div><div><dt>Phone</dt><dd>{contact.redactedPhone ?? 'Not reported'}</dd></div><div><dt>Business</dt><dd>{contact.businessName ?? 'Not reported'}</dd></div><div><dt>About</dt><dd>{contact.about ?? 'Not reported'}</dd></div><div><dt>Known</dt><dd>{contact.found ? 'Yes' : 'No'}</dd></div></dl>{error ? <FailureNoticeV2 error={error} stale onRetry={onRetry} /> : null}</Surface> : label ? <Surface title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments."><dl className="ui-v2-detail-list"><div><dt>Label ID</dt><dd className="ui-v2-mono">{label.id}</dd></div><div><dt>Name</dt><dd>{label.name ?? 'Not reported'}</dd></div><div><dt>Color</dt><dd>{label.color ?? 'Not reported'}</dd></div><div><dt>Predefined ID</dt><dd>{label.predefinedId ?? 'Not reported'}</dd></div></dl>{error ? <FailureNoticeV2 error={error} stale onRetry={onRetry} /> : null}</Surface> : <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The selected projected definition was not returned." />}
-  </Inspector>;
+  return (
+    <Drawer open onClose={onClose} title={title} subtitle={contact ? 'Projected contact' : 'Projected label'}>
+      {loading ? (
+        <StateNotice kind="loading" title="Loading" />
+      ) : error && !contact && !label ? (
+        <FailureNoticeV2 error={error} onRetry={onRetry} />
+      ) : contact ? (
+        <Panel title="Normalized identity" description="Read-only projection; phone identity is redacted by the backend." bodyClassName="pt-2">
+          <dl>
+            <Fact label="JID" value={contact.id} mono />
+            <Fact label="Username" value={contact.username ?? 'Not reported'} />
+            <Fact label="Phone" value={contact.redactedPhone ?? 'Not reported'} />
+            <Fact label="Business" value={contact.businessName ?? 'Not reported'} />
+            <Fact label="About" value={contact.about ?? 'Not reported'} />
+            <Fact label="Known" value={contact.found ? 'Yes' : 'No'} />
+          </dl>
+        </Panel>
+      ) : label ? (
+        <Panel title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments." bodyClassName="pt-2">
+          <dl>
+            <Fact label="Label ID" value={label.id} mono />
+            <Fact label="Name" value={label.name ?? 'Not reported'} />
+            <Fact label="Color" value={label.color ?? 'Not reported'} />
+            <Fact label="Predefined ID" value={label.predefinedId ?? 'Not reported'} />
+          </dl>
+        </Panel>
+      ) : (
+        <StateNotice kind="empty" title="Not found" detail="The selected projected definition was not returned." />
+      )}
+    </Drawer>
+  );
 }
 
 export function MessageInspectorV2({ messageId, loadedChat, enabled, onClose }: { messageId: string; loadedChat?: ChatResource; enabled: boolean; onClose: () => void }) {
@@ -18,11 +59,62 @@ export function MessageInspectorV2({ messageId, loadedChat, enabled, onClose }: 
   const resource = message.data?.resource;
   const matchesChat = resource === undefined || loadedChat === undefined || resource.chatId === loadedChat.id;
   const receipts = useReceiptsV2(messageId, enabled && resource !== undefined && matchesChat);
-  return <Inspector titleId="message-v2-details" eyebrow="Persisted message" title="Message details" subtitle={<span className="ui-v2-mono">{messageId}</span>} status={resource?.status ? <Status tone={resource.status === 'failed' ? 'failed' : resource.status === 'read' || resource.status === 'delivered' ? 'healthy' : 'pending'}>{humanizeToken(resource.status)}</Status> : undefined} modal onClose={onClose}>
-    <div className="ui-v2-stack">
-      {message.isPending ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} /> : message.error && !resource ? <FailureNoticeV2 error={message.error} onRetry={() => message.refetch()} /> : resource && !matchesChat ? <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="The selected message belongs to a different projected chat and is not shown in this context." /> : resource ? <><ProjectionStatusV2 meta={message.data?.meta} />{message.error ? <FailureNoticeV2 error={message.error} stale onRetry={() => message.refetch()} /> : null}<Surface title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery."><dl className="ui-v2-detail-list"><div><dt>Chat</dt><dd className="ui-v2-mono">{resource.chatId}</dd></div><div><dt>Direction</dt><dd>{humanizeToken(resource.direction)}</dd></div><div><dt>Type</dt><dd>{humanizeToken(resource.type)}</dd></div><div><dt>Provenance</dt><dd>{humanizeToken(resource.provenance)}</dd></div><div><dt>Created</dt><dd title={resource.createdAt}>{relativeTime(resource.createdAt) || resource.createdAt}</dd></div><div><dt>Delivered</dt><dd>{resource.deliveredAt ? relativeTime(resource.deliveredAt) : 'Not reported'}</dd></div><div><dt>Read</dt><dd>{resource.readAt ? relativeTime(resource.readAt) : 'Not reported'}</dd></div></dl></Surface></> : <StateNotice value={{ axis: 'resource', state: 'empty' }} />}
-      {resource && matchesChat ? <Surface title="Delivery receipts" description="Per-recipient projected receipts.">{receipts.isPending ? <StateNotice value={{ axis: 'resource', state: 'initial-loading' }} /> : receipts.error && !receipts.data ? <FailureNoticeV2 error={receipts.error} onRetry={() => receipts.refetch()} /> : receipts.data ? <><ProjectionStatusV2 meta={receipts.data.meta} />{receipts.error ? <FailureNoticeV2 error={receipts.error} stale onRetry={() => receipts.refetch()} /> : null}{receipts.data.resource.length ? <ul className="ui-v2-receipt-list">{receipts.data.resource.map((receipt) => <li key={`${receipt.recipientJid}-${receipt.receiptType}-${receipt.receiptAt}`}><Status tone={receipt.receiptType === 'read' || receipt.receiptType === 'delivered' ? 'healthy' : 'pending'}>{humanizeToken(receipt.receiptType)}</Status><span className="ui-v2-mono">{receipt.recipientJid}</span><time title={receipt.receiptAt}>{relativeTime(receipt.receiptAt)}</time></li>)}</ul> : <StateNotice value={{ axis: 'resource', state: 'empty' }} detail="No per-recipient receipts have been projected." />}</> : null}</Surface> : null}
-      <Button onClick={onClose}>Back to conversation</Button>
-    </div>
-  </Inspector>;
+  const statusTone: Tone | undefined = resource?.status
+    ? resource.status === 'failed' ? 'failed' : resource.status === 'read' || resource.status === 'delivered' ? 'ok' : 'pending'
+    : undefined;
+  return (
+    <Drawer open onClose={onClose} title="Message details" subtitle={messageId}>
+      <div className="grid gap-4">
+        {statusTone ? <Status tone={statusTone}>{humanizeToken(resource!.status!)}</Status> : null}
+        {message.isPending ? (
+          <StateNotice kind="loading" title="Loading message" />
+        ) : message.error && !resource ? (
+          <FailureNoticeV2 error={message.error} onRetry={() => message.refetch()} />
+        ) : resource && !matchesChat ? (
+          <StateNotice kind="empty" title="Different chat" detail="The selected message belongs to a different projected chat and is not shown in this context." />
+        ) : resource ? (
+          <>
+            <ProjectionStatusV2 meta={message.data?.meta} />
+            <Panel title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyClassName="pt-2">
+              <dl>
+                <Fact label="Chat" value={resource.chatId} mono />
+                <Fact label="Direction" value={humanizeToken(resource.direction)} />
+                <Fact label="Type" value={humanizeToken(resource.type)} />
+                <Fact label="Provenance" value={humanizeToken(resource.provenance)} />
+                <Fact label="Created" value={relativeTime(resource.createdAt) || resource.createdAt} />
+                <Fact label="Delivered" value={resource.deliveredAt ? (relativeTime(resource.deliveredAt) || 'Not reported') : 'Not reported'} />
+                <Fact label="Read" value={resource.readAt ? (relativeTime(resource.readAt) || 'Not reported') : 'Not reported'} />
+              </dl>
+            </Panel>
+          </>
+        ) : (
+          <StateNotice kind="empty" title="Not returned" />
+        )}
+
+        {resource && matchesChat ? (
+          <Panel title="Delivery receipts" description="Per-recipient projected receipts.">
+            {receipts.isPending ? (
+              <StateNotice kind="loading" title="Loading receipts" />
+            ) : receipts.error && !receipts.data ? (
+              <FailureNoticeV2 error={receipts.error} onRetry={() => receipts.refetch()} />
+            ) : receipts.data ? (
+              receipts.data.resource.length ? (
+                <ul className="grid">
+                  {receipts.data.resource.map((r) => (
+                    <li key={`${r.recipientJid}-${r.receiptType}-${r.receiptAt}`} className="flex items-center justify-between gap-3 py-1.5 border-b border-line last:border-b-0">
+                      <Status tone={receiptTone(r.receiptType)}>{humanizeToken(r.receiptType)}</Status>
+                      <span className="font-mono text-xs text-fg-2 truncate">{r.recipientJid}</span>
+                      <time className="text-xs text-fg-3" title={r.receiptAt}>{relativeTime(r.receiptAt)}</time>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <StateNotice kind="empty" title="No receipts" detail="No per-recipient receipts have been projected." />
+              )
+            ) : null}
+          </Panel>
+        ) : null}
+      </div>
+    </Drawer>
+  );
 }

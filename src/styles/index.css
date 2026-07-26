@@ -1,0 +1,82 @@
+/*
+ * OmniWA Console — v3 design system entry.
+ * Editorial-minimal, dark-only, dense, square (no radius), flat.
+ * Grayscale base + a few bold comic accents. Tailwind v4 @theme.
+ *
+ * NOTE: the legacy @imports below are TRANSITIONAL. They keep not-yet-rebuilt
+ * surfaces styled during the v3 rebuild and are removed in the cleanup phase.
+ */
+@import 'tailwindcss';
+
+/* ── v3 theme tokens ───────────────────────────────────────────────────── */
+@theme {
+  /* Manga: black ink on white paper. Pure monochrome, screentone for tone. */
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-elevated: #f2f2f2;
+  --color-recessed: #f6f6f6;
+  --color-line: #e2e2e2;
+  --color-line-strong: #111111;
+
+  /* Ink tiers (dark on light) */
+  --color-fg: #111111;
+  --color-fg-2: #565656;
+  --color-fg-3: #8c8c8c;
+
+  /* No chroma. Accent = black ink; primary inverts to a solid black block.
+     Status tokens stay ink-black and are differentiated by screentone
+     pattern, never by hue (see src/ui/Status.tsx). */
+  --color-accent: #111111;
+  --color-accent-ink: #ffffff;
+  --color-ok: #111111;
+  --color-warn: #111111;
+  --color-danger: #111111;
+
+  /* Type */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Square everything — no rounded corners anywhere. */
+  --radius-none: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-full: 0px;
+}
+
+/* ── v3 base ───────────────────────────────────────────────────────────── */
+@layer base {
+  /* Absolute square: neutralizes any rounding, including transitional legacy. */
+  *,
+  ::before,
+  ::after {
+    border-radius: 0 !important;
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Tabular numerals for all data/metrics by default in the console. */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
