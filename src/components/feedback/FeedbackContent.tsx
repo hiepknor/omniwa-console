@@ -1,14 +1,15 @@
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { Button } from '@/ui/Button';
 import { CloseButton } from '@/ui/CloseButton';
+import { statusMarkStyle, type StatusMarkTone } from '@/ui/statusMarks';
 import type { FeedbackAction, FeedbackKind } from './feedback-types';
 
-const mark: Record<FeedbackKind, CSSProperties> = {
-  completed: { background: '#111' },
-  info: { background: '#111' },
-  accepted: { background: 'radial-gradient(circle, #111 45%, transparent 47%)', backgroundSize: '3px 3px' },
-  warning: { background: 'repeating-linear-gradient(45deg, #111 0 1px, transparent 1px 3px)' },
-  error: { background: 'linear-gradient(45deg, transparent 42%, #fff 42% 58%, transparent 58%), #111' },
+const markTone: Record<FeedbackKind, StatusMarkTone> = {
+  completed: 'ok',
+  info: 'info',
+  accepted: 'pending',
+  warning: 'degraded',
+  error: 'failed',
 };
 
 export function FeedbackContent({
@@ -42,7 +43,7 @@ export function FeedbackContent({
 
   return (
     <div className="flex items-start gap-3 p-3">
-      <span aria-hidden className="mt-1 size-2 shrink-0" style={mark[kind]} />
+      <span aria-hidden className="mt-1 size-2.5 shrink-0" style={statusMarkStyle[markTone[kind]]} />
       <div className="grid gap-1 min-w-0 flex-1">
         <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">{label ?? kind}</span>
         <strong className="text-[13px] font-semibold text-fg">{title}</strong>

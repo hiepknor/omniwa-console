@@ -49,7 +49,14 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-const tones: Tone[] = ['ok', 'pending', 'degraded', 'failed', 'info', 'neutral'];
+const statusExamples: { tone: Tone; label: string; use: string }[] = [
+  { tone: 'ok', label: 'Connected', use: 'healthy / delivered' },
+  { tone: 'pending', label: 'Pairing', use: 'queued / running' },
+  { tone: 'degraded', label: 'Retrying', use: 'stale / throttled' },
+  { tone: 'failed', label: 'Disconnected', use: 'failed / dead' },
+  { tone: 'info', label: 'Live projection', use: 'informational' },
+  { tone: 'neutral', label: 'Unknown', use: 'retired / unreported' },
+];
 const surfaces = [
   ['bg', '#ffffff'],
   ['surface', '#ffffff'],
@@ -192,12 +199,17 @@ export function UiGallery() {
         </Section>
 
         <Section title="Status">
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            {tones.map((t) => (
-              <Status key={t} tone={t}>
-                {t}
-              </Status>
+          <div className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+            {statusExamples.map(({ tone, label, use }) => (
+              <div key={tone} className="grid gap-2 bg-surface p-3">
+                <Status tone={tone}>{label}</Status>
+                <span className="font-mono text-[10px] text-fg-3">{tone} · {use}</span>
+              </div>
             ))}
+          </div>
+          <div className="flex max-w-sm items-center justify-between gap-3 border border-line p-3">
+            <span className="text-xs text-fg-3">Constrained operational row</span>
+            <Status tone="degraded">Projection syncing with a longer explicit label</Status>
           </div>
         </Section>
 

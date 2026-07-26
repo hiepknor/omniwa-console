@@ -35,6 +35,21 @@ for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 's
   if (!icon.includes(marker)) failures.push(`src/ui/Icon.tsx: iconography contract is missing ${marker}`);
 }
 
+const status = await read('src/ui/Status.tsx');
+for (const marker of ['data-tone={tone}', 'grid-cols-[20px_minmax(0,1fr)]', 'justify-self-start', 'size-2.5', "tone === 'failed'", 'statusMarkStyle[tone]']) {
+  if (!status.includes(marker)) failures.push(`src/ui/Status.tsx: status stamp contract is missing ${marker}`);
+}
+
+const statusMarks = await read('src/ui/statusMarks.ts');
+for (const marker of ['StatusMarkTone', 'to bottom', 'radial-gradient', 'repeating-linear-gradient', "border: '1px solid var(--color-fg-3)'"]) {
+  if (!statusMarks.includes(marker)) failures.push(`src/ui/statusMarks.ts: shared screentone registry is missing ${marker}`);
+}
+
+const stateNotice = await read('src/ui/StateNotice.tsx');
+if (!stateNotice.includes('statusMarkStyle[markTone[kind]]')) {
+  failures.push('src/ui/StateNotice.tsx: notice marks must use the shared screentone registry');
+}
+
 const input = await read('src/ui/Input.tsx');
 for (const marker of ['aria-describedby', 'aria-invalid', 'aria-required', 'max-sm:h-10']) {
   if (!input.includes(marker)) failures.push(`src/ui/Input.tsx: accessible field contract is missing ${marker}`);
@@ -76,8 +91,8 @@ if (!dateTime.includes('type="datetime-local"')) {
 }
 
 const feedbackContent = await read('src/components/feedback/FeedbackContent.tsx');
-if (!feedbackContent.includes('<CloseButton')) {
-  failures.push('src/components/feedback/FeedbackContent.tsx: notification dismiss must use CloseButton');
+for (const marker of ['<CloseButton', 'statusMarkStyle[markTone[kind]]']) {
+  if (!feedbackContent.includes(marker)) failures.push(`src/components/feedback/FeedbackContent.tsx: feedback contract is missing ${marker}`);
 }
 
 const toastViewport = await read('src/components/feedback/ToastViewport.tsx');

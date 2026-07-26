@@ -72,9 +72,7 @@ const allowedHex = new Set([
 // Frozen exceptions from design/DESIGN.md: semantic/progress screentones, the
 // danger hatch, a connection-state mark, and the deterministic QR fixture.
 const gradientAllowlist = new Set([
-  'src/ui/Status.tsx',
-  'src/ui/StateNotice.tsx',
-  'src/components/feedback/FeedbackContent.tsx',
+  'src/ui/statusMarks.ts',
   'src/ui/Button.tsx',
   'src/ui/ProgressBar.tsx',
   'src/app/ConnectPage.tsx',

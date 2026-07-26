@@ -1,14 +1,10 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from './cn';
+import { statusMarkStyle } from './statusMarks';
 
 type Kind = 'info' | 'loading' | 'empty' | 'error';
 
-const mark: Record<Kind, CSSProperties> = {
-  info: { background: '#111' },
-  loading: { background: 'radial-gradient(circle, #111 45%, transparent 47%)', backgroundSize: '3px 3px' },
-  empty: { background: 'transparent', border: '1px solid var(--color-fg-3)' },
-  error: { background: 'linear-gradient(45deg, transparent 42%, #fff 42% 58%, transparent 58%), #111' },
-};
+const markTone = { info: 'info', loading: 'pending', empty: 'neutral', error: 'failed' } as const;
 
 /** Honest inline state: loading / empty / error, with optional requestId + action. */
 export function StateNotice({
@@ -30,7 +26,7 @@ export function StateNotice({
     <div className={cn('flex items-start justify-between gap-4 border border-line bg-elevated p-3', className)}>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span aria-hidden className="size-2 shrink-0" style={mark[kind]} />
+          <span aria-hidden className="size-2.5 shrink-0" style={statusMarkStyle[markTone[kind]]} />
           <strong className="text-sm font-semibold text-fg">{title}</strong>
         </div>
         {detail ? <p className="mt-1 text-sm text-fg-2">{detail}</p> : null}

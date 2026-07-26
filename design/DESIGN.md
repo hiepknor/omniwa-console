@@ -66,12 +66,16 @@ screentone pattern, never by hue** (see `src/ui/Status.tsx`).
 
 ### Status vocabulary (the frozen set)
 
-A status is an **8px screentone mark + label**. The fill pattern carries the
-meaning:
+A status is a **24px minimum-height framed ink stamp**: a 20px recessed marker
+cell, 10px screentone mark, and an explicit 11px/500 label. The frame keeps
+status visually stable in tables, headers, inspectors, and dense trailing
+content; long labels wrap instead of escaping their container. The fill pattern
+carries the meaning:
 
 | Status | Screentone |
 | --- | --- |
-| `ok` / `active` / `delivered`, `info` / `live` | solid ink |
+| `ok` / `active` / `delivered` | solid ink |
+| `info` / `live` | split horizontal ink |
 | `pending` / `pairing` / `queued` | halftone dots |
 | `degraded` / `retrying` | diagonal hatch |
 | `failed` / `disconnected` / `dead` | ink block with a white slash (cancelled) |
@@ -139,7 +143,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   SVG. Icons are decorative and never replace a visible label; icon-only actions
   require an explicit accessible name. Navigation uses `NavigationItemContent`
   so full rail, compact rail, and mobile bottom nav cannot drift independently.
-- **Status** — 8px square mark + label; tones map to §2. `<Status tone>`.
+- **Status** — the canonical framed ink stamp from §2. All usages share the
+  screentone registry in `statusMarks.ts`; notices and feedback map their state
+  vocabulary into the same marks instead of copying gradients. Failed status
+  receives the strong frame; other tones use the default hairline frame.
+  `<Status tone>`.
 - **Input / Field** — recessed bg, 1px border, square, 13px; focus → strong border.
   Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted. Field descriptions and errors are linked with `aria-describedby`; errors set `aria-invalid`, and required state remains explicit.
 - **Textarea / DateTimeInput** — use the same surface, border, focus, invalid,
