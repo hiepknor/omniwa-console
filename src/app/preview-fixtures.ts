@@ -1,6 +1,7 @@
 /* Dev-only sample data for rendering v3 surfaces without a backend (/__preview). */
 import type { Campaign } from '@/api/campaigns';
 import type { ChatResource } from '@/api/chats';
+import type { EventResource } from '@/api/events-api';
 import type { GroupResource } from '@/api/groups';
 import type { InstanceResource } from '@/api/instances';
 import type { MessageResource } from '@/api/messages';
@@ -93,6 +94,15 @@ export const campaignDetailFixture = {
   recipientCount: 1284,
   byStatus: { delivered: 918, processing: 240, queued: 84, failed: 30, skipped: 12 },
 };
+
+export const eventsFixture: EventResource[] = [
+  { id: 'evt_01HZX9', type: 'message.received', occurredAt: ago(60), ingestedAt: ago(59), summary: { chatId: '15551230001@s.whatsapp.net', direction: 'incoming', messageType: 'text' } },
+  { id: 'evt_02KQP7', type: 'instance.connected', occurredAt: ago(300), ingestedAt: ago(300), summary: { instanceId: 'inst_01HZX', connected: true } },
+  { id: 'evt_03TMR3', type: 'campaign.transition', occurredAt: ago(900), ingestedAt: ago(899), summary: { campaignId: 'cmp_01HB', fromStatus: 'scheduled', toStatus: 'running' } },
+  { id: 'evt_04WLK1', type: 'message.status', occurredAt: ago(1200), ingestedAt: ago(1200), summary: { messageId: 'msg_2', status: 'delivered' } },
+] as unknown as EventResource[];
+
+export const eventDetailFixture = eventsFixture[0];
 
 export const healthFixture: ServerHealthResource = {
   generatedAt: ago(30),
