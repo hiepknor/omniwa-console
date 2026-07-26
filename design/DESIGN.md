@@ -147,7 +147,8 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   Closed hover uses recessed paper + strong border without movement. Open state
   inverts the chevron cell. The active option is ink with a white label; selected
   state has a square marker that also inverts when active. Trigger and options are
-  40px tall on mobile. Menus flip/align at viewport edges.
+  40px tall on mobile. Menus remain 4px from the trigger and flip/align at
+  viewport edges; parent grid stretching must not change that gap.
 - **Table** — the workhorse. `--color-surface` container, 1px border, no radius.
   Sticky 11px uppercase muted headers; 13px cells; hairline row dividers; row hover
   = `--color-elevated`. IDs mono; timestamps relative with ISO `title`; numeric
