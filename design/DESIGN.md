@@ -1,26 +1,29 @@
-# OmniWA Console — Design System (v3)
+# OmniWA Console — Locked Design System
 
 > Category: Operations & Infrastructure — WhatsApp platform operations console.
-> A ground-up rebuild. This document is the brand contract. Canonical tokens live
-> in `src/styles/index.css` (Tailwind v4 `@theme`); the primitives in `src/ui/`
-> are the implementation source of truth. Where doc and code disagree, code wins.
+> **Status: frozen visual contract.** Canonical tokens live in
+> `src/styles/index.css` (Tailwind v4 `@theme`), primitives live in `src/ui/`, and
+> `/__ui` is the review surface. These three sources must change together; code
+> does not silently override this contract.
 
 ## 0. One-paragraph brief
 
 A **manga-inspired, dense operational console** — **black ink on white paper**,
 editorial and typography-led. Everything is **square** — no rounded corners
-anywhere. Surfaces are **flat**: hairline 1px borders, no shadows, no gradients,
-no blur; depth comes from stepping light grays. The palette is **pure monochrome**
-— ink, paper, and gray **screentone**, with **no chroma at all**. Meaning is
-carried by ink weight, fill, and screentone pattern, never by hue. Built
+anywhere. Surfaces are **flat**: hairline 1px borders and stepped light grays.
+Only action lift and floating menus may use a crisp, zero-blur offset ink shadow;
+only semantic status and danger treatments may use screentone gradients. Soft
+shadows, decorative gradients, and blur are forbidden. The palette is **pure
+monochrome** — ink, paper, and gray, with **no chroma at all**. Built
 **Tailwind-first**.
 
 ## 1. Principles
 
 1. **Square, always.** `border-radius: 0` globally (enforced in `@layer base`). No
    pills, no rounded avatars, no soft cards. Corners are hard.
-2. **Flat, not floating.** 1px borders (`--color-line`) and background steps carry
-   elevation. No `box-shadow`, no gradients, no backdrop blur.
+2. **Flat, with explicit lift.** Borders and background steps carry ordinary
+   elevation. A hard offset shadow is reserved for buttons and open menus; it is
+   never soft, blurred, or used to turn content sections into floating cards.
 3. **Ink on paper.** White paper, black ink, gray screentone for tone. A light
    surface, not dark.
 4. **No chroma.** There are no colors — only ink, paper, and gray. Emphasis is an
@@ -39,8 +42,8 @@ carried by ink weight, fill, and screentone pattern, never by hue. Built
 | Token | Value | Role |
 | --- | --- | --- |
 | `--color-bg` | `#ffffff` | Paper / page background |
-| `--color-surface` | `#ffffff` | Panels, tables, rail |
-| `--color-elevated` | `#f2f2f2` | Hover rows, drawers, dialogs, menus |
+| `--color-surface` | `#ffffff` | Panels, tables, rail, overlays |
+| `--color-elevated` | `#f2f2f2` | Hover rows, action footers, notices |
 | `--color-recessed` | `#f6f6f6` | Inputs, code/QR wells |
 | `--color-line` | `#e2e2e2` | Default hairline divider (inner rows) |
 | `--color-line-strong` | `#111111` | Ink frame of panels, focus, active edges |
@@ -93,13 +96,22 @@ status in words.
 | Label / table header | 11px | 500 | **Uppercase**, tracking `0.08em`, muted |
 | Metadata / mono ID | 12px | 400 | Mono, secondary/muted |
 
-Weights: 400 body, 500 labels/buttons, 600 headings/metrics. Uppercase is only
+Weights: 400 body, 500 labels, 600 buttons/headings/metrics. Uppercase is only
 for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 
-## 4. Form & layout
+## 4. Form, layout, and elevation
 
 - **Corners:** 0 everywhere. **Borders:** 1px `--color-line`; `--color-line-strong`
-  for focus/active. **Elevation:** background step only.
+  for focus/active.
+- **Elevation:** stepped surfaces by default. Buttons may lift by 1px and grow a
+  2–3px zero-blur offset shadow. Open selectors may use a 4px zero-blur offset
+  shadow. Panels, drawers, dialogs, tables, and notices remain shadowless.
+- **Patterns:** gradients are not decorative backgrounds. They are restricted to
+  screentone status marks, the danger button at rest, and deterministic QR/sample
+  fixtures. Danger hover clears the hatch and becomes solid ink.
+- **Motion:** interaction transitions are 150ms, limited to color, border,
+  shadow, and the property that actually moves (`translate`/`rotate`). All motion
+  has a `motion-reduce` fallback.
 - **Spacing:** Tailwind 4px scale. Dense rhythm — 8/12/16 within blocks, 24 between
   sections.
 - **Focus:** a 1px `--color-line-strong` inset ring or a 2px `--color-accent`
@@ -109,29 +121,35 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 
 ## 5. Core components (`src/ui/`)
 
-- **Button** — square, 1px border, 13px/500, `h-9` dense. `primary` = flat
-  `--color-accent` fill + white ink; `ghost` = transparent + `--color-line` border,
-  hover lifts to `--color-elevated` + `--color-line-strong`; `danger` = a diagonal
-  hazard-hatch fill that inverts to a solid ink block on hover (no hue). One primary per view.
-- **Status** — 6px square mark + label; tones map to §2. `<Status tone>`.
+- **Button** — square, 1px border, 13px/600, `h-9` desktop and `h-10` mobile.
+  `primary` = ink fill + white label; `ghost` = paper + strong border; `danger` =
+  diagonal hazard hatch at rest and a solid ink block on hover. Enabled buttons
+  lift 1px with a hard offset shadow; active returns to the baseline. Busy is
+  visibly marked and natively disabled. One primary action per view.
+- **Status** — 8px square mark + label; tones map to §2. `<Status tone>`.
 - **Input / Field** — recessed bg, 1px border, square, 13px; focus → strong border.
   Invalid → strong ink (`--color-line-strong`) border + 12px message below. Labels are 11px uppercase muted.
-- **Select** — ghost control with a chevron; active filters become dismissible
-  square chips in the toolbar.
+- **Select** — custom ARIA combobox/listbox, never the browser-native visual.
+  Closed hover uses recessed paper + strong border without movement. Open state
+  inverts the chevron cell. The active option is ink with a white label; selected
+  state has a square marker that also inverts when active. Trigger and options are
+  40px tall on mobile. Menus flip/align at viewport edges.
 - **Table** — the workhorse. `--color-surface` container, 1px border, no radius.
   Sticky 11px uppercase muted headers; 13px cells; hairline row dividers; row hover
   = `--color-elevated`. IDs mono; timestamps relative with ISO `title`; numeric
-  right-aligned tabular. Locally bounded horizontal scroll; the page never scrolls
-  sideways. ≤640px rows become label/value stacks — never floating cards.
+  right-aligned tabular. Horizontal overflow stays inside the table container;
+  the page never scrolls sideways and rows never become floating cards.
 - **MetricGrid** — one contiguous bordered grid (not separate cards): hairline
   cell separators, 11px uppercase label, **24px mono** value. Wraps to 2→1 columns.
 - **Tabs** — underline tabs; 2px `--color-accent` underline on the active tab.
-- **Drawer (inspector)** — detail opens as a right panel, `min(440px,100%)`,
-  `--color-surface`, 1px left border, over a `rgba(0,0,0,0.6)` scrim. Header =
-  title + mono ID + close. ≤640px → full-width bottom sheet.
-- **Dialog** — `min(520px,100%)`, `--color-elevated`, 1px `--color-line-strong`
-  border, centered over a scrim. Destructive dialogs require typing the resource
-  name; confirm stays disabled until it matches.
+- **Drawer (inspector)** — right panel, `min(440px,100%)`, paper surface, 1px
+  strong left border, and a 60% ink scrim. Header = title + mono ID + square close
+  cell. ≤640px becomes an 85dvh full-width bottom sheet. The body scrolls without
+  moving the page.
+- **Dialog** — `min(560px,100%)`, paper surface, 1px strong frame, square close
+  cell, bounded body, and elevated action footer over a 60% ink scrim. ≤640px
+  docks to the bottom and gives footer actions equal 40px targets. Destructive
+  dialogs require explicit intent; pending commands can lock dismissal.
 - **Toast** — bottom-right, `--color-elevated`, a 2px ink left edge,
   13px/500 title + 12px detail, and **always** the mono `requestId` on API errors.
   Accepted commands say `accepted` and auto-dismiss (6s); errors persist.
@@ -153,25 +171,70 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Page header:** an optional 11px uppercase eyebrow, the page title, connection
   state on the right, at most one primary action. ≤640px stacks to one column.
 - **Responsive:** ≥901px full rail; 641–900px icon-only rail; ≤640px a fixed
-  bottom nav bar. Touch targets ≥44px.
+  bottom nav bar. Dense form/action controls are at least 40px on mobile; primary
+  navigation targets remain at least 44px.
 
-## 7. Do / Don't
+## 7. Frozen interaction states
+
+Every shared control ships and is reviewed in all applicable states. State
+styles must be mutually exclusive; do not stack conflicting `text-*`, `bg-*`,
+or `border-*` utilities and rely on generated CSS order.
+
+| Primitive | Required visual states |
+| --- | --- |
+| Button | rest, hover, active, keyboard focus, disabled, busy |
+| Select trigger | rest, hover, open, open + hover, keyboard focus, invalid, disabled |
+| Select option | rest, active/hover, selected, active + selected, disabled |
+| Input | rest, hover, keyboard focus, populated, invalid, disabled |
+| Table row | rest, hover, keyboard focus, selected |
+| Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close |
+
+Hover never hides a label or icon. Inverted surfaces always use paper-colored
+foregrounds. Motion may reinforce state, but color/border/fill must communicate
+the same state when reduced motion is enabled. Touch devices do not depend on
+hover to expose meaning or actions.
+
+## 8. Change control
+
+The visual language is locked. A deliberate change requires all of the
+following in one pull request:
+
+1. Update this contract when tokens, geometry, elevation, interaction states, or
+   an allowlisted exception changes.
+2. Update or add the production primitive in `src/ui/`; features do not invent a
+   competing control.
+3. Add the state to `/__ui` using the production primitive.
+4. Add a regression test, `scripts/check-design.mjs` interaction rule, or
+   `scripts/check-visual-language.mjs` visual-boundary rule that fails before the
+   change and protects the decision afterward.
+5. Record Chrome DevTools evidence at desktop and 390px mobile, including hover,
+   focus, open, disabled/pending, and overflow behavior as applicable.
+
+Allowlist changes in `scripts/check-visual-language.mjs` require a matching
+rationale in this document. A screenshot alone does not authorize a new token,
+hue, shadow, gradient, blur, radius, or feature-local primitive.
+
+## 9. Do / Don't
 
 **Do:** keep every corner square; render status as mark + label; put every ID in
 mono; use tabular numerals on data; keep one primary action per view; say
 `accepted`/`queued` honestly; reflect filters/cursors into the URL; derive nav from
 scope.
 
-**Don't:** add any `border-radius`, shadow, gradient, or blur; introduce any hue or
-chroma (the palette is ink + paper + gray only); signal with pattern or color alone
-(always label); use weight 700+; center-max-width product pages.
+**Don't:** add any `border-radius`, soft shadow, decorative gradient, or blur;
+introduce any hue or chroma; use hard shadows outside buttons/open menus; signal
+with pattern or color alone; stack conflicting state-color utilities; use weight
+700+; center-max-width product pages.
 
-## 8. Agent quick reference
+## 10. Agent quick reference
 
 - Paper `#ffffff` / `#f2f2f2` / `#f6f6f6`; lines `#e2e2e2` (inner) / `#111111` (ink frame).
 - Ink `#111111 / #565656 / #8c8c8c`. No chroma.
 - Primary = inverted ink block; status = screentone (§2), never hue.
-- Everything square (radius 0), flat (1px borders, no shadow), dense, light.
+- Everything square, dense, light, and framed with 1px borders. Only buttons and
+  open menus receive hard zero-blur lift; overlays remain flat.
 - Sans 13–14px UI, mono 12px IDs + 24px metrics; labels 11px uppercase.
 - Build with Tailwind utilities against the `@theme` tokens; compose `src/ui/`
   primitives before writing bespoke markup.
+- Review every state in §7; update the contract, gallery, tests, and gates
+  together when intentionally changing the language.
