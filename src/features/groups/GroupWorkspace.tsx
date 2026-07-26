@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ApiFailure } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import type { GroupMemberResource, GroupResource, GroupSetting } from '@/api/groups';
 import type { ProjectionMeta } from '@/api/envelopes';
 import { humanizeToken, relativeTime } from '@/lib/format';
@@ -19,8 +19,7 @@ const settings: Array<{ key: GroupSetting; label: string; hint: string }> = [
 ];
 
 function Fail({ error, command, stale, onRetry }: { error: unknown; command?: boolean; stale?: boolean; onRetry?: () => void }) {
-  const f = error instanceof ApiFailure ? error : undefined;
-  return <StateNotice kind="error" title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={onRetry ? <Button onClick={onRetry}>Retry</Button> : undefined} />;
+  return <ApiFailureNotice error={error} title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} onRetry={onRetry} />;
 }
 function Ack({ action }: { action: string }) { return <StateNotice kind="info" title={`${action} accepted`} detail="The refreshed group projection remains authoritative; acknowledgement does not prove provider completion." />; }
 function ProjectionLine({ meta }: { meta?: ProjectionMeta }) {
@@ -28,12 +27,14 @@ function ProjectionLine({ meta }: { meta?: ProjectionMeta }) {
   const tone: Tone = meta.syncStatus === 'ready' ? 'ok' : meta.syncStatus === 'failed' ? 'failed' : meta.syncStatus === 'stale' ? 'degraded' : 'pending';
   return <Status tone={tone}>Projection {meta.syncStatus.replace('_', ' ')}</Status>;
 }
-export function GroupWorkspace({ groupId, enabled, outboundEnabled, onClose, onLeft }: { groupId: string; enabled: boolean; outboundEnabled: boolean; onClose: () => void; onLeft: () => void }) {
-  const query = useGroup(groupId, enabled);
+export function GroupWorkspace({ groupId, readEnabled, commandsEnabled, outboundEnabled, onClose, onLeft }: { groupId: string; readEnabled: boolean; commandsEnabled: boolean; outboundEnabled: boolean; onClose: () => void; onLeft: () => void }) {
+  const query = useGroup(groupId, readEnabled);
   const group = query.data?.resource;
   return (
     <Drawer open onClose={onClose} title={group?.subject ?? 'Group details'} subtitle={groupId}>
-      {query.isPending ? (
+      {!readEnabled && !group ? (
+        <StateNotice kind="empty" title="Group detail unavailable" detail="The groups projection capability is absent and no cached detail is available." />
+      ) : query.isPending ? (
         <StateNotice kind="loading" title="Loading group" />
       ) : query.error && !group ? (
         <Fail error={query.error} onRetry={() => query.refetch()} />
@@ -43,8 +44,9 @@ export function GroupWorkspace({ groupId, enabled, outboundEnabled, onClose, onL
             <Status tone={group.status === 'active' ? 'ok' : 'degraded'}>{humanizeToken(group.status ?? 'unreported')}</Status>
             <ProjectionLine meta={query.data?.meta} />
           </div>
-          {query.error ? <Fail error={query.error} stale onRetry={() => query.refetch()} /> : null}
-          <GroupWorkspaceContent group={group} outboundEnabled={outboundEnabled} onLeft={onLeft} />
+          {!commandsEnabled ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable group detail visible. Provider commands remain disabled until groups_projection returns." /> : null}
+          {query.error ? <Fail error={query.error} stale onRetry={readEnabled ? () => query.refetch() : undefined} /> : null}
+          <GroupWorkspaceContent group={group} commandsEnabled={commandsEnabled} outboundEnabled={outboundEnabled} onLeft={onLeft} />
         </div>
       ) : (
         <StateNotice kind="empty" title="Not returned" detail="The projected group detail was not returned." />
@@ -53,7 +55,7 @@ export function GroupWorkspace({ groupId, enabled, outboundEnabled, onClose, onL
   );
 }
 
-function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: GroupResource; outboundEnabled: boolean; onLeft: () => void }) {
+function GroupWorkspaceContent({ group, commandsEnabled, outboundEnabled, onLeft }: { group: GroupResource; commandsEnabled: boolean; outboundEnabled: boolean; onLeft: () => void }) {
   const [subject, setSubject] = useState(group.subject ?? '');
   const [description, setDescription] = useState(group.description ?? '');
   const [memberJid, setMemberJid] = useState('');
@@ -69,7 +71,7 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
   const demote = useDemoteGroupMember(group.id);
   const remove = useRemoveGroupMember(group.id);
   const leave = useLeaveGroup(group.id);
-  const invite = useGroupInvite(group.id, true);
+  const invite = useGroupInvite(group.id, commandsEnabled);
   const resetInvite = useResetInvite(group.id);
   const send = useSendGroupText(group.id);
   useEffect(() => { setSubject(group.subject ?? ''); setDescription(group.description ?? ''); }, [group.description, group.subject]);
@@ -79,7 +81,7 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
   const lastAck = commandAck ?? (update.data ? 'Metadata update' : setting.data ? 'Setting update' : add.data ? 'Member add' : promote.data ? 'Member promotion' : demote.data ? 'Member demotion' : undefined);
   const closeConfirm = () => { setConfirm(undefined); setConfirmText(''); remove.reset(); leave.reset(); resetInvite.reset(); };
   const submitConfirm = () => {
-    if (!confirm) return;
+    if (!confirm || !commandsEnabled) return;
     if (confirm.action === 'remove') { const ref = confirm.member.memberRef ?? confirm.member.id; if (confirmText !== ref || remove.isPending) return; remove.mutate(ref, { onSuccess: () => { setCommandAck('Member removal'); closeConfirm(); } }); }
     if (confirm.action === 'leave') { if (confirmText !== group.id || leave.isPending) return; leave.mutate(undefined, { onSuccess: () => { closeConfirm(); onLeft(); } }); }
     if (confirm.action === 'reset-invite' && !resetInvite.isPending) resetInvite.mutate(undefined, { onSuccess: () => { setCommandAck('Invite-link reset'); closeConfirm(); } });
@@ -103,9 +105,9 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
 
       <Panel title="Metadata" description="Only changed fields are submitted; a partial failure is not automatically retried.">
         <div className="grid gap-3">
-          <Field label="Subject">{(id) => <Input id={id} value={subject} disabled={update.isPending} onChange={(e) => setSubject(e.target.value)} />}</Field>
-          <Field label="Description">{(id) => <Textarea id={id} rows={3} value={description} disabled={update.isPending} onChange={(e) => setDescription(e.target.value)} />}</Field>
-          <Button disabled={!metadataDirty || update.isPending} onClick={() => update.mutate({ ...(subject !== (group.subject ?? '') ? { subject } : {}), ...(description !== (group.description ?? '') ? { description } : {}) })}>{update.isPending ? 'Submitting…' : 'Update metadata'}</Button>
+          <Field label="Subject">{(id) => <Input id={id} value={subject} disabled={!commandsEnabled || update.isPending} onChange={(e) => setSubject(e.target.value)} />}</Field>
+          <Field label="Description">{(id) => <Textarea id={id} rows={3} value={description} disabled={!commandsEnabled || update.isPending} onChange={(e) => setDescription(e.target.value)} />}</Field>
+          <Button disabled={!commandsEnabled || !metadataDirty || update.isPending} onClick={() => update.mutate({ ...(subject !== (group.subject ?? '') ? { subject } : {}), ...(description !== (group.description ?? '') ? { description } : {}) })}>{update.isPending ? 'Submitting…' : 'Update metadata'}</Button>
           {update.error ? <Fail error={update.error} command /> : null}
         </div>
       </Panel>
@@ -115,7 +117,7 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
           {settings.map(({ key, label, hint }) => {
             const checked = Boolean(group[key]);
             return (
-              <Switch key={key} className="border-b border-line last:border-b-0" label={label} description={hint} checked={checked} disabled={setting.isPending} onChange={() => setting.mutate({ setting: key, enabled: !checked })} />
+              <Switch key={key} className="border-b border-line last:border-b-0" label={label} description={hint} checked={checked} disabled={!commandsEnabled || setting.isPending} onChange={() => setting.mutate({ setting: key, enabled: !checked })} />
             );
           })}
           {setting.error ? <div className="pt-3"><Fail error={setting.error} command /></div> : null}
@@ -124,16 +126,16 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
 
       <Panel title="Invite link" description="Reading uses the projection/cache path. Reset revokes the previous link and requires confirmation.">
         <div className="grid gap-3">
-          {invite.isPending ? <StateNotice kind="loading" title="Loading invite" /> : invite.error && !invite.data ? <Fail error={invite.error} onRetry={() => invite.refetch()} /> : <code className="block p-2 font-mono text-xs text-fg bg-recessed border border-line break-all">{invite.data ?? 'No invite link reported'}</code>}
-          <Button variant="danger" onClick={() => setConfirm({ action: 'reset-invite' })}>Reset invite link…</Button>
+          {!commandsEnabled && !invite.data ? <StateNotice kind="empty" title="Invite unavailable" detail="The groups projection capability is absent; no invite request was sent." /> : invite.isPending ? <StateNotice kind="loading" title="Loading invite" /> : invite.error && !invite.data ? <Fail error={invite.error} onRetry={commandsEnabled ? () => invite.refetch() : undefined} /> : <code className="block p-2 font-mono text-xs text-fg bg-recessed border border-line break-all">{invite.data ?? 'No invite link reported'}</code>}
+          <Button variant="danger" disabled={!commandsEnabled} onClick={() => setConfirm({ action: 'reset-invite' })}>Reset invite link…</Button>
         </div>
       </Panel>
 
       <Panel title="Members" description="Member commands act on the linked provider; refreshed projection remains authoritative.">
         <div className="grid gap-3">
-          <form className="grid grid-cols-[minmax(0,1fr)_auto] gap-2" onSubmit={(e) => { e.preventDefault(); if (memberJid.trim() && !memberPending) add.mutate(memberJid.trim(), { onSuccess: () => setMemberJid('') }); }}>
-            <Field label="Phone or JID">{(id) => <Input id={id} value={memberJid} disabled={memberPending} onChange={(e) => setMemberJid(e.target.value)} />}</Field>
-            <div className="flex items-end"><Button type="submit" disabled={!memberJid.trim() || memberPending}>{add.isPending ? 'Adding…' : 'Add member'}</Button></div>
+          <form className="grid grid-cols-[minmax(0,1fr)_auto] gap-2" onSubmit={(e) => { e.preventDefault(); if (commandsEnabled && memberJid.trim() && !memberPending) add.mutate(memberJid.trim(), { onSuccess: () => setMemberJid('') }); }}>
+            <Field label="Phone or JID">{(id) => <Input id={id} value={memberJid} disabled={!commandsEnabled || memberPending} onChange={(e) => setMemberJid(e.target.value)} />}</Field>
+            <div className="flex items-end"><Button type="submit" disabled={!commandsEnabled || !memberJid.trim() || memberPending}>{add.isPending ? 'Adding…' : 'Add member'}</Button></div>
           </form>
           {memberError ? <Fail error={memberError} command /> : null}
           {group.members.length ? (
@@ -145,8 +147,8 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
                     <span className="grid min-w-0"><strong className="truncate text-[13px] font-medium text-fg">{member.displayName ?? ref}</strong><small className="truncate font-mono text-xs text-fg-3">{ref}</small></span>
                     <Status tone={member.role === 'member' ? 'neutral' : 'ok'}>{humanizeToken(member.role)}</Status>
                     <div className="col-span-2 flex gap-2">
-                      {member.role === 'member' ? <Button disabled={memberPending} onClick={() => promote.mutate(ref)}>Promote</Button> : <Button disabled={memberPending} onClick={() => demote.mutate(ref)}>Demote</Button>}
-                      <Button variant="danger" disabled={memberPending} onClick={() => setConfirm({ action: 'remove', member })}>Remove…</Button>
+                      {member.role === 'member' ? <Button disabled={!commandsEnabled || memberPending} onClick={() => promote.mutate(ref)}>Promote</Button> : <Button disabled={!commandsEnabled || memberPending} onClick={() => demote.mutate(ref)}>Demote</Button>}
+                      <Button variant="danger" disabled={!commandsEnabled || memberPending} onClick={() => setConfirm({ action: 'remove', member })}>Remove…</Button>
                     </div>
                   </li>
                 );
@@ -158,13 +160,13 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
 
       <Panel title="Send text" description="Requires outbound-rate-limit support; acknowledgement is not delivery.">
         <div className="grid gap-3">
-          <Button disabled={!outboundEnabled} onClick={() => { send.reset(); setSendText(''); setSendOpen(true); }}>Send group text…</Button>
-          {!outboundEnabled ? <StateNotice kind="empty" title="Sending unavailable" detail="The backend does not advertise outbound_rate_limit; group sends remain disabled." /> : null}
+          <Button disabled={!commandsEnabled || !outboundEnabled} onClick={() => { send.reset(); setSendText(''); setSendOpen(true); }}>Send group text…</Button>
+          {!commandsEnabled || !outboundEnabled ? <StateNotice kind="empty" title="Sending unavailable" detail={!commandsEnabled ? 'The groups projection capability is absent; group commands remain disabled.' : 'The backend does not advertise outbound_rate_limit; group sends remain disabled.'} /> : null}
         </div>
       </Panel>
 
       <Panel title="Danger zone" description="Leaving removes the active account from this group and requires the exact group JID.">
-        <Button variant="danger" onClick={() => setConfirm({ action: 'leave' })}>Leave group…</Button>
+        <Button variant="danger" disabled={!commandsEnabled} onClick={() => setConfirm({ action: 'leave' })}>Leave group…</Button>
       </Panel>
 
       <Dialog
@@ -172,11 +174,11 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
         onClose={closeConfirm}
         closeDisabled={confirmPending}
         title={confirm?.action === 'remove' ? 'Remove member?' : confirm?.action === 'leave' ? 'Leave group?' : 'Reset invite link?'}
-        footer={<><Button disabled={confirmPending} onClick={closeConfirm}>Cancel</Button><Button variant="danger" disabled={confirmPending || (confirm?.action !== 'reset-invite' && confirmText !== (confirm?.action === 'leave' ? group.id : confirm?.member.memberRef ?? confirm?.member.id))} onClick={submitConfirm}>{confirmPending ? 'Submitting…' : 'Confirm command'}</Button></>}
+        footer={<><Button disabled={confirmPending} onClick={closeConfirm}>Cancel</Button><Button variant="danger" disabled={!commandsEnabled || confirmPending || (confirm?.action !== 'reset-invite' && confirmText !== (confirm?.action === 'leave' ? group.id : confirm?.member.memberRef ?? confirm?.member.id))} onClick={submitConfirm}>{confirmPending ? 'Submitting…' : 'Confirm command'}</Button></>}
       >
         <div className="grid gap-3">
           <p className="text-sm text-fg-2">{confirm?.action === 'reset-invite' ? 'The existing link will be revoked. Server acknowledgement is not refreshed projection state.' : 'Type the exact identifier to confirm. This command is not automatically retried.'}</p>
-          {confirm && confirm.action !== 'reset-invite' ? <Field label={confirm.action === 'leave' ? 'Group JID' : 'Member reference'}>{(id) => <Input id={id} value={confirmText} autoComplete="off" autoFocus disabled={confirmPending} onChange={(e) => setConfirmText(e.target.value)} />}</Field> : null}
+          {confirm && confirm.action !== 'reset-invite' ? <Field label={confirm.action === 'leave' ? 'Group JID' : 'Member reference'}>{(id) => <Input id={id} value={confirmText} autoComplete="off" autoFocus disabled={!commandsEnabled || confirmPending} onChange={(e) => setConfirmText(e.target.value)} />}</Field> : null}
           {confirmError ? <Fail error={confirmError} command /> : null}
         </div>
       </Dialog>
@@ -186,11 +188,11 @@ function GroupWorkspaceContent({ group, outboundEnabled, onLeft }: { group: Grou
         onClose={() => setSendOpen(false)}
         closeDisabled={send.isPending}
         title="Send text to group"
-        footer={send.data ? <Button variant="primary" onClick={() => setSendOpen(false)}>Close acknowledgement</Button> : <><Button disabled={send.isPending} onClick={() => setSendOpen(false)}>Cancel</Button><Button variant="primary" disabled={!sendText.trim() || send.isPending} onClick={() => send.mutate(sendText.trim())}>{send.isPending ? 'Submitting…' : 'Send text'}</Button></>}
+        footer={send.data ? <Button variant="primary" onClick={() => setSendOpen(false)}>Close acknowledgement</Button> : <><Button disabled={send.isPending} onClick={() => setSendOpen(false)}>Cancel</Button><Button variant="primary" disabled={!commandsEnabled || !sendText.trim() || send.isPending} onClick={() => send.mutate(sendText.trim())}>{send.isPending ? 'Submitting…' : 'Send text'}</Button></>}
       >
         <div className="grid gap-3">
           <p className="text-sm text-fg-2">Acknowledgement does not prove WhatsApp delivery. Inspect projected conversation history before retrying an uncertain outcome.</p>
-          <Field label="Message">{(id) => <Textarea id={id} rows={4} value={sendText} maxLength={10_000} disabled={send.isPending || Boolean(send.data)} onChange={(e) => setSendText(e.target.value)} />}</Field>
+          <Field label="Message">{(id) => <Textarea id={id} rows={4} value={sendText} maxLength={10_000} disabled={!commandsEnabled || send.isPending || Boolean(send.data)} onChange={(e) => setSendText(e.target.value)} />}</Field>
           {send.data ? <Ack action="Group text send" /> : null}
           {send.error ? <Fail error={send.error} command /> : null}
         </div>

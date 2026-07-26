@@ -3,9 +3,10 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure, type ProjectionMeta } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, PageHeader, StateNotice, Status, type Tone } from '@/ui';
+import { PageHeader, StateNotice, Status, type Tone } from '@/ui';
 import { CreateGroup } from './CreateGroup';
 import { GroupsView } from './GroupsView';
 import { GroupWorkspace } from './GroupWorkspace';
@@ -30,7 +31,7 @@ function ProjectionStatus({ meta }: { meta?: ProjectionMeta }) {
 function Fail({ error, stale, onRetry }: { error: unknown; stale?: boolean; onRetry: () => void }) {
   const f = error instanceof ApiFailure ? error : undefined;
   const notReady = f?.code === 'projection_not_ready';
-  return <StateNotice kind={notReady ? 'empty' : 'error'} title={notReady ? 'Projection not ready' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={notReady ? undefined : <Button onClick={onRetry}>Retry</Button>} />;
+  return <ApiFailureNotice error={error} kind={notReady ? 'empty' : 'error'} title={notReady ? 'Projection not ready' : stale ? 'Showing last known data' : 'Read failed'} onRetry={notReady ? undefined : onRetry} />;
 }
 
 export function GroupsPage() {
@@ -94,7 +95,7 @@ export function GroupsPage() {
         onCursor={(v) => setParam('cursor', v)}
       />
 
-      {groupId && groupsReady ? <GroupWorkspace groupId={groupId} enabled outboundEnabled={outboundReady} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
+      {groupId ? <GroupWorkspace groupId={groupId} readEnabled={groupsReady} commandsEnabled={groupsReady} outboundEnabled={outboundReady} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
       <CreateGroup open={route.create && groupsReady} pending={create.isPending} error={create.error} onClose={closeCreate} onCreate={(body) => create.mutate(body, { onSuccess: () => { setAck('Create group'); closeCreate(); } })} />
     </>
   );

@@ -3,13 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { ProjectionFailure } from '@/api/recovery';
-import { ApiFailure } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, DescriptionItem, DescriptionList, Dialog, Drawer, Field, Input, PageHeader, StateNotice, Status } from '@/ui';
-import { failureDetail, failureRequestId } from './state';
 import { useDiscardProjectionFailure, useProjectionFailures, useReplayProjectionFailure } from './hooks';
 import { recoveryFiltersFromSearch } from './route-state';
 import { failureIdentity, RecoveryView } from './RecoveryView';
@@ -48,7 +47,6 @@ export function RecoveryPage() {
   const pending = replay.isPending || discard.isPending;
   const acknowledgement = replay.data ?? discard.data;
   const commandError = replay.error ?? discard.error;
-  const readRateLimited = state.error instanceof ApiFailure && state.error.category === 'rate_limited';
 
   useEffect(() => setInstanceDraft(filters.instanceId ?? ''), [filters.instanceId]);
   useEffect(() => setResourceDraft(filters.resource ?? ''), [filters.resource]);
@@ -90,10 +88,10 @@ export function RecoveryPage() {
               <StateNotice kind="info" title={`${humanizeToken(acknowledgement.action, 'Command')} accepted`} detail={`Acknowledged for ${acknowledgement.resource ?? 'the selected resource'} / ${acknowledgement.eventKey ?? 'event'}. Acknowledgement does not prove projection recovery.`} />
             ) : null}
             {commandError ? (
-              <StateNotice kind="error" title="Command failed" detail={failureDetail(commandError)} requestId={failureRequestId(commandError)} />
+              <ApiFailureNotice error={commandError} title="Command failed" />
             ) : null}
             {state.isError ? (
-              <StateNotice kind="error" title="Read failed" detail={`${failureDetail(state.error)}${readRateLimited ? ' Automatic retries are disabled.' : ''}`} requestId={failureRequestId(state.error)} action={readRateLimited ? undefined : <Button onClick={() => query.refetch()}>Retry read</Button>} />
+              <ApiFailureNotice error={state.error} title="Read failed" onRetry={() => query.refetch()} retryLabel="Retry read" />
             ) : null}
           </div>
         }

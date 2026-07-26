@@ -3,7 +3,7 @@ import { createApiClient, DEFAULT_BASE_URL } from '@/api/client';
 import { ApiFailure } from '@/api/envelopes';
 import type { ConsoleSession, KeyKind } from '@/lib/session';
 
-type ConnectError = { category: string; message: string; detail?: string; requestId?: string };
+type ConnectError = { category: string; message: string; detail?: string; diagnostic?: string; requestId?: string };
 
 export const CONNECT_TIMEOUT_MS = 15_000;
 export type ConnectProbeStage = 'verify-key' | 'detect-scope';
@@ -20,9 +20,10 @@ export async function probeKey(client: ReturnType<typeof createApiClient>, signa
 }
 
 export function connectErrorForFailure(error: ApiFailure): ConnectError {
-  if (error.category === 'authentication') return { category: error.category, message: 'Authentication failed', detail: 'The API did not authorize this key. Verify the API origin and credential, then try again.', requestId: error.requestId };
-  if (error.category === 'authorization') return { category: error.category, message: 'Access denied', detail: 'This key does not have access to the requested runtime scope.', requestId: error.requestId };
-  return { category: error.category, message: error.message, requestId: error.requestId };
+  const diagnostic = error.code ?? error.category;
+  if (error.category === 'authentication') return { category: error.category, message: 'Authentication failed', detail: 'The API did not authorize this key. Verify the API origin and credential, then try again.', diagnostic, requestId: error.requestId };
+  if (error.category === 'authorization') return { category: error.category, message: 'Access denied', detail: 'This key does not have access to the requested runtime scope.', diagnostic, requestId: error.requestId };
+  return { category: error.category, message: error.message, diagnostic, requestId: error.requestId };
 }
 
 export function normalizeApiOrigin(value: string): string | undefined {
@@ -64,9 +65,9 @@ export function useConnectFlow(onConnected: (session: ConsoleSession) => void) {
       const client = createApiClient({ baseUrl: origin, apiKey: normalizedKey });
       onConnected({ baseUrl: origin, apiKey: normalizedKey, keyKind: await probeKey(client, controller.signal, setProbeStage), connectedAt: new Date().toISOString() });
     } catch (caught) {
-      if (controller.signal.aborted) setError({ category: 'timeout', message: 'The OmniWA API did not respond within 15 seconds.' });
+      if (controller.signal.aborted) setError({ category: 'timeout', diagnostic: 'timeout', message: 'The OmniWA API did not respond within 15 seconds.' });
       else if (caught instanceof ApiFailure) setError(connectErrorForFailure(caught));
-      else setError({ category: 'network', message: 'Could not reach the OmniWA API at that address.' });
+      else setError({ category: 'network', diagnostic: 'network', message: 'Could not reach the OmniWA API at that address.' });
     } finally {
       window.clearTimeout(timeoutId);
       pendingRef.current = false;

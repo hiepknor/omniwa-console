@@ -23,23 +23,24 @@ import {
 import { instanceKeys, queryKeys } from '@/api/keys';
 import { useInstanceClient } from '@/api/useInstanceClient';
 import { CREDENTIAL_HEALTH_STALE_TIME, FLEET_STALE_TIME, pollingWhen, QUERY_INTERVALS } from '@/lib/query-policy';
+import { clearInstanceCredentialCache } from './credential-cache';
 
-export function useInstances(enabled: boolean) {
+export function useInstances(enabled: boolean, metadata: boolean) {
   const client = useApi();
   return useQuery({
-    queryKey: queryKeys.instances({ metadata: true }),
-    queryFn: () => listInstances(client, { metadata: true }),
+    queryKey: queryKeys.instances({ metadata }),
+    queryFn: () => listInstances(client, { metadata }),
     enabled,
     staleTime: FLEET_STALE_TIME,
     refetchInterval: pollingWhen(enabled, QUERY_INTERVALS.fleet),
   });
 }
 
-export function useInstance(instanceId: string | undefined, enabled: boolean) {
+export function useInstance(instanceId: string | undefined, enabled: boolean, metadata: boolean) {
   const client = useApi();
   return useQuery({
-    queryKey: queryKeys.instanceMetadata(instanceId ?? '', true),
-    queryFn: () => getInstance(client, instanceId ?? '', true),
+    queryKey: queryKeys.instanceMetadata(instanceId ?? '', metadata),
+    queryFn: () => getInstance(client, instanceId ?? '', metadata),
     enabled: enabled && instanceId !== undefined,
     staleTime: FLEET_STALE_TIME,
     refetchInterval: pollingWhen(enabled && Boolean(instanceId), QUERY_INTERVALS.fleet),
@@ -79,11 +80,13 @@ export function useCreateInstance() {
 
 export function useDestroyInstance(instanceId: string) {
   const client = useApi();
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateInstance();
   const setCredential = useSetInstanceCredential();
   return useMutation({
     mutationFn: () => destroyInstance(client, instanceId),
     onSuccess: () => {
+      clearInstanceCredentialCache(queryClient, instanceId);
       setCredential(instanceId, undefined);
       return invalidate(instanceId);
     },
@@ -92,12 +95,14 @@ export function useDestroyInstance(instanceId: string) {
 
 export function useRotateInstanceToken(instanceId: string) {
   const client = useApi();
+  const queryClient = useQueryClient();
   const invalidate = useInvalidateInstance();
   const setCredential = useSetInstanceCredential();
   return useMutation({
     mutationFn: ({ expectedVersion, reason }: { expectedVersion: number; reason: string }) =>
       rotateInstanceToken(client, instanceId, expectedVersion, reason),
     onSuccess: (result) => {
+      clearInstanceCredentialCache(queryClient, instanceId);
       setCredential(instanceId, result.token);
       return invalidate(instanceId);
     },

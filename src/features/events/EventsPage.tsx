@@ -3,10 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import type { EventResource } from '@/api/events-api';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, DescriptionItem, DescriptionList, Drawer, PageHeader, StateNotice, Status } from '@/ui';
+import { DescriptionItem, DescriptionList, Drawer, PageHeader, StateNotice, Status } from '@/ui';
 import { EventsView } from './EventsView';
 import { useEvents } from './hooks';
 import { eventRouteState, setEventParam } from './route-state';
@@ -23,7 +24,7 @@ function Blocked({ detail, title }: { detail: string; title: string }) {
 function Fail({ error, stale, onRetry }: { error: unknown; stale?: boolean; onRetry: () => void }) {
   const f = error instanceof ApiFailure ? error : undefined;
   const notReady = f?.code === 'projection_not_ready';
-  return <StateNotice kind={notReady ? 'empty' : 'error'} title={notReady ? 'Projection not ready' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={notReady ? undefined : <Button onClick={onRetry}>Retry</Button>} />;
+  return <ApiFailureNotice error={error} kind={notReady ? 'empty' : 'error'} title={notReady ? 'Projection not ready' : stale ? 'Showing last known data' : 'Read failed'} onRetry={notReady ? undefined : onRetry} />;
 }
 
 function summaryValue(value: unknown) {

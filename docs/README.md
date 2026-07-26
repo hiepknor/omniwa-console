@@ -40,6 +40,7 @@ then open the document that covers your task below.
 | Document | Purpose |
 | --- | --- |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Immutable image build, promotion, and rollback gates |
+| [RELEASE_READINESS.md](RELEASE_READINESS.md) | Latest release audit findings, verification evidence, and live acceptance gap |
 | [CREDENTIAL_ROLLOUT_EVIDENCE.md](CREDENTIAL_ROLLOUT_EVIDENCE.md) | C2–C4 credential migration observation and approvals |
 
 ## Documentation conventions

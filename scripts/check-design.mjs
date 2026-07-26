@@ -25,6 +25,11 @@ for (const marker of ['data-variant', 'shrink-0', 'active:translate-x-px', 'focu
   if (!button.includes(marker)) failures.push(`src/ui/Button.tsx: action contract is missing ${marker}`);
 }
 
+const connectPage = await read('src/app/ConnectPage.tsx');
+if (connectPage.includes('font-mono text-[11px] opacity')) {
+  failures.push('src/app/ConnectPage.tsx: connection-step labels must retain AA contrast');
+}
+
 const closeButton = await read('src/ui/CloseButton.tsx');
 for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10', '<Icon name="close"']) {
   if (!closeButton.includes(marker)) failures.push(`src/ui/CloseButton.tsx: close-control contract is missing ${marker}`);
@@ -48,6 +53,16 @@ for (const marker of ['StatusMarkTone', 'to bottom', 'radial-gradient', 'repeati
 const stateNotice = await read('src/ui/StateNotice.tsx');
 if (!stateNotice.includes('statusMarkStyle[markTone[kind]]')) {
   failures.push('src/ui/StateNotice.tsx: notice marks must use the shared screentone registry');
+}
+
+const apiFailureNotice = await read('src/components/ApiFailureNotice.tsx');
+for (const marker of ['rateLimitPresentation', 'scheduleManualRetry', 'ApiFailureNotice', 'Automatic retries are disabled.']) {
+  if (!apiFailureNotice.includes(marker)) failures.push(`src/components/ApiFailureNotice.tsx: API failure contract is missing ${marker}`);
+}
+
+const uiGallery = await read('src/app/UiGallery.tsx');
+if (!uiGallery.includes('<ApiFailureNotice error={galleryRateLimit}')) {
+  failures.push('src/app/UiGallery.tsx: locked feedback fixtures must include the shared rate-limit notice');
 }
 
 const input = await read('src/ui/Input.tsx');

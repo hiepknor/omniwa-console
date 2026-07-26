@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ApiFailure } from '@/api/envelopes';
 import type { CampaignStatus } from '@/api/campaigns';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, CursorPagination, DateTimeInput, DescriptionItem, DescriptionList, Dialog, Drawer, Field, StateNotice, Status, Table, Tabs, Td, Th, Tr } from '@/ui';
@@ -14,8 +14,7 @@ const allowedActions: Record<CampaignStatus, Array<'schedule' | 'start' | 'pause
 };
 
 function Fail({ error, command, stale, onRetry }: { error: unknown; command?: boolean; stale?: boolean; onRetry?: () => void }) {
-  const f = error instanceof ApiFailure ? error : undefined;
-  return <StateNotice kind="error" title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} detail={f?.message ?? 'An unexpected error occurred.'} requestId={f?.requestId} action={onRetry ? <Button onClick={onRetry}>Retry</Button> : undefined} />;
+  return <ApiFailureNotice error={error} title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} onRetry={onRetry} />;
 }
 export function CampaignInspector({ campaignId, commandsEnabled = true, onClose }: { campaignId: string; commandsEnabled?: boolean; onClose: () => void }) {
   const [searchParams, setSearchParams] = useSearchParams();

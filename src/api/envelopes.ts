@@ -128,8 +128,7 @@ export class ApiFailure extends Error {
   readonly retryable: boolean;
   readonly retryAfterSeconds: number | undefined;
   readonly retryAt: number | undefined;
-  /** omniwa-go never returns a request id; kept for surface compatibility. */
-  readonly requestId: string | undefined = undefined;
+  readonly requestId: string | undefined;
   readonly credentialScope: CredentialScope;
 
   constructor(errorBody: unknown, httpStatus: number, headers?: Headers, credentialScope: CredentialScope = 'session') {
@@ -142,6 +141,10 @@ export class ApiFailure extends Error {
     this.name = 'ApiFailure';
     this.httpStatus = httpStatus;
     this.credentialScope = credentialScope;
+    const headerRequestId = headers?.get('X-Request-ID')?.trim();
+    const bodyRequestId = typeof body?.requestId === 'string' ? body.requestId.trim() : undefined;
+    const requestId = headerRequestId || bodyRequestId;
+    this.requestId = requestId ? requestId.slice(0, 256) : undefined;
     this.code = typeof body?.code === 'string' ? body.code : undefined;
     // omniwa-go surfaces WhatsApp throttling as a 500 whose body carries the
     // upstream 429 (e.g. "info query returned status 429: rate-overlimit").
@@ -162,6 +165,12 @@ export class ApiFailure extends Error {
     const permanentServiceCondition = this.code === 'projection_not_ready';
     this.retryable = !rateLimited && !permanentServiceCondition && (httpStatus >= 500 && httpStatus !== 501);
   }
+}
+
+/** Product-safe error detail with the machine-readable code/category required by operator surfaces. */
+export function apiFailureDetail(error: unknown, fallback = 'An unexpected error occurred.'): string {
+  if (error instanceof ApiFailure) return `${error.code ?? error.category} · ${error.message}`;
+  return error instanceof Error ? error.message : fallback;
 }
 
 /**

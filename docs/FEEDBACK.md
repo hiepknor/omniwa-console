@@ -39,7 +39,7 @@ must not replace an existing snapshot with a loading skeleton.
 
 ## API errors
 
-`InlineError` renders normalized `ApiFailure` information:
+`ApiFailureNotice` renders normalized `ApiFailure` information:
 
 - machine-readable code when present, otherwise category;
 - product-safe message;
@@ -47,8 +47,9 @@ must not replace an existing snapshot with a loading skeleton.
 - retry action only when safe;
 - rate-limit detail and countdown from the shared timer logic.
 
-The current backend does not provide request IDs, so the UI never fabricates an
-“unavailable” value. Credentials, stack traces, raw provider payloads, and
+The backend exposes `X-Request-ID` on current responses. The UI normalizes and
+renders it when present, and never fabricates an “unavailable” value.
+Credentials, stack traces, raw provider payloads, and
 reconstructed redacted identities are never feedback content.
 
 ## Mutation acknowledgement

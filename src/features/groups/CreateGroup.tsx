@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ApiFailure } from '@/api/envelopes';
+import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import type { GroupCreateRequest } from '@/api/groups';
-import { Button, Dialog, Field, Input, StateNotice, Textarea } from '@/ui';
+import { Button, Dialog, Field, Input, Textarea } from '@/ui';
 
 export function CreateGroup({ open, pending, error, onCreate, onClose }: { open: boolean; pending: boolean; error: unknown; onCreate: (body: GroupCreateRequest) => void; onClose: () => void }) {
   const [name, setName] = useState('');
@@ -24,7 +25,7 @@ export function CreateGroup({ open, pending, error, onCreate, onClose }: { open:
         <Field label="Initial participants" description={`${parsed.length} participant${parsed.length === 1 ? '' : 's'}. Comma-separated values are also accepted.`}>
           {(id) => <Textarea id={id} rows={4} value={participants} disabled={pending} placeholder="One phone or JID per line" onChange={(e) => setParticipants(e.target.value)} />}
         </Field>
-        {failure ? <StateNotice kind="error" title="Command failed" detail={failure.message} requestId={failure.requestId} /> : null}
+        {failure ? <ApiFailureNotice error={failure} title="Command failed" /> : null}
       </div>
     </Dialog>
   );

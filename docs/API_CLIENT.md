@@ -118,8 +118,8 @@ Runtime errors are normalized to `ApiFailure` with:
 - HTTP status;
 - retryability;
 - `retryAfterSeconds` and absolute `retryAt` for rate limits;
-- optional request ID for forward compatibility (current OmniWA GO responses do
-  not provide one).
+- optional request ID, preferring the exposed `X-Request-ID` response header and
+  falling back to a body `requestId` when present;
 - local credential scope (`session` or `instance`) so an invalid attached
   instance token cannot invalidate an otherwise valid admin session. This scope
   is browser-only metadata and is never sent over the network.
@@ -161,7 +161,7 @@ Keys mirror resource and credential scope:
 ['instances', instanceId, 'label', labelId]
 ['instances', instanceId, 'chats', {}] # infinite-query cursors stay in page params
 ['instances', instanceId, 'chat', chatId]
-['instances', instanceId, 'chats', chatId, 'messages', {}]
+['instances', instanceId, 'chat', chatId, 'messages', {}]
 ['instances', instanceId, 'message', messageId]
 ['instances', instanceId, 'message', messageId, 'delivery-history']
 ['events', { type, cursor, limit }]

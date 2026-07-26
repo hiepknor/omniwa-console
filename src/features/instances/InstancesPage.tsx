@@ -12,6 +12,7 @@ import { InstancesView } from './InstancesView';
 import { InstanceWorkspace } from './InstanceWorkspace';
 import { filterInstances, instanceFiltersFromSearch } from './route-state';
 import { FailureNotice } from './ui';
+import { fleetReadMode } from './fleet-readiness';
 
 function Blocked({ detail, title }: { detail: string; title: string }) {
   return (
@@ -26,12 +27,18 @@ export function InstancesPage() {
   const session = useApiSession();
   const capabilities = useServerCapabilities();
   const metadataAvailable = capabilities.data?.capabilities.includes('instance_metadata_views') ?? false;
-  const enabled = session.keyKind === 'admin' && metadataAvailable;
+  const readMode = fleetReadMode({
+    keyKind: session.keyKind,
+    capabilitiesPending: capabilities.isPending,
+    capabilitiesError: capabilities.isError,
+    metadataAvailable,
+  });
+  const enabled = readMode === 'metadata' || readMode === 'compatibility';
   const { instanceId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const list = useInstances(enabled);
-  const detail = useInstance(instanceId, enabled);
+  const list = useInstances(enabled, readMode === 'metadata');
+  const detail = useInstance(instanceId, enabled, readMode === 'metadata');
   const create = useCreateInstance();
   const state = useResilientReadState(list, list.data?.resource !== undefined);
   const [destroyAck, setDestroyAck] = useState(false);
@@ -50,9 +57,9 @@ export function InstancesPage() {
   const openInstance = (id: string) => navigate(withSearchParams(`/instances/${encodeURIComponent(id)}`, routeParams));
   const closeCreate = () => { create.reset(); setParam('create'); };
 
-  if (session.keyKind !== 'admin') return <Blocked title="Admin credential required" detail="Instance fleet management requires an admin credential. No fleet request was sent." />;
-  if (capabilities.isPending) return <Blocked title="Discovering capabilities" detail="Waiting for capability discovery." />;
-  if (!metadataAvailable) return <Blocked title="Unsupported" detail={capabilities.isError ? 'Capability discovery failed; fleet metadata remains disabled.' : 'The backend does not advertise instance_metadata_views.'} />;
+  if (readMode === 'scope-blocked') return <Blocked title="Admin credential required" detail="Instance fleet management requires an admin credential. No fleet request was sent." />;
+  if (readMode === 'discovering') return <Blocked title="Discovering capabilities" detail="Waiting for capability discovery before choosing the credential-safe fleet endpoint." />;
+  if (readMode === 'capability-error') return <Blocked title="Unsupported" detail="Capability discovery failed; fleet reads remain disabled until endpoint ownership can be determined safely." />;
 
   return (
     <>
@@ -78,7 +85,12 @@ export function InstancesPage() {
         error={state.isError ? <FailureNotice error={state.error} stale={state.isStaleError} onRetry={() => list.refetch()} /> : undefined}
         emptyAll={Boolean(list.data) && instances.length === 0}
         emptyFiltered={instances.length > 0 && filtered.length === 0}
-        credentialHealth={<CredentialHealth />}
+        credentialHealth={
+          <div className="grid gap-3">
+            {readMode === 'compatibility' ? <StateNotice kind="info" title="Compatibility fleet read" detail="instance_metadata_views is not advertised. Console is using the compatibility admin list/detail adapter and strips credential fields before they enter view models or query caches." /> : null}
+            <CredentialHealth />
+          </div>
+        }
       />
 
       {instanceId ? (
