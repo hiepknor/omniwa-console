@@ -1,7 +1,7 @@
 import { useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from './cn';
-import { OverlayCloseButton } from './OverlayCloseButton';
+import { CloseButton } from './CloseButton';
 import { useModalFocus } from './useModalFocus';
 
 /** Right-side inspector that becomes a bottom sheet on narrow viewports. */
@@ -43,12 +43,14 @@ export function Drawer({
           'max-sm:mt-auto max-sm:h-[85dvh] max-sm:w-full max-sm:border-l-0 max-sm:border-t',
         )}
       >
-        <header className="grid min-h-14 grid-cols-[minmax(0,1fr)_2.25rem] items-stretch border-b border-line-strong bg-surface max-sm:grid-cols-[minmax(0,1fr)_2.5rem]">
+        <header className="grid min-h-14 grid-cols-[minmax(0,1fr)_2.75rem] items-stretch border-b border-line-strong bg-surface max-sm:grid-cols-[minmax(0,1fr)_3rem]">
           <div className="grid min-w-0 content-center gap-1 px-4 py-3">
             <h2 id={titleId} className="truncate text-sm font-semibold leading-tight text-fg">{title}</h2>
             {subtitle ? <div className="truncate font-mono text-xs text-fg-2">{subtitle}</div> : null}
           </div>
-          <OverlayCloseButton label="Close drawer" onClick={onClose} disabled={closeDisabled} />
+          <div className="grid place-items-center">
+            <CloseButton label="Close drawer" onClick={onClose} disabled={closeDisabled} />
+          </div>
         </header>
         <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-surface p-4">{children}</div>
       </aside>

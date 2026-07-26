@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from 'react';
+import { CloseButton } from '@/ui/CloseButton';
 import type { FeedbackAction, FeedbackKind } from './feedback-types';
 
 const mark: Record<FeedbackKind, CSSProperties> = {
@@ -53,7 +54,7 @@ export function FeedbackContent({
         )}
         {action && <button type="button" className="justify-self-start mt-1 h-8 px-2.5 text-xs border border-line hover:bg-elevated hover:border-line-strong" onClick={action.run}>{action.label}</button>}
       </div>
-      {onDismiss && <button type="button" aria-label="Dismiss notification" className="shrink-0 size-6 inline-flex items-center justify-center text-fg-3 hover:text-fg" onClick={onDismiss}>✕</button>}
+      {onDismiss && <CloseButton label="Dismiss notification" onClick={onDismiss} />}
     </div>
   );
 }

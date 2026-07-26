@@ -110,6 +110,12 @@ for (const path of await sourceFiles('src')) {
   if (/\bbox-shadow\s*:|\bdrop-shadow(?:-|\[)/.test(code)) {
     failures.push(`${path}: direct or drop shadow violates the zero-blur lift lock`);
   }
+  if (path !== 'src/ui/CloseButton.tsx' && /<button\b[^>]*aria-label=["'](?:Close|Dismiss)/.test(code)) {
+    failures.push(`${path}: icon-only close actions must use the canonical CloseButton`);
+  }
+  if (code.includes('OverlayCloseButton') || /[✕×]/.test(code)) {
+    failures.push(`${path}: legacy or text-glyph close controls violate the CloseButton lock`);
+  }
 }
 
 const contract = await read('design/DESIGN.md');
@@ -125,7 +131,7 @@ for (const marker of [
 }
 
 const gallery = await read('src/app/UiGallery.tsx');
-for (const marker of ['Locked design system', 'hard lift only', '<Button', '<Select', '<Drawer', '<Dialog']) {
+for (const marker of ['Locked design system', 'hard lift only', '<Button', '<CloseButton', '<Select', '<Drawer', '<Dialog']) {
   if (!gallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: locked review surface is missing ${marker}`);
 }
 

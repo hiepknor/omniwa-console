@@ -6,12 +6,12 @@ const read = (path) => readFile(resolve(root, path), 'utf8');
 const failures = [];
 
 const dialog = await read('src/ui/Dialog.tsx');
-for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDisabled', 'OverlayCloseButton']) {
+for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDisabled', 'CloseButton']) {
   if (!dialog.includes(marker)) failures.push(`src/ui/Dialog.tsx: missing ${marker}`);
 }
 
 const drawer = await read('src/ui/Drawer.tsx');
-for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDisabled', 'OverlayCloseButton']) {
+for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDisabled', 'CloseButton']) {
   if (!drawer.includes(marker)) failures.push(`src/ui/Drawer.tsx: missing ${marker}`);
 }
 
@@ -23,6 +23,16 @@ for (const marker of ["document.body.style.overflow = 'hidden'", 'modalStack.len
 const button = await read('src/ui/Button.tsx');
 for (const marker of ['data-variant', 'active:translate-x-px', 'focus-visible:outline-2', 'disabled:pointer-events-none', 'ButtonLink']) {
   if (!button.includes(marker)) failures.push(`src/ui/Button.tsx: action contract is missing ${marker}`);
+}
+
+const closeButton = await read('src/ui/CloseButton.tsx');
+for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10']) {
+  if (!closeButton.includes(marker)) failures.push(`src/ui/CloseButton.tsx: close-control contract is missing ${marker}`);
+}
+
+const feedbackContent = await read('src/components/feedback/FeedbackContent.tsx');
+if (!feedbackContent.includes('<CloseButton')) {
+  failures.push('src/components/feedback/FeedbackContent.tsx: notification dismiss must use CloseButton');
 }
 
 const table = await read('src/ui/Table.tsx');
