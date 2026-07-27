@@ -92,6 +92,22 @@ Recipient status:
 Do not collapse `sent`, `delivered`, and `read`. An API acknowledgement is not a
 recipient outcome.
 
+## Progress and operational state
+
+Campaign list and detail responses expose the same backend-owned monitoring
+facts: `target`, `progress`, `statusReason`, `pauseReason`, `retryAt`, and
+`needsAttention`. The Console displays `progress.processed` against
+`progress.total` without recomputing it from recipient rows. The backend defines
+`processed` as the sum of terminal outcomes; `pending` and `processing` remain
+non-terminal.
+
+The directory renders a compact per-campaign progress bar. The drawer renders
+the complete outcome breakdown and target snapshot. `needsAttention` is an
+operator warning, while `retryAt` is an informational backend retry window; the
+Console never starts a retry timer or submits a retry command. A global campaign
+footer is deliberately omitted because one cursor page is not a fleet-wide
+aggregate and presenting it as one would be misleading.
+
 ## Worker guarantees and UI implications
 
 The backend provides a durable queue, per-recipient state, leases, retry with
@@ -109,7 +125,10 @@ Therefore the Console:
 - loads recipients and audit when their respective drawer tabs are opened, and
   successful commands invalidate both reads for their next use;
 - applies the shared rate-limit behavior without retrying commands
-  automatically.
+  automatically;
+- polls authoritative campaign reads at the bounded shared campaign interval;
+- displays backend pause, retry, status-reason, and attention fields without
+  duplicating backend thresholds.
 
 ## Integrated UI
 

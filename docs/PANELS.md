@@ -228,7 +228,11 @@ POST /campaigns/{campaignId}/abort
 ```
 
 Campaign execution, opt-in enforcement, leases, pacing, and retry stay in
-OmniWA GO.
+OmniWA GO. List rows display backend-returned target and progress snapshots;
+the detail drawer displays the complete outcome breakdown plus `statusReason`,
+`pauseReason`, `retryAt`, and `needsAttention`. The Console does not recompute
+processed totals, trigger retry, or present the current cursor page as a global
+footer aggregate.
 
 Campaign creation additionally reads `GET /group-lists`,
 `GET /group-lists/{groupListId}`, and `GET /group-lists/{groupListId}/groups`
