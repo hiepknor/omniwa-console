@@ -12,6 +12,7 @@ import { GroupsView } from './GroupsView';
 import { GroupWorkspace } from './GroupWorkspace';
 import { useCreateGroup, useGroups } from './hooks';
 import { groupRouteState } from './route-state';
+import { GroupSectionTabs } from './GroupSectionTabs';
 
 function Blocked({ detail, title }: { detail: string; title: string }) {
   return (
@@ -68,6 +69,7 @@ export function GroupsPage() {
     <>
       <GroupsView
         refreshing={list.isFetching}
+        sectionNav={<GroupSectionTabs />}
         onRefresh={() => list.refetch()}
         onNew={() => { create.reset(); setParam('create', '1'); }}
         commandsEnabled={groupsReady}

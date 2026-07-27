@@ -1,167 +1,53 @@
-import { useMemo, useRef, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
-import { Button, Field, Input, PageHeader, Panel, StateNotice, Status, Table, Td, Textarea, Th, Tr } from '@/ui';
+import { humanizeToken } from '@/lib/format';
+import { Button, Field, Input, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Textarea, Th, Tr } from '@/ui';
+import { useGroupList, useGroupListEntries, useGroupLists } from '@/api/group-list-hooks';
 import { useCreateCampaign } from './hooks';
-import { inspectConsentRows, type ConsentInspection } from './consent';
-
-const RECIPIENT_PREVIEW_LIMIT = 5;
-
-function RecipientReadiness({ inspection }: { inspection: ConsentInspection }) {
-  const preview = inspection.recipients.slice(0, RECIPIENT_PREVIEW_LIMIT);
-  const hidden = inspection.recipients.length - preview.length;
-  const tone = !inspection.rowCount ? 'neutral' : inspection.issues.length ? 'failed' : 'ok';
-  const label = !inspection.rowCount
-    ? 'No recipients'
-    : inspection.issues.length
-      ? `${inspection.issues.length} invalid`
-      : `${inspection.recipients.length} ready`;
-
-  return (
-    <div className="grid gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 border border-line bg-elevated p-3" aria-live="polite" aria-atomic="true">
-        <div className="grid gap-0.5">
-          <strong className="text-sm font-semibold text-fg">Recipient validation</strong>
-          <span className="text-xs text-fg-3">{inspection.rowCount} non-empty source {inspection.rowCount === 1 ? 'line' : 'lines'}</span>
-        </div>
-        <Status tone={tone}>{label}</Status>
-      </div>
-
-      {inspection.issues.length ? (
-        <ul className="grid gap-1 border border-line bg-recessed p-3 text-xs text-danger">
-          {inspection.issues.slice(0, RECIPIENT_PREVIEW_LIMIT).map((issue) => <li key={`${issue.line}-${issue.message}`}>{issue.message}</li>)}
-          {inspection.issues.length > RECIPIENT_PREVIEW_LIMIT ? <li>{inspection.issues.length - RECIPIENT_PREVIEW_LIMIT} more invalid rows.</li> : null}
-        </ul>
-      ) : null}
-
-      {preview.length ? (
-        <div className="grid gap-2">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <strong className="text-xs font-semibold text-fg">Recipient preview</strong>
-            <span className="text-xs text-fg-3">Evidence references remain in the source editor only.</span>
-          </div>
-          <Table>
-            <thead><tr><Th>Recipient</Th><Th>Source</Th><Th>Opted in</Th><Th>Evidence</Th></tr></thead>
-            <tbody>
-              {preview.map((recipient, index) => (
-                <Tr key={`${recipient.jid}-${index}`}>
-                  <Td className="font-mono text-xs">{recipient.jid}</Td>
-                  <Td>{recipient.optInSource}</Td>
-                  <Td className="font-mono text-xs whitespace-nowrap">{recipient.optedInAt}</Td>
-                  <Td>Provided</Td>
-                </Tr>
-              ))}
-            </tbody>
-          </Table>
-          {hidden > 0 ? <p className="text-xs text-fg-3">Previewing {preview.length} of {inspection.recipients.length} valid recipients.</p> : null}
-        </div>
-      ) : null}
-    </div>
-  );
-}
 
 export function CreateCampaign() {
   const session = useApiSession();
   const capabilities = useServerCapabilities();
-  const create = useCreateCampaign();
   const navigate = useNavigate();
+  const create = useCreateCampaign();
   const [name, setName] = useState('');
   const [text, setText] = useState('');
-  const [rows, setRows] = useState('');
-  const recipientInput = useRef<HTMLTextAreaElement>(null);
-  const inspection = useMemo(() => inspectConsentRows(rows), [rows]);
-  const recipientsReady = inspection.rowCount > 0 && inspection.issues.length === 0;
-  const canSubmit = Boolean(name.trim() && text.trim() && recipientsReady && !create.isPending);
+  const [listSearchDraft, setListSearchDraft] = useState('');
+  const [listSearch, setListSearch] = useState('');
+  const [selectedId, setSelectedId] = useState('');
+  const instanceScope = session.keyKind === 'api';
+  const orchestration = capabilities.data?.capabilities.includes('campaign_orchestration') ?? false;
+  const groupListsEnabled = capabilities.data?.capabilities.includes('group_lists') ?? false;
+  const groupTargetsEnabled = capabilities.data?.capabilities.includes('campaign_group_targets') ?? false;
+  const enabled = instanceScope && orchestration && groupListsEnabled && groupTargetsEnabled;
+  const lists = useGroupLists(listSearch, undefined, enabled);
+  const selected = useGroupList(selectedId || undefined, enabled);
+  const preview = useGroupListEntries(selectedId || undefined, undefined, enabled && Boolean(selectedId));
+  const canSubmit = Boolean(name.trim() && text.trim() && selected.data?.id && selected.data.groupCount > 0 && !create.isPending);
   const clearFailure = () => { if (create.error) create.reset(); };
+  const applyListSearch = () => {
+    const nextSearch = listSearchDraft.trim();
+    if (nextSearch === listSearch) return;
+    setListSearch(nextSearch);
+    setSelectedId('');
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!recipientsReady) {
-      recipientInput.current?.focus();
-      return;
-    }
+    if (!canSubmit || !selected.data) return;
     try {
-      const result = await create.mutateAsync({ name: name.trim(), text, recipients: inspection.recipients });
-      setRows('');
+      const result = await create.mutateAsync({ name: name.trim(), text, target: { type: 'group_list', groupListId: selected.data.id, groupListVersion: selected.data.version } });
       navigate(`/campaigns/${encodeURIComponent(result.campaign.id)}?created=1`, { replace: true });
     } catch { /* rendered below */ }
   };
-  const instanceScope = session.keyKind === 'api';
-  const orchestration = capabilities.data?.capabilities.includes('campaign_orchestration') ?? false;
 
-  if (!instanceScope || capabilities.isPending || capabilities.isError || !orchestration) {
-    const detail = !instanceScope
-      ? 'Campaign creation requires an instance credential. No campaign request was sent.'
-      : capabilities.isPending
-        ? 'Discovering instance capabilities before enabling campaign creation.'
-        : capabilities.isError
-          ? 'Capability discovery failed. Campaign creation remains disabled.'
-          : 'The backend does not advertise campaign_orchestration. The Console does not emulate campaign execution.';
-    return (
-      <div className="grid gap-6 p-6 max-sm:p-4">
-        <PageHeader eyebrow="Messaging / Campaigns" title="Create campaign draft" description="Submit consent evidence once; execution remains in OmniWA GO." />
-        <StateNotice kind="empty" title={!instanceScope ? 'Instance credential required' : capabilities.isPending ? 'Discovering capabilities' : 'Unsupported'} detail={detail} action={<Link to="/campaigns" className="underline">Return to campaigns</Link>} />
-      </div>
-    );
+  if (!enabled) {
+    const detail = !instanceScope ? 'Campaign creation requires an instance credential.' : capabilities.isPending ? 'Discovering backend capabilities.' : !orchestration ? 'The backend does not advertise campaign_orchestration.' : !groupListsEnabled ? 'The backend does not advertise group_lists.' : 'The backend does not advertise campaign_group_targets.';
+    return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging / Campaigns" title="Create campaign draft" description="Create one server-snapshotted Group List campaign." /><StateNotice kind="empty" title="Group campaign creation unavailable" detail={`${detail} No campaign request was sent.`} action={<Link to="/campaigns" className="underline">Return to campaigns</Link>} /></div>;
   }
 
-  return (
-    <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader
-        eyebrow="Messaging / Campaigns"
-        title="Create campaign draft"
-        description="Submit consent evidence once; execution, pacing, leases, and recipient retry remain in OmniWA GO."
-      />
-
-      <form className="grid min-w-0 gap-4 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)] xl:items-start" aria-busy={create.isPending} onSubmit={(e) => void submit(e)}>
-        <Panel title="Campaign content" description="Define the operator-facing draft and the text submitted for server-owned execution.">
-          <div className="grid gap-4">
-            <Field label="Campaign name" required>{(id) => <Input id={id} required maxLength={255} autoComplete="off" disabled={create.isPending} value={name} onChange={(e) => { clearFailure(); setName(e.target.value); }} />}</Field>
-            <Field label="Message text" required description="Creation acknowledges the draft only; it does not prove send or delivery.">
-              {(id) => <Textarea id={id} rows={10} required disabled={create.isPending} value={text} onChange={(e) => { clearFailure(); setText(e.target.value); }} />}
-            </Field>
-          </div>
-        </Panel>
-
-        <Panel title="Recipients & consent" description="Validate every consent-backed recipient before submitting the draft.">
-          <div className="grid gap-4">
-            <StateNotice kind="info" title="Consent evidence" detail="Raw evidence references are sent once and are not retained by the Console after successful submission." />
-            <Field
-              label="Consent-backed recipients"
-              required
-              description="One recipient per line: JID | opt-in source | evidence reference | ISO opt-in time."
-              error={rows.trim() && inspection.issues[0] ? inspection.issues[0].message : undefined}
-            >
-              {(id) => (
-                <Textarea
-                  ref={recipientInput}
-                  id={id}
-                  rows={10}
-                  required
-                  disabled={create.isPending}
-                  value={rows}
-                  className="font-mono text-xs"
-                  placeholder="84901234567@s.whatsapp.net | checkout | consent-record-id | 2026-07-22T08:00:00Z"
-                  onChange={(e) => { clearFailure(); setRows(e.target.value); }}
-                />
-              )}
-            </Field>
-            <RecipientReadiness inspection={inspection} />
-          </div>
-        </Panel>
-
-        {create.error ? <div className="xl:col-span-2"><ApiFailureNotice error={create.error} title="Command failed" /></div> : null}
-
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 xl:col-span-2">
-          <p className="text-xs text-fg-3">The refreshed campaign detail remains authoritative after creation.</p>
-          <div className="flex flex-wrap justify-end gap-2 max-sm:w-full">
-            <Button className="max-sm:flex-1" disabled={create.isPending} onClick={() => navigate('/campaigns')}>Cancel</Button>
-            <Button className="max-sm:flex-1" variant="primary" type="submit" disabled={!canSubmit}>{create.isPending ? 'Creating draft…' : 'Create draft'}</Button>
-          </div>
-        </div>
-      </form>
-    </div>
-  );
+  return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging / Campaigns" title="Create campaign draft" description="Choose one versioned Group List; execution, pacing, retry, and eligibility remain backend-owned." /><form className="grid min-w-0 gap-4 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)] xl:items-start" aria-busy={create.isPending} onSubmit={(event) => void submit(event)}><Panel title="Campaign content" description="Creation acknowledges a text draft only; it does not prove send or delivery."><div className="grid gap-4"><Field label="Campaign name" required>{(id) => <Input id={id} required maxLength={255} value={name} disabled={create.isPending} onChange={(event) => { clearFailure(); setName(event.target.value); }} />}</Field><Field label="Message text" required>{(id) => <Textarea id={id} rows={10} required maxLength={4096} value={text} disabled={create.isPending} onChange={(event) => { clearFailure(); setText(event.target.value); }} />}</Field></div></Panel><Panel title="Target Group List" description="The backend snapshots this exact list version and never expands groups into members."><div className="grid gap-4"><div className="flex items-end gap-2 max-sm:items-stretch"><Field label="Find Group Lists" className="min-w-0 flex-1" description="Prefix search is server-owned and bounded to the active instance.">{(id) => <Input id={id} type="search" value={listSearchDraft} disabled={create.isPending} onChange={(event) => setListSearchDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); applyListSearch(); } }} />}</Field><Button disabled={create.isPending || lists.isFetching || listSearchDraft.trim() === listSearch} onClick={applyListSearch}>Search</Button></div>{lists.error ? <ApiFailureNotice error={lists.error} onRetry={() => lists.refetch()} /> : lists.isPending ? <StateNotice kind="loading" title="Loading Group Lists" /> : <Field label="Target Group List" required>{(id, labelId) => <Select id={id} aria-labelledby={labelId} value={selectedId} disabled={create.isPending || !lists.data?.items.length} placeholder="Select Group List" onValueChange={(value) => { clearFailure(); setSelectedId(value); }}><option value="">Select Group List</option>{lists.data?.items.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.groupCount} groups · v{item.version}</option>)}</Select>}</Field>}{selected.isPending && selectedId ? <StateNotice kind="loading" title="Loading selected Group List" /> : selected.error ? <ApiFailureNotice error={selected.error} onRetry={() => selected.refetch()} /> : selected.data ? <div className="grid gap-3"><div className="flex flex-wrap items-center justify-between gap-2 border border-line bg-elevated p-3" aria-live="polite"><div className="grid"><strong className="text-sm">{selected.data.name}</strong><span className="text-xs text-fg-3">Reviewed version {selected.data.version}</span></div><Status tone={selected.data.groupCount ? 'ok' : 'failed'}>{selected.data.groupCount} groups</Status></div>{preview.isPending ? <StateNotice kind="loading" title="Loading target preview" /> : preview.error ? <ApiFailureNotice error={preview.error} onRetry={() => preview.refetch()} /> : preview.data ? <><Table><thead><tr><Th>Group</Th><Th>Eligibility</Th></tr></thead><tbody>{preview.data.items.slice(0, 5).map((entry) => <Tr key={entry.groupJid}><Td><div className="grid gap-0.5"><span className="font-medium">{entry.currentName ?? entry.snapshotName ?? entry.groupJid}</span><small className="font-mono text-xs text-fg-3">{entry.groupJid}</small></div></Td><Td><Status tone={entry.eligibility === 'eligible' ? 'ok' : entry.eligibility === 'unavailable' ? 'failed' : 'degraded'}>{humanizeToken(entry.eligibilityReason ?? entry.eligibility)}</Status></Td></Tr>)}</tbody></Table><p className="text-xs text-fg-3">Previewing {Math.min(5, preview.data.items.length)} groups. The backend revalidates every target atomically when the draft is created.</p></> : null}</div> : <StateNotice kind="info" title="Select a Group List" detail="Create and authorize reusable targets under Groups / Group Lists." action={<Link className="underline" to="/groups/lists/new">New Group List</Link>} />}</div></Panel>{create.error ? <div className="xl:col-span-2"><ApiFailureNotice error={create.error} title="Campaign creation failed" /></div> : null}<div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 xl:col-span-2"><p className="text-xs text-fg-3">A version conflict or unavailable target requires refresh and explicit review.</p><div className="flex gap-2 max-sm:w-full"><Button className="max-sm:flex-1" disabled={create.isPending} onClick={() => navigate('/campaigns')}>Cancel</Button><Button className="max-sm:flex-1" type="submit" variant="primary" disabled={!canSubmit}>{create.isPending ? 'Creating draft…' : 'Create draft'}</Button></div></div></form></div>;
 }

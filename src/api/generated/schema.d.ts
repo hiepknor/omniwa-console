@@ -122,7 +122,7 @@ export interface paths {
         put?: never;
         /**
          * Create campaign draft
-         * @description Creates a text campaign draft. Every recipient requires instance-scoped opt-in evidence; raw evidence references are hashed before persistence.
+         * @description Creates a text campaign draft. Group-list targets are available when WA_CAMPAIGN_GROUP_TARGETS_ENABLED is true. Existing direct recipients remain available behind WA_CAMPAIGN_DIRECT_CREATE_ENABLED during migration.
          */
         post: {
             parameters: {
@@ -1477,6 +1477,432 @@ export interface paths {
                     };
                 };
                 /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group-lists": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Group Lists */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Normalized name prefix */
+                    search?: string;
+                    /** @description Page size (1-100) */
+                    limit?: number;
+                    /** @description Opaque instance- and search-scoped cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create Group List */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group List */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["pkg_groupList_handler.CreateRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListDetailResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group-lists/{groupListId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Group List */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Group List UUID */
+                    groupListId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListDetailResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        /** Update Group List */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Group List UUID */
+                    groupListId: string;
+                };
+                cookie?: never;
+            };
+            /** @description Replacement Group List and expected version */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["pkg_groupList_handler.UpdateRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListDetailResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete Group List */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Group List UUID */
+                    groupListId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group-lists/{groupListId}/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Group List audit history */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page size (1-100) */
+                    limit?: number;
+                    /** @description Opaque list-scoped cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Group List UUID */
+                    groupListId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListAuditListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group-lists/{groupListId}/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Group List groups */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page size (1-100) */
+                    limit?: number;
+                    /** @description Opaque list-scoped cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Group List UUID */
+                    groupListId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListEntryListResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
                 500: {
                     headers: {
                         [name: string]: unknown;
@@ -7702,7 +8128,7 @@ export interface components {
             error?: string;
         };
         "apidocs.CampaignListResponse": {
-            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"][];
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignSummary"][];
             /** @example success */
             message?: string;
             meta?: components["schemas"]["apidocs.ProjectionMeta"];
@@ -7761,6 +8187,39 @@ export interface components {
             error?: string;
             /** @example 0123456789abcdef0123456789abcdef */
             requestId?: string;
+        };
+        "apidocs.GroupListAuditEvent": {
+            actorType?: string;
+            eventType?: string;
+            fromVersion?: number;
+            groupListId?: string;
+            id?: string;
+            metadata?: unknown;
+            occurredAt?: string;
+            toVersion?: number;
+        };
+        "apidocs.GroupListAuditListResponse": {
+            data?: components["schemas"]["apidocs.GroupListAuditEvent"][];
+            /** @example success */
+            message?: string;
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
+        };
+        "apidocs.GroupListDetailResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary"];
+            /** @example success */
+            message?: string;
+        };
+        "apidocs.GroupListEntryListResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_service.EntryView"][];
+            /** @example success */
+            message?: string;
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
+        };
+        "apidocs.GroupListListResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary"][];
+            /** @example success */
+            message?: string;
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
         };
         "apidocs.LabelItem": {
             id?: string;
@@ -7941,14 +8400,21 @@ export interface components {
             id?: string;
             instanceId?: string;
             name?: string;
+            needsAttention?: boolean;
+            pauseReason?: string;
+            retryAt?: string;
             startsAt?: string;
             status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus"];
+            statusReason?: string;
+            targetType?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"];
             textBody?: string;
             updatedAt?: string;
             version?: number;
         };
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus": "draft" | "scheduled" | "running" | "paused" | "completed" | "aborted" | "failed";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType": "direct" | "group_list";
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient": {
             attemptCount?: number;
             campaignId?: string;
@@ -7965,16 +8431,66 @@ export interface components {
             recipientJid?: string;
             sentAt?: string;
             status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientStatus"];
+            targetLabel?: string;
+            targetType?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientTargetType"];
             updatedAt?: string;
         };
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientStatus": "pending" | "processing" | "sent" | "delivered" | "read" | "failed" | "skipped" | "aborted";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientTargetType": "direct" | "group";
         "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignDetail": {
             byStatus?: {
                 [key: string]: number;
             };
             campaign?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"];
+            needsAttention?: boolean;
+            pauseReason?: string;
+            progress?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.Progress"];
             recipientCount?: number;
+            retryAt?: string;
+            statusReason?: string;
+            target?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignTarget"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignSummary": {
+            contentType?: string;
+            createdAt?: string;
+            finishedAt?: string;
+            id?: string;
+            instanceId?: string;
+            name?: string;
+            needsAttention?: boolean;
+            pauseReason?: string;
+            progress?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.Progress"];
+            retryAt?: string;
+            startsAt?: string;
+            status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus"];
+            statusReason?: string;
+            target?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignTarget"];
+            targetType?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"];
+            textBody?: string;
+            updatedAt?: string;
+            version?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignTarget": {
+            groupListId?: string;
+            groupListName?: string;
+            groupListVersion?: number;
+            targetCount?: number;
+            type?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_service.Progress": {
+            aborted?: number;
+            delivered?: number;
+            failed?: number;
+            pending?: number;
+            processed?: number;
+            processing?: number;
+            read?: number;
+            sent?: number;
+            skipped?: number;
+            total?: number;
+            updatedAt?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
             chat?: string;
@@ -7989,6 +8505,27 @@ export interface components {
         };
         "github_com_evolution-foundation_evolution-go_pkg_community_service.CreateCommunityStruct": {
             communityName?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary": {
+            authorizationSource?: string;
+            authorizedAt?: string;
+            createdAt?: string;
+            description?: string;
+            groupCount?: number;
+            id?: string;
+            instanceId?: string;
+            name?: string;
+            updatedAt?: string;
+            version?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EntryView": {
+            canSend?: boolean;
+            checkedAt?: string;
+            currentName?: string;
+            eligibility?: string;
+            eligibilityReason?: string;
+            groupJid?: string;
+            snapshotName?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_group_service.AddParticipantStruct": {
             action?: components["schemas"]["whatsmeow.ParticipantChange"];
@@ -8784,13 +9321,38 @@ export interface components {
             optInSource: string;
             optedInAt: string;
         };
+        "pkg_campaign_handler.CampaignTargetRequest": {
+            groupListId: string;
+            groupListVersion: number;
+            type: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"];
+        };
         "pkg_campaign_handler.CreateCampaignRequest": {
             name: string;
-            recipients: components["schemas"]["pkg_campaign_handler.CampaignRecipientConsent"][];
+            recipients?: components["schemas"]["pkg_campaign_handler.CampaignRecipientConsent"][];
+            target?: components["schemas"]["pkg_campaign_handler.CampaignTargetRequest"];
             text: string;
         };
         "pkg_campaign_handler.ScheduleCampaignRequest": {
             startsAt: string;
+        };
+        "pkg_groupList_handler.AuthorizationRequest": {
+            /** Format: date-time */
+            authorizedAt?: string;
+            evidenceReference?: string;
+            source?: string;
+        };
+        "pkg_groupList_handler.CreateRequest": {
+            authorization?: components["schemas"]["pkg_groupList_handler.AuthorizationRequest"];
+            description?: string;
+            groupJids?: string[];
+            name?: string;
+        };
+        "pkg_groupList_handler.UpdateRequest": {
+            authorization?: components["schemas"]["pkg_groupList_handler.AuthorizationRequest"];
+            description?: string;
+            expectedVersion?: number;
+            groupJids?: string[];
+            name?: string;
         };
         "pkg_instance_handler.InstanceMetadataView": {
             alwaysOnline?: boolean;

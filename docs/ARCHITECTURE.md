@@ -169,7 +169,10 @@ into caches. See `docs/REALTIME.md`.
 /overview
 /connection
 /instances/:instanceId?
-/groups/:instanceId?
+/groups/:groupId?
+/groups/lists/:groupListId?
+/groups/lists/new
+/groups/lists/:groupListId/edit
 /chats/:instanceId?/:chatId?
 /campaigns
 /campaigns/new

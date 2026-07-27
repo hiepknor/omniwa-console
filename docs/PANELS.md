@@ -92,7 +92,7 @@ status is not connected or is already paired. QR polling runs only while the
 pairing surface is mounted, connected, unpaired, and not submitting a command.
 An acknowledgement never substitutes for refreshed status.
 
-## Groups — `/groups/:groupId?`
+## Groups and Group Lists — `/groups/:groupId?`, `/groups/lists/:groupListId?`
 
 **Status:** projection list/info/search and mutations integrated. The route uses
 the active instance credential as its scope and never calls the admin fleet
@@ -125,6 +125,21 @@ POST /send/text
 Search is prefix-based and cursor-scoped to instance and normalized query.
 Changing either resets the cursor. The panel never decodes cursors or falls back
 to a live WhatsApp read.
+
+Group Lists are gated independently by `group_lists`. They are instance-scoped,
+versioned target sets; eligibility is consumed from the backend and is never
+inferred from participant metadata. Create and edit read Groups projections for
+selection and own these operations:
+
+```text
+GET    /group-lists
+POST   /group-lists
+GET    /group-lists/{groupListId}
+GET    /group-lists/{groupListId}/groups
+PUT    /group-lists/{groupListId}
+DELETE /group-lists/{groupListId}
+GET    /group-lists/{groupListId}/audit
+```
 
 ## Chats workspace — `/chats/:chatId?`
 
@@ -214,6 +229,12 @@ POST /campaigns/{campaignId}/abort
 
 Campaign execution, opt-in enforcement, leases, pacing, and retry stay in
 OmniWA GO.
+
+Campaign creation additionally reads `GET /group-lists`,
+`GET /group-lists/{groupListId}`, and `GET /group-lists/{groupListId}/groups`
+to select and preview a versioned target. New drafts are gated by both
+`group_lists` and `campaign_group_targets`; the Console does not create direct
+recipient campaigns.
 
 ## Events — `/events`
 

@@ -16,6 +16,7 @@ export type GroupsViewProps = {
   applyDisabled: boolean;
   projectionStatus?: ReactNode;
   notices?: ReactNode;
+  sectionNav?: ReactNode;
   initialLoading: boolean;
   empty: boolean;
   emptyDetail?: string;
@@ -41,6 +42,8 @@ export function GroupsView(props: GroupsViewProps) {
           </>
         }
       />
+
+      {props.sectionNav}
 
       {props.ack}
 

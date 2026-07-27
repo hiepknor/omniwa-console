@@ -177,7 +177,7 @@ for (const path of [
 }
 
 const createCampaign = await read('src/features/campaigns/CreateCampaign.tsx');
-for (const marker of ['inspectConsentRows', 'RecipientReadiness', 'Recipient preview', 'aria-live="polite"', 'aria-busy={create.isPending}', 'xl:grid-cols-', 'label="Campaign name" required', 'disabled={!canSubmit}', '<Table>']) {
+for (const marker of ['useGroupLists', 'Target Group List', 'Reviewed version', 'groupListVersion', 'aria-live="polite"', 'aria-busy={create.isPending}', 'xl:grid-cols-', 'label="Campaign name" required', 'disabled={!canSubmit}', '<Table>']) {
   if (!createCampaign.includes(marker)) failures.push(`src/features/campaigns/CreateCampaign.tsx: campaign creation recipe is missing ${marker}`);
 }
 const campaignCancelActions = createCampaign.match(/>Cancel<\/Button>/g) ?? [];

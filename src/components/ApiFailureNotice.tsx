@@ -35,13 +35,13 @@ export function scheduleManualRetry(
 
 export function ApiFailureNotice({
   error,
-  title,
+  title = 'Request failed',
   kind = 'error',
   onRetry,
   retryLabel = 'Retry',
 }: {
   error: unknown;
-  title: string;
+  title?: string;
   kind?: 'error' | 'empty';
   onRetry?: () => void;
   retryLabel?: string;

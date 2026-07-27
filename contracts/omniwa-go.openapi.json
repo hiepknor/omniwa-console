@@ -147,7 +147,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Creates a text campaign draft. Every recipient requires instance-scoped opt-in evidence; raw evidence references are hashed before persistence.",
+        "description": "Creates a text campaign draft. Group-list targets are available when WA_CAMPAIGN_GROUP_TARGETS_ENABLED is true. Existing direct recipients remain available behind WA_CAMPAIGN_DIRECT_CREATE_ENABLED during migration.",
         "tags": [
           "Campaigns"
         ],
@@ -1602,6 +1602,520 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group-lists": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "List Group Lists",
+        "parameters": [
+          {
+            "description": "Normalized name prefix",
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          {
+            "description": "Page size (1-100)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque instance- and search-scoped cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "Create Group List",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pkg_groupList_handler.CreateRequest"
+              }
+            }
+          },
+          "description": "Group List",
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group-lists/{groupListId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "Get Group List",
+        "parameters": [
+          {
+            "description": "Group List UUID",
+            "name": "groupListId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "Update Group List",
+        "parameters": [
+          {
+            "description": "Group List UUID",
+            "name": "groupListId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pkg_groupList_handler.UpdateRequest"
+              }
+            }
+          },
+          "description": "Replacement Group List and expected version",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListDetailResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "Delete Group List",
+        "parameters": [
+          {
+            "description": "Group List UUID",
+            "name": "groupListId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group-lists/{groupListId}/audit": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "Get Group List audit history",
+        "parameters": [
+          {
+            "description": "Group List UUID",
+            "name": "groupListId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-100)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque list-scoped cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListAuditListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group-lists/{groupListId}/groups": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "List Group List groups",
+        "parameters": [
+          {
+            "description": "Group List UUID",
+            "name": "groupListId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-100)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque list-scoped cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListEntryListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -8053,7 +8567,7 @@
           "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignSummary"
             }
           },
           "message": {
@@ -8178,6 +8692,99 @@
           "requestId": {
             "type": "string",
             "example": "0123456789abcdef0123456789abcdef"
+          }
+        }
+      },
+      "apidocs.GroupListAuditEvent": {
+        "type": "object",
+        "properties": {
+          "actorType": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "fromVersion": {
+            "type": "integer"
+          },
+          "groupListId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "metadata": {},
+          "occurredAt": {
+            "type": "string"
+          },
+          "toVersion": {
+            "type": "integer"
+          }
+        }
+      },
+      "apidocs.GroupListAuditListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/apidocs.GroupListAuditEvent"
+            }
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
+          }
+        }
+      },
+      "apidocs.GroupListDetailResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary"
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          }
+        }
+      },
+      "apidocs.GroupListEntryListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_service.EntryView"
+            }
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
+          }
+        }
+      },
+      "apidocs.GroupListListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary"
+            }
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
           }
         }
       },
@@ -8626,11 +9233,26 @@
           "name": {
             "type": "string"
           },
+          "needsAttention": {
+            "type": "boolean"
+          },
+          "pauseReason": {
+            "type": "string"
+          },
+          "retryAt": {
+            "type": "string"
+          },
           "startsAt": {
             "type": "string"
           },
           "status": {
             "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus"
+          },
+          "statusReason": {
+            "type": "string"
+          },
+          "targetType": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"
           },
           "textBody": {
             "type": "string"
@@ -8662,6 +9284,17 @@
           "CampaignStatusCompleted",
           "CampaignStatusAborted",
           "CampaignStatusFailed"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType": {
+        "type": "string",
+        "enum": [
+          "direct",
+          "group_list"
+        ],
+        "x-enum-varnames": [
+          "CampaignTargetDirect",
+          "CampaignTargetGroupList"
         ]
       },
       "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient": {
@@ -8712,6 +9345,12 @@
           "status": {
             "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientStatus"
           },
+          "targetLabel": {
+            "type": "string"
+          },
+          "targetType": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientTargetType"
+          },
           "updatedAt": {
             "type": "string"
           }
@@ -8740,6 +9379,17 @@
           "RecipientStatusAborted"
         ]
       },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientTargetType": {
+        "type": "string",
+        "enum": [
+          "direct",
+          "group"
+        ],
+        "x-enum-varnames": [
+          "RecipientTargetDirect",
+          "RecipientTargetGroup"
+        ]
+      },
       "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignDetail": {
         "type": "object",
         "properties": {
@@ -8752,8 +9402,143 @@
           "campaign": {
             "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"
           },
+          "needsAttention": {
+            "type": "boolean"
+          },
+          "pauseReason": {
+            "type": "string"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_service.Progress"
+          },
           "recipientCount": {
             "type": "integer"
+          },
+          "retryAt": {
+            "type": "string"
+          },
+          "statusReason": {
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignTarget"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignSummary": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "needsAttention": {
+            "type": "boolean"
+          },
+          "pauseReason": {
+            "type": "string"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_service.Progress"
+          },
+          "retryAt": {
+            "type": "string"
+          },
+          "startsAt": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus"
+          },
+          "statusReason": {
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignTarget"
+          },
+          "targetType": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"
+          },
+          "textBody": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignTarget": {
+        "type": "object",
+        "properties": {
+          "groupListId": {
+            "type": "string"
+          },
+          "groupListName": {
+            "type": "string"
+          },
+          "groupListVersion": {
+            "type": "integer"
+          },
+          "targetCount": {
+            "type": "integer"
+          },
+          "type": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_service.Progress": {
+        "type": "object",
+        "properties": {
+          "aborted": {
+            "type": "integer"
+          },
+          "delivered": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "pending": {
+            "type": "integer"
+          },
+          "processed": {
+            "type": "integer"
+          },
+          "processing": {
+            "type": "integer"
+          },
+          "read": {
+            "type": "integer"
+          },
+          "sent": {
+            "type": "integer"
+          },
+          "skipped": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
           }
         }
       },
@@ -8794,6 +9579,67 @@
         "type": "object",
         "properties": {
           "communityName": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary": {
+        "type": "object",
+        "properties": {
+          "authorizationSource": {
+            "type": "string"
+          },
+          "authorizedAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "groupCount": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "instanceId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EntryView": {
+        "type": "object",
+        "properties": {
+          "canSend": {
+            "type": "boolean"
+          },
+          "checkedAt": {
+            "type": "string"
+          },
+          "currentName": {
+            "type": "string"
+          },
+          "eligibility": {
+            "type": "string"
+          },
+          "eligibilityReason": {
+            "type": "string"
+          },
+          "groupJid": {
+            "type": "string"
+          },
+          "snapshotName": {
             "type": "string"
           }
         }
@@ -10816,11 +11662,29 @@
           }
         }
       },
+      "pkg_campaign_handler.CampaignTargetRequest": {
+        "type": "object",
+        "required": [
+          "groupListId",
+          "groupListVersion",
+          "type"
+        ],
+        "properties": {
+          "groupListId": {
+            "type": "string"
+          },
+          "groupListVersion": {
+            "type": "integer"
+          },
+          "type": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"
+          }
+        }
+      },
       "pkg_campaign_handler.CreateCampaignRequest": {
         "type": "object",
         "required": [
           "name",
-          "recipients",
           "text"
         ],
         "properties": {
@@ -10832,6 +11696,9 @@
             "items": {
               "$ref": "#/components/schemas/pkg_campaign_handler.CampaignRecipientConsent"
             }
+          },
+          "target": {
+            "$ref": "#/components/schemas/pkg_campaign_handler.CampaignTargetRequest"
           },
           "text": {
             "type": "string"
@@ -10845,6 +11712,64 @@
         ],
         "properties": {
           "startsAt": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_groupList_handler.AuthorizationRequest": {
+        "type": "object",
+        "properties": {
+          "authorizedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evidenceReference": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_groupList_handler.CreateRequest": {
+        "type": "object",
+        "properties": {
+          "authorization": {
+            "$ref": "#/components/schemas/pkg_groupList_handler.AuthorizationRequest"
+          },
+          "description": {
+            "type": "string"
+          },
+          "groupJids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "pkg_groupList_handler.UpdateRequest": {
+        "type": "object",
+        "properties": {
+          "authorization": {
+            "$ref": "#/components/schemas/pkg_groupList_handler.AuthorizationRequest"
+          },
+          "description": {
+            "type": "string"
+          },
+          "expectedVersion": {
+            "type": "integer"
+          },
+          "groupJids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
             "type": "string"
           }
         }

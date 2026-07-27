@@ -33,27 +33,25 @@ POST /campaigns/{campaignId}/abort
 All cursors are opaque. Invalid lifecycle transitions return HTTP `409` and
 must remain visible as conflict errors.
 
-## Creation and consent
+## Creation and Group List targets
 
-Each recipient requires explicit opt-in evidence:
+New Console campaigns select one server-owned Group List version:
 
 ```json
 {
   "name": "July campaign",
   "text": "Message content",
-  "recipients": [
-    {
-      "jid": "84901234567@s.whatsapp.net",
-      "optInSource": "checkout",
-      "optInEvidenceReference": "consent-record-id",
-      "optedInAt": "2026-07-22T08:00:00Z"
-    }
-  ]
+  "target": {
+    "type": "group_list",
+    "groupListId": "4cae2734-b8f4-4faa-8d09-5933ef3bf1b0",
+    "groupListVersion": 4
+  }
 }
 ```
 
-The backend hashes the evidence reference before persistence and never echoes
-it. The Console does not cache or display the original reference after submit.
+The backend locks and snapshots the list, validates every group, and rejects a
+stale reviewed version. Existing direct campaigns remain readable, but the
+Console no longer creates them.
 
 ## State machines
 
@@ -116,13 +114,12 @@ Therefore the Console:
 ## Integrated UI
 
 The `/campaigns` route is the campaign list and monitoring surface.
-`/campaigns/new` is a consent-aware creation flow. A campaign drawer owns
+`/campaigns/new` is a Group List-targeted creation flow. A campaign drawer owns
 lifecycle commands, recipient pagination, and audit history. The route and all
 filters/cursors remain deep-linkable.
 
-Campaign creation uses the full-width Console layout: content and consent are
-separate responsive panels that stack on narrower viewports. The consent source
-editor validates every non-empty line, reports original line numbers, previews
-normalized recipients without duplicating raw evidence references, and enables
-draft creation only when every row is valid. All fields and the sole Cancel
-action are disabled while creation is pending.
+Campaign creation uses the full-width Console layout: content and target panels
+stack on narrower viewports. The target selector searches server-owned Group
+Lists, records the reviewed version, previews a bounded first page of groups,
+and leaves full eligibility validation to the atomic create command. All fields
+and the sole Cancel action are disabled while creation is pending.

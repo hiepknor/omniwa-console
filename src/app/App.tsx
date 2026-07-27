@@ -17,6 +17,8 @@ const InstancesPage = lazy(() => import('@/features/instances/InstancesPage').th
 const PairingPage = lazy(() => import('@/features/instances/PairingPage').then((m) => ({ default: m.PairingPage })));
 const ConversationsPage = lazy(() => import('@/features/conversations/ConversationsPage').then((m) => ({ default: m.ConversationsPage })));
 const GroupsPage = lazy(() => import('@/features/groups/GroupsPage').then((m) => ({ default: m.GroupsPage })));
+const GroupListsPage = lazy(() => import('@/features/groups/GroupListsPage').then((m) => ({ default: m.GroupListsPage })));
+const GroupListEditorPage = lazy(() => import('@/features/groups/GroupListEditorPage').then((m) => ({ default: m.GroupListEditorPage })));
 const CampaignsPage = lazy(() => import('@/features/campaigns/CampaignsPage').then((m) => ({ default: m.CampaignsPage })));
 const CreateCampaignPage = lazy(() => import('@/features/campaigns/CreateCampaign').then((m) => ({ default: m.CreateCampaign })));
 const EventsPage = lazy(() => import('@/features/events/EventsPage').then((m) => ({ default: m.EventsPage })));
@@ -25,6 +27,10 @@ export const authenticatedRoutes: RouteObject[] = [
   { path: '/chats', element: <ConversationsPage /> },
   { path: '/chats/:chatId', element: <ConversationsPage /> },
   { path: '/groups', element: <GroupsPage /> },
+  { path: '/groups/lists', element: <GroupListsPage /> },
+  { path: '/groups/lists/new', element: <GroupListEditorPage /> },
+  { path: '/groups/lists/:groupListId', element: <GroupListsPage /> },
+  { path: '/groups/lists/:groupListId/edit', element: <GroupListEditorPage /> },
   { path: '/groups/:groupId', element: <GroupsPage /> },
   { path: '/campaigns', element: <CampaignsPage /> },
   { path: '/campaigns/new', element: <CreateCampaignPage /> },
