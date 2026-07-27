@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { CampaignStatus } from '@/api/campaigns';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
@@ -8,10 +7,7 @@ import { Button, CursorPagination, DateTimeInput, DescriptionItem, DescriptionLi
 import { useCampaignAudit, useCampaignRecipients, useCampaignTransition, useCampaign } from './hooks';
 import { campaignRouteState, setCampaignParam, type CampaignTab } from './route-state';
 import { campaignTone } from './CampaignsView';
-
-const allowedActions: Record<CampaignStatus, Array<'schedule' | 'start' | 'pause' | 'resume' | 'abort'>> = {
-  draft: ['schedule', 'start', 'abort'], scheduled: ['start', 'abort'], running: ['pause', 'abort'], paused: ['resume', 'abort'], completed: [], aborted: [], failed: [],
-};
+import { campaignActions, type CampaignAction } from './lifecycle';
 
 function Fail({ error, command, stale, onRetry }: { error: unknown; command?: boolean; stale?: boolean; onRetry?: () => void }) {
   return <ApiFailureNotice error={error} title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} onRetry={onRetry} />;
@@ -23,7 +19,7 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
   const recipients = useCampaignRecipients(campaignId, route.recipientCursor, commandsEnabled && route.tab === 'recipients');
   const audit = useCampaignAudit(campaignId, route.auditCursor, commandsEnabled && route.tab === 'audit');
   const transition = useCampaignTransition(campaignId);
-  const [command, setCommand] = useState<'schedule' | 'start' | 'pause' | 'resume' | 'abort'>();
+  const [command, setCommand] = useState<CampaignAction>();
   const [startsAt, setStartsAt] = useState('');
   const [ack, setAck] = useState<string>();
   const campaign = detail.data?.campaign;
@@ -87,7 +83,7 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {(commandsEnabled ? allowedActions[campaign.status] : []).map((action) => (
+                  {(commandsEnabled ? campaignActions[campaign.status] : []).map((action) => (
                     <Button key={action} variant={action === 'abort' ? 'danger' : action === 'start' || action === 'resume' ? 'primary' : 'ghost'} disabled={transition.isPending} onClick={() => { transition.reset(); setCommand(action); }}>{humanizeToken(action)}</Button>
                   ))}
                 </div>
