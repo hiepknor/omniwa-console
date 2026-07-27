@@ -4,6 +4,12 @@ import type { components } from "./generated/schema";
 
 type CampaignPayload =
   components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"];
+type CampaignSummaryPayload =
+  components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignSummary"];
+type CampaignProgressPayload =
+  components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.Progress"];
+type CampaignTargetPayload =
+  components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignTarget"];
 type RecipientPayload =
   components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient"];
 type AuditPayload =
@@ -28,6 +34,26 @@ export type RecipientStatus =
   | "failed"
   | "skipped"
   | "aborted";
+export type CampaignProgress = {
+  total: number;
+  processed: number;
+  pending: number;
+  processing: number;
+  sent: number;
+  delivered: number;
+  read: number;
+  failed: number;
+  skipped: number;
+  aborted: number;
+  updatedAt?: string;
+};
+export type CampaignTarget = {
+  type: "direct" | "group_list" | "unknown";
+  targetCount: number;
+  groupListId?: string;
+  groupListName?: string;
+  groupListVersion?: number;
+};
 export type Campaign = {
   id: string;
   name: string;
@@ -39,6 +65,12 @@ export type Campaign = {
   createdAt?: string;
   updatedAt?: string;
   version: number;
+  target: CampaignTarget;
+  progress: CampaignProgress;
+  statusReason?: string;
+  pauseReason?: string;
+  retryAt?: string;
+  needsAttention: boolean;
 };
 export type CampaignDetail = {
   campaign: Campaign;
@@ -48,6 +80,8 @@ export type CampaignDetail = {
 export type CampaignRecipient = {
   id: string;
   jid: string;
+  targetType: "direct" | "group";
+  targetLabel?: string;
   status: RecipientStatus;
   optInSource: string;
   optedInAt?: string;
@@ -107,7 +141,42 @@ function value<T extends string>(
 function text(candidate: string | undefined, fallback = ""): string {
   return candidate?.trim() || fallback;
 }
-function campaign(payload: CampaignPayload | undefined): Campaign {
+function count(candidate: number | undefined): number {
+  return Number.isFinite(candidate) ? Math.max(0, candidate ?? 0) : 0;
+}
+function progress(payload: CampaignProgressPayload | undefined): CampaignProgress {
+  return {
+    total: count(payload?.total),
+    processed: count(payload?.processed),
+    pending: count(payload?.pending),
+    processing: count(payload?.processing),
+    sent: count(payload?.sent),
+    delivered: count(payload?.delivered),
+    read: count(payload?.read),
+    failed: count(payload?.failed),
+    skipped: count(payload?.skipped),
+    aborted: count(payload?.aborted),
+    updatedAt: payload?.updatedAt,
+  };
+}
+function target(payload: CampaignTargetPayload | undefined): CampaignTarget {
+  return {
+    type: payload?.type === "group_list" ? "group_list" : payload?.type === "direct" ? "direct" : "unknown",
+    targetCount: count(payload?.targetCount),
+    groupListId: payload?.groupListId,
+    groupListName: payload?.groupListName,
+    groupListVersion: payload?.groupListVersion,
+  };
+}
+type CampaignOperations = {
+  progress?: CampaignProgressPayload;
+  target?: CampaignTargetPayload;
+  statusReason?: string;
+  pauseReason?: string;
+  retryAt?: string;
+  needsAttention?: boolean;
+};
+function campaign(payload: CampaignPayload | CampaignSummaryPayload | undefined, operations: CampaignOperations = payload ?? {}): Campaign {
   return {
     id: text(payload?.id),
     name: text(payload?.name, "Untitled campaign"),
@@ -119,11 +188,17 @@ function campaign(payload: CampaignPayload | undefined): Campaign {
     createdAt: payload?.createdAt,
     updatedAt: payload?.updatedAt,
     version: payload?.version ?? 0,
+    target: target(operations.target),
+    progress: progress(operations.progress),
+    statusReason: operations.statusReason,
+    pauseReason: operations.pauseReason,
+    retryAt: operations.retryAt,
+    needsAttention: operations.needsAttention === true,
   };
 }
 function detail(payload: DetailPayload | undefined): CampaignDetail {
   return {
-    campaign: campaign(payload?.campaign),
+    campaign: campaign(payload?.campaign, payload),
     recipientCount: Math.max(0, payload?.recipientCount ?? 0),
     byStatus: { ...(payload?.byStatus ?? {}) },
   };
@@ -163,8 +238,8 @@ export async function listCampaigns(
   });
   if (response.data === undefined) return unwrap(response);
   return {
-    items: envelopeItems<CampaignPayload>(response.data)
-      .map(campaign)
+    items: envelopeItems<CampaignSummaryPayload>(response.data)
+      .map((item) => campaign(item))
       .filter((item) => item.id),
     nextCursor: cursor(response.data),
   };
@@ -198,6 +273,8 @@ export async function listCampaignRecipients(
       .map((item) => ({
         id: text(item.id),
         jid: text(item.recipientJid),
+        targetType: item.targetType === "group" ? "group" as const : "direct" as const,
+        targetLabel: item.targetLabel,
         status: value(item.status, recipientStatuses, "failed"),
         optInSource: text(item.optInSource),
         optedInAt: item.optedInAt,

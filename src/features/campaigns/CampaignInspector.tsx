@@ -8,6 +8,7 @@ import { useCampaignAudit, useCampaignRecipients, useCampaignTransition, useCamp
 import { campaignRouteState, setCampaignParam, type CampaignTab } from './route-state';
 import { campaignTone } from './CampaignsView';
 import { campaignActions, type CampaignAction } from './lifecycle';
+import { CampaignOperationalState, CampaignProgressSummary, campaignTargetLabel } from './CampaignProgress';
 
 function Fail({ error, command, stale, onRetry }: { error: unknown; command?: boolean; stale?: boolean; onRetry?: () => void }) {
   return <ApiFailureNotice error={error} title={command ? 'Command failed' : stale ? 'Showing last known data' : 'Read failed'} onRetry={onRetry} />;
@@ -49,10 +50,11 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
           <Fail error={detail.error ?? new Error('Campaign detail unavailable.')} onRetry={() => detail.refetch()} />
         ) : (
           <div className="grid gap-4">
-            <Status tone={campaignTone(campaign.status)}>{humanizeToken(campaign.status)}</Status>
+            <div className="flex flex-wrap items-center justify-between gap-2"><Status tone={campaignTone(campaign.status)}>{humanizeToken(campaign.status)}</Status><span className="text-xs text-fg-3">{campaignTargetLabel(campaign)}</span></div>
             {ack ? <StateNotice kind="info" title={`${humanizeToken(ack)} accepted`} detail="Refreshed campaign, recipient, and audit reads remain authoritative; this does not prove recipient delivery or completion." /> : null}
             {transition.error ? <Fail error={transition.error} command /> : null}
             {!commandsEnabled ? <StateNotice kind="empty" title="Commands unavailable" detail="The last usable campaign snapshot remains visible, but capability discovery no longer advertises campaign_orchestration." /> : null}
+            <CampaignOperationalState campaign={campaign} />
 
             <Tabs
               active={route.tab}
@@ -62,9 +64,11 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
 
             {route.tab === 'overview' ? (
               <div className="grid gap-4">
+                <CampaignProgressSummary campaign={campaign} />
                 <DescriptionList>
                   <DescriptionItem label="Status">{humanizeToken(campaign.status)}</DescriptionItem>
                   <DescriptionItem label="Recipients">{String(detail.data.recipientCount)}</DescriptionItem>
+                  <DescriptionItem label="Target">{campaignTargetLabel(campaign)}</DescriptionItem>
                   <DescriptionItem label="Content">{campaign.contentType}</DescriptionItem>
                   <DescriptionItem label="Starts">{relativeTime(campaign.startsAt) || 'Not scheduled'}</DescriptionItem>
                   <DescriptionItem label="Finished">{relativeTime(campaign.finishedAt) || 'Not finished'}</DescriptionItem>
@@ -73,14 +77,6 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
                 <div className="grid gap-1">
                   <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Message content</span>
                   <p className="p-3 text-[13px] text-fg bg-recessed border border-line whitespace-pre-wrap">{campaign.text || 'No text reported.'}</p>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 border-t border-l border-line">
-                  {Object.entries(detail.data.byStatus).map(([status, count]) => (
-                    <div key={status} className="grid gap-1 p-3 border-r border-b border-line">
-                      <span className="text-[11px] uppercase tracking-wide text-fg-3">{humanizeToken(status)}</span>
-                      <strong className="font-mono text-lg font-semibold tabular-nums">{String(count)}</strong>
-                    </div>
-                  ))}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {(commandsEnabled ? campaignActions[campaign.status] : []).map((action) => (
@@ -98,7 +94,7 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
                     <tbody>
                       {recipients.data.items.map((item) => (
                         <Tr key={item.id}>
-                          <Td><div className="grid gap-0.5"><span className="font-mono text-xs text-fg-2">{item.jid}</span><small className="text-xs text-fg-3">{item.optInSource || 'Source unreported'}</small></div></Td>
+                          <Td><div className="grid gap-0.5"><span className={item.targetLabel ? 'text-sm font-medium text-fg' : 'font-mono text-xs text-fg-2'}>{item.targetLabel || item.jid}</span><small className="font-mono text-xs text-fg-3">{item.targetLabel ? item.jid : item.optInSource || 'Source unreported'} · {humanizeToken(item.targetType)}</small></div></Td>
                           <Td><Status tone={campaignTone(item.status)}>{humanizeToken(item.status)}</Status></Td>
                           <Td className="text-right font-mono tabular-nums">{item.attemptCount}</Td>
                           <Td className="text-fg-2">{relativeTime(item.updatedAt) || 'Not reported'}</Td>
