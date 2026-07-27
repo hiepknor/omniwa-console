@@ -76,6 +76,7 @@ export type CampaignRecipientConsent = {
   optInEvidenceReference: string;
   optedInAt: string;
 };
+export type CampaignGroupListTarget = { type: 'group_list'; groupListId: string; groupListVersion: number };
 
 const campaignStatuses: CampaignStatus[] = [
   "draft",
@@ -242,7 +243,7 @@ export async function listCampaignAudit(
 }
 export async function createCampaign(
   client: ApiClient,
-  input: { name: string; text: string; recipients: CampaignRecipientConsent[] },
+  input: { name: string; text: string; target: CampaignGroupListTarget },
 ): Promise<CampaignDetail> {
   return detail(
     unwrap<DetailPayload>(await client.POST("/campaigns", { body: input })),

@@ -14,6 +14,8 @@ export const capabilityNames = [
   'events_projection',
   'outbound_rate_limit',
   'campaign_orchestration',
+  'group_lists',
+  'campaign_group_targets',
   'projection_failure_operations',
   'instance_metadata_views',
   'instance_token_rotation',

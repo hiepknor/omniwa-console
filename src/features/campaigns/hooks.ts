@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
-import { createCampaign, getCampaign, listCampaignAudit, listCampaignRecipients, listCampaigns, transitionCampaign, type CampaignRecipientConsent, type CampaignStatus } from '@/api/campaigns';
+import { createCampaign, getCampaign, listCampaignAudit, listCampaignRecipients, listCampaigns, transitionCampaign, type CampaignGroupListTarget, type CampaignStatus } from '@/api/campaigns';
 import { queryKeys, SESSION_QUERY_SCOPE } from '@/api/keys';
 import { CAMPAIGN_READ_POLICY } from '@/lib/query-policy';
 
@@ -43,7 +43,7 @@ function useInvalidateCampaign(campaignId?: string) {
 export function useCreateCampaign() {
   const client = useApi();
   const invalidate = useInvalidateCampaign();
-  return useMutation({ mutationFn: (input: { name: string; text: string; recipients: CampaignRecipientConsent[] }) => createCampaign(client, input), onSuccess: invalidate });
+  return useMutation({ mutationFn: (input: { name: string; text: string; target: CampaignGroupListTarget }) => createCampaign(client, input), onSuccess: invalidate });
 }
 
 export function useCampaignTransition(campaignId: string) {

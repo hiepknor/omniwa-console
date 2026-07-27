@@ -14,11 +14,12 @@ describe('campaign orchestration adapter', () => {
     expect(result.items[0]).not.toHaveProperty('instanceId');
   });
 
-  it('submits consent evidence but never exposes it in normalized recipient state', async () => {
+  it('submits a versioned Group List target and never exposes consent evidence in normalized history', async () => {
     const recipient = { jid: '84901234567@s.whatsapp.net', optInSource: 'checkout', optInEvidenceReference: 'consent-secret', optedInAt: '2026-07-22T08:00:00Z' };
     const POST = vi.fn().mockResolvedValue(ok({ message: 'success', data: { campaign: { id: 'campaign-1', name: 'Launch', status: 'draft' }, recipientCount: 1, byStatus: { pending: 1 } } }, 201));
-    await createCampaign({ POST } as unknown as ApiClient, { name: 'Launch', text: 'Hello', recipients: [recipient] });
-    expect(POST).toHaveBeenCalledWith('/campaigns', { body: { name: 'Launch', text: 'Hello', recipients: [recipient] } });
+    const target = { type: 'group_list' as const, groupListId: 'list-1', groupListVersion: 4 };
+    await createCampaign({ POST } as unknown as ApiClient, { name: 'Launch', text: 'Hello', target });
+    expect(POST).toHaveBeenCalledWith('/campaigns', { body: { name: 'Launch', text: 'Hello', target } });
 
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [{ id: 'recipient-1', recipientJid: recipient.jid, status: 'pending', optInSource: 'checkout', optedInAt: recipient.optedInAt, optInEvidenceReference: 'must-not-pass' }], meta: {} }));
     const result = await listCampaignRecipients({ GET } as unknown as ApiClient, 'campaign-1');

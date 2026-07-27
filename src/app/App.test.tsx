@@ -15,6 +15,10 @@ describe('authenticated route manifest', () => {
   });
 
   it.each([
+    ['/groups/lists', '/groups/lists'],
+    ['/groups/lists/new', '/groups/lists/new'],
+    ['/groups/lists/list-1', '/groups/lists/:groupListId'],
+    ['/groups/lists/list-1/edit', '/groups/lists/:groupListId/edit'],
     ['/campaigns', '/campaigns'],
     ['/campaigns/new', '/campaigns/new'],
     ['/campaigns/campaign-1', '/campaigns/:campaignId'],
