@@ -176,6 +176,15 @@ for (const path of [
   }
 }
 
+const createCampaign = await read('src/features/campaigns/CreateCampaign.tsx');
+for (const marker of ['inspectConsentRows', 'RecipientReadiness', 'Recipient preview', 'aria-live="polite"', 'aria-busy={create.isPending}', 'xl:grid-cols-', 'label="Campaign name" required', 'disabled={!canSubmit}', '<Table>']) {
+  if (!createCampaign.includes(marker)) failures.push(`src/features/campaigns/CreateCampaign.tsx: campaign creation recipe is missing ${marker}`);
+}
+const campaignCancelActions = createCampaign.match(/>Cancel<\/Button>/g) ?? [];
+if (createCampaign.includes('max-w-3xl') || createCampaign.includes('<ButtonLink') || campaignCancelActions.length !== 1) {
+  failures.push('src/features/campaigns/CreateCampaign.tsx: campaign creation must remain full-width with one pending-aware Cancel action');
+}
+
 for (const [path, owner] of Object.entries({
   'src/app/PreviewOverview.tsx': 'OverviewView',
   'src/app/PreviewInstances.tsx': 'InstancesView',
