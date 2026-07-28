@@ -42,6 +42,21 @@ describe('form controls', () => {
     expect(toggle).toContain('peer-checked:after:translate-x-4');
   });
 
+  it('exposes a native mixed checkbox state for page selection', () => {
+    const checkbox = renderToStaticMarkup(<Checkbox label="Select this page" indeterminate />);
+    expect(checkbox).toContain('aria-checked="mixed"');
+    expect(checkbox).toContain('peer-indeterminate:bg-fg');
+    expect(checkbox).toContain('peer-indeterminate:after:w-2');
+  });
+
+  it('keeps a table checkbox label accessible with the canonical touch target', () => {
+    const checkbox = renderToStaticMarkup(<Checkbox label="Select Operations" visuallyHiddenLabel />);
+    expect(checkbox).toContain('size-9');
+    expect(checkbox).toContain('max-sm:size-10');
+    expect(checkbox).toContain('sr-only');
+    expect(checkbox).toContain('Select Operations');
+  });
+
   it('renders a square native radio option', () => {
     const radio = renderToStaticMarkup(<Radio name="scope" value="admin" label="Admin" defaultChecked />);
     expect(radio).toContain('type="radio"');

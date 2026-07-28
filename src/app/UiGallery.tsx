@@ -30,6 +30,7 @@ import {
   ProgressBar,
   Radio,
   Select,
+  SelectionBar,
   SplitWorkspace,
   StateNotice,
   Status,
@@ -144,6 +145,7 @@ export function UiGallery() {
   const [notificationVisible, setNotificationVisible] = useState(true);
   const [cursor, setCursor] = useState<string>();
   const [workspaceDetail, setWorkspaceDetail] = useState(true);
+  const [selectionCount, setSelectionCount] = useState(1);
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-bg text-fg">
@@ -374,6 +376,31 @@ export function UiGallery() {
               { label: 'Failed', value: '7', hint: 'action required' },
             ]}
           />
+        </Section>
+
+        <Section title="Selection + table recipe">
+          <div className="grid">
+            <SelectionBar
+              scopeLabel="Select eligible on this page"
+              selectedCount={selectionCount}
+              pageSelectedCount={selectionCount}
+              pageSelectableCount={3}
+              checked={selectionCount === 3}
+              indeterminate={selectionCount > 0 && selectionCount < 3}
+              onTogglePage={(checked) => setSelectionCount(checked ? 3 : 0)}
+              onClear={() => setSelectionCount(0)}
+            />
+            <Table className="border-t-0">
+              <thead><tr><Th className="w-12"><span className="sr-only">Select</span></Th><Th>Group</Th><Th>State</Th><Th>Eligibility</Th></tr></thead>
+              <tbody>
+                {['Operations', 'Editorial', 'Support'].map((name, index) => <Tr key={name}><Td><Checkbox visuallyHiddenLabel label={<>Select {name}</>} checked={index < selectionCount} onChange={(event) => setSelectionCount((current) => event.currentTarget.checked ? Math.max(current, index + 1) : Math.min(current, index))} /></Td><Td><span className="grid gap-0.5"><strong className="font-medium">{name}</strong><code className="font-mono text-xs text-fg-3">12036300000{index}@g.us</code></span></Td><Td><Status tone="ok">Active</Status></Td><Td><Status tone="ok">Eligible</Status></Td></Tr>)}
+              </tbody>
+            </Table>
+          </div>
+          <div className="grid items-start gap-3 md:grid-cols-2">
+            <SelectionBar scopeLabel="Select eligible on this page" selectedCount={0} pageSelectedCount={0} pageSelectableCount={0} checked={false} disabled scopeDescription="No eligible groups are available on this page." onTogglePage={() => undefined} onClear={() => undefined} />
+            <div className="grid content-start gap-2"><SelectionBar scopeLabel="Select eligible on this page" selectedCount={4} pageSelectedCount={2} pageSelectableCount={2} checked onTogglePage={() => undefined} onClear={() => undefined} /><StateNotice kind="empty" title="Selection requires review" detail="2 selected groups are unavailable or not yet verified." /></div>
+          </div>
         </Section>
 
         <Section title="List recipe">
