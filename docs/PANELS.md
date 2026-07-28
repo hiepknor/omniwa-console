@@ -95,6 +95,8 @@ GET  /instance/status
 GET  /instance/qr
 POST /instance/connect
 POST /instance/reconnect
+POST /instance/disconnect
+DELETE /instance/logout
 ```
 
 The QR cache is cleared before every connect/restart attempt and whenever live
@@ -107,6 +109,13 @@ not expose or infer the configured admin Instance Name. The status `Name` is
 rendered as WhatsApp name only after authoritative status reports `LoggedIn` and
 the value is non-empty; `Connected` does not gate it. During a failed refresh,
 cached identity may remain visible only with the standard stale-data notice.
+The backend-authenticated `instanceId` is the stable identity and query scope;
+older revisions that omit it render the identity as unreported rather than
+inferring it. A successful but incomplete status snapshot is an explicit error,
+not an endless loading state. Disconnect and logout require exact-target
+confirmation and cannot overlap another lifecycle command. QR remains the
+primary pairing surface; contract-supplied passkey codes and validated HTTPS
+open URLs render as an alternate pairing method when present.
 
 ## Groups and Group Lists — `/groups/:groupId?`, `/groups/lists/:groupListId?`
 

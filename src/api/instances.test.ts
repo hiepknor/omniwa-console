@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from './client';
-import { completeAdvancedSettings, createInstance, getInstance, getInstanceCredentialHealth, getInstanceStatus, listInstances, rotateInstanceToken } from './instances';
+import { completeAdvancedSettings, createInstance, getInstance, getInstanceCredentialHealth, getInstanceQr, getInstanceStatus, listInstances, rotateInstanceToken } from './instances';
 
 function ok(data: unknown) { return { data, response: new Response(null, { status: 200 }) }; }
 
@@ -45,6 +45,22 @@ describe('credential-safe instance adapter', () => {
 
     expect(list.resource?.items[0]).toEqual(expect.objectContaining({ connected: undefined, status: 'unknown' }));
     expect(status).toEqual({ connected: undefined, loggedIn: undefined, name: undefined });
+  });
+
+  it('preserves passkey pairing data and rejects unsafe open URLs', async () => {
+    const GET = vi.fn()
+      .mockResolvedValueOnce(ok({ message: 'success', data: { qrcode: '', code: 'raw-code', passkeyCode: 'ABCD-EFGH', passkeyOpenUrl: 'https://example.test/pair', passkeyStage: 'code_ready' } }))
+      .mockResolvedValueOnce(ok({ message: 'success', data: { passkeyCode: 'SAFE-CODE', passkeyOpenUrl: 'javascript:alert(1)' } }));
+    const client = { GET } as unknown as ApiClient;
+
+    expect(await getInstanceQr(client)).toEqual({
+      qrcode: undefined,
+      code: 'raw-code',
+      passkeyCode: 'ABCD-EFGH',
+      passkeyOpenUrl: 'https://example.test/pair',
+      passkeyStage: 'code_ready',
+    });
+    expect(await getInstanceQr(client)).toEqual(expect.objectContaining({ passkeyCode: 'SAFE-CODE', passkeyOpenUrl: undefined }));
   });
 
   it('returns create and rotation credentials only as explicit one-time results', async () => {

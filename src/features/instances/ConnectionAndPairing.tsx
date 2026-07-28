@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from 'react';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/keys';
-import { Button, Image, Panel, StateNotice } from '@/ui';
+import { humanizeToken } from '@/lib/format';
+import { Button, DescriptionItem, DescriptionList, Image, Panel, StateNotice, Status } from '@/ui';
 import { useConnectInstance, useInstanceQr, useInstanceStatus, useReconnectInstance } from './hooks';
 import { FailureNotice } from './ui';
 
@@ -91,7 +92,7 @@ export function useInstancePairing(instanceId: string, token: string | undefined
 
 export type InstancePairingController = ReturnType<typeof useInstancePairing>;
 
-function Acknowledgement({ action }: { action: string }) {
+export function InstanceCommandAcknowledgement({ action }: { action: string }) {
   return (
     <StateNotice
       kind="info"
@@ -101,18 +102,31 @@ function Acknowledgement({ action }: { action: string }) {
   );
 }
 
-export function ConnectionAndPairing({ controller }: { controller: InstancePairingController }) {
+export function ConnectionAndPairing({
+  controller,
+  commandsDisabled = false,
+}: {
+  controller: InstancePairingController;
+  commandsDisabled?: boolean;
+}) {
   const showQr = shouldShowPairingQr({
     connected: controller.connected,
     loggedIn: controller.loggedIn,
-    qrcode: controller.qr.data?.qrcode,
+    qrcode: controller.qr.error ? undefined : controller.qr.data?.qrcode,
   });
+  const passkey = !controller.qr.error && controller.connected === true && controller.loggedIn === false
+    ? controller.qr.data
+    : undefined;
+  const showPasskey = Boolean(passkey?.passkeyCode || passkey?.passkeyOpenUrl);
+  const openPasskey = () => {
+    if (passkey?.passkeyOpenUrl) window.open(passkey.passkeyOpenUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <Panel title="Connection & pairing" description="Connected and paired are different server facts.">
       <div className="grid gap-3">
-        {controller.status.isPending ? <StateNotice kind="loading" title="Reading status" detail="Reading instance status." /> : controller.status.error ? <FailureNotice error={controller.status.error} stale={controller.status.data !== undefined} onRetry={() => controller.status.refetch()} /> : null}
-        {controller.lastAcknowledgement ? <Acknowledgement action={controller.lastAcknowledgement} /> : null}
+        {controller.status.isPending ? <StateNotice kind="loading" title="Reading status" detail="Reading instance status." /> : controller.status.error ? <FailureNotice error={controller.status.error} stale={controller.status.data !== undefined} onRetry={() => controller.status.refetch()} /> : !controller.statusReady ? <StateNotice kind="error" title="Status snapshot incomplete" detail="Connected and LoggedIn were not both reported. Lifecycle commands remain disabled." /> : null}
+        {controller.lastAcknowledgement ? <InstanceCommandAcknowledgement action={controller.lastAcknowledgement} /> : null}
         {controller.commandError ? <FailureNotice error={controller.commandError} command /> : null}
         {controller.pairing ? (
           <div className="grid gap-2">
@@ -120,17 +134,32 @@ export function ConnectionAndPairing({ controller }: { controller: InstancePairi
               <FailureNotice error={controller.qr.error} onRetry={() => controller.qr.refetch()} />
             ) : showQr ? (
               <Image src={controller.qr.data?.qrcode} alt="QR code to pair this OmniWA instance" aspect="square" fit="contain" className="w-52 justify-self-start" imageClassName="bg-surface p-3" />
-            ) : controller.connected === true ? (
+            ) : controller.connected === true && !showPasskey ? (
               <StateNotice kind="loading" title="Waiting for QR" detail="Waiting for the rotating pairing QR." />
-            ) : (
+            ) : !showPasskey ? (
               <StateNotice kind="empty" title="No active QR" detail="Start a connection to generate a new pairing QR." />
-            )}
-            <p className="text-xs text-fg-3">WhatsApp → Linked Devices → Link a Device. Pairing is complete only when status reports loggedIn.</p>
+            ) : null}
+            {showPasskey ? (
+              <div className="grid gap-2 border border-line-strong bg-surface p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <strong className="text-sm font-semibold text-fg">Pair with a code</strong>
+                  {passkey?.passkeyStage ? <Status tone="neutral" wrap>{humanizeToken(passkey.passkeyStage)}</Status> : null}
+                </div>
+                {passkey?.passkeyCode ? (
+                  <DescriptionList>
+                    <DescriptionItem label="Pairing code" mono>{passkey.passkeyCode}</DescriptionItem>
+                  </DescriptionList>
+                ) : null}
+                {passkey?.passkeyOpenUrl ? <Button onClick={openPasskey}>Open secure pairing link (new tab)</Button> : null}
+                <p className="text-xs text-fg-3">Use only the WhatsApp pairing flow opened from this active instance session.</p>
+              </div>
+            ) : null}
+            {!controller.qr.error ? <p className="text-xs text-fg-3">{showQr ? 'WhatsApp → Linked Devices → Link a Device.' : 'Follow the displayed WhatsApp pairing method.'} Pairing is complete only when status reports loggedIn.</p> : null}
           </div>
         ) : null}
         <div className="flex flex-wrap gap-2">
-          <Button variant="primary" disabled={!controller.commandReady || controller.commandPending || controller.loggedIn !== false} onClick={controller.startPairing}>{controller.connected === true ? 'Restart pairing' : 'Connect'}</Button>
-          <Button disabled={!controller.commandReady || controller.commandPending || controller.loggedIn !== true} onClick={controller.reconnectSession}>Reconnect</Button>
+          <Button variant="primary" disabled={commandsDisabled || !controller.commandReady || controller.commandPending || controller.loggedIn !== false} onClick={controller.startPairing}>{controller.connected === true ? 'Restart pairing' : 'Connect'}</Button>
+          <Button disabled={commandsDisabled || !controller.commandReady || controller.commandPending || controller.loggedIn !== true} onClick={controller.reconnectSession}>Reconnect</Button>
         </div>
       </div>
     </Panel>
