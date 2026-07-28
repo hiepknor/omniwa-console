@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useInstanceCredential, useSetInstanceCredential } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import type { InstanceAdvancedSettings, InstanceResource } from '@/api/instances';
+import { completeAdvancedSettings, type CompleteInstanceAdvancedSettings, type InstanceResource } from '@/api/instances';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { Button, DescriptionItem, DescriptionList, Dialog, Field, Input, Panel, StateNotice, Status, Switch } from '@/ui';
 import { Drawer } from '@/ui';
@@ -20,7 +20,7 @@ import { ConnectionAndPairing, useInstancePairing } from './ConnectionAndPairing
 
 type ConfirmAction = 'disconnect' | 'logout' | 'destroy';
 
-const settings: Array<{ key: keyof InstanceAdvancedSettings; label: string; hint: string }> = [
+const settings: Array<{ key: Exclude<keyof CompleteInstanceAdvancedSettings, 'msgRejectCall'>; label: string; hint: string }> = [
   { key: 'alwaysOnline', label: 'Always online', hint: 'Keep account presence online.' },
   { key: 'readMessages', label: 'Read receipts', hint: 'Send read receipts for incoming messages.' },
   { key: 'rejectCall', label: 'Reject calls', hint: 'Automatically decline incoming calls.' },
@@ -45,26 +45,30 @@ function Toggle({ label, hint, checked, disabled, onChange }: { label: string; h
 function AdvancedSettings({ instanceId, token }: { instanceId: string; token: string }) {
   const query = useAdvancedSettings(instanceId, token);
   const update = useUpdateAdvancedSettings(instanceId, token);
-  const [draft, setDraft] = useState<InstanceAdvancedSettings>();
-  useEffect(() => { if (query.data) setDraft(query.data); }, [query.data]);
+  const complete = completeAdvancedSettings(query.data);
+  const [draft, setDraft] = useState<CompleteInstanceAdvancedSettings>();
+  useEffect(() => { setDraft(completeAdvancedSettings(query.data)); }, [query.data]);
   const dirty = draft && query.data && JSON.stringify(draft) !== JSON.stringify(query.data);
+  const changeDraft = (next: CompleteInstanceAdvancedSettings) => { update.reset(); setDraft(next); };
   return (
     <Panel title="Advanced settings" description="Instance-scoped live configuration. Saving does not imply provider delivery.">
       {query.isPending ? (
         <StateNotice kind="loading" title="Loading settings" />
-      ) : !draft && query.isError ? (
+      ) : !query.data && query.isError ? (
         <FailureNotice error={query.error} onRetry={() => query.refetch()} />
+      ) : query.data && !complete ? (
+        <StateNotice kind="error" title="Settings snapshot incomplete" detail="One or more settings were not reported. Editing remains disabled so unknown values cannot be overwritten." />
       ) : draft ? (
         <div className="grid gap-3">
           {query.isError ? <FailureNotice error={query.error} stale onRetry={() => query.refetch()} /> : null}
           <div>
             {settings.map(({ key, label, hint }) => (
-              <Toggle key={key} label={label} hint={hint} checked={Boolean(draft[key])} disabled={update.isPending} onChange={() => setDraft({ ...draft, [key]: !draft[key] })} />
+              <Toggle key={key} label={label} hint={hint} checked={draft[key]} disabled={update.isPending} onChange={() => changeDraft({ ...draft, [key]: !draft[key] })} />
             ))}
           </div>
           <Field label="Call rejection message">
             {(id) => (
-              <Input id={id} value={draft.msgRejectCall ?? ''} disabled={!draft.rejectCall || update.isPending} onChange={(e) => setDraft({ ...draft, msgRejectCall: e.target.value })} />
+              <Input id={id} value={draft.msgRejectCall} disabled={!draft.rejectCall || update.isPending} onChange={(e) => changeDraft({ ...draft, msgRejectCall: e.target.value })} />
             )}
           </Field>
           <Button onClick={() => update.mutate(draft)} disabled={!dirty || update.isPending}>{update.isPending ? 'Saving…' : 'Save settings'}</Button>
@@ -86,13 +90,15 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
   const [confirmText, setConfirmText] = useState('');
   const [rotationOpen, setRotationOpen] = useState(false);
   const [rotationReason, setRotationReason] = useState('');
+  const [rotationDiscardOpen, setRotationDiscardOpen] = useState(false);
+  const [rotationCopyState, setRotationCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const pairing = useInstancePairing(instance.id, token);
   const { connected, loggedIn, statusReady } = pairing;
   const disconnect = useDisconnectInstance(instance.id, token);
   const logout = useLogoutInstance(instance.id, token);
   const destroy = useDestroyInstance(instance.id);
   const rotate = useRotateInstanceToken(instance.id);
-  const rotationAvailable = capabilities.data?.capabilities.includes('instance_token_rotation') && (instance.credentialVersion ?? 0) > 0;
+  const rotationAvailable = !capabilities.isError && capabilities.data?.capabilities.includes('instance_token_rotation') && (instance.credentialVersion ?? 0) > 0;
   const confirmMutation = confirm === 'disconnect' ? disconnect : confirm === 'logout' ? logout : destroy;
   const lastAck = disconnect.data ? 'Disconnect' : logout.data ? 'Logout' : undefined;
   const commandError = disconnect.error ?? logout.error;
@@ -106,12 +112,22 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
     clearInstanceCredentialCache(queryClient, instance.id);
     setCredential(instance.id, nextToken);
   };
+  const copyRotationToken = async () => {
+    if (!rotate.data) return;
+    try {
+      await navigator.clipboard.writeText(rotate.data.token);
+      setRotationCopyState('copied');
+    } catch {
+      setRotationCopyState('failed');
+    }
+  };
+  const closeRotationReveal = () => { setRotationDiscardOpen(false); setRotationOpen(false); };
 
   const drawerStatus: { tone: 'pending' | 'ok' | 'failed'; label: string } = !statusReady
     ? { tone: 'pending', label: 'Status not read' }
-    : loggedIn
+    : loggedIn === true
       ? { tone: 'ok', label: 'Paired' }
-      : connected
+      : connected === true
         ? { tone: 'pending', label: 'Pairing' }
         : { tone: 'failed', label: 'Disconnected' };
 
@@ -125,9 +141,9 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
           <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyPadding="compact-top">
             <DescriptionList>
               <DescriptionItem label="Metadata status">{humanizeToken(instance.status)}</DescriptionItem>
-              <DescriptionItem label="Metadata connection">{instance.connected ? 'Connected' : 'Disconnected'}</DescriptionItem>
-              <DescriptionItem label="Live connection">{statusReady ? (connected ? 'Connected' : 'Disconnected') : 'Not read'}</DescriptionItem>
-              <DescriptionItem label="Paired">{statusReady ? (loggedIn ? 'Yes' : 'No') : 'Not read'}</DescriptionItem>
+              <DescriptionItem label="Metadata connection">{instance.connected === true ? 'Connected' : instance.connected === false ? 'Disconnected' : 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Live connection">{statusReady ? (connected === true ? 'Connected' : 'Disconnected') : 'Not read'}</DescriptionItem>
+              <DescriptionItem label="Paired">{statusReady ? (loggedIn === true ? 'Yes' : 'No') : 'Not read'}</DescriptionItem>
               <DescriptionItem label="WhatsApp ID" mono>{instance.jid ?? 'Not reported'}</DescriptionItem>
               <DescriptionItem label="Credential version">{String(instance.credentialVersion ?? 'Not reported')}</DescriptionItem>
               <DescriptionItem label="Created">{relativeTime(instance.createdAt) || 'Not reported'}</DescriptionItem>
@@ -155,18 +171,18 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
             </>
           ) : null}
 
-          {token && loggedIn ? <AdvancedSettings instanceId={instance.id} token={token} /> : null}
+          {token && loggedIn === true ? <AdvancedSettings instanceId={instance.id} token={token} /> : null}
 
           {rotationAvailable ? (
             <Panel title="Credential rotation" description="Requires current version and an audit reason; the replacement token is shown once.">
-              <Button variant="danger" onClick={() => { rotate.reset(); setRotationReason(''); setRotationOpen(true); }}>Rotate token…</Button>
+              <Button variant="danger" onClick={() => { rotate.reset(); setRotationReason(''); setRotationCopyState('idle'); setRotationOpen(true); }}>Rotate token…</Button>
             </Panel>
           ) : null}
 
           <Panel title="Destructive actions" description="Disconnect drops the live connection; logout unpairs; destroy permanently removes the instance.">
             <div className="flex flex-wrap gap-2">
-              <Button variant="danger" disabled={!token} onClick={() => setConfirm('disconnect')}>Disconnect…</Button>
-              <Button variant="danger" disabled={!token || !loggedIn} onClick={() => setConfirm('logout')}>Log out…</Button>
+              <Button variant="danger" disabled={!token || !pairing.commandReady || connected !== true} onClick={() => setConfirm('disconnect')}>Disconnect…</Button>
+              <Button variant="danger" disabled={!token || !pairing.commandReady || loggedIn !== true} onClick={() => setConfirm('logout')}>Log out…</Button>
               <Button variant="danger" onClick={() => setConfirm('destroy')}>Destroy…</Button>
             </div>
           </Panel>
@@ -197,11 +213,11 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
       <Dialog
         open={rotationOpen}
         onClose={() => setRotationOpen(false)}
-        closeDisabled={rotate.isPending}
+        closeDisabled={rotate.isPending || Boolean(rotate.data)}
         title={rotate.data ? 'Store the replacement token' : 'Rotate instance token?'}
         footer={
           rotate.data ? (
-            <Button variant="primary" onClick={() => setRotationOpen(false)}>I stored the token</Button>
+            <><Button onClick={() => void copyRotationToken()}>Copy token</Button><Button variant="danger" onClick={() => setRotationDiscardOpen(true)}>Discard without storing…</Button><Button variant="primary" onClick={() => setRotationOpen(false)}>I stored the token</Button></>
           ) : (
             <>
               <Button disabled={rotate.isPending} onClick={() => setRotationOpen(false)}>Cancel</Button>
@@ -218,6 +234,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
               <Field label="One-time replacement token">
                 {(id) => <Input id={id} value={rotate.data.token} readOnly autoComplete="off" spellCheck={false} onFocus={(e) => e.currentTarget.select()} />}
               </Field>
+              <p aria-live="polite" className="text-xs text-fg-3">{rotationCopyState === 'copied' ? 'Token copied to clipboard.' : rotationCopyState === 'failed' ? 'Copy failed. Select the token field and copy it manually.' : 'Copying does not confirm durable storage.'}</p>
             </>
           ) : (
             <>
@@ -229,6 +246,14 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
           )}
           {rotate.error ? <FailureNotice error={rotate.error} command /> : null}
         </div>
+      </Dialog>
+      <Dialog
+        open={rotationDiscardOpen}
+        onClose={() => setRotationDiscardOpen(false)}
+        title="Discard the replacement token?"
+        footer={<><Button onClick={() => setRotationDiscardOpen(false)}>Keep token visible</Button><Button variant="danger" onClick={closeRotationReveal}>Discard token</Button></>}
+      >
+        <p className="text-sm text-fg-2">Console will close this one-time reveal. The replacement token cannot be displayed again, although it remains attached in memory until reload or sign-out.</p>
       </Dialog>
     </>
   );

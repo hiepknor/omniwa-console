@@ -6,7 +6,7 @@ export type InstanceFilters = { search: string; status?: InstanceStatus };
 export function instanceFiltersFromSearch(searchParams: URLSearchParams): InstanceFilters {
   return {
     search: readSearchText(searchParams, 'search'),
-    status: readSearchEnum(searchParams, 'status', ['', 'connected', 'disconnected'], '') || undefined,
+    status: readSearchEnum(searchParams, 'status', ['', 'connected', 'disconnected', 'unknown'], '') || undefined,
   };
 }
 

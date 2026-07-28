@@ -55,6 +55,7 @@ export function OverviewPage() {
       initialLoading={healthState.isInitialLoading || overviewState.isInitialLoading || projectionState.isInitialLoading}
       notices={
         <div className="grid gap-2">
+          {capabilities.isError ? <ApiFailureNotice error={capabilities.error} title={capabilities.data ? 'Showing last known capabilities' : 'Capability discovery failed'} onRetry={() => capabilities.refetch()} /> : null}
           <QueryNotice label="Health" query={health} state={healthState} />
           <QueryNotice label="Overview" query={overview} state={overviewState} />
           <QueryNotice label="Projection" query={projection} state={projectionState} />
@@ -63,7 +64,7 @@ export function OverviewPage() {
       health={health.data}
       overview={overview.data}
       projection={projection.data}
-      recovery={recovery}
+      recovery={capabilities.isError && !capabilities.data ? 'error' : recovery}
     />
   );
 }

@@ -4,16 +4,16 @@ import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import type { ProjectionFailure } from '@/api/recovery';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
-import { humanizeToken, relativeTime } from '@/lib/format';
+import { humanizeToken } from '@/lib/format';
 import { useResilientReadState } from '@/lib/query-state';
 import { updateSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, DescriptionItem, DescriptionList, Dialog, Drawer, Field, Input, PageHeader, StateNotice, Status } from '@/ui';
+import { PageHeader, StateNotice } from '@/ui';
 import { useDiscardProjectionFailure, useProjectionFailures, useReplayProjectionFailure } from './hooks';
 import { recoveryFiltersFromSearch } from './route-state';
 import { failureIdentity, RecoveryView } from './RecoveryView';
+import { RecoveryCommandDialog, RecoveryInspector, type RecoveryAction } from './RecoveryInspector';
 
-type RecoveryAction = 'replay' | 'discard';
 
 function Blocked({ detail, title }: { detail: string; title: string }) {
   return (
@@ -29,6 +29,7 @@ export function RecoveryPage() {
   const capabilities = useServerCapabilities();
   const capabilityReady = capabilities.data?.capabilities.includes('projection_failure_operations') ?? false;
   const enabled = session.keyKind === 'admin' && capabilityReady;
+  const commandsEnabled = capabilityReady && !capabilities.isError;
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = recoveryFiltersFromSearch(searchParams);
   const [instanceDraft, setInstanceDraft] = useState(filters.instanceId ?? '');
@@ -59,7 +60,7 @@ export function RecoveryPage() {
   const selectFailure = (failure: ProjectionFailure | undefined) => {
     updateFilters({ failureInstance: failure?.instanceId, failureResource: failure?.resource, failureEvent: failure?.eventKey }, failure === undefined);
   };
-  const openCommand = (nextAction: RecoveryAction) => { replay.reset(); discard.reset(); setReason(''); setAction(nextAction); };
+  const openCommand = (nextAction: RecoveryAction) => { if (!commandsEnabled) return; replay.reset(); discard.reset(); setReason(''); setAction(nextAction); };
   const applyFilters = (event: FormEvent) => {
     event.preventDefault();
     updateFilters({ instanceId: instanceDraft.trim() || undefined, resource: resourceDraft.trim() || undefined });
@@ -74,8 +75,14 @@ export function RecoveryPage() {
   useInvalidCursorReset(query.error, filters.cursor, () => updateFilters({ cursor: undefined, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }));
 
   if (session.keyKind !== 'admin') return <Blocked title="Admin credential required" detail="Projection recovery requires an admin credential. No recovery request was sent." />;
-  if (capabilities.isPending) return <Blocked title="Discovering capabilities" detail="Waiting for server capability discovery before reading failures." />;
-  if (!capabilityReady) return <Blocked title="Unsupported" detail={capabilities.isError ? 'Capability discovery failed; recovery remains disabled.' : 'The server does not advertise projection_failure_operations.'} />;
+  if (capabilities.isPending && !capabilities.data) return <Blocked title="Discovering capabilities" detail="Waiting for server capability discovery before reading failures." />;
+  if (capabilities.isError && !capabilities.data) return (
+    <div className="grid gap-6 p-6 max-sm:p-4">
+      <PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." />
+      <ApiFailureNotice error={capabilities.error} title="Capability discovery failed" onRetry={() => capabilities.refetch()} />
+    </div>
+  );
+  if (!capabilityReady) return <Blocked title="Unsupported" detail="The last successful capability snapshot does not advertise projection_failure_operations." />;
 
   return (
     <>
@@ -84,11 +91,9 @@ export function RecoveryPage() {
         onRefresh={() => query.refetch()}
         notices={
           <div className="grid gap-2">
+            {capabilities.isError ? <ApiFailureNotice error={capabilities.error} title="Showing last known capabilities" onRetry={() => capabilities.refetch()} /> : null}
             {acknowledgement ? (
               <StateNotice kind="info" title={`${humanizeToken(acknowledgement.action, 'Command')} accepted`} detail={`Acknowledged for ${acknowledgement.resource ?? 'the selected resource'} / ${acknowledgement.eventKey ?? 'event'}. Acknowledgement does not prove projection recovery.`} />
-            ) : null}
-            {commandError ? (
-              <ApiFailureNotice error={commandError} title="Command failed" />
             ) : null}
             {state.isError ? (
               <ApiFailureNotice error={state.error} title="Read failed" onRetry={() => query.refetch()} retryLabel="Retry read" />
@@ -112,53 +117,8 @@ export function RecoveryPage() {
         onCursor={(value) => updateFilters({ cursor: value, failureInstance: undefined, failureResource: undefined, failureEvent: undefined }, false)}
       />
 
-      {selected ? (
-        <Drawer open onClose={() => selectFailure(undefined)} title={humanizeToken(selected.resource)} subtitle={selected.eventKey}>
-          <div className="grid gap-4">
-            <Status tone="failed">{humanizeToken(selected.failureClass, 'Failed')}</Status>
-            <DescriptionList>
-              <DescriptionItem label="Instance" mono>{selected.instanceId}</DescriptionItem>
-              <DescriptionItem label="Event type">{humanizeToken(selected.eventType)}</DescriptionItem>
-              <DescriptionItem label="Error code" mono>{selected.lastErrorCode ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Attempts">{`${selected.retryCount ?? '—'} of ${selected.maxAttempts ?? '—'}`}</DescriptionItem>
-              <DescriptionItem label="Occurred">{relativeTime(selected.occurredAt) || 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Last attempt">{relativeTime(selected.lastAttemptAt) || 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Dead-lettered">{relativeTime(selected.deadLetteredAt) || 'Not reported'}</DescriptionItem>
-            </DescriptionList>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="primary" onClick={() => openCommand('replay')}>Replay…</Button>
-              <Button variant="danger" onClick={() => openCommand('discard')}>Discard…</Button>
-            </div>
-          </div>
-        </Drawer>
-      ) : null}
-
-      <Dialog
-        open={Boolean(selected && action)}
-        onClose={() => setAction(undefined)}
-        closeDisabled={pending}
-        title={action === 'replay' ? 'Replay this failure?' : 'Discard this failure?'}
-        footer={
-          <>
-            <Button onClick={() => setAction(undefined)} disabled={pending}>Cancel</Button>
-            <Button variant={action === 'discard' ? 'danger' : 'primary'} onClick={submitCommand} disabled={reason.trim().length < 8 || pending}>{pending ? 'Submitting…' : action === 'replay' ? 'Submit replay' : 'Confirm discard'}</Button>
-          </>
-        }
-      >
-        {selected ? (
-          <div className="grid gap-3">
-            <p className="text-sm text-fg-2">{action === 'replay' ? 'The server will acknowledge the replay request. Recovery remains authoritative only after a refreshed projection and failure list.' : 'Discard is irreversible for this dead letter. It does not repair or replay the underlying projection event.'}</p>
-            <Field label="Operator reason">
-              {(id) => <Input id={id} value={reason} minLength={8} required autoFocus disabled={pending} placeholder="Minimum 8 characters for the audit record" onChange={(e) => setReason(e.target.value)} />}
-            </Field>
-            <div className="grid gap-1 font-mono text-xs text-fg-3">
-              <span>instance: {selected.instanceId}</span>
-              <span>resource: {selected.resource}</span>
-              <span>event: {selected.eventKey}</span>
-            </div>
-          </div>
-        ) : null}
-      </Dialog>
+      <RecoveryInspector failure={selected} commandsEnabled={commandsEnabled} onClose={() => selectFailure(undefined)} onAction={openCommand} />
+      <RecoveryCommandDialog failure={selected} action={action} reason={reason} pending={pending} error={commandError} onReason={setReason} onClose={() => setAction(undefined)} onSubmit={submitCommand} />
     </>
   );
 }

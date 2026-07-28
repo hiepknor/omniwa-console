@@ -31,6 +31,7 @@ export function InstancesPage() {
     keyKind: session.keyKind,
     capabilitiesPending: capabilities.isPending,
     capabilitiesError: capabilities.isError,
+    capabilitiesAvailable: capabilities.data !== undefined,
     metadataAvailable,
   });
   const enabled = readMode === 'metadata' || readMode === 'compatibility';
@@ -59,13 +60,24 @@ export function InstancesPage() {
 
   if (readMode === 'scope-blocked') return <Blocked title="Admin credential required" detail="Instance fleet management requires an admin credential. No fleet request was sent." />;
   if (readMode === 'discovering') return <Blocked title="Discovering capabilities" detail="Waiting for capability discovery before choosing the credential-safe fleet endpoint." />;
-  if (readMode === 'capability-error') return <Blocked title="Unsupported" detail="Capability discovery failed; fleet reads remain disabled until endpoint ownership can be determined safely." />;
+  if (readMode === 'capability-error') return (
+    <div className="grid gap-6 p-6 max-sm:p-4">
+      <PageHeader eyebrow="Platform" title="Instances" description="Fleet metadata, pairing, lifecycle, settings, and credential posture." />
+      <FailureNotice error={capabilities.error} onRetry={() => capabilities.refetch()} />
+    </div>
+  );
 
   return (
     <>
       {destroyAck ? (
         <div className="px-6 pt-6 max-sm:px-4">
           <StateNotice kind="info" title="Destroy accepted" detail="The refreshed metadata list remains authoritative." />
+        </div>
+      ) : null}
+
+      {capabilities.isError && capabilities.data ? (
+        <div className="px-6 pt-6 max-sm:px-4">
+          <FailureNotice error={capabilities.error} stale onRetry={() => capabilities.refetch()} />
         </div>
       ) : null}
 

@@ -44,6 +44,7 @@ describe('connection and pairing state', () => {
     const controller = {
       commandError: null,
       commandPending: false,
+      commandReady: true,
       connected: false,
       lastAcknowledgement: undefined,
       loggedIn: false,
@@ -58,5 +59,26 @@ describe('connection and pairing state', () => {
     const html = renderToStaticMarkup(<ConnectionAndPairing controller={controller} />);
     expect(html).toContain('No active QR');
     expect(html).not.toContain('data:image/png;base64,stale');
+  });
+
+  it('fails closed when live status is incomplete', () => {
+    const controller = {
+      commandError: null,
+      commandPending: false,
+      commandReady: false,
+      connected: undefined,
+      lastAcknowledgement: undefined,
+      loggedIn: undefined,
+      pairing: false,
+      qr: { data: undefined, error: null, refetch: vi.fn() },
+      reconnectSession: vi.fn(),
+      startPairing: vi.fn(),
+      status: { data: {}, error: null, isPending: false, refetch: vi.fn() },
+      statusReady: false,
+    } as unknown as InstancePairingController;
+
+    const html = renderToStaticMarkup(<ConnectionAndPairing controller={controller} />);
+    expect(html.match(/<button[^>]*disabled/g)).toHaveLength(2);
+    expect(html).not.toContain('QR code to pair');
   });
 });

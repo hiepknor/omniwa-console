@@ -191,7 +191,10 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Dialog** — `min(560px,100%)`, paper surface, 1px strong frame, square close
   cell, bounded body, and elevated action footer over a 60% ink scrim. ≤640px
   docks to the bottom and gives footer actions equal 40px targets. Destructive
-  dialogs require explicit intent; pending commands can lock dismissal.
+  dialogs require explicit intent; pending commands can lock dismissal. A
+  one-time secret reveal also locks X, Escape, and scrim dismissal until the
+  operator explicitly confirms storage or confirms discarding the reveal;
+  copying alone is not treated as durable storage.
 - **Toast** — bottom-right, `--color-elevated`, a 2px ink left edge,
   13px/500 title + 12px detail, and **always** the mono `requestId` on API errors.
   Accepted commands say `accepted` and auto-dismiss (6s); errors persist.
@@ -278,7 +281,7 @@ or `border-*` utilities and rely on generated CSS order.
 | Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav |
 | Split workspace | two panes >900px, directory or detail + Back ≤900px |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
-| Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close |
+| Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close, one-time-secret dismissal |
 
 Hover never hides a label or icon. Inverted surfaces always use paper-colored
 foregrounds. Motion may reinforce state, but color/border/fill must communicate
@@ -294,7 +297,10 @@ a parts bin:
    cursor pagination. Loading, empty, stale/syncing, not-ready, error, and ready
    are mutually exclusive render paths in product panels.
 2. **Inspector:** selection → Drawer → identity/status → DescriptionList → only
-   the narrow actions owned by that panel. Long content remains body-scrollable.
+   the narrow actions owned by that panel. Fact groups and action groups use
+   canonical framed Panel surfaces rather than floating directly in the Drawer
+   body. Long identifiers remain fully available in the body even when repeated
+   as a compact header subtitle. Long content remains body-scrollable.
 3. **Command:** consequence notice → required fields/confirmation → stable
    footer. Duplicate submission is disabled; pending commands lock dismissal;
    acknowledgement never claims downstream delivery.
@@ -313,6 +319,8 @@ source. They must render the production route view and shared composition
 primitives. Fixture-only inspector content may model server states without
 network hooks, but it may not recreate a shared frame, filter toolbar, state
 notice, image treatment, split workspace, drawer, or dialog visual language.
+Fixture state combinations must also be contract-valid: for example a paired
+instance cannot simultaneously display an active pairing QR.
 
 ## 8. Change control
 
