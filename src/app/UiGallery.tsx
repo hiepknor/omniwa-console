@@ -99,6 +99,17 @@ const sessionUtilityItems = [
   ['session', 'Session'],
 ] as const;
 const primaryNavigationItems = navigationItems.filter(([icon]) => icon !== 'connection');
+const listRows = [
+  { id: 'inst_01', tone: 'ok' as const, messages: '12,004', seen: '3m ago', alerts: 6 },
+  { id: 'inst_02', tone: 'pending' as const, messages: '842', seen: '1m ago', alerts: 3 },
+  { id: 'inst_03', tone: 'failed' as const, messages: '0', seen: '2h ago', alerts: 1 },
+];
+
+const listStatusLabels: Record<string, string> = {
+  ok: 'Healthy',
+  pending: 'Pending',
+  failed: 'Failed',
+};
 
 function ShellAnatomy({ onOpenSession }: { onOpenSession: () => void }) {
   return (
@@ -156,19 +167,23 @@ function ShellAnatomy({ onOpenSession }: { onOpenSession: () => void }) {
 }
 
 export function UiGallery() {
-  const [tab, setTab] = useState('stream');
+  const [tab, setTab] = useState('all');
   const [drawer, setDrawer] = useState(false);
   const [dialogMode, setDialogMode] = useState<'ready' | 'pending'>();
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const [switchEnabled, setSwitchEnabled] = useState(true);
   const [deliveryMode, setDeliveryMode] = useState('safe');
   const [filterVisible, setFilterVisible] = useState(true);
-  const [listFilterVisible, setListFilterVisible] = useState(true);
+  const [listStatusDraft, setListStatusDraft] = useState('failed');
+  const [listStatus, setListStatus] = useState('failed');
   const [notificationVisible, setNotificationVisible] = useState(true);
   const [cursor, setCursor] = useState<string>();
   const [workspaceDetail, setWorkspaceDetail] = useState(true);
   const [galleryFile, setGalleryFile] = useState<File | undefined>(() => new File(['locked upload fixture'], 'group-photo.png', { type: 'image/png' }));
   const [selectionCount, setSelectionCount] = useState(1);
+  const tabRows = tab === 'attention' ? listRows.filter((row) => row.tone !== 'ok') : listRows;
+  const visibleListRows = listStatus ? tabRows.filter((row) => row.tone === listStatus) : tabRows;
+  const listTotal = tab === 'attention' ? 2 : 18;
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-bg text-fg">
@@ -471,51 +486,74 @@ export function UiGallery() {
         </Section>
 
         <Section title="List recipe">
-          <Tabs
-            active={tab}
-            onChange={setTab}
-            tabs={[
-              { id: 'stream', label: 'Event stream', count: 200 },
-              { id: 'audit', label: 'Audit', count: 42 },
-            ]}
-          />
-          <FilterToolbar>
-            <Field label="Status" className="min-w-48 flex-1">
-              {(id, labelId) => <Select id={id} aria-labelledby={labelId} defaultValue=""><option value="">All statuses</option><option value="ok">Healthy</option><option value="failed">Failed</option></Select>}
-            </Field>
-            {listFilterVisible ? <FilterChip label="Status" value="connected" onRemove={() => setListFilterVisible(false)} /> : null}
-            <Button>Apply filters</Button>
-          </FilterToolbar>
-          <div className="p-3"><StateNotice kind="info" title="Projection ready" detail="Rows below are authoritative for this cursor page." /></div>
-          <Table>
-            <thead>
-              <tr>
-                <Th>Instance</Th>
-                <Th>Status</Th>
-                <Th priority="supporting" className="text-right">Messages</Th>
-                <Th priority="detail">Last seen</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['inst_01', 'ok', '12,004', '3m ago', '6'],
-                ['inst_02', 'pending', '842', '1m ago', '3'],
-                ['inst_03', 'failed', '0', '2h ago', '1'],
-              ].map(([id, tone, msgs, seen, count]) => (
-                <Tr key={id} onClick={() => setDrawer(true)}>
-                  <Td mobileLabel="Instance" className="font-mono text-xs text-fg-2">{id}</Td>
-                  <Td mobileLabel="Status">
-                    <Status tone={tone as Tone}>{tone}</Status>
-                  </Td>
-                  <Td mobileLabel="Messages" priority="supporting" className="text-right tabular-nums">{msgs}</Td>
-                  <Td mobileLabel="Last seen" priority="detail" className="text-fg-2">
-                    {seen} <Badge>{count}</Badge>
-                  </Td>
-                </Tr>
-              ))}
-            </tbody>
-          </Table>
-          <CursorPagination cursor={cursor} nextCursor={cursor ? undefined : 'cursor_02'} onCursor={setCursor} info={cursor ? 'Showing the next cursor page.' : 'Showing 3 of 18 instances.'} />
+          <Panel bodyPadding="none">
+            <Tabs
+              active={tab}
+              countStyle="badge"
+              onChange={setTab}
+              tabs={[
+                { id: 'all', label: 'All instances', count: 18 },
+                { id: 'attention', label: 'Needs attention', count: 2 },
+              ]}
+            />
+            <FilterToolbar
+              as="form"
+              onSubmit={(event) => {
+                event.preventDefault();
+                setListStatus(listStatusDraft);
+                setCursor(undefined);
+              }}
+            >
+              <Field label="Status" className="min-w-48 flex-1">
+                {(id, labelId) => (
+                  <Select id={id} aria-labelledby={labelId} value={listStatusDraft} onValueChange={setListStatusDraft}>
+                    <option value="">All statuses</option>
+                    <option value="ok">Healthy</option>
+                    <option value="pending">Pending</option>
+                    <option value="failed">Failed</option>
+                  </Select>
+                )}
+              </Field>
+              <Button type="submit" disabled={listStatusDraft === listStatus}>Apply filters</Button>
+            </FilterToolbar>
+            <div className="flex min-h-14 flex-wrap items-center gap-2 border-b border-line p-3">
+              {listStatus ? (
+                <FilterChip
+                  label="Status"
+                  value={listStatusLabels[listStatus]}
+                  onRemove={() => {
+                    setListStatus('');
+                    setListStatusDraft('');
+                    setCursor(undefined);
+                  }}
+                />
+              ) : <span className="text-xs text-fg-3">No active filters.</span>}
+            </div>
+            <div className="border-b border-line p-3"><StateNotice kind="info" title="Projection ready" detail="Rows below match the selected tab and applied filters for this cursor page." /></div>
+            <Table className="border-0">
+              <thead>
+                <tr>
+                  <Th>Instance</Th>
+                  <Th>Status</Th>
+                  <Th priority="supporting" className="text-right">Messages</Th>
+                  <Th priority="detail">Last seen</Th>
+                  <Th priority="detail" className="text-right">Alerts</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleListRows.map(({ id, tone, messages, seen, alerts }) => (
+                  <Tr key={id} onClick={() => setDrawer(true)}>
+                    <Td mobileLabel="Instance" className="font-mono text-xs text-fg-2">{id}</Td>
+                    <Td mobileLabel="Status"><Status tone={tone}>{tone}</Status></Td>
+                    <Td mobileLabel="Messages" priority="supporting" className="text-right tabular-nums">{messages}</Td>
+                    <Td mobileLabel="Last seen" priority="detail" className="text-fg-2">{seen}</Td>
+                    <Td mobileLabel="Alerts" priority="detail" className="text-right"><Badge>{alerts}</Badge></Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
+            <CursorPagination cursor={cursor} nextCursor={cursor ? undefined : 'cursor_02'} onCursor={setCursor} info={cursor ? 'Showing the next cursor page.' : `Showing ${visibleListRows.length} of ${listTotal} instances.`} />
+          </Panel>
         </Section>
 
         <Section title="Split workspace recipe">
