@@ -161,6 +161,15 @@ for (const path of await sourceFiles('src')) {
   if (!path.endsWith('.test.tsx') && path !== 'src/ui/ProgressBar.tsx' && (/<progress\b/.test(code) || /role=["']progressbar["']/.test(code))) {
     failures.push(`${path}: progress indicators must use the canonical ProgressBar primitive`);
   }
+  if (path !== 'src/ui/PageHeader.tsx' && /<PageHeader\b[^>]*\bactions=/.test(code)) {
+    failures.push(`${path}: PageHeader actions must use the secondaryActions/primaryAction hierarchy`);
+  }
+  if (/<PageHeader\b[^>]*eyebrow=["'][^"']*\//.test(code)) {
+    failures.push(`${path}: PageHeader eyebrow is a short section label, not a breadcrumb`);
+  }
+  if (/<PageHeader\b[^>]*(?:secondaryActions|primaryAction)=\{<Select\b/.test(code)) {
+    failures.push(`${path}: selectors and filters belong below PageHeader`);
+  }
 }
 
 const contract = await read('design/DESIGN.md');
@@ -176,7 +185,7 @@ for (const marker of [
 }
 
 const gallery = await read('src/app/UiGallery.tsx');
-for (const marker of ['Locked design system', 'hard lift only', '<Logo', '<Icon', '<Button', '<ButtonLink', '<CloseButton', '<Textarea', '<Checkbox', '<Radio', '<Switch', '<DateTimeInput', '<Select', '<SelectionBar', '<SelectionReview', '<FilterToolbar', '<FilterChip', '<DescriptionList', '<Panel', '<StateNotice', '<CursorPagination', '<ProgressBar', '<Image', '<SplitWorkspace', '<WorkspacePaneHeader', '<Drawer', '<Dialog', '<SurfaceNotice', '<ToastViewport', '<ShellAnatomy']) {
+for (const marker of ['Locked design system', 'hard lift only', '<Logo', '<Icon', '<PageHeader', '<Button', '<ButtonLink', '<CloseButton', '<Textarea', '<Checkbox', '<Radio', '<Switch', '<DateTimeInput', '<Select', '<SelectionBar', '<SelectionReview', '<FilterToolbar', '<FilterChip', '<DescriptionList', '<Panel', '<StateNotice', '<CursorPagination', '<ProgressBar', '<Image', '<SplitWorkspace', '<WorkspacePaneHeader', '<Drawer', '<Dialog', '<SurfaceNotice', '<ToastViewport', '<ShellAnatomy']) {
   if (!gallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: locked review surface is missing ${marker}`);
 }
 

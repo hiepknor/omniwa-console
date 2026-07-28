@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
-import { Button, ButtonLink, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { Button, ButtonLink, Field, FilterToolbar, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
 
 function projectionTone(status: string): Tone {
   if (status === 'healthy' || status === 'ready') return 'ok';
@@ -30,19 +30,8 @@ export function OverviewView(props: OverviewViewProps) {
       <PageHeader
         eyebrow="Platform"
         title="Operational overview"
-        description="Persisted server, instance, projection, and message facts. Missing values remain unreported."
-        actions={
-          <>
-            <Select value={props.window} onValueChange={props.onWindowChange} aria-label="Metric window">
-              {props.windowOptions.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </Select>
-            <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>
-              {props.refreshing ? 'Refreshing…' : 'Refresh'}
-            </Button>
-          </>
-        }
+        description="Monitor server, instance, projection, and messaging health."
+        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
       />
 
       {props.notices}
@@ -93,10 +82,13 @@ export function OverviewView(props: OverviewViewProps) {
           description={`${humanizeToken(overview.scope.type)} scope · ${props.window} · generated ${relativeTime(overview.generatedAt) || 'at an unreported time'}`}
           bodyPadding="none"
         >
+          <FilterToolbar aria-label="Metric controls">
+            <Field label="Metric window" className="w-full max-w-48">{(id, labelId) => <Select id={id} aria-labelledby={labelId} value={props.window} onValueChange={props.onWindowChange}>{props.windowOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</Select>}</Field>
+          </FilterToolbar>
           <MetricGrid
             columns={5}
             density="compact"
-            frame="flush"
+            frame="flush-after-content"
             metrics={[
               { label: 'Instances', value: formatCount(overview.instances.total) },
               { label: 'Connected', value: formatCount(overview.instances.connected) },

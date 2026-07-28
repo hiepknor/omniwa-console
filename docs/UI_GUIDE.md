@@ -119,6 +119,11 @@ resource models, or rendered diagnostics.
 
 ## Interaction contract
 
+- Page headers use a short owning-section eyebrow, one `h1`, concise user-goal
+  copy, secondary actions, and at most one primary action. They never act as a
+  filter toolbar, breadcrumb, status summary, or duplicate of Shell connection
+  context. At narrow widths description precedes actions in DOM order; actions
+  wrap without clipping or horizontal page overflow.
 - Dialogs and drawers use the shared framed overlay treatment, lock background
   scrolling, trap and restore focus, have an accessible name, and declare
   whether pending commands can close.

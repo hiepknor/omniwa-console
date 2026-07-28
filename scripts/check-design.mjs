@@ -25,6 +25,14 @@ for (const marker of ['data-variant', 'shrink-0', 'active:translate-x-px', 'focu
   if (!button.includes(marker)) failures.push(`src/ui/Button.tsx: action contract is missing ${marker}`);
 }
 
+const pageHeader = await read('src/ui/PageHeader.tsx');
+for (const marker of ['<header', '<h1', 'secondaryActions', 'primaryAction', 'sm:grid-cols-[minmax(0,1fr)_auto]', 'max-sm:py-2', 'sm:row-start-3', 'max-w-[70ch]']) {
+  if (!pageHeader.includes(marker)) failures.push(`src/ui/PageHeader.tsx: compact page-header contract is missing ${marker}`);
+}
+if (pageHeader.includes('actions?: ReactNode')) {
+  failures.push('src/ui/PageHeader.tsx: generic actions slot would bypass primary/secondary hierarchy');
+}
+
 const connectPage = await read('src/app/ConnectPage.tsx');
 if (connectPage.includes('font-mono text-[11px] opacity')) {
   failures.push('src/app/ConnectPage.tsx: connection-step labels must retain AA contrast');
@@ -130,7 +138,7 @@ for (const marker of ["density = 'default'", "frame = 'standalone'", "density ==
 }
 
 for (const [path, marker] of Object.entries({
-  'src/features/platform/OverviewView.tsx': 'frame="flush"',
+  'src/features/platform/OverviewView.tsx': 'frame="flush-after-content"',
   'src/features/instances/CredentialHealth.tsx': "'flush-after-content' : 'flush'",
 })) {
   const source = await read(path);

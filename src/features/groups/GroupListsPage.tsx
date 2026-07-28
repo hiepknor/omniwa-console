@@ -31,13 +31,13 @@ export function GroupListsPage() {
 
   if (session.keyKind !== 'api' || capabilities.isPending || (!enabled && !query.data)) {
     const detail = session.keyKind !== 'api' ? 'Group Lists requires an instance credential.' : capabilities.isPending ? 'Discovering Group List capability.' : 'The backend does not advertise group_lists. Enable the complete backend feature before managing campaign targets.';
-    return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging / Groups" title="Group Lists" description="Reusable, server-owned group targets for campaigns." /><GroupSectionTabs /><StateNotice kind="empty" title="Group Lists unavailable" detail={detail} /></div>;
+    return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title="Group Lists" description="Build and maintain reusable group targets for campaigns." /><GroupSectionTabs /><StateNotice kind="empty" title="Group Lists unavailable" detail={detail} /></div>;
   }
 
   return (
     <>
       <div className="grid gap-6 p-6 max-sm:p-4">
-        <PageHeader eyebrow="Messaging / Groups" title="Group Lists" description="Versioned sets of WhatsApp groups with backend-owned send eligibility." actions={<><Button disabled={query.isFetching} onClick={() => query.refetch()}>{query.isFetching ? 'Refreshing…' : 'Refresh'}</Button><ButtonLink to="/groups/lists/new" variant="primary">New group list</ButtonLink></>} />
+        <PageHeader eyebrow="Messaging" title="Group Lists" description="Build and maintain reusable group targets for campaigns." secondaryActions={<Button disabled={query.isFetching} onClick={() => query.refetch()}>{query.isFetching ? 'Refreshing…' : 'Refresh'}</Button>} primaryAction={<ButtonLink to="/groups/lists/new" variant="primary">New group list</ButtonLink>} />
         <GroupSectionTabs />
         {!enabled ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable list page visible; mutations remain unavailable." /> : null}
         <Panel title="Group List directory" description="Name search, cursor, and selected list remain URL-addressable." bodyPadding="none">

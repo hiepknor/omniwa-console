@@ -16,7 +16,7 @@ import { FailureNotice, ProjectionStatus } from './ui';
 function BlockedPage({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Messaging" title="Conversations" description="Projection-backed chats, messages, contacts, labels, and bounded sends." />
+      <PageHeader eyebrow="Messaging" title="Conversations" description="Review projected chats, contacts, labels, and message history." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );
@@ -83,8 +83,8 @@ export function ConversationsPage() {
         <PageHeader
           eyebrow="Messaging"
           title="Conversations"
-          description="Projection-backed chats, messages, contacts, labels, and bounded sends in the active instance scope."
-          actions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+          description="Review projected chats, contacts, labels, and message history."
+          secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
         />
       </div>
 

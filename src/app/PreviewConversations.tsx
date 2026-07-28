@@ -11,7 +11,7 @@ export function PreviewConversations() {
   return (
     <main className="flex flex-col h-dvh overflow-hidden bg-bg">
       <div className="px-6 max-sm:px-4">
-        <PageHeader eyebrow="Messaging" title="Conversations" description="Projection-backed chats, messages, contacts, labels, and bounded sends." actions={<Button>Refresh</Button>} />
+        <PageHeader eyebrow="Messaging" title="Conversations" description="Review projected chats, contacts, labels, and message history." secondaryActions={<Button>Refresh</Button>} />
       </div>
       <SplitWorkspace
         detailOpen={Boolean(chat)}

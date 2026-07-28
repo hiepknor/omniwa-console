@@ -266,8 +266,15 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
     active-runtime identity and lifecycle; connection and pairing are sections,
     not navigation categories.
   - **Unknown** → *Runtime*: Overview.
-- **Page header:** an optional 11px uppercase eyebrow, the page title, connection
-  state on the right, at most one primary action. ≤640px stacks to one column.
+- **Page header:** one compact semantic header with an optional 11px uppercase
+  section label, one page title, concise goal-oriented description, a secondary
+  action cluster, and at most one primary action. It never owns filters,
+  selectors, metrics, global connection state, breadcrumbs, or feature status.
+  At ≥641px actions align with the title while the description retains its own
+  full row; at ≤640px DOM and visual order is section → title → description →
+  actions. Actions wrap instead of overflowing, and the primary action remains
+  last. The header keeps the paper background, hairline bottom rule, square
+  geometry, 14px body copy, and existing Button interaction language.
 - **Responsive:** ≥901px full rail; 641–900px icon-only rail; ≤640px a fixed
   bottom nav bar with icon + visible 10px label while the main viewport reserves
   its height. At compact widths Sign out is a separately framed session utility,
@@ -289,6 +296,7 @@ or `border-*` utilities and rely on generated CSS order.
 
 | Primitive | Required visual states |
 | --- | --- |
+| PageHeader | title only, section + description, secondary actions, primary action, three-action wrap, long copy |
 | Button | rest, hover, active, keyboard focus, disabled, busy |
 | Select trigger | rest, hover, open, open + hover, keyboard focus, invalid, disabled |
 | Select option | rest, active/hover, selected, active + selected, disabled |

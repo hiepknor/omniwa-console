@@ -157,7 +157,8 @@ export function UiGallery() {
           eyebrow="Locked design system"
           title="UI Gallery"
           description="Manga · ink on white paper · dense · square · semantic screentone · hard lift only."
-          actions={<Button variant="primary">Primary action</Button>}
+          secondaryActions={<Button>Secondary action</Button>}
+          primaryAction={<Button variant="primary">Primary action</Button>}
         />
 
         <Section title="Surfaces">
