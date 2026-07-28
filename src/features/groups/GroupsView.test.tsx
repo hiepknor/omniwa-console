@@ -5,6 +5,7 @@ import { GroupsView, type GroupsViewProps } from './GroupsView';
 
 const groups: GroupResource[] = [{
   id: '120363001@g.us',
+  normalized: true,
   subject: 'Operations',
   groupType: 'subgroup',
   sendMode: 'admins_only',
@@ -18,6 +19,10 @@ function render(overrides: Partial<GroupsViewProps> = {}) {
     refreshing={false}
     onRefresh={vi.fn()}
     onNew={vi.fn()}
+    onJoin={vi.fn()}
+    normalized
+    filters={{}}
+    onFilter={vi.fn()}
     searchDraft=""
     onSearchDraft={vi.fn()}
     onApply={(event) => event.preventDefault()}

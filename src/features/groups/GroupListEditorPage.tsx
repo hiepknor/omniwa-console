@@ -25,14 +25,16 @@ export function GroupListEditorPage() {
   const session = useApiSession();
   const capabilities = useServerCapabilities();
   const enabled = session.keyKind === 'api' && (capabilities.data?.capabilities.includes('group_lists') ?? false);
+  const groupsReady = capabilities.data?.capabilities.includes('groups_projection') ?? false;
   const eligibilityEnabled = capabilities.data?.capabilities.includes('group_list_eligibility') ?? false;
+  const normalizedGroups = capabilities.data?.capabilities.includes('group_management_permissions') ?? false;
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const route = groupListRouteState(params);
   const [searchDraft, setSearchDraft] = useState(route.groupSearch);
   const detail = useGroupList(groupListId, enabled && editing);
   const allEntries = useAllGroupListEntries(groupListId, detail.data?.groupCount ?? 0, enabled && editing && Boolean(detail.data));
-  const groups = useGroups(route.groupSearch, route.groupSearchCursor, enabled);
+  const groups = useGroups({ search: route.groupSearch, cursor: route.groupSearchCursor }, enabled && groupsReady, normalizedGroups);
   const create = useCreateGroupList();
   const update = useUpdateGroupList(groupListId ?? '');
   const mutation = editing ? update : create;
@@ -86,7 +88,7 @@ export function GroupListEditorPage() {
   const entriesReady = !editing || Boolean(allEntries.data && detail.data && allEntries.data.length === detail.data.groupCount);
   const selectedCounts = [...selected.values()].reduce((counts, item) => ({ ...counts, [item.eligibility ?? 'unknown']: counts[item.eligibility ?? 'unknown'] + 1 }), { eligible: 0, unavailable: 0, unknown: 0 } as Record<GroupEligibility, number>);
   const hasBlockedSelection = eligibilityEnabled && (selectedCounts.unavailable > 0 || selectedCounts.unknown > 0);
-  const canSubmit = enabled && entriesReady && !hasBlockedSelection && !versionConflict && !mutation.isPending && Boolean(name.trim() && source.trim() && evidence.trim() && authorizedAt && selected.size);
+  const canSubmit = enabled && groupsReady && entriesReady && !hasBlockedSelection && !versionConflict && !mutation.isPending && Boolean(name.trim() && source.trim() && evidence.trim() && authorizedAt && selected.size);
   const clearFailure = () => { if (mutation.error && !versionConflict) mutation.reset(); };
   const toggle = (jid: string, label: string, assessment?: GroupListEntry) => setSelected((current) => { const next = new Map(current); if (next.has(jid)) next.delete(jid); else if (!eligibilityEnabled || assessment?.eligibility === 'eligible') next.set(jid, { label, eligibility: assessment?.eligibility, eligibilityReason: assessment?.eligibilityReason }); return next; });
   const submit = (event: FormEvent) => {
@@ -123,7 +125,7 @@ export function GroupListEditorPage() {
         <FilterToolbar><Field label="Group prefix" className="flex-1">{(id) => <Input id={id} type="search" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); applyGroupSearch(); } }} />}</Field><div className="flex items-end"><Button disabled={searchDraft.trim() === route.groupSearch || groups.isFetching} onClick={applyGroupSearch}>Search</Button></div></FilterToolbar>
         {groups.error ? <ApiFailureNotice error={groups.error} onRetry={() => groups.refetch()} /> : null}
         {eligibility.error ? <ApiFailureNotice error={eligibility.error} title="Eligibility check failed" onRetry={() => eligibility.refetch()} /> : null}
-        {groups.isPending ? <StateNotice kind="loading" title="Loading groups" /> : groupItems.length ? <div className="grid max-h-[28rem] overflow-y-auto border border-line px-3">{groupItems.map((group) => {
+        {!groupsReady ? <StateNotice kind="empty" title="Groups projection unavailable" detail="groups_projection is not advertised for this instance. The target directory is unavailable, not empty." /> : groups.isPending ? <StateNotice kind="loading" title="Loading groups" /> : groupItems.length ? <div className="grid max-h-[28rem] overflow-y-auto border border-line px-3">{groupItems.map((group) => {
           const assessment = eligibilityById.get(group.id);
           const checked = selected.has(group.id);
           const eligibilityLabel = !eligibilityEnabled ? 'Validated on submit' : eligibility.isPending ? 'Checking send eligibility' : humanizeToken(assessment?.eligibilityReason ?? assessment?.eligibility ?? 'unknown');

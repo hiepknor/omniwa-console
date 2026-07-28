@@ -42,7 +42,21 @@ export const queryKeys = {
     ['instances', instanceId, 'group-list-eligibility', { groupJids }] as const,
   groupListEligibility: (instanceId: string, groupListId: string, expectedVersion?: number) =>
     ['instances', instanceId, 'group-lists', groupListId, 'eligibility', { expectedVersion }] as const,
-  group: (instanceId: string, groupId: string) => ['instances', instanceId, 'group', groupId] as const,
+  group: (instanceId: string, groupId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'group', groupId] as const
+      : ['instances', instanceId, 'group', groupId, params] as const,
+  groupSummary: (instanceId: string) => ['instances', instanceId, 'groups', 'summary'] as const,
+  groupMembers: (instanceId: string, groupId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'group', groupId, 'members'] as const
+      : ['instances', instanceId, 'group', groupId, 'members', params] as const,
+  groupAudit: (instanceId: string, groupId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'group', groupId, 'audit'] as const
+      : ['instances', instanceId, 'group', groupId, 'audit', params] as const,
+  mediaAsset: (instanceId: string, mediaId: string) => ['instances', instanceId, 'media-assets', mediaId] as const,
+  mediaAssetContent: (instanceId: string, mediaId: string) => ['instances', instanceId, 'media-assets', mediaId, 'content'] as const,
   chat: (instanceId: string, chatId: string) => ['instances', instanceId, 'chat', chatId] as const,
   instanceMessages: (instanceId: string, chatId: string, params?: Record<string, unknown>) =>
     params === undefined

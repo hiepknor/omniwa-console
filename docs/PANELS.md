@@ -18,7 +18,7 @@ Rules:
 | --- | --- | --- |
 | Shared capability/error/projection layer | Available | Integrated |
 | Instances | Available | Integrated |
-| Groups | Projection available | Projection list/detail/search integrated |
+| Groups | Normalized management available | Capability-gated directory, detail, members, commands, photo, audit, and summary integrated |
 | Chats | Projection available | Projection list/detail integrated |
 | Messages and delivery | Projection available | History/detail/receipts and text send integrated |
 | Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
@@ -98,19 +98,33 @@ cached identity may remain visible only with the standard stale-data notice.
 
 ## Groups and Group Lists — `/groups/:groupId?`, `/groups/lists/:groupListId?`
 
-**Status:** projection list/info/search and mutations integrated. The route uses
+**Status:** normalized Group Management integrated with a capability-based
+cutover. The route uses
 the active instance credential as its scope and never calls the admin fleet
 list. Reads remain available from persisted projection data while the
 WhatsApp instance is offline; live mutations still require provider
 connectivity.
 
+The normalized surfaces require their corresponding instance capability:
+`group_management_permissions`, `group_members_projection`,
+`group_management_commands`, `group_management_audit`, `group_photo_assets`,
+and `group_summary`. A missing capability is unavailable/not-ready, never an
+empty result. The compatibility directory may remain visible when only
+`groups_projection` is advertised, but it never enables normalized actions or
+infers permissions.
+
 Reads:
 
 ```text
 GET  /group/list
-GET  /group/search?q=&limit=&cursor=
+GET  /group/search?q=&type=&myRole=&sendMode=&state=&membershipState=&limit=&cursor=
 POST /group/info
 POST /group/invitelink        # reset:false is projection/cache read
+GET  /group/{groupJid}/members?q=&role=&limit=&cursor=
+GET  /group/{groupJid}/audit?limit=&cursor=
+GET  /group/summary
+GET  /media-assets/{mediaId}
+GET  /media-assets/{mediaId}/content
 ```
 
 Mutations:
@@ -123,11 +137,32 @@ POST /group/settings
 POST /group/participant
 POST /group/invitelink        # reset:true is live mutation + write-through
 POST /group/leave
+POST /group/join
+POST /group/photo
+POST /media-assets
 ```
 
-Search is prefix-based and cursor-scoped to instance and normalized query.
-Changing either resets the cursor. The panel never decodes cursors or falls back
-to a live WhatsApp read.
+`/group/list` is the unfiltered normalized directory; `/group/search` owns the
+complete filter scope. Directory, members, and audit cursors are opaque and
+bound to their full instance/resource/filter scopes. Changing a search or
+filter resets its cursor. The panel never decodes cursors or falls back to a
+live WhatsApp read.
+
+Detail and member actions use backend tri-state decisions. Only `allowed`
+enables a command; `denied` and `unknown` remain disabled with their reason.
+Participant remove/promote/demote commands use opaque `memberId` values, while
+add uses canonical user JIDs. Per-participant partial and unknown outcomes are
+rendered individually. Management mutations carry an idempotency key, are
+never auto-retried, and treat acknowledgement and projection convergence as
+different facts. HTTP 429 remains operator-controlled and preserves
+`Retry-After` through the shared failure surface.
+
+Group photo uses shared media ownership: upload a JPEG/PNG to `/media-assets`,
+poll only that asset until terminal state, then send its opaque ID to
+`/group/photo`. Existing managed content is fetched through the authenticated
+API client; the browser never constructs a storage URL. `/group/summary` alone
+owns global metrics; the current directory page is never aggregated into a
+global total. Audit is terminal history and never a source of current state.
 
 The Groups directory distinguishes projected group state from WhatsApp send
 mode and does not infer the active account's management permissions or campaign

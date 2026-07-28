@@ -7,6 +7,7 @@ import { GroupWorkspace } from './GroupWorkspace';
 
 const group: GroupResource = {
   id: '120363001@g.us',
+  normalized: false,
   subject: 'Operations',
   groupType: 'group',
   status: 'active',
@@ -24,15 +25,28 @@ vi.mock('@/ui', async (importOriginal) => {
 vi.mock('./hooks', () => {
   const cachedGroup: GroupResource = {
     id: '120363001@g.us',
+    normalized: false,
     subject: 'Operations',
     groupType: 'group',
     status: 'active',
+    actions: {
+      editName: { state: 'allowed' },
+      editDescription: { state: 'unknown', reason: 'projection_not_ready' },
+      editSettings: { state: 'denied', reason: 'admin_required' },
+      sendMessage: { state: 'allowed' },
+    },
     members: [{ id: 'member-1', memberRef: '15551230000', role: 'member' }],
   };
   const mutation = () => ({ data: undefined, error: undefined, isPending: false, mutate: vi.fn(), reset: vi.fn() });
   return {
     useGroup: () => ({ data: { resource: cachedGroup, meta: { syncStatus: 'ready' } }, error: undefined, isPending: false, refetch: vi.fn() }),
     useGroupInvite: () => ({ data: 'https://example.test/invite', error: undefined, isPending: false, refetch: vi.fn() }),
+    useGroupMembers: () => ({ data: undefined, error: undefined, isPending: false, isFetching: false, refetch: vi.fn() }),
+    useGroupAudit: () => ({ data: undefined, error: undefined, isPending: false, refetch: vi.fn() }),
+    useUploadMediaAsset: mutation,
+    useMediaAsset: () => ({ data: undefined, error: undefined, isPending: false, refetch: vi.fn() }),
+    useMediaAssetContent: () => ({ data: undefined, error: undefined, isPending: false, refetch: vi.fn() }),
+    useSetGroupPhoto: mutation,
     useAddGroupMember: mutation,
     useDemoteGroupMember: mutation,
     useLeaveGroup: mutation,
@@ -52,7 +66,13 @@ describe('GroupWorkspace capability loss', () => {
         groupId={group.id}
         readEnabled={false}
         commandsEnabled={false}
+        normalized={false}
+        membersEnabled={false}
+        auditEnabled={false}
+        photoEnabled={false}
         activeTab="settings"
+        memberSearch=""
+        onParam={vi.fn()}
         onTab={vi.fn()}
         onClose={vi.fn()}
         onLeft={vi.fn()}
@@ -60,19 +80,25 @@ describe('GroupWorkspace capability loss', () => {
     );
 
     expect(html).toContain('Operations');
-    expect(html).toContain('Keeping the last usable group detail visible');
+    expect(html).toContain('Keeping the last usable detail visible');
     expect(html).not.toContain('Loading group');
     expect((html.match(/disabled=""/g) ?? []).length).toBeGreaterThanOrEqual(7);
   });
 
-  it('hands messaging and targeting to their owning routes without a send command', () => {
+  it('keeps messaging disabled when normalized permission is unavailable while handing off targeting', () => {
     const html = renderToStaticMarkup(
       <MemoryRouter>
         <GroupWorkspace
           groupId={group.id}
           readEnabled
-          commandsEnabled
+          commandsEnabled={false}
+          normalized={false}
+          membersEnabled={false}
+          auditEnabled={false}
+          photoEnabled={false}
           activeTab="overview"
+          memberSearch=""
+          onParam={vi.fn()}
           onTab={vi.fn()}
           onClose={vi.fn()}
           onLeft={vi.fn()}
@@ -80,8 +106,8 @@ describe('GroupWorkspace capability loss', () => {
       </MemoryRouter>,
     );
 
-    expect(html).toContain('Open in Inbox');
-    expect(html).toContain('/chats/120363001%40g.us');
+    expect(html).toContain('Messaging unavailable');
+    expect(html).not.toContain('/chats/120363001%40g.us');
     expect(html).toContain('Manage campaign targets');
     expect(html).not.toContain('Send group text');
   });
@@ -92,7 +118,13 @@ describe('GroupWorkspace capability loss', () => {
         groupId={group.id}
         readEnabled
         commandsEnabled
+        normalized={false}
+        membersEnabled={false}
+        auditEnabled={false}
+        photoEnabled={false}
         activeTab="settings"
+        memberSearch=""
+        onParam={vi.fn()}
         onTab={vi.fn()}
         onClose={vi.fn()}
         onLeft={vi.fn()}
@@ -101,6 +133,33 @@ describe('GroupWorkspace capability loss', () => {
 
     expect(html).toContain('Update subject');
     expect(html).toContain('Update description');
-    expect(html).toContain('independent provider commands');
+    expect(html).toContain('independent commands with independently revalidated permission');
+  });
+
+  it('renders allowed, denied, and unknown decisions as distinct normalized states', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <GroupWorkspace
+          groupId={group.id}
+          readEnabled
+          commandsEnabled
+          normalized
+          membersEnabled
+          auditEnabled
+          photoEnabled={false}
+          activeTab="overview"
+          memberSearch=""
+          onParam={vi.fn()}
+          onTab={vi.fn()}
+          onClose={vi.fn()}
+          onLeft={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Edit name');
+    expect(html).toContain('Allowed');
+    expect(html).toContain('Permission denied · Admin required');
+    expect(html).toContain('Permission unknown · Projection not ready');
   });
 });

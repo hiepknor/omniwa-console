@@ -2308,7 +2308,7 @@ export interface paths {
         put?: never;
         /**
          * Create group
-         * @description Create group
+         * @description Create a group with bounded typed participant outcomes. The command is journaled before provider admission when group management commands are enabled.
          */
         post: {
             parameters: {
@@ -2324,17 +2324,28 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description success */
+                /** @description accepted */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.CreateGroupCommandResult"];
+                        };
                     };
                 };
                 /** @description Error on validation */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description idempotency_conflict */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2379,7 +2390,7 @@ export interface paths {
         put?: never;
         /**
          * Set group description
-         * @description Set group description
+         * @description Set or clear group description with command-time permission revalidation and a journaled acknowledgement.
          */
         post: {
             parameters: {
@@ -2395,13 +2406,15 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description success */
+                /** @description accepted */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"];
+                        };
                     };
                 };
                 /** @description Error on validation */
@@ -2413,8 +2426,44 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description group_permission_denied */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_state_changed or idempotency_conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Mutation rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description projection_not_ready or provider_disconnected */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2441,7 +2490,7 @@ export interface paths {
         put?: never;
         /**
          * Get group info
-         * @description Get group info
+         * @description Get normalized projected group facts and advisory tri-state action decisions without members or live WhatsApp queries. Mutations must revalidate permissions.
          */
         post: {
             parameters: {
@@ -2464,11 +2513,11 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["types.GroupInfo"];
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupDetail"];
                         };
                     };
                 };
-                /** @description Error on validation */
+                /** @description invalid_filter */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -2614,7 +2663,7 @@ export interface paths {
         put?: never;
         /**
          * Join group link
-         * @description Join group link
+         * @description Join with an invite code and return a typed public-safe outcome without claiming membership when post-command confirmation is unavailable.
          */
         post: {
             parameters: {
@@ -2630,13 +2679,15 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description success */
+                /** @description accepted */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.JoinGroupCommandResult"];
+                        };
                     };
                 };
                 /** @description Error on validation */
@@ -2648,8 +2699,35 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description idempotency_conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Mutation rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description provider_disconnected */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2676,7 +2754,7 @@ export interface paths {
         put?: never;
         /**
          * Leave group
-         * @description Leave group
+         * @description Leave a group after command-time membership revalidation; unknown provider outcomes are not retried.
          */
         post: {
             parameters: {
@@ -2688,17 +2766,19 @@ export interface paths {
             /** @description Group data */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.LeaveGroupStruct"];
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementLeaveGroupRequest"];
                 };
             };
             responses: {
-                /** @description success */
+                /** @description accepted */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"];
+                        };
                     };
                 };
                 /** @description Error on validation */
@@ -2710,8 +2790,44 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description group_permission_denied */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_state_changed or idempotency_conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Mutation rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description projection_not_ready or provider_disconnected */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2736,11 +2852,16 @@ export interface paths {
         };
         /**
          * List groups
-         * @description List groups
+         * @description List normalized group summaries from the persisted instance projection. This is the unfiltered form of /group/search when group_management_permissions is advertised.
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque cursor bound to the instance */
+                    cursor?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2754,8 +2875,17 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["types.GroupInfo"][];
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupSummary"][];
                         };
+                    };
+                };
+                /** @description invalid_pagination or invalid_cursor */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
                 /** @description Internal server error */
@@ -2856,7 +2986,7 @@ export interface paths {
         put?: never;
         /**
          * Set group name
-         * @description Set group name
+         * @description Set group name with command-time permission revalidation and a journaled acknowledgement when group management commands are enabled.
          */
         post: {
             parameters: {
@@ -2872,13 +3002,15 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description success */
+                /** @description accepted */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"];
+                        };
                     };
                 };
                 /** @description Error on validation */
@@ -2890,8 +3022,44 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description group_permission_denied */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_state_changed or idempotency_conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Mutation rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description projection_not_ready or provider_disconnected */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2918,7 +3086,7 @@ export interface paths {
         put?: never;
         /**
          * Update participant
-         * @description Update participant
+         * @description Execute a bounded participant command. Add accepts canonical user JIDs; remove/promote/demote accept opaque memberId values when group management commands are enabled.
          */
         post: {
             parameters: {
@@ -2927,20 +3095,22 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            /** @description Group data */
+            /** @description Group participant command */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.AddParticipantStruct"];
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementParticipantRequest"];
                 };
             };
             responses: {
-                /** @description success */
+                /** @description accepted */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantCommandResult"];
+                        };
                     };
                 };
                 /** @description Error on validation */
@@ -2952,8 +3122,44 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description group_permission_denied */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_state_changed or idempotency_conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Mutation rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description projection_not_ready or provider_disconnected */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2980,7 +3186,7 @@ export interface paths {
         put?: never;
         /**
          * Set group photo
-         * @description Set group photo
+         * @description Set a Group photo from an instance-owned ready shared media asset. The normalized contract performs command-time permission revalidation and never accepts a URL or base64 image.
          */
         post: {
             parameters: {
@@ -2989,25 +3195,25 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            /** @description Group data */
+            /** @description Group photo asset command */
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoStruct"];
+                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoAssetRequest"];
                 };
             };
             responses: {
-                /** @description success */
+                /** @description accepted */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: string;
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"];
                         };
                     };
                 };
-                /** @description Error on validation */
+                /** @description invalid_request */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -3016,8 +3222,71 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description group_permission_denied */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description media_asset_not_found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_state_changed, media_asset_not_ready, media_asset_integrity_failed, or idempotency_conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description media_asset_too_large */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description media_asset_invalid_type */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Mutation rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description projection_not_ready, provider_disconnected, or media_asset_storage_unavailable */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3042,16 +3311,26 @@ export interface paths {
         };
         /**
          * Search projected groups
-         * @description Prefix-search groups from the persisted instance projection without querying WhatsApp
+         * @description Search normalized group summaries from the persisted instance projection without participants or live WhatsApp queries. The normalized contract is active when group_management_permissions is advertised.
          */
         get: {
             parameters: {
                 query?: {
                     /** @description Case-insensitive group JID or name prefix */
                     q?: string;
+                    /** @description Group type */
+                    type?: "group" | "community" | "subgroup" | "unknown";
+                    /** @description Current instance role */
+                    myRole?: "owner" | "superadmin" | "admin" | "member" | "not_member" | "unknown";
+                    /** @description Who may send */
+                    sendMode?: "all_members" | "admins_only" | "unknown";
+                    /** @description Projected group state */
+                    state?: "active" | "suspended" | "dissolved" | "unavailable" | "unknown";
+                    /** @description Current instance membership */
+                    membershipState?: "joined" | "left" | "removed" | "unknown";
                     /** @description Page size (1-200) */
                     limit?: number;
-                    /** @description Opaque cursor bound to the instance and normalized query */
+                    /** @description Opaque cursor bound to the instance and all filters */
                     cursor?: string;
                 };
                 header?: never;
@@ -3067,11 +3346,11 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["types.GroupInfo"][];
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupSummary"][];
                         };
                     };
                 };
-                /** @description Invalid search or cursor */
+                /** @description invalid_filter, invalid_pagination, or invalid_cursor */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -3135,17 +3414,197 @@ export interface paths {
                 };
             };
             responses: {
+                /** @description accepted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"];
+                        };
+                    };
+                };
+                /** @description Error on validation */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_permission_denied */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_state_changed or idempotency_conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Mutation rate limited; see Retry-After header */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.RateLimitResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description projection_not_ready or provider_disconnected */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get authoritative group summary
+         * @description Aggregate the complete normalized Group projection for the authenticated instance. Counts are never derived from a directory page and the endpoint never calls WhatsApp.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
                 /** @description success */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupDirectorySummary"];
+                        };
                     };
                 };
-                /** @description Error on validation */
+                /** @description not_found when the normalized management contract is disabled */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description projection_not_ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/{groupJid}/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get group management audit history
+         * @description List terminal management command outcomes without provider payloads, aliases, invite links, media, or credentials.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque cursor bound to instance and group */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Canonical WhatsApp Group JID */
+                    groupJid: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementAuditEvent"][];
+                        };
+                    };
+                };
+                /** @description invalid_cursor or invalid_pagination */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description not_found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3164,6 +3623,106 @@ export interface paths {
                 };
             };
         };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group/{groupJid}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List projected group members
+         * @description Search current projected members without provider aliases or live WhatsApp queries. Target actions are advisory tri-state decisions and mutations revalidate them.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Case-insensitive display-name prefix */
+                    q?: string;
+                    /** @description Public member role */
+                    role?: "owner" | "superadmin" | "admin" | "member";
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque cursor bound to instance, group, and filters */
+                    cursor?: string;
+                };
+                header?: never;
+                path: {
+                    /** @description Canonical WhatsApp Group JID */
+                    groupJid: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMember"][];
+                        };
+                    };
+                };
+                /** @description invalid_filter, invalid_pagination, or invalid_cursor */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_not_found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description group_unavailable */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description projection_not_ready */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -9292,10 +9851,37 @@ export interface components {
             groupJid?: string;
             snapshotName?: string;
         };
-        "github_com_evolution-foundation_evolution-go_pkg_group_service.AddParticipantStruct": {
-            action?: components["schemas"]["whatsmeow.ParticipantChange"];
-            groupJid?: components["schemas"]["types.JID"];
-            participants?: string[];
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_group_model.ManagementCommandStatus": "requested" | "executing" | "completed" | "partially_completed" | "failed" | "unknown";
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision": {
+            checkedAt?: string;
+            /** @enum {string} */
+            reason?: "admin_required" | "owner_required" | "not_a_member" | "group_suspended" | "group_unavailable" | "protected_member" | "self_action_not_allowed" | "already_admin" | "not_an_admin" | "permission_unknown" | "projection_not_ready" | "provider_disconnected" | "unsupported";
+            /** @enum {string} */
+            state?: "allowed" | "denied" | "unknown";
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement": {
+            command?: string;
+            /** Format: uuid */
+            commandId?: string;
+            groupJid?: string;
+            projectionRefreshExpected?: boolean;
+            /** @enum {string} */
+            status?: "accepted" | "completed" | "partially_completed" | "unknown";
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.CreateGroupCommandResult": {
+            /** @enum {string} */
+            acknowledgementStatus?: "completed" | "partially_completed" | "failed" | "unknown";
+            /** Format: uuid */
+            commandId?: string;
+            failedCount?: number;
+            groupJid?: string;
+            name?: string;
+            participantOutcomes?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantOutcome"][];
+            projectionRefreshExpected?: boolean;
+            requestedCount?: number;
+            succeededCount?: number;
+            unknownCount?: number;
         };
         "github_com_evolution-foundation_evolution-go_pkg_group_service.CreateGroupStruct": {
             groupName?: string;
@@ -9308,11 +9894,165 @@ export interface components {
             groupJid?: string;
             reset?: boolean;
         };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupActions": {
+            addMembers?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            demoteMembers?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            editDescription?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            editName?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            editSettings?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            leaveGroup?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            promoteMembers?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            readInviteLink?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            removeMembers?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            resetInviteLink?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            sendMessage?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            setPhoto?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupDetail": {
+            actions?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupActions"];
+            adminCount?: number;
+            announce?: boolean;
+            createdAt?: string;
+            description?: string;
+            descriptionPreview?: string;
+            ephemeralEnabled?: boolean;
+            ephemeralTimerSeconds?: number;
+            groupJid?: string;
+            isDefaultSubgroup?: boolean;
+            joinApproval?: boolean;
+            locked?: boolean;
+            /** @enum {string} */
+            memberAddMode?: "all_members" | "admins_only" | "unknown";
+            memberCount?: number;
+            /** @enum {string} */
+            membershipState?: "joined" | "left" | "removed" | "unknown";
+            /** @enum {string} */
+            myRole?: "owner" | "superadmin" | "admin" | "member" | "not_member" | "unknown";
+            name?: string;
+            owner?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.SafeMemberReference"];
+            parentGroupJid?: string;
+            photo?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupPhotoMetadata"];
+            /** @enum {string} */
+            sendMode?: "all_members" | "admins_only" | "unknown";
+            /** @enum {string} */
+            state?: "active" | "suspended" | "dissolved" | "unavailable" | "unknown";
+            /** @enum {string} */
+            type?: "group" | "community" | "subgroup" | "unknown";
+            updatedAt?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupDirectorySummary": {
+            active?: number;
+            adminsOnlySend?: number;
+            communities?: number;
+            subgroups?: number;
+            suspended?: number;
+            total?: number;
+            updatedAt?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMember": {
+            actions?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMemberActions"];
+            displayName?: string;
+            /** Format: uuid */
+            memberId?: string;
+            /** @enum {string} */
+            membershipState?: "active" | "pending" | "removed" | "unknown";
+            /** @enum {string} */
+            role?: "owner" | "superadmin" | "admin" | "member";
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMemberActions": {
+            demote?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            promote?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+            remove?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupPhotoMetadata": {
+            available?: boolean;
+            /** Format: uuid */
+            mediaAssetId?: string;
+            updatedAt?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupSummary": {
+            createdAt?: string;
+            descriptionPreview?: string;
+            groupJid?: string;
+            isDefaultSubgroup?: boolean;
+            memberCount?: number;
+            /** @enum {string} */
+            membershipState?: "joined" | "left" | "removed" | "unknown";
+            /** @enum {string} */
+            myRole?: "owner" | "superadmin" | "admin" | "member" | "not_member" | "unknown";
+            name?: string;
+            parentGroupJid?: string;
+            /** @enum {string} */
+            sendMode?: "all_members" | "admins_only" | "unknown";
+            /** @enum {string} */
+            state?: "active" | "suspended" | "dissolved" | "unavailable" | "unknown";
+            /** @enum {string} */
+            type?: "group" | "community" | "subgroup" | "unknown";
+            updatedAt?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.JoinGroupCommandResult": {
+            /** Format: uuid */
+            commandId?: string;
+            groupJid?: string;
+            projectionRefreshExpected?: boolean;
+            reason?: string;
+            /** @enum {string} */
+            status?: "joined" | "already_member" | "approval_required" | "rejected" | "unknown";
+        };
         "github_com_evolution-foundation_evolution-go_pkg_group_service.JoinGroupStruct": {
             code?: string;
         };
-        "github_com_evolution-foundation_evolution-go_pkg_group_service.LeaveGroupStruct": {
-            groupJid?: components["schemas"]["types.JID"];
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementAuditEvent": {
+            /** @enum {string} */
+            actorType?: "instance" | "system";
+            /** @enum {unknown} */
+            commandStatus?: "completed" | "partially_completed" | "failed" | "unknown";
+            eventType?: string;
+            /** Format: uuid */
+            id?: string;
+            occurredAt?: string;
+            summary?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementAuditSummary"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementAuditSummary": {
+            failureCount?: number;
+            participantCount?: number;
+            reason?: string;
+            setting?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementLeaveGroupRequest": {
+            groupJid?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementParticipantRequest": {
+            /** @enum {string} */
+            action?: "add" | "remove" | "promote" | "demote";
+            groupJid?: string;
+            participants?: string[];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantCommandResult": {
+            /** @enum {string} */
+            action?: "add" | "remove" | "promote" | "demote";
+            /** Format: uuid */
+            commandId?: string;
+            failedCount?: number;
+            groupJid?: string;
+            outcomes?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantOutcome"][];
+            projectionRefreshExpected?: boolean;
+            requestedCount?: number;
+            /** @enum {string} */
+            status?: "completed" | "partially_completed" | "failed" | "unknown";
+            succeededCount?: number;
+            unknownCount?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantOutcome": {
+            /** @enum {string} */
+            code?: "already_member" | "not_member" | "admin_required" | "invalid_participant" | "provider_rejected" | "unknown_outcome";
+            message?: string;
+            participant?: string;
+            /** @enum {string} */
+            status?: "succeeded" | "failed" | "unknown";
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.SafeMemberReference": {
+            memberId?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupDescriptionStruct": {
             description?: string;
@@ -9322,9 +10062,10 @@ export interface components {
             groupJid?: string;
             name?: string;
         };
-        "github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoStruct": {
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoAssetRequest": {
             groupJid?: string;
-            image?: string;
+            /** Format: uuid */
+            mediaAssetId?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_group_service.UpdateGroupSettingsStruct": {
             /** @description announcement, not_announcement, locked, unlocked */
@@ -12845,8 +13586,6 @@ export interface components {
             serial?: number;
             verifiedName?: string;
         };
-        /** @enum {string} */
-        "whatsmeow.ParticipantChange": "add" | "remove" | "promote" | "demote";
     };
     responses: never;
     parameters: never;

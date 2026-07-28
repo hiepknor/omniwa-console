@@ -153,7 +153,12 @@ Keys mirror resource and credential scope:
 ['capabilities', 'session']
 ['capabilities', 'instance:<instanceId>']
 ['instances']
-['instances', instanceId, 'groups', { search, cursor, limit }]
+['instances', instanceId, 'groups', { search, type, myRole, sendMode, state, membershipState, cursor, limit, normalized }]
+['instances', instanceId, 'groups', 'summary']
+['instances', instanceId, 'group', groupId, 'members', { search, role, cursor, limit }]
+['instances', instanceId, 'group', groupId, 'audit', { cursor, limit }]
+['instances', instanceId, 'media-assets', mediaId]
+['instances', instanceId, 'media-assets', mediaId, 'content']
 ['instances', instanceId, 'group', groupId]
 ['instances', instanceId, 'group-lists', { search, cursor, limit }]
 ['instances', instanceId, 'group-lists', groupListId]
@@ -210,6 +215,20 @@ remains visible but does not auto-resubmit a send.
 Media sends use the JSON URL branch with an explicit supported media type. The
 Console does not retain binary uploads or base64 media in component, mutation,
 or query state.
+
+Normalized Group Management commands are the idempotent exception to the
+older provider mutation model. Generate one `Idempotency-Key` per operator
+submission and keep the acknowledgement typed as `completed`,
+`partially_completed`, `failed`, or `unknown`. Never auto-retry a management
+mutation, including HTTP 429 or `unknown`; the operator reviews the projection
+and audit before issuing another command. Participant commands preserve every
+ordered outcome. `projectionRefreshExpected` authorizes a narrow invalidation,
+but does not claim that the refreshed projection has converged.
+
+Group photo upload uses authenticated multipart `POST /media-assets`, polls
+only the returned asset record while it is non-terminal, and applies a `ready`
+asset by ID. Blob content is read through `src/api/` so the instance credential
+is attached without exposing a storage URL.
 
 The Composer requires both `messages_projection` and `outbound_rate_limit`.
 Projection readiness makes the write-through result observable; outbound
