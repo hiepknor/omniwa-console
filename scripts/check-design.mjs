@@ -91,6 +91,11 @@ for (const marker of ['role="group"', '<Checkbox', 'indeterminate={indeterminate
   if (!selectionBar.includes(marker)) failures.push(`src/ui/SelectionBar.tsx: selection-bar contract is missing ${marker}`);
 }
 
+const selectionReview = await read('src/ui/SelectionReview.tsx');
+for (const marker of ['aria-label=', 'aria-live="polite"', 'max-h-56 overflow-y-auto', '<Status', '<Button', 'Remove selected item', 'max-sm:grid-cols-1']) {
+  if (!selectionReview.includes(marker)) failures.push(`src/ui/SelectionReview.tsx: retained-selection contract is missing ${marker}`);
+}
+
 const tablePrimitive = await read('src/ui/Table.tsx');
 for (const marker of ["multiline = false", "multiline && 'py-2'", 'overflow-x-auto', 'border-b border-line']) {
   if (!tablePrimitive.includes(marker)) failures.push(`src/ui/Table.tsx: multiline table-cell rhythm is missing ${marker}`);
@@ -187,7 +192,7 @@ for (const marker of ['<FilterToolbar as="form"', '<StateNotice kind="loading"',
 }
 
 const groupListEditor = await read('src/features/groups/GroupListEditorPage.tsx');
-for (const marker of ['<SelectionBar', 'Select eligible on this page', '<Table', 'border-t-0', 'Selection requires review', 'setPageSelection', '>Members</Th>', '<ProjectedMemberCount', '<GroupTargetIdentity', '<GroupTargetEligibility']) {
+for (const marker of ['<SelectionBar', '<SelectionReview', 'Selected targets', 'Select eligible on this page', '<Table', 'border-t-0', 'Selection requires review', 'setPageSelection', '<CursorPagination', '>Members</Th>', '<ProjectedMemberCount', '<GroupTargetIdentity', '<GroupTargetEligibility']) {
   if (!groupListEditor.includes(marker)) failures.push(`src/features/groups/GroupListEditorPage.tsx: target selection recipe is missing ${marker}`);
 }
 if (groupListEditor.includes('selectedCounts.eligible} eligible ·') || /<Status[^>]*>\{selected\.size\} selected/.test(groupListEditor)) {

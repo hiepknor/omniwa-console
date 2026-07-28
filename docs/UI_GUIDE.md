@@ -137,7 +137,10 @@ resource models, or rendered diagnostics.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the
-  owning feature. Counts are not operational statuses. Target directories keep
+  owning feature. When a selection can span pages, the shared `SelectionReview`
+  surface exposes every retained item and an individual remove action; blocked
+  items appear first so a disabled submit never strands the operator. Counts are
+  not operational statuses. Target directories keep
   projected member counts factual (`—` when unreported), place group type beside
   identity, and wrap a permission reason below its short eligibility status;
   multiline cells grow vertically instead of widening or clipping the table.

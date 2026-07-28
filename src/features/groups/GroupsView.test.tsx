@@ -68,4 +68,14 @@ describe('Groups directory', () => {
     expect(html).toContain('Group projection syncing');
     expect(html).not.toContain('The ready group projection contains no groups');
   });
+
+  it('distinguishes unavailable and unknown Group states visually', () => {
+    const html = render({ groups: [
+      { ...groups[0], id: 'unavailable@g.us', status: 'unavailable' },
+      { ...groups[0], id: 'unknown@g.us', status: 'unknown' },
+    ] });
+
+    expect(html.match(/data-tone="failed"/g)).toHaveLength(1);
+    expect(html.match(/data-tone="neutral"/g)).toHaveLength(1);
+  });
 });

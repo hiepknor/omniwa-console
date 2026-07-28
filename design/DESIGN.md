@@ -224,6 +224,12 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   mono text rather than Status; Status remains reserved for operational state.
   Place SelectionBar directly above its canonical Table with one contiguous
   strong frame. Eligibility and other domain rules remain feature-owned.
+- **SelectionReview** — the only retained-selection review surface when choices
+  can span cursor pages. It uses one bounded square frame, states the retained
+  total without turning it into a status, keeps stable identity metadata visible,
+  and gives every item an explicit Remove action. Domain status remains textual
+  and blocked items sort first in the owning feature so a disabled submit never
+  strands the operator.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
   list progression. Panel body spacing is selected through its named padding
@@ -291,6 +297,7 @@ or `border-*` utilities and rely on generated CSS order.
 | FileUpload | empty, selected, replace, clear, keyboard focus, invalid, required, disabled |
 | Checkbox / Radio / Switch | off, on, indeterminate, hover, keyboard focus, disabled |
 | SelectionBar | zero, partial, all-page, cross-page total, disabled, clear, blocked composition |
+| SelectionReview | hidden-empty, retained items, mixed statuses, long detail, remove, disabled, bounded overflow |
 | Filter chip | rest, hover, keyboard focus, removed |
 | Table row | rest, hover, keyboard focus, selected, multiline status + reason |
 | StateNotice | info/stale, loading, empty/not-ready, error + requestId, action |

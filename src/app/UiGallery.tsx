@@ -32,6 +32,7 @@ import {
   Radio,
   Select,
   SelectionBar,
+  SelectionReview,
   SplitWorkspace,
   StateNotice,
   Status,
@@ -427,6 +428,16 @@ export function UiGallery() {
             <SelectionBar scopeLabel="Select eligible on this page" selectedCount={0} pageSelectedCount={0} pageSelectableCount={0} checked={false} disabled scopeDescription="No eligible groups are available on this page." onTogglePage={() => undefined} onClear={() => undefined} />
             <div className="grid content-start gap-2"><SelectionBar scopeLabel="Select eligible on this page" selectedCount={4} pageSelectedCount={2} pageSelectableCount={2} checked onTogglePage={() => undefined} onClear={() => undefined} /><StateNotice kind="empty" title="Selection requires review" detail="2 selected groups are unavailable or not yet verified." /></div>
           </div>
+          <SelectionReview
+            title="Selected targets"
+            description="Selections can span pages. Unavailable and unknown targets appear first and must be removed before saving."
+            items={[
+              { id: '120363000002@g.us', label: 'Editorial', meta: '120363000002@g.us', status: 'Unavailable', tone: 'failed', detail: 'Send permission denied' },
+              { id: '120363000003@g.us', label: 'Support', meta: '120363000003@g.us', status: 'Unknown', tone: 'degraded', detail: 'Select a sendable subgroup' },
+              { id: '120363000001@g.us', label: 'Operations', meta: '120363000001@g.us', status: 'Eligible', tone: 'ok' },
+            ]}
+            onRemove={() => undefined}
+          />
         </Section>
 
         <Section title="List recipe">

@@ -6,9 +6,10 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { eligibilityIssues, type GroupEligibility, type GroupListEntry } from '@/api/group-lists';
 import { humanizeToken } from '@/lib/format';
-import { Badge, Button, Checkbox, DateTimeInput, Field, FilterToolbar, Input, PageHeader, Panel, ProgressBar, SelectionBar, StateNotice, Status, Table, Td, Textarea, Th, Tr, type Tone } from '@/ui';
+import { Badge, Button, Checkbox, CursorPagination, DateTimeInput, Field, FilterToolbar, Input, PageHeader, Panel, ProgressBar, SelectionBar, SelectionReview, StateNotice, Status, Table, Td, Textarea, Th, Tr, type SelectionReviewItem, type Tone } from '@/ui';
 import { GroupSectionTabs } from './GroupSectionTabs';
 import { GroupTargetEligibility, GroupTargetIdentity, ProjectedMemberCount } from './GroupTargetCells';
+import { groupStatusTone } from './group-status-tone';
 import { pageSelectionState, setPageSelection, type GroupSelectionCandidate, type SelectedGroup } from './group-list-selection';
 import { groupListRouteState, setGroupListParam } from './group-list-route-state';
 import { useGroups } from './hooks';
@@ -91,6 +92,21 @@ export function GroupListEditorPage() {
   }, [mutation.error]);
   const entriesReady = !editing || Boolean(allEntries.data && detail.data && allEntries.data.length === detail.data.groupCount);
   const selectedCounts = [...selected.values()].reduce((counts, item) => ({ ...counts, [item.eligibility ?? 'unknown']: counts[item.eligibility ?? 'unknown'] + 1 }), { eligible: 0, unavailable: 0, unknown: 0 } as Record<GroupEligibility, number>);
+  const selectedReviewItems = useMemo<SelectionReviewItem[]>(() => [...selected.entries()]
+    .sort(([, left], [, right]) => {
+      const leftBlocked = left.eligibility === 'unavailable' || left.eligibility === 'unknown';
+      const rightBlocked = right.eligibility === 'unavailable' || right.eligibility === 'unknown';
+      if (leftBlocked !== rightBlocked) return leftBlocked ? -1 : 1;
+      return left.label.localeCompare(right.label);
+    })
+    .map(([id, item]) => ({
+      id,
+      label: item.label,
+      meta: id,
+      detail: item.eligibilityReason ? humanizeToken(item.eligibilityReason) : undefined,
+      status: eligibilityEnabled ? humanizeToken(item.eligibility ?? 'unknown') : 'Validated on submit',
+      tone: eligibilityEnabled ? item.eligibility === 'eligible' ? 'ok' : item.eligibility === 'unavailable' ? 'failed' : 'degraded' : 'neutral',
+    })), [eligibilityEnabled, selected]);
   const pageSelection = pageSelectionState(selected, pageCandidates);
   const hasBlockedSelection = eligibilityEnabled && (selectedCounts.unavailable > 0 || selectedCounts.unknown > 0);
   const canSubmit = enabled && groupsReady && entriesReady && !hasBlockedSelection && !versionConflict && !mutation.isPending && Boolean(name.trim() && source.trim() && evidence.trim() && authorizedAt && selected.size);
@@ -150,20 +166,31 @@ export function GroupListEditorPage() {
               const assessment = eligibilityById.get(group.id);
               const checked = selected.has(group.id);
               const groupState = group.status ?? 'unreported';
-              const stateTone: Tone = group.status === 'active' ? 'ok' : group.status === 'suspended' ? 'degraded' : group.status === 'dissolved' || group.status === 'unavailable' ? 'failed' : 'neutral';
               const eligibilityState = !eligibilityEnabled ? 'validated on submit' : eligibility.isPending ? 'checking' : assessment?.eligibility ?? 'unknown';
               const eligibilityTone: Tone = !eligibilityEnabled ? 'neutral' : eligibility.isPending ? 'pending' : assessment?.eligibility === 'eligible' ? 'ok' : assessment?.eligibility === 'unavailable' ? 'failed' : 'degraded';
               return <Tr key={group.id}>
                 <Td className="w-12"><Checkbox visuallyHiddenLabel checked={checked} disabled={mutation.isPending || versionConflict || (eligibilityEnabled && !checked && assessment?.eligibility !== 'eligible')} label={<>Select {group.subject ?? group.id}</>} onChange={() => toggle(group.id, group.subject ?? group.id, assessment)} /></Td>
                 <Td multiline><GroupTargetIdentity id={group.id} name={group.subject} type={group.groupType} /></Td>
                 <Td className="w-24 min-w-24 text-right"><ProjectedMemberCount count={group.memberCount} /></Td>
-                <Td><Status tone={stateTone}>{humanizeToken(groupState)}</Status></Td>
+                <Td><Status tone={groupStatusTone(group.status)}>{humanizeToken(groupState)}</Status></Td>
                 <Td multiline className="w-44 min-w-44"><GroupTargetEligibility label={humanizeToken(eligibilityState)} tone={eligibilityTone} reason={assessment?.eligibilityReason} /></Td>
               </Tr>;
             })}</tbody>
           </Table> : <div className="border border-t-0 border-line-strong p-3"><StateNotice kind="empty" title="No groups" detail={route.groupSearch ? 'No projected group matches this prefix.' : 'The ready group projection contains no groups.'} /></div>}
+          <CursorPagination
+            cursor={route.groupSearchCursor}
+            nextCursor={groups.data.resource?.pagination.nextCursor ?? undefined}
+            onCursor={(cursor) => setParams(setGroupListParam(params, 'groupSearchCursor', cursor), { replace: true })}
+            info={route.groupSearchCursor ? 'Opaque cursor page' : `${groupItems.length} groups on first page`}
+          />
         </div> : null}
-        {groups.data ? <div className="flex justify-between gap-2"><Button disabled={!route.groupSearchCursor} onClick={() => setParams(setGroupListParam(params, 'groupSearchCursor'), { replace: true })}>First page</Button><Button disabled={!groups.data.resource?.pagination.nextCursor} onClick={() => setParams(setGroupListParam(params, 'groupSearchCursor', groups.data?.resource?.pagination.nextCursor ?? undefined), { replace: true })}>Next page</Button></div> : null}
+        <SelectionReview
+          title="Selected targets"
+          description="Selections can span pages. Unavailable and unknown targets appear first and must be removed before saving."
+          items={selectedReviewItems}
+          disabled={mutation.isPending || versionConflict}
+          onRemove={(id) => setSelected((current) => { const next = new Map(current); next.delete(id); return next; })}
+        />
       </div></Panel>
       {versionConflict ? <div className="xl:col-span-2"><StateNotice kind="error" title="Group List changed" detail="Reload the current version and review every selection before submitting a new authorization assertion." action={<Button onClick={() => window.location.reload()}>Reload</Button>} /></div> : mutation.error ? <div className="xl:col-span-2 grid gap-3"><ApiFailureNotice error={mutation.error} />{mutationIssues ? <StateNotice kind="error" title={`${mutationIssues.issueCount} selected groups require review`} detail={`${mutationIssues.issues.map((item) => item.currentName || item.groupJid).slice(0, 3).join(', ')}${mutationIssues.truncated || mutationIssues.issueCount > 3 ? '…' : ''}`} /> : null}</div> : null}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 xl:col-span-2"><p className="text-xs text-fg-3">Preflight is advisory. The backend validates the complete selection atomically on submit.</p><div className="flex gap-2 max-sm:w-full"><Button className="max-sm:flex-1" disabled={mutation.isPending} onClick={() => navigate(editing && groupListId ? `/groups/lists/${encodeURIComponent(groupListId)}` : '/groups/lists')}>Cancel</Button><Button className="max-sm:flex-1" type="submit" variant="primary" disabled={!canSubmit}>{mutation.isPending ? 'Submitting…' : editing ? 'Save new version' : 'Create Group List'}</Button></div></div>

@@ -12,6 +12,7 @@ export { Textarea } from './Textarea';
 export { DateTimeInput } from './DateTimeInput';
 export { Checkbox, Radio, Switch } from './ChoiceControls';
 export { SelectionBar } from './SelectionBar';
+export { SelectionReview, type SelectionReviewItem } from './SelectionReview';
 export { DescriptionList, DescriptionItem } from './DescriptionList';
 export { FilterToolbar, FilterChip } from './Filters';
 export { Select } from './Select';

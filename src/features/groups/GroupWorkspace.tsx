@@ -11,6 +11,7 @@ import {
   useResetInvite, useSetGroupPhoto, useUpdateGroupDescription, useUpdateGroupName, useUpdateGroupSetting, useUploadMediaAsset,
 } from './hooks';
 import { groupMemberRoles, type GroupWorkspaceTab } from './route-state';
+import { groupStatusTone } from './group-status-tone';
 
 type Confirm = { action: 'remove'; member: GroupMemberResource } | { action: 'leave' } | { action: 'reset-invite' };
 const settings: Array<{ key: GroupSetting; label: string; hint: string }> = [
@@ -62,7 +63,7 @@ export function GroupWorkspace({
       : query.isPending ? <StateNotice kind="loading" title="Loading group" />
         : query.error && !group ? <Fail error={query.error} onRetry={() => query.refetch()} />
           : group ? <div className="grid gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-3"><Status tone={group.status === 'active' ? 'ok' : 'degraded'}>Group {humanizeToken(group.status ?? 'unknown')}</Status><ProjectionLine meta={query.data?.meta} /></div>
+            <div className="flex flex-wrap items-center justify-between gap-3"><Status tone={groupStatusTone(group.status)}>Group {humanizeToken(group.status ?? 'unknown')}</Status><ProjectionLine meta={query.data?.meta} /></div>
             {!commandsEnabled ? <StateNotice kind="empty" title="Management commands unavailable" detail={normalized ? 'The normalized projection remains readable, but group_management_commands is not advertised for this instance.' : 'Keeping the last usable detail visible while provider commands are disabled.'} /> : null}
             {query.error ? <Fail error={query.error} stale onRetry={readEnabled ? () => query.refetch() : undefined} /> : null}
             <GroupWorkspaceContent key={group.id} group={group} normalized={normalized} commandsEnabled={commandsEnabled} membersEnabled={membersEnabled} auditEnabled={auditEnabled} photoEnabled={photoEnabled} activeTab={activeTab} memberSearch={memberSearch} memberRole={memberRole} memberCursor={memberCursor} auditCursor={auditCursor} onParam={onParam} onTab={onTab} onLeft={onLeft} />
