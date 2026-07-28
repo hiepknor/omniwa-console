@@ -33,12 +33,17 @@ one loading boolean:
 | Request | idle, loading, success, error |
 | Data | empty, ready |
 | Projection | not ready, syncing, ready, stale, failed when applicable |
-| Capability | discovering, supported, unsupported |
+| Capability | discovering, supported, unsupported, failed with or without a cached snapshot |
 | Command | idle, pending, acknowledged, failed |
 
 Every list route renders loading, empty, ready, and normalized error states.
 Projection-backed routes also render not-ready, syncing, and stale states.
 Errors show the `ApiFailure` category/code, message, and request ID when present.
+Missing optional booleans and counts remain **unknown/unreported**. They are
+never converted to `false` or `0`, and unknown command prerequisites disable the
+command. A failed capability refresh may retain read-only data from the last
+successful snapshot, but live commands remain disabled until discovery is
+authoritative again.
 
 Commands disable duplicate submission and render only the server
 acknowledgement. They must not imply WhatsApp delivery, projection convergence,
@@ -117,6 +122,13 @@ resource models, or rendered diagnostics.
 - Dialogs and drawers use the shared framed overlay treatment, lock background
   scrolling, trap and restore focus, have an accessible name, and declare
   whether pending commands can close.
+- One-time credentials cannot be dismissed implicitly after reveal. The
+  operator must explicitly confirm storage or pass a second destructive
+  confirmation to discard the reveal; a copy acknowledgement is informational.
+- Inspector drawers place full identifiers in a semantic DescriptionList and
+  group commands behind a titled action boundary. Preview fixtures reuse the
+  same production inspector composition and may not invent contradictory live
+  states.
 - Interactive table rows support keyboard activation and expose selection.
 - Custom selectors follow the ARIA combobox/listbox pattern, retain an active
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.

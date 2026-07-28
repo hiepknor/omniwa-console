@@ -3,8 +3,8 @@ import { SESSION_QUERY_SCOPE } from '@/api/keys';
 import { DescriptionItem, DescriptionList, PageHeader, Panel, StateNotice, Status } from '@/ui';
 import { ConnectionAndPairing, useInstancePairing } from './ConnectionAndPairing';
 
-export function whatsappNameWhenLoggedIn(loggedIn: boolean, name: string | undefined): string | undefined {
-  if (!loggedIn) return undefined;
+export function whatsappNameWhenLoggedIn(loggedIn: boolean | undefined, name: string | undefined): string | undefined {
+  if (loggedIn !== true) return undefined;
   const normalized = name?.trim();
   return normalized || undefined;
 }
@@ -25,9 +25,9 @@ export function PairingPage() {
 
   const status = !pairing.statusReady
     ? { tone: 'pending' as const, label: 'Reading status' }
-    : pairing.loggedIn
+    : pairing.loggedIn === true
       ? { tone: 'ok' as const, label: 'Paired' }
-      : pairing.connected
+      : pairing.connected === true
         ? { tone: 'pending' as const, label: 'Pairing' }
         : { tone: 'failed' as const, label: 'Disconnected' };
   const whatsappName = whatsappNameWhenLoggedIn(pairing.loggedIn, pairing.status.data?.name);
@@ -44,8 +44,8 @@ export function PairingPage() {
           <div className="grid gap-3">
             <Status tone={status.tone}>{status.label}</Status>
             <DescriptionList>
-              <DescriptionItem label="Connection">{pairing.statusReady ? (pairing.connected ? 'Connected' : 'Disconnected') : 'Not read'}</DescriptionItem>
-              <DescriptionItem label="Paired">{pairing.statusReady ? (pairing.loggedIn ? 'Yes' : 'No') : 'Not read'}</DescriptionItem>
+              <DescriptionItem label="Connection">{pairing.statusReady ? (pairing.connected === true ? 'Connected' : 'Disconnected') : 'Not read'}</DescriptionItem>
+              <DescriptionItem label="Paired">{pairing.statusReady ? (pairing.loggedIn === true ? 'Yes' : 'No') : 'Not read'}</DescriptionItem>
               {whatsappName ? <DescriptionItem label="WhatsApp name">{whatsappName}</DescriptionItem> : null}
             </DescriptionList>
             <StateNotice kind="info" title="Memory-only credential" detail="Reload or Sign out clears this credential from Console memory." />

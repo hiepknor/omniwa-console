@@ -177,8 +177,8 @@ for (const marker of ['<FilterToolbar as="form"', '<StateNotice kind="loading"',
 }
 
 const instancesPreview = await read('src/app/PreviewInstances.tsx');
-if (!instancesPreview.includes('<Image src="/ui-qr-sample.svg"')) {
-  failures.push('src/app/PreviewInstances.tsx: QR fixture must use the canonical Image primitive');
+if (!instancesPreview.includes('<ConnectionAndPairing') || instancesPreview.includes('ui-qr-sample.svg')) {
+  failures.push('src/app/PreviewInstances.tsx: pairing preview must use the production composition and avoid contradictory static QR state');
 }
 
 const pairingSurface = await read('src/features/instances/ConnectionAndPairing.tsx');
@@ -226,6 +226,22 @@ for (const [path, owner] of Object.entries({
   const source = await read(path);
   if (!source.includes(`import { ${owner}`) || !source.includes(`<${owner}`)) {
     failures.push(`${path}: deterministic preview must render its production ${owner}`);
+  }
+}
+
+const recoveryPreview = await read('src/app/PreviewRecovery.tsx');
+const recoveryInspector = await read('src/features/platform/RecoveryInspector.tsx');
+for (const marker of ['<RecoveryInspector', '<RecoveryCommandDialog']) {
+  if (!recoveryPreview.includes(marker)) failures.push(`src/app/PreviewRecovery.tsx: recovery preview must include shared ${marker.slice(1)}`);
+}
+for (const marker of ['<Drawer', 'label="Event key"', 'Recovery actions', '<Dialog']) {
+  if (!recoveryInspector.includes(marker)) failures.push(`src/features/platform/RecoveryInspector.tsx: recovery inspector contract is missing ${marker}`);
+}
+
+for (const path of ['src/features/instances/CreateInstance.tsx', 'src/features/instances/InstanceWorkspace.tsx']) {
+  const source = await read(path);
+  for (const marker of ['Discard without storing…', 'Copying does not confirm durable storage.', 'closeDisabled=']) {
+    if (!source.includes(marker)) failures.push(`${path}: one-time secret dismissal contract is missing ${marker}`);
   }
 }
 

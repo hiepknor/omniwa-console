@@ -38,11 +38,11 @@ export type ProjectionHealthResource = {
 
 export type InstanceHealthResource = {
   instanceId: string;
-  connection: { status: string; connected: boolean };
+  connection: { status: string; connected?: boolean };
   projection: ProjectionHealthResource;
   throttling: {
     status: string;
-    observed: boolean;
+    observed?: boolean;
     circuitState: string;
     openUntil?: string;
     retryAfterSeconds?: number;
@@ -128,12 +128,12 @@ export async function getServerHealth(client: ApiClient): Promise<ServerHealthRe
       instanceId: text(instance.instanceId, 'unknown'),
       connection: {
         status: text(instance.connection?.status, 'unknown'),
-        connected: instance.connection?.connected ?? false,
+        connected: instance.connection?.connected,
       },
       projection: projectionHealth(instance.projection),
       throttling: {
         status: text(instance.throttling?.status, 'unknown'),
-        observed: instance.throttling?.observed ?? false,
+        observed: instance.throttling?.observed,
         circuitState: text(instance.throttling?.circuitState, 'unknown'),
         openUntil: instance.throttling?.openUntil,
         retryAfterSeconds: instance.throttling?.retryAfterSeconds,

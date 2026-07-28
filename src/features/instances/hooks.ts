@@ -17,7 +17,7 @@ import {
   reconnectInstance,
   rotateInstanceToken,
   updateAdvancedSettings,
-  type InstanceAdvancedSettings,
+  type CompleteInstanceAdvancedSettings,
   type InstanceCreateRequest,
 } from '@/api/instances';
 import { instanceKeys, queryKeys } from '@/api/keys';
@@ -176,7 +176,7 @@ export function useUpdateAdvancedSettings(instanceId: string, token: string | un
   const client = useInstanceClient(token);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: InstanceAdvancedSettings) => {
+    mutationFn: (body: CompleteInstanceAdvancedSettings) => {
       if (!client) throw new Error('Attach an instance token before updating settings.');
       return updateAdvancedSettings(client, instanceId, body);
     },

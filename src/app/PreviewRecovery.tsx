@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { RecoveryView, failureIdentity } from '@/features/platform/RecoveryView';
+import { RecoveryCommandDialog, RecoveryInspector, type RecoveryAction } from '@/features/platform/RecoveryInspector';
 import { failuresFixture } from './preview-fixtures';
 
 /** Dev-only: Projection recovery queue with sample data. */
 export function PreviewRecovery() {
-  const [selected, setSelected] = useState(failuresFixture[0]);
+  const [selected, setSelected] = useState<(typeof failuresFixture)[number] | undefined>(failuresFixture[0]);
+  const [action, setAction] = useState<RecoveryAction>();
+  const [reason, setReason] = useState('');
   return (
-    <div className="min-h-dvh bg-bg">
+    <main className="min-h-dvh bg-bg">
       <RecoveryView
         refreshing={false}
         onRefresh={() => {}}
@@ -20,12 +23,14 @@ export function PreviewRecovery() {
         initialLoading={false}
         empty={false}
         items={failuresFixture}
-        selectedKey={failureIdentity(selected)}
-        onSelect={setSelected}
+        selectedKey={selected ? failureIdentity(selected) : undefined}
+        onSelect={(failure) => { setSelected(failure); setAction(undefined); }}
         cursor={undefined}
         nextCursor="cursor_next"
         onCursor={() => {}}
       />
-    </div>
+      <RecoveryInspector failure={selected} commandsEnabled onClose={() => { setSelected(undefined); setAction(undefined); }} onAction={(next) => { setReason(''); setAction(next); }} />
+      <RecoveryCommandDialog failure={selected} action={action} reason={reason} pending={false} onReason={setReason} onClose={() => setAction(undefined)} onSubmit={() => setAction(undefined)} />
+    </main>
   );
 }
