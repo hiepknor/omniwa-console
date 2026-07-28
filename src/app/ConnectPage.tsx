@@ -146,7 +146,7 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
 
               <div className="grid gap-1">
                 <Status tone="neutral">Memory-only credential</Status>
-                <p className="text-xs text-fg-3">Reload and sign-out destroy the active key. Never persisted to storage, URLs, or logs.</p>
+                <p className="text-xs text-fg-3">Reload and End Console session destroy the active key. Never persisted to storage, URLs, or logs.</p>
               </div>
 
               {flow.connectionError ? (

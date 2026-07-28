@@ -1,5 +1,5 @@
 export { cn } from './cn';
-export { Button, ButtonLink, type ButtonVariant } from './Button';
+export { Button, ButtonLink, buttonClassName, type ButtonVariant } from './Button';
 export { CloseButton } from './CloseButton';
 export { Icon, type IconName, type IconSize, type NavigationIconName } from './Icon';
 export { Image, type ImageAspect, type ImageFit, type ImageState } from './Image';

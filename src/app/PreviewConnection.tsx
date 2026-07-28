@@ -36,7 +36,7 @@ export function PreviewConnection() {
 
   return (
     <main className="min-h-dvh bg-bg">
-      <PairingPageView instanceId="inst_preview_01" pairing={pairing} lifecycle={lifecycle} />
+      <PairingPageView instanceId="inst_preview_01" pairing={pairing} lifecycle={lifecycle} onEndConsoleSession={() => undefined} />
     </main>
   );
 }

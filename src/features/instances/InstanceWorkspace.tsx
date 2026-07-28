@@ -179,10 +179,10 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
             </Panel>
           ) : null}
 
-          <Panel title="Destructive actions" description="Disconnect drops the live connection; logout unpairs; destroy permanently removes the instance.">
+          <Panel title="Destructive actions" description="Disconnect drops the live connection; Log out WhatsApp unpairs; destroy permanently removes the instance.">
             <div className="flex flex-wrap gap-2">
               <Button variant="danger" disabled={!token || !pairing.commandReady || connected !== true} onClick={() => setConfirm('disconnect')}>Disconnect…</Button>
-              <Button variant="danger" disabled={!token || !pairing.commandReady || loggedIn !== true} onClick={() => setConfirm('logout')}>Log out…</Button>
+              <Button variant="danger" disabled={!token || !pairing.commandReady || loggedIn !== true} onClick={() => setConfirm('logout')}>Log out WhatsApp…</Button>
               <Button variant="danger" onClick={() => setConfirm('destroy')}>Destroy…</Button>
             </div>
           </Panel>
@@ -193,7 +193,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
         open={Boolean(confirm)}
         onClose={closeConfirm}
         closeDisabled={confirmMutation.isPending}
-        title={`${confirm === 'destroy' ? 'Destroy' : confirm === 'logout' ? 'Log out' : 'Disconnect'} instance?`}
+        title={confirm === 'logout' ? 'Log out WhatsApp account?' : `${confirm === 'destroy' ? 'Destroy' : 'Disconnect'} instance?`}
         footer={
           <>
             <Button disabled={confirmMutation.isPending} onClick={closeConfirm}>Cancel</Button>
@@ -230,7 +230,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
           {rotate.data ? (
             <>
               <Ack action="Token rotation" />
-              <p className="text-sm text-fg-2">This token is shown once and remains in Console memory only until reload or sign-out.</p>
+              <p className="text-sm text-fg-2">This token is shown once and remains in Console memory only until reload or the Console session ends.</p>
               <Field label="One-time replacement token">
                 {(id) => <Input id={id} value={rotate.data.token} readOnly autoComplete="off" spellCheck={false} onFocus={(e) => e.currentTarget.select()} />}
               </Field>
@@ -253,7 +253,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
         title="Discard the replacement token?"
         footer={<><Button onClick={() => setRotationDiscardOpen(false)}>Keep token visible</Button><Button variant="danger" onClick={closeRotationReveal}>Discard token</Button></>}
       >
-        <p className="text-sm text-fg-2">Console will close this one-time reveal. The replacement token cannot be displayed again, although it remains attached in memory until reload or sign-out.</p>
+        <p className="text-sm text-fg-2">Console will close this one-time reveal. The replacement token cannot be displayed again, although it remains attached in memory until reload or the Console session ends.</p>
       </Dialog>
     </>
   );

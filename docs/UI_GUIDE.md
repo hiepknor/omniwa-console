@@ -64,9 +64,8 @@ The connected credential determines the available navigation and API scope:
 
 - admin keys expose platform overview, recovery when advertised, and instance
   fleet management;
-- instance API keys expose the active Instance destination (including
-  connection/pairing), conversations, groups,
-  campaigns, and events;
+- instance API keys expose the pinned active Connection destination,
+  conversations, groups, campaigns, and events;
 - instance-scoped live commands require an in-memory instance token where the
   active session does not already provide that scope.
 - instance scope never invents or requests the configured admin Instance Name.
@@ -80,7 +79,7 @@ The connected credential determines the available navigation and API scope:
 
 ### Instance-scope WhatsApp identity
 
-The active Instance destination may present `Name` from `GET /instance/status`
+The active Connection destination may present `Name` from `GET /instance/status`
 only as **WhatsApp name**. Treat it as provider identity, not configured instance
 metadata, and apply these rules consistently:
 
@@ -159,6 +158,13 @@ resource models, or rendered diagnostics.
   and credential lifetime on compact tablets, and disappears at 640px and below. Page actions,
   WhatsApp state, projection progress, errors, and acknowledgements stay in
   their owning surfaces.
+- Instance scope pins Connection at the bottom of the shell outside the
+  horizontally scrolling destination group. Its `/connection` page owns the
+  separate `End Console session` browser-only action. Admin and unknown scopes
+  keep their platform navigation intact and expose a Session utility that opens
+  origin, scope, and memory-lifetime facts before ending the Console session.
+  Ending the Console session never implies disconnecting or unpairing WhatsApp;
+  the server mutation is explicitly named `Log out WhatsApp…`.
 - Full-height directory/detail routes use `WorkspacePageFrame`. At 900px and
   wider it presents the canonical PageHeader and two-pane workspace; below
   900px it replaces that header with one 57px contextual bar while
