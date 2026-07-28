@@ -297,9 +297,10 @@ a parts bin:
    cursor pagination. Loading, empty, stale/syncing, not-ready, error, and ready
    are mutually exclusive render paths in product panels.
 2. **Inspector:** selection → Drawer → identity/status → DescriptionList → only
-   the narrow actions owned by that panel. Long identifiers remain fully
-   available in the body even when repeated as a compact header subtitle. Long
-   content remains body-scrollable.
+   the narrow actions owned by that panel. Fact groups and action groups use
+   canonical framed Panel surfaces rather than floating directly in the Drawer
+   body. Long identifiers remain fully available in the body even when repeated
+   as a compact header subtitle. Long content remains body-scrollable.
 3. **Command:** consequence notice → required fields/confirmation → stable
    footer. Duplicate submission is disabled; pending commands lock dismissal;
    acknowledgement never claims downstream delivery.

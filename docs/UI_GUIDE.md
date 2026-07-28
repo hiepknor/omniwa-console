@@ -126,9 +126,9 @@ resource models, or rendered diagnostics.
   operator must explicitly confirm storage or pass a second destructive
   confirmation to discard the reveal; a copy acknowledgement is informational.
 - Inspector drawers place full identifiers in a semantic DescriptionList and
-  group commands behind a titled action boundary. Preview fixtures reuse the
-  same production inspector composition and may not invent contradictory live
-  states.
+  place facts and commands in separate canonical Panel surfaces. Preview
+  fixtures reuse the same production inspector composition and may not invent
+  contradictory live states.
 - Interactive table rows support keyboard activation and expose selection.
 - Custom selectors follow the ARIA combobox/listbox pattern, retain an active
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.

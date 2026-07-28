@@ -1,7 +1,7 @@
 import type { ProjectionFailure } from '@/api/recovery';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, DescriptionItem, DescriptionList, Dialog, Drawer, Field, Input, Status } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Drawer, Field, Input, Panel, Status } from '@/ui';
 
 export type RecoveryAction = 'replay' | 'discard';
 
@@ -20,28 +20,30 @@ export function RecoveryInspector({
     <Drawer open={Boolean(failure)} onClose={onClose} title={humanizeToken(failure?.resource, 'Projection failure')} subtitle={failure?.eventKey}>
       {failure ? (
         <div className="grid gap-4">
-          <Status tone="failed">{humanizeToken(failure.failureClass, 'Failed')}</Status>
-          <DescriptionList>
-            <DescriptionItem label="Event key" mono>{failure.eventKey}</DescriptionItem>
-            <DescriptionItem label="Instance" mono>{failure.instanceId}</DescriptionItem>
-            <DescriptionItem label="Resource">{humanizeToken(failure.resource)}</DescriptionItem>
-            <DescriptionItem label="Event type">{humanizeToken(failure.eventType)}</DescriptionItem>
-            <DescriptionItem label="Error code" mono>{failure.lastErrorCode ?? 'Not reported'}</DescriptionItem>
-            <DescriptionItem label="Attempts">{`${failure.retryCount ?? '—'} of ${failure.maxAttempts ?? '—'}`}</DescriptionItem>
-            <DescriptionItem label="Occurred">{relativeTime(failure.occurredAt) || 'Not reported'}</DescriptionItem>
-            <DescriptionItem label="Last attempt">{relativeTime(failure.lastAttemptAt) || 'Not reported'}</DescriptionItem>
-            <DescriptionItem label="Dead-lettered">{relativeTime(failure.deadLetteredAt) || 'Not reported'}</DescriptionItem>
-          </DescriptionList>
-          <section className="grid gap-3 border-t border-line pt-4" aria-labelledby="recovery-actions-title">
-            <div className="grid gap-1">
-              <h3 id="recovery-actions-title" className="text-sm font-semibold text-fg">Recovery actions</h3>
-              <p className="text-xs text-fg-3">Commands are audited and revalidated by the backend. Acknowledgement is not recovered state.</p>
-            </div>
+          <Panel
+            title="Failure facts"
+            description="Persisted terminal projection record."
+            actions={<Status tone="failed">{humanizeToken(failure.failureClass, 'Failed')}</Status>}
+            bodyPadding="compact-top"
+          >
+            <DescriptionList>
+              <DescriptionItem label="Event key" mono>{failure.eventKey}</DescriptionItem>
+              <DescriptionItem label="Instance" mono>{failure.instanceId}</DescriptionItem>
+              <DescriptionItem label="Resource">{humanizeToken(failure.resource)}</DescriptionItem>
+              <DescriptionItem label="Event type">{humanizeToken(failure.eventType)}</DescriptionItem>
+              <DescriptionItem label="Error code" mono>{failure.lastErrorCode ?? 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Attempts">{`${failure.retryCount ?? '—'} of ${failure.maxAttempts ?? '—'}`}</DescriptionItem>
+              <DescriptionItem label="Occurred">{relativeTime(failure.occurredAt) || 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Last attempt">{relativeTime(failure.lastAttemptAt) || 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Dead-lettered">{relativeTime(failure.deadLetteredAt) || 'Not reported'}</DescriptionItem>
+            </DescriptionList>
+          </Panel>
+          <Panel title="Recovery actions" description="Commands are audited and revalidated by the backend. Acknowledgement is not recovered state.">
             <div className="flex flex-wrap gap-2 max-sm:[&>*]:flex-1">
               <Button variant="primary" disabled={!commandsEnabled} onClick={() => onAction('replay')}>Replay…</Button>
               <Button variant="danger" disabled={!commandsEnabled} onClick={() => onAction('discard')}>Discard…</Button>
             </div>
-          </section>
+          </Panel>
         </div>
       ) : null}
     </Drawer>

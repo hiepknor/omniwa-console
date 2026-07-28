@@ -234,7 +234,7 @@ const recoveryInspector = await read('src/features/platform/RecoveryInspector.ts
 for (const marker of ['<RecoveryInspector', '<RecoveryCommandDialog']) {
   if (!recoveryPreview.includes(marker)) failures.push(`src/app/PreviewRecovery.tsx: recovery preview must include shared ${marker.slice(1)}`);
 }
-for (const marker of ['<Drawer', 'label="Event key"', 'Recovery actions', '<Dialog']) {
+for (const marker of ['<Drawer', '<Panel', 'title="Failure facts"', 'label="Event key"', 'title="Recovery actions"', '<Dialog']) {
   if (!recoveryInspector.includes(marker)) failures.push(`src/features/platform/RecoveryInspector.tsx: recovery inspector contract is missing ${marker}`);
 }
 
