@@ -158,6 +158,13 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Textarea / DateTimeInput** — use the same surface, border, focus, invalid,
   disabled, and mobile target language as Input. Textarea resizes vertically;
   DateTimeInput standardizes the browser's local date-time field surface.
+- **FileUpload** — the only single-file chooser. Native file semantics remain
+  available without exposing browser-default visual chrome. The square recessed
+  frame always names the selected file and its local MIME/size metadata, with
+  explicit Choose, Replace, and Clear actions. Empty, selected, invalid,
+  required, and disabled states use the same Field and Button language. Upload
+  transport, progress, validation, and server acknowledgement remain owned by
+  the calling feature; selecting a file never implies it was uploaded.
 - **Checkbox / Radio / Switch** — native choice semantics with fully custom
   square visuals. Checkbox and radio use a framed 16px ink mark; radio remains
   square by design. Switch uses a 36×20px square track with an ink/paper thumb
@@ -259,6 +266,7 @@ or `border-*` utilities and rely on generated CSS order.
 | Select option | rest, active/hover, selected, active + selected, disabled |
 | Input | rest, hover, keyboard focus, populated, invalid, disabled |
 | Textarea / DateTimeInput | rest, populated, keyboard focus, invalid, disabled |
+| FileUpload | empty, selected, replace, clear, keyboard focus, invalid, required, disabled |
 | Checkbox / Radio / Switch | off, on, hover, keyboard focus, disabled |
 | Filter chip | rest, hover, keyboard focus, removed |
 | Table row | rest, hover, keyboard focus, selected |
