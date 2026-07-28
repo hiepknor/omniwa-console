@@ -547,7 +547,7 @@ export function UiGallery() {
         </Section>
       </main>
 
-      <Drawer open={drawer} onClose={() => setDrawer(false)} title="inst_01" subtitle="inst_01HZX9Q…">
+      <Drawer open={drawer} onClose={() => setDrawer(false)} title="inst_01" subtitle="inst_01HZX9Q…" footer={<Button onClick={() => setDrawer(false)}>Edit instance</Button>}>
         <div className="grid gap-3">
           <Status tone="ok">connected</Status>
           <p className="text-sm text-fg-2">Framed right-side inspector with a strong header, scroll-safe body, and responsive bottom-sheet treatment.</p>

@@ -114,6 +114,21 @@ One-off messaging navigates to Inbox; campaign target management navigates to
 Group Lists. The Groups feature owns neither workflow and never sends a message
 itself.
 
+Group List create and replacement editors keep one canonical target table.
+Selections on the current page are reviewed and removed in that table; only
+selections outside the current search/cursor page appear in the compact review
+surface below it. The submission review states every unmet prerequisite, and a
+stable bottom action bar remains reachable on long tablet/mobile forms. Leaving
+with changed facts, targets, authorization time, or an entered evidence reference
+requires explicit discard confirmation.
+
+Create and replace responses are treated as successful only when the backend
+returns the required list identity, version, and group count. The detail drawer
+then reports the acknowledged version and target count, exposes complete
+server-owned facts, and keeps Edit in its fixed footer; delete remains isolated
+in the scrollable danger zone. Long target names and JIDs wrap inside the drawer
+instead of widening the page or introducing a second horizontal scroll surface.
+
 Never persist credentials or place credential values in URLs, query keys, logs,
 resource models, or rendered diagnostics.
 

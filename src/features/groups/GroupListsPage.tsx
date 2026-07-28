@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
-import type { ProjectionMeta } from '@/api/envelopes';
+import type { CommandResult, ProjectionMeta } from '@/api/envelopes';
 import { GroupEligibilitySummary } from '@/components/GroupEligibilitySummary';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, withSearchParams } from '@/lib/url-search-state';
@@ -35,6 +35,7 @@ export function GroupListsPage() {
   const navigate = useNavigate();
   const route = groupListRouteState(params);
   const [searchDraft, setSearchDraft] = useState(route.search);
+  const [deleteAck, setDeleteAck] = useState<{ name: string; result: CommandResult }>();
   const readEnabled = session.keyKind === 'api' && (capabilities.data?.capabilities.includes('group_lists') ?? false);
   const commandsEnabled = readEnabled && !capabilities.isPending && !capabilities.isError;
   const eligibilityEnabled = capabilities.data?.capabilities.includes('group_list_eligibility') ?? false;
@@ -43,7 +44,7 @@ export function GroupListsPage() {
   const setParam = (key: string, value?: string) => setParams(setGroupListParam(params, key, value), { replace: true });
   useInvalidCursorReset(query.error, route.cursor, () => setParam('cursor'));
   useEffect(() => setSearchDraft(route.search), [route.search]);
-  const directoryParams = omitSearchParams(params, ['tab', 'groupCursor', 'auditCursor']);
+  const directoryParams = omitSearchParams(params, ['tab', 'groupCursor', 'auditCursor', 'notice']);
   const directoryUrl = withSearchParams('/groups/lists', directoryParams);
 
   if (session.keyKind !== 'api' || capabilities.isPending || (!readEnabled && !query.data)) {
@@ -56,6 +57,7 @@ export function GroupListsPage() {
       <div className="grid gap-6 p-6 max-sm:p-4">
         <PageHeader eyebrow="Messaging" title="Group Lists" description="Build and maintain reusable group targets for campaigns." secondaryActions={<Button disabled={query.isFetching} onClick={() => query.refetch()}>{query.isFetching ? 'Refreshing…' : 'Refresh'}</Button>} primaryAction={commandsEnabled ? <ButtonLink to={withSearchParams('/groups/lists/new', directoryParams)} variant="primary">New group list</ButtonLink> : <Button variant="primary" disabled>New group list</Button>} />
         <GroupSectionTabs />
+        {deleteAck ? <StateNotice kind="info" title={`${deleteAck.name} deleted`} detail={deleteAck.result.message || 'The server completed the deletion. Existing campaign snapshots remain unchanged.'} /> : null}
         {!commandsEnabled && query.data ? <StateNotice kind={capabilities.isError ? 'error' : 'empty'} title={capabilities.isError ? 'Showing last known capabilities' : 'Capability changed'} detail="Keeping the last usable list page visible; create, edit, and delete commands remain unavailable until capability discovery is authoritative." /> : null}
         <Panel title="Group List directory" description="Name search, cursor, and selected list remain URL-addressable." bodyPadding="none">
           <FilterToolbar as="form" onSubmit={(event) => { event.preventDefault(); setParam('search', searchDraft.trim()); }}>
@@ -82,12 +84,12 @@ export function GroupListsPage() {
           <CursorPagination cursor={route.cursor} nextCursor={query.data?.nextCursor ?? undefined} onCursor={(value) => setParam('cursor', value)} />
         </Panel>
       </div>
-      {groupListId ? <GroupListInspector id={groupListId} readEnabled={readEnabled} commandsEnabled={commandsEnabled} eligibilityEnabled={eligibilityEnabled} directoryParams={directoryParams} route={route} setParam={setParam} onClose={() => navigate(directoryUrl)} /> : null}
+      {groupListId ? <GroupListInspector id={groupListId} readEnabled={readEnabled} commandsEnabled={commandsEnabled} eligibilityEnabled={eligibilityEnabled} directoryParams={directoryParams} route={route} setParam={setParam} onDeleted={(name, result) => { setDeleteAck({ name, result }); navigate(directoryUrl); }} onClose={() => navigate(directoryUrl)} /> : null}
     </>
   );
 }
 
-function GroupListInspector({ id, readEnabled, commandsEnabled, eligibilityEnabled, directoryParams, route, setParam, onClose }: { id: string; readEnabled: boolean; commandsEnabled: boolean; eligibilityEnabled: boolean; directoryParams: URLSearchParams; route: ReturnType<typeof groupListRouteState>; setParam: (key: string, value?: string) => void; onClose: () => void }) {
+function GroupListInspector({ id, readEnabled, commandsEnabled, eligibilityEnabled, directoryParams, route, setParam, onDeleted, onClose }: { id: string; readEnabled: boolean; commandsEnabled: boolean; eligibilityEnabled: boolean; directoryParams: URLSearchParams; route: ReturnType<typeof groupListRouteState>; setParam: (key: string, value?: string) => void; onDeleted: (name: string, result: CommandResult) => void; onClose: () => void }) {
   const navigate = useNavigate();
   const detail = useGroupList(id, readEnabled);
   const entries = useGroupListEntries(id, route.groupCursor, readEnabled && route.tab === 'groups');
@@ -100,17 +102,21 @@ function GroupListInspector({ id, readEnabled, commandsEnabled, eligibilityEnabl
   const item = detail.data;
   const assessment = useGroupListEligibility(id, item?.version, readEnabled && eligibilityEnabled && Boolean(item));
   return <>
-    <Drawer open onClose={onClose} closeDisabled={remove.isPending} title={item?.name ?? 'Group List'} subtitle={id}>
+    <Drawer open onClose={onClose} closeDisabled={remove.isPending} title={item?.name ?? 'Group List'} subtitle={id} footer={item ? <Button disabled={!commandsEnabled} onClick={() => navigate(withSearchParams(`/groups/lists/${encodeURIComponent(id)}/edit`, directoryParams))}>Edit Group List</Button> : undefined}>
       {detail.isPending ? <StateNotice kind="loading" title="Loading Group List" /> : !item ? <Failure error={detail.error ?? new Error('Group List unavailable.')} onRetry={() => detail.refetch()} /> : (
         <div className="grid gap-4">
+          {route.notice ? <StateNotice kind="info" title={route.notice === 'created' ? 'Group List created' : 'New Group List version created'} detail={`${item.name} · version ${item.version ?? 'not reported'} · ${item.groupCount ?? '—'} targets`} /> : null}
           {detail.error ? <Failure error={detail.error} stale onRetry={() => detail.refetch()} /> : null}
           <Panel title="Group List facts" description="Server-owned identity and immutable version facts.">
             <DescriptionList>
               <DescriptionItem label="Group List ID" mono>{item.id}</DescriptionItem>
               <DescriptionItem label="Version">{item.version ?? 'Not reported'}</DescriptionItem>
               <DescriptionItem label="Groups">{item.groupCount ?? 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Description">{item.description || 'Not reported'}</DescriptionItem>
               <DescriptionItem label="Authorization">{humanizeToken(item.authorizationSource ?? 'unreported')}</DescriptionItem>
-              <DescriptionItem label="Updated">{relativeTime(item.updatedAt) || 'Not reported'}</DescriptionItem>
+              <DescriptionItem label="Authorized"><span title={item.authorizedAt}>{relativeTime(item.authorizedAt) || 'Not reported'}</span></DescriptionItem>
+              <DescriptionItem label="Created"><span title={item.createdAt}>{relativeTime(item.createdAt) || 'Not reported'}</span></DescriptionItem>
+              <DescriptionItem label="Updated"><span title={item.updatedAt}>{relativeTime(item.updatedAt) || 'Not reported'}</span></DescriptionItem>
             </DescriptionList>
           </Panel>
 
@@ -126,7 +132,7 @@ function GroupListInspector({ id, readEnabled, commandsEnabled, eligibilityEnabl
                 {entries.isPending ? <StateNotice kind="loading" title="Loading target groups" /> : entries.error && !entries.data ? <Failure error={entries.error} onRetry={() => entries.refetch()} /> : entries.data ? <>
                   <ProjectionNotice meta={entries.data.meta} resource="Target groups" />
                   {entries.error ? <Failure error={entries.error} stale onRetry={() => entries.refetch()} /> : null}
-                  {entries.data.items.length ? <ul className="grid">{entries.data.items.map((entry) => <li key={entry.groupJid} className="grid gap-1 border-b border-line py-3 last:border-b-0"><div className="flex items-center justify-between gap-3"><strong className="truncate text-sm">{entry.currentName ?? entry.snapshotName ?? entry.groupJid}</strong><Status tone={entry.eligibility === 'eligible' ? 'ok' : entry.eligibility === 'unavailable' ? 'failed' : 'degraded'}>{humanizeToken(entry.eligibility)}</Status></div><code className="truncate text-xs text-fg-3">{entry.groupJid}</code>{entry.currentName && entry.snapshotName && entry.currentName !== entry.snapshotName ? <small className="text-xs text-fg-3">Previously: {entry.snapshotName}</small> : null}{entry.eligibilityReason ? <small className="text-xs text-danger">{humanizeToken(entry.eligibilityReason)}</small> : null}</li>)}</ul> : !entries.data.meta?.syncStatus || entries.data.meta.syncStatus === 'ready' ? <StateNotice kind="empty" title="No groups" /> : null}
+                  {entries.data.items.length ? <ul className="grid min-w-0">{entries.data.items.map((entry) => <li key={entry.groupJid} className="grid min-w-0 gap-1 border-b border-line py-3 last:border-b-0"><div className="flex min-w-0 items-center justify-between gap-3"><strong className="min-w-0 truncate text-sm">{entry.currentName ?? entry.snapshotName ?? entry.groupJid}</strong><Status tone={entry.eligibility === 'eligible' ? 'ok' : entry.eligibility === 'unavailable' ? 'failed' : 'degraded'}>{humanizeToken(entry.eligibility)}</Status></div><code className="min-w-0 truncate text-xs text-fg-3">{entry.groupJid}</code>{entry.currentName && entry.snapshotName && entry.currentName !== entry.snapshotName ? <small className="min-w-0 truncate text-xs text-fg-3">Previously: {entry.snapshotName}</small> : null}{entry.eligibilityReason ? <small className="min-w-0 break-words text-xs text-danger">{humanizeToken(entry.eligibilityReason)}</small> : null}</li>)}</ul> : !entries.data.meta?.syncStatus || entries.data.meta.syncStatus === 'ready' ? <StateNotice kind="empty" title="No groups" /> : null}
                   <CursorPagination cursor={route.groupCursor} nextCursor={entries.data.nextCursor ?? undefined} onCursor={(value) => setParam('groupCursor', value)} />
                 </> : null}
               </div>
@@ -144,16 +150,11 @@ function GroupListInspector({ id, readEnabled, commandsEnabled, eligibilityEnabl
             </Panel>
           )}
 
-          <Panel title="List actions" description="Edit creates a new immutable version; deletion leaves campaign snapshots unchanged.">
-            <div className="flex flex-wrap gap-2">
-              <Button disabled={!commandsEnabled} onClick={() => navigate(withSearchParams(`/groups/lists/${encodeURIComponent(id)}/edit`, directoryParams))}>Edit</Button>
-              <Button variant="danger" disabled={!commandsEnabled} onClick={() => { setConfirm(''); setDeleteOpen(true); }}>Delete…</Button>
-            </div>
-          </Panel>
+          <Panel title="Danger zone" description="Deletion leaves existing campaign snapshots unchanged."><Button variant="danger" disabled={!commandsEnabled} onClick={() => { setConfirm(''); setDeleteOpen(true); }}>Delete Group List…</Button></Panel>
         </div>
       )}
     </Drawer>
-    <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} closeDisabled={remove.isPending} title="Delete Group List?" footer={<><Button disabled={remove.isPending} onClick={() => setDeleteOpen(false)}>Cancel</Button><Button variant="danger" disabled={remove.isPending || confirm !== item?.name} onClick={() => remove.mutate(undefined, { onSuccess: () => { setDeleteOpen(false); onClose(); } })}>{remove.isPending ? 'Deleting…' : 'Delete Group List'}</Button></>}>
+    <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} closeDisabled={remove.isPending} title="Delete Group List?" footer={<><Button disabled={remove.isPending} onClick={() => setDeleteOpen(false)}>Cancel</Button><Button variant="danger" disabled={remove.isPending || confirm !== item?.name} onClick={() => remove.mutate(undefined, { onSuccess: (result) => { setDeleteOpen(false); if (item) onDeleted(item.name, result); } })}>{remove.isPending ? 'Deleting…' : 'Delete Group List'}</Button></>}>
       <div className="grid gap-3"><p className="text-sm text-fg-2">Campaign snapshots remain unchanged. Type the exact list name to confirm.</p><Field label="Group List name">{(fieldId) => <Input id={fieldId} value={confirm} onChange={(event) => setConfirm(event.target.value)} />}</Field>{remove.error ? <Failure error={remove.error} /> : null}</div>
     </Dialog>
   </>;

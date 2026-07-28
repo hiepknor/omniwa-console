@@ -11,8 +11,18 @@ for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDis
 }
 
 const drawer = await read('src/ui/Drawer.tsx');
-for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDisabled', 'CloseButton']) {
+for (const marker of ['useModalFocus', 'aria-labelledby', 'aria-busy', 'closeDisabled', 'CloseButton', 'footer?: ReactNode', 'shrink-0']) {
   if (!drawer.includes(marker)) failures.push(`src/ui/Drawer.tsx: missing ${marker}`);
+}
+
+const safeGroupListEditor = await read('src/features/groups/GroupListEditorPage.tsx');
+for (const marker of ['Submission review', 'sticky bottom-0', 'useBlocker', 'useBeforeUnload', 'Discard unsaved Group List changes?']) {
+  if (!safeGroupListEditor.includes(marker)) failures.push(`src/features/groups/GroupListEditorPage.tsx: editor safety contract is missing ${marker}`);
+}
+
+const groupListsPage = await read('src/features/groups/GroupListsPage.tsx');
+for (const marker of ['footer={item ?', 'min-w-0', 'Group List facts', 'Danger zone']) {
+  if (!groupListsPage.includes(marker)) failures.push(`src/features/groups/GroupListsPage.tsx: detail inspector contract is missing ${marker}`);
 }
 
 const modalFocus = await read('src/ui/useModalFocus.ts');
@@ -49,7 +59,7 @@ for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 's
 }
 
 const status = await read('src/ui/Status.tsx');
-for (const marker of ['data-tone={tone}', 'grid-cols-[20px_minmax(0,1fr)]', 'justify-self-start', "wrap ? 'w-auto max-w-full' : 'w-max'", "wrap ? 'whitespace-normal break-words' : 'whitespace-nowrap'", 'size-2.5', "tone === 'failed'", 'statusMarkStyle[tone]']) {
+for (const marker of ['data-tone={tone}', 'grid-cols-[20px_minmax(0,1fr)]', 'shrink-0', 'justify-self-start', "wrap ? 'w-auto max-w-full' : 'w-max'", "wrap ? 'whitespace-normal break-words' : 'whitespace-nowrap'", 'size-2.5', "tone === 'failed'", 'statusMarkStyle[tone]']) {
   if (!status.includes(marker)) failures.push(`src/ui/Status.tsx: status stamp contract is missing ${marker}`);
 }
 

@@ -65,6 +65,16 @@ function summary(payload: SummaryPayload | undefined): GroupListSummary {
     authorizedAt: payload?.authorizedAt, createdAt: payload?.createdAt, updatedAt: payload?.updatedAt,
   };
 }
+function writeSummary(payload: SummaryPayload | undefined, operation: 'create' | 'update'): GroupListSummary {
+  const value = summary(payload);
+  if (!value.id || value.version === undefined || value.groupCount === undefined) {
+    throw new ApiFailure({
+      code: 'invalid_response',
+      error: `Group List ${operation} returned an incomplete resource.`,
+    }, 502);
+  }
+  return value;
+}
 function nextCursor(meta?: ProjectionMeta): string | null { return meta?.nextCursor ?? null; }
 function eligibility(payload: EligibilityPayload | undefined): GroupListEntry {
   return {
@@ -132,10 +142,10 @@ export async function listGroupListAudit(client: ApiClient, id: string, params: 
   return { items: (result.resource ?? []).map((item) => ({ id: stringValue(item.id), eventType: stringValue(item.eventType), actorType: stringValue(item.actorType), fromVersion: item.fromVersion, toVersion: item.toVersion, occurredAt: item.occurredAt })).filter((item) => item.id), nextCursor: nextCursor(result.meta), meta: result.meta };
 }
 export async function createGroupList(client: ApiClient, input: GroupListWrite): Promise<GroupListSummary> {
-  return summary(unwrap<SummaryPayload>(await client.POST('/group-lists', { body: input })));
+  return writeSummary(unwrap<SummaryPayload>(await client.POST('/group-lists', { body: input })), 'create');
 }
 export async function updateGroupList(client: ApiClient, id: string, input: GroupListWrite & { expectedVersion: number }): Promise<GroupListSummary> {
-  return summary(unwrap<SummaryPayload>(await client.PUT('/group-lists/{groupListId}', { params: { path: { groupListId: id } }, body: input })));
+  return writeSummary(unwrap<SummaryPayload>(await client.PUT('/group-lists/{groupListId}', { params: { path: { groupListId: id } }, body: input })), 'update');
 }
 export async function deleteGroupList(client: ApiClient, id: string): Promise<CommandResult> {
   return unwrapCommand(await client.DELETE('/group-lists/{groupListId}', { params: { path: { groupListId: id } } }));

@@ -50,6 +50,23 @@ describe('Group Lists adapter', () => {
     expect(PUT).toHaveBeenCalledWith('/group-lists/{groupListId}', { params: { path: { groupListId: 'list-1' } }, body: { ...input, expectedVersion: 1 } });
   });
 
+  it.each([
+    ['create', { message: 'success', data: [] }],
+    ['update', { message: 'success', data: { id: 'list-1' } }],
+  ] as const)('rejects an incomplete %s success resource at runtime', async (operation, body) => {
+    const input = { name: 'Branches', groupJids: ['1@g.us'], authorization: { source: 'ticket', evidenceReference: 'T-1', authorizedAt: '2026-07-27T08:00:00Z' } };
+    const client = {
+      POST: vi.fn().mockResolvedValue(ok(body)),
+      PUT: vi.fn().mockResolvedValue(ok(body)),
+    } as unknown as ApiClient;
+
+    const request = operation === 'create'
+      ? createGroupList(client, input)
+      : updateGroupList(client, 'list-1', { ...input, expectedVersion: 1 });
+
+    await expect(request).rejects.toMatchObject({ code: 'invalid_response', httpStatus: 502 });
+  });
+
   it('checks an ordered batch without inferring eligibility', async () => {
     const POST = vi.fn().mockResolvedValue(ok({ message: 'success', data: [
       { groupJid: '2@g.us', eligibility: 'unknown', eligibilityReason: 'projection_not_ready', canSend: false },

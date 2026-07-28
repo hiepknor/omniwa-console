@@ -210,7 +210,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Drawer (inspector)** — right panel, `min(440px,100%)`, paper surface, 1px
   strong left border, and a 60% ink scrim. Header = title + mono ID + square close
   cell. ≤640px becomes an 85dvh full-width bottom sheet. The body scrolls without
-  moving the page.
+  moving the page. An optional contextual-action footer remains outside that
+  scroll container, so the primary next action is visible without competing with
+  destructive actions at the end of long inspector content.
 - **Dialog** — `min(560px,100%)`, paper surface, 1px strong frame, square close
   cell, bounded body, and elevated action footer over a 60% ink scrim. ≤640px
   docks to the bottom and gives footer actions equal 40px targets. Destructive
@@ -371,9 +373,12 @@ a parts bin:
    canonical framed Panel surfaces rather than floating directly in the Drawer
    body. Long identifiers remain fully available in the body even when repeated
    as a compact header subtitle. Long content remains body-scrollable.
-3. **Command:** consequence notice → required fields/confirmation → stable
-   footer. Duplicate submission is disabled; pending commands lock dismissal;
-   acknowledgement never claims downstream delivery.
+3. **Command:** consequence notice → required fields/confirmation → explicit
+   readiness review → stable footer. Duplicate submission is disabled; pending
+   commands lock dismissal; dirty editors confirm destructive navigation;
+   acknowledgement never claims downstream delivery. Multi-page replacement
+   editors report honest loading state rather than fabricating determinate
+   progress from an atomic query.
 4. **Recovery:** normalized error with request ID → explicit review → danger
    intent → refreshed narrow projection. It never infers success from aggregate
    health.

@@ -11,6 +11,7 @@ export function Drawer({
   title,
   subtitle,
   children,
+  footer,
   closeDisabled = false,
 }: {
   open: boolean;
@@ -18,6 +19,7 @@ export function Drawer({
   title: ReactNode;
   subtitle?: ReactNode;
   children: ReactNode;
+  footer?: ReactNode;
   closeDisabled?: boolean;
 }) {
   const titleId = useId();
@@ -53,6 +55,7 @@ export function Drawer({
           </div>
         </header>
         <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-y-contain bg-surface p-4">{children}</div>
+        {footer ? <footer className="flex shrink-0 flex-wrap justify-end gap-2 border-t border-line-strong bg-elevated p-3 max-sm:[&>*]:min-w-[calc(50%_-_0.25rem)] max-sm:[&>*]:flex-1">{footer}</footer> : null}
       </aside>
     </div>,
     document.body,

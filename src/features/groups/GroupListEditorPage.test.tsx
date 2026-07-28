@@ -3,6 +3,11 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { GroupListEditorPage } from './GroupListEditorPage';
 
+vi.mock('react-router-dom', async (importOriginal) => ({
+  ...await importOriginal<typeof import('react-router-dom')>(),
+  useBlocker: () => ({ state: 'unblocked' }),
+  useBeforeUnload: () => undefined,
+}));
 vi.mock('@/api/ApiProvider', () => ({ useApiSession: () => ({ keyKind: 'api' }) }));
 vi.mock('@/api/CapabilitiesProvider', () => ({ useServerCapabilities: () => ({ data: { capabilities: ['group_lists', 'group_list_eligibility', 'groups_projection', 'group_management_permissions'] } }) }));
 vi.mock('./hooks', () => ({
@@ -42,6 +47,8 @@ describe('GroupListEditorPage', () => {
     expect(html).toContain('84');
     expect(html).toContain('Send permission denied');
     expect(html).toContain('Load more');
+    expect(html).toContain('Submission review');
+    expect(html).toContain('sticky bottom-0');
     expect(html).not.toContain('Next page');
   });
 });
