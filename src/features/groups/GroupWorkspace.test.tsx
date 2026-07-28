@@ -39,6 +39,7 @@ vi.mock('./hooks', () => {
       sendMessage: { state: 'allowed' },
       readInviteLink: { state: 'allowed' },
       resetInviteLink: { state: 'allowed' },
+      setPhoto: { state: 'allowed' },
     },
     members: [{ id: 'member-1', memberRef: '15551230000', role: 'member' }],
   };
@@ -140,6 +141,30 @@ describe('GroupWorkspace capability loss', () => {
     expect(html).toContain('Update subject');
     expect(html).toContain('Update description');
     expect(html).toContain('independent commands with independently revalidated permission');
+  });
+
+  it('uses the canonical file chooser for Group photos', () => {
+    const html = renderToStaticMarkup(
+      <GroupWorkspace
+        groupId={group.id}
+        readEnabled
+        commandsEnabled
+        normalized
+        membersEnabled
+        auditEnabled
+        photoEnabled
+        activeTab="settings"
+        memberSearch=""
+        onParam={vi.fn()}
+        onTab={vi.fn()}
+        onClose={vi.fn()}
+        onLeft={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('No file selected');
+    expect(html).toContain('Choose file');
+    expect(html).toContain('The file stays local until Upload asset is selected.');
   });
 
   it('renders allowed, denied, and unknown decisions as distinct normalized states', () => {

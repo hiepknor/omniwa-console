@@ -143,6 +143,9 @@ for (const path of await sourceFiles('src')) {
   if (!path.endsWith('.test.tsx') && path !== 'src/ui/DateTimeInput.tsx' && /<input\b[^>]*type=["']datetime-local["']/.test(code)) {
     failures.push(`${path}: local date-time controls must use DateTimeInput`);
   }
+  if (!path.endsWith('.test.tsx') && path !== 'src/ui/FileUpload.tsx' && /<input\b[^>]*type=["']file["']/.test(code)) {
+    failures.push(`${path}: file inputs must use the canonical FileUpload primitive`);
+  }
   if (!path.endsWith('.test.tsx') && path !== 'src/ui/DescriptionList.tsx' && /<(?:dl|dt|dd)\b/.test(code)) {
     failures.push(`${path}: repeated definition data must use DescriptionList and DescriptionItem`);
   }
@@ -175,6 +178,14 @@ for (const marker of [
 const gallery = await read('src/app/UiGallery.tsx');
 for (const marker of ['Locked design system', 'hard lift only', '<Logo', '<Icon', '<Button', '<ButtonLink', '<CloseButton', '<Textarea', '<Checkbox', '<Radio', '<Switch', '<DateTimeInput', '<Select', '<SelectionBar', '<FilterToolbar', '<FilterChip', '<DescriptionList', '<Panel', '<StateNotice', '<CursorPagination', '<ProgressBar', '<Image', '<SplitWorkspace', '<WorkspacePaneHeader', '<Drawer', '<Dialog', '<SurfaceNotice', '<ToastViewport', '<ShellAnatomy']) {
   if (!gallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: locked review surface is missing ${marker}`);
+}
+
+const fileUpload = await read('src/ui/FileUpload.tsx');
+for (const marker of ['type="file"', 'className="sr-only"', 'aria-hidden="true"', 'Choose file', 'Replace', 'Clear', 'aria-describedby', 'aria-invalid', 'required={required}', 'max-sm:grid-cols-1']) {
+  if (!fileUpload.includes(marker)) failures.push(`src/ui/FileUpload.tsx: file-upload contract is missing ${marker}`);
+}
+if (!gallery.includes('<FileUpload')) {
+  failures.push('src/app/UiGallery.tsx: locked review surface is missing FileUpload states');
 }
 
 if (failures.length) {

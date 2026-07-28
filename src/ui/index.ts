@@ -7,6 +7,7 @@ export { ProgressBar, type ProgressStatus } from './ProgressBar';
 export { NavigationItemContent, navigationItemClassName } from './NavigationItem';
 export { Status, type Tone } from './Status';
 export { Input, Field } from './Input';
+export { FileUpload } from './FileUpload';
 export { Textarea } from './Textarea';
 export { DateTimeInput } from './DateTimeInput';
 export { Checkbox, Radio, Switch } from './ChoiceControls';

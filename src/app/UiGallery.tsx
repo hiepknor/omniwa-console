@@ -16,6 +16,7 @@ import {
   Dialog,
   Drawer,
   Field,
+  FileUpload,
   FilterChip,
   FilterToolbar,
   Icon,
@@ -145,6 +146,7 @@ export function UiGallery() {
   const [notificationVisible, setNotificationVisible] = useState(true);
   const [cursor, setCursor] = useState<string>();
   const [workspaceDetail, setWorkspaceDetail] = useState(true);
+  const [galleryFile, setGalleryFile] = useState<File | undefined>(() => new File(['locked upload fixture'], 'group-photo.png', { type: 'image/png' }));
   const [selectionCount, setSelectionCount] = useState(1);
 
   return (
@@ -273,6 +275,9 @@ export function UiGallery() {
               <Switch label="Always online" description="Submits one explicit settings command." checked={switchEnabled} onChange={(event) => setSwitchEnabled(event.target.checked)} />
               <Switch label="Unavailable setting" description="Disabled by capability discovery." disabled />
             </div>
+            <FileUpload label="File upload" description="Single-file chooser · selected state" accept="image/jpeg,image/png" file={galleryFile} onFileChange={setGalleryFile} />
+            <FileUpload label="Required upload" description="JPEG or PNG · empty state" error="Choose an image before continuing." required accept="image/jpeg,image/png" onFileChange={() => undefined} />
+            <FileUpload label="Unavailable upload" description="Disabled by capability or permission." disabled onFileChange={() => undefined} />
           </div>
         </Section>
 
