@@ -82,8 +82,13 @@ for (const marker of ['fieldControlClassName', 'resize-y', 'min-h-20']) {
 }
 
 const choices = await read('src/ui/ChoiceControls.tsx');
-for (const marker of ['appearance-none', 'type="radio"', 'role="switch"', 'peer-focus-visible:outline-2', 'max-sm:min-h-10']) {
+for (const marker of ['appearance-none', 'type="radio"', 'role="switch"', 'indeterminate', 'peer-indeterminate:bg-fg', 'visuallyHiddenLabel', 'max-sm:size-10', 'peer-focus-visible:outline-2', 'max-sm:min-h-10']) {
   if (!choices.includes(marker)) failures.push(`src/ui/ChoiceControls.tsx: choice-control contract is missing ${marker}`);
+}
+
+const selectionBar = await read('src/ui/SelectionBar.tsx');
+for (const marker of ['role="group"', '<Checkbox', 'indeterminate={indeterminate}', 'selected total', 'selectable on this page', 'Clear selection', 'max-sm:grid-cols-1']) {
+  if (!selectionBar.includes(marker)) failures.push(`src/ui/SelectionBar.tsx: selection-bar contract is missing ${marker}`);
 }
 
 const descriptionList = await read('src/ui/DescriptionList.tsx');
@@ -147,6 +152,14 @@ for (const marker of ['<SplitWorkspace', '<WorkspacePaneHeader', '>Back</Button>
 const groupsView = await read('src/features/groups/GroupsView.tsx');
 for (const marker of ['<FilterToolbar as="form"', '<StateNotice kind="loading"', '<StateNotice kind="empty"']) {
   if (!groupsView.includes(marker)) failures.push(`src/features/groups/GroupsView.tsx: list recipe is missing ${marker}`);
+}
+
+const groupListEditor = await read('src/features/groups/GroupListEditorPage.tsx');
+for (const marker of ['<SelectionBar', 'Select eligible on this page', '<Table', 'border-t-0', 'Selection requires review', 'setPageSelection']) {
+  if (!groupListEditor.includes(marker)) failures.push(`src/features/groups/GroupListEditorPage.tsx: target selection recipe is missing ${marker}`);
+}
+if (groupListEditor.includes('selectedCounts.eligible} eligible ·') || /<Status[^>]*>\{selected\.size\} selected/.test(groupListEditor)) {
+  failures.push('src/features/groups/GroupListEditorPage.tsx: selection counts must use SelectionBar rather than a status stamp or zero-bucket sentence');
 }
 
 const instancesPreview = await read('src/app/PreviewInstances.tsx');

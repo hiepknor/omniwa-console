@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type InputHTMLAttributes, type ReactNode } from 'react';
 import { cn } from './cn';
 
 type ChoiceProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'children' | 'role' | 'type'> & {
@@ -6,18 +6,22 @@ type ChoiceProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'children' | 'rol
   description?: ReactNode;
 };
 
-export function Checkbox({ label, description, className, disabled, id: providedId, ...props }: ChoiceProps) {
+export function Checkbox({ label, description, className, disabled, id: providedId, indeterminate = false, visuallyHiddenLabel = false, ...props }: ChoiceProps & { indeterminate?: boolean; visuallyHiddenLabel?: boolean }) {
   const generatedId = useId();
   const id = providedId ?? generatedId;
   const labelId = `${id}-label`;
   const descriptionId = description ? `${id}-description` : undefined;
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.indeterminate = indeterminate;
+  }, [indeterminate]);
   return (
-    <label htmlFor={id} className={cn('flex min-h-9 cursor-pointer items-start gap-2 py-2 max-sm:min-h-10', disabled && 'cursor-not-allowed opacity-60', className)}>
+    <label htmlFor={id} className={cn('flex min-h-9 cursor-pointer items-start gap-2 py-2 max-sm:min-h-10', visuallyHiddenLabel && 'size-9 items-center justify-center p-0 max-sm:size-10', disabled && 'cursor-not-allowed opacity-60', className)}>
       <span className="relative mt-0.5 size-4 shrink-0">
-        <input id={id} type="checkbox" aria-labelledby={labelId} aria-describedby={descriptionId} disabled={disabled} className="peer absolute inset-0 size-full cursor-inherit appearance-none opacity-0" {...props} />
-        <span aria-hidden className="pointer-events-none grid size-4 place-items-center border border-line-strong bg-surface after:size-1.5 after:bg-bg after:opacity-0 after:content-[''] peer-checked:bg-fg peer-checked:after:opacity-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent peer-disabled:border-line peer-disabled:bg-elevated" />
+        <input ref={inputRef} id={id} type="checkbox" aria-labelledby={labelId} aria-describedby={descriptionId} disabled={disabled} className="peer absolute inset-0 size-full cursor-inherit appearance-none opacity-0" {...props} aria-checked={indeterminate ? 'mixed' : props['aria-checked']} />
+        <span aria-hidden className="pointer-events-none grid size-4 place-items-center border border-line-strong bg-surface after:size-1.5 after:bg-bg after:opacity-0 after:content-[''] peer-checked:bg-fg peer-checked:after:opacity-100 peer-indeterminate:bg-fg peer-indeterminate:after:h-px peer-indeterminate:after:w-2 peer-indeterminate:after:opacity-100 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent peer-disabled:border-line peer-disabled:bg-elevated" />
       </span>
-      <span className="grid min-w-0 gap-0.5">
+      <span className={cn('grid min-w-0 gap-0.5', visuallyHiddenLabel && 'sr-only')}>
         <strong id={labelId} className="text-[13px] font-medium leading-4 text-fg">{label}</strong>
         {description ? <small id={descriptionId} className="text-xs leading-4 text-fg-3">{description}</small> : null}
       </span>

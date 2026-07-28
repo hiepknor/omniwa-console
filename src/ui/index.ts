@@ -11,6 +11,7 @@ export { FileUpload } from './FileUpload';
 export { Textarea } from './Textarea';
 export { DateTimeInput } from './DateTimeInput';
 export { Checkbox, Radio, Switch } from './ChoiceControls';
+export { SelectionBar } from './SelectionBar';
 export { DescriptionList, DescriptionItem } from './DescriptionList';
 export { FilterToolbar, FilterChip } from './Filters';
 export { Select } from './Select';

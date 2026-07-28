@@ -122,6 +122,10 @@ resource models, or rendered diagnostics.
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.
 - Buttons preserve a clear ghost/primary/danger hierarchy, expose pressed and
   keyboard-focus feedback, and use `ButtonLink` for navigation styled as an action.
+- Multi-selection directories compose the shared `SelectionBar` directly above
+  the canonical `Table`. Bulk labels always state their page scope; selection
+  totals may span pages, while eligibility and selectable-row rules stay in the
+  owning feature. Counts are not operational statuses.
 - Destructive commands state their exact target and require explicit intent.
 - Loading and refresh behavior uses `src/lib/query-policy.ts`; routes do not own
   numeric polling intervals.

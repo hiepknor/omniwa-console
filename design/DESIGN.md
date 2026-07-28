@@ -204,6 +204,12 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   active-filter token. Toolbars wrap without horizontal page overflow; chips
   stay square, show label and value, and expose an explicit remove name. Filter
   controls and chips reflect URL state in product panels.
+- **SelectionBar** — the only bulk-selection header. It separates an explicitly
+  named page scope from the cross-page selected total, owns none/partial/all
+  checkbox state, and exposes one global Clear selection action. Counts use
+  mono text rather than Status; Status remains reserved for operational state.
+  Place SelectionBar directly above its canonical Table with one contiguous
+  strong frame. Eligibility and other domain rules remain feature-owned.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
   list progression. API errors include normalized detail and `requestId` when
@@ -267,7 +273,8 @@ or `border-*` utilities and rely on generated CSS order.
 | Input | rest, hover, keyboard focus, populated, invalid, disabled |
 | Textarea / DateTimeInput | rest, populated, keyboard focus, invalid, disabled |
 | FileUpload | empty, selected, replace, clear, keyboard focus, invalid, required, disabled |
-| Checkbox / Radio / Switch | off, on, hover, keyboard focus, disabled |
+| Checkbox / Radio / Switch | off, on, indeterminate, hover, keyboard focus, disabled |
+| SelectionBar | zero, partial, all-page, cross-page total, disabled, clear, blocked composition |
 | Filter chip | rest, hover, keyboard focus, removed |
 | Table row | rest, hover, keyboard focus, selected |
 | StateNotice | info/stale, loading, empty/not-ready, error + requestId, action |
