@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken } from '@/lib/format';
 import { createSearchParams, omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Status, Tabs, WorkspacePaneHeader } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Status, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
 import { ChatList, ContactList, LabelList, MessageTimeline } from './ConversationsView';
 import { DirectoryInspector, MessageInspector } from './Details';
@@ -30,6 +30,8 @@ export function ConversationsPage() {
   const navigate = useNavigate();
   const route = conversationRouteState(searchParams);
   const activeChatId = route.view === 'chats' ? chatId : undefined;
+  const hasChat = Boolean(activeChatId);
+  const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(activeChatId);
   const [searchDraft, setSearchDraft] = useState(route.search);
   useEffect(() => setSearchDraft(route.search), [route.search]);
   const instanceScope = session.keyKind === 'api';
@@ -57,14 +59,20 @@ export function ConversationsPage() {
 
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
   const switchView = (view: ConversationView) => navigate(withSearchParams('/chats', createSearchParams({ view: view === 'chats' ? undefined : view })));
-  const openChat = (id: string) => navigate(withSearchParams(`/chats/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'selected'])));
+  const openChat = (id: string) => {
+    rememberFocusOrigin();
+    navigate(withSearchParams(`/chats/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'selected'])));
+  };
   const closeChat = () => navigate(withSearchParams('/chats', omitSearchParams(searchParams, ['message', 'messageCursor'])));
   const applySearch = () => replaceParams(updateSearchParams(searchParams, { search: searchDraft.trim() }, ['cursor', 'selected']));
   const currentQuery = route.view === 'chats' ? chats : route.view === 'contacts' ? contacts : labels;
   const currentMeta = currentQuery.data?.meta;
   const currentAuthoritative = currentMeta?.syncStatus === undefined || currentMeta.syncStatus === 'ready';
-  const routeRefreshing = currentQuery.isFetching || (Boolean(activeChatId) && (chat.isFetching || messages.isFetching));
-  const refresh = () => { void currentQuery.refetch(); if (activeChatId) { void chat.refetch(); if (messagesReady) void messages.refetch(); } };
+  const detailRefreshing = Boolean(activeChatId) && (chat.isFetching || messages.isFetching);
+  const routeRefreshing = currentQuery.isFetching || detailRefreshing;
+  const refreshDirectory = () => { void currentQuery.refetch(); };
+  const refreshDetail = () => { if (activeChatId) { void chat.refetch(); if (messagesReady) void messages.refetch(); } };
+  const refresh = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(currentQuery.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined }, ['selected'])));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
 
@@ -74,46 +82,48 @@ export function ConversationsPage() {
 
   const advertised = route.view === 'chats' ? chatsReady : route.view === 'contacts' ? contactsReady : labelsReady;
   const viewSupported = advertised || currentQuery.data !== undefined;
-  const hasChat = Boolean(activeChatId);
   const emptyDirectory = viewSupported && currentQuery.data && currentAuthoritative && ((route.view === 'chats' && filteredChats.length === 0) || (route.view === 'contacts' && (contacts.data?.resource.items.length ?? 0) === 0) || (route.view === 'labels' && filteredLabels.length === 0));
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-6 max-sm:px-4">
-        <PageHeader
-          eyebrow="Messaging"
-          title="Conversations"
-          description="Review projected chats, contacts, labels, and message history."
-          secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
-        />
-      </div>
-
-      <SplitWorkspace
-        detailOpen={hasChat}
-        directoryLabel={`${route.view} directory`}
-        detailLabel="Message timeline"
-        directory={
-          <>
-            <div className="sticky top-0 z-10 border-b border-line bg-surface">
-            <Tabs
-              active={route.view}
-              onChange={(id) => switchView(id as ConversationView)}
-              tabs={[{ id: 'chats', label: 'Chats' }, { id: 'contacts', label: 'Contacts' }, { id: 'labels', label: 'Labels' }]}
-            />
-            <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
-              <Field label="Search" className="min-w-48 flex-1">
-                {(id) => <Input id={id} type="search" value={searchDraft} placeholder={route.view === 'contacts' ? 'Server prefix search' : 'Filter loaded page'} onChange={(e) => setSearchDraft(e.target.value)} />}
-              </Field>
-              <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
-            </FilterToolbar>
-            </div>
+    <>
+      <WorkspacePageFrame
+        eyebrow="Messaging"
+        title="Conversations"
+        description="Review projected chats, contacts, labels, and message history."
+        secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        compactTitle={hasChat ? selectedChat?.displayName ?? activeChatId ?? 'Message timeline' : 'Conversations'}
+        compactDescription={hasChat ? (selectedChat ? humanizeToken(selectedChat.type) : 'Message timeline') : undefined}
+        compactLeadingAction={hasChat ? <Button onClick={closeChat}>Back</Button> : undefined}
+        compactActions={<Button disabled={!viewSupported || (hasChat ? detailRefreshing : currentQuery.isFetching)} onClick={hasChat ? refreshDetail : refreshDirectory}>{(hasChat ? detailRefreshing : currentQuery.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
+        compactHeadingRef={compactHeadingRef}
+      >
+        <SplitWorkspace
+          frame="attached"
+          detailOpen={hasChat}
+          directoryLabel={`${route.view} directory`}
+          detailLabel="Message timeline"
+          directory={
+            <>
+              <div className="sticky top-0 z-10 border-b border-line bg-surface">
+                <Tabs
+                  active={route.view}
+                  onChange={(id) => switchView(id as ConversationView)}
+                  tabs={[{ id: 'chats', label: 'Chats' }, { id: 'contacts', label: 'Contacts' }, { id: 'labels', label: 'Labels' }]}
+                />
+                <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
+                  <Field label="Search" className="min-w-48 flex-1">
+                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder={route.view === 'contacts' ? 'Server prefix search' : 'Filter loaded page'} onChange={(e) => setSearchDraft(e.target.value)} />}
+                  </Field>
+                  <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
+                </FilterToolbar>
+              </div>
             {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail={`The backend does not currently advertise ${route.view === 'chats' ? 'chats_projection' : route.view === 'contacts' ? 'contacts_projection' : 'labels_projection'}; capability polling continues because the projection may be unsupported or waiting for readiness.`} /></div> : null}
             {viewSupported && !advertised ? <div className="p-3"><StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable projection snapshot visible while capability discovery no longer advertises this resource." /></div> : null}
             {viewSupported && currentQuery.isPending ? <div className="p-3"><StateNotice kind="loading" title="Loading" /></div> : null}
-            {viewSupported && currentQuery.error && !currentQuery.data ? <div className="p-3"><FailureNotice error={currentQuery.error} onRetry={refresh} /></div> : null}
+            {viewSupported && currentQuery.error && !currentQuery.data ? <div className="p-3"><FailureNotice error={currentQuery.error} onRetry={refreshDirectory} /></div> : null}
             {viewSupported && currentQuery.data ? (
               <>
-                {currentQuery.error ? <div className="p-3"><FailureNotice error={currentQuery.error} stale onRetry={refresh} /></div> : null}
+                {currentQuery.error ? <div className="p-3"><FailureNotice error={currentQuery.error} stale onRetry={refreshDirectory} /></div> : null}
                 <div className="px-3"><ProjectionStatus meta={'meta' in currentQuery.data ? currentQuery.data.meta : undefined} /></div>
                 {route.view === 'chats' ? <ChatList items={filteredChats} selectedId={activeChatId} onSelect={openChat} />
                   : route.view === 'contacts' ? <ContactList items={contacts.data?.resource.items ?? []} selectedId={route.selected} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'selected', id))} />
@@ -121,17 +131,17 @@ export function ConversationsPage() {
                 {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected item matches the URL-backed search.' : 'The ready projection contains no items.'} /></div> : null}
               </>
             ) : null}
-          </>
-        }
+            </>
+          }
         directoryFooter={route.view !== 'labels' && viewSupported && currentQuery.data ? (
           <CursorPagination cursor={route.cursor} nextCursor={(route.view === 'chats' ? chats.data?.resource.pagination.nextCursor : contacts.data?.resource.pagination.nextCursor) ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }, ['selected']))} />
         ) : undefined}
         detail={
           <>
             <WorkspacePaneHeader
+              className="max-[900px]:hidden"
               title={selectedChat?.displayName ?? selectedChat?.id ?? 'Message timeline'}
               description={activeChatId ? 'Persisted projection history' : 'Select a projected chat to inspect its history'}
-              actions={activeChatId ? <Button className="hidden max-[900px]:inline-flex" onClick={closeChat}>Back</Button> : undefined}
             />
             {!activeChatId ? (
               <div className="p-4"><StateNotice kind="empty" title="No chat selected" detail="Select a chat from the projected directory." /></div>
@@ -169,10 +179,11 @@ export function ConversationsPage() {
           </>
         }
         detailFooter={selectedChat ? <Composer chatId={selectedChat.id} chatName={selectedChat.displayName ?? selectedChat.id} enabled={messagesReady && outboundReady} /> : undefined}
-      />
+        />
+      </WorkspacePageFrame>
 
       {route.message && activeChatId && messagesSupported ? <MessageInspector messageId={route.message} loadedChat={selectedChat} enabled={messagesReady} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
       {route.selected && route.view !== 'chats' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
-    </div>
+    </>
   );
 }

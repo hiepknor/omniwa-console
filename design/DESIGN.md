@@ -245,11 +245,16 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   (`square`, `video`, `wide`, or intrinsic), `cover`/`contain`, alt text, caption,
   deterministic loading, and unavailable/error fallback. QR pairing uses
   `contain` and a paper quiet zone. Features do not render raw `<img>` elements.
-- **SplitWorkspace / WorkspacePaneHeader** — the only directory-detail frame.
-  It owns the 320px directory column, internal pane scrolling, the 900px
-  single-pane breakpoint, and the sticky pane header. Production and preview
-  routes use the same primitive; detail mode on tablet/mobile must expose a
-  visible Back action supplied by the feature.
+- **WorkspacePageFrame / SplitWorkspace / WorkspacePaneHeader** — the only
+  full-height directory-detail composition. At 900px and wider the frame
+  renders the canonical PageHeader with a 24px top inset, then an attached
+  320px directory and fluid detail pane. Below 900px it replaces the full
+  PageHeader with one edge-to-edge 57px compact bar: directory mode identifies the workspace;
+  detail mode exposes a visible full Back action, truncated resource identity,
+  optional short context, and contextual actions. The compact bar and sticky
+  desktop pane header never appear together. The composition owns one boundary
+  hairline, internal pane scrolling, focus entry/restoration, and footer space;
+  production, preview, and `/__ui` use the same primitives.
 
 ## 6. Shell & navigation
 
@@ -275,13 +280,16 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   actions. Actions wrap instead of overflowing, and the primary action remains
   last. The header keeps the paper background, hairline bottom rule, square
   geometry, 14px body copy, and existing Button interaction language.
-- **Responsive:** ≥901px full rail; 641–900px icon-only rail; ≤640px a fixed
+  Full-height split workspaces do not shrink or restyle this primitive: their
+  WorkspacePageFrame shows it only at 900px and wider and supplies the
+  separately locked compact workspace bar at tablet/mobile widths.
+- **Responsive:** ≥900px full rail; 640–899px icon-only rail; <640px a fixed
   bottom nav bar with icon + visible 10px label while the main viewport reserves
   its height. At compact widths Sign out is a separately framed session utility,
   never a navigation destination. Dense form/action controls are at least 40px
   on mobile; primary navigation targets remain at least 44px.
-- **Split workspaces:** directory + detail use two panes only above 900px. At
-  tablet/mobile widths the selected detail replaces the directory and exposes a
+- **Split workspaces:** directory + detail use two panes at 900px and wider.
+  Below 900px the selected detail replaces the directory and exposes a
   full `Back` action; neither pane may remain positioned outside the viewport.
 - **Feedback placement:** `SurfaceNotice` is the framed inline/workspace banner;
   `ToastViewport` is fixed bottom-right and becomes full inset-width on mobile.
@@ -313,7 +321,7 @@ or `border-*` utilities and rely on generated CSS order.
 | ProgressBar | 0–99%, indeterminate, complete, failed at last known value |
 | Image | loading, ready, contain/cover, long caption, missing/error fallback |
 | Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav |
-| Split workspace | two panes >900px, directory or detail + Back ≤900px |
+| Workspace page / split workspace | PageHeader + two panes ≥900px, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close, one-time-secret dismissal |
 

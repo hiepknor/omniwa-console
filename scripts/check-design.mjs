@@ -180,17 +180,22 @@ if (shell.indexOf('Compact session utility') < shell.indexOf('</nav>')) {
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<SplitWorkspace', 'detailOpen={Boolean(chat)}', '<WorkspacePaneHeader', '>Back</Button>']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(chat)}', 'className="max-[900px]:hidden"', '>Back</Button>']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
+const workspacePageFrame = await read('src/ui/WorkspacePageFrame.tsx');
+for (const marker of ['<PageHeader', 'px-6 pt-6 max-[900px]:hidden', 'min-h-[57px]', 'min-[900px]:hidden', 'compactLeadingAction', 'compactHeadingRef', 'tabIndex={-1}', 'focus-visible:outline-2', 'useWorkspacePageFocus', 'rememberFocusOrigin', "matchMedia('(width < 900px)'"]) {
+  if (!workspacePageFrame.includes(marker)) failures.push(`src/ui/WorkspacePageFrame.tsx: responsive workspace-page contract is missing ${marker}`);
+}
+
 const splitWorkspace = await read('src/ui/SplitWorkspace.tsx');
-for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-1', "detailOpen && 'max-[900px]:hidden'", "!detailOpen && 'max-[900px]:hidden'", 'WorkspacePaneHeader']) {
+for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-1', "detailOpen && 'max-[900px]:hidden'", "!detailOpen && 'max-[900px]:hidden'", "frame === 'standalone'", 'WorkspacePaneHeader']) {
   if (!splitWorkspace.includes(marker)) failures.push(`src/ui/SplitWorkspace.tsx: split-workspace recipe is missing ${marker}`);
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<SplitWorkspace', '<WorkspacePaneHeader', '>Back</Button>']) {
+for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 
