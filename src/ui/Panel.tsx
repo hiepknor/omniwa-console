@@ -24,14 +24,14 @@ export function Panel({
   }[bodyPadding];
 
   return (
-    <section className={cn('min-w-0 border border-line-strong bg-surface', className)}>
+    <section className={cn('@container min-w-0 border border-line-strong bg-surface', className)}>
       {title || actions ? (
-        <header className="flex min-w-0 items-start justify-between gap-4 p-4 border-b border-line">
+        <header className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-3 p-4 border-b border-line @max-[32rem]:grid-cols-1">
           <div className="grid gap-1 min-w-0">
             {title ? <h2 className="text-sm font-semibold text-fg">{title}</h2> : null}
             {description ? <p className="text-xs text-fg-3">{description}</p> : null}
           </div>
-          {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+          {actions ? <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 @max-[32rem]:justify-start">{actions}</div> : null}
         </header>
       ) : null}
       <div className={cn('min-w-0', bodyPaddingClass)}>{children}</div>

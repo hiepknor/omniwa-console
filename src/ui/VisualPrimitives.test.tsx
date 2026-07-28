@@ -50,6 +50,21 @@ describe('visual primitives', () => {
     expect(compactPanel).toContain('<div class="min-w-0 px-4 pb-4 pt-2">Compact body</div>');
   });
 
+  it('keeps panel-scoped controls beside the heading and stacks them on narrow screens', () => {
+    const html = renderToStaticMarkup(
+      <Panel title="Persisted metrics" actions={<label>Window <select><option>24h</option></select></label>}>
+        Metrics
+      </Panel>,
+    );
+
+    expect(html).toContain('grid-cols-[minmax(0,1fr)_auto]');
+    expect(html).toContain('@max-[32rem]:grid-cols-1');
+    expect(html).toContain('justify-end');
+    expect(html).toContain('@max-[32rem]:justify-start');
+    expect(html.indexOf('Persisted metrics')).toBeLessThan(html.indexOf('Window'));
+    expect(html.indexOf('Window')).toBeLessThan(html.indexOf('</header>'));
+  });
+
   it('keeps compact rows at a 44px minimum while padding multiline cells vertically', () => {
     const compact = renderToStaticMarkup(<Table><tbody><Tr><Td mobileLabel="State">Eligible</Td></Tr></tbody></Table>);
     const html = renderToStaticMarkup(<Table><thead><tr><Th>State</Th></tr></thead><tbody><Tr><Td mobileLabel="State" multiline>Unavailable<br />Send permission denied</Td></Tr></tbody></Table>);

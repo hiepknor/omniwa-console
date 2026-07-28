@@ -4,6 +4,7 @@ import { healthFixture, overviewFixture, projectionFixture } from './preview-fix
 
 /** Dev-only: render the Overview surface with sample data, no backend. */
 export function PreviewOverview() {
+  const instanceId = 'inst_01HZX';
   return (
     <main className="min-h-dvh bg-bg">
       <OverviewView
@@ -13,10 +14,12 @@ export function PreviewOverview() {
         onRefresh={() => {}}
         refreshing={false}
         initialLoading={false}
-        health={healthFixture}
-        overview={overviewFixture}
-        projection={projectionFixture}
-        recovery="available"
+        health={{ ...healthFixture, instances: healthFixture.instances.filter((item) => item.instanceId === instanceId) }}
+        overview={{ ...overviewFixture, scope: { type: 'instance', instanceId }, instances: { total: 1, connected: 1, disconnected: 0 } }}
+        projection={{ ...projectionFixture, resources: projectionFixture.resources.filter((item) => item.instanceId === instanceId) }}
+        recovery="unsupported"
+        credentialScope="instance"
+        authenticatedInstanceId={instanceId}
       />
     </main>
   );

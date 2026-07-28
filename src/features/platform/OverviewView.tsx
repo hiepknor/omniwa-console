@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
-import { Button, ButtonLink, Field, FilterToolbar, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { Button, ButtonLink, Field, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
 
 function projectionTone(status: string): Tone {
   if (status === 'healthy' || status === 'ready') return 'ok';
@@ -21,29 +21,47 @@ export type OverviewViewProps = {
   overview?: OverviewResource;
   projection?: ProjectionHealthResource;
   recovery: 'available' | 'pending' | 'unsupported' | 'error';
+  credentialScope: 'admin' | 'instance' | 'unknown';
+  authenticatedInstanceId?: string;
 };
 
 export function OverviewView(props: OverviewViewProps) {
   const { health, overview, projection } = props;
+  const instanceScope = props.credentialScope === 'instance';
+  const instanceId = props.authenticatedInstanceId
+    ?? (overview?.scope.type === 'instance' ? overview.scope.instanceId : undefined);
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
       <PageHeader
-        eyebrow="Platform"
+        eyebrow={instanceScope ? 'Instance' : 'Platform'}
         title="Operational overview"
-        description="Monitor server, instance, projection, and messaging health."
+        description={instanceScope
+          ? (
+              <>
+                Monitor connection, projection, throttling, and messaging health for the authenticated instance
+                {instanceId ? <>{' '}<span className="font-mono [overflow-wrap:anywhere]">{instanceId}</span></> : null}.
+              </>
+            )
+          : 'Monitor server, instance, projection, and messaging health.'}
         secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
       />
 
       {props.notices}
 
       {props.initialLoading ? (
-        <StateNotice kind="loading" title="Loading platform snapshots" detail="Reading the persisted platform snapshots." />
+        <StateNotice
+          kind="loading"
+          title={instanceScope ? 'Loading instance snapshots' : 'Loading platform snapshots'}
+          detail={`Reading persisted ${instanceScope ? 'instance' : 'platform'} snapshots.`}
+        />
       ) : null}
 
       {health ? (
         <Panel
-          title="Control plane and instance health"
-          description={`Generated ${relativeTime(health.generatedAt) || 'at an unreported time'}. Connection, projection, and throttling remain independent.`}
+          title={instanceScope ? 'API and instance health' : 'Control plane and instance health'}
+          description={instanceScope
+            ? `Generated ${relativeTime(health.generatedAt) || 'at an unreported time'}. Transport, projection, and throttling remain independent; pairing status is reported on the Instance page.`
+            : `Generated ${relativeTime(health.generatedAt) || 'at an unreported time'}. Connection, projection, and throttling remain independent.`}
           actions={<Status tone={health.api.status === 'healthy' ? 'ok' : 'degraded'}>{humanizeToken(health.api.status)}</Status>}
           bodyPadding="none"
         >
@@ -56,7 +74,7 @@ export function OverviewView(props: OverviewViewProps) {
               <thead>
                 <tr>
                   <Th>Instance</Th>
-                  <Th>Connection</Th>
+                  <Th>{instanceScope ? 'Transport' : 'Connection'}</Th>
                   <Th>Projection</Th>
                   <Th>Throttling</Th>
                 </tr>
@@ -65,7 +83,7 @@ export function OverviewView(props: OverviewViewProps) {
                 {health.instances.map((i) => (
                   <Tr key={i.instanceId}>
                     <Td mobileLabel="Instance" className="font-mono text-xs text-fg-2">{i.instanceId}</Td>
-                    <Td mobileLabel="Connection"><Status tone={i.connection.connected === true ? 'ok' : i.connection.connected === false ? 'failed' : 'neutral'}>{humanizeToken(i.connection.status)}</Status></Td>
+                    <Td mobileLabel={instanceScope ? 'Transport' : 'Connection'}><Status tone={i.connection.connected === true ? 'ok' : i.connection.connected === false ? 'failed' : 'neutral'}>{humanizeToken(i.connection.status)}</Status></Td>
                     <Td mobileLabel="Projection"><Status tone={projectionTone(i.projection.status)}>{humanizeToken(i.projection.status)}</Status></Td>
                     <Td mobileLabel="Throttling"><Status tone={i.throttling.observed === true ? 'degraded' : 'neutral'}>{humanizeToken(i.throttling.status)}</Status></Td>
                   </Tr>
@@ -80,17 +98,19 @@ export function OverviewView(props: OverviewViewProps) {
         <Panel
           title="Persisted metrics"
           description={`${humanizeToken(overview.scope.type)} scope · ${props.window} · generated ${relativeTime(overview.generatedAt) || 'at an unreported time'}`}
+          actions={(
+            <Field label="Metric window" className="w-48 @max-[32rem]:w-full">
+              {(id, labelId) => <Select id={id} aria-labelledby={labelId} value={props.window} onValueChange={props.onWindowChange}>{props.windowOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</Select>}
+            </Field>
+          )}
           bodyPadding="none"
         >
-          <FilterToolbar aria-label="Metric controls">
-            <Field label="Metric window" className="w-full max-w-48">{(id, labelId) => <Select id={id} aria-labelledby={labelId} value={props.window} onValueChange={props.onWindowChange}>{props.windowOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</Select>}</Field>
-          </FilterToolbar>
           <MetricGrid
             columns={5}
             density="compact"
-            frame="flush-after-content"
+            frame="flush"
             metrics={[
-              { label: 'Instances', value: formatCount(overview.instances.total) },
+              { label: instanceScope ? 'Instances in scope' : 'Instances', value: formatCount(overview.instances.total) },
               { label: 'Connected', value: formatCount(overview.instances.connected) },
               { label: 'Disconnected', value: formatCount(overview.instances.disconnected) },
               { label: 'Messages', value: formatCount(overview.messages.total) },
@@ -145,20 +165,22 @@ export function OverviewView(props: OverviewViewProps) {
         </Panel>
       ) : null}
 
-      <Panel title="Recovery" description="Terminal projection failures require an explicit audited operator command.">
-        {props.recovery === 'pending' ? (
-          <StateNotice kind="loading" title="Discovering capabilities" detail="Waiting for capability discovery before enabling Recovery." />
-        ) : props.recovery === 'available' ? (
-          <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-stretch">
-            <p className="text-sm text-fg-2">Review dead letters without inferring recovery from aggregate health.</p>
-            <ButtonLink to="/recovery">Open recovery</ButtonLink>
-          </div>
-        ) : props.recovery === 'error' ? (
-          <StateNotice kind="error" title="Recovery availability unknown" detail="Capability discovery failed. Retry the capability read before relying on Recovery availability." />
-        ) : (
-          <StateNotice kind="empty" title="Recovery unavailable" detail="Recovery requires admin scope and the projection_failure_operations capability." />
-        )}
-      </Panel>
+      {props.credentialScope === 'admin' ? (
+        <Panel title="Recovery" description="Terminal projection failures require an explicit audited operator command.">
+          {props.recovery === 'pending' ? (
+            <StateNotice kind="loading" title="Discovering capabilities" detail="Waiting for capability discovery before enabling Recovery." />
+          ) : props.recovery === 'available' ? (
+            <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-stretch">
+              <p className="text-sm text-fg-2">Review dead letters without inferring recovery from aggregate health.</p>
+              <ButtonLink to="/recovery">Open recovery</ButtonLink>
+            </div>
+          ) : props.recovery === 'error' ? (
+            <StateNotice kind="error" title="Recovery availability unknown" detail="Capability discovery failed. Retry the capability read before relying on Recovery availability." />
+          ) : (
+            <StateNotice kind="empty" title="Recovery unavailable" detail="Recovery requires admin scope and the projection_failure_operations capability." />
+          )}
+        </Panel>
+      ) : null}
     </div>
   );
 }

@@ -154,7 +154,7 @@ for (const marker of ['role="progressbar"', 'aria-valuenow', 'aria-valuetext', '
 }
 
 const panel = await read('src/ui/Panel.tsx');
-for (const marker of ["bodyPadding = 'default'", "'compact-top': 'px-4 pb-4 pt-2'", "none: ''"]) {
+for (const marker of ["bodyPadding = 'default'", "'compact-top': 'px-4 pb-4 pt-2'", "none: ''", '@container', 'grid-cols-[minmax(0,1fr)_auto]', '@max-[32rem]:grid-cols-1', '@max-[32rem]:justify-start']) {
   if (!panel.includes(marker)) failures.push(`src/ui/Panel.tsx: controlled body-spacing contract is missing ${marker}`);
 }
 if (panel.includes('bodyClassName')) {
@@ -167,7 +167,7 @@ for (const marker of ["density = 'default'", "frame = 'standalone'", "density ==
 }
 
 for (const [path, marker] of Object.entries({
-  'src/features/platform/OverviewView.tsx': 'frame="flush-after-content"',
+  'src/features/platform/OverviewView.tsx': 'frame="flush"',
   'src/features/instances/CredentialHealth.tsx': "'flush-after-content' : 'flush'",
 })) {
   const source = await read(path);
@@ -176,7 +176,7 @@ for (const [path, marker] of Object.entries({
   }
 }
 
-if (!uiGallery.includes('Compact full-bleed metrics') || !uiGallery.includes('density="compact"') || !uiGallery.includes('frame="flush"')) {
+if (!uiGallery.includes('Compact full-bleed metrics') || !uiGallery.includes('One bounded panel-scoped control belongs in the header') || !uiGallery.includes('density="compact"') || !uiGallery.includes('frame="flush"')) {
   failures.push('src/app/UiGallery.tsx: locked metrics fixtures must cover compact full-bleed composition');
 }
 

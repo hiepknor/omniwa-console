@@ -231,7 +231,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **FilterToolbar / FilterChip** — the canonical list-filter frame and removable
   active-filter token. Toolbars wrap without horizontal page overflow; chips
   stay square, show label and value, and expose an explicit remove name. Filter
-  controls and chips reflect URL state in product panels.
+  controls and chips reflect URL state in product panels. A lone bounded control
+  that affects only its owning Panel (for example metric window, density, or view
+  mode) belongs in the Panel header actions instead of occupying a separate
+  FilterToolbar row. Search/apply forms, multiple filters, and active chips stay
+  in FilterToolbar.
 - **SelectionBar** — the only bulk-selection header. It separates an explicitly
   named page scope from the cross-page selected total, owns none/partial/all
   checkbox state, and exposes one global Clear selection action. Counts use
@@ -248,7 +252,10 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   submit never strands the operator.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
-  list progression. Panel body spacing is selected through its named padding
+  list progression. Panel headers place actions and a lone panel-scoped control
+  beside the title on wide surfaces and stack them below the title when the
+  Panel itself is ≤512px wide; this behavior is container-owned.
+  Panel body spacing is selected through its named padding
   modes (`default`, `none`, or `compact-top`), never through a free-form body
   class escape hatch. API errors include normalized detail and `requestId` when
   present; pagination never suggests an unavailable page.

@@ -18,6 +18,11 @@ Use the established monochrome, square, dense visual language. Compose Tailwind
 utilities in components; do not add feature CSS files. Extend a shared primitive
 when behavior is repeated across routes.
 
+A single bounded control that changes only one Panel belongs in that Panel's
+header actions and stacks below its title when the Panel is narrow. Use FilterToolbar
+for multi-filter, search/apply, or chip workflows; do not create a full-width
+toolbar row for one compact selector.
+
 The frozen token, geometry, elevation, state, exception, and change-control
 rules live in [`../design/DESIGN.md`](../design/DESIGN.md). Every intentional
 visual-language change updates that contract, `/__ui`, regression coverage, and
@@ -65,6 +70,13 @@ The connected credential determines the available navigation and API scope:
 - instance-scoped live commands require an in-memory instance token where the
   active session does not already provide that scope.
 - instance scope never invents or requests the configured admin Instance Name.
+- `/overview` adapts its heading and metric context to the authenticated scope.
+  Instance scope may identify itself with the backend-authenticated instance ID,
+  retains all server-returned health dimensions, and never renders the
+  admin-only Recovery surface.
+- Instance Overview labels server-health `connection` as **Transport**. It does
+  not equate that snapshot with the live `LoggedIn` pairing fact shown on
+  `/connection`; paired and transport-connected are independent states.
 
 ### Instance-scope WhatsApp identity
 
