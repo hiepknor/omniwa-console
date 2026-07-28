@@ -120,6 +120,12 @@ filter scope changes. Detail and members return advisory tri-state actions;
 the client enables only `allowed` and never derives permission from role or
 provider aliases.
 
+Group detail exposes cached invite-link availability independently from
+`readInviteLink` and `resetInviteLink` permission. A missing cached link returns
+`group_invite_link_not_found` and is presented as unavailable without retry;
+it is not a missing Group or a projection-readiness failure. Reset returns a
+typed command acknowledgement and refreshes both detail and cached-link reads.
+
 Management acknowledgements and participant outcomes are public typed facts.
 The client preserves partial/unknown results, does not retry automatically,
 and does not equate `projectionRefreshExpected` with convergence. Remove,

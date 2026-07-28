@@ -1,9 +1,12 @@
 import { createElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GroupResource } from '@/api/groups';
+import { ApiFailure } from '@/api/envelopes';
 import { GroupWorkspace } from './GroupWorkspace';
+
+const workspaceState = vi.hoisted(() => ({ inviteAvailable: undefined as boolean | undefined, inviteError: undefined as unknown }));
 
 const group: GroupResource = {
   id: '120363001@g.us',
@@ -34,13 +37,15 @@ vi.mock('./hooks', () => {
       editDescription: { state: 'unknown', reason: 'projection_not_ready' },
       editSettings: { state: 'denied', reason: 'admin_required' },
       sendMessage: { state: 'allowed' },
+      readInviteLink: { state: 'allowed' },
+      resetInviteLink: { state: 'allowed' },
     },
     members: [{ id: 'member-1', memberRef: '15551230000', role: 'member' }],
   };
   const mutation = () => ({ data: undefined, error: undefined, isPending: false, mutate: vi.fn(), reset: vi.fn() });
   return {
-    useGroup: () => ({ data: { resource: cachedGroup, meta: { syncStatus: 'ready' } }, error: undefined, isPending: false, refetch: vi.fn() }),
-    useGroupInvite: () => ({ data: 'https://example.test/invite', error: undefined, isPending: false, refetch: vi.fn() }),
+    useGroup: () => ({ data: { resource: { ...cachedGroup, inviteLink: workspaceState.inviteAvailable === undefined ? undefined : { available: workspaceState.inviteAvailable } }, meta: { syncStatus: 'ready' } }, error: undefined, isPending: false, refetch: vi.fn() }),
+    useGroupInvite: () => ({ data: workspaceState.inviteError ? undefined : { resource: 'https://example.test/invite' }, error: workspaceState.inviteError, isPending: false, refetch: vi.fn() }),
     useGroupMembers: () => ({ data: undefined, error: undefined, isPending: false, isFetching: false, refetch: vi.fn() }),
     useGroupAudit: () => ({ data: undefined, error: undefined, isPending: false, refetch: vi.fn() }),
     useUploadMediaAsset: mutation,
@@ -60,6 +65,7 @@ vi.mock('./hooks', () => {
 });
 
 describe('GroupWorkspace capability loss', () => {
+  beforeEach(() => { workspaceState.inviteAvailable = undefined; workspaceState.inviteError = undefined; });
   it('keeps cached detail visible and disables every provider command', () => {
     const html = renderToStaticMarkup(
       <GroupWorkspace
@@ -163,5 +169,57 @@ describe('GroupWorkspace capability loss', () => {
     expect(html).toContain('Admin required');
     expect(html).toContain('Unknown');
     expect(html).toContain('Projection not ready');
+  });
+
+  it('renders missing cached invite links as unavailable without a retry action', () => {
+    workspaceState.inviteAvailable = false;
+    const html = renderToStaticMarkup(
+      <GroupWorkspace
+        groupId={group.id}
+        readEnabled
+        commandsEnabled
+        normalized
+        membersEnabled
+        auditEnabled
+        photoEnabled={false}
+        activeTab="settings"
+        memberSearch=""
+        onParam={vi.fn()}
+        onTab={vi.fn()}
+        onClose={vi.fn()}
+        onLeft={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('Invite link not available');
+    expect(html).toContain('Reset invite link');
+    expect(html).not.toContain('Read failed');
+    expect(html).not.toContain('Retry');
+  });
+
+  it('treats a raced missing-link response as unavailable instead of a failed read', () => {
+    workspaceState.inviteAvailable = true;
+    workspaceState.inviteError = new ApiFailure({ code: 'group_invite_link_not_found', error: 'cached group invite link is not available' }, 404);
+    const html = renderToStaticMarkup(
+      <GroupWorkspace
+        groupId={group.id}
+        readEnabled
+        commandsEnabled
+        normalized
+        membersEnabled
+        auditEnabled
+        photoEnabled={false}
+        activeTab="settings"
+        memberSearch=""
+        onParam={vi.fn()}
+        onTab={vi.fn()}
+        onClose={vi.fn()}
+        onLeft={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('Invite link not available');
+    expect(html).not.toContain('Read failed');
+    expect(html).not.toContain('Retry');
   });
 });

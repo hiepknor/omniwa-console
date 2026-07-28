@@ -94,6 +94,9 @@ normalized detail/member command is enabled only by an explicit backend
 `allowed` decision; `denied` explains why and `unknown` remains visibly
 disabled as unsynchronized. Unknown settings remain visibly unreported and
 cannot be toggled until the backend returns their current value.
+Invite-link permission and cached-link availability remain separate. A missing
+cached link is an empty state with the independently gated reset action, not a
+failed read with a retry loop.
 
 The directory exposes all normalized filters, with filter and opaque cursor
 state in the URL. Summary metrics come only from the authoritative global

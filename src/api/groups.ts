@@ -70,6 +70,7 @@ export type GroupMemberResource = {
 };
 
 export type GroupPhoto = { available?: boolean; mediaAssetId?: string; updatedAt?: string };
+export type GroupInviteLinkMetadata = { available?: boolean; updatedAt?: string };
 
 export type GroupResource = {
   id: string;
@@ -97,6 +98,7 @@ export type GroupResource = {
   adminsOnlyAdd?: boolean;
   actions?: GroupActions;
   photo?: GroupPhoto;
+  inviteLink?: GroupInviteLinkMetadata;
   /** Populated only by the legacy compatibility detail response. */
   members: GroupMemberResource[];
 };
@@ -171,6 +173,7 @@ function toNormalizedGroup(raw: NormalizedSummary | NormalizedDetail): GroupReso
     adminsOnlyAdd: detail.memberAddMode === undefined || detail.memberAddMode === 'unknown' ? undefined : detail.memberAddMode === 'admins_only',
     actions: toActions(detail.actions),
     photo: detail.photo ? { available: detail.photo.available, mediaAssetId: detail.photo.mediaAssetId || undefined, updatedAt: detail.photo.updatedAt || undefined } : undefined,
+    inviteLink: detail.inviteLink ? { available: detail.inviteLink.available, updatedAt: detail.inviteLink.updatedAt || undefined } : undefined,
     members: [],
   };
 }
@@ -268,7 +271,10 @@ async function acknowledgement(result: Awaited<ReturnType<ApiClient['POST']>>, f
 
 export async function updateGroupName(client: ApiClient, groupJid: string, name: string, normalized: boolean, key?: string) { return acknowledgement(await client.POST('/group/name', commandOptions({ groupJid, name }, key)), 'group_name_updated', normalized); }
 export async function updateGroupDescription(client: ApiClient, groupJid: string, description: string, normalized: boolean, key?: string) { return acknowledgement(await client.POST('/group/description', commandOptions({ groupJid, description }, key)), 'group_description_updated', normalized); }
-export async function getGroupInviteLink(client: ApiClient, groupJid: string): Promise<string | undefined> { const link = unwrap<string>(await client.POST('/group/invitelink', { body: { groupJid, reset: false } })); return typeof link === 'string' && link ? link : undefined; }
+export async function getGroupInviteLink(client: ApiClient, groupJid: string): Promise<ReadResult<string>> {
+  const projection = unwrapProjection<string>(await client.POST('/group/invitelink', { body: { groupJid, reset: false } }));
+  return { resource: typeof projection.resource === 'string' && projection.resource ? projection.resource : undefined, meta: projection.meta };
+}
 export async function refreshGroupInviteLink(client: ApiClient, groupJid: string, normalized: boolean, key?: string) { return acknowledgement(await client.POST('/group/invitelink', commandOptions({ groupJid, reset: true }, key)), 'group_invite_reset', normalized); }
 export async function leaveGroup(client: ApiClient, groupJid: string, normalized: boolean, key?: string) { return acknowledgement(await client.POST('/group/leave', commandOptions({ groupJid }, key)), 'group_left', normalized); }
 export async function updateGroupSetting(client: ApiClient, groupJid: string, setting: GroupSetting, enabled: boolean, normalized: boolean, key?: string) { const action = enabled ? GROUP_SETTING_ACTIONS[setting].on : GROUP_SETTING_ACTIONS[setting].off; return acknowledgement(await client.POST('/group/settings', commandOptions({ action, groupJid }, key)), 'group_setting_updated', normalized); }

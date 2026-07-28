@@ -4,6 +4,7 @@ import {
   addGroupMember,
   createGroup,
   getGroup,
+  getGroupInviteLink,
   getGroupSummary,
   listGroupAudit,
   listGroupMembers,
@@ -168,6 +169,7 @@ describe('group projection adapter', () => {
         removeMembers: { state: 'denied', reason: 'protected_member' },
         sendMessage: { state: 'unknown', reason: 'permission_unknown' },
       },
+      inviteLink: { available: false, updatedAt: '2026-07-28T10:00:00Z' },
     }, meta: { syncStatus: 'ready' } }));
 
     const result = await getGroup({ POST } as unknown as ApiClient, 'group-1@g.us', true);
@@ -176,6 +178,14 @@ describe('group projection adapter', () => {
       removeMembers: { state: 'denied', reason: 'protected_member' },
       sendMessage: { state: 'unknown', reason: 'permission_unknown' },
     });
+    expect(result.resource?.inviteLink).toEqual({ available: false, updatedAt: '2026-07-28T10:00:00Z' });
+  });
+
+  it('preserves cached invite-link projection metadata separately from availability', async () => {
+    const POST = vi.fn().mockResolvedValue(ok({ message: 'success', data: 'https://chat.whatsapp.com/cached', meta: { source: 'projection', syncStatus: 'stale', lastSyncedAt: '2026-07-28T10:00:00Z' } }));
+    const result = await getGroupInviteLink({ POST } as unknown as ApiClient, 'group-1@g.us');
+    expect(POST).toHaveBeenCalledWith('/group/invitelink', { body: { groupJid: 'group-1@g.us', reset: false } });
+    expect(result).toEqual({ resource: 'https://chat.whatsapp.com/cached', meta: { source: 'projection', syncStatus: 'stale', lastSyncedAt: '2026-07-28T10:00:00Z', nextCursor: undefined } });
   });
 
   it('maps authoritative global summary independently from a directory page', async () => {

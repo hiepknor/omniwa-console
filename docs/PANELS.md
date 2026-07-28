@@ -150,6 +150,11 @@ live WhatsApp read.
 
 Detail and member actions use backend tri-state decisions. Only `allowed`
 enables a command; `denied` and `unknown` remain disabled with their reason.
+Invite-link read permission and cached-link availability are separate detail
+facts. `group_invite_link_not_found` is an expected unavailable state without
+automatic retry; it remains distinct from `group_not_found` and
+`projection_not_ready`. Reset remains independently permission-gated and
+returns a typed acknowledgement.
 Participant remove/promote/demote commands use opaque `memberId` values, while
 add uses canonical user JIDs. Per-participant partial and unknown outcomes are
 rendered individually. Management mutations carry an idempotency key, are

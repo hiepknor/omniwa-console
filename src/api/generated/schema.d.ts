@@ -2572,7 +2572,7 @@ export interface paths {
         put?: never;
         /**
          * Get group invite link
-         * @description Get group invite link
+         * @description Read the cached group invite link from the instance-scoped Groups projection. This endpoint never calls WhatsApp when reset=false. Permission and cache availability are separate facts.
          */
         post: {
             parameters: {
@@ -2588,15 +2588,13 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description success */
+                /** @description data is a cached-link string for reset=false or a CommandAcknowledgement for reset=true */
                 200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: string;
-                        };
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
                     };
                 };
                 /** @description Error on validation */
@@ -2608,13 +2606,31 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
-                /** @description Cached invite link not found */
+                /** @description group_permission_denied */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupProjectionErrorResponse"];
+                    };
+                };
+                /** @description group_not_found or group_invite_link_not_found */
                 404: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                        "application/json": components["schemas"]["apidocs.GroupInviteLinkNotFoundErrorResponse"];
+                    };
+                };
+                /** @description group_state_changed */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupProjectionErrorResponse"];
                     };
                 };
                 /** @description Information query rate limited; see Retry-After header */
@@ -9416,6 +9432,20 @@ export interface components {
             /** @example 0123456789abcdef0123456789abcdef */
             requestId?: string;
         };
+        "apidocs.GroupInviteLinkNotFoundDetails": {
+            /** @example false */
+            available?: boolean;
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
+        };
+        "apidocs.GroupInviteLinkNotFoundErrorResponse": {
+            /** @example group_invite_link_not_found */
+            code?: string;
+            details?: components["schemas"]["apidocs.GroupInviteLinkNotFoundDetails"];
+            /** @example cached group invite link is not available */
+            error?: string;
+            /** @example 0123456789abcdef0123456789abcdef */
+            requestId?: string;
+        };
         "apidocs.GroupListAuditEvent": {
             actorType?: string;
             eventType?: string;
@@ -9469,6 +9499,18 @@ export interface components {
             /** @example success */
             message?: string;
             meta?: components["schemas"]["apidocs.ProjectionMeta"];
+        };
+        "apidocs.GroupProjectionErrorDetails": {
+            meta?: components["schemas"]["apidocs.ProjectionMeta"];
+        };
+        "apidocs.GroupProjectionErrorResponse": {
+            /** @example group_permission_denied */
+            code?: string;
+            details?: components["schemas"]["apidocs.GroupProjectionErrorDetails"];
+            /** @example group management permission denied */
+            error?: string;
+            /** @example 0123456789abcdef0123456789abcdef */
+            requestId?: string;
         };
         "apidocs.LabelItem": {
             id?: string;
@@ -9918,6 +9960,7 @@ export interface components {
             ephemeralEnabled?: boolean;
             ephemeralTimerSeconds?: number;
             groupJid?: string;
+            inviteLink?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_group_service.GroupInviteLinkMetadata"];
             isDefaultSubgroup?: boolean;
             joinApproval?: boolean;
             locked?: boolean;
@@ -9947,6 +9990,10 @@ export interface components {
             subgroups?: number;
             suspended?: number;
             total?: number;
+            updatedAt?: string;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupInviteLinkMetadata": {
+            available?: boolean;
             updatedAt?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMember": {
