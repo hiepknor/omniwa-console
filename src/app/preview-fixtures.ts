@@ -81,16 +81,26 @@ export const groupDetailFixture = {
   ],
 } as unknown as GroupResource;
 
+const campaignProgress = (total: number, processed: number, failed = 0, skipped = 0): Campaign['progress'] => ({
+  total, processed, pending: Math.max(0, total - processed), processing: 0,
+  sent: Math.max(0, processed - failed - skipped), delivered: 0, read: 0,
+  failed, skipped, aborted: 0, updatedAt: ago(120),
+});
+const campaignTarget = (name: string, count: number, version = 1): Campaign['target'] => ({
+  type: 'group_list', groupListId: `list_${name.toLowerCase().replaceAll(' ', '_')}`,
+  groupListName: name, groupListVersion: version, targetCount: count,
+});
+
 export const campaignsFixture: Campaign[] = [
-  { id: 'cmp_01HB', name: 'July promo blast', status: 'running', startsAt: ago(3600), updatedAt: ago(120), version: 4 },
-  { id: 'cmp_02KC', name: 'Cart abandonment', status: 'scheduled', startsAt: ago(-7200), updatedAt: ago(600), version: 1 },
-  { id: 'cmp_03QD', name: 'Welcome series', status: 'completed', startsAt: ago(86_400 * 3), updatedAt: ago(86_400 * 2), version: 7 },
-  { id: 'cmp_04TE', name: 'Flash sale', status: 'aborted', startsAt: ago(86_400), updatedAt: ago(80_000), version: 2 },
-  { id: 'cmp_05WF', name: 'Feedback request', status: 'draft', startsAt: undefined, updatedAt: ago(300), version: 1 },
+  { id: 'cmp_01HB', name: 'July promo blast', status: 'running', startsAt: ago(3600), updatedAt: ago(120), version: 4, target: campaignTarget('Retail stores', 1284, 4), progress: { ...campaignProgress(1284, 960, 30, 12), pending: 320, processing: 4 }, needsAttention: false },
+  { id: 'cmp_02KC', name: 'Cart abandonment', status: 'scheduled', startsAt: ago(-7200), updatedAt: ago(600), version: 1, target: campaignTarget('Recovery teams', 96), progress: campaignProgress(96, 0), needsAttention: false, retryAt: ago(-600) },
+  { id: 'cmp_03QD', name: 'Welcome series', status: 'completed', startsAt: ago(86_400 * 3), updatedAt: ago(86_400 * 2), version: 7, target: campaignTarget('New branches', 84, 2), progress: campaignProgress(84, 84), needsAttention: false },
+  { id: 'cmp_04TE', name: 'Flash sale', status: 'aborted', startsAt: ago(86_400), updatedAt: ago(80_000), version: 2, target: campaignTarget('VIP stores', 42, 3), progress: { ...campaignProgress(42, 42), sent: 20, aborted: 22 }, needsAttention: false },
+  { id: 'cmp_05WF', name: 'Feedback request', status: 'paused', startsAt: undefined, updatedAt: ago(300), version: 1, target: campaignTarget('Support teams', 32), progress: campaignProgress(32, 8, 1), needsAttention: true, statusReason: 'unknown_send_outcome', pauseReason: 'operator_attention_required' },
 ] as unknown as Campaign[];
 
 export const campaignDetailFixture = {
-  campaign: { id: 'cmp_01HB', name: 'July promo blast', status: 'running', contentType: 'text', text: 'Hi {{name}}! Our July sale is live — 25% off everything through Sunday. Reply STOP to opt out.', startsAt: ago(3600), finishedAt: undefined, version: 4 },
+  campaign: { id: 'cmp_01HB', name: 'July promo blast', status: 'running', contentType: 'text', text: 'Hi {{name}}! Our July sale is live — 25% off everything through Sunday. Reply STOP to opt out.', startsAt: ago(3600), finishedAt: undefined, updatedAt: ago(120), version: 4, target: campaignTarget('Retail stores', 1284, 4), progress: { ...campaignProgress(1284, 960, 30, 12), processing: 4, pending: 320 }, needsAttention: false } as Campaign,
   recipientCount: 1284,
   byStatus: { delivered: 918, processing: 240, queued: 84, failed: 30, skipped: 12 },
 };

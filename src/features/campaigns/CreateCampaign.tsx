@@ -1,79 +1,61 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { ApiFailure } from '@/api/envelopes';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
-import { Button, ButtonLink, Field, Input, PageHeader, Panel, StateNotice, Textarea } from '@/ui';
+import { GroupEligibilitySummary } from '@/components/GroupEligibilitySummary';
+import { eligibilityIssues } from '@/api/group-lists';
+import { humanizeToken } from '@/lib/format';
+import { Button, Field, Input, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Textarea, Th, Tr } from '@/ui';
+import { useGroupList, useGroupListEligibility, useGroupListEntries, useGroupLists } from '@/api/group-list-hooks';
 import { useCreateCampaign } from './hooks';
-import { parseConsentRows } from './consent';
 
 export function CreateCampaign() {
   const session = useApiSession();
   const capabilities = useServerCapabilities();
-  const create = useCreateCampaign();
   const navigate = useNavigate();
+  const create = useCreateCampaign();
   const [name, setName] = useState('');
   const [text, setText] = useState('');
-  const [rows, setRows] = useState('');
-  const [validation, setValidation] = useState<string>();
+  const [listSearchDraft, setListSearchDraft] = useState('');
+  const [listSearch, setListSearch] = useState('');
+  const [selectedId, setSelectedId] = useState('');
+  const instanceScope = session.keyKind === 'api';
+  const orchestration = capabilities.data?.capabilities.includes('campaign_orchestration') ?? false;
+  const groupListsEnabled = capabilities.data?.capabilities.includes('group_lists') ?? false;
+  const groupTargetsEnabled = capabilities.data?.capabilities.includes('campaign_group_targets') ?? false;
+  const eligibilityEnabled = capabilities.data?.capabilities.includes('group_list_eligibility') ?? false;
+  const enabled = instanceScope && orchestration && groupListsEnabled && groupTargetsEnabled;
+  const lists = useGroupLists(listSearch, undefined, enabled);
+  const selected = useGroupList(selectedId || undefined, enabled);
+  const preview = useGroupListEntries(selectedId || undefined, undefined, enabled && Boolean(selectedId));
+  const assessment = useGroupListEligibility(selectedId || undefined, selected.data?.version, enabled && eligibilityEnabled && Boolean(selected.data));
+  const canSubmit = Boolean(name.trim() && text.trim() && selected.data?.id && selected.data.groupCount > 0 && !create.isPending && (!eligibilityEnabled || assessment.data?.aggregate.readyToTarget));
+  const createIssues = eligibilityIssues(create.error);
+  useEffect(() => {
+    if (create.error && eligibilityEnabled && selected.data) void assessment.refetch();
+  }, [create.error]);
+  const clearFailure = () => { if (create.error) create.reset(); };
+  const applyListSearch = () => {
+    const nextSearch = listSearchDraft.trim();
+    if (nextSearch === listSearch) return;
+    setListSearch(nextSearch);
+    setSelectedId('');
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    setValidation(undefined);
-    let recipients;
-    try { recipients = parseConsentRows(rows); } catch (error) { setValidation(error instanceof Error ? error.message : 'Invalid consent records.'); return; }
+    if (!canSubmit || !selected.data) return;
     try {
-      const result = await create.mutateAsync({ name: name.trim(), text, recipients });
-      setRows('');
-      navigate(`/messages/${encodeURIComponent(result.campaign.id)}?created=1`, { replace: true });
+      const result = await create.mutateAsync({ name: name.trim(), text, target: { type: 'group_list', groupListId: selected.data.id, groupListVersion: selected.data.version } });
+      navigate(`/campaigns/${encodeURIComponent(result.campaign.id)}?created=1`, { replace: true });
     } catch { /* rendered below */ }
   };
-  const failure = create.error instanceof ApiFailure ? create.error : undefined;
-  const instanceScope = session.keyKind === 'api';
-  const orchestration = capabilities.data?.capabilities.includes('campaign_orchestration') ?? false;
 
-  if (!instanceScope || capabilities.isPending || capabilities.isError || !orchestration) {
-    const detail = !instanceScope
-      ? 'Campaign creation requires an instance credential. No campaign request was sent.'
-      : capabilities.isPending
-        ? 'Discovering instance capabilities before enabling campaign creation.'
-        : capabilities.isError
-          ? 'Capability discovery failed. Campaign creation remains disabled.'
-          : 'The backend does not advertise campaign_orchestration. The Console does not emulate campaign execution.';
-    return (
-      <div className="grid gap-6 p-6 max-sm:p-4 max-w-3xl">
-        <PageHeader eyebrow="Messaging / Campaigns" title="Create campaign draft" description="Submit consent evidence once; execution remains in OmniWA GO." />
-        <StateNotice kind="empty" title={!instanceScope ? 'Instance credential required' : capabilities.isPending ? 'Discovering capabilities' : 'Unsupported'} detail={detail} action={<Link to="/messages" className="underline">Return to campaigns</Link>} />
-      </div>
-    );
+  if (!enabled) {
+    const detail = !instanceScope ? 'Campaign creation requires an instance credential.' : capabilities.isPending ? 'Discovering backend capabilities.' : !orchestration ? 'The backend does not advertise campaign_orchestration.' : !groupListsEnabled ? 'The backend does not advertise group_lists.' : 'The backend does not advertise campaign_group_targets.';
+    return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging / Campaigns" title="Create campaign draft" description="Create one server-snapshotted Group List campaign." /><StateNotice kind="empty" title="Group campaign creation unavailable" detail={`${detail} No campaign request was sent.`} action={<Link to="/campaigns" className="underline">Return to campaigns</Link>} /></div>;
   }
 
-  return (
-    <div className="grid gap-6 p-6 max-sm:p-4 max-w-3xl">
-      <PageHeader
-        eyebrow="Messaging / Campaigns"
-        title="Create campaign draft"
-        description="Submit consent evidence once; execution, pacing, leases, and recipient retry remain in OmniWA GO."
-        actions={<ButtonLink to="/messages">Cancel</ButtonLink>}
-      />
-
-      <StateNotice kind="info" title="Consent evidence" detail="Raw evidence references are sent to the backend and are not retained by the Console after successful submission." />
-
-      <Panel title="Campaign definition" description="Text campaigns only. Every recipient must carry explicit opt-in evidence.">
-        <form className="grid gap-4" onSubmit={(e) => void submit(e)}>
-          <Field label="Campaign name">{(id) => <Input id={id} required maxLength={255} value={name} onChange={(e) => setName(e.target.value)} />}</Field>
-          <Field label="Message text" required>{(id) => <Textarea id={id} rows={4} required value={text} onChange={(e) => setText(e.target.value)} />}</Field>
-          <Field label="Consent-backed recipients" required description={validation ? undefined : 'One recipient per line: JID | opt-in source | evidence reference | ISO opt-in time.'} error={validation}>
-            {(id) => <Textarea id={id} rows={8} required value={rows} placeholder="84901234567@s.whatsapp.net | checkout | consent-record-id | 2026-07-22T08:00:00Z" onChange={(e) => setRows(e.target.value)} />}
-          </Field>
-          {failure ? <ApiFailureNotice error={failure} title="Command failed" /> : null}
-          <div className="flex justify-end gap-2">
-            <Button disabled={create.isPending} onClick={() => navigate('/messages')}>Cancel</Button>
-            <Button variant="primary" type="submit" disabled={create.isPending || !name.trim() || !text.trim() || !rows.trim()}>{create.isPending ? 'Creating draft…' : 'Create draft'}</Button>
-          </div>
-        </form>
-      </Panel>
-    </div>
-  );
+  return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging / Campaigns" title="Create campaign draft" description="Choose one versioned Group List; execution, pacing, retry, and eligibility remain backend-owned." /><form className="grid min-w-0 gap-4 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)] xl:items-start" aria-busy={create.isPending} onSubmit={(event) => void submit(event)}><Panel title="Campaign content" description="Creation acknowledges a text draft only; it does not prove send or delivery."><div className="grid gap-4"><Field label="Campaign name" required>{(id) => <Input id={id} required maxLength={255} value={name} disabled={create.isPending} onChange={(event) => { clearFailure(); setName(event.target.value); }} />}</Field><Field label="Message text" required>{(id) => <Textarea id={id} rows={10} required maxLength={4096} value={text} disabled={create.isPending} onChange={(event) => { clearFailure(); setText(event.target.value); }} />}</Field></div></Panel><Panel title="Target Group List" description="The backend snapshots this exact list version and never expands groups into members."><div className="grid gap-4"><div className="flex items-end gap-2 max-sm:items-stretch"><Field label="Find Group Lists" className="min-w-0 flex-1" description="Prefix search is server-owned and bounded to the active instance.">{(id) => <Input id={id} type="search" value={listSearchDraft} disabled={create.isPending} onChange={(event) => setListSearchDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); applyListSearch(); } }} />}</Field><Button disabled={create.isPending || lists.isFetching || listSearchDraft.trim() === listSearch} onClick={applyListSearch}>Search</Button></div>{lists.error ? <ApiFailureNotice error={lists.error} onRetry={() => lists.refetch()} /> : lists.isPending ? <StateNotice kind="loading" title="Loading Group Lists" /> : <Field label="Target Group List" required>{(id, labelId) => <Select id={id} aria-labelledby={labelId} value={selectedId} disabled={create.isPending || !lists.data?.items.length} placeholder="Select Group List" onValueChange={(value) => { clearFailure(); setSelectedId(value); }}><option value="">Select Group List</option>{lists.data?.items.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.groupCount} groups · v{item.version}</option>)}</Select>}</Field>}{selected.isPending && selectedId ? <StateNotice kind="loading" title="Loading selected Group List" /> : selected.error ? <ApiFailureNotice error={selected.error} onRetry={() => selected.refetch()} /> : selected.data ? <div className="grid gap-3"><div className="flex flex-wrap items-center justify-between gap-2 border border-line bg-elevated p-3" aria-live="polite"><div className="grid"><strong className="text-sm">{selected.data.name}</strong><span className="text-xs text-fg-3">Reviewed version {selected.data.version}</span></div><Status tone={selected.data.groupCount ? 'ok' : 'failed'}>{selected.data.groupCount} groups</Status></div>{eligibilityEnabled ? assessment.isPending ? <StateNotice kind="loading" title="Checking the complete target" detail="Draft creation remains disabled until this exact Group List version is assessed." /> : assessment.error ? <ApiFailureNotice error={assessment.error} title="Target eligibility check failed" onRetry={() => assessment.refetch()} /> : assessment.data ? <GroupEligibilitySummary value={assessment.data.aggregate} /> : null : <StateNotice kind="info" title="Eligibility preflight unavailable" detail="The backend will validate the complete Group List atomically when the draft is created." />}{preview.isPending ? <StateNotice kind="loading" title="Loading target preview" /> : preview.error ? <ApiFailureNotice error={preview.error} onRetry={() => preview.refetch()} /> : preview.data ? <><Table><thead><tr><Th>Group</Th><Th>Eligibility</Th></tr></thead><tbody>{preview.data.items.slice(0, 5).map((entry) => <Tr key={entry.groupJid}><Td><div className="grid gap-0.5"><span className="font-medium">{entry.currentName ?? entry.snapshotName ?? entry.groupJid}</span><small className="font-mono text-xs text-fg-3">{entry.groupJid}</small></div></Td><Td><Status tone={entry.eligibility === 'eligible' ? 'ok' : entry.eligibility === 'unavailable' ? 'failed' : 'degraded'}>{humanizeToken(entry.eligibilityReason ?? entry.eligibility)}</Status></Td></Tr>)}</tbody></Table><p className="text-xs text-fg-3">Previewing {Math.min(5, preview.data.items.length)} groups. The aggregate above covers the complete exact version.</p></> : null}</div> : <StateNotice kind="info" title="Select a Group List" detail="Create and authorize reusable targets under Groups / Group Lists." action={<Link className="underline" to="/groups/lists/new">New Group List</Link>} />}</div></Panel>{create.error ? <div className="xl:col-span-2 grid gap-3"><ApiFailureNotice error={create.error} title="Campaign creation failed" />{createIssues ? <StateNotice kind="error" title={`${createIssues.issueCount} target groups changed eligibility`} detail="Refresh and explicitly review the same Group List version before creating another draft. No campaign retry was submitted." /> : null}</div> : null}<div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 xl:col-span-2"><p className="text-xs text-fg-3">A version conflict or unavailable target requires refresh and explicit review.</p><div className="flex gap-2 max-sm:w-full"><Button className="max-sm:flex-1" disabled={create.isPending} onClick={() => navigate('/campaigns')}>Cancel</Button><Button className="max-sm:flex-1" type="submit" variant="primary" disabled={!canSubmit}>{create.isPending ? 'Creating draft…' : 'Create draft'}</Button></div></div></form></div>;
 }

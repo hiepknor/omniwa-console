@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { Campaign, CampaignStatus } from '@/api/campaigns';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { Button, ButtonLink, CursorPagination, Field, FilterToolbar, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { CampaignProgressSummary, campaignTargetLabel } from './CampaignProgress';
 
 const statuses: CampaignStatus[] = ['draft', 'scheduled', 'running', 'paused', 'completed', 'aborted', 'failed'];
 
@@ -39,7 +40,7 @@ export function CampaignsView(props: CampaignsViewProps) {
       <PageHeader
         eyebrow="Messaging"
         title="Campaigns"
-        description="Server-owned campaign orchestration with explicit consent, factual recipient outcomes, and durable audit history."
+        description="Server-owned campaign orchestration with versioned targets, factual outcomes, and durable audit history."
         actions={
           <>
             <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>
@@ -69,18 +70,17 @@ export function CampaignsView(props: CampaignsViewProps) {
         {props.items.length > 0 ? (
           <Table className="border-0">
             <thead>
-              <tr><Th>Campaign</Th><Th>Status</Th><Th>Starts</Th><Th>Updated</Th><Th className="text-right">Version</Th></tr>
+              <tr><Th>Campaign</Th><Th className="max-sm:hidden">Status</Th><Th>Progress</Th><Th className="max-md:hidden">Activity</Th></tr>
             </thead>
             <tbody>
               {props.items.map((c) => (
                 <Tr key={c.id} selected={c.id === props.selectedId} onClick={() => props.onOpen(c.id)}>
                   <Td>
-                    <div className="grid gap-0.5"><span className="font-medium">{c.name}</span><small className="font-mono text-xs text-fg-3">{c.id}</small></div>
+                    <div className="grid gap-0.5"><span className="font-medium">{c.name}</span><small className="text-xs text-fg-2">{campaignTargetLabel(c)}</small><small className="font-mono text-[11px] text-fg-3">{c.id}</small><div className="mt-1 hidden flex-wrap gap-1 max-sm:flex"><Status tone={campaignTone(c.status)}>{humanizeToken(c.status)}</Status>{c.needsAttention ? <Status tone="failed">Attention</Status> : c.retryAt ? <Status tone="pending">Waiting</Status> : null}</div></div>
                   </Td>
-                  <Td><Status tone={campaignTone(c.status)}>{humanizeToken(c.status)}</Status></Td>
-                  <Td className="text-fg-2">{relativeTime(c.startsAt) || 'Not scheduled'}</Td>
-                  <Td className="text-fg-2">{relativeTime(c.updatedAt) || 'Not reported'}</Td>
-                  <Td className="text-right font-mono tabular-nums">{c.version}</Td>
+                  <Td className="max-sm:hidden"><div className="grid justify-items-start gap-1.5"><Status tone={campaignTone(c.status)}>{humanizeToken(c.status)}</Status>{c.needsAttention ? <Status tone="failed">Attention</Status> : c.retryAt ? <Status tone="pending">Waiting</Status> : null}</div></Td>
+                  <Td><CampaignProgressSummary campaign={c} compact /></Td>
+                  <Td className="text-fg-2 max-md:hidden">{relativeTime(c.progress.updatedAt ?? c.updatedAt) || 'Not reported'}</Td>
                 </Tr>
               ))}
             </tbody>

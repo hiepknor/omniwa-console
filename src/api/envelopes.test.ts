@@ -91,6 +91,11 @@ describe('ApiFailure', () => {
     expect(new ApiFailure({ error: 'x' }, 400).requestId).toBeUndefined();
   });
 
+  it('preserves contract-defined domain details for API-layer narrowing', () => {
+    const details = { issueCount: 1, issues: [{ groupJid: '1@g.us' }] };
+    expect(new ApiFailure({ error: 'blocked', details }, 409).details).toEqual(details);
+  });
+
   it('defaults to session scope and preserves an explicit instance scope', () => {
     expect(new ApiFailure({ error: 'x' }, 401).credentialScope).toBe('session');
     expect(new ApiFailure({ error: 'x' }, 401, undefined, 'instance').credentialScope).toBe('instance');

@@ -33,27 +33,25 @@ POST /campaigns/{campaignId}/abort
 All cursors are opaque. Invalid lifecycle transitions return HTTP `409` and
 must remain visible as conflict errors.
 
-## Creation and consent
+## Creation and Group List targets
 
-Each recipient requires explicit opt-in evidence:
+New Console campaigns select one server-owned Group List version:
 
 ```json
 {
   "name": "July campaign",
   "text": "Message content",
-  "recipients": [
-    {
-      "jid": "84901234567@s.whatsapp.net",
-      "optInSource": "checkout",
-      "optInEvidenceReference": "consent-record-id",
-      "optedInAt": "2026-07-22T08:00:00Z"
-    }
-  ]
+  "target": {
+    "type": "group_list",
+    "groupListId": "4cae2734-b8f4-4faa-8d09-5933ef3bf1b0",
+    "groupListVersion": 4
+  }
 }
 ```
 
-The backend hashes the evidence reference before persistence and never echoes
-it. The Console does not cache or display the original reference after submit.
+The backend locks and snapshots the list, validates every group, and rejects a
+stale reviewed version. Existing direct campaigns remain readable, but the
+Console no longer creates them.
 
 ## State machines
 
@@ -66,6 +64,19 @@ Campaign status:
 - `completed`
 - `aborted`
 - `failed`
+
+Scheduling is optional. A newly created draft supports either path:
+
+```text
+draft ── start ──────────────> running
+  └──── schedule ─> scheduled ── start ─> running
+```
+
+The Console offers `schedule`, `start`, and `abort` for a draft; `start` and
+`abort` for a scheduled campaign; `pause` and `abort` while running; and
+`resume` and `abort` while paused. Completed, aborted, and failed campaigns are
+terminal in the Console. The server still validates every transition and a
+conflict response remains authoritative.
 
 Recipient status:
 
@@ -81,6 +92,22 @@ Recipient status:
 Do not collapse `sent`, `delivered`, and `read`. An API acknowledgement is not a
 recipient outcome.
 
+## Progress and operational state
+
+Campaign list and detail responses expose the same backend-owned monitoring
+facts: `target`, `progress`, `statusReason`, `pauseReason`, `retryAt`, and
+`needsAttention`. The Console displays `progress.processed` against
+`progress.total` without recomputing it from recipient rows. The backend defines
+`processed` as the sum of terminal outcomes; `pending` and `processing` remain
+non-terminal.
+
+The directory renders a compact per-campaign progress bar. The drawer renders
+the complete outcome breakdown and target snapshot. `needsAttention` is an
+operator warning, while `retryAt` is an informational backend retry window; the
+Console never starts a retry timer or submits a retry command. A global campaign
+footer is deliberately omitted because one cursor page is not a fleet-wide
+aggregate and presenting it as one would be misleading.
+
 ## Worker guarantees and UI implications
 
 The backend provides a durable queue, per-recipient state, leases, retry with
@@ -92,15 +119,30 @@ Therefore the Console:
 
 - never performs optimistic lifecycle changes;
 - disables duplicate command submission;
-- refreshes campaign detail, recipients, and audit after acknowledgement;
+- refreshes the campaign list and detail after acknowledgement;
 - explains that pause may allow already-processing recipients to finish;
 - uses recipient and audit reads as authority instead of toast history;
+- loads recipients and audit when their respective drawer tabs are opened, and
+  successful commands invalidate both reads for their next use;
 - applies the shared rate-limit behavior without retrying commands
-  automatically.
+  automatically;
+- polls authoritative campaign reads at the bounded shared campaign interval;
+- displays backend pause, retry, status-reason, and attention fields without
+  duplicating backend thresholds.
 
 ## Integrated UI
 
-The `/messages` route is the campaign list and monitoring surface.
-`/messages/new` is a consent-aware creation flow. A campaign drawer owns
+The `/campaigns` route is the campaign list and monitoring surface.
+`/campaigns/new` is a Group List-targeted creation flow. A campaign drawer owns
 lifecycle commands, recipient pagination, and audit history. The route and all
 filters/cursors remain deep-linkable.
+
+Campaign creation uses the full-width Console layout: content and target panels
+stack on narrower viewports. The target selector searches server-owned Group
+Lists, records the reviewed version, previews a bounded first page of groups,
+and, when `group_list_eligibility` is advertised, reads an on-demand aggregate
+for that exact version. The create action stays disabled while any target is
+unavailable or unknown. This check is advisory; the atomic create command and
+worker revalidation remain authoritative. Servers without the additive
+capability retain submit-time validation with an explicit compatibility notice. All fields
+and the sole Cancel action are disabled while creation is pending.

@@ -155,6 +155,12 @@ Keys mirror resource and credential scope:
 ['instances']
 ['instances', instanceId, 'groups', { search, cursor, limit }]
 ['instances', instanceId, 'group', groupId]
+['instances', instanceId, 'group-lists', { search, cursor, limit }]
+['instances', instanceId, 'group-lists', groupListId]
+['instances', instanceId, 'group-lists', groupListId, 'groups', { cursor, limit }]
+['instances', instanceId, 'group-lists', groupListId, 'audit', { cursor, limit }]
+['instances', instanceId, 'group-list-eligibility', { groupJids }]
+['instances', instanceId, 'group-lists', groupListId, 'eligibility', { expectedVersion }]
 ['instances', instanceId, 'contacts', { search, cursor, limit }]
 ['instances', instanceId, 'contact', contactId]
 ['instances', instanceId, 'labels']
@@ -176,6 +182,12 @@ object in mutation invalidation, because it would miss cached filtered or
 paginated variants. The literal `session` scope is the non-secret cache scope
 for panels whose active API client already represents one operator session;
 credentials never enter a key.
+
+Group List eligibility preflight is a read even though its bounded batch
+operation uses `POST`. It is owned by TanStack Query, keyed by the ordered group
+JIDs, and never auto-submits a mutation. Whole-list assessment includes the
+reviewed version in its key. Structured eligibility rejection details remain
+inside `src/api/` until narrowed to the public-safe issue shape.
 
 Resource adapters stay split by backend domain. Chat projection DTOs live in
 `src/api/chats.ts`; Message, receipt, and verified send contracts live in

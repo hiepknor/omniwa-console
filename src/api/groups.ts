@@ -120,10 +120,10 @@ function toGroup(raw: GoGroup): GroupResource {
 export async function listInstanceGroups(
   client: ApiClient,
   _instanceId?: string,
-  params: { search?: string; cursor?: string; limit?: number } = {},
+  params: { search?: string; cursor?: string; limit?: number; paged?: boolean } = {},
 ): Promise<ReadResult<GroupListPage>> {
   const search = params.search?.trim() ?? '';
-  const result = search || params.cursor
+  const result = params.paged || search || params.cursor
     ? await client.GET('/group/search', {
       params: { query: { q: search, limit: params.limit ?? 50, cursor: params.cursor } },
     })

@@ -25,6 +25,23 @@ export const queryKeys = {
     params === undefined
       ? ['instances', instanceId, 'groups'] as const
       : ['instances', instanceId, 'groups', params] as const,
+  instanceGroupLists: (instanceId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'group-lists'] as const
+      : ['instances', instanceId, 'group-lists', params] as const,
+  groupList: (instanceId: string, groupListId: string) => ['instances', instanceId, 'group-lists', groupListId] as const,
+  groupListEntries: (instanceId: string, groupListId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'group-lists', groupListId, 'groups'] as const
+      : ['instances', instanceId, 'group-lists', groupListId, 'groups', params] as const,
+  groupListAudit: (instanceId: string, groupListId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'group-lists', groupListId, 'audit'] as const
+      : ['instances', instanceId, 'group-lists', groupListId, 'audit', params] as const,
+  groupEligibility: (instanceId: string, groupJids: readonly string[]) =>
+    ['instances', instanceId, 'group-list-eligibility', { groupJids }] as const,
+  groupListEligibility: (instanceId: string, groupListId: string, expectedVersion?: number) =>
+    ['instances', instanceId, 'group-lists', groupListId, 'eligibility', { expectedVersion }] as const,
   group: (instanceId: string, groupId: string) => ['instances', instanceId, 'group', groupId] as const,
   chat: (instanceId: string, chatId: string) => ['instances', instanceId, 'chat', chatId] as const,
   instanceMessages: (instanceId: string, chatId: string, params?: Record<string, unknown>) =>

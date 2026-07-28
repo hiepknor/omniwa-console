@@ -26,7 +26,7 @@ Rules:
 | Events | Durable history available | Integrated with retention and no-backfill metadata |
 | Overview and Health | Persisted/split APIs available | Integrated |
 | Projection Recovery | Admin failure operations available | Integrated when capability is advertised |
-| Campaigns (`/messages`) | Orchestration available | Integrated |
+| Campaigns (`/campaigns`) | Orchestration available | Integrated |
 | Queue/jobs | No generic management API | Unsupported |
 | Webhook administration | No management API | Unsupported |
 | Global Settings | No global settings API | Unsupported |
@@ -96,7 +96,7 @@ rendered as WhatsApp name only after authoritative status reports `LoggedIn` and
 the value is non-empty; `Connected` does not gate it. During a failed refresh,
 cached identity may remain visible only with the standard stale-data notice.
 
-## Groups — `/groups/:groupId?`
+## Groups and Group Lists — `/groups/:groupId?`, `/groups/lists/:groupListId?`
 
 **Status:** projection list/info/search and mutations integrated. The route uses
 the active instance credential as its scope and never calls the admin fleet
@@ -129,6 +129,30 @@ POST /send/text
 Search is prefix-based and cursor-scoped to instance and normalized query.
 Changing either resets the cursor. The panel never decodes cursors or falls back
 to a live WhatsApp read.
+
+Group Lists are gated independently by `group_lists`. They are instance-scoped,
+versioned target sets; eligibility is consumed from the backend and is never
+inferred from participant metadata. Create and edit read Groups projections for
+selection and own these operations:
+
+```text
+GET    /group-lists
+POST   /group-lists
+GET    /group-lists/{groupListId}
+GET    /group-lists/{groupListId}/groups
+PUT    /group-lists/{groupListId}
+DELETE /group-lists/{groupListId}
+GET    /group-lists/{groupListId}/audit
+POST   /group-lists/eligibility
+GET    /group-lists/{groupListId}/eligibility
+```
+
+When `group_list_eligibility` is advertised, the editor checks only the current
+bounded Groups page before selection and the inspector reads an on-demand
+whole-list aggregate. Preflight is advisory: writes validate the complete set
+again, and structured rejection issues are never converted into client-side
+eligibility rules. Older servers retain submit-time validation with an explicit
+compatibility notice.
 
 ## Chats workspace — `/chats/:chatId?`
 
@@ -195,7 +219,7 @@ POST /chat/pin
 POST /chat/unpin
 ```
 
-## Campaigns — `/messages`, `/messages/new`, `/messages/:campaignId`
+## Campaigns — `/campaigns`, `/campaigns/new`, `/campaigns/:campaignId`
 
 **Status:** integrated. Full behavior is in `docs/CAMPAIGNS.md`.
 
@@ -217,7 +241,19 @@ POST /campaigns/{campaignId}/abort
 ```
 
 Campaign execution, opt-in enforcement, leases, pacing, and retry stay in
-OmniWA GO.
+OmniWA GO. List rows display backend-returned target and progress snapshots;
+the detail drawer displays the complete outcome breakdown plus `statusReason`,
+`pauseReason`, `retryAt`, and `needsAttention`. The Console does not recompute
+processed totals, trigger retry, or present the current cursor page as a global
+footer aggregate.
+
+Campaign creation additionally reads `GET /group-lists`,
+`GET /group-lists/{groupListId}`, and `GET /group-lists/{groupListId}/groups`
+to select and preview a versioned target. When advertised, it also reads
+`GET /group-lists/{groupListId}/eligibility?expectedVersion=` and requires the
+exact reviewed version to be ready before submission. New drafts are gated by both
+`group_lists` and `campaign_group_targets`; the Console does not create direct
+recipient campaigns.
 
 ## Events — `/events`
 
