@@ -57,6 +57,209 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/campaign-media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload campaign image
+         * @description Uploads and normalizes one private JPEG or PNG image. The response never exposes an object-store key or URL.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description Instance-scoped upload idempotency key */
+                    "Idempotency-Key"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["postCampaignMedia"];
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignMediaAssetResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Request Entity Too Large */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Unsupported Media Type */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/campaign-media/{mediaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get campaign image metadata */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Media asset ID */
+                    mediaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignMediaAssetResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete campaign image */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Media asset ID */
+                    mediaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.CampaignErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/campaigns": {
         parameters: {
             query?: never;
@@ -122,7 +325,7 @@ export interface paths {
         put?: never;
         /**
          * Create campaign draft
-         * @description Creates a text campaign draft. Group-list targets are available when WA_CAMPAIGN_GROUP_TARGETS_ENABLED is true. Existing direct recipients remain available behind WA_CAMPAIGN_DIRECT_CREATE_ENABLED during migration.
+         * @description Creates a text or image campaign draft from one Group List snapshot. Legacy top-level text remains readable for compatibility. Image campaigns require WA_CAMPAIGN_IMAGE_CONTENT_ENABLED.
          */
         post: {
             parameters: {
@@ -165,6 +368,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListEligibilityErrorResponse"];
+                    };
+                };
                 /** @description Internal Server Error */
                 500: {
                     headers: {
@@ -172,6 +384,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListEligibilityErrorResponse"];
                     };
                 };
             };
@@ -1606,11 +1827,79 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                        "application/json": components["schemas"]["apidocs.GroupListEligibilityErrorResponse"];
                     };
                 };
                 /** @description Service Unavailable */
                 503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListEligibilityErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group-lists/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Evaluate Group List eligibility */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Group JIDs */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["pkg_groupList_handler.EligibilityRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListEligibilityResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1726,7 +2015,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                        "application/json": components["schemas"]["apidocs.GroupListEligibilityErrorResponse"];
                     };
                 };
                 /** @description Service Unavailable */
@@ -1735,7 +2024,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                        "application/json": components["schemas"]["apidocs.GroupListEligibilityErrorResponse"];
                     };
                 };
             };
@@ -1833,6 +2122,93 @@ export interface paths {
                 };
                 /** @description Not Found */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/group-lists/{groupListId}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Aggregate Group List eligibility */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Expected current Group List version */
+                    expectedVersion?: number;
+                };
+                header?: never;
+                path: {
+                    /** @description Group List UUID */
+                    groupListId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.GroupListEligibilityAggregateResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4362,6 +4738,272 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/media-assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload shared image asset */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description Instance-scoped upload idempotency key */
+                    "Idempotency-Key"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: components["requestBodies"]["postCampaignMedia"];
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.MediaAssetResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Request Entity Too Large */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unsupported Media Type */
+                415: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media-assets/{mediaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get shared image asset metadata */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Media asset UUID */
+                    mediaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.MediaAssetResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete shared image asset */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Media asset UUID */
+                    mediaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/media-assets/{mediaId}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Stream shared image asset content */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description Single bytes range */
+                    Range?: string;
+                };
+                path: {
+                    /** @description Media asset UUID */
+                    mediaId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": string;
+                        "image/png": string;
+                    };
+                };
+                /** @description Partial Content */
+                206: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": string;
+                        "image/png": string;
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": components["schemas"]["apidocs.ErrorResponse"];
+                        "image/png": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": components["schemas"]["apidocs.ErrorResponse"];
+                        "image/png": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Requested Range Not Satisfiable */
+                416: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": components["schemas"]["apidocs.ErrorResponse"];
+                        "image/png": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": components["schemas"]["apidocs.ErrorResponse"];
+                        "image/png": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/message/delete": {
         parameters: {
             query?: never;
@@ -4482,8 +5124,26 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Media exceeds the configured limit */
+                413: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Media download timed out */
+                504: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -6197,7 +6857,7 @@ export interface paths {
         put?: never;
         /**
          * Send a media message
-         * @description Send a media message
+         * @description Send legacy URL/base64 media, or one private device-upload image by mediaAssetId with an optional caption
          */
         post: {
             parameters: {
@@ -8133,6 +8793,11 @@ export interface components {
             message?: string;
             meta?: components["schemas"]["apidocs.ProjectionMeta"];
         };
+        "apidocs.CampaignMediaAssetResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.MediaAsset"];
+            /** @example success */
+            message?: string;
+        };
         "apidocs.CampaignRecipientListResponse": {
             data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient"][];
             /** @example success */
@@ -8145,6 +8810,10 @@ export interface components {
              *       "campaign_orchestration",
              *       "rate_limit_retry_after",
              *       "groups_projection",
+             *       "group_lists",
+             *       "group_list_eligibility",
+             *       "campaign_group_targets",
+             *       "campaign_image_content",
              *       "instance_metadata_views",
              *       "instance_credential_health",
              *       "instance_token_rotation"
@@ -8209,6 +8878,27 @@ export interface components {
             /** @example success */
             message?: string;
         };
+        "apidocs.GroupListEligibilityAggregateResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityAggregate"];
+            /** @example success */
+            message?: string;
+            meta?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityMeta"];
+        };
+        "apidocs.GroupListEligibilityErrorResponse": {
+            /** @example group_list_group_unavailable */
+            code?: string;
+            details?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityIssueDetails"];
+            /** @example group list contains an unavailable group */
+            error?: string;
+            /** @example 0123456789abcdef0123456789abcdef */
+            requestId?: string;
+        };
+        "apidocs.GroupListEligibilityResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityResult"][];
+            /** @example success */
+            message?: string;
+            meta?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityMeta"];
+        };
         "apidocs.GroupListEntryListResponse": {
             data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_service.EntryView"][];
             /** @example success */
@@ -8237,6 +8927,11 @@ export interface components {
             metadata?: unknown;
             /** @example 2026-07-21T10:30:00Z */
             timestamp?: string;
+        };
+        "apidocs.MediaAssetResponse": {
+            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.Asset"];
+            /** @example success */
+            message?: string;
         };
         "apidocs.MessageIdData": {
             /** @example 3EB0C767D26A8D4E2A1B */
@@ -8394,7 +9089,7 @@ export interface components {
             toStatus?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign": {
-            contentType?: string;
+            contentType?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType"];
             createdAt?: string;
             finishedAt?: string;
             id?: string;
@@ -8412,9 +9107,27 @@ export interface components {
             version?: number;
         };
         /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType": "text" | "image";
+        /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus": "draft" | "scheduled" | "running" | "paused" | "completed" | "aborted" | "failed";
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType": "direct" | "group_list";
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.MediaAsset": {
+            createdAt?: string;
+            expiresAt?: string;
+            height?: number;
+            id?: string;
+            mimeType?: string;
+            readyAt?: string;
+            sha256?: string;
+            size?: number;
+            status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.MediaAssetStatus"];
+            type?: string;
+            updatedAt?: string;
+            width?: number;
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_model.MediaAssetStatus": "uploading" | "ready" | "failed" | "deleted";
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient": {
             attemptCount?: number;
             campaignId?: string;
@@ -8439,11 +9152,23 @@ export interface components {
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientStatus": "pending" | "processing" | "sent" | "delivered" | "read" | "failed" | "skipped" | "aborted";
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_campaign_model.RecipientTargetType": "direct" | "group";
+        "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignContent": {
+            caption?: string;
+            height?: number;
+            mediaId?: string;
+            mimeType?: string;
+            sha256?: string;
+            size?: number;
+            text?: string;
+            type?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType"];
+            width?: number;
+        };
         "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignDetail": {
             byStatus?: {
                 [key: string]: number;
             };
             campaign?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"];
+            content?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignContent"];
             needsAttention?: boolean;
             pauseReason?: string;
             progress?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.Progress"];
@@ -8453,7 +9178,8 @@ export interface components {
             target?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignTarget"];
         };
         "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignSummary": {
-            contentType?: string;
+            content?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignContent"];
+            contentType?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType"];
             createdAt?: string;
             finishedAt?: string;
             id?: string;
@@ -8506,6 +9232,14 @@ export interface components {
         "github_com_evolution-foundation_evolution-go_pkg_community_service.CreateCommunityStruct": {
             communityName?: string;
         };
+        "github_com_evolution-foundation_evolution-go_pkg_groupList_repository.EligibilityIssue": {
+            canSend?: boolean;
+            checkedAt?: string;
+            currentName?: string;
+            eligibility?: string;
+            eligibilityReason?: string;
+            groupJid?: string;
+        };
         "github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary": {
             authorizationSource?: string;
             authorizedAt?: string;
@@ -8517,6 +9251,37 @@ export interface components {
             name?: string;
             updatedAt?: string;
             version?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityAggregate": {
+            byReason?: {
+                [key: string]: number;
+            };
+            checkedAt?: string;
+            eligible?: number;
+            groupListId?: string;
+            groupListVersion?: number;
+            readyToTarget?: boolean;
+            total?: number;
+            unavailable?: number;
+            unknown?: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityIssueDetails": {
+            issueCount?: number;
+            issues?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_groupList_repository.EligibilityIssue"][];
+            truncated?: boolean;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityMeta": {
+            lastSyncedAt?: string;
+            source?: string;
+            syncStatus?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityResult": {
+            canSend?: boolean;
+            checkedAt?: string;
+            currentName?: string;
+            eligibility?: string;
+            eligibilityReason?: string;
+            groupJid?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EntryView": {
             canSend?: boolean;
@@ -8650,6 +9415,33 @@ export interface components {
             labelId?: string;
             messageId?: string;
         };
+        "github_com_evolution-foundation_evolution-go_pkg_media_model.Asset": {
+            canonical?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.AssetVariant"];
+            createdAt?: string;
+            expiresAt?: string;
+            failureCode?: string;
+            id?: string;
+            mediaType?: string;
+            origin?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.AssetOrigin"];
+            readyAt?: string;
+            status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.AssetStatus"];
+            updatedAt?: string;
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetOrigin": "device_upload" | "whatsapp_inbound";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetStatus": "pending" | "uploading" | "downloading" | "processing" | "ready" | "failed" | "deleting" | "deleted";
+        "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetVariant": {
+            createdAt?: string;
+            height?: number;
+            mimeType?: string;
+            sha256?: string;
+            sizeBytes?: number;
+            variant?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.VariantKind"];
+            width?: number;
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_media_model.VariantKind": "provider_original" | "canonical";
         "github_com_evolution-foundation_evolution-go_pkg_message_service.ChatPresenceStruct": {
             /**
              * @description Delay, in milliseconds, keeps the "composing"/"recording" indicator alive
@@ -8803,6 +9595,7 @@ export interface components {
             deliveredAt?: string;
             direction?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection"];
             historySyncId?: string;
+            mediaAssetId?: string;
             mediaDurationSeconds?: number;
             mediaFileName?: string;
             mediaHeight?: number;
@@ -9166,6 +9959,7 @@ export interface components {
             formatJid?: boolean;
             forwardingScore?: number;
             id?: string;
+            mediaAssetId?: string;
             mentionAll?: boolean;
             mentionedJid?: string[];
             number?: string;
@@ -9315,11 +10109,11 @@ export interface components {
         "jsontime.UnixString": {
             "time.Time"?: string;
         };
-        "pkg_campaign_handler.CampaignRecipientConsent": {
-            jid: string;
-            optInEvidenceReference: string;
-            optInSource: string;
-            optedInAt: string;
+        "pkg_campaign_handler.CampaignContentRequest": {
+            caption?: string;
+            mediaId?: string;
+            text?: string;
+            type: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType"];
         };
         "pkg_campaign_handler.CampaignTargetRequest": {
             groupListId: string;
@@ -9327,10 +10121,10 @@ export interface components {
             type: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignTargetType"];
         };
         "pkg_campaign_handler.CreateCampaignRequest": {
+            content?: components["schemas"]["pkg_campaign_handler.CampaignContentRequest"];
             name: string;
-            recipients?: components["schemas"]["pkg_campaign_handler.CampaignRecipientConsent"][];
             target?: components["schemas"]["pkg_campaign_handler.CampaignTargetRequest"];
-            text: string;
+            text?: string;
         };
         "pkg_campaign_handler.ScheduleCampaignRequest": {
             startsAt: string;
@@ -9346,6 +10140,9 @@ export interface components {
             description?: string;
             groupJids?: string[];
             name?: string;
+        };
+        "pkg_groupList_handler.EligibilityRequest": {
+            groupJids?: string[];
         };
         "pkg_groupList_handler.UpdateRequest": {
             authorization?: components["schemas"]["pkg_groupList_handler.AuthorizationRequest"];
@@ -12070,6 +12867,17 @@ export interface components {
         "github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct": {
             content: {
                 "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct"];
+            };
+        };
+        postCampaignMedia: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description JPEG or PNG image
+                     */
+                    file: string;
+                };
             };
         };
         /** @description Chat */

@@ -12,7 +12,7 @@ import { invalidateGroupSendProjections } from './cache';
 
 export function useGroups(search: string, cursor: string | undefined, enabled: boolean) {
   const client = useApi();
-  const params = { search: search || undefined, cursor, limit: 50 };
+  const params = { search: search || undefined, cursor, limit: 50, paged: true };
   return useQuery({ queryKey: queryKeys.instanceGroups(SESSION_QUERY_SCOPE, params), queryFn: () => listInstanceGroups(client, undefined, params), enabled, ...PROJECTION_READ_POLICY });
 }
 export function useGroup(groupId: string | undefined, enabled: boolean) {

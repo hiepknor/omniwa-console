@@ -18,7 +18,7 @@ export type ProjectionResult<T> = { resource: T; meta?: ProjectionMeta };
  */
 export type SuccessEnvelope<T = unknown> = { message?: string; data?: T; meta?: unknown };
 
-/** omniwa-go error body: a single opaque string. */
+/** omniwa-go public-safe error envelope; domain details are narrowed in src/api/. */
 export type ApiErrorBody = components['schemas']['apidocs.ErrorResponse'];
 
 /**
@@ -129,6 +129,8 @@ export class ApiFailure extends Error {
   readonly retryAfterSeconds: number | undefined;
   readonly retryAt: number | undefined;
   readonly requestId: string | undefined;
+  /** Public, contract-defined domain details; consumers must narrow in src/api/. */
+  readonly details: unknown;
   readonly credentialScope: CredentialScope;
 
   constructor(errorBody: unknown, httpStatus: number, headers?: Headers, credentialScope: CredentialScope = 'session') {
@@ -145,6 +147,7 @@ export class ApiFailure extends Error {
     const bodyRequestId = typeof body?.requestId === 'string' ? body.requestId.trim() : undefined;
     const requestId = headerRequestId || bodyRequestId;
     this.requestId = requestId ? requestId.slice(0, 256) : undefined;
+    this.details = body?.details;
     this.code = typeof body?.code === 'string' ? body.code : undefined;
     // omniwa-go surfaces WhatsApp throttling as a 500 whose body carries the
     // upstream 429 (e.g. "info query returned status 429: rate-overlimit").

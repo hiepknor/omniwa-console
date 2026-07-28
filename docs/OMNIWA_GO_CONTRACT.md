@@ -44,6 +44,9 @@ Known capabilities:
 - `events_projection`
 - `outbound_rate_limit`
 - `campaign_orchestration`
+- `group_lists`
+- `group_list_eligibility`
+- `campaign_group_targets`
 - `instance_metadata_views`
 - `instance_token_rotation`
 - `instance_credential_health`
@@ -110,6 +113,14 @@ projection envelope, but never invents readiness metadata for the raw form.
 Reads come from PostgreSQL. Search is case-insensitive prefix matching on group
 JID and name. Invite-link reads use projection/cache; `reset: true` remains a
 live mutation followed by write-through.
+
+Group List selection may use `POST /group-lists/eligibility` for an ordered,
+bounded advisory batch and `GET /group-lists/{groupListId}/eligibility` for an
+on-demand whole-list aggregate. Both consume the persisted Groups projection
+and never call WhatsApp live. `eligible`, `unavailable`, and `unknown` plus the
+backend reason are authoritative; the Console never derives them from member
+roles. Group List and Campaign mutations validate again and may return bounded
+public-safe `details.issues` when state changes after preflight.
 
 ### Contacts and labels
 

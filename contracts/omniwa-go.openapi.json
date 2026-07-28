@@ -60,6 +60,225 @@
         }
       }
     },
+    "/campaign-media": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Uploads and normalizes one private JPEG or PNG image. The response never exposes an object-store key or URL.",
+        "tags": [
+          "Campaign Media"
+        ],
+        "summary": "Upload campaign image",
+        "parameters": [
+          {
+            "description": "Instance-scoped upload idempotency key",
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/postCampaignMedia"
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignMediaAssetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/campaign-media/{mediaId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaign Media"
+        ],
+        "summary": "Get campaign image metadata",
+        "parameters": [
+          {
+            "description": "Media asset ID",
+            "name": "mediaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignMediaAssetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Campaign Media"
+        ],
+        "summary": "Delete campaign image",
+        "parameters": [
+          {
+            "description": "Media asset ID",
+            "name": "mediaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.CampaignErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/campaigns": {
       "get": {
         "security": [
@@ -147,7 +366,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Creates a text campaign draft. Group-list targets are available when WA_CAMPAIGN_GROUP_TARGETS_ENABLED is true. Existing direct recipients remain available behind WA_CAMPAIGN_DIRECT_CREATE_ENABLED during migration.",
+        "description": "Creates a text or image campaign draft from one Group List snapshot. Legacy top-level text remains readable for compatibility. Image campaigns require WA_CAMPAIGN_IMAGE_CONTENT_ENABLED.",
         "tags": [
           "Campaigns"
         ],
@@ -194,12 +413,32 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListEligibilityErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListEligibilityErrorResponse"
                 }
               }
             }
@@ -1754,13 +1993,79 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                  "$ref": "#/components/schemas/apidocs.GroupListEligibilityErrorResponse"
                 }
               }
             }
           },
           "503": {
             "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListEligibilityErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group-lists/eligibility": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "Evaluate Group List eligibility",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/pkg_groupList_handler.EligibilityRequest"
+              }
+            }
+          },
+          "description": "Group JIDs",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListEligibilityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -1895,7 +2200,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                  "$ref": "#/components/schemas/apidocs.GroupListEligibilityErrorResponse"
                 }
               }
             }
@@ -1905,7 +2210,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                  "$ref": "#/components/schemas/apidocs.GroupListEligibilityErrorResponse"
                 }
               }
             }
@@ -2031,6 +2336,101 @@
           },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group-lists/{groupListId}/eligibility": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Group Lists"
+        ],
+        "summary": "Aggregate Group List eligibility",
+        "parameters": [
+          {
+            "description": "Group List UUID",
+            "name": "groupListId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Expected current Group List version",
+            "name": "expectedVersion",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupListEligibilityAggregateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
@@ -4595,6 +4995,322 @@
         }
       }
     },
+    "/media-assets": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Media Assets"
+        ],
+        "summary": "Upload shared image asset",
+        "parameters": [
+          {
+            "description": "Instance-scoped upload idempotency key",
+            "name": "Idempotency-Key",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/postCampaignMedia"
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.MediaAssetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media-assets/{mediaId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Media Assets"
+        ],
+        "summary": "Get shared image asset metadata",
+        "parameters": [
+          {
+            "description": "Media asset UUID",
+            "name": "mediaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.MediaAssetResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Media Assets"
+        ],
+        "summary": "Delete shared image asset",
+        "parameters": [
+          {
+            "description": "Media asset UUID",
+            "name": "mediaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/media-assets/{mediaId}/content": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Media Assets"
+        ],
+        "summary": "Stream shared image asset content",
+        "parameters": [
+          {
+            "description": "Media asset UUID",
+            "name": "mediaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Single bytes range",
+            "name": "Range",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "206": {
+            "description": "Partial Content",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "416": {
+            "description": "Requested Range Not Satisfiable",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/message/delete": {
       "post": {
         "security": [
@@ -4730,8 +5446,28 @@
               }
             }
           },
+          "413": {
+            "description": "Media exceeds the configured limit",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Media download timed out",
             "content": {
               "application/json": {
                 "schema": {
@@ -6428,7 +7164,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Send a media message",
+        "description": "Send legacy URL/base64 media, or one private device-upload image by mediaAssetId with an optional caption",
         "tags": [
           "Send Message"
         ],
@@ -8454,6 +9190,26 @@
         "description": "Newsletter data",
         "required": true
       },
+      "postCampaignMedia": {
+        "content": {
+          "multipart/form-data": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "description": "JPEG or PNG image",
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "required": [
+                "file"
+              ]
+            }
+          }
+        },
+        "required": true
+      },
       "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
         "content": {
           "application/json": {
@@ -8579,6 +9335,18 @@
           }
         }
       },
+      "apidocs.CampaignMediaAssetResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.MediaAsset"
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          }
+        }
+      },
       "apidocs.CampaignRecipientListResponse": {
         "type": "object",
         "properties": {
@@ -8609,6 +9377,10 @@
               "campaign_orchestration",
               "rate_limit_retry_after",
               "groups_projection",
+              "group_lists",
+              "group_list_eligibility",
+              "campaign_group_targets",
+              "campaign_image_content",
               "instance_metadata_views",
               "instance_credential_health",
               "instance_token_rotation"
@@ -8752,6 +9524,59 @@
           }
         }
       },
+      "apidocs.GroupListEligibilityAggregateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityAggregate"
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityMeta"
+          }
+        }
+      },
+      "apidocs.GroupListEligibilityErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "group_list_group_unavailable"
+          },
+          "details": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityIssueDetails"
+          },
+          "error": {
+            "type": "string",
+            "example": "group list contains an unavailable group"
+          },
+          "requestId": {
+            "type": "string",
+            "example": "0123456789abcdef0123456789abcdef"
+          }
+        }
+      },
+      "apidocs.GroupListEligibilityResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityResult"
+            }
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityMeta"
+          }
+        }
+      },
       "apidocs.GroupListEntryListResponse": {
         "type": "object",
         "properties": {
@@ -8828,6 +9653,18 @@
           "timestamp": {
             "type": "string",
             "example": "2026-07-21T10:30:00Z"
+          }
+        }
+      },
+      "apidocs.MediaAssetResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.Asset"
+          },
+          "message": {
+            "type": "string",
+            "example": "success"
           }
         }
       },
@@ -9216,7 +10053,7 @@
         "type": "object",
         "properties": {
           "contentType": {
-            "type": "string"
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType"
           },
           "createdAt": {
             "type": "string"
@@ -9265,6 +10102,17 @@
           }
         }
       },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType": {
+        "type": "string",
+        "enum": [
+          "text",
+          "image"
+        ],
+        "x-enum-varnames": [
+          "CampaignContentText",
+          "CampaignContentImage"
+        ]
+      },
       "github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignStatus": {
         "type": "string",
         "enum": [
@@ -9295,6 +10143,62 @@
         "x-enum-varnames": [
           "CampaignTargetDirect",
           "CampaignTargetGroupList"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.MediaAsset": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "id": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "readyAt": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.MediaAssetStatus"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "width": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_model.MediaAssetStatus": {
+        "type": "string",
+        "enum": [
+          "uploading",
+          "ready",
+          "failed",
+          "deleted"
+        ],
+        "x-enum-varnames": [
+          "MediaAssetStatusUploading",
+          "MediaAssetStatusReady",
+          "MediaAssetStatusFailed",
+          "MediaAssetStatusDeleted"
         ]
       },
       "github_com_evolution-foundation_evolution-go_pkg_campaign_model.Recipient": {
@@ -9390,6 +10294,38 @@
           "RecipientTargetGroup"
         ]
       },
+      "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignContent": {
+        "type": "object",
+        "properties": {
+          "caption": {
+            "type": "string"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "mediaId": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType"
+          },
+          "width": {
+            "type": "integer"
+          }
+        }
+      },
       "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignDetail": {
         "type": "object",
         "properties": {
@@ -9401,6 +10337,9 @@
           },
           "campaign": {
             "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.Campaign"
+          },
+          "content": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignContent"
           },
           "needsAttention": {
             "type": "boolean"
@@ -9428,8 +10367,11 @@
       "github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignSummary": {
         "type": "object",
         "properties": {
+          "content": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_service.CampaignContent"
+          },
           "contentType": {
-            "type": "string"
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType"
           },
           "createdAt": {
             "type": "string"
@@ -9583,6 +10525,29 @@
           }
         }
       },
+      "github_com_evolution-foundation_evolution-go_pkg_groupList_repository.EligibilityIssue": {
+        "type": "object",
+        "properties": {
+          "canSend": {
+            "type": "boolean"
+          },
+          "checkedAt": {
+            "type": "string"
+          },
+          "currentName": {
+            "type": "string"
+          },
+          "eligibility": {
+            "type": "string"
+          },
+          "eligibilityReason": {
+            "type": "string"
+          },
+          "groupJid": {
+            "type": "string"
+          }
+        }
+      },
       "github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary": {
         "type": "object",
         "properties": {
@@ -9615,6 +10580,95 @@
           },
           "version": {
             "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityAggregate": {
+        "type": "object",
+        "properties": {
+          "byReason": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "checkedAt": {
+            "type": "string"
+          },
+          "eligible": {
+            "type": "integer"
+          },
+          "groupListId": {
+            "type": "string"
+          },
+          "groupListVersion": {
+            "type": "integer"
+          },
+          "readyToTarget": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "unavailable": {
+            "type": "integer"
+          },
+          "unknown": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityIssueDetails": {
+        "type": "object",
+        "properties": {
+          "issueCount": {
+            "type": "integer"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_groupList_repository.EligibilityIssue"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityMeta": {
+        "type": "object",
+        "properties": {
+          "lastSyncedAt": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "syncStatus": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityResult": {
+        "type": "object",
+        "properties": {
+          "canSend": {
+            "type": "boolean"
+          },
+          "checkedAt": {
+            "type": "string"
+          },
+          "currentName": {
+            "type": "string"
+          },
+          "eligibility": {
+            "type": "string"
+          },
+          "eligibilityReason": {
+            "type": "string"
+          },
+          "groupJid": {
+            "type": "string"
           }
         }
       },
@@ -10002,6 +11056,112 @@
             "type": "string"
           }
         }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_media_model.Asset": {
+        "type": "object",
+        "properties": {
+          "canonical": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.AssetVariant"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "failureCode": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "mediaType": {
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.AssetOrigin"
+          },
+          "readyAt": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.AssetStatus"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetOrigin": {
+        "type": "string",
+        "enum": [
+          "device_upload",
+          "whatsapp_inbound"
+        ],
+        "x-enum-varnames": [
+          "AssetOriginDeviceUpload",
+          "AssetOriginWhatsAppInbound"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "uploading",
+          "downloading",
+          "processing",
+          "ready",
+          "failed",
+          "deleting",
+          "deleted"
+        ],
+        "x-enum-varnames": [
+          "AssetStatusPending",
+          "AssetStatusUploading",
+          "AssetStatusDownloading",
+          "AssetStatusProcessing",
+          "AssetStatusReady",
+          "AssetStatusFailed",
+          "AssetStatusDeleting",
+          "AssetStatusDeleted"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetVariant": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "height": {
+            "type": "integer"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "integer"
+          },
+          "variant": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.VariantKind"
+          },
+          "width": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_media_model.VariantKind": {
+        "type": "string",
+        "enum": [
+          "provider_original",
+          "canonical"
+        ],
+        "x-enum-varnames": [
+          "VariantProviderOriginal",
+          "VariantCanonical"
+        ]
       },
       "github_com_evolution-foundation_evolution-go_pkg_message_service.ChatPresenceStruct": {
         "type": "object",
@@ -10469,6 +11629,9 @@
             "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection"
           },
           "historySyncId": {
+            "type": "string"
+          },
+          "mediaAssetId": {
             "type": "string"
           },
           "mediaDurationSeconds": {
@@ -11233,6 +12396,9 @@
           "id": {
             "type": "string"
           },
+          "mediaAssetId": {
+            "type": "string"
+          },
           "mentionAll": {
             "type": "boolean"
           },
@@ -11639,26 +12805,23 @@
           }
         }
       },
-      "pkg_campaign_handler.CampaignRecipientConsent": {
+      "pkg_campaign_handler.CampaignContentRequest": {
         "type": "object",
         "required": [
-          "jid",
-          "optInEvidenceReference",
-          "optInSource",
-          "optedInAt"
+          "type"
         ],
         "properties": {
-          "jid": {
+          "caption": {
             "type": "string"
           },
-          "optInEvidenceReference": {
+          "mediaId": {
             "type": "string"
           },
-          "optInSource": {
+          "text": {
             "type": "string"
           },
-          "optedInAt": {
-            "type": "string"
+          "type": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_campaign_model.CampaignContentType"
           }
         }
       },
@@ -11684,18 +12847,14 @@
       "pkg_campaign_handler.CreateCampaignRequest": {
         "type": "object",
         "required": [
-          "name",
-          "text"
+          "name"
         ],
         "properties": {
+          "content": {
+            "$ref": "#/components/schemas/pkg_campaign_handler.CampaignContentRequest"
+          },
           "name": {
             "type": "string"
-          },
-          "recipients": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/pkg_campaign_handler.CampaignRecipientConsent"
-            }
           },
           "target": {
             "$ref": "#/components/schemas/pkg_campaign_handler.CampaignTargetRequest"
@@ -11748,6 +12907,17 @@
           },
           "name": {
             "type": "string"
+          }
+        }
+      },
+      "pkg_groupList_handler.EligibilityRequest": {
+        "type": "object",
+        "properties": {
+          "groupJids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
