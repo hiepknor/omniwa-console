@@ -6,10 +6,14 @@ export type Metric = { label: string; value: string; hint?: string };
 export function MetricGrid({
   metrics,
   columns = 4,
+  density = 'default',
+  frame = 'standalone',
   className,
 }: {
   metrics: Metric[];
   columns?: 3 | 4 | 5 | 6;
+  density?: 'default' | 'compact';
+  frame?: 'standalone' | 'flush' | 'flush-after-content';
   className?: string;
 }) {
   const cols: Record<number, string> = {
@@ -19,11 +23,20 @@ export function MetricGrid({
     6: 'sm:grid-cols-3 lg:grid-cols-6',
   };
   return (
-    <div className={cn('grid grid-cols-1 border-t border-l border-line', cols[columns], className)}>
+    <div
+      className={cn(
+        'grid border-line',
+        density === 'compact' ? 'grid-cols-2' : 'grid-cols-1',
+        frame === 'standalone' && 'border-t border-l',
+        frame === 'flush-after-content' && 'border-t',
+        cols[columns],
+        className,
+      )}
+    >
       {metrics.map((m) => (
-        <div key={m.label} className="grid gap-2 min-h-24 p-3 border-r border-b border-line">
+        <div key={m.label} className="grid min-w-0 gap-2 min-h-24 p-3 border-r border-b border-line">
           <span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">{m.label}</span>
-          <span className="font-mono text-2xl font-semibold text-fg tabular-nums">{m.value}</span>
+          <span className="break-words font-mono text-2xl font-semibold text-fg tabular-nums">{m.value}</span>
           {m.hint ? <span className="text-xs text-fg-3">{m.hint}</span> : null}
         </div>
       ))}

@@ -55,14 +55,16 @@ export function GroupsView(props: GroupsViewProps) {
       {props.ack}
 
       {props.summaryNotice}
-      {props.summary ? <MetricGrid columns={4} metrics={[
+      {props.summary ? <MetricGrid columns={6} density="compact" metrics={[
         { label: 'All groups', value: String(props.summary.total ?? '—') },
         { label: 'Active', value: String(props.summary.active ?? '—') },
-        { label: 'Communities / subgroups', value: `${props.summary.communities ?? '—'} / ${props.summary.subgroups ?? '—'}` },
+        { label: 'Suspended', value: String(props.summary.suspended ?? '—') },
+        { label: 'Communities', value: String(props.summary.communities ?? '—') },
+        { label: 'Subgroups', value: String(props.summary.subgroups ?? '—') },
         { label: 'Admins-only send', value: String(props.summary.adminsOnlySend ?? '—') },
       ]} /> : null}
 
-      <Panel title="Group directory" description="Applied prefix search, opaque cursor, and selected group remain URL-addressable." bodyClassName="p-0">
+      <Panel title="Group directory" description="Applied prefix search, opaque cursor, and selected group remain URL-addressable." bodyPadding="none">
         <FilterToolbar as="form" onSubmit={props.onApply}>
           <Field label="Prefix search" className="min-w-56 flex-1">{(id) => <Input id={id} type="search" value={props.searchDraft} placeholder="Group name or JID prefix" onChange={(e) => props.onSearchDraft(e.target.value)} />}</Field>
           <div className="flex items-end"><Button type="submit" disabled={props.applyDisabled}>Apply search</Button></div>
