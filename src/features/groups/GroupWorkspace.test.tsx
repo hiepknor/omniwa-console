@@ -159,7 +159,9 @@ describe('GroupWorkspace capability loss', () => {
 
     expect(html).toContain('Edit name');
     expect(html).toContain('Allowed');
-    expect(html).toContain('Permission denied · Admin required');
-    expect(html).toContain('Permission unknown · Projection not ready');
+    expect(html).toContain('Denied');
+    expect(html).toContain('Admin required');
+    expect(html).toContain('Unknown');
+    expect(html).toContain('Projection not ready');
   });
 });
