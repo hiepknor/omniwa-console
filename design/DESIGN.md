@@ -259,9 +259,18 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 ## 6. Shell & navigation
 
 - **Rail:** a fixed ~224px `--color-surface` column, 1px right border. Top: brand
-  (logomark + `OmniWA Console` + base URL in mono 10px). Then a context block
-  (environment, key scope, capability status, `GO {version}`). Then the nav. Bottom:
-  a session footer (connection status + in-memory-credential note + Sign out).
+  (logomark + `OmniWA Console` + base URL in mono 10px), then navigation without
+  a runtime-context interruption. Bottom: Sign out remains a separately framed
+  session utility, never a navigation destination.
+- **Console footer:** a persistent 36px status bar at the bottom of the main
+  column, outside the page scroll container and never beneath the rail. It owns
+  environment, credential scope, canonical capability-discovery Status, optional
+  `GO {version}` with revision tooltip, and the `Memory-only` credential-lifetime
+  note. It uses one top hairline, paper background, square geometry, and one row;
+  it never owns page actions, page progress, WhatsApp connection, filters, errors,
+  acknowledgements, or inferred health. At 640–759px the balanced right metadata
+  column remains reserved but visually hidden; below 640px the complete footer is
+  hidden so it cannot compete with bottom navigation.
 - **Scope-aware nav** (from `navigationForKeyKind`): navigation is derived from the
   session key kind, not hardcoded.
   - **Admin** → *Platform*: Overview · Recovery (only when the server advertises
@@ -320,7 +329,8 @@ or `border-*` utilities and rely on generated CSS order.
 | CursorPagination | first page, next cursor, final page, responsive stacking |
 | ProgressBar | 0–99%, indeterminate, complete, failed at last known value |
 | Image | loading, ready, contain/cover, long caption, missing/error fallback |
-| Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav |
+| Shell navigation | 224px full rail + Sign out, 64px icon rail, fixed mobile bottom nav |
+| Console footer | ready capabilities, discovery pending, discovery failure, version absent, compact tablet, hidden mobile |
 | Workspace page / split workspace | PageHeader + two panes ≥900px, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close, one-time-secret dismissal |

@@ -4,7 +4,8 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { ConsoleSession } from '@/lib/session';
-import { Button, Icon, Logo, NavigationItemContent, navigationItemClassName, Status } from '@/ui';
+import { Button, Icon, Logo, NavigationItemContent, navigationItemClassName } from '@/ui';
+import { ConsoleFooter } from './ConsoleFooter';
 import { navigationForKeyKind, scopeLabelForKeyKind } from './navigation';
 
 function environmentLabel(env: string): string {
@@ -54,22 +55,6 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
             </span>
           </div>
 
-          {/* Context */}
-          <div className="grid gap-2 p-4 border-b border-line max-[900px]:hidden">
-            <div className="flex items-center justify-between gap-2 text-[11px] text-fg-3">
-              <span className="inline-flex items-center border border-line-strong px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
-                {environmentLabel(environment)}
-              </span>
-              <span>{scopeLabelForKeyKind(session.keyKind)}</span>
-            </div>
-            <Status tone={capabilityStatus.tone}>{capabilityStatus.label}</Status>
-            {capabilities.data?.version ? (
-              <span className="font-mono text-[10px] text-fg-3" title={capabilities.data.revision}>
-                GO {capabilities.data.version}
-              </span>
-            ) : null}
-          </div>
-
           {/* Nav */}
           <nav aria-label="Primary" className="flex-1 min-h-0 overflow-y-auto p-3 max-[640px]:flex max-[640px]:overflow-x-auto max-[640px]:p-2">
             {sections.map((section) => (
@@ -102,22 +87,28 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
             </Button>
           </div>
 
-          {/* Session footer */}
-          <footer className="grid gap-3 p-3 border-t border-line max-[900px]:hidden">
-            <div className="grid gap-0.5">
-              <Status tone="ok">Connected</Status>
-              <span className="font-mono text-[10px] text-fg-3">In-memory credential</span>
-            </div>
+          {/* Desktop session utility — separate from runtime context and navigation. */}
+          <footer className="p-3 border-t border-line max-[900px]:hidden">
             <Button onClick={onDisconnect} aria-label="Sign out" title="Sign out" className="w-full">
               Sign out
             </Button>
           </footer>
         </aside>
 
-        <main id="main" tabIndex={-1} className="min-w-0 h-dvh overflow-auto max-[640px]:pb-[61px]">
-          <Suspense fallback={<div role="status" className="p-6 text-sm text-fg-3">Loading panel…</div>}>
-            <Outlet />
-          </Suspense>
+        <main id="main" tabIndex={-1} className="flex min-w-0 h-dvh flex-col overflow-hidden max-[640px]:pb-[61px]">
+          <div className="min-h-0 flex-1 overflow-auto">
+            <Suspense fallback={<div role="status" className="p-6 text-sm text-fg-3">Loading panel…</div>}>
+              <Outlet />
+            </Suspense>
+          </div>
+          <ConsoleFooter
+            environment={environmentLabel(environment)}
+            scope={scopeLabelForKeyKind(session.keyKind)}
+            capabilityLabel={capabilityStatus.label}
+            capabilityTone={capabilityStatus.tone}
+            version={capabilities.data?.version}
+            revision={capabilities.data?.revision}
+          />
         </main>
       </div>
     </WorkspaceEnvironmentProvider>

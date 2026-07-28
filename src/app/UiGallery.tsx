@@ -3,6 +3,7 @@ import { ApiFailure } from '@/api/envelopes';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { ToastViewport } from '@/components/feedback/ToastViewport';
+import { ConsoleFooter } from './ConsoleFooter';
 import {
   Badge,
   Button,
@@ -106,12 +107,15 @@ function ShellAnatomy() {
             <Logo />
             <span className="grid min-w-0"><strong className="text-[13px] font-semibold">OmniWA Console</strong><span className="truncate font-mono text-[10px] text-fg-3">https://api.example.test</span></span>
           </div>
-          <div className="grid gap-2 border-b border-line p-4"><Status tone="ok">12 capabilities</Status><span className="font-mono text-[10px] text-fg-3">GO 1.8.0</span></div>
-          <nav aria-label="Full rail example" className="grid gap-0.5 p-3">
+          <nav aria-label="Full rail example" className="grid flex-1 content-start gap-0.5 p-3">
             {navigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0)}><NavigationItemContent icon={icon} label={label} /></div>)}
           </nav>
+          <div className="border-t border-line p-2"><Button className="w-full">Sign out</Button></div>
         </aside>
-        <div className="min-w-0 p-4"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Content viewport</span><div className="mt-3 h-28 border border-line-strong bg-surface" /></div>
+        <div className="flex min-w-0 flex-col overflow-hidden">
+          <div className="min-h-0 flex-1 p-4"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Content viewport</span><div className="mt-3 h-28 border border-line-strong bg-surface" /></div>
+          <ConsoleFooter environment="Self-hosted" scope="Instance scope" capabilityLabel="12 capabilities" capabilityTone="ok" version="1.8.0" revision="revision-01" />
+        </div>
       </div>
       <div className="grid gap-4">
         <div className="grid h-56 grid-cols-[64px_minmax(0,1fr)] overflow-hidden border border-line-strong">

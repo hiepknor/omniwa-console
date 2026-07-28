@@ -172,11 +172,19 @@ for (const marker of ['placement', 'onMouseEnter', 'onFocusCapture', 'visibility
 }
 
 const shell = await read('src/app/Shell.tsx');
-for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', 'max-[640px]:flex-row', '<NavigationItemContent', 'Compact session utility', 'aria-label="Sign out"']) {
+for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', 'max-[640px]:flex-row', '<NavigationItemContent', 'Compact session utility', 'aria-label="Sign out"', 'min-h-0 flex-1 overflow-auto', '<ConsoleFooter']) {
   if (!shell.includes(marker)) failures.push(`src/app/Shell.tsx: responsive shell contract is missing ${marker}`);
 }
 if (shell.indexOf('Compact session utility') < shell.indexOf('</nav>')) {
   failures.push('src/app/Shell.tsx: compact Sign out utility must remain outside primary navigation');
+}
+if (shell.includes('{/* Context */}') || shell.includes('>Connected</Status>')) {
+  failures.push('src/app/Shell.tsx: runtime context belongs to ConsoleFooter, not the rail');
+}
+
+const consoleFooter = await read('src/app/ConsoleFooter.tsx');
+for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-9', 'grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]', '<Status', 'max-[760px]:invisible', 'max-[640px]:hidden', 'Memory-only']) {
+  if (!consoleFooter.includes(marker)) failures.push(`src/app/ConsoleFooter.tsx: main-column runtime footer is missing ${marker}`);
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
