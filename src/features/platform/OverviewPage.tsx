@@ -10,9 +10,13 @@ import { usePlatformHealth, usePlatformOverview, usePlatformProjectionHealth } f
 import { overviewWindowFromSearch, overviewWindowOptions } from './route-state';
 import { OverviewView } from './OverviewView';
 
+export function overviewReadFailureTitle(label: string, stale: boolean): string {
+  return stale ? `Showing last known ${label.toLowerCase()}` : `${label} read failed`;
+}
+
 function QueryNotice({ label, query, state }: { label: string; query: { error: unknown; refetch: () => unknown }; state: ReturnType<typeof useResilientReadState> }) {
   if (!state.isError) return null;
-  return <ApiFailureNotice error={state.error} title={`${label} read failed`} onRetry={() => query.refetch()} />;
+  return <ApiFailureNotice error={state.error} title={overviewReadFailureTitle(label, state.isStaleError)} onRetry={() => query.refetch()} />;
 }
 
 export function OverviewPage() {
@@ -65,6 +69,8 @@ export function OverviewPage() {
       overview={overview.data}
       projection={projection.data}
       recovery={capabilities.isError && !capabilities.data ? 'error' : recovery}
+      credentialScope={session.keyKind === 'api' ? 'instance' : session.keyKind === 'admin' ? 'admin' : 'unknown'}
+      authenticatedInstanceId={session.instanceId}
     />
   );
 }

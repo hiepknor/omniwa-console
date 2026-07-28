@@ -65,6 +65,13 @@ The connected credential determines the available navigation and API scope:
 - instance-scoped live commands require an in-memory instance token where the
   active session does not already provide that scope.
 - instance scope never invents or requests the configured admin Instance Name.
+- `/overview` adapts its heading and metric context to the authenticated scope.
+  Instance scope may identify itself with the backend-authenticated instance ID,
+  retains all server-returned health dimensions, and never renders the
+  admin-only Recovery surface.
+- Instance Overview labels server-health `connection` as **Transport**. It does
+  not equate that snapshot with the live `LoggedIn` pairing fact shown on
+  `/connection`; paired and transport-connected are independent states.
 
 ### Instance-scope WhatsApp identity
 

@@ -355,6 +355,15 @@ projection readiness, or circuit-breaker posture.
 The metric window is stored in the URL and is capped by the supported 720-hour
 contract. Missing counters remain unreported rather than being coerced to zero.
 Instance health dimensions are grouped by the server-provided instance ID.
+The active authenticated credential scope controls presentation only: instance
+scope identifies its runtime snapshot without requesting configured fleet
+metadata and omits the admin-only Recovery surface. It does not filter or infer
+server results in the browser. Failed background refreshes keep usable snapshots
+visible with an explicit last-known-data notice.
+In instance scope, the health row labels `connection` as the transport snapshot
+it represents. Pairing (`LoggedIn`) remains a separate live fact owned by
+`/connection`; Overview does not call `GET /instance/status` or imply that a
+paired account must currently have a connected transport.
 
 ## Projection Recovery — `/recovery`
 
