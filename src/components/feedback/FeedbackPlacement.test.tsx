@@ -24,4 +24,15 @@ describe('feedback placement', () => {
     expect(html).toContain('role="alert"');
     expect(html).not.toContain('fixed bottom-4');
   });
+
+  it('keeps fixed mobile toasts above the bottom navigation', () => {
+    const html = renderToStaticMarkup(
+      <ToastViewport
+        toasts={[{ id: 'saved', createdAt: 0, kind: 'completed', title: 'Saved' }]}
+        onDismiss={vi.fn()}
+      />,
+    );
+    expect(html).toContain('bottom-4');
+    expect(html).toContain('max-sm:bottom-[77px]');
+  });
 });

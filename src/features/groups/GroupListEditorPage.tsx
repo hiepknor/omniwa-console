@@ -160,7 +160,7 @@ export function GroupListEditorPage() {
             onTogglePage={(checked) => setSelected((current) => setPageSelection(current, pageCandidates, checked))}
             onClear={() => setSelected(new Map())}
           />
-          {groupItems.length ? <Table className="max-h-[28rem] overflow-y-auto border-t-0">
+          {groupItems.length ? <Table className="border-t-0 min-[900px]:max-h-[28rem] min-[900px]:overflow-y-auto">
             <thead className="sticky top-0 z-10 bg-surface"><tr><Th className="w-12"><span className="sr-only">Select</span></Th><Th className="min-w-56">Group</Th><Th className="w-24 min-w-24 text-right">Members</Th><Th className="min-w-28">State</Th><Th className="w-44 min-w-44">Eligibility</Th></tr></thead>
             <tbody>{groupItems.map((group) => {
               const assessment = eligibilityById.get(group.id);

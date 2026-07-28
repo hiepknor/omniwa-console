@@ -49,7 +49,7 @@ function ToastItem({ toast, onDismiss }: { toast: FeedbackToast; onDismiss: (id:
 
 export function ToastViewport({ toasts, onDismiss, placement = 'fixed' }: { toasts: FeedbackToast[]; onDismiss: (id: string) => void; placement?: 'fixed' | 'inline' }) {
   return (
-    <section className={placement === 'fixed' ? 'fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-sm:left-4 max-sm:right-4' : 'flex min-w-0 flex-col items-end gap-2'} aria-label="Notifications">
+    <section className={placement === 'fixed' ? 'fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-sm:bottom-[77px] max-sm:left-4 max-sm:right-4' : 'flex min-w-0 flex-col items-end gap-2'} aria-label="Notifications">
       {toasts.map((toast) => <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />)}
     </section>
   );

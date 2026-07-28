@@ -33,6 +33,9 @@ describe('GroupListEditorPage', () => {
     const html = renderToStaticMarkup(<MemoryRouter initialEntries={['/groups/lists/new']}><Routes><Route path="/groups/lists/new" element={<GroupListEditorPage />} /></Routes></MemoryRouter>);
 
     expect(html).toContain('Create Group List');
+    expect(html).toContain('min-[900px]:max-h-[28rem]');
+    expect(html).toContain('min-[900px]:overflow-y-auto');
+    expect(html).not.toContain('class="max-h-[28rem] overflow-y-auto');
     expect(html).toContain('Select eligible on this page');
     expect(html).toContain('Operations');
     expect(html).toContain('Subgroup');

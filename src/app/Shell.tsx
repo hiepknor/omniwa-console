@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Suspense, useEffect, useLayoutEffect, useRef } from 'react';
+import { NavLink, Outlet, useLocation, useNavigationType } from 'react-router-dom';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
@@ -7,6 +7,7 @@ import type { ConsoleSession } from '@/lib/session';
 import { Button, Icon, Logo, NavigationItemContent, navigationItemClassName } from '@/ui';
 import { ConsoleFooter } from './ConsoleFooter';
 import { navigationForKeyKind, scopeLabelForKeyKind } from './navigation';
+import { horizontalRevealScrollLeft, mainScrollScope, scrollTopForNavigation } from './scroll-behavior';
 
 function environmentLabel(env: string): string {
   if (env === 'production') return 'Production';
@@ -16,6 +17,7 @@ function environmentLabel(env: string): string {
 
 export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDisconnect: () => void }) {
   const location = useLocation();
+  const navigationType = useNavigationType();
   const capabilities = useServerCapabilities();
   const recoveryAvailable = capabilities.data?.capabilities.includes('projection_failure_operations') ?? false;
   const sections = navigationForKeyKind(session.keyKind, recoveryAvailable);
@@ -23,6 +25,39 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
   const active = items.find((i) => location.pathname === i.to || (!i.end && location.pathname.startsWith(`${i.to}/`)));
   useDocumentTitle(active?.label ?? 'OmniWA Console');
   const environment = environmentForApiOrigin(session.baseUrl);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const navItemRefs = useRef(new Map<string, HTMLAnchorElement>());
+  const scrollPositions = useRef(new Map<string, number>());
+  const scrollState = useRef({ locationKey: location.key, scope: mainScrollScope(location.pathname, location.search) });
+  const scrollScope = mainScrollScope(location.pathname, location.search);
+
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    const previous = scrollState.current;
+    if (!viewport || previous.locationKey === location.key) return;
+
+    scrollPositions.current.set(previous.locationKey, viewport.scrollTop);
+    viewport.scrollTop = scrollTopForNavigation({
+      navigationType,
+      previousScope: previous.scope,
+      nextScope: scrollScope,
+      currentTop: viewport.scrollTop,
+      savedTop: scrollPositions.current.get(location.key),
+    });
+    scrollState.current = { locationKey: location.key, scope: scrollScope };
+  }, [location.key, navigationType, scrollScope]);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    const activeItem = active ? navItemRefs.current.get(active.to) : undefined;
+    if (!nav || !activeItem || !window.matchMedia('(width < 640px)').matches) return;
+    nav.scrollLeft = horizontalRevealScrollLeft(
+      nav.scrollLeft,
+      nav.getBoundingClientRect(),
+      activeItem.getBoundingClientRect(),
+    );
+  }, [active?.to]);
 
   const capabilityStatus = capabilities.isPending
     ? { tone: 'pending' as const, label: 'Discovering capabilities' }
@@ -32,7 +67,7 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
 
   return (
     <WorkspaceEnvironmentProvider environment={environment}>
-      <div className="grid h-dvh grid-cols-[224px_minmax(0,1fr)] max-[900px]:grid-cols-[64px_minmax(0,1fr)] max-[640px]:block">
+      <div className="fixed inset-0 grid overflow-hidden grid-cols-[224px_minmax(0,1fr)] max-[900px]:grid-cols-[64px_minmax(0,1fr)] max-[640px]:block">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:m-2 focus:bg-fg focus:px-3 focus:py-2 focus:text-bg"
@@ -56,7 +91,7 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
           </div>
 
           {/* Nav */}
-          <nav aria-label="Primary" className="flex-1 min-h-0 overflow-y-auto p-3 max-[640px]:flex max-[640px]:overflow-x-auto max-[640px]:p-2">
+          <nav ref={navRef} aria-label="Primary" className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 max-[640px]:flex max-[640px]:overflow-x-auto max-[640px]:p-2">
             {sections.map((section) => (
               <div key={section.label} className="mb-4 grid gap-0.5 max-[640px]:mb-0 max-[640px]:flex">
                 <span className="px-2.5 pb-1 text-[9px] font-medium uppercase tracking-[0.14em] text-fg-3 max-[900px]:hidden">
@@ -69,6 +104,10 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
                     end={item.end}
                     title={item.label}
                     aria-label={item.label}
+                    ref={(node) => {
+                      if (node) navItemRefs.current.set(item.to, node);
+                      else navItemRefs.current.delete(item.to);
+                    }}
                     className={({ isActive }) =>
                       navigationItemClassName(isActive)
                     }
@@ -96,7 +135,7 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
         </aside>
 
         <main id="main" tabIndex={-1} className="flex min-w-0 h-dvh flex-col overflow-hidden max-[640px]:pb-[61px]">
-          <div className="min-h-0 flex-1 overflow-auto">
+          <div ref={viewportRef} className="min-h-0 flex-1 overflow-auto overscroll-y-contain">
             <Suspense fallback={<div role="status" className="p-6 text-sm text-fg-3">Loading panel…</div>}>
               <Outlet />
             </Suspense>

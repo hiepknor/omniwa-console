@@ -100,6 +100,8 @@ export function ConversationsPage() {
         <SplitWorkspace
           frame="attached"
           detailOpen={hasChat}
+          directoryScrollKey={JSON.stringify([route.view, route.search, route.cursor])}
+          detailScrollKey={JSON.stringify([activeChatId, route.messageCursor])}
           directoryLabel={`${route.view} directory`}
           detailLabel="Message timeline"
           directory={
