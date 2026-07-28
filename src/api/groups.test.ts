@@ -66,6 +66,14 @@ describe('group projection adapter', () => {
     });
   });
 
+  it('uses the bounded search directory for an empty paged query', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [], meta: { syncStatus: 'ready' } }));
+    await listInstanceGroups({ GET } as unknown as ApiClient, 'instance-a', { limit: 50, paged: true });
+    expect(GET).toHaveBeenCalledWith('/group/search', {
+      params: { query: { q: '', limit: 50, cursor: undefined } },
+    });
+  });
+
   it('keeps the historical raw list response compatible without inventing readiness', async () => {
     const GET = vi.fn().mockResolvedValue(ok([projectedGroup]));
 

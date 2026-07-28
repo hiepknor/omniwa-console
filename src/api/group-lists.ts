@@ -1,10 +1,12 @@
 import type { ApiClient } from './client';
-import { unwrap, unwrapCommand, unwrapProjection, type CommandResult, type ProjectionMeta } from './envelopes';
+import { ApiFailure, unwrap, unwrapCommand, unwrapProjection, type CommandResult, type ProjectionMeta } from './envelopes';
 import type { components } from './generated/schema';
 
 type SummaryPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_groupList_repository.Summary'];
 type EntryPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_groupList_service.EntryView'];
 type AuditPayload = components['schemas']['apidocs.GroupListAuditEvent'];
+type EligibilityPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityResult'];
+type AggregatePayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_groupList_service.EligibilityAggregate'];
 
 export type GroupListSummary = {
   id: string;
@@ -27,6 +29,19 @@ export type GroupListEntry = {
   canSend: boolean;
   checkedAt?: string;
 };
+export type GroupEligibilityAggregate = {
+  groupListId: string;
+  groupListVersion: number;
+  total: number;
+  eligible: number;
+  unavailable: number;
+  unknown: number;
+  readyToTarget: boolean;
+  byReason: Record<string, number>;
+  checkedAt?: string;
+};
+export type GroupEligibilityAssessment = { items: GroupListEntry[]; meta?: ProjectionMeta };
+export type GroupEligibilityIssueDetails = { issueCount: number; truncated: boolean; issues: GroupListEntry[] };
 export type GroupListAudit = {
   id: string;
   eventType: string;
@@ -50,6 +65,13 @@ function summary(payload: SummaryPayload | undefined): GroupListSummary {
   };
 }
 function nextCursor(meta?: ProjectionMeta): string | null { return meta?.nextCursor ?? null; }
+function eligibility(payload: EligibilityPayload | undefined): GroupListEntry {
+  return {
+    groupJid: stringValue(payload?.groupJid), currentName: payload?.currentName,
+    eligibility: payload?.eligibility === 'eligible' || payload?.eligibility === 'unavailable' ? payload.eligibility : 'unknown',
+    eligibilityReason: payload?.eligibilityReason, canSend: payload?.canSend === true, checkedAt: payload?.checkedAt,
+  };
+}
 
 export async function listGroupLists(client: ApiClient, params: { search?: string; cursor?: string; limit?: number } = {}): Promise<GroupListPage<GroupListSummary>> {
   const result = unwrapProjection<SummaryPayload[]>(await client.GET('/group-lists', { params: { query: { search: params.search, cursor: params.cursor, limit: params.limit ?? 50 } } }));
@@ -61,13 +83,34 @@ export async function getGroupList(client: ApiClient, id: string): Promise<Group
 export async function listGroupListEntries(client: ApiClient, id: string, params: { cursor?: string; limit?: number } = {}): Promise<GroupListPage<GroupListEntry>> {
   const result = unwrapProjection<EntryPayload[]>(await client.GET('/group-lists/{groupListId}/groups', { params: { path: { groupListId: id }, query: { cursor: params.cursor, limit: params.limit ?? 50 } } }));
   return {
-    items: (result.resource ?? []).map((item): GroupListEntry => ({
-      groupJid: stringValue(item.groupJid), snapshotName: item.snapshotName, currentName: item.currentName,
-      eligibility: item.eligibility === 'eligible' || item.eligibility === 'unavailable' ? item.eligibility : 'unknown',
-      eligibilityReason: item.eligibilityReason, canSend: item.canSend === true, checkedAt: item.checkedAt,
-    })).filter((item) => item.groupJid),
+    items: (result.resource ?? []).map((item): GroupListEntry => ({ ...eligibility(item), snapshotName: item.snapshotName })).filter((item) => item.groupJid),
     nextCursor: nextCursor(result.meta), meta: result.meta,
   };
+}
+export async function checkGroupEligibility(client: ApiClient, groupJids: string[]): Promise<GroupEligibilityAssessment> {
+  const result = unwrapProjection<EligibilityPayload[]>(await client.POST('/group-lists/eligibility', { body: { groupJids } }));
+  return { items: (result.resource ?? []).map(eligibility).filter((item) => item.groupJid), meta: result.meta };
+}
+export async function getGroupListEligibility(client: ApiClient, id: string, expectedVersion?: number): Promise<{ aggregate: GroupEligibilityAggregate; meta?: ProjectionMeta }> {
+  const result = unwrapProjection<AggregatePayload>(await client.GET('/group-lists/{groupListId}/eligibility', { params: { path: { groupListId: id }, query: { expectedVersion } } }));
+  const value = result.resource;
+  return { aggregate: {
+    groupListId: stringValue(value?.groupListId, id), groupListVersion: Math.max(1, value?.groupListVersion ?? expectedVersion ?? 1),
+    total: countValue(value?.total), eligible: countValue(value?.eligible), unavailable: countValue(value?.unavailable), unknown: countValue(value?.unknown),
+    readyToTarget: value?.readyToTarget === true, byReason: value?.byReason ?? {}, checkedAt: value?.checkedAt,
+  }, meta: result.meta };
+}
+
+function objectValue(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+export function eligibilityIssues(error: unknown): GroupEligibilityIssueDetails | undefined {
+  if (!(error instanceof ApiFailure)) return undefined;
+  const details = objectValue(error.details);
+  if (!details) return undefined;
+  const issueCount = typeof details.issueCount === 'number' && Number.isFinite(details.issueCount) ? Math.max(0, details.issueCount) : 0;
+  const issues = Array.isArray(details.issues) ? details.issues.map((item) => eligibility(objectValue(item) as EligibilityPayload | undefined)).filter((item) => item.groupJid) : [];
+  return { issueCount: Math.max(issueCount, issues.length), truncated: details.truncated === true, issues };
 }
 export async function loadAllGroupListEntries(client: ApiClient, id: string, expectedCount: number): Promise<GroupListEntry[]> {
   const items: GroupListEntry[] = [];

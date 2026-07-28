@@ -140,5 +140,9 @@ filters/cursors remain deep-linkable.
 Campaign creation uses the full-width Console layout: content and target panels
 stack on narrower viewports. The target selector searches server-owned Group
 Lists, records the reviewed version, previews a bounded first page of groups,
-and leaves full eligibility validation to the atomic create command. All fields
+and, when `group_list_eligibility` is advertised, reads an on-demand aggregate
+for that exact version. The create action stays disabled while any target is
+unavailable or unknown. This check is advisory; the atomic create command and
+worker revalidation remain authoritative. Servers without the additive
+capability retain submit-time validation with an explicit compatibility notice. All fields
 and the sole Cancel action are disabled while creation is pending.

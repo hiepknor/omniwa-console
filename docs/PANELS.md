@@ -139,7 +139,16 @@ GET    /group-lists/{groupListId}/groups
 PUT    /group-lists/{groupListId}
 DELETE /group-lists/{groupListId}
 GET    /group-lists/{groupListId}/audit
+POST   /group-lists/eligibility
+GET    /group-lists/{groupListId}/eligibility
 ```
+
+When `group_list_eligibility` is advertised, the editor checks only the current
+bounded Groups page before selection and the inspector reads an on-demand
+whole-list aggregate. Preflight is advisory: writes validate the complete set
+again, and structured rejection issues are never converted into client-side
+eligibility rules. Older servers retain submit-time validation with an explicit
+compatibility notice.
 
 ## Chats workspace — `/chats/:chatId?`
 
@@ -236,7 +245,9 @@ footer aggregate.
 
 Campaign creation additionally reads `GET /group-lists`,
 `GET /group-lists/{groupListId}`, and `GET /group-lists/{groupListId}/groups`
-to select and preview a versioned target. New drafts are gated by both
+to select and preview a versioned target. When advertised, it also reads
+`GET /group-lists/{groupListId}/eligibility?expectedVersion=` and requires the
+exact reviewed version to be ready before submission. New drafts are gated by both
 `group_lists` and `campaign_group_targets`; the Console does not create direct
 recipient campaigns.
 
