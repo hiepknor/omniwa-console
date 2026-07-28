@@ -31,7 +31,13 @@ export type InstanceResource = {
 };
 
 export type InstanceStatusResource = { connected?: boolean; loggedIn?: boolean; name?: string };
-export type InstanceQr = { qrcode?: string; code?: string };
+export type InstanceQr = {
+  qrcode?: string;
+  code?: string;
+  passkeyCode?: string;
+  passkeyOpenUrl?: string;
+  passkeyStage?: string;
+};
 export type InstanceAdvancedSettings = {
   alwaysOnline?: boolean;
   readMessages?: boolean;
@@ -146,7 +152,22 @@ export async function getInstanceStatus(client: ApiClient): Promise<InstanceStat
 
 export async function getInstanceQr(client: ApiClient): Promise<InstanceQr> {
   const data = unwrap<GoQr>(await client.GET('/instance/qr'));
-  return { qrcode: data?.qrcode || undefined, code: data?.code || undefined };
+  let passkeyOpenUrl: string | undefined;
+  if (data?.passkeyOpenUrl) {
+    try {
+      const parsed = new URL(data.passkeyOpenUrl);
+      if (parsed.protocol === 'https:') passkeyOpenUrl = parsed.href;
+    } catch {
+      // An invalid server-provided URL is omitted rather than rendered as a link.
+    }
+  }
+  return {
+    qrcode: data?.qrcode || undefined,
+    code: data?.code || undefined,
+    passkeyCode: data?.passkeyCode || undefined,
+    passkeyOpenUrl,
+    passkeyStage: data?.passkeyStage || undefined,
+  };
 }
 
 export async function connectInstance(client: ApiClient, opts: { immediate?: boolean } = {}): Promise<CommandResult> {

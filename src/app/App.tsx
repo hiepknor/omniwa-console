@@ -70,6 +70,13 @@ const developmentRoutes = import.meta.env.DEV
         },
       },
       {
+        path: '/__preview/connection',
+        lazy: async () => {
+          const { PreviewConnection } = await import('./PreviewConnection');
+          return { Component: PreviewConnection };
+        },
+      },
+      {
         path: '/__preview/recovery',
         lazy: async () => {
           const { PreviewRecovery } = await import('./PreviewRecovery');

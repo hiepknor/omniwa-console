@@ -1,6 +1,14 @@
 import { useMemo } from 'react';
-import { useApiSession } from './ApiProvider';
-import { createApiClient, type ApiClient } from './client';
+import type { ConsoleSession } from '@/lib/session';
+import { useApi, useApiSession } from './ApiProvider';
+import { createApiClient, type ApiClient, type CredentialScope } from './client';
+
+export function instanceTokenCredentialScope(
+  session: Pick<ConsoleSession, 'apiKey' | 'keyKind'>,
+  token: string | undefined,
+): CredentialScope {
+  return token && session.keyKind === 'api' && token === session.apiKey ? 'session' : 'instance';
+}
 
 /**
  * Build an instance-scoped client without allowing the bearer token into a
@@ -8,8 +16,13 @@ import { createApiClient, type ApiClient } from './client';
  */
 export function useInstanceClient(token: string | undefined): ApiClient | undefined {
   const session = useApiSession();
+  const sessionClient = useApi();
   return useMemo(
-    () => (token ? createApiClient({ baseUrl: session.baseUrl, apiKey: token }, 'instance') : undefined),
-    [session.baseUrl, token],
+    () => {
+      if (!token) return undefined;
+      if (instanceTokenCredentialScope(session, token) === 'session') return sessionClient;
+      return createApiClient({ baseUrl: session.baseUrl, apiKey: token }, 'instance');
+    },
+    [session, sessionClient, token],
   );
 }

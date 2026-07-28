@@ -80,5 +80,52 @@ describe('connection and pairing state', () => {
     const html = renderToStaticMarkup(<ConnectionAndPairing controller={controller} />);
     expect(html.match(/<button[^>]*disabled/g)).toHaveLength(2);
     expect(html).not.toContain('QR code to pair');
+    expect(html).toContain('Status snapshot incomplete');
+  });
+
+  it('renders a passkey-only payload without claiming that it is still waiting for QR', () => {
+    const controller = {
+      commandError: null,
+      commandPending: false,
+      commandReady: true,
+      connected: true,
+      lastAcknowledgement: undefined,
+      loggedIn: false,
+      pairing: true,
+      qr: { data: { passkeyCode: 'ABCD-EFGH', passkeyOpenUrl: 'https://example.test/pair', passkeyStage: 'code_ready' }, error: null, refetch: vi.fn() },
+      reconnectSession: vi.fn(),
+      startPairing: vi.fn(),
+      status: { data: { connected: true, loggedIn: false }, error: null, isError: false, isPending: false, refetch: vi.fn() },
+      statusReady: true,
+    } as unknown as InstancePairingController;
+
+    const html = renderToStaticMarkup(<ConnectionAndPairing controller={controller} />);
+    expect(html).toContain('Pair with a code');
+    expect(html).toContain('ABCD-EFGH');
+    expect(html).toContain('Open secure pairing link (new tab)');
+    expect(html).toContain('Code ready');
+    expect(html).not.toContain('Waiting for QR');
+  });
+
+  it('does not render cached QR or passkey data after the pairing payload refresh fails', () => {
+    const controller = {
+      commandError: null,
+      commandPending: false,
+      commandReady: true,
+      connected: true,
+      lastAcknowledgement: undefined,
+      loggedIn: false,
+      pairing: true,
+      qr: { data: { qrcode: 'stale-qr', passkeyCode: 'STALE-CODE' }, error: new Error('refresh failed'), refetch: vi.fn() },
+      reconnectSession: vi.fn(),
+      startPairing: vi.fn(),
+      status: { data: { connected: true, loggedIn: false }, error: null, isError: false, isPending: false, refetch: vi.fn() },
+      statusReady: true,
+    } as unknown as InstancePairingController;
+
+    const html = renderToStaticMarkup(<ConnectionAndPairing controller={controller} />);
+    expect(html).toContain('Read failed');
+    expect(html).not.toContain('stale-qr');
+    expect(html).not.toContain('STALE-CODE');
   });
 });
