@@ -8,6 +8,8 @@ describe('Group List target cells', () => {
     expect(html).toContain('Operations');
     expect(html).toContain('120363001@g.us');
     expect(html).toContain('Subgroup');
+    expect(html).toContain('[overflow-wrap:anywhere]');
+    expect(html).not.toContain('truncate');
   });
 
   it('keeps missing member count unreported instead of manufacturing zero', () => {
@@ -19,7 +21,7 @@ describe('Group List target cells', () => {
     const html = renderToStaticMarkup(<GroupTargetEligibility label="Unavailable" tone="failed" reason="send_permission_denied" />);
     expect(html).toContain('Unavailable');
     expect(html).toContain('Send permission denied');
-    expect(html).toContain('max-w-44');
+    expect(html).not.toContain('max-w-44');
     expect(html).toContain('break-words');
     expect(html).toContain('leading-4');
   });

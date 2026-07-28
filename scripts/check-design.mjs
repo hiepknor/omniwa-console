@@ -105,8 +105,27 @@ for (const marker of ['aria-label=', 'aria-live="polite"', 'max-h-56 overflow-y-
 }
 
 const tablePrimitive = await read('src/ui/Table.tsx');
-for (const marker of ["multiline = false", "multiline && 'py-2'", 'overflow-x-auto', 'border-b border-line']) {
-  if (!tablePrimitive.includes(marker)) failures.push(`src/ui/Table.tsx: multiline table-cell rhythm is missing ${marker}`);
+for (const marker of ["multiline = false", "multiline && 'py-2'", 'overflow-x-auto', 'border-b border-line', '@container', '@max-[40rem]:block', '@min-[40.0625rem]:@max-[48rem]:hidden', '@min-[40.0625rem]:@max-[60rem]:hidden', 'mobileLabel: string', '[overflow-wrap:anywhere]']) {
+  if (!tablePrimitive.includes(marker)) failures.push(`src/ui/Table.tsx: responsive table contract is missing ${marker}`);
+}
+
+for (const path of [
+  'src/app/UiGallery.tsx',
+  'src/features/campaigns/CampaignInspector.tsx',
+  'src/features/campaigns/CampaignsView.tsx',
+  'src/features/campaigns/CreateCampaign.tsx',
+  'src/features/events/EventsView.tsx',
+  'src/features/groups/GroupListEditorPage.tsx',
+  'src/features/groups/GroupListsPage.tsx',
+  'src/features/groups/GroupsView.tsx',
+  'src/features/instances/InstancesView.tsx',
+  'src/features/platform/OverviewView.tsx',
+  'src/features/platform/RecoveryView.tsx',
+]) {
+  const source = await read(path);
+  if (/<T[hd]\b[^>]*\bmax-(?:sm|md|lg|xl|\[)/.test(source)) {
+    failures.push(`${path}: table cells must use shared priority instead of feature breakpoints`);
+  }
 }
 
 const descriptionList = await read('src/ui/DescriptionList.tsx');
@@ -221,7 +240,7 @@ if (groupListEditor.includes('selectedCounts.eligible} eligible ·') || /<Status
 }
 
 const groupTargetCells = await read('src/features/groups/GroupTargetCells.tsx');
-for (const marker of ["formatCount(count)", "'Type unreported'", 'max-w-44 gap-1', 'break-words text-xs leading-4']) {
+for (const marker of ["formatCount(count)", "'Type unreported'", '[overflow-wrap:anywhere]', 'grid min-w-0 gap-1', 'break-words text-xs leading-4']) {
   if (!groupTargetCells.includes(marker)) failures.push(`src/features/groups/GroupTargetCells.tsx: projected target facts are missing ${marker}`);
 }
 

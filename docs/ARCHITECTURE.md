@@ -121,7 +121,10 @@ the resource-state authority.
 List panels use `src/ui/Table.tsx`. The shared system owns responsive
 geometry, sticky columns, loading/error/empty rows, mobile summaries, selection
 semantics, and overflow cues. Features own typed columns, filters, rows, and URL
-state. Panel-specific table breakpoints or duplicate shells are not allowed.
+state. Its compact/narrow/regular/wide modes are derived from table container width so
+the same panel behaves consistently in a page, split workspace, or drawer.
+Features provide `mobileLabel` and semantic column priority only; panel-specific
+table breakpoints or duplicate shells are not allowed.
 
 ### Drawers
 

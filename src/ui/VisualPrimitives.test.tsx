@@ -51,11 +51,11 @@ describe('visual primitives', () => {
   });
 
   it('keeps compact rows at a 44px minimum while padding multiline cells vertically', () => {
-    const compact = renderToStaticMarkup(<Table><tbody><Tr><Td>Eligible</Td></Tr></tbody></Table>);
-    const html = renderToStaticMarkup(<Table><thead><tr><Th>State</Th></tr></thead><tbody><Tr><Td multiline>Unavailable<br />Send permission denied</Td></Tr></tbody></Table>);
+    const compact = renderToStaticMarkup(<Table><tbody><Tr><Td mobileLabel="State">Eligible</Td></Tr></tbody></Table>);
+    const html = renderToStaticMarkup(<Table><thead><tr><Th>State</Th></tr></thead><tbody><Tr><Td mobileLabel="State" multiline>Unavailable<br />Send permission denied</Td></Tr></tbody></Table>);
     expect(compact).toContain('h-11 px-3 align-middle');
-    expect(compact).not.toContain('py-2');
-    expect(html).toContain('h-11 px-3 align-middle text-fg border-b border-line py-2');
+    expect(compact).not.toContain('border-line py-2');
+    expect(html).toContain('@max-[40rem]:py-2 py-2');
     expect(html).toContain('Send permission denied');
   });
 

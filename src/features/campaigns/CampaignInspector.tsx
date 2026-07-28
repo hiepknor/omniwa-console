@@ -90,14 +90,14 @@ export function CampaignInspector({ campaignId, commandsEnabled = true, onClose 
               !commandsEnabled && !recipients.data ? <StateNotice kind="empty" title="Recipients unavailable" detail="No cached recipient page is available while campaign_orchestration is absent." /> : recipients.isPending ? <StateNotice kind="loading" title="Loading recipients" /> : recipients.error && !recipients.data ? <Fail error={recipients.error} onRetry={() => recipients.refetch()} /> : recipients.data ? (
                 <div className="grid gap-3">
                   <Table>
-                    <thead><tr><Th>Recipient</Th><Th>Status</Th><Th className="text-right">Attempts</Th><Th>Updated</Th></tr></thead>
+                    <thead><tr><Th>Recipient</Th><Th>Status</Th><Th priority="supporting" className="text-right">Attempts</Th><Th priority="detail">Updated</Th></tr></thead>
                     <tbody>
                       {recipients.data.items.map((item) => (
                         <Tr key={item.id}>
-                          <Td><div className="grid gap-0.5"><span className={item.targetLabel ? 'text-sm font-medium text-fg' : 'font-mono text-xs text-fg-2'}>{item.targetLabel || item.jid}</span><small className="font-mono text-xs text-fg-3">{item.targetLabel ? item.jid : item.optInSource || 'Source unreported'} · {humanizeToken(item.targetType)}</small></div></Td>
-                          <Td><Status tone={campaignTone(item.status)}>{humanizeToken(item.status)}</Status></Td>
-                          <Td className="text-right font-mono tabular-nums">{item.attemptCount}</Td>
-                          <Td className="text-fg-2">{relativeTime(item.updatedAt) || 'Not reported'}</Td>
+                          <Td mobileLabel="Recipient"><div className="grid gap-0.5"><span className={item.targetLabel ? 'text-sm font-medium text-fg' : 'font-mono text-xs text-fg-2'}>{item.targetLabel || item.jid}</span><small className="font-mono text-xs text-fg-3">{item.targetLabel ? item.jid : item.optInSource || 'Source unreported'} · {humanizeToken(item.targetType)}</small></div></Td>
+                          <Td mobileLabel="Status"><Status tone={campaignTone(item.status)}>{humanizeToken(item.status)}</Status></Td>
+                          <Td mobileLabel="Attempts" priority="supporting" className="text-right font-mono tabular-nums">{item.attemptCount}</Td>
+                          <Td mobileLabel="Updated" priority="detail" className="text-fg-2">{relativeTime(item.updatedAt) || 'Not reported'}</Td>
                         </Tr>
                       ))}
                     </tbody>

@@ -57,14 +57,14 @@ export function EventsView(props: EventsViewProps) {
 
         {props.items.length > 0 ? (
           <Table className="border-0">
-            <thead><tr><Th>Type</Th><Th>Durable ID</Th><Th>Occurred</Th><Th>Ingested</Th></tr></thead>
+            <thead><tr><Th>Type</Th><Th priority="supporting">Durable ID</Th><Th>Occurred</Th><Th priority="detail">Ingested</Th></tr></thead>
             <tbody>
               {props.items.map((e) => (
                 <Tr key={e.id} selected={e.id === props.selectedId} onClick={() => props.onOpen(e.id)}>
-                  <Td className="font-mono text-xs text-fg">{e.type}</Td>
-                  <Td className="font-mono text-xs text-fg-2">{e.id}</Td>
-                  <Td className="text-fg-2">{relativeTime(e.occurredAt) || 'Not reported'}</Td>
-                  <Td className="text-fg-2">{relativeTime(e.ingestedAt) || 'Not reported'}</Td>
+                  <Td mobileLabel="Type" className="font-mono text-xs text-fg">{e.type}</Td>
+                  <Td mobileLabel="Durable ID" priority="supporting" className="font-mono text-xs text-fg-2">{e.id}</Td>
+                  <Td mobileLabel="Occurred" className="text-fg-2">{relativeTime(e.occurredAt) || 'Not reported'}</Td>
+                  <Td mobileLabel="Ingested" priority="detail" className="text-fg-2">{relativeTime(e.ingestedAt) || 'Not reported'}</Td>
                 </Tr>
               ))}
             </tbody>
