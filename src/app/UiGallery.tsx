@@ -16,6 +16,7 @@ import {
   Dialog,
   Drawer,
   Field,
+  FileUpload,
   FilterChip,
   FilterToolbar,
   Icon,
@@ -30,6 +31,8 @@ import {
   ProgressBar,
   Radio,
   Select,
+  SelectionBar,
+  SelectionReview,
   SplitWorkspace,
   StateNotice,
   Status,
@@ -144,6 +147,8 @@ export function UiGallery() {
   const [notificationVisible, setNotificationVisible] = useState(true);
   const [cursor, setCursor] = useState<string>();
   const [workspaceDetail, setWorkspaceDetail] = useState(true);
+  const [galleryFile, setGalleryFile] = useState<File | undefined>(() => new File(['locked upload fixture'], 'group-photo.png', { type: 'image/png' }));
+  const [selectionCount, setSelectionCount] = useState(1);
 
   return (
     <div className="min-h-dvh overflow-x-clip bg-bg text-fg">
@@ -271,6 +276,9 @@ export function UiGallery() {
               <Switch label="Always online" description="Submits one explicit settings command." checked={switchEnabled} onChange={(event) => setSwitchEnabled(event.target.checked)} />
               <Switch label="Unavailable setting" description="Disabled by capability discovery." disabled />
             </div>
+            <FileUpload label="File upload" description="Single-file chooser · selected state" accept="image/jpeg,image/png" file={galleryFile} onFileChange={setGalleryFile} />
+            <FileUpload label="Required upload" description="JPEG or PNG · empty state" error="Choose an image before continuing." required accept="image/jpeg,image/png" onFileChange={() => undefined} />
+            <FileUpload label="Unavailable upload" description="Disabled by capability or permission." disabled onFileChange={() => undefined} />
           </div>
         </Section>
 
@@ -391,6 +399,45 @@ export function UiGallery() {
               />
             </Panel>
           </div>
+        </Section>
+
+        <Section title="Selection + table recipe">
+          <div className="grid">
+            <SelectionBar
+              scopeLabel="Select eligible on this page"
+              selectedCount={selectionCount}
+              pageSelectedCount={selectionCount}
+              pageSelectableCount={1}
+              checked={selectionCount === 1}
+              indeterminate={false}
+              onTogglePage={(checked) => setSelectionCount(checked ? 1 : 0)}
+              onClear={() => setSelectionCount(0)}
+            />
+            <Table className="border-t-0">
+              <thead><tr><Th className="w-12"><span className="sr-only">Select</span></Th><Th className="min-w-56">Group</Th><Th className="w-24 min-w-24 text-right">Members</Th><Th className="min-w-28">State</Th><Th className="w-44 min-w-44">Eligibility</Th></tr></thead>
+              <tbody>
+                {[
+                  { name: 'Operations', type: 'Subgroup', members: '1,284', state: 'Active', stateTone: 'ok' as const, eligibility: 'Eligible', eligibilityTone: 'ok' as const },
+                  { name: 'Editorial', type: 'Group', members: '—', state: 'Active', stateTone: 'ok' as const, eligibility: 'Unavailable', eligibilityTone: 'failed' as const, reason: 'Send permission denied' },
+                  { name: 'Support', type: 'Community', members: '84', state: 'Suspended', stateTone: 'degraded' as const, eligibility: 'Unknown', eligibilityTone: 'degraded' as const, reason: 'Select a sendable subgroup' },
+                ].map((group, index) => <Tr key={group.name}><Td><Checkbox visuallyHiddenLabel label={<>Select {group.name}</>} checked={index === 0 && selectionCount === 1} disabled={index > 0} onChange={(event) => setSelectionCount(event.currentTarget.checked ? 1 : 0)} /></Td><Td multiline><span className="grid min-w-0 gap-0.5"><strong className="truncate font-medium">{group.name}</strong><span className="flex flex-wrap items-baseline gap-x-2 text-xs text-fg-3"><code className="font-mono">12036300000{index}@g.us</code><span>{group.type}</span></span></span></Td><Td className="w-24 min-w-24 text-right font-mono tabular-nums">{group.members}</Td><Td><Status tone={group.stateTone}>{group.state}</Status></Td><Td multiline className="w-44 min-w-44"><span className="grid min-w-0 max-w-44 gap-1"><Status tone={group.eligibilityTone}>{group.eligibility}</Status>{group.reason ? <small className="break-words text-xs leading-4 text-fg-3">{group.reason}</small> : null}</span></Td></Tr>)}
+              </tbody>
+            </Table>
+          </div>
+          <div className="grid items-start gap-3 md:grid-cols-2">
+            <SelectionBar scopeLabel="Select eligible on this page" selectedCount={0} pageSelectedCount={0} pageSelectableCount={0} checked={false} disabled scopeDescription="No eligible groups are available on this page." onTogglePage={() => undefined} onClear={() => undefined} />
+            <div className="grid content-start gap-2"><SelectionBar scopeLabel="Select eligible on this page" selectedCount={4} pageSelectedCount={2} pageSelectableCount={2} checked onTogglePage={() => undefined} onClear={() => undefined} /><StateNotice kind="empty" title="Selection requires review" detail="2 selected groups are unavailable or not yet verified." /></div>
+          </div>
+          <SelectionReview
+            title="Selected targets"
+            description="Selections can span pages. Unavailable and unknown targets appear first and must be removed before saving."
+            items={[
+              { id: '120363000002@g.us', label: 'Editorial', meta: '120363000002@g.us', status: 'Unavailable', tone: 'failed', detail: 'Send permission denied' },
+              { id: '120363000003@g.us', label: 'Support', meta: '120363000003@g.us', status: 'Unknown', tone: 'degraded', detail: 'Select a sendable subgroup' },
+              { id: '120363000001@g.us', label: 'Operations', meta: '120363000001@g.us', status: 'Eligible', tone: 'ok' },
+            ]}
+            onRemove={() => undefined}
+          />
         </Section>
 
         <Section title="List recipe">

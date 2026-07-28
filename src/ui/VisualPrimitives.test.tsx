@@ -5,6 +5,7 @@ import { Image } from './Image';
 import { MetricGrid } from './MetricGrid';
 import { Panel } from './Panel';
 import { ProgressBar } from './ProgressBar';
+import { Table, Td, Th, Tr } from './Table';
 
 describe('visual primitives', () => {
   it('renders only the canonical decorative icon geometry', () => {
@@ -47,6 +48,15 @@ describe('visual primitives', () => {
     expect(flushPanel).toContain('<div class="min-w-0">Flush body</div>');
     expect(flushPanel).not.toContain('p-4 p-0');
     expect(compactPanel).toContain('<div class="min-w-0 px-4 pb-4 pt-2">Compact body</div>');
+  });
+
+  it('keeps compact rows at a 44px minimum while padding multiline cells vertically', () => {
+    const compact = renderToStaticMarkup(<Table><tbody><Tr><Td>Eligible</Td></Tr></tbody></Table>);
+    const html = renderToStaticMarkup(<Table><thead><tr><Th>State</Th></tr></thead><tbody><Tr><Td multiline>Unavailable<br />Send permission denied</Td></Tr></tbody></Table>);
+    expect(compact).toContain('h-11 px-3 align-middle');
+    expect(compact).not.toContain('py-2');
+    expect(html).toContain('h-11 px-3 align-middle text-fg border-b border-line py-2');
+    expect(html).toContain('Send permission denied');
   });
 
   it('keeps standalone, full-bleed, and compact metric geometry explicit', () => {

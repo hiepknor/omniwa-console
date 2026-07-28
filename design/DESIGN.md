@@ -158,6 +158,13 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Textarea / DateTimeInput** — use the same surface, border, focus, invalid,
   disabled, and mobile target language as Input. Textarea resizes vertically;
   DateTimeInput standardizes the browser's local date-time field surface.
+- **FileUpload** — the only single-file chooser. Native file semantics remain
+  available without exposing browser-default visual chrome. The square recessed
+  frame always names the selected file and its local MIME/size metadata, with
+  explicit Choose, Replace, and Clear actions. Empty, selected, invalid,
+  required, and disabled states use the same Field and Button language. Upload
+  transport, progress, validation, and server acknowledgement remain owned by
+  the calling feature; selecting a file never implies it was uploaded.
 - **Checkbox / Radio / Switch** — native choice semantics with fully custom
   square visuals. Checkbox and radio use a framed 16px ink mark; radio remains
   square by design. Switch uses a 36×20px square track with an ink/paper thumb
@@ -172,8 +179,12 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Table** — the workhorse. `--color-surface` container, 1px border, no radius.
   Sticky 11px uppercase muted headers; 13px cells; hairline row dividers; row hover
   = `--color-elevated`. IDs mono; timestamps relative with ISO `title`; numeric
-  right-aligned tabular. Horizontal overflow stays inside the table container;
-  the page never scrolls sideways and rows never become floating cards.
+  right-aligned tabular. Cells retain a 44px minimum; the named `Td multiline`
+  composition adds canonical 8px vertical padding when identity metadata or a
+  status reason needs multiple lines. Reasons wrap below the short status and
+  expand only that row vertically, while ordinary rows remain 44px. Horizontal
+  overflow stays inside the table container; the page never scrolls sideways
+  and rows never become floating cards.
 - **MetricGrid** — one contiguous bordered grid (not separate cards): hairline
   cell separators, 11px uppercase label, **24px mono** value. The default density
   wraps to one column on narrow screens so long textual values remain readable;
@@ -207,6 +218,18 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   active-filter token. Toolbars wrap without horizontal page overflow; chips
   stay square, show label and value, and expose an explicit remove name. Filter
   controls and chips reflect URL state in product panels.
+- **SelectionBar** — the only bulk-selection header. It separates an explicitly
+  named page scope from the cross-page selected total, owns none/partial/all
+  checkbox state, and exposes one global Clear selection action. Counts use
+  mono text rather than Status; Status remains reserved for operational state.
+  Place SelectionBar directly above its canonical Table with one contiguous
+  strong frame. Eligibility and other domain rules remain feature-owned.
+- **SelectionReview** — the only retained-selection review surface when choices
+  can span cursor pages. It uses one bounded square frame, states the retained
+  total without turning it into a status, keeps stable identity metadata visible,
+  and gives every item an explicit Remove action. Domain status remains textual
+  and blocked items sort first in the owning feature so a disabled submit never
+  strands the operator.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
   list progression. Panel body spacing is selected through its named padding
@@ -271,9 +294,12 @@ or `border-*` utilities and rely on generated CSS order.
 | Select option | rest, active/hover, selected, active + selected, disabled |
 | Input | rest, hover, keyboard focus, populated, invalid, disabled |
 | Textarea / DateTimeInput | rest, populated, keyboard focus, invalid, disabled |
-| Checkbox / Radio / Switch | off, on, hover, keyboard focus, disabled |
+| FileUpload | empty, selected, replace, clear, keyboard focus, invalid, required, disabled |
+| Checkbox / Radio / Switch | off, on, indeterminate, hover, keyboard focus, disabled |
+| SelectionBar | zero, partial, all-page, cross-page total, disabled, clear, blocked composition |
+| SelectionReview | hidden-empty, retained items, mixed statuses, long detail, remove, disabled, bounded overflow |
 | Filter chip | rest, hover, keyboard focus, removed |
-| Table row | rest, hover, keyboard focus, selected |
+| Table row | rest, hover, keyboard focus, selected, multiline status + reason |
 | StateNotice | info/stale, loading, empty/not-ready, error + requestId, action |
 | CursorPagination | first page, next cursor, final page, responsive stacking |
 | ProgressBar | 0–99%, indeterminate, complete, failed at last known value |

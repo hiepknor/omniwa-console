@@ -2,6 +2,7 @@ import type { FormEvent, ReactNode } from 'react';
 import type { GroupDirectorySummary, GroupMembershipState, GroupMyRole, GroupResource, GroupSendMode, GroupState, GroupType } from '@/api/groups';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { Button, CursorPagination, Field, FilterToolbar, Input, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
+import { groupStatusTone } from './group-status-tone';
 import { groupMembershipStates, groupRoles, groupSendModes, groupStates, groupTypes } from './route-state';
 
 export type GroupsViewProps = {
@@ -97,7 +98,7 @@ export function GroupsView(props: GroupsViewProps) {
                     </div>
                   </Td>
                   <Td>{humanizeToken(g.groupType ?? 'unreported')}</Td>
-                  <Td><Status tone={g.status === 'active' ? 'ok' : 'degraded'}>{humanizeToken(g.status ?? 'unreported')}</Status></Td>
+                  <Td><Status tone={groupStatusTone(g.status)}>{humanizeToken(g.status ?? 'unreported')}</Status></Td>
                   {props.normalized ? <Td>{humanizeToken(g.myRole ?? 'unknown')}</Td> : null}
                   <Td>{g.sendMode ? humanizeToken(g.sendMode) : 'Not reported'}</Td>
                   <Td className="text-right font-mono tabular-nums">{g.memberCount ?? '—'}</Td>

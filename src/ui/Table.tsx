@@ -22,8 +22,8 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
   );
 }
 
-export function Td({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn('h-11 px-3 align-middle text-fg border-b border-line', className)} {...props} />;
+export function Td({ className, multiline = false, ...props }: TdHTMLAttributes<HTMLTableCellElement> & { multiline?: boolean }) {
+  return <td className={cn('h-11 px-3 align-middle text-fg border-b border-line', multiline && 'py-2', className)} {...props} />;
 }
 
 export function Tr({
