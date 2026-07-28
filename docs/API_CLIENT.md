@@ -51,6 +51,15 @@ owns cache scope.
 session. Projection panels call `useInstanceCapabilities(instanceId, token)`
 when instance scope changes.
 
+- The connect adapter uses the authenticated `credentialScope` response field
+  directly as its primary and single scope-discovery request. `instanceId` is
+  retained only for explicit instance scope.
+- It does not infer credential scope from capabilities, projection readiness,
+  key syntax, or HTTP failures. A 401 is an authentication failure.
+- Only a successful response from an older revision with no `credentialScope`
+  enables the sequential compatibility probes (`/instance/all`, then
+  `/instance/status` when the admin endpoint returns 403). The probes never run
+  concurrently.
 - Preserve unknown capability strings.
 - Use each projection capability as an initial-readiness signal for its owning
   feature; response metadata remains authoritative after a usable read.

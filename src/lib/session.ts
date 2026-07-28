@@ -4,6 +4,8 @@ export interface ConsoleSession {
   baseUrl: string;
   apiKey: string;
   keyKind: KeyKind;
+  /** Backend-authenticated identity for an instance-scoped credential. */
+  instanceId?: string;
   connectedAt: string;
 }
 

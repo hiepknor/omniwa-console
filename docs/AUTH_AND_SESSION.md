@@ -23,11 +23,21 @@ The Console does not broaden a token by proxying through the admin client.
 
 `ConnectPage` classifies the key without exposing it:
 
-1. call `GET /instance/all`;
-2. success means admin scope;
-3. a 401/403 falls back to `GET /instance/status`;
-4. success there means instance-token scope;
-5. failure renders the normalized API error.
+1. call `GET /server/capabilities` as the primary and single credential-scope
+   discovery request;
+2. use its authenticated `credentialScope: admin | instance` directly and
+   retain `instanceId` only for instance scope;
+3. treat 401 as a missing or invalid credential, never as scope control flow;
+4. only when a successful older-backend response omits `credentialScope`, run
+   the compatibility probes sequentially: `GET /instance/all`, then
+   `GET /instance/status` after a 403 from the admin endpoint;
+5. render any failure through the normalized API error.
+
+Capability values, projection readiness, key syntax, and failed requests never
+infer scope. Explicit scope remains valid when the capabilities array is empty
+or projection-backed capabilities are syncing, stale, or not ready. An explicit
+scope response sends no compatibility probe, and compatibility probes are never
+concurrent.
 
 The probe has a 15-second timeout. Origin and credential fields are locked
 while it is active so the visible values cannot diverge from the in-flight

@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
+import { getCapabilities } from '@/api/capabilities';
 import { createApiClient, DEFAULT_BASE_URL } from '@/api/client';
 import { ApiFailure } from '@/api/envelopes';
 import type { ConsoleSession, KeyKind } from '@/lib/session';
@@ -7,15 +8,24 @@ type ConnectError = { category: string; message: string; detail?: string; diagno
 
 export const CONNECT_TIMEOUT_MS = 15_000;
 export type ConnectProbeStage = 'verify-key' | 'detect-scope';
+export type CredentialDiscovery = { keyKind: KeyKind; instanceId?: string };
 
-export async function probeKey(client: ReturnType<typeof createApiClient>, signal?: AbortSignal, onStage?: (stage: ConnectProbeStage) => void): Promise<KeyKind> {
+export async function probeKey(client: ReturnType<typeof createApiClient>, signal?: AbortSignal, onStage?: (stage: ConnectProbeStage) => void): Promise<CredentialDiscovery> {
   onStage?.('verify-key');
-  const admin = await client.GET('/instance/all', { signal });
-  if (admin.data !== undefined) return 'admin';
-  if (admin.response.status !== 401 && admin.response.status !== 403) throw new ApiFailure(admin.error, admin.response.status, admin.response.headers);
+  const capabilities = await getCapabilities(client, signal);
+  if (capabilities.credentialScope === 'admin') return { keyKind: 'admin' };
+  if (capabilities.credentialScope === 'instance') {
+    return { keyKind: 'api', ...(capabilities.instanceId ? { instanceId: capabilities.instanceId } : {}) };
+  }
+
+  // Compatibility only: older revisions omit credentialScope. These probes
+  // remain sequential, and 401 is always an authentication failure.
   onStage?.('detect-scope');
+  const admin = await client.GET('/instance/all', { signal });
+  if (admin.data !== undefined) return { keyKind: 'admin' };
+  if (admin.response.status !== 403) throw new ApiFailure(admin.error, admin.response.status, admin.response.headers);
   const scoped = await client.GET('/instance/status', { signal });
-  if (scoped.data !== undefined) return 'api';
+  if (scoped.data !== undefined) return { keyKind: 'api' };
   throw new ApiFailure(scoped.error, scoped.response.status, scoped.response.headers);
 }
 
@@ -63,7 +73,8 @@ export function useConnectFlow(onConnected: (session: ConsoleSession) => void) {
     setPending(true);
     try {
       const client = createApiClient({ baseUrl: origin, apiKey: normalizedKey });
-      onConnected({ baseUrl: origin, apiKey: normalizedKey, keyKind: await probeKey(client, controller.signal, setProbeStage), connectedAt: new Date().toISOString() });
+      const credential = await probeKey(client, controller.signal, setProbeStage);
+      onConnected({ baseUrl: origin, apiKey: normalizedKey, ...credential, connectedAt: new Date().toISOString() });
     } catch (caught) {
       if (controller.signal.aborted) setError({ category: 'timeout', diagnostic: 'timeout', message: 'The OmniWA API did not respond within 15 seconds.' });
       else if (caught instanceof ApiFailure) setError(connectErrorForFailure(caught));
