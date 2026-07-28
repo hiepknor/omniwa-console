@@ -237,7 +237,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   table numbers, metrics, selection sentences, and operational Status labels do
   not become chips. MetadataBadge retains the same compact framed family for
   non-quantity facts such as an immutable version, without coupling their future
-  treatment to count chips.
+  treatment to count chips. Conversations omit zero unread counts in dense
+  directory rows, show positive unread counts as accessible CountBadges, and
+  pair the badge with a visible `Unread` label in the selected-chat facts.
 - **DescriptionList / DescriptionItem** — the only repeated key/value facts
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
   values on wide screens, stacks them at ≤640px, wraps long content, and uses

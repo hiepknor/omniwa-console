@@ -202,6 +202,10 @@ resource models, or rendered diagnostics.
   automatically. Numeric table cells, metrics, selection prose, and counts stated
   inside an operational Status remain in their context instead of becoming chips.
   Framed non-count facts such as resource versions use `MetadataBadge`.
+  Conversation directory rows omit zero unread counts and expose positive counts
+  through an accessible CountBadge; selected-chat facts keep the visible `Unread`
+  label and show zero explicitly. Conversation tabs do not derive totals from a
+  filtered or cursor-bounded page.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the

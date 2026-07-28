@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { ChatList, MessageTimeline } from '@/features/conversations/ConversationsView';
-import { Button, Field, FilterToolbar, Input, SplitWorkspace, Status, Tabs, Textarea, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { ChatList, ConversationUnreadCount, MessageTimeline } from '@/features/conversations/ConversationsView';
+import { Button, Field, FilterToolbar, Input, SplitWorkspace, Tabs, Textarea, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { chatsFixture, messagesFixture } from './preview-fixtures';
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
@@ -49,7 +49,7 @@ export function PreviewConversations() {
             />
           {chat ? <>
             <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
-              <Status tone="pending">{chat.unreadCount} unread</Status>
+              <ConversationUnreadCount count={chat.unreadCount} context="detail" />
               <span>Individual</span>
               <span className="font-mono text-fg-2">{chat.id}</span>
             </div>

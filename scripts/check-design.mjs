@@ -227,7 +227,7 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(chat)}', 'className="max-[900px]:hidden"', '>Back</Button>']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(chat)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={chat.unreadCount} context="detail"']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
@@ -242,8 +242,16 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>']) {
+for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedChat.unreadCount} context="detail"']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
+}
+
+const conversationsView = await read('src/features/conversations/ConversationsView.tsx');
+for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail'", "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>']) {
+  if (!conversationsView.includes(marker)) failures.push(`src/features/conversations/ConversationsView.tsx: unread-count contract is missing ${marker}`);
+}
+if (/<Status\b[^>]*>[^<]*unread/.test(conversationsView) || /<Status\b[^>]*>[^<]*unread/.test(conversationsPage)) {
+  failures.push('Conversations: unread quantities must use ConversationUnreadCount, not operational Status');
 }
 
 const groupsView = await read('src/features/groups/GroupsView.tsx');

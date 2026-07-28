@@ -5,9 +5,9 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken } from '@/lib/format';
 import { createSearchParams, omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Status, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
-import { ChatList, ContactList, LabelList, MessageTimeline } from './ConversationsView';
+import { ChatList, ContactList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
 import { DirectoryInspector, MessageInspector } from './Details';
 import { useChat, useChats, useContact, useContacts, useLabel, useLabels, useMessages } from './hooks';
 import { conversationRouteState, setConversationParam, type ConversationView } from './route-state';
@@ -157,7 +157,7 @@ export function ConversationsPage() {
               <>
                 <div className="px-4"><ProjectionStatus meta={chat.data?.meta} /></div>
                 <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
-                  <Status tone={selectedChat.unreadCount ? 'pending' : 'neutral'}>{selectedChat.unreadCount} unread</Status>
+                  <ConversationUnreadCount count={selectedChat.unreadCount} context="detail" />
                   <span>{humanizeToken(selectedChat.type)}</span>
                   <span className="font-mono text-fg-2">{selectedChat.id}</span>
                 </div>
