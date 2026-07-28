@@ -29,6 +29,23 @@ function ProjectionStatus({ meta }: { meta?: ProjectionMeta }) {
   return <div className="py-2"><Status tone={tone}>Projection {meta.syncStatus.replace('_', ' ')}</Status></div>;
 }
 
+export function getEmptyGroupProjectionState(meta: ProjectionMeta | undefined, search: string): { kind: 'empty' | 'loading' | 'error'; title: string; detail: string } {
+  const state = meta?.syncStatus;
+  if (!state || state === 'ready') {
+    return { kind: 'empty', title: 'No groups', detail: search ? 'No projected group matches this prefix.' : 'The ready group projection contains no groups.' };
+  }
+  if (state === 'syncing') {
+    return { kind: 'loading', title: 'Group projection syncing', detail: 'No usable group snapshot has been returned yet. Synchronization continues without a live WhatsApp fallback.' };
+  }
+  if (state === 'stale') {
+    return { kind: 'empty', title: 'Stale projection has no groups', detail: 'This empty snapshot is not authoritative. Refresh after projection recovery before concluding that the instance has no groups.' };
+  }
+  if (state === 'failed') {
+    return { kind: 'error', title: 'Group projection failed', detail: 'No usable group snapshot is available. The Console did not fall back to a live WhatsApp lookup.' };
+  }
+  return { kind: 'empty', title: 'Group projection not ready', detail: 'The projection has not produced an authoritative snapshot. An empty result is not being presented as an empty directory.' };
+}
+
 function Fail({ error, stale, onRetry }: { error: unknown; stale?: boolean; onRetry: () => void }) {
   const f = error instanceof ApiFailure ? error : undefined;
   const notReady = f?.code === 'projection_not_ready';
@@ -47,12 +64,10 @@ export function GroupsPage() {
   useEffect(() => setSearchDraft(route.search), [route.search]);
   const instanceScope = session.keyKind === 'api';
   const groupsReady = instanceScope && (capabilities.data?.capabilities.includes('groups_projection') ?? false);
-  const outboundReady = capabilities.data?.capabilities.includes('outbound_rate_limit') ?? false;
   const list = useGroups(route.search, route.cursor, groupsReady);
   const create = useCreateGroup();
   const groups = useMemo(() => list.data?.resource?.items ?? [], [list.data]);
-  const authoritative = list.data?.meta?.syncStatus === undefined || list.data.meta.syncStatus === 'ready';
-  const listParams = omitSearchParams(searchParams, ['create']);
+  const listParams = omitSearchParams(searchParams, ['create', 'tab']);
   const listUrl = withSearchParams('/groups', listParams);
   const setParam = (key: string, value?: string) => setSearchParams(updateSearchParams(searchParams, { [key]: value }, key === 'search' ? ['cursor'] : []), { replace: true });
   const applySearch = () => setParam('search', searchDraft.trim());
@@ -74,12 +89,6 @@ export function GroupsPage() {
         onNew={() => { create.reset(); setParam('create', '1'); }}
         commandsEnabled={groupsReady}
         ack={ack ? <StateNotice kind="info" title={`${ack} accepted`} detail="The refreshed group projection remains authoritative." /> : undefined}
-        metrics={list.data && groups.length > 0 ? {
-          loaded: groups.length,
-          members: groups.reduce((s, g) => s + (g.memberCount ?? 0), 0),
-          admins: groups.reduce((s, g) => s + (g.adminCount ?? 0), 0),
-          announce: groups.filter((g) => g.announce).length,
-        } : undefined}
         searchDraft={searchDraft}
         onSearchDraft={setSearchDraft}
         onApply={(e) => { e.preventDefault(); applySearch(); }}
@@ -87,8 +96,7 @@ export function GroupsPage() {
         projectionStatus={list.data ? <><ProjectionStatus meta={list.data.meta} />{!groupsReady ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable group projection visible while capability discovery no longer advertises groups_projection." /> : null}</> : undefined}
         notices={list.error && !list.data ? <Fail error={list.error} onRetry={() => list.refetch()} /> : list.error ? <Fail error={list.error} stale onRetry={() => list.refetch()} /> : undefined}
         initialLoading={list.isPending}
-        empty={Boolean(list.data) && groups.length === 0 && authoritative}
-        emptyDetail={route.search ? 'No projected group matches this prefix.' : 'The ready group projection contains no groups.'}
+        emptyState={list.data && groups.length === 0 ? getEmptyGroupProjectionState(list.data.meta, route.search) : undefined}
         groups={groups}
         selectedId={groupId}
         onOpen={openGroup}
@@ -97,7 +105,7 @@ export function GroupsPage() {
         onCursor={(v) => setParam('cursor', v)}
       />
 
-      {groupId ? <GroupWorkspace groupId={groupId} readEnabled={groupsReady} commandsEnabled={groupsReady} outboundEnabled={outboundReady} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
+      {groupId ? <GroupWorkspace groupId={groupId} readEnabled={groupsReady} commandsEnabled={groupsReady} activeTab={route.tab} onTab={(tab) => setParam('tab', tab === 'overview' ? undefined : tab)} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
       <CreateGroup open={route.create && groupsReady} pending={create.isPending} error={create.error} onClose={closeCreate} onCreate={(body) => create.mutate(body, { onSuccess: () => { setAck('Create group'); closeCreate(); } })} />
     </>
   );

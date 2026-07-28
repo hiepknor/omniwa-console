@@ -13,13 +13,11 @@ export function PreviewGroups() {
         refreshing={false}
         onRefresh={() => {}}
         onNew={() => {}}
-        metrics={{ loaded: 3, members: 62, admins: 7, announce: 2 }}
         searchDraft=""
         onSearchDraft={() => {}}
         onApply={(e) => e.preventDefault()}
         applyDisabled
         initialLoading={false}
-        empty={false}
         groups={groupsFixture}
         selectedId={g.id}
         onOpen={() => setOpen(true)}

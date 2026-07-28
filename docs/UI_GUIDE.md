@@ -81,6 +81,20 @@ metadata, and apply these rules consistently:
 Commands and acknowledgements never establish or clear this identity. A
 refreshed status remains authoritative.
 
+### Groups workspace boundaries
+
+`/groups` is the projected WhatsApp group directory and management workspace.
+Its selected resource and `overview`, `members`, or `settings` inspector tab are
+URL-addressable. Directory rows remain inspectable when a cached projection is
+usable but live group commands have been disabled.
+
+Group state, group type, and send mode are provider facts. They never establish
+the active account's role, management permissions, or campaign eligibility.
+Unknown settings remain visibly unreported and cannot be toggled until the
+backend returns their current state. One-off messaging navigates to Inbox;
+campaign target management navigates to Group Lists. The Groups feature owns
+neither workflow and never sends a message itself.
+
 Never persist credentials or place credential values in URLs, query keys, logs,
 resource models, or rendered diagnostics.
 

@@ -63,14 +63,16 @@ export const messagesFixture: MessageResource[] = [
 ] as unknown as MessageResource[];
 
 export const groupsFixture: GroupResource[] = [
-  { id: '120363001@g.us', subject: 'Support escalations', status: 'active', memberCount: 42, adminCount: 4, updatedAt: ago(1800), announce: true, members: [] },
-  { id: '120363002@g.us', subject: 'Order fulfilment', status: 'active', memberCount: 12, adminCount: 2, updatedAt: ago(86_400), announce: false, members: [] },
-  { id: '120363003@g.us', subject: 'VIP customers', status: 'inactive', memberCount: 8, adminCount: 1, updatedAt: ago(86_400 * 7), announce: true, members: [] },
+  { id: '120363001@g.us', subject: 'Support escalations', groupType: 'group', sendMode: 'admins_only', status: 'active', memberCount: 42, adminCount: 4, updatedAt: ago(1800), announce: true, members: [] },
+  { id: '120363002@g.us', subject: 'Order fulfilment', groupType: 'subgroup', sendMode: 'all_members', status: 'active', memberCount: 12, adminCount: 2, updatedAt: ago(86_400), announce: false, members: [] },
+  { id: '120363003@g.us', subject: 'VIP customers', groupType: 'community', sendMode: 'admins_only', status: 'suspended', memberCount: 8, adminCount: 1, updatedAt: ago(86_400 * 7), announce: true, members: [] },
 ] as unknown as GroupResource[];
 
 export const groupDetailFixture = {
   id: '120363001@g.us',
   subject: 'Support escalations',
+  groupType: 'group',
+  sendMode: 'admins_only',
   status: 'active',
   memberCount: 42,
   adminCount: 4,

@@ -1,5 +1,6 @@
 import { createElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import type { GroupResource } from '@/api/groups';
 import { GroupWorkspace } from './GroupWorkspace';
@@ -7,6 +8,7 @@ import { GroupWorkspace } from './GroupWorkspace';
 const group: GroupResource = {
   id: '120363001@g.us',
   subject: 'Operations',
+  groupType: 'group',
   status: 'active',
   members: [{ id: 'member-1', memberRef: '15551230000', role: 'member' }],
 };
@@ -23,6 +25,7 @@ vi.mock('./hooks', () => {
   const cachedGroup: GroupResource = {
     id: '120363001@g.us',
     subject: 'Operations',
+    groupType: 'group',
     status: 'active',
     members: [{ id: 'member-1', memberRef: '15551230000', role: 'member' }],
   };
@@ -36,9 +39,9 @@ vi.mock('./hooks', () => {
     usePromoteGroupMember: mutation,
     useRemoveGroupMember: mutation,
     useResetInvite: mutation,
-    useSendGroupText: mutation,
     useUpdateGroupSetting: mutation,
-    useUpdateGroup: mutation,
+    useUpdateGroupName: mutation,
+    useUpdateGroupDescription: mutation,
   };
 });
 
@@ -49,7 +52,8 @@ describe('GroupWorkspace capability loss', () => {
         groupId={group.id}
         readEnabled={false}
         commandsEnabled={false}
-        outboundEnabled
+        activeTab="settings"
+        onTab={vi.fn()}
         onClose={vi.fn()}
         onLeft={vi.fn()}
       />,
@@ -58,6 +62,45 @@ describe('GroupWorkspace capability loss', () => {
     expect(html).toContain('Operations');
     expect(html).toContain('Keeping the last usable group detail visible');
     expect(html).not.toContain('Loading group');
-    expect((html.match(/disabled=""/g) ?? []).length).toBeGreaterThanOrEqual(10);
+    expect((html.match(/disabled=""/g) ?? []).length).toBeGreaterThanOrEqual(7);
+  });
+
+  it('hands messaging and targeting to their owning routes without a send command', () => {
+    const html = renderToStaticMarkup(
+      <MemoryRouter>
+        <GroupWorkspace
+          groupId={group.id}
+          readEnabled
+          commandsEnabled
+          activeTab="overview"
+          onTab={vi.fn()}
+          onClose={vi.fn()}
+          onLeft={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(html).toContain('Open in Inbox');
+    expect(html).toContain('/chats/120363001%40g.us');
+    expect(html).toContain('Manage campaign targets');
+    expect(html).not.toContain('Send group text');
+  });
+
+  it('presents subject and description as separate commands', () => {
+    const html = renderToStaticMarkup(
+      <GroupWorkspace
+        groupId={group.id}
+        readEnabled
+        commandsEnabled
+        activeTab="settings"
+        onTab={vi.fn()}
+        onClose={vi.fn()}
+        onLeft={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('Update subject');
+    expect(html).toContain('Update description');
+    expect(html).toContain('independent provider commands');
   });
 });

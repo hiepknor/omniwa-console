@@ -20,6 +20,9 @@ type GoParticipant = {
   DisplayName?: string;
 };
 type GoGroup = {
+  AddressingMode?: string;
+  CreatorCountryCode?: string;
+  DisappearingTimer?: number;
   JID?: string;
   Name?: string;
   Topic?: string;
@@ -27,15 +30,24 @@ type GoGroup = {
   OwnerPN?: string;
   GroupCreated?: string;
   NameSetAt?: string;
+  TopicSetAt?: string;
   IsAnnounce?: boolean;
+  IsDefaultSubGroup?: boolean;
+  IsEphemeral?: boolean;
+  IsIncognito?: boolean;
   IsLocked?: boolean;
   IsJoinApprovalRequired?: boolean;
+  IsParent?: boolean;
+  LinkedParentJID?: string;
   MemberAddMode?: string;
+  ParticipantCount?: number;
   Suspended?: boolean;
   Participants?: GoParticipant[];
 };
 
 export type GroupMemberRole = 'superadmin' | 'admin' | 'member';
+export type GroupType = 'group' | 'community' | 'subgroup';
+export type GroupSendMode = 'admins_only' | 'all_members';
 
 export type GroupMemberResource = {
   id: string;
@@ -51,10 +63,21 @@ export type GroupResource = {
   instanceId?: string;
   subject?: string;
   description?: string;
+  groupType?: GroupType;
+  sendMode?: GroupSendMode;
   status?: string;
   memberCount?: number;
   adminCount?: number;
   updatedAt?: string;
+  createdAt?: string;
+  ownerRef?: string;
+  parentGroupId?: string;
+  defaultSubgroup?: boolean;
+  ephemeral?: boolean;
+  disappearingTimerSeconds?: number;
+  incognito?: boolean;
+  addressingMode?: string;
+  creatorCountryCode?: string;
   announce?: boolean;
   locked?: boolean;
   joinApproval?: boolean;
@@ -81,9 +104,7 @@ const GROUP_SETTING_ACTIONS: Record<GroupSetting, { on: GroupSettingAction; off:
   adminsOnlyAdd: { on: 'admin_add', off: 'all_member_add' },
 };
 
-export type GroupMetadataRequest = { subject?: string; description?: string };
 export type GroupMemberRequest = { jid: string };
-export type GroupTextMessageRequest = { text: string };
 export type GroupCreateRequest = { name: string; participants: string[] };
 
 export type GroupPagination = { nextCursor?: string | null; hasMore?: boolean };
@@ -99,20 +120,49 @@ function toMember(raw: GoParticipant): GroupMemberResource {
   };
 }
 
+function latestTimestamp(...values: Array<string | undefined>): string | undefined {
+  const reported = values.filter((value): value is string => Boolean(value));
+  return reported.reduce<string | undefined>((latest, candidate) => {
+    if (!latest) return candidate;
+    const latestTime = Date.parse(latest);
+    const candidateTime = Date.parse(candidate);
+    if (Number.isNaN(candidateTime)) return latest;
+    return Number.isNaN(latestTime) || candidateTime > latestTime ? candidate : latest;
+  }, undefined);
+}
+
 function toGroup(raw: GoGroup): GroupResource {
   const members = (raw.Participants ?? []).map(toMember);
+  const groupType: GroupType | undefined = raw.IsParent
+    ? 'community'
+    : raw.LinkedParentJID || raw.IsDefaultSubGroup
+      ? 'subgroup'
+      : raw.IsParent === false || raw.IsDefaultSubGroup === false
+        ? 'group'
+        : undefined;
   return {
     id: raw.JID ?? '',
     subject: raw.Name || undefined,
     description: raw.Topic || undefined,
-    status: raw.Suspended ? 'suspended' : 'active',
-    memberCount: members.length,
-    adminCount: members.filter((member) => member.role !== 'member').length,
-    updatedAt: raw.NameSetAt || raw.GroupCreated || undefined,
+    groupType,
+    sendMode: raw.IsAnnounce === undefined ? undefined : raw.IsAnnounce ? 'admins_only' : 'all_members',
+    status: raw.Suspended === undefined ? undefined : raw.Suspended ? 'suspended' : 'active',
+    memberCount: raw.ParticipantCount ?? (raw.Participants ? members.length : undefined),
+    adminCount: raw.Participants ? members.filter((member) => member.role !== 'member').length : undefined,
+    updatedAt: latestTimestamp(raw.TopicSetAt, raw.NameSetAt, raw.GroupCreated),
+    createdAt: raw.GroupCreated || undefined,
+    ownerRef: raw.OwnerPN || raw.OwnerJID || undefined,
+    parentGroupId: raw.LinkedParentJID || undefined,
+    defaultSubgroup: raw.IsDefaultSubGroup ?? undefined,
+    ephemeral: raw.IsEphemeral ?? undefined,
+    disappearingTimerSeconds: raw.DisappearingTimer,
+    incognito: raw.IsIncognito ?? undefined,
+    addressingMode: raw.AddressingMode || undefined,
+    creatorCountryCode: raw.CreatorCountryCode || undefined,
     announce: raw.IsAnnounce ?? undefined,
     locked: raw.IsLocked ?? undefined,
     joinApproval: raw.IsJoinApprovalRequired ?? undefined,
-    adminsOnlyAdd: raw.MemberAddMode === 'admin_add',
+    adminsOnlyAdd: raw.MemberAddMode === undefined ? undefined : raw.MemberAddMode === 'admin_add',
     members,
   };
 }
@@ -144,19 +194,12 @@ export async function getGroup(client: ApiClient, groupJid: string): Promise<Rea
   return { resource: projection.resource ? toGroup(projection.resource) : undefined, meta: projection.meta };
 }
 
-export async function updateGroup(
-  client: ApiClient,
-  groupJid: string,
-  body: GroupMetadataRequest,
-): Promise<CommandResult> {
-  let result: CommandResult = { disposition: 'completed', data: null };
-  if (body.subject !== undefined) {
-    result = unwrapCommand(await client.POST('/group/name', { body: { groupJid, name: body.subject } }));
-  }
-  if (body.description !== undefined) {
-    result = unwrapCommand(await client.POST('/group/description', { body: { groupJid, description: body.description } }));
-  }
-  return result;
+export async function updateGroupName(client: ApiClient, groupJid: string, name: string): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/group/name', { body: { groupJid, name } }));
+}
+
+export async function updateGroupDescription(client: ApiClient, groupJid: string, description: string): Promise<CommandResult> {
+  return unwrapCommand(await client.POST('/group/description', { body: { groupJid, description } }));
 }
 
 export async function getGroupInviteLink(client: ApiClient, groupJid: string): Promise<string | undefined> {
@@ -213,13 +256,4 @@ export async function promoteGroupMember(client: ApiClient, groupJid: string, me
 
 export async function demoteGroupMember(client: ApiClient, groupJid: string, memberJid: string): Promise<CommandResult> {
   return participantAction(client, groupJid, 'demote', [memberJid]);
-}
-
-export async function sendGroupTextMessage(
-  client: ApiClient,
-  groupJid: string,
-  body: GroupTextMessageRequest,
-): Promise<CommandResult> {
-  // swaggo mis-types /send/text `number`; the API accepts a plain-string recipient.
-  return unwrapCommand(await client.POST('/send/text', { body: { number: groupJid, text: body.text } as never }));
 }
