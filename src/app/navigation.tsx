@@ -6,6 +6,7 @@ export type NavItem = { to: string; label: string; icon: NavIcon; end?: boolean 
 export type NavSection = { label: string; items: NavItem[] };
 
 const overview = { to: '/overview', label: 'Overview', icon: 'overview', end: true } as const;
+const connection = { to: '/connection', label: 'Connection', icon: 'connection', end: true } as const;
 
 /** Navigation is derived from the session key kind, never hardcoded. */
 export function navigationForKeyKind(keyKind: KeyKind, recoveryAvailable = false): NavSection[] {
@@ -23,7 +24,7 @@ export function navigationForKeyKind(keyKind: KeyKind, recoveryAvailable = false
   }
   if (keyKind === 'api') {
     return [
-      { label: 'Runtime', items: [overview, { to: '/connection', label: 'Instance', icon: 'instances' }] },
+      { label: 'Runtime', items: [overview] },
       {
         label: 'Messaging',
         items: [
@@ -36,6 +37,11 @@ export function navigationForKeyKind(keyKind: KeyKind, recoveryAvailable = false
     ];
   }
   return [{ label: 'Runtime', items: [overview] }];
+}
+
+/** The active instance connection stays reachable as a pinned runtime destination. */
+export function pinnedNavigationForKeyKind(keyKind: KeyKind): NavItem | undefined {
+  return keyKind === 'api' ? connection : undefined;
 }
 
 export function scopeLabelForKeyKind(keyKind: KeyKind): string {

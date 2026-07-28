@@ -65,10 +65,10 @@ export function PreviewInstances() {
             </div>
           </Panel>
 
-          <Panel title="Destructive actions" description="Disconnect drops the live connection; logout unpairs; destroy permanently removes the instance.">
+          <Panel title="Destructive actions" description="Disconnect drops the live connection; Log out WhatsApp unpairs; destroy permanently removes the instance.">
             <div className="flex flex-wrap gap-2">
               <Button variant="danger">Disconnect…</Button>
-              <Button variant="danger">Log out…</Button>
+              <Button variant="danger">Log out WhatsApp…</Button>
               <Button variant="danger">Destroy…</Button>
             </div>
           </Panel>

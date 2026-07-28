@@ -54,7 +54,7 @@ for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10', '<I
 }
 
 const icon = await read('src/ui/Icon.tsx');
-for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 'signout:', 'strokeWidth="1.75"', 'aria-hidden']) {
+for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 'connection:', 'session:', 'strokeWidth="1.75"', 'aria-hidden']) {
   if (!icon.includes(marker)) failures.push(`src/ui/Icon.tsx: iconography contract is missing ${marker}`);
 }
 
@@ -82,8 +82,8 @@ const uiGallery = await read('src/app/UiGallery.tsx');
 if (!uiGallery.includes('<ApiFailureNotice error={galleryRateLimit}')) {
   failures.push('src/app/UiGallery.tsx: locked feedback fixtures must include the shared rate-limit notice');
 }
-if (!uiGallery.includes("['signout', 'Sign out']")) {
-  failures.push('src/app/UiGallery.tsx: locked iconography registry must include Sign out');
+if (!uiGallery.includes("['connection', 'Connection']") || !uiGallery.includes("['session', 'Session']")) {
+  failures.push('src/app/UiGallery.tsx: locked iconography registry must include Connection and Session');
 }
 if (!uiGallery.includes('const sessionUtilityItems') || !uiGallery.includes('Mobile navigation example')) {
   failures.push('src/app/UiGallery.tsx: compact session utilities must remain separate from navigation fixtures');
@@ -201,11 +201,8 @@ for (const marker of ['placement', 'onMouseEnter', 'onFocusCapture', 'visibility
 }
 
 const shell = await read('src/app/Shell.tsx');
-for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', 'max-[640px]:flex-row', '<NavigationItemContent', 'Compact session utility', 'aria-label="Sign out"', 'min-h-0 flex-1 overflow-auto', '<ConsoleFooter']) {
+for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', 'max-[640px]:flex-row', '<NavigationItemContent', 'aria-label="Runtime connection"', 'aria-label="Console session"', 'End Console session', 'min-h-0 flex-1 overflow-auto', '<ConsoleFooter']) {
   if (!shell.includes(marker)) failures.push(`src/app/Shell.tsx: responsive shell contract is missing ${marker}`);
-}
-if (shell.indexOf('Compact session utility') < shell.indexOf('</nav>')) {
-  failures.push('src/app/Shell.tsx: compact Sign out utility must remain outside primary navigation');
 }
 if (shell.includes('{/* Context */}') || shell.includes('>Connected</Status>')) {
   failures.push('src/app/Shell.tsx: runtime context belongs to ConsoleFooter, not the rail');
@@ -265,7 +262,7 @@ for (const marker of ['clearPairingQrCache', 'shouldShowPairingQr', 'shouldPollP
 }
 
 const pairingPage = await read('src/features/instances/PairingPage.tsx');
-for (const marker of ['title="Instance"', 'whatsappNameWhenLoggedIn', 'label="WhatsApp name"', '<ConnectionAndPairing', '<Status']) {
+for (const marker of ['title="Connection"', 'whatsappNameWhenLoggedIn', 'label="WhatsApp name"', '<ConnectionAndPairing', '<Status', 'End Console session', 'Log out WhatsApp…']) {
   if (!pairingPage.includes(marker)) failures.push(`src/features/instances/PairingPage.tsx: direct pairing route is missing ${marker}`);
 }
 if (pairingPage.includes('label="Runtime name"')) {

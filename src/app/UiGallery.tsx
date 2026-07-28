@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   ButtonLink,
+  buttonClassName,
   Checkbox,
   CloseButton,
   CursorPagination,
@@ -88,17 +89,18 @@ const inkRamp = [
 ];
 const navigationItems = [
   ['overview', 'Overview'],
-  ['instances', 'Instance'],
+  ['connection', 'Connection'],
   ['chats', 'Conversations'],
   ['groups', 'Groups'],
   ['campaigns', 'Campaigns'],
   ['events', 'Events'],
 ] as const;
 const sessionUtilityItems = [
-  ['signout', 'Sign out'],
+  ['session', 'Session'],
 ] as const;
+const primaryNavigationItems = navigationItems.filter(([icon]) => icon !== 'connection');
 
-function ShellAnatomy() {
+function ShellAnatomy({ onOpenSession }: { onOpenSession: () => void }) {
   return (
     <div className="grid gap-4">
       <div className="grid h-80 grid-cols-[224px_minmax(0,1fr)] overflow-hidden border border-line-strong bg-bg">
@@ -108,9 +110,11 @@ function ShellAnatomy() {
             <span className="grid min-w-0"><strong className="text-[13px] font-semibold">OmniWA Console</strong><span className="truncate font-mono text-[10px] text-fg-3">https://api.example.test</span></span>
           </div>
           <nav aria-label="Full rail example" className="grid flex-1 content-start gap-0.5 p-3">
-            {navigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0)}><NavigationItemContent icon={icon} label={label} /></div>)}
+            {primaryNavigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0)}><NavigationItemContent icon={icon} label={label} /></div>)}
           </nav>
-          <div className="border-t border-line p-2"><Button className="w-full">Sign out</Button></div>
+          <nav aria-label="Pinned runtime connection example" className="border-t border-line p-2">
+            <div className={buttonClassName('ghost', 'w-full gap-2 px-3')}><NavigationItemContent icon="connection" label="Connection" /></div>
+          </nav>
         </aside>
         <div className="flex min-w-0 flex-col overflow-hidden">
           <div className="min-h-0 flex-1 p-4"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Content viewport</span><div className="mt-3 h-28 border border-line-strong bg-surface" /></div>
@@ -121,21 +125,31 @@ function ShellAnatomy() {
         <div className="grid h-56 grid-cols-[64px_minmax(0,1fr)] overflow-hidden border border-line-strong">
           <aside className="flex min-h-0 flex-col border-r border-line-strong bg-surface">
             <nav aria-label="Compact rail example" className="grid flex-1 content-start gap-0.5 p-3">
-              {navigationItems.slice(0, 3).map(([icon, label], index) => <div key={icon} title={label} className={navigationItemClassName(index === 0, 'justify-center px-0')}><Icon name={icon} size="nav" /><span className="sr-only">{label}</span></div>)}
+              {primaryNavigationItems.slice(0, 3).map(([icon, label]) => <div key={icon} title={label} className={navigationItemClassName(false, 'justify-center px-0')}><Icon name={icon} size="nav" /><span className="sr-only">{label}</span></div>)}
             </nav>
-            <div className="grid place-items-center border-t border-line p-3"><Button aria-label="Sign out" title="Sign out" className="size-9"><Icon name="signout" size="nav" /></Button></div>
+            <nav aria-label="Pinned compact connection example" className="grid place-items-center border-t border-line p-3"><div title="Connection" className={buttonClassName('primary', 'size-9 gap-0 px-0')}><Icon name="connection" size="nav" /><span className="sr-only">Connection</span></div></nav>
           </aside>
           <div className="bg-bg p-3 text-[11px] uppercase tracking-wider text-fg-3">64px rail</div>
         </div>
         <div className="grid overflow-hidden border border-line-strong bg-bg">
           <div className="h-20 p-3 text-[11px] uppercase tracking-wider text-fg-3">Mobile content reserves bottom-nav space</div>
-          <div className="flex border-t border-line-strong bg-surface">
+          <div className="flex min-w-0 border-t border-line-strong bg-surface">
             <nav aria-label="Mobile navigation example" className="flex min-w-0 flex-1 overflow-x-auto p-2">
-              {navigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0, 'min-h-11 min-w-[72px] flex-col justify-center gap-0.5 px-2')}><Icon name={icon} size="nav" /><span className="text-[10px]">{label}</span></div>)}
+              {primaryNavigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0, 'min-h-11 min-w-[72px] flex-col justify-center gap-0.5 px-2')}><Icon name={icon} size="nav" /><span className="text-[10px]">{label}</span></div>)}
             </nav>
-            <div className="grid shrink-0 place-items-center border-l border-line p-2"><Button aria-label="Sign out" title="Sign out" className="size-10"><Icon name="signout" size="nav" /></Button></div>
+            <nav aria-label="Pinned mobile connection example" className="grid w-[60px] shrink-0 place-items-center border-l border-line p-2"><div title="Connection" className={buttonClassName('ghost', 'size-11 min-h-11 gap-0 px-0')}><Icon name="connection" size="nav" /><span className="sr-only">Connection</span></div></nav>
           </div>
         </div>
+      </div>
+      <div className="flex items-center justify-between gap-4 border border-line-strong p-3">
+        <div className="grid gap-1"><strong className="text-sm font-semibold">Admin / unknown session utility</strong><span className="text-xs text-fg-2">Opens session facts before ending the memory-only Console session.</span></div>
+        <Button
+          onClick={onOpenSession}
+          className="max-[640px]:size-11 max-[640px]:min-h-11"
+        >
+          <Icon name="session" size="nav" />
+          <span className="max-[640px]:sr-only">Session</span>
+        </Button>
       </div>
     </div>
   );
@@ -145,6 +159,7 @@ export function UiGallery() {
   const [tab, setTab] = useState('stream');
   const [drawer, setDrawer] = useState(false);
   const [dialogMode, setDialogMode] = useState<'ready' | 'pending'>();
+  const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const [switchEnabled, setSwitchEnabled] = useState(true);
   const [deliveryMode, setDeliveryMode] = useState('safe');
   const [filterVisible, setFilterVisible] = useState(true);
@@ -212,7 +227,7 @@ export function UiGallery() {
         </Section>
 
         <Section title="Shell + navigation">
-          <ShellAnatomy />
+          <ShellAnatomy onOpenSession={() => setSessionDialogOpen(true)} />
         </Section>
 
         <Section title="Buttons">
@@ -584,6 +599,26 @@ export function UiGallery() {
         <div className="grid gap-3">
           <StateNotice kind={dialogMode === 'pending' ? 'loading' : 'error'} title={dialogMode === 'pending' ? 'Command pending' : 'Destructive command'} detail={dialogMode === 'pending' ? 'Dismissal is locked until the request settles.' : 'This command retires the selected instance. It does not imply message delivery outcomes.'} />
           <Field label="Confirmation" description="Enter the instance ID before enabling the command.">{(id) => <Input id={id} defaultValue="inst_01" disabled={dialogMode === 'pending'} />}</Field>
+        </div>
+      </Dialog>
+      <Dialog
+        open={sessionDialogOpen}
+        onClose={() => setSessionDialogOpen(false)}
+        title="Console session"
+        footer={(
+          <>
+            <Button onClick={() => setSessionDialogOpen(false)}>Cancel</Button>
+            <Button variant="primary">End Console session</Button>
+          </>
+        )}
+      >
+        <div className="grid gap-4">
+          <p className="text-sm text-fg-2">End this browser session and return to Connect. This clears the in-memory credential without sending a server command.</p>
+          <DescriptionList>
+            <DescriptionItem label="API origin" mono>https://api.example.test</DescriptionItem>
+            <DescriptionItem label="Credential scope">Admin scope</DescriptionItem>
+            <DescriptionItem label="Credential lifetime">Memory-only</DescriptionItem>
+          </DescriptionList>
         </div>
       </Dialog>
     </div>

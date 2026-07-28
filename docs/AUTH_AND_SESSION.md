@@ -59,7 +59,7 @@ interface ConsoleSession {
 ```
 
 - The active admin key or instance token is held in React memory only.
-- Reload, sign-out, and authentication failure discard the active session and
+- Reload, `End Console session`, and authentication failure discard the active session and
   clear the TanStack Query cache.
 - Application startup removes credentials left in `sessionStorage` or
   `localStorage` by older Console builds; current builds never write them.
@@ -76,7 +76,7 @@ interface ConsoleSession {
 - Instance-token rotation must refresh the scoped client without persisting the
   old token elsewhere.
 - An admin may attach an existing instance token to the in-memory vault after a
-  reload. The value is cleared on reload, sign-out, or explicit forget; it is
+  reload. The value is cleared on reload, ending the Console session, or explicit forget; it is
   never added to instance resources or query caches.
 - The Console does not open `/ws`, because doing so would expose the global admin
   key to browser code. See `docs/REALTIME.md`.

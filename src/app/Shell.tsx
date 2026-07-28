@@ -1,12 +1,12 @@
-import { Suspense, useEffect, useLayoutEffect, useRef } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigationType } from 'react-router-dom';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { environmentForApiOrigin, WorkspaceEnvironmentProvider } from '@/components/EnvironmentBadge';
 import { useDocumentTitle } from '@/components/useDocumentTitle';
 import type { ConsoleSession } from '@/lib/session';
-import { Button, Icon, Logo, NavigationItemContent, navigationItemClassName } from '@/ui';
+import { Button, buttonClassName, DescriptionItem, DescriptionList, Dialog, Icon, Logo, NavigationItemContent, navigationItemClassName } from '@/ui';
 import { ConsoleFooter } from './ConsoleFooter';
-import { navigationForKeyKind, scopeLabelForKeyKind } from './navigation';
+import { navigationForKeyKind, pinnedNavigationForKeyKind, scopeLabelForKeyKind } from './navigation';
 import { horizontalRevealScrollLeft, mainScrollScope, scrollTopForNavigation } from './scroll-behavior';
 
 function environmentLabel(env: string): string {
@@ -21,7 +21,8 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
   const capabilities = useServerCapabilities();
   const recoveryAvailable = capabilities.data?.capabilities.includes('projection_failure_operations') ?? false;
   const sections = navigationForKeyKind(session.keyKind, recoveryAvailable);
-  const items = sections.flatMap((s) => s.items);
+  const pinnedNavigation = pinnedNavigationForKeyKind(session.keyKind);
+  const items = [...sections.flatMap((s) => s.items), ...(pinnedNavigation ? [pinnedNavigation] : [])];
   const active = items.find((i) => location.pathname === i.to || (!i.end && location.pathname.startsWith(`${i.to}/`)));
   useDocumentTitle(active?.label ?? 'OmniWA Console');
   const environment = environmentForApiOrigin(session.baseUrl);
@@ -31,6 +32,7 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
   const scrollPositions = useRef(new Map<string, number>());
   const scrollState = useRef({ locationKey: location.key, scope: mainScrollScope(location.pathname, location.search) });
   const scrollScope = mainScrollScope(location.pathname, location.search);
+  const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -119,25 +121,44 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
             ))}
           </nav>
 
-          {/* Compact session utility — separate from navigation destinations. */}
-          <div className="hidden shrink-0 items-center justify-center border-t border-line p-3 max-[900px]:flex max-[640px]:border-t-0 max-[640px]:border-l max-[640px]:p-2">
-            <Button onClick={onDisconnect} aria-label="Sign out" title="Sign out" className="size-9 max-sm:size-10">
-              <Icon name="signout" size="nav" />
-            </Button>
-          </div>
-
-          {/* Desktop session utility — separate from runtime context and navigation. */}
-          <footer className="p-3 border-t border-line max-[900px]:hidden">
-            <Button onClick={onDisconnect} aria-label="Sign out" title="Sign out" className="w-full">
-              Sign out
-            </Button>
-          </footer>
+          {pinnedNavigation ? (
+            <nav
+              aria-label="Runtime connection"
+              className="shrink-0 border-t border-line p-3 max-[640px]:w-[60px] max-[640px]:border-t-0 max-[640px]:border-l max-[640px]:p-2"
+            >
+              <NavLink
+                to={pinnedNavigation.to}
+                end={pinnedNavigation.end}
+                title={pinnedNavigation.label}
+                aria-label={pinnedNavigation.label}
+                className={({ isActive }) => buttonClassName(
+                  isActive ? 'primary' : 'ghost',
+                  'w-full gap-2 px-3 max-[900px]:size-9 max-[900px]:gap-0 max-[900px]:px-0 max-[640px]:size-11 max-[640px]:min-h-11',
+                )}
+              >
+                <Icon name={pinnedNavigation.icon} size="nav" />
+                <span className="max-[900px]:sr-only">{pinnedNavigation.label}</span>
+              </NavLink>
+            </nav>
+          ) : (
+            <div className="shrink-0 border-t border-line p-3 max-[640px]:w-[60px] max-[640px]:border-t-0 max-[640px]:border-l max-[640px]:p-2">
+              <Button
+                onClick={() => setSessionDialogOpen(true)}
+                aria-label="Console session"
+                title="Console session"
+                className="w-full max-[900px]:size-9 max-[640px]:size-11 max-[640px]:min-h-11"
+              >
+                <Icon name="session" size="nav" />
+                <span className="max-[900px]:sr-only">Session</span>
+              </Button>
+            </div>
+          )}
         </aside>
 
         <main id="main" tabIndex={-1} className="flex min-w-0 h-dvh flex-col overflow-hidden max-[640px]:pb-[61px]">
           <div ref={viewportRef} className="min-h-0 flex-1 overflow-auto overscroll-y-contain">
             <Suspense fallback={<div role="status" className="p-6 text-sm text-fg-3">Loading panel…</div>}>
-              <Outlet />
+              <Outlet context={{ onEndConsoleSession: onDisconnect }} />
             </Suspense>
           </div>
           <ConsoleFooter
@@ -149,6 +170,29 @@ export function Shell({ session, onDisconnect }: { session: ConsoleSession; onDi
             revision={capabilities.data?.revision}
           />
         </main>
+
+        <Dialog
+          open={sessionDialogOpen}
+          onClose={() => setSessionDialogOpen(false)}
+          title="Console session"
+          footer={(
+            <>
+              <Button onClick={() => setSessionDialogOpen(false)}>Cancel</Button>
+              <Button variant="primary" onClick={onDisconnect}>End Console session</Button>
+            </>
+          )}
+        >
+          <div className="grid gap-4">
+            <p className="text-sm text-fg-2">
+              End this browser session and return to Connect. This clears the in-memory credential without sending a server command.
+            </p>
+            <DescriptionList>
+              <DescriptionItem label="API origin" mono>{session.baseUrl}</DescriptionItem>
+              <DescriptionItem label="Credential scope">{scopeLabelForKeyKind(session.keyKind)}</DescriptionItem>
+              <DescriptionItem label="Credential lifetime">Memory-only</DescriptionItem>
+            </DescriptionList>
+          </div>
+        </Dialog>
       </div>
     </WorkspaceEnvironmentProvider>
   );

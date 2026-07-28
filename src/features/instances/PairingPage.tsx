@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { SESSION_QUERY_SCOPE } from '@/api/keys';
 import { Button, DescriptionItem, DescriptionList, Dialog, Field, Input, PageHeader, Panel, StateNotice, Status, type Tone } from '@/ui';
@@ -18,6 +19,8 @@ export type InstanceLifecycleController = {
   disconnect: LifecycleMutation;
   logout: ReturnType<typeof useLogoutInstance>;
 };
+
+type ConsoleOutletContext = { onEndConsoleSession: () => void };
 
 export function whatsappNameWhenLoggedIn(loggedIn: boolean | undefined, name: string | undefined): string | undefined {
   if (loggedIn !== true) return undefined;
@@ -103,7 +106,7 @@ function ActiveInstanceLifecycle({
 
   return (
     <>
-      <Panel title="Instance lifecycle" description="Disconnect drops the live connection; log out unpairs this WhatsApp account.">
+      <Panel title="Instance lifecycle" description="Disconnect drops the live connection; Log out WhatsApp unpairs this WhatsApp account.">
         <div className="grid gap-3">
           {lastAcknowledgement ? <InstanceCommandAcknowledgement action={lastAcknowledgement} /> : null}
           <div className="flex flex-wrap gap-2">
@@ -119,7 +122,7 @@ function ActiveInstanceLifecycle({
               disabled={!pairing.commandReady || pairing.commandPending || lifecyclePending || pairing.loggedIn !== true}
               onClick={() => openConfirm('logout')}
             >
-              Log out…
+              Log out WhatsApp…
             </Button>
           </div>
         </div>
@@ -129,7 +132,7 @@ function ActiveInstanceLifecycle({
         open={Boolean(confirm)}
         onClose={closeConfirm}
         closeDisabled={lifecyclePending}
-        title={confirm === 'logout' ? 'Log out instance?' : 'Disconnect instance?'}
+        title={confirm === 'logout' ? 'Log out WhatsApp account?' : 'Disconnect instance?'}
         footer={(
           <>
             <Button disabled={lifecyclePending} onClick={closeConfirm}>Cancel</Button>
@@ -157,10 +160,12 @@ function ActiveInstanceLifecycle({
 export function PairingPageView({
   instanceId,
   lifecycle,
+  onEndConsoleSession,
   pairing,
 }: {
   instanceId?: string;
   lifecycle: InstanceLifecycleController;
+  onEndConsoleSession: () => void;
   pairing: InstancePairingController;
 }) {
   const status = instanceStatusPresentation({
@@ -177,22 +182,32 @@ export function PairingPageView({
     <div className="grid gap-6 p-6 max-sm:p-4">
       <PageHeader
         eyebrow="Runtime"
-        title="Instance"
-        description="Inspect connection state and manage WhatsApp pairing for this runtime."
+        title="Connection"
+        description="Inspect the active runtime connection and manage WhatsApp pairing."
       />
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-        <Panel title="Active instance" description="Live token-scoped status; server facts remain authoritative.">
-          <div className="grid gap-3">
-            <Status tone={status.tone}>{status.label}</Status>
-            <DescriptionList>
-              <DescriptionItem label="Instance ID" mono>{instanceId ?? 'Not reported by this backend revision'}</DescriptionItem>
-              <DescriptionItem label="Connection">{pairing.statusReady ? (pairing.connected === true ? 'Connected' : 'Disconnected') : status.factFallback}</DescriptionItem>
-              <DescriptionItem label="Paired">{pairing.statusReady ? (pairing.loggedIn === true ? 'Yes' : 'No') : status.factFallback}</DescriptionItem>
-              {whatsappName ? <DescriptionItem label="WhatsApp name">{whatsappName}</DescriptionItem> : null}
-            </DescriptionList>
-            <StateNotice kind="info" title="Memory-only credential" detail="Reload or Sign out clears this credential from Console memory." />
-          </div>
-        </Panel>
+        <div className="grid content-start gap-4">
+          <Panel title="Active instance" description="Live token-scoped status; server facts remain authoritative.">
+            <div className="grid gap-3">
+              <Status tone={status.tone}>{status.label}</Status>
+              <DescriptionList>
+                <DescriptionItem label="Instance ID" mono>{instanceId ?? 'Not reported by this backend revision'}</DescriptionItem>
+                <DescriptionItem label="Connection">{pairing.statusReady ? (pairing.connected === true ? 'Connected' : 'Disconnected') : status.factFallback}</DescriptionItem>
+                <DescriptionItem label="Paired">{pairing.statusReady ? (pairing.loggedIn === true ? 'Yes' : 'No') : status.factFallback}</DescriptionItem>
+                {whatsappName ? <DescriptionItem label="WhatsApp name">{whatsappName}</DescriptionItem> : null}
+              </DescriptionList>
+              <StateNotice kind="info" title="Memory-only credential" detail="Reload or end the Console session to clear this credential from memory." />
+            </div>
+          </Panel>
+          <Panel title="Console session" description="This credential exists only in the current browser session.">
+            <div className="grid gap-3">
+              <p className="text-sm text-fg-2">
+                End the Console session and return to Connect. WhatsApp remains connected and paired.
+              </p>
+              <Button className="justify-self-start" onClick={onEndConsoleSession}>End Console session</Button>
+            </div>
+          </Panel>
+        </div>
         <div className="grid content-start gap-4">
           <ConnectionAndPairing controller={pairing} commandsDisabled={lifecyclePending} />
           <ActiveInstanceLifecycle instanceId={instanceId} lifecycle={lifecycle} pairing={pairing} />
@@ -204,6 +219,7 @@ export function PairingPageView({
 
 export function PairingPage() {
   const session = useApiSession();
+  const { onEndConsoleSession } = useOutletContext<ConsoleOutletContext>();
   const token = session.keyKind === 'api' ? session.apiKey : undefined;
   const queryScope = activeInstanceQueryScope(session.instanceId);
   const pairing = useInstancePairing(queryScope, token);
@@ -215,11 +231,11 @@ export function PairingPage() {
   if (!token) {
     return (
       <div className="grid gap-6 p-6 max-sm:p-4">
-        <PageHeader eyebrow="Runtime" title="Instance" description="Inspect connection state and manage WhatsApp pairing for this runtime." />
+        <PageHeader eyebrow="Runtime" title="Connection" description="Inspect the active runtime connection and manage WhatsApp pairing." />
         <StateNotice kind="empty" title="Instance credential required" detail="Connection and pairing uses the active instance credential. No provider request was sent." />
       </div>
     );
   }
 
-  return <PairingPageView instanceId={session.instanceId} pairing={pairing} lifecycle={lifecycle} />;
+  return <PairingPageView instanceId={session.instanceId} pairing={pairing} lifecycle={lifecycle} onEndConsoleSession={onEndConsoleSession} />;
 }

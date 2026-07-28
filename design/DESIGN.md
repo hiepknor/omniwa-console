@@ -144,9 +144,14 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Logo / Icon** — brand identity remains in `Logo`; every interface glyph is
   drawn by `Icon`. Icons use the canonical 12/14/18px sizes, 1.75px square-cap
   monochrome stroke, no emoji, text glyph, filled icon library, or feature-local
-  SVG. Icons are decorative and never replace a visible label; icon-only actions
-  require an explicit accessible name. Navigation uses `NavigationItemContent`
-  so full rail, compact rail, and mobile bottom nav cannot drift independently.
+  SVG. Icons are decorative and never supply an accessible name themselves;
+  icon-only controls require an explicit accessible name and tooltip. Visible
+  labels remain the default, with the compact rail and the pinned compact footer
+  controls as the frozen space-constrained exceptions. Navigation uses
+  `NavigationItemContent` so full rail, compact rail, and mobile bottom nav cannot
+  drift independently.
+  Connection uses the canonical chain-link glyph; the browser-session utility
+  uses the canonical key glyph. Neither reuses the instance-fleet server glyph.
 - **Status** — the canonical framed ink stamp from §2. All usages share the
   screentone registry in `statusMarks.ts`; notices and feedback map their state
   vocabulary into the same marks instead of copying gradients. Failed status
@@ -283,8 +288,13 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 
 - **Rail:** a fixed ~224px `--color-surface` column, 1px right border. Top: brand
   (logomark + `OmniWA Console` + base URL in mono 10px), then navigation without
-  a runtime-context interruption. Bottom: Sign out remains a separately framed
-  session utility, never a navigation destination.
+  a runtime-context interruption. For instance scope, bottom is the separately
+  framed, active-aware **Connection** destination. Admin and unknown scopes have
+  no current runtime connection; their bottom cell is a **Session** utility that
+  opens browser-session facts before offering `End Console session`. Connection
+  and Session share the canonical framed Button geometry in this footer cell;
+  Connection retains link semantics and an inverted active state, while Session
+  retains button semantics and opens a dialog.
 - **Console footer:** a persistent 40px status bar at the bottom of the main
   column, outside the page scroll container and never beneath the rail. It owns
   environment, credential scope, canonical capability-discovery Status, optional
@@ -301,11 +311,18 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   session key kind, not hardcoded.
   - **Admin** → *Platform*: Overview · Recovery (only when the server advertises
     `projection_failure_operations`) · Instances.
-  - **API** → *Runtime*: Overview, Instance · *Messaging*: Conversations, Groups,
-    Campaigns · *Observability*: Events. Instance is the stable destination for
-    active-runtime identity and lifecycle; connection and pairing are sections,
-    not navigation categories.
+  - **API** → *Runtime*: Overview plus the pinned **Connection** destination ·
+    *Messaging*: Conversations, Groups, Campaigns · *Observability*: Events.
+    Connection owns active-runtime identity, transport, pairing, lifecycle, and
+    the explicit memory-only Console-session exit.
   - **Unknown** → *Runtime*: Overview.
+- **Console session exit:** ending the Console session clears browser-memory
+  credentials and query state, returns to Connect, and sends no server command.
+  Instance scope exposes it in a separate `Console session` Panel on
+  `/connection`; it never shares the WhatsApp lifecycle command group. Admin and
+  unknown scopes expose the same facts and action in the Session dialog. The
+  wording remains distinct: `Disconnect…` drops transport, `Log out WhatsApp…`
+  unpairs WhatsApp, and `End Console session` clears only browser state.
 - **Page header:** one compact semantic header with an optional 11px uppercase
   section label, one page title, concise goal-oriented description, a secondary
   action cluster, and at most one primary action. It never owns filters,
@@ -320,9 +337,14 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   separately locked compact workspace bar at tablet/mobile widths.
 - **Responsive:** ≥900px full rail; 640–899px icon-only rail; <640px a fixed
   bottom nav bar with icon + visible 10px label while the main viewport reserves
-  its height. At compact widths Sign out is a separately framed session utility,
-  never a navigation destination. Dense form/action controls are at least 40px
-  on mobile; primary navigation targets remain at least 44px.
+  its height. The instance-scoped Connection destination remains pinned outside
+  the scrolling destination group at compact widths; admin/unknown Session stays
+  a separately framed utility outside navigation. Both pinned footer controls
+  collapse to the same icon-only framed control on compact tablet and mobile,
+  retain explicit accessible names and tooltips, and use a 44px mobile target.
+  Scrolling primary-navigation destinations keep their visible 10px mobile
+  labels. Dense form/action controls are at least 40px on mobile; primary
+  navigation targets remain at least 44px.
 - **Split workspaces:** directory + detail use two panes at 900px and wider.
   Below 900px the selected detail replaces the directory and exposes a
   full `Back` action; neither pane may remain positioned outside the viewport.
@@ -356,7 +378,7 @@ or `border-*` utilities and rely on generated CSS order.
 | CursorPagination | first page, next cursor, final page, responsive stacking |
 | ProgressBar | 0–99%, indeterminate, complete, failed at last known value |
 | Image | loading, ready, contain/cover, long caption, missing/error fallback |
-| Shell navigation | 224px full rail + Sign out, 64px icon rail, fixed mobile bottom nav |
+| Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav, pinned instance Connection, admin/unknown Session utility + dialog |
 | Console footer | ready capabilities, discovery pending, discovery failure, version absent, compact tablet, hidden mobile |
 | Workspace page / split workspace | PageHeader + two panes ≥900px, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |

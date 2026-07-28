@@ -84,9 +84,9 @@ reveals whose implicit dismissal is locked until the operator explicitly stores
 or confirms discarding the reveal.
 `/server/ok` is not connection state.
 
-## Active Instance — `/connection`, embedded in `/instances/:instanceId`
+## Active Connection — `/connection`, embedded in `/instances/:instanceId`
 
-**Status:** integrated. Instance-scoped sessions reach the Instance destination
+**Status:** integrated. Instance-scoped sessions reach the pinned Connection destination
 directly; admin sessions use the same surface after attaching the selected
 instance token.
 

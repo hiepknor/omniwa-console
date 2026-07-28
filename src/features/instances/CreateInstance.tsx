@@ -49,7 +49,7 @@ export function CreateInstance({ open, pending, error, created, onCreate, onClos
                 {(id) => <Input id={id} value={created.token} readOnly autoComplete="off" spellCheck={false} onFocus={(e) => e.currentTarget.select()} />}
               </Field>
               <p aria-live="polite" className="text-xs text-fg-3">{copyState === 'copied' ? 'Token copied to clipboard.' : copyState === 'failed' ? 'Copy failed. Select the token field and copy it manually.' : 'Copying does not confirm durable storage.'}</p>
-              <p className="text-xs text-fg-3">Instance <code className="font-mono">{created.instanceId}</code>. Reload or sign-out clears the in-memory token.</p>
+              <p className="text-xs text-fg-3">Instance <code className="font-mono">{created.instanceId}</code>. Reload or ending the Console session clears the in-memory token.</p>
             </>
           ) : (
             <Field label="Display name">
@@ -65,7 +65,7 @@ export function CreateInstance({ open, pending, error, created, onCreate, onClos
         title="Discard the one-time token?"
         footer={<><Button onClick={() => setDiscardOpen(false)}>Keep token visible</Button><Button variant="danger" onClick={onClose}>Discard token</Button></>}
       >
-        <p className="text-sm text-fg-2">Console will close this one-time reveal. The token cannot be displayed again, although the in-memory session remains available until reload or sign-out.</p>
+        <p className="text-sm text-fg-2">Console will close this one-time reveal. The token cannot be displayed again, although the in-memory session remains available until reload or the Console session ends.</p>
       </Dialog>
     </>
   );

@@ -29,15 +29,16 @@ function pairing(overrides: Partial<InstancePairingController> = {}): InstancePa
 
 describe('instance-scope page view', () => {
   it('renders backend-authenticated identity and the complete lifecycle surface', () => {
-    const html = renderToStaticMarkup(<PairingPageView instanceId="inst_01" pairing={pairing()} lifecycle={lifecycle()} />);
+    const html = renderToStaticMarkup(<PairingPageView instanceId="inst_01" pairing={pairing()} lifecycle={lifecycle()} onEndConsoleSession={vi.fn()} />);
     expect(html).toContain('Instance ID');
     expect(html).toContain('inst_01');
     expect(html).toContain('Disconnect…');
-    expect(html).toContain('Log out…');
+    expect(html).toContain('Log out WhatsApp…');
+    expect(html).toContain('End Console session');
   });
 
   it('marks legacy identity as unreported instead of inferring it', () => {
-    const html = renderToStaticMarkup(<PairingPageView pairing={pairing()} lifecycle={lifecycle()} />);
+    const html = renderToStaticMarkup(<PairingPageView pairing={pairing()} lifecycle={lifecycle()} onEndConsoleSession={vi.fn()} />);
     expect(html).toContain('Not reported by this backend revision');
   });
 
@@ -46,6 +47,7 @@ describe('instance-scope page view', () => {
     const html = renderToStaticMarkup(<PairingPageView
       instanceId="inst_01"
       lifecycle={lifecycle()}
+      onEndConsoleSession={vi.fn()}
       pairing={pairing({
         commandReady: false,
         connected: undefined,
@@ -57,11 +59,11 @@ describe('instance-scope page view', () => {
     expect(html).toContain('Status unavailable');
     expect(html).toContain('Read failed');
     expect(html).not.toContain('Reading status');
-    expect(html.match(/<button[^>]*disabled/g)?.length).toBeGreaterThanOrEqual(4);
+    expect(html.match(/<button[^>]*\sdisabled=""/g)?.length).toBeGreaterThanOrEqual(4);
   });
 
   it('locks connect, reconnect, disconnect, and logout while a lifecycle command is pending', () => {
-    const html = renderToStaticMarkup(<PairingPageView instanceId="inst_01" pairing={pairing()} lifecycle={lifecycle(true)} />);
-    expect(html.match(/<button[^>]*disabled/g)).toHaveLength(4);
+    const html = renderToStaticMarkup(<PairingPageView instanceId="inst_01" pairing={pairing()} lifecycle={lifecycle(true)} onEndConsoleSession={vi.fn()} />);
+    expect(html.match(/<button[^>]*\sdisabled=""/g)).toHaveLength(4);
   });
 });
