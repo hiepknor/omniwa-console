@@ -10,17 +10,27 @@ export function CredentialHealth() {
   const capabilities = useServerCapabilities();
   const supported = capabilities.data?.capabilities.includes('instance_credential_health') ?? false;
   const query = useCredentialHealth(session.keyKind === 'admin' && supported);
+  const incomplete = query.data ? [
+    query.data.currentKeyVersion,
+    query.data.instances.total,
+    query.data.instances.currentDigest,
+    query.data.instances.plaintextOnly,
+    query.data.instances.otherKeyVersion,
+    query.data.plaintextFallback.lookups,
+    query.data.plaintextFallback.affectedInstances,
+  ].some((value) => value === undefined) : false;
+  const metric = (value: number | undefined) => value === undefined ? '—' : String(value);
   if (session.keyKind !== 'admin') return null;
   return (
     <Panel
       title="Credential health"
       description="C3 observation facts only; Console never derives safeToRemove."
       actions={supported ? <Button onClick={() => query.refetch()} disabled={query.isFetching}>{query.isFetching ? 'Refreshing…' : 'Refresh health'}</Button> : undefined}
-      bodyClassName={query.data ? 'p-0' : undefined}
+      bodyPadding={query.data ? 'none' : 'default'}
     >
       {capabilities.isPending ? (
         <StateNotice kind="loading" title="Discovering capabilities" />
-      ) : capabilities.isError ? (
+      ) : capabilities.isError && !capabilities.data ? (
         <FailureNotice error={capabilities.error} onRetry={() => capabilities.refetch()} />
       ) : !supported ? (
         <StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise instance_credential_health; no migration conclusion is available." />
@@ -31,18 +41,19 @@ export function CredentialHealth() {
       ) : query.data ? (
         <div>
           {query.isError ? <div className="p-4"><FailureNotice error={query.error} stale onRetry={() => query.refetch()} /></div> : null}
+          {incomplete ? <div className="p-4"><StateNotice kind="info" title="Incomplete credential-health report" detail="Missing facts remain unreported; zero is shown only when the backend explicitly reports zero." /></div> : null}
           <MetricGrid
             columns={4}
-            className="border-t-0 border-l-0"
+            frame={query.isError || incomplete ? 'flush-after-content' : 'flush'}
             metrics={[
-              { label: 'Key version', value: String(query.data.currentKeyVersion) },
-              { label: 'Instances', value: String(query.data.instances.total) },
-              { label: 'Current digest', value: String(query.data.instances.currentDigest) },
-              { label: 'Plaintext only', value: String(query.data.instances.plaintextOnly) },
-              { label: 'Other key version', value: String(query.data.instances.otherKeyVersion) },
-              { label: 'Fallback lookups', value: String(query.data.plaintextFallback.lookups) },
-              { label: 'Affected instances', value: String(query.data.plaintextFallback.affectedInstances) },
-              { label: 'Last fallback', value: query.data.plaintextFallback.lastObservedAt ? (relativeTime(query.data.plaintextFallback.lastObservedAt) || 'Not reported') : 'Never observed' },
+              { label: 'Key version', value: metric(query.data.currentKeyVersion) },
+              { label: 'Instances', value: metric(query.data.instances.total) },
+              { label: 'Current digest', value: metric(query.data.instances.currentDigest) },
+              { label: 'Plaintext only', value: metric(query.data.instances.plaintextOnly) },
+              { label: 'Other key version', value: metric(query.data.instances.otherKeyVersion) },
+              { label: 'Fallback lookups', value: metric(query.data.plaintextFallback.lookups) },
+              { label: 'Affected instances', value: metric(query.data.plaintextFallback.affectedInstances) },
+              { label: 'Last fallback', value: query.data.plaintextFallback.lastObservedAt ? (relativeTime(query.data.plaintextFallback.lastObservedAt) || 'Not reported') : 'Not reported' },
             ]}
           />
           {query.data.instances.total === 0 ? <div className="p-4"><StateNotice kind="empty" title="Zero instances" detail="Zero instances is a 0/0 baseline, not adoption evidence." /></div> : null}

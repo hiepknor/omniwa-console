@@ -106,6 +106,33 @@ for (const marker of ['role="progressbar"', 'aria-valuenow', 'aria-valuetext', '
   if (!progress.includes(marker)) failures.push(`src/ui/ProgressBar.tsx: progress contract is missing ${marker}`);
 }
 
+const panel = await read('src/ui/Panel.tsx');
+for (const marker of ["bodyPadding = 'default'", "'compact-top': 'px-4 pb-4 pt-2'", "none: ''"]) {
+  if (!panel.includes(marker)) failures.push(`src/ui/Panel.tsx: controlled body-spacing contract is missing ${marker}`);
+}
+if (panel.includes('bodyClassName')) {
+  failures.push('src/ui/Panel.tsx: uncontrolled bodyClassName can reintroduce conflicting Panel spacing');
+}
+
+const metricGrid = await read('src/ui/MetricGrid.tsx');
+for (const marker of ["density = 'default'", "frame = 'standalone'", "density === 'compact' ? 'grid-cols-2'", "frame === 'standalone' && 'border-t border-l'", "frame === 'flush-after-content' && 'border-t'", 'break-words']) {
+  if (!metricGrid.includes(marker)) failures.push(`src/ui/MetricGrid.tsx: metric composition contract is missing ${marker}`);
+}
+
+for (const [path, marker] of Object.entries({
+  'src/features/platform/OverviewView.tsx': 'frame="flush"',
+  'src/features/instances/CredentialHealth.tsx': "'flush-after-content' : 'flush'",
+})) {
+  const source = await read(path);
+  if (!source.includes(marker) || source.includes('border-t-0 border-l-0')) {
+    failures.push(`${path}: full-bleed metrics must use the canonical contextual frame`);
+  }
+}
+
+if (!uiGallery.includes('Compact full-bleed metrics') || !uiGallery.includes('density="compact"') || !uiGallery.includes('frame="flush"')) {
+  failures.push('src/app/UiGallery.tsx: locked metrics fixtures must cover compact full-bleed composition');
+}
+
 const image = await read('src/ui/Image.tsx');
 for (const marker of ['alt: string', '<img', 'Loading image…', 'Image unavailable', '<figcaption']) {
   if (!image.includes(marker)) failures.push(`src/ui/Image.tsx: image contract is missing ${marker}`);
@@ -163,8 +190,8 @@ if (groupListEditor.includes('selectedCounts.eligible} eligible ·') || /<Status
 }
 
 const instancesPreview = await read('src/app/PreviewInstances.tsx');
-if (!instancesPreview.includes('<Image src="/ui-qr-sample.svg"')) {
-  failures.push('src/app/PreviewInstances.tsx: QR fixture must use the canonical Image primitive');
+if (!instancesPreview.includes('<ConnectionAndPairing') || instancesPreview.includes('ui-qr-sample.svg')) {
+  failures.push('src/app/PreviewInstances.tsx: pairing preview must use the production composition and avoid contradictory static QR state');
 }
 
 const pairingSurface = await read('src/features/instances/ConnectionAndPairing.tsx');
@@ -212,6 +239,22 @@ for (const [path, owner] of Object.entries({
   const source = await read(path);
   if (!source.includes(`import { ${owner}`) || !source.includes(`<${owner}`)) {
     failures.push(`${path}: deterministic preview must render its production ${owner}`);
+  }
+}
+
+const recoveryPreview = await read('src/app/PreviewRecovery.tsx');
+const recoveryInspector = await read('src/features/platform/RecoveryInspector.tsx');
+for (const marker of ['<RecoveryInspector', '<RecoveryCommandDialog']) {
+  if (!recoveryPreview.includes(marker)) failures.push(`src/app/PreviewRecovery.tsx: recovery preview must include shared ${marker.slice(1)}`);
+}
+for (const marker of ['<Drawer', '<Panel', 'title="Failure facts"', 'label="Event key"', 'title="Recovery actions"', '<Dialog']) {
+  if (!recoveryInspector.includes(marker)) failures.push(`src/features/platform/RecoveryInspector.tsx: recovery inspector contract is missing ${marker}`);
+}
+
+for (const path of ['src/features/instances/CreateInstance.tsx', 'src/features/instances/InstanceWorkspace.tsx']) {
+  const source = await read(path);
+  for (const marker of ['Discard without storing…', 'Copying does not confirm durable storage.', 'closeDisabled=']) {
+    if (!source.includes(marker)) failures.push(`${path}: one-time secret dismissal contract is missing ${marker}`);
   }
 }
 

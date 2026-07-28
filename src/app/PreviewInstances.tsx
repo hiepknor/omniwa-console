@@ -1,14 +1,29 @@
 import { useState } from 'react';
+import { ConnectionAndPairing, type InstancePairingController } from '@/features/instances/ConnectionAndPairing';
 import { InstancesView } from '@/features/instances/InstancesView';
-import { Button, DescriptionItem, DescriptionList, Drawer, Field, Image, Input, Panel, Status, Switch } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Drawer, Field, Input, Panel, Status, Switch } from '@/ui';
 import { instancesFixture } from './preview-fixtures';
 
 /** Dev-only: Instances table + an open workspace drawer, with sample data. */
 export function PreviewInstances() {
   const [open, setOpen] = useState(true);
   const instance = instancesFixture[0];
+  const pairingController = {
+    commandError: null,
+    commandPending: false,
+    commandReady: true,
+    connected: true,
+    lastAcknowledgement: undefined,
+    loggedIn: true,
+    pairing: false,
+    qr: { data: undefined, error: null, refetch: async () => undefined },
+    reconnectSession: () => {},
+    startPairing: () => {},
+    status: { data: { connected: true, loggedIn: true }, error: null, isError: false, isPending: false, refetch: async () => undefined },
+    statusReady: true,
+  } as unknown as InstancePairingController;
   return (
-    <div className="min-h-dvh bg-bg">
+    <main className="min-h-dvh bg-bg">
       <InstancesView
         search=""
         status=""
@@ -19,7 +34,7 @@ export function PreviewInstances() {
         onNew={() => {}}
         instances={instancesFixture}
         totalLoaded={instancesFixture.length}
-        selectedId={instance.id}
+        selectedId={open ? instance.id : undefined}
         onOpen={() => setOpen(true)}
       />
 
@@ -27,7 +42,7 @@ export function PreviewInstances() {
         <div className="grid gap-4">
           <Status tone="ok">Paired</Status>
 
-          <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyClassName="pt-2">
+          <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyPadding="compact-top">
             <DescriptionList>
               <DescriptionItem label="Metadata status">Connected</DescriptionItem>
               <DescriptionItem label="Live connection">Connected</DescriptionItem>
@@ -38,16 +53,7 @@ export function PreviewInstances() {
             </DescriptionList>
           </Panel>
 
-          <Panel title="Connection & pairing" description="Connected and paired are different server facts.">
-            <div className="grid gap-3">
-              <Image src="/ui-qr-sample.svg" alt="Sample QR code for the pairing preview" aspect="square" fit="contain" className="w-52 justify-self-start" imageClassName="bg-surface p-3" />
-              <p className="text-xs text-fg-3">WhatsApp → Linked Devices → Link a Device. Pairing is complete only when status reports loggedIn.</p>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="primary">Restart pairing</Button>
-                <Button>Reconnect</Button>
-              </div>
-            </div>
-          </Panel>
+          <ConnectionAndPairing controller={pairingController} />
 
           <Panel title="Advanced settings" description="Instance-scoped live configuration. Saving does not imply provider delivery.">
             <div className="grid gap-3">
@@ -68,6 +74,6 @@ export function PreviewInstances() {
           </Panel>
         </div>
       </Drawer>
-    </div>
+    </main>
   );
 }

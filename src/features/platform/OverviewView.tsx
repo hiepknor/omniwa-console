@@ -20,7 +20,7 @@ export type OverviewViewProps = {
   health?: ServerHealthResource;
   overview?: OverviewResource;
   projection?: ProjectionHealthResource;
-  recovery: 'available' | 'pending' | 'unsupported';
+  recovery: 'available' | 'pending' | 'unsupported' | 'error';
 };
 
 export function OverviewView(props: OverviewViewProps) {
@@ -56,7 +56,7 @@ export function OverviewView(props: OverviewViewProps) {
           title="Control plane and instance health"
           description={`Generated ${relativeTime(health.generatedAt) || 'at an unreported time'}. Connection, projection, and throttling remain independent.`}
           actions={<Status tone={health.api.status === 'healthy' ? 'ok' : 'degraded'}>{humanizeToken(health.api.status)}</Status>}
-          bodyClassName="p-0"
+          bodyPadding="none"
         >
           {health.instances.length === 0 ? (
             <div className="p-4">
@@ -76,9 +76,9 @@ export function OverviewView(props: OverviewViewProps) {
                 {health.instances.map((i) => (
                   <Tr key={i.instanceId}>
                     <Td className="font-mono text-xs text-fg-2">{i.instanceId}</Td>
-                    <Td><Status tone={i.connection.connected ? 'ok' : 'failed'}>{humanizeToken(i.connection.status)}</Status></Td>
+                    <Td><Status tone={i.connection.connected === true ? 'ok' : i.connection.connected === false ? 'failed' : 'neutral'}>{humanizeToken(i.connection.status)}</Status></Td>
                     <Td><Status tone={projectionTone(i.projection.status)}>{humanizeToken(i.projection.status)}</Status></Td>
-                    <Td><Status tone={i.throttling.observed ? 'degraded' : 'neutral'}>{humanizeToken(i.throttling.status)}</Status></Td>
+                    <Td><Status tone={i.throttling.observed === true ? 'degraded' : 'neutral'}>{humanizeToken(i.throttling.status)}</Status></Td>
                   </Tr>
                 ))}
               </tbody>
@@ -91,10 +91,12 @@ export function OverviewView(props: OverviewViewProps) {
         <Panel
           title="Persisted metrics"
           description={`${humanizeToken(overview.scope.type)} scope · ${props.window} · generated ${relativeTime(overview.generatedAt) || 'at an unreported time'}`}
-          bodyClassName="p-0"
+          bodyPadding="none"
         >
           <MetricGrid
             columns={5}
+            density="compact"
+            frame="flush"
             metrics={[
               { label: 'Instances', value: formatCount(overview.instances.total) },
               { label: 'Connected', value: formatCount(overview.instances.connected) },
@@ -107,7 +109,6 @@ export function OverviewView(props: OverviewViewProps) {
               { label: 'Contacts', value: formatCount(overview.projections.contacts) },
               { label: 'Events', value: formatCount(overview.projections.events) },
             ]}
-            className="border-t-0 border-l-0"
           />
         </Panel>
       ) : null}
@@ -117,7 +118,7 @@ export function OverviewView(props: OverviewViewProps) {
           title="Projection posture"
           description={`Aggregate snapshot generated ${relativeTime(projection.generatedAt) || 'at an unreported time'}.`}
           actions={<Status tone={projectionTone(projection.status)}>{humanizeToken(projection.status)}</Status>}
-          bodyClassName="p-0"
+          bodyPadding="none"
         >
           {projection.resources.length === 0 ? (
             <div className="p-4">
@@ -160,6 +161,8 @@ export function OverviewView(props: OverviewViewProps) {
             <p className="text-sm text-fg-2">Review dead letters without inferring recovery from aggregate health.</p>
             <ButtonLink to="/recovery">Open recovery</ButtonLink>
           </div>
+        ) : props.recovery === 'error' ? (
+          <StateNotice kind="error" title="Recovery availability unknown" detail="Capability discovery failed. Retry the capability read before relying on Recovery availability." />
         ) : (
           <StateNotice kind="empty" title="Recovery unavailable" detail="Recovery requires admin scope and the projection_failure_operations capability." />
         )}

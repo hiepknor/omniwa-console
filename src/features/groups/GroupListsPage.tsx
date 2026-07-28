@@ -40,7 +40,7 @@ export function GroupListsPage() {
         <PageHeader eyebrow="Messaging / Groups" title="Group Lists" description="Versioned sets of WhatsApp groups with backend-owned send eligibility." actions={<><Button disabled={query.isFetching} onClick={() => query.refetch()}>{query.isFetching ? 'Refreshing…' : 'Refresh'}</Button><ButtonLink to="/groups/lists/new" variant="primary">New group list</ButtonLink></>} />
         <GroupSectionTabs />
         {!enabled ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable list page visible; mutations remain unavailable." /> : null}
-        <Panel title="Group List directory" description="Name search, cursor, and selected list remain URL-addressable." bodyClassName="p-0">
+        <Panel title="Group List directory" description="Name search, cursor, and selected list remain URL-addressable." bodyPadding="none">
           <FilterToolbar as="form" onSubmit={(event) => { event.preventDefault(); setParam('search', searchDraft.trim()); }}>
             <Field label="Prefix search" className="min-w-56 flex-1">{(id) => <Input id={id} type="search" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} />}</Field>
             <div className="flex items-end"><Button type="submit" disabled={searchDraft.trim() === route.search || query.isFetching}>Apply search</Button></div>

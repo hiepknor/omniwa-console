@@ -71,7 +71,13 @@ advanced settings use the explicitly attached instance token. Metadata reads are
 `/instance/info/{instanceId}` remain compatible with servers that do not yet
 advertise metadata views.
 Credential Health renders factual C3 migration signals, treats zero instances
-as non-representative, and never derives a plaintext-removal decision.
+as non-representative, preserves missing counters as unreported, and never
+derives a plaintext-removal decision. Missing metadata connection facts remain
+`unknown` rather than disconnected. Advanced settings use a full-snapshot PUT;
+editing is disabled unless every current setting is reported, preventing an
+unknown value from being overwritten. Create and rotation tokens are one-time
+reveals whose implicit dismissal is locked until the operator explicitly stores
+or confirms discarding the reveal.
 `/server/ok` is not connection state.
 
 ## Active Instance — `/connection`, embedded in `/instances/:instanceId`
@@ -90,7 +96,9 @@ POST /instance/reconnect
 The QR cache is cleared before every connect/restart attempt and whenever live
 status is not connected or is already paired. QR polling runs only while the
 pairing surface is mounted, connected, unpaired, and not submitting a command.
-An acknowledgement never substitutes for refreshed status. Instance scope does
+Connect, reconnect, disconnect, and logout fail closed when either live status
+boolean is missing or its latest refresh failed. An acknowledgement never
+substitutes for refreshed status. Instance scope does
 not expose or infer the configured admin Instance Name. The status `Name` is
 rendered as WhatsApp name only after authoritative status reports `LoggedIn` and
 the value is non-empty; `Connected` does not gate it. During a failed refresh,
@@ -348,7 +356,10 @@ Filters, page size, opaque cursor, and selected failure are URL-backed. These
 operations require the admin key and the `projection_failure_operations`
 capability. Replay and discard are explicit, audited server commands: Console
 does not optimistically remove a failure, automatically retry a command, or
-render acknowledgement as recovered state.
+render acknowledgement as recovered state. A failed capability refresh may
+leave the cached failure directory inspectable, but replay/discard remain
+disabled. The shared inspector preserves the full event key in its fact list and
+separates audited actions from failure identity and status.
 
 ## Unsupported routes
 

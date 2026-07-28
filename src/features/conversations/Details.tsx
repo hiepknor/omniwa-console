@@ -19,7 +19,7 @@ export function DirectoryInspector({ contact, label, error, loading, onRetry, on
       ) : error && !contact && !label ? (
         <FailureNotice error={error} onRetry={onRetry} />
       ) : contact ? (
-        <Panel title="Normalized identity" description="Read-only projection; phone identity is redacted by the backend." bodyClassName="pt-2">
+        <Panel title="Normalized identity" description="Read-only projection; phone identity is redacted by the backend." bodyPadding="compact-top">
           <DescriptionList>
             <DescriptionItem label="JID" mono>{contact.id}</DescriptionItem>
             <DescriptionItem label="Username">{contact.username ?? 'Not reported'}</DescriptionItem>
@@ -30,7 +30,7 @@ export function DirectoryInspector({ contact, label, error, loading, onRetry, on
           </DescriptionList>
         </Panel>
       ) : label ? (
-        <Panel title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments." bodyClassName="pt-2">
+        <Panel title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments." bodyPadding="compact-top">
           <DescriptionList>
             <DescriptionItem label="Label ID" mono>{label.id}</DescriptionItem>
             <DescriptionItem label="Name">{label.name ?? 'Not reported'}</DescriptionItem>
@@ -66,7 +66,7 @@ export function MessageInspector({ messageId, loadedChat, enabled, onClose }: { 
         ) : resource ? (
           <>
             <ProjectionStatus meta={message.data?.meta} />
-            <Panel title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyClassName="pt-2">
+            <Panel title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyPadding="compact-top">
               <DescriptionList>
                 <DescriptionItem label="Chat" mono>{resource.chatId}</DescriptionItem>
                 <DescriptionItem label="Direction">{humanizeToken(resource.direction)}</DescriptionItem>

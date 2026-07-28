@@ -52,6 +52,17 @@ describe('Groups directory', () => {
     expect(html).toContain('disabled=""');
   });
 
+  it('renders each authoritative Group summary fact as an independent metric', () => {
+    const html = render({ summary: { total: 120, active: 105, suspended: 2, communities: 4, subgroups: 18, adminsOnlySend: 30 } });
+
+    for (const label of ['All groups', 'Active', 'Suspended', 'Communities', 'Subgroups', 'Admins-only send']) {
+      expect(html).toContain(label);
+    }
+    expect(html).not.toContain('Communities / subgroups');
+    expect(html).toContain('grid-cols-2');
+    expect(html).toContain('lg:grid-cols-6');
+  });
+
   it('renders the caller-provided non-authoritative empty state', () => {
     const html = render({ groups: [], emptyState: { kind: 'loading', title: 'Group projection syncing', detail: 'Waiting for a usable snapshot.' } });
     expect(html).toContain('Group projection syncing');

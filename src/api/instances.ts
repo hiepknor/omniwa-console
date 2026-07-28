@@ -10,7 +10,7 @@ type GoAdvancedSettings = components['schemas']['github_com_evolution-foundation
 type RotationPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_instance_credential.RotationResult'];
 type CredentialHealthPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_instance_credential.CredentialHealth'];
 
-export type InstanceStatus = 'connected' | 'disconnected';
+export type InstanceStatus = 'connected' | 'disconnected' | 'unknown';
 
 /**
  * Console-facing instance shape, adapted from omniwa-go's whatsmeow-shaped
@@ -21,7 +21,7 @@ export type InstanceResource = {
   id: string;
   displayName?: string;
   status: InstanceStatus;
-  connected: boolean;
+  connected?: boolean;
   jid?: string;
   credentialVersion?: number;
   webhook?: string;
@@ -30,23 +30,24 @@ export type InstanceResource = {
   updatedAt?: string;
 };
 
-export type InstanceStatusResource = { connected: boolean; loggedIn: boolean; name?: string };
+export type InstanceStatusResource = { connected?: boolean; loggedIn?: boolean; name?: string };
 export type InstanceQr = { qrcode?: string; code?: string };
 export type InstanceAdvancedSettings = {
-  alwaysOnline: boolean;
-  readMessages: boolean;
-  rejectCall: boolean;
-  ignoreGroups: boolean;
-  ignoreStatus: boolean;
-  msgRejectCall: string;
+  alwaysOnline?: boolean;
+  readMessages?: boolean;
+  rejectCall?: boolean;
+  ignoreGroups?: boolean;
+  ignoreStatus?: boolean;
+  msgRejectCall?: string;
 };
+export type CompleteInstanceAdvancedSettings = Required<InstanceAdvancedSettings>;
 export type InstanceCreateRequest = { name?: string };
 export type InstanceCredentialSecret = { instanceId: string; token: string; credentialVersion: number; rotatedAt?: string };
 export type InstanceCredentialHealth = {
   generatedAt?: string;
-  currentKeyVersion: number;
-  instances: { total: number; currentDigest: number; plaintextOnly: number; otherKeyVersion: number };
-  plaintextFallback: { lookups: number; affectedInstances: number; firstObservedAt?: string; lastObservedAt?: string };
+  currentKeyVersion?: number;
+  instances: { total?: number; currentDigest?: number; plaintextOnly?: number; otherKeyVersion?: number };
+  plaintextFallback: { lookups?: number; affectedInstances?: number; firstObservedAt?: string; lastObservedAt?: string };
 };
 
 export type InstancePagination = { nextCursor?: string | null; hasMore?: boolean };
@@ -56,12 +57,12 @@ export type InstanceListPage = { items: InstanceResource[]; pagination: Instance
 const NO_PAGINATION: InstancePagination = { nextCursor: null, hasMore: false };
 
 function toInstance(raw: GoInstance | MetadataInstance): InstanceResource {
-  const connected = raw.connected ?? false;
+  const connected = raw.connected;
   return {
     id: raw.id ?? '',
     displayName: raw.name || undefined,
     connected,
-    status: connected ? 'connected' : 'disconnected',
+    status: connected === true ? 'connected' : connected === false ? 'disconnected' : 'unknown',
     jid: raw.jid || undefined,
     credentialVersion: 'credentialVersion' in raw ? raw.credentialVersion : undefined,
     webhook: raw.webhook || undefined,
@@ -120,16 +121,16 @@ export async function getInstanceCredentialHealth(client: ApiClient): Promise<In
   const data = unwrap<CredentialHealthPayload>(await client.GET('/instance/credential-health'));
   return {
     generatedAt: data?.generatedAt,
-    currentKeyVersion: data?.currentKeyVersion ?? 0,
+    currentKeyVersion: data?.currentKeyVersion,
     instances: {
-      total: data?.instances?.total ?? 0,
-      currentDigest: data?.instances?.currentDigest ?? 0,
-      plaintextOnly: data?.instances?.plaintextOnly ?? 0,
-      otherKeyVersion: data?.instances?.otherKeyVersion ?? 0,
+      total: data?.instances?.total,
+      currentDigest: data?.instances?.currentDigest,
+      plaintextOnly: data?.instances?.plaintextOnly,
+      otherKeyVersion: data?.instances?.otherKeyVersion,
     },
     plaintextFallback: {
-      lookups: data?.plaintextFallback?.lookups ?? 0,
-      affectedInstances: data?.plaintextFallback?.affectedInstances ?? 0,
+      lookups: data?.plaintextFallback?.lookups,
+      affectedInstances: data?.plaintextFallback?.affectedInstances,
       firstObservedAt: data?.plaintextFallback?.firstObservedAt,
       lastObservedAt: data?.plaintextFallback?.lastObservedAt,
     },
@@ -140,7 +141,7 @@ export async function getInstanceCredentialHealth(client: ApiClient): Promise<In
 
 export async function getInstanceStatus(client: ApiClient): Promise<InstanceStatusResource> {
   const data = unwrap<GoStatus>(await client.GET('/instance/status'));
-  return { connected: data?.Connected ?? false, loggedIn: data?.LoggedIn ?? false, name: data?.Name || undefined };
+  return { connected: data?.Connected, loggedIn: data?.LoggedIn, name: data?.Name || undefined };
 }
 
 export async function getInstanceQr(client: ApiClient): Promise<InstanceQr> {
@@ -166,13 +167,25 @@ export async function logoutInstance(client: ApiClient): Promise<CommandResult> 
 
 function toAdvancedSettings(raw: GoAdvancedSettings | undefined): InstanceAdvancedSettings {
   return {
-    alwaysOnline: raw?.alwaysOnline ?? false,
-    readMessages: raw?.readMessages ?? false,
-    rejectCall: raw?.rejectCall ?? false,
-    ignoreGroups: raw?.ignoreGroups ?? false,
-    ignoreStatus: raw?.ignoreStatus ?? false,
-    msgRejectCall: raw?.msgRejectCall ?? '',
+    alwaysOnline: raw?.alwaysOnline,
+    readMessages: raw?.readMessages,
+    rejectCall: raw?.rejectCall,
+    ignoreGroups: raw?.ignoreGroups,
+    ignoreStatus: raw?.ignoreStatus,
+    msgRejectCall: raw?.msgRejectCall,
   };
+}
+
+export function completeAdvancedSettings(value: InstanceAdvancedSettings | undefined): CompleteInstanceAdvancedSettings | undefined {
+  if (
+    typeof value?.alwaysOnline !== 'boolean'
+    || typeof value.readMessages !== 'boolean'
+    || typeof value.rejectCall !== 'boolean'
+    || typeof value.ignoreGroups !== 'boolean'
+    || typeof value.ignoreStatus !== 'boolean'
+    || typeof value.msgRejectCall !== 'string'
+  ) return undefined;
+  return value as CompleteInstanceAdvancedSettings;
 }
 
 export async function getAdvancedSettings(client: ApiClient, instanceId: string): Promise<InstanceAdvancedSettings> {
@@ -186,7 +199,7 @@ export async function getAdvancedSettings(client: ApiClient, instanceId: string)
 export async function updateAdvancedSettings(
   client: ApiClient,
   instanceId: string,
-  body: InstanceAdvancedSettings,
+  body: CompleteInstanceAdvancedSettings,
 ): Promise<CommandResult> {
   return unwrapCommand(
     await client.PUT('/instance/{instanceId}/advanced-settings', { params: { path: { instanceId } }, body }),

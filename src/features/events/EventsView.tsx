@@ -46,7 +46,7 @@ export function EventsView(props: EventsViewProps) {
         <Status tone="neutral">No historical backfill</Status>
       </div>
 
-      <Panel title="Event history" description="Exact type filter, opaque cursor, and selected event remain URL-addressable." bodyClassName="p-0">
+      <Panel title="Event history" description="Exact type filter, opaque cursor, and selected event remain URL-addressable." bodyPadding="none">
         <FilterToolbar as="form" onSubmit={props.onApply}>
           <Field label="Exact event type" className="min-w-56 flex-1">{(id) => <Input id={id} type="search" maxLength={64} value={props.typeDraft} placeholder="Message" onChange={(e) => props.onTypeDraft(e.target.value)} />}</Field>
           <div className="flex items-end"><Button type="submit" disabled={props.applyDisabled}>Apply filter</Button></div>

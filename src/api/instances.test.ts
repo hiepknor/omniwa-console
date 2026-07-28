@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from './client';
-import { createInstance, getInstance, getInstanceCredentialHealth, listInstances, rotateInstanceToken } from './instances';
+import { completeAdvancedSettings, createInstance, getInstance, getInstanceCredentialHealth, getInstanceStatus, listInstances, rotateInstanceToken } from './instances';
 
 function ok(data: unknown) { return { data, response: new Response(null, { status: 200 }) }; }
 
@@ -33,6 +33,18 @@ describe('credential-safe instance adapter', () => {
     const detail = await getInstance(client, 'instance-1', false);
     expect(list.resource?.items[0]).not.toHaveProperty('token');
     expect(detail.resource).not.toHaveProperty('token');
+  });
+
+  it('preserves missing connection and status facts as unknown', async () => {
+    const GET = vi.fn()
+      .mockResolvedValueOnce(ok({ message: 'success', data: [{ id: 'instance-1' }] }))
+      .mockResolvedValueOnce(ok({ message: 'success', data: {} }));
+    const client = { GET } as unknown as ApiClient;
+    const list = await listInstances(client, { metadata: true });
+    const status = await getInstanceStatus(client);
+
+    expect(list.resource?.items[0]).toEqual(expect.objectContaining({ connected: undefined, status: 'unknown' }));
+    expect(status).toEqual({ connected: undefined, loggedIn: undefined, name: undefined });
   });
 
   it('returns create and rotation credentials only as explicit one-time results', async () => {
@@ -69,5 +81,18 @@ describe('credential-safe instance adapter', () => {
       plaintextFallback: { lookups: 0, affectedInstances: 0, firstObservedAt: undefined, lastObservedAt: undefined },
     });
     expect(health).not.toHaveProperty('safeToRemove');
+  });
+
+  it('does not manufacture zero-valued credential-health facts', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { instances: {}, plaintextFallback: {} } }));
+    const health = await getInstanceCredentialHealth({ GET } as unknown as ApiClient);
+    expect(health.instances).toEqual({ total: undefined, currentDigest: undefined, plaintextOnly: undefined, otherKeyVersion: undefined });
+    expect(health.plaintextFallback).toEqual({ lookups: undefined, affectedInstances: undefined, firstObservedAt: undefined, lastObservedAt: undefined });
+  });
+
+  it('accepts advanced settings for a full-snapshot update only when every field is known', () => {
+    const complete = { alwaysOnline: true, readMessages: false, rejectCall: false, ignoreGroups: false, ignoreStatus: true, msgRejectCall: '' };
+    expect(completeAdvancedSettings(complete)).toEqual(complete);
+    expect(completeAdvancedSettings({ ...complete, readMessages: undefined })).toBeUndefined();
   });
 });

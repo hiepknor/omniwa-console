@@ -44,7 +44,7 @@ export function InstancesView(props: InstancesViewProps) {
       <Panel
         title="Fleet metadata"
         description="List and detail use /instance/metadata only; tokens never enter view models or query keys."
-        bodyClassName="p-0"
+        bodyPadding="none"
       >
         <FilterToolbar>
           <Field label="Search" className="min-w-56 flex-1">
@@ -64,6 +64,7 @@ export function InstancesView(props: InstancesViewProps) {
                 <option value="">All statuses</option>
                 <option value="connected">Connected</option>
                 <option value="disconnected">Disconnected</option>
+                <option value="unknown">Unknown</option>
               </Select>
             )}
           </Field>
@@ -96,7 +97,7 @@ export function InstancesView(props: InstancesViewProps) {
                 <Tr key={i.id} selected={i.id === props.selectedId} onClick={() => props.onOpen(i.id)}>
                   <Td className="font-medium">{i.displayName ?? 'Unnamed instance'}</Td>
                   <Td className="font-mono text-xs text-fg-2">{i.id}</Td>
-                  <Td><Status tone={i.connected ? 'ok' : 'failed'}>{humanizeToken(i.status)}</Status></Td>
+                  <Td><Status tone={i.connected === true ? 'ok' : i.connected === false ? 'failed' : 'neutral'}>{humanizeToken(i.status)}</Status></Td>
                   <Td className="font-mono text-xs text-fg-2">{i.credentialVersion ? `v${i.credentialVersion}` : 'Not reported'}</Td>
                   <Td className="text-fg-2" title={i.createdAt}>{relativeTime(i.createdAt) || 'Not reported'}</Td>
                 </Tr>

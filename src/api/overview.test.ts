@@ -47,6 +47,16 @@ describe('persisted overview adapters', () => {
     }));
   });
 
+  it('preserves missing health booleans instead of reporting negative facts', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: {
+      api: { status: 'healthy' },
+      instances: [{ instanceId: 'instance-1', connection: { status: 'unknown' }, projection: {}, throttling: { status: 'unknown' } }],
+    } }));
+    const result = await getServerHealth({ GET } as unknown as ApiClient);
+    expect(result.instances[0].connection.connected).toBeUndefined();
+    expect(result.instances[0].throttling.observed).toBeUndefined();
+  });
+
   it('preserves unavailable overview counters instead of coercing them to zero', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: {
       scope: { type: 'server' },

@@ -14,11 +14,11 @@ export function shouldShowPairingQr({
   loggedIn,
   qrcode,
 }: {
-  connected: boolean;
-  loggedIn: boolean;
+  connected?: boolean;
+  loggedIn?: boolean;
   qrcode?: string;
 }): boolean {
-  return connected && !loggedIn && Boolean(qrcode);
+  return connected === true && loggedIn === false && Boolean(qrcode);
 }
 
 export function shouldPollPairingQr({
@@ -42,12 +42,13 @@ export function useInstancePairing(instanceId: string, token: string | undefined
   const status = useInstanceStatus(instanceId, token);
   const connect = useConnectInstance(instanceId, token);
   const reconnect = useReconnectInstance(instanceId, token);
-  const connected = status.data?.connected ?? false;
-  const loggedIn = status.data?.loggedIn ?? false;
-  const statusReady = status.data !== undefined;
+  const connected = status.data?.connected;
+  const loggedIn = status.data?.loggedIn;
+  const statusReady = typeof connected === 'boolean' && typeof loggedIn === 'boolean';
+  const commandReady = statusReady && !status.isError;
   const commandPending = connect.isPending || reconnect.isPending;
-  const pairing = Boolean(token && statusReady && !loggedIn);
-  const qrEnabled = shouldPollPairingQr({ token: Boolean(token), statusReady, connected, loggedIn, commandPending });
+  const pairing = Boolean(token && commandReady && loggedIn === false);
+  const qrEnabled = shouldPollPairingQr({ token: Boolean(token), statusReady: commandReady, connected: connected === true, loggedIn: loggedIn === true, commandPending });
   const qr = useInstanceQr(instanceId, token, qrEnabled);
 
   const clearQr = useCallback(() => clearPairingQrCache(queryClient, instanceId), [instanceId, queryClient]);
@@ -57,15 +58,15 @@ export function useInstancePairing(instanceId: string, token: string | undefined
   }, [clearQr, qrEnabled]);
 
   const startPairing = () => {
-    if (!token || commandPending || loggedIn) return;
+    if (!token || !commandReady || commandPending || loggedIn !== false) return;
     connect.reset();
     reconnect.reset();
     clearQr();
-    (connected ? reconnect : connect).mutate();
+    (connected === true ? reconnect : connect).mutate();
   };
 
   const reconnectSession = () => {
-    if (!token || commandPending || !loggedIn) return;
+    if (!token || !commandReady || commandPending || loggedIn !== true) return;
     connect.reset();
     reconnect.reset();
     clearQr();
@@ -75,6 +76,7 @@ export function useInstancePairing(instanceId: string, token: string | undefined
   return {
     commandError: connect.error ?? reconnect.error,
     commandPending,
+    commandReady,
     connected,
     lastAcknowledgement: connect.data ? 'Connect' : reconnect.data ? 'Reconnect' : undefined,
     loggedIn,
@@ -114,11 +116,11 @@ export function ConnectionAndPairing({ controller }: { controller: InstancePairi
         {controller.commandError ? <FailureNotice error={controller.commandError} command /> : null}
         {controller.pairing ? (
           <div className="grid gap-2">
-            {controller.qr.error && controller.connected ? (
+            {controller.qr.error && controller.connected === true ? (
               <FailureNotice error={controller.qr.error} onRetry={() => controller.qr.refetch()} />
             ) : showQr ? (
               <Image src={controller.qr.data?.qrcode} alt="QR code to pair this OmniWA instance" aspect="square" fit="contain" className="w-52 justify-self-start" imageClassName="bg-surface p-3" />
-            ) : controller.connected ? (
+            ) : controller.connected === true ? (
               <StateNotice kind="loading" title="Waiting for QR" detail="Waiting for the rotating pairing QR." />
             ) : (
               <StateNotice kind="empty" title="No active QR" detail="Start a connection to generate a new pairing QR." />
@@ -127,8 +129,8 @@ export function ConnectionAndPairing({ controller }: { controller: InstancePairi
           </div>
         ) : null}
         <div className="flex flex-wrap gap-2">
-          <Button variant="primary" disabled={controller.commandPending || controller.loggedIn} onClick={controller.startPairing}>{controller.connected ? 'Restart pairing' : 'Connect'}</Button>
-          <Button disabled={controller.commandPending || !controller.loggedIn} onClick={controller.reconnectSession}>Reconnect</Button>
+          <Button variant="primary" disabled={!controller.commandReady || controller.commandPending || controller.loggedIn !== false} onClick={controller.startPairing}>{controller.connected === true ? 'Restart pairing' : 'Connect'}</Button>
+          <Button disabled={!controller.commandReady || controller.commandPending || controller.loggedIn !== true} onClick={controller.reconnectSession}>Reconnect</Button>
         </div>
       </div>
     </Panel>

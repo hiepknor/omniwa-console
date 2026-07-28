@@ -1,17 +1,14 @@
 import { OverviewView } from '@/features/platform/OverviewView';
+import { overviewWindowOptions } from '@/features/platform/route-state';
 import { healthFixture, overviewFixture, projectionFixture } from './preview-fixtures';
 
 /** Dev-only: render the Overview surface with sample data, no backend. */
 export function PreviewOverview() {
   return (
-    <div className="min-h-dvh bg-bg">
+    <main className="min-h-dvh bg-bg">
       <OverviewView
         window="24h"
-        windowOptions={[
-          { value: '1h', label: 'Last hour' },
-          { value: '24h', label: 'Last 24 hours' },
-          { value: '7d', label: 'Last 7 days' },
-        ]}
+        windowOptions={overviewWindowOptions.map((option) => ({ value: option.value, label: option.label }))}
         onWindowChange={() => {}}
         onRefresh={() => {}}
         refreshing={false}
@@ -21,6 +18,6 @@ export function PreviewOverview() {
         projection={projectionFixture}
         recovery="available"
       />
-    </div>
+    </main>
   );
 }
