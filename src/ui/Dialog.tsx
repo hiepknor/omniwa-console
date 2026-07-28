@@ -51,7 +51,7 @@ export function Dialog({
             <CloseButton label="Close dialog" onClick={onClose} disabled={closeDisabled} />
           </div>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto bg-surface p-4">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain bg-surface p-4">{children}</div>
         {footer ? (
           <footer className="flex flex-wrap justify-end gap-2 border-t border-line-strong bg-elevated p-3 max-sm:[&>*]:min-w-[calc(50%_-_0.25rem)] max-sm:[&>*]:flex-1">
             {footer}

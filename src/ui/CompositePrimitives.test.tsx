@@ -38,6 +38,8 @@ describe('composite primitives', () => {
     const html = renderToStaticMarkup(
       <SplitWorkspace
         detailOpen
+        directoryScrollKey="chats:first-page"
+        detailScrollKey="chat_01:first-page"
         directoryLabel="Chats"
         detailLabel="Timeline"
         directory={<WorkspacePaneHeader title="Chats" />}
@@ -51,6 +53,7 @@ describe('composite primitives', () => {
     expect(html).toContain('max-[900px]:hidden');
     expect(html).toContain('grid-cols-[320px_minmax(0,1fr)]');
     expect(html).toContain('Projected history');
+    expect(html.match(/overscroll-y-contain/g)).toHaveLength(2);
   });
 
   it('switches a full page header to one compact workspace bar at the shared breakpoint', () => {

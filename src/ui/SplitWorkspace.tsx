@@ -1,5 +1,15 @@
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { cn } from './cn';
+
+function useScrollReset(ref: RefObject<HTMLDivElement | null>, key: string | undefined) {
+  const previousKey = useRef(key);
+  useLayoutEffect(() => {
+    if (previousKey.current !== key) {
+      if (ref.current) ref.current.scrollTop = 0;
+      previousKey.current = key;
+    }
+  }, [key, ref]);
+}
 
 export function SplitWorkspace({
   directory,
@@ -9,6 +19,8 @@ export function SplitWorkspace({
   detailLabel = 'Detail',
   directoryFooter,
   detailFooter,
+  directoryScrollKey,
+  detailScrollKey,
   frame = 'standalone',
   className,
 }: {
@@ -19,9 +31,16 @@ export function SplitWorkspace({
   detailLabel?: string;
   directoryFooter?: ReactNode;
   detailFooter?: ReactNode;
+  directoryScrollKey?: string;
+  detailScrollKey?: string;
   frame?: 'standalone' | 'attached';
   className?: string;
 }) {
+  const directoryScrollRef = useRef<HTMLDivElement>(null);
+  const detailScrollRef = useRef<HTMLDivElement>(null);
+  useScrollReset(directoryScrollRef, directoryScrollKey);
+  useScrollReset(detailScrollRef, detailScrollKey);
+
   return (
     <div className={cn(
       'min-h-0 flex-1 grid grid-cols-[320px_minmax(0,1fr)] max-[900px]:grid-cols-1',
@@ -32,14 +51,14 @@ export function SplitWorkspace({
         aria-label={directoryLabel}
         className={cn('flex min-h-0 min-w-0 flex-col border-r border-line max-[900px]:border-r-0', detailOpen && 'max-[900px]:hidden')}
       >
-        <div className="min-h-0 flex-1 overflow-y-auto">{directory}</div>
+        <div ref={directoryScrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">{directory}</div>
         {directoryFooter ? <div className="shrink-0">{directoryFooter}</div> : null}
       </section>
       <section
         aria-label={detailLabel}
         className={cn('flex min-h-0 min-w-0 flex-col', !detailOpen && 'max-[900px]:hidden')}
       >
-        <div className="min-h-0 flex-1 overflow-y-auto">{detail}</div>
+        <div ref={detailScrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">{detail}</div>
         {detailFooter ? <div className="shrink-0">{detailFooter}</div> : null}
       </section>
     </div>
