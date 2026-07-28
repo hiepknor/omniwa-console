@@ -16,7 +16,7 @@ export function CredentialHealth() {
       title="Credential health"
       description="C3 observation facts only; Console never derives safeToRemove."
       actions={supported ? <Button onClick={() => query.refetch()} disabled={query.isFetching}>{query.isFetching ? 'Refreshing…' : 'Refresh health'}</Button> : undefined}
-      bodyClassName={query.data ? 'p-0' : undefined}
+      bodyPadding={query.data ? 'none' : 'default'}
     >
       {capabilities.isPending ? (
         <StateNotice kind="loading" title="Discovering capabilities" />
@@ -33,7 +33,7 @@ export function CredentialHealth() {
           {query.isError ? <div className="p-4"><FailureNotice error={query.error} stale onRetry={() => query.refetch()} /></div> : null}
           <MetricGrid
             columns={4}
-            className="border-t-0 border-l-0"
+            frame={query.isError ? 'flush-after-content' : 'flush'}
             metrics={[
               { label: 'Key version', value: String(query.data.currentKeyVersion) },
               { label: 'Instances', value: String(query.data.instances.total) },

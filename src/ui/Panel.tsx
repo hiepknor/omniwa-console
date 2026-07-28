@@ -8,15 +8,21 @@ export function Panel({
   actions,
   children,
   className,
-  bodyClassName,
+  bodyPadding = 'default',
 }: {
   title?: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
   className?: string;
-  bodyClassName?: string;
+  bodyPadding?: 'default' | 'none' | 'compact-top';
 }) {
+  const bodyPaddingClass = {
+    default: 'p-4',
+    none: '',
+    'compact-top': 'px-4 pb-4 pt-2',
+  }[bodyPadding];
+
   return (
     <section className={cn('min-w-0 border border-line-strong bg-surface', className)}>
       {title || actions ? (
@@ -28,7 +34,7 @@ export function Panel({
           {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
         </header>
       ) : null}
-      <div className={cn('min-w-0 p-4', bodyClassName)}>{children}</div>
+      <div className={cn('min-w-0', bodyPaddingClass)}>{children}</div>
     </section>
   );
 }

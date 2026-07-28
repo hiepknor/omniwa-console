@@ -175,7 +175,14 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   right-aligned tabular. Horizontal overflow stays inside the table container;
   the page never scrolls sideways and rows never become floating cards.
 - **MetricGrid** — one contiguous bordered grid (not separate cards): hairline
-  cell separators, 11px uppercase label, **24px mono** value. Wraps to 2→1 columns.
+  cell separators, 11px uppercase label, **24px mono** value. The default density
+  wraps to one column on narrow screens so long textual values remain readable;
+  the explicit `compact` density retains two columns for short numeric facts.
+  Standalone grids own their complete frame; a `flush` grid delegates its top
+  and left frame edges to a zero-padding Panel. A grid following another Panel
+  body element uses `flush-after-content` to restore the separating top edge.
+  Features never remove individual grid borders or override Panel padding with
+  conflicting utilities.
 - **Tabs** — underline tabs; 2px `--color-accent` underline on the active tab.
 - **Drawer (inspector)** — right panel, `min(440px,100%)`, paper surface, 1px
   strong left border, and a 60% ink scrim. Header = title + mono ID + square close
@@ -199,7 +206,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   controls and chips reflect URL state in product panels.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
-  list progression. API errors include normalized detail and `requestId` when
+  list progression. Panel body spacing is selected through its named padding
+  modes (`default`, `none`, or `compact-top`), never through a free-form body
+  class escape hatch. API errors include normalized detail and `requestId` when
   present; pagination never suggests an unavailable page.
 - **ProgressBar** — an 8px square framed track with an ink fill and explicit
   text label. Determinate progress exposes its bounded numeric value;

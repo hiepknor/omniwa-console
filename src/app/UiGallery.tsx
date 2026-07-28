@@ -365,15 +365,32 @@ export function UiGallery() {
         </Section>
 
         <Section title="Metric grid">
-          <MetricGrid
-            columns={4}
-            metrics={[
-              { label: 'Instances', value: '18', hint: '2 pairing' },
-              { label: 'Queue depth', value: '1,284', hint: '+38 / min' },
-              { label: 'Delivered', value: '99.2%', hint: 'last 24h' },
-              { label: 'Failed', value: '7', hint: 'action required' },
-            ]}
-          />
+          <div className="grid gap-4">
+            <MetricGrid
+              columns={4}
+              metrics={[
+                { label: 'Instances', value: '18', hint: '2 pairing' },
+                { label: 'Queue depth', value: '1,284', hint: '+38 / min' },
+                { label: 'Delivered', value: '99.2%', hint: 'last 24h' },
+                { label: 'Last fallback', value: 'Never observed', hint: 'long-value fixture' },
+              ]}
+            />
+            <Panel title="Compact full-bleed metrics" description="Short numeric facts may retain two columns on narrow viewports." bodyPadding="none">
+              <MetricGrid
+                columns={6}
+                density="compact"
+                frame="flush"
+                metrics={[
+                  { label: 'All groups', value: '120' },
+                  { label: 'Active', value: '105' },
+                  { label: 'Suspended', value: '2' },
+                  { label: 'Communities', value: '4' },
+                  { label: 'Subgroups', value: '18' },
+                  { label: 'Admins-only send', value: '30' },
+                ]}
+              />
+            </Panel>
+          </div>
         </Section>
 
         <Section title="List recipe">

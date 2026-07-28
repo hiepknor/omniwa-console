@@ -43,7 +43,7 @@ export function RecoveryView(props: RecoveryViewProps) {
       <Panel
         title="Failure queue"
         description="Filters and the opaque cursor stay in the URL; changing a filter resets pagination and selection."
-        bodyClassName="p-0"
+        bodyPadding="none"
       >
         <FilterToolbar as="form" onSubmit={props.onApply}>
           <Field label="Instance ID" className="min-w-56 flex-1">{(id) => <Input id={id} value={props.instanceDraft} placeholder="All instances" onChange={(e) => props.onInstanceDraft(e.target.value)} />}</Field>
