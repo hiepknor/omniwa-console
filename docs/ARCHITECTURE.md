@@ -141,8 +141,8 @@ Transport conditions, scoped failures, command acknowledgements, projection
 freshness, and toasts follow `docs/FEEDBACK.md`. Features do not implement
 custom toast queues, retry timers, or transport banners.
 
-`pnpm design:check` protects the shared table, drawer, dialog, and workspace
-contracts.
+`pnpm design:check` protects the shared page header, main-column Console footer,
+full-height workspace frame, table, drawer, and dialog contracts.
 
 ## Realtime and polling
 

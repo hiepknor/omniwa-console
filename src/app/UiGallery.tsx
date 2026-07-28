@@ -3,6 +3,7 @@ import { ApiFailure } from '@/api/envelopes';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { ToastViewport } from '@/components/feedback/ToastViewport';
+import { ConsoleFooter } from './ConsoleFooter';
 import {
   Badge,
   Button,
@@ -43,6 +44,7 @@ import {
   Th,
   Textarea,
   Tr,
+  WorkspacePageFrame,
   WorkspacePaneHeader,
   type Tone,
 } from '@/ui';
@@ -98,21 +100,24 @@ const sessionUtilityItems = [
 
 function ShellAnatomy() {
   return (
-    <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+    <div className="grid gap-4">
       <div className="grid h-80 grid-cols-[224px_minmax(0,1fr)] overflow-hidden border border-line-strong bg-bg">
         <aside className="flex min-w-0 flex-col border-r border-line-strong bg-surface">
           <div className="flex min-h-[57px] items-center gap-3 border-b border-line px-4">
             <Logo />
             <span className="grid min-w-0"><strong className="text-[13px] font-semibold">OmniWA Console</strong><span className="truncate font-mono text-[10px] text-fg-3">https://api.example.test</span></span>
           </div>
-          <div className="grid gap-2 border-b border-line p-4"><Status tone="ok">12 capabilities</Status><span className="font-mono text-[10px] text-fg-3">GO 1.8.0</span></div>
-          <nav aria-label="Full rail example" className="grid gap-0.5 p-3">
+          <nav aria-label="Full rail example" className="grid flex-1 content-start gap-0.5 p-3">
             {navigationItems.slice(0, 4).map(([icon, label], index) => <div key={icon} className={navigationItemClassName(index === 0)}><NavigationItemContent icon={icon} label={label} /></div>)}
           </nav>
+          <div className="border-t border-line p-2"><Button className="w-full">Sign out</Button></div>
         </aside>
-        <div className="min-w-0 p-4"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Content viewport</span><div className="mt-3 h-28 border border-line-strong bg-surface" /></div>
+        <div className="flex min-w-0 flex-col overflow-hidden">
+          <div className="min-h-0 flex-1 p-4"><span className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Content viewport</span><div className="mt-3 h-28 border border-line-strong bg-surface" /></div>
+          <ConsoleFooter environment="Self-hosted" scope="Instance scope" capabilityLabel="12 capabilities" capabilityTone="ok" version="1.8.0" revision="revision-01" />
+        </div>
       </div>
-      <div className="grid gap-4">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="grid h-56 grid-cols-[64px_minmax(0,1fr)] overflow-hidden border border-line-strong">
           <aside className="flex min-h-0 flex-col border-r border-line-strong bg-surface">
             <nav aria-label="Compact rail example" className="grid flex-1 content-start gap-0.5 p-3">
@@ -157,7 +162,8 @@ export function UiGallery() {
           eyebrow="Locked design system"
           title="UI Gallery"
           description="Manga · ink on white paper · dense · square · semantic screentone · hard lift only."
-          actions={<Button variant="primary">Primary action</Button>}
+          secondaryActions={<Button>Secondary action</Button>}
+          primaryAction={<Button variant="primary">Primary action</Button>}
         />
 
         <Section title="Surfaces">
@@ -489,26 +495,37 @@ export function UiGallery() {
         </Section>
 
         <Section title="Split workspace recipe">
-          <div className="flex h-80 min-h-0 flex-col overflow-hidden border border-line-strong">
-            <SplitWorkspace
-              className="border-t-0"
-              detailOpen={workspaceDetail}
-              directoryLabel="Sample directory"
-              detailLabel="Sample detail"
-              directory={
-                <>
-                  <WorkspacePaneHeader title="Directory" description="Select a projected resource" />
-                  {['chat_01', 'chat_02', 'chat_03'].map((id) => <button key={id} type="button" className="flex min-h-14 w-full items-center border-b border-line px-3 text-left text-[13px] hover:bg-elevated" onClick={() => setWorkspaceDetail(true)}><span className="font-mono">{id}</span></button>)}
-                </>
-              }
-              detail={
-                <>
-                  <WorkspacePaneHeader title="chat_01" description="Projected detail" actions={<Button className="hidden max-[900px]:inline-flex" onClick={() => setWorkspaceDetail(false)}>Back</Button>} />
-                  <div className="grid gap-3 p-4"><Status tone="ok">Ready</Status><DescriptionList><DescriptionItem label="Identifier" mono>chat_01</DescriptionItem><DescriptionItem label="Updated">Just now</DescriptionItem></DescriptionList></div>
-                </>
-              }
-              detailFooter={<div className="flex justify-end border-t border-line p-3"><Button variant="primary">Narrow action</Button></div>}
-            />
+          <div className="h-[34rem] min-h-0 overflow-hidden border border-line-strong">
+            <WorkspacePageFrame
+              eyebrow="Messaging"
+              title="Conversations"
+              description="Review projected chats, contacts, labels, and message history."
+              secondaryActions={<Button>Refresh</Button>}
+              compactTitle={workspaceDetail ? 'chat_01' : 'Conversations'}
+              compactDescription={workspaceDetail ? 'Projected detail' : undefined}
+              compactLeadingAction={workspaceDetail ? <Button onClick={() => setWorkspaceDetail(false)}>Back</Button> : undefined}
+              compactActions={<Button>Refresh</Button>}
+            >
+              <SplitWorkspace
+                frame="attached"
+                detailOpen={workspaceDetail}
+                directoryLabel="Sample directory"
+                detailLabel="Sample detail"
+                directory={
+                  <>
+                    <WorkspacePaneHeader className="max-[900px]:hidden" title="Directory" description="Select a projected resource" />
+                    {['chat_01', 'chat_02', 'chat_03'].map((id) => <button key={id} type="button" className="flex min-h-14 w-full items-center border-b border-line px-3 text-left text-[13px] hover:bg-elevated" onClick={() => setWorkspaceDetail(true)}><span className="font-mono">{id}</span></button>)}
+                  </>
+                }
+                detail={
+                  <>
+                    <WorkspacePaneHeader className="max-[900px]:hidden" title="chat_01" description="Projected detail" />
+                    <div className="grid gap-3 p-4"><Status tone="ok">Ready</Status><DescriptionList><DescriptionItem label="Identifier" mono>chat_01</DescriptionItem><DescriptionItem label="Updated">Just now</DescriptionItem></DescriptionList></div>
+                  </>
+                }
+                detailFooter={<div className="flex justify-end border-t border-line p-3"><Button variant="primary">Narrow action</Button></div>}
+              />
+            </WorkspacePageFrame>
           </div>
         </Section>
 

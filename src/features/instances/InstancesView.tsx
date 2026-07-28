@@ -28,15 +28,9 @@ export function InstancesView(props: InstancesViewProps) {
       <PageHeader
         eyebrow="Platform"
         title="Instances"
-        description="Secret-free fleet metadata with explicit instance-scoped credential attachment."
-        actions={
-          <>
-            <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>
-              {props.refreshing ? 'Refreshing…' : 'Refresh'}
-            </Button>
-            <Button variant="primary" onClick={props.onNew}>New instance</Button>
-          </>
-        }
+        description="Manage instances, credentials, pairing, and lifecycle."
+        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        primaryAction={<Button variant="primary" onClick={props.onNew}>New instance</Button>}
       />
 
       {props.credentialHealth}

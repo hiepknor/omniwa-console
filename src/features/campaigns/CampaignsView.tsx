@@ -40,13 +40,9 @@ export function CampaignsView(props: CampaignsViewProps) {
       <PageHeader
         eyebrow="Messaging"
         title="Campaigns"
-        description="Server-owned campaign orchestration with versioned targets, factual outcomes, and durable audit history."
-        actions={
-          <>
-            <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>
-            {props.newHref ? <ButtonLink to={props.newHref} variant="primary">New campaign</ButtonLink> : null}
-          </>
-        }
+        description="Create and monitor Group List campaigns with factual progress and outcomes."
+        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        primaryAction={props.newHref ? <ButtonLink to={props.newHref} variant="primary">New campaign</ButtonLink> : undefined}
       />
 
       {props.notices}

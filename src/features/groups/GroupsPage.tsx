@@ -18,7 +18,7 @@ import { GroupSectionTabs } from './GroupSectionTabs';
 function Blocked({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Messaging" title="Groups" description="Projection-backed group directory and explicit provider commands." />
+      <PageHeader eyebrow="Messaging" title="Groups" description="Inspect projected WhatsApp groups and run available management actions." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );

@@ -18,7 +18,7 @@ import { RecoveryCommandDialog, RecoveryInspector, type RecoveryAction } from '.
 function Blocked({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." />
+      <PageHeader eyebrow="Platform" title="Projection recovery" description="Review failed projections and submit audited recovery actions." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );
@@ -78,7 +78,7 @@ export function RecoveryPage() {
   if (capabilities.isPending && !capabilities.data) return <Blocked title="Discovering capabilities" detail="Waiting for server capability discovery before reading failures." />;
   if (capabilities.isError && !capabilities.data) return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Platform" title="Projection recovery" description="Inspect and operate terminal projection failures." />
+      <PageHeader eyebrow="Platform" title="Projection recovery" description="Review failed projections and submit audited recovery actions." />
       <ApiFailureNotice error={capabilities.error} title="Capability discovery failed" onRetry={() => capabilities.refetch()} />
     </div>
   );

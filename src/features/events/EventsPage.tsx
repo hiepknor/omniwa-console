@@ -15,7 +15,7 @@ import { eventRouteState, setEventParam } from './route-state';
 function Blocked({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Observability" title="Events" description="Durable normalized event history and recovery context." />
+      <PageHeader eyebrow="Observability" title="Events" description="Inspect durable operational events and audit context." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );

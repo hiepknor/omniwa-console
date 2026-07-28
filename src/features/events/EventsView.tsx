@@ -36,8 +36,8 @@ export function EventsView(props: EventsViewProps) {
       <PageHeader
         eyebrow="Observability"
         title="Events"
-        description="Durable normalized history for recovery and audit context; persisted before external fan-out."
-        actions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        description="Inspect durable operational events and audit context."
+        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
       />
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 p-3 border border-line bg-surface">

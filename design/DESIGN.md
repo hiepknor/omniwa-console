@@ -245,18 +245,35 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   (`square`, `video`, `wide`, or intrinsic), `cover`/`contain`, alt text, caption,
   deterministic loading, and unavailable/error fallback. QR pairing uses
   `contain` and a paper quiet zone. Features do not render raw `<img>` elements.
-- **SplitWorkspace / WorkspacePaneHeader** — the only directory-detail frame.
-  It owns the 320px directory column, internal pane scrolling, the 900px
-  single-pane breakpoint, and the sticky pane header. Production and preview
-  routes use the same primitive; detail mode on tablet/mobile must expose a
-  visible Back action supplied by the feature.
+- **WorkspacePageFrame / SplitWorkspace / WorkspacePaneHeader** — the only
+  full-height directory-detail composition. At 900px and wider the frame
+  renders the canonical PageHeader with a 24px top inset, then an attached
+  320px directory and fluid detail pane. Below 900px it replaces the full
+  PageHeader with one edge-to-edge 57px compact bar: directory mode identifies the workspace;
+  detail mode exposes a visible full Back action, truncated resource identity,
+  optional short context, and contextual actions. The compact bar and sticky
+  desktop pane header never appear together. The composition owns one boundary
+  hairline, internal pane scrolling, focus entry/restoration, and footer space;
+  production, preview, and `/__ui` use the same primitives.
 
 ## 6. Shell & navigation
 
 - **Rail:** a fixed ~224px `--color-surface` column, 1px right border. Top: brand
-  (logomark + `OmniWA Console` + base URL in mono 10px). Then a context block
-  (environment, key scope, capability status, `GO {version}`). Then the nav. Bottom:
-  a session footer (connection status + in-memory-credential note + Sign out).
+  (logomark + `OmniWA Console` + base URL in mono 10px), then navigation without
+  a runtime-context interruption. Bottom: Sign out remains a separately framed
+  session utility, never a navigation destination.
+- **Console footer:** a persistent 40px status bar at the bottom of the main
+  column, outside the page scroll container and never beneath the rail. It owns
+  environment, credential scope, canonical capability-discovery Status, optional
+  `GO {version}` with revision tooltip, and the `Memory-only` credential-lifetime
+  note. It uses one top hairline, paper background, square geometry, and one row
+  with two coherent edge-aligned clusters: runtime and scope on the left;
+  capability, version, and credential lifetime on the right. Hairline separators
+  establish hierarchy without nested surfaces. It never owns page actions, page
+  progress, WhatsApp connection, filters, errors, acknowledgements, or inferred
+  health. At 641–900px version and credential lifetime are hidden while runtime,
+  scope, and capability remain visible; at 640px and below the complete footer is
+  hidden so it cannot compete with bottom navigation.
 - **Scope-aware nav** (from `navigationForKeyKind`): navigation is derived from the
   session key kind, not hardcoded.
   - **Admin** → *Platform*: Overview · Recovery (only when the server advertises
@@ -266,15 +283,25 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
     active-runtime identity and lifecycle; connection and pairing are sections,
     not navigation categories.
   - **Unknown** → *Runtime*: Overview.
-- **Page header:** an optional 11px uppercase eyebrow, the page title, connection
-  state on the right, at most one primary action. ≤640px stacks to one column.
-- **Responsive:** ≥901px full rail; 641–900px icon-only rail; ≤640px a fixed
+- **Page header:** one compact semantic header with an optional 11px uppercase
+  section label, one page title, concise goal-oriented description, a secondary
+  action cluster, and at most one primary action. It never owns filters,
+  selectors, metrics, global connection state, breadcrumbs, or feature status.
+  At ≥641px actions align with the title while the description retains its own
+  full row; at ≤640px DOM and visual order is section → title → description →
+  actions. Actions wrap instead of overflowing, and the primary action remains
+  last. The header keeps the paper background, hairline bottom rule, square
+  geometry, 14px body copy, and existing Button interaction language.
+  Full-height split workspaces do not shrink or restyle this primitive: their
+  WorkspacePageFrame shows it only at 900px and wider and supplies the
+  separately locked compact workspace bar at tablet/mobile widths.
+- **Responsive:** ≥900px full rail; 640–899px icon-only rail; <640px a fixed
   bottom nav bar with icon + visible 10px label while the main viewport reserves
   its height. At compact widths Sign out is a separately framed session utility,
   never a navigation destination. Dense form/action controls are at least 40px
   on mobile; primary navigation targets remain at least 44px.
-- **Split workspaces:** directory + detail use two panes only above 900px. At
-  tablet/mobile widths the selected detail replaces the directory and exposes a
+- **Split workspaces:** directory + detail use two panes at 900px and wider.
+  Below 900px the selected detail replaces the directory and exposes a
   full `Back` action; neither pane may remain positioned outside the viewport.
 - **Feedback placement:** `SurfaceNotice` is the framed inline/workspace banner;
   `ToastViewport` is fixed bottom-right and becomes full inset-width on mobile.
@@ -289,6 +316,7 @@ or `border-*` utilities and rely on generated CSS order.
 
 | Primitive | Required visual states |
 | --- | --- |
+| PageHeader | title only, section + description, secondary actions, primary action, three-action wrap, long copy |
 | Button | rest, hover, active, keyboard focus, disabled, busy |
 | Select trigger | rest, hover, open, open + hover, keyboard focus, invalid, disabled |
 | Select option | rest, active/hover, selected, active + selected, disabled |
@@ -304,8 +332,9 @@ or `border-*` utilities and rely on generated CSS order.
 | CursorPagination | first page, next cursor, final page, responsive stacking |
 | ProgressBar | 0–99%, indeterminate, complete, failed at last known value |
 | Image | loading, ready, contain/cover, long caption, missing/error fallback |
-| Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav |
-| Split workspace | two panes >900px, directory or detail + Back ≤900px |
+| Shell navigation | 224px full rail + Sign out, 64px icon rail, fixed mobile bottom nav |
+| Console footer | ready capabilities, discovery pending, discovery failure, version absent, compact tablet, hidden mobile |
+| Workspace page / split workspace | PageHeader + two panes ≥900px, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close, one-time-secret dismissal |
 
