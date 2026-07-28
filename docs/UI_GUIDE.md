@@ -198,6 +198,10 @@ resource models, or rendered diagnostics.
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.
 - Buttons preserve a clear ghost/primary/danger hierarchy, expose pressed and
   keyboard-focus feedback, and use `ButtonLink` for navigation styled as an action.
+- Count chips use the shared `CountBadge`; count-bearing Tabs apply it
+  automatically. Numeric table cells, metrics, selection prose, and counts stated
+  inside an operational Status remain in their context instead of becoming chips.
+  Framed non-count facts such as resource versions use `MetadataBadge`.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the

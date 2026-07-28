@@ -12,16 +12,13 @@ describe('Tabs', () => {
     expect(html).toContain('overflow-y-hidden');
   });
 
-  it('can opt into the canonical count badge without changing existing tabs', () => {
-    const inlineHtml = renderToStaticMarkup(
-      <Tabs active="one" onChange={() => undefined} tabs={[{ id: 'one', label: 'One', count: 12 }]} />,
-    );
-    const badgeHtml = renderToStaticMarkup(
-      <Tabs active="one" countStyle="badge" onChange={() => undefined} tabs={[{ id: 'one', label: 'One', count: 12 }]} />,
+  it('uses the canonical count badge for every count-bearing tab', () => {
+    const html = renderToStaticMarkup(
+      <Tabs active="one" onChange={() => undefined} tabs={[{ id: 'one', label: 'One', count: 1_284 }]} />,
     );
 
-    expect(inlineHtml).not.toContain('bg-recessed border border-line');
-    expect(badgeHtml).toContain('bg-recessed border border-line');
-    expect(badgeHtml).toContain('>12</span>');
+    expect(html).toContain('bg-recessed border border-line');
+    expect(html).toContain('tabular-nums');
+    expect(html).toContain('>1,284</span>');
   });
 });

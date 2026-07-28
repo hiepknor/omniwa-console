@@ -1,5 +1,5 @@
 import { cn } from './cn';
-import { Badge } from './Badge';
+import { CountBadge } from './Badge';
 
 export type Tab = { id: string; label: string; count?: number };
 
@@ -8,13 +8,11 @@ export function Tabs({
   active,
   onChange,
   className,
-  countStyle = 'inline',
 }: {
   tabs: Tab[];
   active: string;
   onChange: (id: string) => void;
   className?: string;
-  countStyle?: 'inline' | 'badge';
 }) {
   return (
     <div className={cn('flex gap-0.5 overflow-x-auto overflow-y-hidden border-b border-line', className)} role="tablist">
@@ -34,9 +32,7 @@ export function Tabs({
           >
             {tab.label}
             {typeof tab.count === 'number' ? (
-              countStyle === 'badge'
-                ? <Badge>{tab.count}</Badge>
-                : <span className="font-mono text-[11px] text-fg-3 tabular-nums">{tab.count}</span>
+              <CountBadge count={tab.count} />
             ) : null}
           </button>
         );

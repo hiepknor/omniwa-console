@@ -16,7 +16,7 @@ export { SelectionReview, type SelectionReviewItem } from './SelectionReview';
 export { DescriptionList, DescriptionItem } from './DescriptionList';
 export { FilterToolbar, FilterChip } from './Filters';
 export { Select } from './Select';
-export { Badge } from './Badge';
+export { CountBadge, MetadataBadge } from './Badge';
 export { Table, Th, Td, Tr } from './Table';
 export { MetricGrid, type Metric } from './MetricGrid';
 export { PageHeader } from './PageHeader';

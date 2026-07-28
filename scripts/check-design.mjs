@@ -63,6 +63,19 @@ for (const marker of ['data-tone={tone}', 'grid-cols-[20px_minmax(0,1fr)]', 'shr
   if (!status.includes(marker)) failures.push(`src/ui/Status.tsx: status stamp contract is missing ${marker}`);
 }
 
+const badges = await read('src/ui/Badge.tsx');
+for (const marker of ['CountBadge', 'count.toLocaleString', 'tabular-nums', 'MetadataBadge']) {
+  if (!badges.includes(marker)) failures.push(`src/ui/Badge.tsx: count/metadata badge contract is missing ${marker}`);
+}
+
+const tabs = await read('src/ui/Tabs.tsx');
+for (const marker of ['<CountBadge count={tab.count}', "import { CountBadge } from './Badge'"]) {
+  if (!tabs.includes(marker)) failures.push(`src/ui/Tabs.tsx: canonical count badge contract is missing ${marker}`);
+}
+if (tabs.includes('countStyle')) {
+  failures.push('src/ui/Tabs.tsx: feature-selectable count styles would allow count chips to drift');
+}
+
 const statusMarks = await read('src/ui/statusMarks.ts');
 for (const marker of ['StatusMarkTone', 'to bottom', 'radial-gradient', 'repeating-linear-gradient', "border: '1px solid var(--color-fg-3)'"]) {
   if (!statusMarks.includes(marker)) failures.push(`src/ui/statusMarks.ts: shared screentone registry is missing ${marker}`);

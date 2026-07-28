@@ -5,12 +5,12 @@ import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { ToastViewport } from '@/components/feedback/ToastViewport';
 import { ConsoleFooter } from './ConsoleFooter';
 import {
-  Badge,
   Button,
   ButtonLink,
   buttonClassName,
   Checkbox,
   CloseButton,
+  CountBadge,
   CursorPagination,
   DateTimeInput,
   DescriptionItem,
@@ -26,6 +26,7 @@ import {
   Input,
   Logo,
   MetricGrid,
+  MetadataBadge,
   NavigationItemContent,
   navigationItemClassName,
   PageHeader,
@@ -341,14 +342,14 @@ export function UiGallery() {
 
         <Section title="Panels + data description">
           <div className="grid gap-4 md:grid-cols-2">
-            <Panel title="Instance identity" description="Canonical key/value presentation for inspectors." actions={<Badge>3</Badge>}>
+            <Panel title="Instance identity" description="Canonical key/value presentation for inspectors." actions={<CountBadge count={3} aria-label="3 facts" />}>
               <DescriptionList>
                 <DescriptionItem label="Instance ID" mono>inst_01HZX9Q42</DescriptionItem>
                 <DescriptionItem label="Display name">Primary sender with a deliberately long value that wraps safely inside the panel</DescriptionItem>
                 <DescriptionItem label="Connection"><Status tone="ok">connected</Status></DescriptionItem>
               </DescriptionList>
             </Panel>
-            <Panel title="Command boundary" description="Server acknowledgement does not imply delivery.">
+            <Panel title="Command boundary" description="Server acknowledgement does not imply delivery." actions={<MetadataBadge>Version 3</MetadataBadge>}>
               <StateNotice kind="info" title="Command accepted" detail="Track projected state for completion." requestId="req_01J2F2X9" />
             </Panel>
           </div>
@@ -489,7 +490,6 @@ export function UiGallery() {
           <Panel bodyPadding="none">
             <Tabs
               active={tab}
-              countStyle="badge"
               onChange={setTab}
               tabs={[
                 { id: 'all', label: 'All instances', count: 18 },
@@ -547,7 +547,7 @@ export function UiGallery() {
                     <Td mobileLabel="Status"><Status tone={tone}>{tone}</Status></Td>
                     <Td mobileLabel="Messages" priority="supporting" className="text-right tabular-nums">{messages}</Td>
                     <Td mobileLabel="Last seen" priority="detail" className="text-fg-2">{seen}</Td>
-                    <Td mobileLabel="Alerts" priority="detail" className="text-right"><Badge>{alerts}</Badge></Td>
+                    <Td mobileLabel="Alerts" priority="detail" className="text-right"><CountBadge count={alerts} /></Td>
                   </Tr>
                 ))}
               </tbody>
