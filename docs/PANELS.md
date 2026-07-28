@@ -205,7 +205,10 @@ bounded Groups page before selection and the inspector reads an on-demand
 whole-list aggregate. Preflight is advisory: writes validate the complete set
 again, and structured rejection issues are never converted into client-side
 eligibility rules. Older servers retain submit-time validation with an explicit
-compatibility notice.
+compatibility notice. Target rows show projected `memberCount` independently
+from eligibility, preserve an unreported count as `—`, and place normalized
+group type beside the stable Group JID. The Console never expands members,
+aggregates counts into unique recipients, or uses member count to enable a row.
 
 ## Chats workspace — `/chats/:chatId?`
 

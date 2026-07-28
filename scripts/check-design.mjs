@@ -91,6 +91,11 @@ for (const marker of ['role="group"', '<Checkbox', 'indeterminate={indeterminate
   if (!selectionBar.includes(marker)) failures.push(`src/ui/SelectionBar.tsx: selection-bar contract is missing ${marker}`);
 }
 
+const tablePrimitive = await read('src/ui/Table.tsx');
+for (const marker of ["multiline = false", "multiline && 'py-2'", 'overflow-x-auto', 'border-b border-line']) {
+  if (!tablePrimitive.includes(marker)) failures.push(`src/ui/Table.tsx: multiline table-cell rhythm is missing ${marker}`);
+}
+
 const descriptionList = await read('src/ui/DescriptionList.tsx');
 for (const marker of ['<dl', '<dt', '<dd', 'max-sm:grid-cols-1', 'break-words']) {
   if (!descriptionList.includes(marker)) failures.push(`src/ui/DescriptionList.tsx: semantic fact contract is missing ${marker}`);
@@ -182,11 +187,16 @@ for (const marker of ['<FilterToolbar as="form"', '<StateNotice kind="loading"',
 }
 
 const groupListEditor = await read('src/features/groups/GroupListEditorPage.tsx');
-for (const marker of ['<SelectionBar', 'Select eligible on this page', '<Table', 'border-t-0', 'Selection requires review', 'setPageSelection']) {
+for (const marker of ['<SelectionBar', 'Select eligible on this page', '<Table', 'border-t-0', 'Selection requires review', 'setPageSelection', '>Members</Th>', '<ProjectedMemberCount', '<GroupTargetIdentity', '<GroupTargetEligibility']) {
   if (!groupListEditor.includes(marker)) failures.push(`src/features/groups/GroupListEditorPage.tsx: target selection recipe is missing ${marker}`);
 }
 if (groupListEditor.includes('selectedCounts.eligible} eligible ·') || /<Status[^>]*>\{selected\.size\} selected/.test(groupListEditor)) {
   failures.push('src/features/groups/GroupListEditorPage.tsx: selection counts must use SelectionBar rather than a status stamp or zero-bucket sentence');
+}
+
+const groupTargetCells = await read('src/features/groups/GroupTargetCells.tsx');
+for (const marker of ["formatCount(count)", "'Type unreported'", 'max-w-44 gap-1', 'break-words text-xs leading-4']) {
+  if (!groupTargetCells.includes(marker)) failures.push(`src/features/groups/GroupTargetCells.tsx: projected target facts are missing ${marker}`);
 }
 
 const instancesPreview = await read('src/app/PreviewInstances.tsx');

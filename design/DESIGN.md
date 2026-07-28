@@ -179,8 +179,12 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Table** — the workhorse. `--color-surface` container, 1px border, no radius.
   Sticky 11px uppercase muted headers; 13px cells; hairline row dividers; row hover
   = `--color-elevated`. IDs mono; timestamps relative with ISO `title`; numeric
-  right-aligned tabular. Horizontal overflow stays inside the table container;
-  the page never scrolls sideways and rows never become floating cards.
+  right-aligned tabular. Cells retain a 44px minimum; the named `Td multiline`
+  composition adds canonical 8px vertical padding when identity metadata or a
+  status reason needs multiple lines. Reasons wrap below the short status and
+  expand only that row vertically, while ordinary rows remain 44px. Horizontal
+  overflow stays inside the table container; the page never scrolls sideways
+  and rows never become floating cards.
 - **MetricGrid** — one contiguous bordered grid (not separate cards): hairline
   cell separators, 11px uppercase label, **24px mono** value. The default density
   wraps to one column on narrow screens so long textual values remain readable;
@@ -288,7 +292,7 @@ or `border-*` utilities and rely on generated CSS order.
 | Checkbox / Radio / Switch | off, on, indeterminate, hover, keyboard focus, disabled |
 | SelectionBar | zero, partial, all-page, cross-page total, disabled, clear, blocked composition |
 | Filter chip | rest, hover, keyboard focus, removed |
-| Table row | rest, hover, keyboard focus, selected |
+| Table row | rest, hover, keyboard focus, selected, multiline status + reason |
 | StateNotice | info/stale, loading, empty/not-ready, error + requestId, action |
 | CursorPagination | first page, next cursor, final page, responsive stacking |
 | ProgressBar | 0–99%, indeterminate, complete, failed at last known value |

@@ -406,16 +406,20 @@ export function UiGallery() {
               scopeLabel="Select eligible on this page"
               selectedCount={selectionCount}
               pageSelectedCount={selectionCount}
-              pageSelectableCount={3}
-              checked={selectionCount === 3}
-              indeterminate={selectionCount > 0 && selectionCount < 3}
-              onTogglePage={(checked) => setSelectionCount(checked ? 3 : 0)}
+              pageSelectableCount={1}
+              checked={selectionCount === 1}
+              indeterminate={false}
+              onTogglePage={(checked) => setSelectionCount(checked ? 1 : 0)}
               onClear={() => setSelectionCount(0)}
             />
             <Table className="border-t-0">
-              <thead><tr><Th className="w-12"><span className="sr-only">Select</span></Th><Th>Group</Th><Th>State</Th><Th>Eligibility</Th></tr></thead>
+              <thead><tr><Th className="w-12"><span className="sr-only">Select</span></Th><Th className="min-w-56">Group</Th><Th className="w-24 min-w-24 text-right">Members</Th><Th className="min-w-28">State</Th><Th className="w-44 min-w-44">Eligibility</Th></tr></thead>
               <tbody>
-                {['Operations', 'Editorial', 'Support'].map((name, index) => <Tr key={name}><Td><Checkbox visuallyHiddenLabel label={<>Select {name}</>} checked={index < selectionCount} onChange={(event) => setSelectionCount((current) => event.currentTarget.checked ? Math.max(current, index + 1) : Math.min(current, index))} /></Td><Td><span className="grid gap-0.5"><strong className="font-medium">{name}</strong><code className="font-mono text-xs text-fg-3">12036300000{index}@g.us</code></span></Td><Td><Status tone="ok">Active</Status></Td><Td><Status tone="ok">Eligible</Status></Td></Tr>)}
+                {[
+                  { name: 'Operations', type: 'Subgroup', members: '1,284', state: 'Active', stateTone: 'ok' as const, eligibility: 'Eligible', eligibilityTone: 'ok' as const },
+                  { name: 'Editorial', type: 'Group', members: '—', state: 'Active', stateTone: 'ok' as const, eligibility: 'Unavailable', eligibilityTone: 'failed' as const, reason: 'Send permission denied' },
+                  { name: 'Support', type: 'Community', members: '84', state: 'Suspended', stateTone: 'degraded' as const, eligibility: 'Unknown', eligibilityTone: 'degraded' as const, reason: 'Select a sendable subgroup' },
+                ].map((group, index) => <Tr key={group.name}><Td><Checkbox visuallyHiddenLabel label={<>Select {group.name}</>} checked={index === 0 && selectionCount === 1} disabled={index > 0} onChange={(event) => setSelectionCount(event.currentTarget.checked ? 1 : 0)} /></Td><Td multiline><span className="grid min-w-0 gap-0.5"><strong className="truncate font-medium">{group.name}</strong><span className="flex flex-wrap items-baseline gap-x-2 text-xs text-fg-3"><code className="font-mono">12036300000{index}@g.us</code><span>{group.type}</span></span></span></Td><Td className="w-24 min-w-24 text-right font-mono tabular-nums">{group.members}</Td><Td><Status tone={group.stateTone}>{group.state}</Status></Td><Td multiline className="w-44 min-w-44"><span className="grid min-w-0 max-w-44 gap-1"><Status tone={group.eligibilityTone}>{group.eligibility}</Status>{group.reason ? <small className="break-words text-xs leading-4 text-fg-3">{group.reason}</small> : null}</span></Td></Tr>)}
               </tbody>
             </Table>
           </div>

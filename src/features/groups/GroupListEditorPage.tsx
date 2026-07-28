@@ -8,6 +8,7 @@ import { eligibilityIssues, type GroupEligibility, type GroupListEntry } from '@
 import { humanizeToken } from '@/lib/format';
 import { Badge, Button, Checkbox, DateTimeInput, Field, FilterToolbar, Input, PageHeader, Panel, ProgressBar, SelectionBar, StateNotice, Status, Table, Td, Textarea, Th, Tr, type Tone } from '@/ui';
 import { GroupSectionTabs } from './GroupSectionTabs';
+import { GroupTargetEligibility, GroupTargetIdentity, ProjectedMemberCount } from './GroupTargetCells';
 import { pageSelectionState, setPageSelection, type GroupSelectionCandidate, type SelectedGroup } from './group-list-selection';
 import { groupListRouteState, setGroupListParam } from './group-list-route-state';
 import { useGroups } from './hooks';
@@ -144,7 +145,7 @@ export function GroupListEditorPage() {
             onClear={() => setSelected(new Map())}
           />
           {groupItems.length ? <Table className="max-h-[28rem] overflow-y-auto border-t-0">
-            <thead className="sticky top-0 z-10 bg-surface"><tr><Th className="w-12"><span className="sr-only">Select</span></Th><Th className="min-w-56">Group</Th><Th className="min-w-28">State</Th><Th className="min-w-44">Eligibility</Th></tr></thead>
+            <thead className="sticky top-0 z-10 bg-surface"><tr><Th className="w-12"><span className="sr-only">Select</span></Th><Th className="min-w-56">Group</Th><Th className="w-24 min-w-24 text-right">Members</Th><Th className="min-w-28">State</Th><Th className="w-44 min-w-44">Eligibility</Th></tr></thead>
             <tbody>{groupItems.map((group) => {
               const assessment = eligibilityById.get(group.id);
               const checked = selected.has(group.id);
@@ -154,9 +155,10 @@ export function GroupListEditorPage() {
               const eligibilityTone: Tone = !eligibilityEnabled ? 'neutral' : eligibility.isPending ? 'pending' : assessment?.eligibility === 'eligible' ? 'ok' : assessment?.eligibility === 'unavailable' ? 'failed' : 'degraded';
               return <Tr key={group.id}>
                 <Td className="w-12"><Checkbox visuallyHiddenLabel checked={checked} disabled={mutation.isPending || versionConflict || (eligibilityEnabled && !checked && assessment?.eligibility !== 'eligible')} label={<>Select {group.subject ?? group.id}</>} onChange={() => toggle(group.id, group.subject ?? group.id, assessment)} /></Td>
-                <Td><span className="grid min-w-0 gap-0.5"><strong className="truncate font-medium">{group.subject ?? group.id}</strong><code className="truncate font-mono text-xs text-fg-3">{group.id}</code></span></Td>
+                <Td multiline><GroupTargetIdentity id={group.id} name={group.subject} type={group.groupType} /></Td>
+                <Td className="w-24 min-w-24 text-right"><ProjectedMemberCount count={group.memberCount} /></Td>
                 <Td><Status tone={stateTone}>{humanizeToken(groupState)}</Status></Td>
-                <Td><span className="grid min-w-0 gap-1"><Status tone={eligibilityTone}>{humanizeToken(eligibilityState)}</Status>{assessment?.eligibilityReason ? <small className="text-xs text-fg-3">{humanizeToken(assessment.eligibilityReason)}</small> : null}</span></Td>
+                <Td multiline className="w-44 min-w-44"><GroupTargetEligibility label={humanizeToken(eligibilityState)} tone={eligibilityTone} reason={assessment?.eligibilityReason} /></Td>
               </Tr>;
             })}</tbody>
           </Table> : <div className="border border-t-0 border-line-strong p-3"><StateNotice kind="empty" title="No groups" detail={route.groupSearch ? 'No projected group matches this prefix.' : 'The ready group projection contains no groups.'} /></div>}
