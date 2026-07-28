@@ -18,20 +18,23 @@ export function ConsoleFooter({
   return (
     <footer
       aria-label="Console runtime context"
-      className="grid h-9 shrink-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 border-t border-line bg-surface px-4 text-[11px] text-fg-3 max-[640px]:hidden"
+      className="flex h-10 shrink-0 items-center justify-between gap-4 border-t border-line bg-surface px-4 text-[11px] text-fg-3 max-[640px]:hidden"
     >
       <div className="flex min-w-0 items-center gap-3">
-        <span className="inline-flex shrink-0 items-center border border-line-strong px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
+        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.08em] text-fg-2">
           {environment}
         </span>
-        <span className="truncate">{scope}</span>
+        <span className="truncate border-l border-line pl-3">{scope}</span>
       </div>
 
-      <Status tone={capabilityTone}>{capabilityLabel}</Status>
-
-      <div className="flex min-w-0 items-center justify-end gap-4 whitespace-nowrap max-[760px]:invisible">
-        {version ? <span className="truncate font-mono text-[10px]" title={revision}>GO {version}</span> : null}
-        <span>Memory-only</span>
+      <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">
+        <Status tone={capabilityTone}>{capabilityLabel}</Status>
+        {version ? (
+          <span className="border-l border-line pl-3 font-mono text-[10px] max-[900px]:hidden" title={revision}>
+            GO {version}
+          </span>
+        ) : null}
+        <span className="border-l border-line pl-3 max-[900px]:hidden">Memory-only credential</span>
       </div>
     </footer>
   );

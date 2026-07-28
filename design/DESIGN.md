@@ -262,14 +262,17 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   (logomark + `OmniWA Console` + base URL in mono 10px), then navigation without
   a runtime-context interruption. Bottom: Sign out remains a separately framed
   session utility, never a navigation destination.
-- **Console footer:** a persistent 36px status bar at the bottom of the main
+- **Console footer:** a persistent 40px status bar at the bottom of the main
   column, outside the page scroll container and never beneath the rail. It owns
   environment, credential scope, canonical capability-discovery Status, optional
   `GO {version}` with revision tooltip, and the `Memory-only` credential-lifetime
-  note. It uses one top hairline, paper background, square geometry, and one row;
-  it never owns page actions, page progress, WhatsApp connection, filters, errors,
-  acknowledgements, or inferred health. At 640–759px the balanced right metadata
-  column remains reserved but visually hidden; below 640px the complete footer is
+  note. It uses one top hairline, paper background, square geometry, and one row
+  with two coherent edge-aligned clusters: runtime and scope on the left;
+  capability, version, and credential lifetime on the right. Hairline separators
+  establish hierarchy without nested surfaces. It never owns page actions, page
+  progress, WhatsApp connection, filters, errors, acknowledgements, or inferred
+  health. At 641–900px version and credential lifetime are hidden while runtime,
+  scope, and capability remain visible; at 640px and below the complete footer is
   hidden so it cannot compete with bottom navigation.
 - **Scope-aware nav** (from `navigationForKeyKind`): navigation is derived from the
   session key kind, not hardcoded.

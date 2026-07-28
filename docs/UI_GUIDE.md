@@ -125,10 +125,11 @@ resource models, or rendered diagnostics.
   context. At narrow widths description precedes actions in DOM order; actions
   wrap without clipping or horizontal page overflow.
 - Shell runtime metadata belongs to the shared main-column `ConsoleFooter`, not
-  the navigation rail or individual pages. It remains one non-wrapping 36px row
-  outside the page scroll container, uses canonical Status semantics for
-  capability discovery, omits unreported versions, hides secondary right-side
-  metadata on compact tablets, and disappears below 640px. Page actions,
+  the navigation rail or individual pages. It remains one non-wrapping 40px row
+  outside the page scroll container, aligns runtime/scope and operational
+  metadata as two edge clusters separated by hairlines, uses canonical Status
+  semantics for capability discovery, omits unreported versions, hides version
+  and credential lifetime on compact tablets, and disappears at 640px and below. Page actions,
   WhatsApp state, projection progress, errors, and acknowledgements stay in
   their owning surfaces.
 - Full-height directory/detail routes use `WorkspacePageFrame`. At 900px and

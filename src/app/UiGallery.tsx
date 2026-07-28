@@ -100,7 +100,7 @@ const sessionUtilityItems = [
 
 function ShellAnatomy() {
   return (
-    <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+    <div className="grid gap-4">
       <div className="grid h-80 grid-cols-[224px_minmax(0,1fr)] overflow-hidden border border-line-strong bg-bg">
         <aside className="flex min-w-0 flex-col border-r border-line-strong bg-surface">
           <div className="flex min-h-[57px] items-center gap-3 border-b border-line px-4">
@@ -117,7 +117,7 @@ function ShellAnatomy() {
           <ConsoleFooter environment="Self-hosted" scope="Instance scope" capabilityLabel="12 capabilities" capabilityTone="ok" version="1.8.0" revision="revision-01" />
         </div>
       </div>
-      <div className="grid gap-4">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="grid h-56 grid-cols-[64px_minmax(0,1fr)] overflow-hidden border border-line-strong">
           <aside className="flex min-h-0 flex-col border-r border-line-strong bg-surface">
             <nav aria-label="Compact rail example" className="grid flex-1 content-start gap-0.5 p-3">

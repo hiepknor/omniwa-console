@@ -183,7 +183,7 @@ if (shell.includes('{/* Context */}') || shell.includes('>Connected</Status>')) 
 }
 
 const consoleFooter = await read('src/app/ConsoleFooter.tsx');
-for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-9', 'grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]', '<Status', 'max-[760px]:invisible', 'max-[640px]:hidden', 'Memory-only']) {
+for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10', 'justify-between', 'border-l border-line pl-3', '<Status', 'max-[900px]:hidden', 'max-[640px]:hidden', 'Memory-only credential']) {
   if (!consoleFooter.includes(marker)) failures.push(`src/app/ConsoleFooter.tsx: main-column runtime footer is missing ${marker}`);
 }
 
