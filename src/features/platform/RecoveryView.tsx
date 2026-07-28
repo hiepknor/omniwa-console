@@ -65,21 +65,21 @@ export function RecoveryView(props: RecoveryViewProps) {
               <tr>
                 <Th>Event</Th>
                 <Th>Instance</Th>
-                <Th>Resource</Th>
+                <Th priority="supporting">Resource</Th>
                 <Th>Failure</Th>
                 <Th className="text-right">Attempts</Th>
-                <Th>Dead-lettered</Th>
+                <Th priority="detail">Dead-lettered</Th>
               </tr>
             </thead>
             <tbody>
               {props.items.map((f) => (
                 <Tr key={failureIdentity(f)} selected={failureIdentity(f) === props.selectedKey} onClick={() => props.onSelect(f)}>
-                  <Td className="font-mono text-xs text-fg-2">{f.eventKey}</Td>
-                  <Td className="font-mono text-xs text-fg-2">{f.instanceId}</Td>
-                  <Td>{humanizeToken(f.resource)}</Td>
-                  <Td>{humanizeToken(f.lastErrorCode ?? f.failureClass)}</Td>
-                  <Td className="text-right font-mono tabular-nums">{f.retryCount ?? '—'} / {f.maxAttempts ?? '—'}</Td>
-                  <Td className="text-fg-2">{relativeTime(f.deadLetteredAt) || '—'}</Td>
+                  <Td mobileLabel="Event" className="font-mono text-xs text-fg-2">{f.eventKey}</Td>
+                  <Td mobileLabel="Instance" className="font-mono text-xs text-fg-2">{f.instanceId}</Td>
+                  <Td mobileLabel="Resource" priority="supporting">{humanizeToken(f.resource)}</Td>
+                  <Td mobileLabel="Failure">{humanizeToken(f.lastErrorCode ?? f.failureClass)}</Td>
+                  <Td mobileLabel="Attempts" className="text-right font-mono tabular-nums">{f.retryCount ?? '—'} / {f.maxAttempts ?? '—'}</Td>
+                  <Td mobileLabel="Dead-lettered" priority="detail" className="text-fg-2">{relativeTime(f.deadLetteredAt) || '—'}</Td>
                 </Tr>
               ))}
             </tbody>

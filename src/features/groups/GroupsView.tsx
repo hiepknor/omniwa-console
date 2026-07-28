@@ -86,23 +86,23 @@ export function GroupsView(props: GroupsViewProps) {
         {props.groups.length > 0 ? (
           <Table className="border-0">
             <thead>
-              <tr><Th>Group</Th><Th>Type</Th><Th>Group state</Th>{props.normalized ? <Th>My role</Th> : null}<Th>Send mode</Th><Th className="text-right">Members</Th><Th>Updated</Th></tr>
+              <tr><Th>Group</Th><Th priority="detail">Type</Th><Th>Group state</Th>{props.normalized ? <Th priority="detail">My role</Th> : null}<Th>Send mode</Th><Th className="text-right">Members</Th><Th priority="detail">Updated</Th></tr>
             </thead>
             <tbody>
               {props.groups.map((g) => (
                 <Tr key={g.id} selected={g.id === props.selectedId} onClick={() => props.onOpen(g.id)}>
-                  <Td>
+                  <Td mobileLabel="Group">
                     <div className="grid gap-0.5">
                       <span className="font-medium">{g.subject ?? g.id}</span>
                       <small className="font-mono text-xs text-fg-3">{g.id}</small>
                     </div>
                   </Td>
-                  <Td>{humanizeToken(g.groupType ?? 'unreported')}</Td>
-                  <Td><Status tone={groupStatusTone(g.status)}>{humanizeToken(g.status ?? 'unreported')}</Status></Td>
-                  {props.normalized ? <Td>{humanizeToken(g.myRole ?? 'unknown')}</Td> : null}
-                  <Td>{g.sendMode ? humanizeToken(g.sendMode) : 'Not reported'}</Td>
-                  <Td className="text-right font-mono tabular-nums">{g.memberCount ?? '—'}</Td>
-                  <Td className="text-fg-2" title={g.updatedAt}>{relativeTime(g.updatedAt) || 'Not reported'}</Td>
+                  <Td mobileLabel="Type" priority="detail">{humanizeToken(g.groupType ?? 'unreported')}</Td>
+                  <Td mobileLabel="Group state"><Status tone={groupStatusTone(g.status)}>{humanizeToken(g.status ?? 'unreported')}</Status></Td>
+                  {props.normalized ? <Td mobileLabel="My role" priority="detail">{humanizeToken(g.myRole ?? 'unknown')}</Td> : null}
+                  <Td mobileLabel="Send mode">{g.sendMode ? humanizeToken(g.sendMode) : 'Not reported'}</Td>
+                  <Td mobileLabel="Members" className="text-right font-mono tabular-nums">{g.memberCount ?? '—'}</Td>
+                  <Td mobileLabel="Updated" priority="detail" className="text-fg-2" title={g.updatedAt}>{relativeTime(g.updatedAt) || 'Not reported'}</Td>
                 </Tr>
               ))}
             </tbody>

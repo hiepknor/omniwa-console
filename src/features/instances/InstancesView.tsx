@@ -86,20 +86,20 @@ export function InstancesView(props: InstancesViewProps) {
             <thead>
               <tr>
                 <Th>Name</Th>
-                <Th>Instance ID</Th>
+                <Th priority="supporting">Instance ID</Th>
                 <Th>Status</Th>
-                <Th>Credential</Th>
-                <Th>Created</Th>
+                <Th priority="detail">Credential</Th>
+                <Th priority="detail">Created</Th>
               </tr>
             </thead>
             <tbody>
               {props.instances.map((i) => (
                 <Tr key={i.id} selected={i.id === props.selectedId} onClick={() => props.onOpen(i.id)}>
-                  <Td className="font-medium">{i.displayName ?? 'Unnamed instance'}</Td>
-                  <Td className="font-mono text-xs text-fg-2">{i.id}</Td>
-                  <Td><Status tone={i.connected === true ? 'ok' : i.connected === false ? 'failed' : 'neutral'}>{humanizeToken(i.status)}</Status></Td>
-                  <Td className="font-mono text-xs text-fg-2">{i.credentialVersion ? `v${i.credentialVersion}` : 'Not reported'}</Td>
-                  <Td className="text-fg-2" title={i.createdAt}>{relativeTime(i.createdAt) || 'Not reported'}</Td>
+                  <Td mobileLabel="Name" className="font-medium">{i.displayName ?? 'Unnamed instance'}</Td>
+                  <Td mobileLabel="Instance ID" priority="supporting" className="font-mono text-xs text-fg-2">{i.id}</Td>
+                  <Td mobileLabel="Status"><Status tone={i.connected === true ? 'ok' : i.connected === false ? 'failed' : 'neutral'}>{humanizeToken(i.status)}</Status></Td>
+                  <Td mobileLabel="Credential" priority="detail" className="font-mono text-xs text-fg-2">{i.credentialVersion ? `v${i.credentialVersion}` : 'Not reported'}</Td>
+                  <Td mobileLabel="Created" priority="detail" className="text-fg-2" title={i.createdAt}>{relativeTime(i.createdAt) || 'Not reported'}</Td>
                 </Tr>
               ))}
             </tbody>

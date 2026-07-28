@@ -169,11 +169,11 @@ export function GroupListEditorPage() {
               const eligibilityState = !eligibilityEnabled ? 'validated on submit' : eligibility.isPending ? 'checking' : assessment?.eligibility ?? 'unknown';
               const eligibilityTone: Tone = !eligibilityEnabled ? 'neutral' : eligibility.isPending ? 'pending' : assessment?.eligibility === 'eligible' ? 'ok' : assessment?.eligibility === 'unavailable' ? 'failed' : 'degraded';
               return <Tr key={group.id}>
-                <Td className="w-12"><Checkbox visuallyHiddenLabel checked={checked} disabled={mutation.isPending || versionConflict || (eligibilityEnabled && !checked && assessment?.eligibility !== 'eligible')} label={<>Select {group.subject ?? group.id}</>} onChange={() => toggle(group.id, group.subject ?? group.id, assessment)} /></Td>
-                <Td multiline><GroupTargetIdentity id={group.id} name={group.subject} type={group.groupType} /></Td>
-                <Td className="w-24 min-w-24 text-right"><ProjectedMemberCount count={group.memberCount} /></Td>
-                <Td><Status tone={groupStatusTone(group.status)}>{humanizeToken(groupState)}</Status></Td>
-                <Td multiline className="w-44 min-w-44"><GroupTargetEligibility label={humanizeToken(eligibilityState)} tone={eligibilityTone} reason={assessment?.eligibilityReason} /></Td>
+                <Td mobileLabel="Select" className="w-12"><Checkbox visuallyHiddenLabel checked={checked} disabled={mutation.isPending || versionConflict || (eligibilityEnabled && !checked && assessment?.eligibility !== 'eligible')} label={<>Select {group.subject ?? group.id}</>} onChange={() => toggle(group.id, group.subject ?? group.id, assessment)} /></Td>
+                <Td mobileLabel="Group" multiline><GroupTargetIdentity id={group.id} name={group.subject} type={group.groupType} /></Td>
+                <Td mobileLabel="Members" className="w-24 min-w-24 text-right"><ProjectedMemberCount count={group.memberCount} /></Td>
+                <Td mobileLabel="State"><Status tone={groupStatusTone(group.status)}>{humanizeToken(groupState)}</Status></Td>
+                <Td mobileLabel="Eligibility" multiline className="w-44 min-w-44"><GroupTargetEligibility label={humanizeToken(eligibilityState)} tone={eligibilityTone} reason={assessment?.eligibilityReason} /></Td>
               </Tr>;
             })}</tbody>
           </Table> : <div className="border border-t-0 border-line-strong p-3"><StateNotice kind="empty" title="No groups" detail={route.groupSearch ? 'No projected group matches this prefix.' : 'The ready group projection contains no groups.'} /></div>}

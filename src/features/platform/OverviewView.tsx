@@ -75,10 +75,10 @@ export function OverviewView(props: OverviewViewProps) {
               <tbody>
                 {health.instances.map((i) => (
                   <Tr key={i.instanceId}>
-                    <Td className="font-mono text-xs text-fg-2">{i.instanceId}</Td>
-                    <Td><Status tone={i.connection.connected === true ? 'ok' : i.connection.connected === false ? 'failed' : 'neutral'}>{humanizeToken(i.connection.status)}</Status></Td>
-                    <Td><Status tone={projectionTone(i.projection.status)}>{humanizeToken(i.projection.status)}</Status></Td>
-                    <Td><Status tone={i.throttling.observed === true ? 'degraded' : 'neutral'}>{humanizeToken(i.throttling.status)}</Status></Td>
+                    <Td mobileLabel="Instance" className="font-mono text-xs text-fg-2">{i.instanceId}</Td>
+                    <Td mobileLabel="Connection"><Status tone={i.connection.connected === true ? 'ok' : i.connection.connected === false ? 'failed' : 'neutral'}>{humanizeToken(i.connection.status)}</Status></Td>
+                    <Td mobileLabel="Projection"><Status tone={projectionTone(i.projection.status)}>{humanizeToken(i.projection.status)}</Status></Td>
+                    <Td mobileLabel="Throttling"><Status tone={i.throttling.observed === true ? 'degraded' : 'neutral'}>{humanizeToken(i.throttling.status)}</Status></Td>
                   </Tr>
                 ))}
               </tbody>
@@ -139,12 +139,12 @@ export function OverviewView(props: OverviewViewProps) {
               <tbody>
                 {projection.resources.map((r, index) => (
                   <Tr key={`${r.instanceId ?? 'server'}-${r.resource}-${index}`}>
-                    <Td>{humanizeToken(r.resource)}</Td>
-                    <Td className="font-mono text-xs text-fg-2">{r.instanceId ?? 'Server'}</Td>
-                    <Td><Status tone={r.syncStatus === 'ready' ? 'ok' : r.syncStatus === 'failed' ? 'failed' : 'degraded'}>{humanizeToken(r.syncStatus)}</Status></Td>
-                    <Td className="text-right font-mono tabular-nums">{formatCount(r.pendingEvents)}</Td>
-                    <Td className="text-right font-mono tabular-nums">{formatCount(r.deadLetterEvents)}</Td>
-                    <Td className="text-right font-mono tabular-nums">{r.eventLagSeconds === undefined ? '—' : `${r.eventLagSeconds}s`}</Td>
+                    <Td mobileLabel="Resource">{humanizeToken(r.resource)}</Td>
+                    <Td mobileLabel="Instance" className="font-mono text-xs text-fg-2">{r.instanceId ?? 'Server'}</Td>
+                    <Td mobileLabel="Sync state"><Status tone={r.syncStatus === 'ready' ? 'ok' : r.syncStatus === 'failed' ? 'failed' : 'degraded'}>{humanizeToken(r.syncStatus)}</Status></Td>
+                    <Td mobileLabel="Pending" className="text-right font-mono tabular-nums">{formatCount(r.pendingEvents)}</Td>
+                    <Td mobileLabel="Dead letters" className="text-right font-mono tabular-nums">{formatCount(r.deadLetterEvents)}</Td>
+                    <Td mobileLabel="Event lag" className="text-right font-mono tabular-nums">{r.eventLagSeconds === undefined ? '—' : `${r.eventLagSeconds}s`}</Td>
                   </Tr>
                 ))}
               </tbody>

@@ -70,17 +70,17 @@ export function CampaignsView(props: CampaignsViewProps) {
         {props.items.length > 0 ? (
           <Table className="border-0">
             <thead>
-              <tr><Th>Campaign</Th><Th className="max-sm:hidden">Status</Th><Th>Progress</Th><Th className="max-md:hidden">Activity</Th></tr>
+              <tr><Th>Campaign</Th><Th>Status</Th><Th>Progress</Th><Th priority="detail">Activity</Th></tr>
             </thead>
             <tbody>
               {props.items.map((c) => (
                 <Tr key={c.id} selected={c.id === props.selectedId} onClick={() => props.onOpen(c.id)}>
-                  <Td>
-                    <div className="grid gap-0.5"><span className="font-medium">{c.name}</span><small className="text-xs text-fg-2">{campaignTargetLabel(c)}</small><small className="font-mono text-[11px] text-fg-3">{c.id}</small><div className="mt-1 hidden flex-wrap gap-1 max-sm:flex"><Status tone={campaignTone(c.status)}>{humanizeToken(c.status)}</Status>{c.needsAttention ? <Status tone="failed">Attention</Status> : c.retryAt ? <Status tone="pending">Waiting</Status> : null}</div></div>
+                  <Td mobileLabel="Campaign">
+                    <div className="grid gap-0.5"><span className="font-medium">{c.name}</span><small className="text-xs text-fg-2">{campaignTargetLabel(c)}</small><small className="font-mono text-[11px] text-fg-3">{c.id}</small></div>
                   </Td>
-                  <Td className="max-sm:hidden"><div className="grid justify-items-start gap-1.5"><Status tone={campaignTone(c.status)}>{humanizeToken(c.status)}</Status>{c.needsAttention ? <Status tone="failed">Attention</Status> : c.retryAt ? <Status tone="pending">Waiting</Status> : null}</div></Td>
-                  <Td><CampaignProgressSummary campaign={c} compact /></Td>
-                  <Td className="text-fg-2 max-md:hidden">{relativeTime(c.progress.updatedAt ?? c.updatedAt) || 'Not reported'}</Td>
+                  <Td mobileLabel="Status"><div className="grid justify-items-start gap-1.5"><Status tone={campaignTone(c.status)}>{humanizeToken(c.status)}</Status>{c.needsAttention ? <Status tone="failed">Attention</Status> : c.retryAt ? <Status tone="pending">Waiting</Status> : null}</div></Td>
+                  <Td mobileLabel="Progress"><CampaignProgressSummary campaign={c} compact /></Td>
+                  <Td mobileLabel="Activity" priority="detail" className="text-fg-2">{relativeTime(c.progress.updatedAt ?? c.updatedAt) || 'Not reported'}</Td>
                 </Tr>
               ))}
             </tbody>

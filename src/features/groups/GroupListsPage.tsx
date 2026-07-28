@@ -47,7 +47,20 @@ export function GroupListsPage() {
           </FilterToolbar>
           {query.error ? <div className="p-4"><Failure error={query.error} onRetry={() => query.refetch()} /></div> : null}
           {query.isPending ? <div className="p-4"><StateNotice kind="loading" title="Loading Group Lists" /></div> : null}
-          {items.length ? <Table className="border-0"><thead><tr><Th>Group List</Th><Th className="text-right">Groups</Th><Th>Authorization</Th><Th>Updated</Th><Th className="text-right">Version</Th></tr></thead><tbody>{items.map((item) => <Tr key={item.id} selected={item.id === groupListId} onClick={() => navigate(`/groups/lists/${encodeURIComponent(item.id)}${params.size ? `?${params}` : ''}`)}><Td><div className="grid gap-0.5"><strong className="font-medium">{item.name}</strong><small className="text-xs text-fg-3">{item.description || item.id}</small></div></Td><Td className="text-right font-mono tabular-nums">{item.groupCount}</Td><Td>{humanizeToken(item.authorizationSource ?? 'unreported')}</Td><Td className="text-fg-2">{relativeTime(item.updatedAt) || 'Not reported'}</Td><Td className="text-right font-mono">{item.version}</Td></Tr>)}</tbody></Table> : query.data && !query.error ? <div className="p-4"><StateNotice kind="empty" title="No Group Lists" detail={route.search ? 'No Group List matches this prefix.' : 'Create a Group List before creating a campaign.'} /></div> : null}
+          {items.length ? (
+            <Table className="border-0">
+              <thead><tr><Th>Group List</Th><Th className="text-right">Groups</Th><Th priority="detail">Authorization</Th><Th priority="detail">Updated</Th><Th priority="supporting" className="text-right">Version</Th></tr></thead>
+              <tbody>{items.map((item) => (
+                <Tr key={item.id} selected={item.id === groupListId} onClick={() => navigate(`/groups/lists/${encodeURIComponent(item.id)}${params.size ? `?${params}` : ''}`)}>
+                  <Td mobileLabel="Group List"><div className="grid gap-0.5"><strong className="font-medium">{item.name}</strong><small className="text-xs text-fg-3">{item.description || item.id}</small></div></Td>
+                  <Td mobileLabel="Groups" className="text-right font-mono tabular-nums">{item.groupCount}</Td>
+                  <Td mobileLabel="Authorization" priority="detail">{humanizeToken(item.authorizationSource ?? 'unreported')}</Td>
+                  <Td mobileLabel="Updated" priority="detail" className="text-fg-2">{relativeTime(item.updatedAt) || 'Not reported'}</Td>
+                  <Td mobileLabel="Version" priority="supporting" className="text-right font-mono">{item.version}</Td>
+                </Tr>
+              ))}</tbody>
+            </Table>
+          ) : query.data && !query.error ? <div className="p-4"><StateNotice kind="empty" title="No Group Lists" detail={route.search ? 'No Group List matches this prefix.' : 'Create a Group List before creating a campaign.'} /></div> : null}
           <CursorPagination cursor={route.cursor} nextCursor={query.data?.nextCursor ?? undefined} onCursor={(value) => setParam('cursor', value)} />
         </Panel>
       </div>

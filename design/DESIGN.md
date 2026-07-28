@@ -184,7 +184,17 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   status reason needs multiple lines. Reasons wrap below the short status and
   expand only that row vertically, while ordinary rows remain 44px. Horizontal
   overflow stays inside the table container; the page never scrolls sideways
-  and rows never become floating cards.
+  and rows never become floating cards. Responsive geometry is container-owned,
+  not viewport-owned: at **≤640px table width** the header becomes visually
+  hidden and every row becomes one contiguous labelled record grid; at
+  **641–768px** only `essential` columns remain; at **769–960px** `supporting`
+  columns return while `detail` stays hidden; above 960px the complete column
+  set returns. Compact records restore all columns, including `supporting` and
+  `detail`, so narrow screens do not lose facts. Every `Td` supplies its short
+  `mobileLabel`; long values use anywhere wrapping inside the value track.
+  Features assign semantic column priority but never declare table breakpoints.
+  `supporting` and `detail` are limited to redundant or inspector-available
+  facts; a sole health, permission, action, or outcome fact remains `essential`.
 - **MetricGrid** — one contiguous bordered grid (not separate cards): hairline
   cell separators, 11px uppercase label, **24px mono** value. The default density
   wraps to one column on narrow screens so long textual values remain readable;
@@ -300,6 +310,7 @@ or `border-*` utilities and rely on generated CSS order.
 | SelectionReview | hidden-empty, retained items, mixed statuses, long detail, remove, disabled, bounded overflow |
 | Filter chip | rest, hover, keyboard focus, removed |
 | Table row | rest, hover, keyboard focus, selected, multiline status + reason |
+| Table layout | compact labelled records, narrow essentials, regular supporting facts, wide full columns, long wrapping |
 | StateNotice | info/stale, loading, empty/not-ready, error + requestId, action |
 | CursorPagination | first page, next cursor, final page, responsive stacking |
 | ProgressBar | 0–99%, indeterminate, complete, failed at last known value |

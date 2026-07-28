@@ -130,6 +130,15 @@ resource models, or rendered diagnostics.
   fixtures reuse the same production inspector composition and may not invent
   contradictory live states.
 - Interactive table rows support keyboard activation and expose selection.
+- Responsive tables use the shared container-width contract: compact records at
+  640px table width and below, essential columns through 768px, supporting facts
+  through 960px, and the full table above 960px. Every data cell declares a
+  compact label; long IDs and operational text wrap inside the value track.
+  Features may classify a column as `supporting` or `detail`, but may not add
+  viewport breakpoint utilities to `Th` or `Td`.
+  A fact may be reduced only when it is repeated elsewhere or available through
+  the row inspector; sole health, permission, action, and outcome facts remain
+  essential.
 - Custom selectors follow the ARIA combobox/listbox pattern, retain an active
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.
 - Buttons preserve a clear ghost/primary/danger hierarchy, expose pressed and
