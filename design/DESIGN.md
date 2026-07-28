@@ -205,10 +205,14 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   Features never remove individual grid borders or override Panel padding with
   conflicting utilities.
 - **Tabs** — underline tabs; 2px `--color-accent` underline on the active tab.
+  The tab strip may scroll horizontally but always clips vertical overflow so it
+  never becomes a nested vertical scroll target.
 - **Drawer (inspector)** — right panel, `min(440px,100%)`, paper surface, 1px
   strong left border, and a 60% ink scrim. Header = title + mono ID + square close
   cell. ≤640px becomes an 85dvh full-width bottom sheet. The body scrolls without
-  moving the page.
+  moving the page. An optional contextual-action footer remains outside that
+  scroll container, so the primary next action is visible without competing with
+  destructive actions at the end of long inspector content.
 - **Dialog** — `min(560px,100%)`, paper surface, 1px strong frame, square close
   cell, bounded body, and elevated action footer over a 60% ink scrim. ≤640px
   docks to the bottom and gives footer actions equal 40px targets. Destructive
@@ -235,11 +239,13 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   Place SelectionBar directly above its canonical Table with one contiguous
   strong frame. Eligibility and other domain rules remain feature-owned.
 - **SelectionReview** — the only retained-selection review surface when choices
-  can span cursor pages. It uses one bounded square frame, states the retained
-  total without turning it into a status, keeps stable identity metadata visible,
-  and gives every item an explicit Remove action. Domain status remains textual
-  and blocked items sort first in the owning feature so a disabled submit never
-  strands the operator.
+  can span cursor pages. Beside a selectable table it lists only retained choices
+  outside the current page; visible choices remain integrated into their table
+  rows and are never duplicated below. It uses one bounded square frame, states
+  the retained total without turning it into a status, keeps stable identity
+  metadata visible, and gives every item an explicit Remove action. Domain status
+  remains textual and blocked items sort first in the owning feature so a disabled
+  submit never strands the operator.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
   list progression. Panel body spacing is selected through its named padding
@@ -367,9 +373,12 @@ a parts bin:
    canonical framed Panel surfaces rather than floating directly in the Drawer
    body. Long identifiers remain fully available in the body even when repeated
    as a compact header subtitle. Long content remains body-scrollable.
-3. **Command:** consequence notice → required fields/confirmation → stable
-   footer. Duplicate submission is disabled; pending commands lock dismissal;
-   acknowledgement never claims downstream delivery.
+3. **Command:** consequence notice → required fields/confirmation → explicit
+   readiness review → stable footer. Duplicate submission is disabled; pending
+   commands lock dismissal; dirty editors confirm destructive navigation;
+   acknowledgement never claims downstream delivery. Multi-page replacement
+   editors report honest loading state rather than fabricating determinate
+   progress from an atomic query.
 4. **Recovery:** normalized error with request ID → explicit review → danger
    intent → refreshed narrow projection. It never infers success from aggregate
    health.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pageSelectionState, setPageSelection, type GroupSelectionCandidate, type SelectedGroup } from './group-list-selection';
+import { pageSelectionState, selectionsOutsidePage, setPageSelection, type GroupSelectionCandidate, type SelectedGroup } from './group-list-selection';
 
 const candidates: GroupSelectionCandidate[] = [
   { id: 'eligible-1@g.us', label: 'Eligible one', eligibility: 'eligible' },
@@ -37,5 +37,14 @@ describe('Group List page selection', () => {
       ['eligible-2@g.us', { label: 'Eligible two' }],
       ['blocked@g.us', { label: 'Blocked' }],
     ]), candidates)).toMatchObject({ selectedSelectableCount: 2, selectableCount: 2, checked: true, indeterminate: false });
+  });
+
+  it('reviews only selections that are not visible in the current table page', () => {
+    const selected = new Map<string, SelectedGroup>([
+      ['eligible-1@g.us', { label: 'Visible' }],
+      ['other-page@g.us', { label: 'Other page' }],
+    ]);
+
+    expect([...selectionsOutsidePage(selected, candidates).keys()]).toEqual(['other-page@g.us']);
   });
 });

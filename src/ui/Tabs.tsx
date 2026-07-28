@@ -14,7 +14,7 @@ export function Tabs({
   className?: string;
 }) {
   return (
-    <div className={cn('flex gap-0.5 overflow-x-auto border-b border-line', className)} role="tablist">
+    <div className={cn('flex gap-0.5 overflow-x-auto overflow-y-hidden border-b border-line', className)} role="tablist">
       {tabs.map((tab) => {
         const selected = tab.id === active;
         return (

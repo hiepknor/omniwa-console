@@ -47,3 +47,11 @@ export function setPageSelection(
   }
   return next;
 }
+
+export function selectionsOutsidePage(
+  selected: ReadonlyMap<string, SelectedGroup>,
+  candidates: readonly Pick<GroupSelectionCandidate, 'id'>[],
+): Map<string, SelectedGroup> {
+  const visible = new Set(candidates.map((candidate) => candidate.id));
+  return new Map([...selected].filter(([id]) => !visible.has(id)));
+}

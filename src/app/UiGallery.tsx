@@ -435,8 +435,8 @@ export function UiGallery() {
             <div className="grid content-start gap-2"><SelectionBar scopeLabel="Select eligible on this page" selectedCount={4} pageSelectedCount={2} pageSelectableCount={2} checked onTogglePage={() => undefined} onClear={() => undefined} /><StateNotice kind="empty" title="Selection requires review" detail="2 selected groups are unavailable or not yet verified." /></div>
           </div>
           <SelectionReview
-            title="Selected targets"
-            description="Selections can span pages. Unavailable and unknown targets appear first and must be removed before saving."
+            title="Selected outside this page"
+            description="Retained targets from other cursor pages remain reviewable without duplicating selected rows in the table above."
             items={[
               { id: '120363000002@g.us', label: 'Editorial', meta: '120363000002@g.us', status: 'Unavailable', tone: 'failed', detail: 'Send permission denied' },
               { id: '120363000003@g.us', label: 'Support', meta: '120363000003@g.us', status: 'Unknown', tone: 'degraded', detail: 'Select a sendable subgroup' },
@@ -547,7 +547,7 @@ export function UiGallery() {
         </Section>
       </main>
 
-      <Drawer open={drawer} onClose={() => setDrawer(false)} title="inst_01" subtitle="inst_01HZX9Q…">
+      <Drawer open={drawer} onClose={() => setDrawer(false)} title="inst_01" subtitle="inst_01HZX9Q…" footer={<Button onClick={() => setDrawer(false)}>Edit instance</Button>}>
         <div className="grid gap-3">
           <Status tone="ok">connected</Status>
           <p className="text-sm text-fg-2">Framed right-side inspector with a strong header, scroll-safe body, and responsive bottom-sheet treatment.</p>

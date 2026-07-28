@@ -21,9 +21,9 @@ export function useGroupListEntries(id: string | undefined, cursor: string | und
   const params = { cursor, limit: 50 };
   return useQuery({ queryKey: queryKeys.groupListEntries(SESSION_QUERY_SCOPE, id ?? '', params), queryFn: () => listGroupListEntries(client, id!, params), enabled: enabled && Boolean(id), ...PROJECTION_READ_POLICY });
 }
-export function useAllGroupListEntries(id: string | undefined, expectedCount: number, enabled: boolean) {
+export function useAllGroupListEntries(id: string | undefined, expectedCount: number | undefined, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.groupListEntries(SESSION_QUERY_SCOPE, id ?? '', { all: true, expectedCount }), queryFn: () => loadAllGroupListEntries(client, id!, expectedCount), enabled: enabled && Boolean(id), staleTime: 30_000, retry: false });
+  return useQuery({ queryKey: queryKeys.groupListEntries(SESSION_QUERY_SCOPE, id ?? '', { all: true, expectedCount }), queryFn: () => loadAllGroupListEntries(client, id!, expectedCount!), enabled: enabled && Boolean(id) && expectedCount !== undefined, staleTime: 30_000, retry: false });
 }
 export function useGroupListAudit(id: string | undefined, cursor: string | undefined, enabled: boolean) {
   const client = useApi();

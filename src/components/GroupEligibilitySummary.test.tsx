@@ -16,4 +16,12 @@ describe('GroupEligibilitySummary', () => {
     expect(html).toContain('Send permission denied');
     expect(html).toContain('Projection not ready');
   });
+
+  it('does not turn omitted aggregate facts into zeroes', () => {
+    const html = renderToStaticMarkup(<GroupEligibilitySummary value={{ groupListId: 'list-1' }} />);
+
+    expect(html).toContain('Eligibility incomplete');
+    expect(html).toContain('— eligible');
+    expect(html).not.toContain('0 eligible');
+  });
 });

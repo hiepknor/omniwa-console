@@ -30,7 +30,7 @@ export function CreateCampaign() {
   const selected = useGroupList(selectedId || undefined, enabled);
   const preview = useGroupListEntries(selectedId || undefined, undefined, enabled && Boolean(selectedId));
   const assessment = useGroupListEligibility(selectedId || undefined, selected.data?.version, enabled && eligibilityEnabled && Boolean(selected.data));
-  const canSubmit = Boolean(name.trim() && text.trim() && selected.data?.id && selected.data.groupCount > 0 && !create.isPending && (!eligibilityEnabled || assessment.data?.aggregate.readyToTarget));
+  const canSubmit = Boolean(name.trim() && text.trim() && selected.data?.id && (selected.data.groupCount ?? 0) > 0 && selected.data.version !== undefined && !create.isPending && (!eligibilityEnabled || assessment.data?.aggregate.readyToTarget));
   const createIssues = eligibilityIssues(create.error);
   useEffect(() => {
     if (create.error && eligibilityEnabled && selected.data) void assessment.refetch();
@@ -45,7 +45,7 @@ export function CreateCampaign() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!canSubmit || !selected.data) return;
+    if (!canSubmit || !selected.data || selected.data.version === undefined) return;
     try {
       const result = await create.mutateAsync({ name: name.trim(), text, target: { type: 'group_list', groupListId: selected.data.id, groupListVersion: selected.data.version } });
       navigate(`/campaigns/${encodeURIComponent(result.campaign.id)}?created=1`, { replace: true });
