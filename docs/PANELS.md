@@ -41,9 +41,13 @@ providers.
 GET /server/capabilities
 ```
 
-The session call negotiates server-wide features. Projection panels use the
-same endpoint with the selected instance token. Unknown capabilities remain
-preserved.
+The session call negotiates server-wide features and returns the authenticated
+`credentialScope`; instance scope also carries `instanceId`. Connect uses that
+field directly and sends no admin or status probe when it is present. A
+temporary sequential compatibility probe remains only for successful responses
+from older revisions that omit the field. Unknown capabilities remain
+preserved, and projection panels use the same endpoint with the selected
+instance token.
 
 ## Instances — `/instances`, `/instances/:instanceId`
 

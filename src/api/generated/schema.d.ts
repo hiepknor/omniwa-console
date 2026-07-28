@@ -7867,7 +7867,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get server capabilities */
+        /**
+         * Get server capabilities
+         * @description Authenticates either the global admin key or an instance token and returns an explicit credentialScope. instanceId is present only for an instance credential.
+         *     Credential scope is independent of capabilities and projection readiness. A missing or invalid credential returns 401; projection infrastructure failures may return 500.
+         */
         get: {
             parameters: {
                 query?: never;
@@ -9395,6 +9399,16 @@ export interface components {
              *     ]
              */
             capabilities?: string[];
+            /**
+             * @example instance
+             * @enum {string}
+             */
+            credentialScope: "admin" | "instance";
+            /**
+             * Format: uuid
+             * @example 0bca2c34-ef2a-463c-98fd-e2afb6978457
+             */
+            instanceId?: string;
             /** @example 0123456789abcdef0123456789abcdef01234567 */
             revision?: string;
             /** @example 1.2.3 */

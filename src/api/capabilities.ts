@@ -30,18 +30,26 @@ export const capabilityNames = [
 
 export type CapabilityName = (typeof capabilityNames)[number];
 
+export type CapabilityCredentialScope = 'admin' | 'instance';
+
 export type CapabilitySnapshot = {
   version?: string;
   revision?: string;
+  /** Absent only on older backend revisions that predate explicit discovery. */
+  credentialScope?: CapabilityCredentialScope;
+  /** Supplied by the backend only for an instance credential. */
+  instanceId?: string;
   /** Unknown values are preserved so a newer server remains forward-compatible. */
   capabilities: readonly string[];
 };
 
-export async function getCapabilities(client: ApiClient): Promise<CapabilitySnapshot> {
-  const data = unwrap<CapabilitiesData>(await client.GET('/server/capabilities'));
+export async function getCapabilities(client: ApiClient, signal?: AbortSignal): Promise<CapabilitySnapshot> {
+  const data = unwrap<CapabilitiesData>(await client.GET('/server/capabilities', { signal }));
   return {
     version: data?.version || undefined,
     revision: data?.revision || undefined,
+    ...(data?.credentialScope ? { credentialScope: data.credentialScope } : {}),
+    ...(data?.credentialScope === 'instance' && data.instanceId ? { instanceId: data.instanceId } : {}),
     capabilities: [...new Set(data?.capabilities ?? [])].sort(),
   };
 }

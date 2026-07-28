@@ -10,6 +10,8 @@ describe('capabilities', () => {
         data: {
           version: '1.2.3',
           revision: 'abcdef1234567890',
+          credentialScope: 'instance',
+          instanceId: '0bca2c34-ef2a-463c-98fd-e2afb6978457',
           capabilities: ['groups_projection', 'future_projection', 'groups_projection'],
         },
       },
@@ -19,6 +21,8 @@ describe('capabilities', () => {
     expect(snapshot).toEqual({
       version: '1.2.3',
       revision: 'abcdef1234567890',
+      credentialScope: 'instance',
+      instanceId: '0bca2c34-ef2a-463c-98fd-e2afb6978457',
       capabilities: ['future_projection', 'groups_projection'],
     });
     expect(hasCapability(snapshot, 'groups_projection')).toBe(true);

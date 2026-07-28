@@ -1,7 +1,7 @@
 # OmniWA GO Public Contract
 
 This is the Console-facing handoff for the OmniWA GO backend at commit
-`2682ddd` (2026-07-23). The vendored machine contract at
+`ede042a33042bce50868339c1293973713ac0919` (2026-07-28). The vendored machine contract at
 `contracts/omniwa-go.openapi.json` remains authoritative for paths and schemas;
 this document records cross-cutting semantics that generated types cannot
 express reliably.
@@ -28,10 +28,26 @@ changes. The same path accepts either credential scope.
   "message": "success",
   "data": {
     "version": "...",
+    "revision": "...",
+    "credentialScope": "instance",
+    "instanceId": "0bca2c34-ef2a-463c-98fd-e2afb6978457",
     "capabilities": ["rate_limit_retry_after", "groups_projection"]
   }
 }
 ```
+
+`credentialScope` comes directly from backend authentication and is always
+`admin` or `instance` on current revisions. `instanceId` is present only for an
+instance credential. The Console uses this field as its primary and sole scope
+discovery result; it never derives scope from capability strings, projection
+readiness, credential syntax, or failed requests. A successful capability read
+remains HTTP 200 when projection-backed capabilities are empty, syncing, stale,
+or not ready. HTTP 401 means the supplied credential is missing or invalid.
+
+For a temporary older-backend compatibility window, the Console runs its
+sequential `/instance/all` then `/instance/status` probe only after a successful
+capability response omits `credentialScope`. The probes are never concurrent,
+and an HTTP 401 is not used as admin-versus-instance control flow.
 
 Known capabilities:
 
