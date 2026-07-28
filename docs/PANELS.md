@@ -123,12 +123,17 @@ POST /group/settings
 POST /group/participant
 POST /group/invitelink        # reset:true is live mutation + write-through
 POST /group/leave
-POST /send/text
 ```
 
 Search is prefix-based and cursor-scoped to instance and normalized query.
 Changing either resets the cursor. The panel never decodes cursors or falls back
 to a live WhatsApp read.
+
+The Groups directory distinguishes projected group state from WhatsApp send
+mode and does not infer the active account's management permissions or campaign
+eligibility. Its URL-backed inspector owns overview, member, and settings
+contexts. One-off messaging is handed to the Chats workspace, and campaign
+target management is handed to Group Lists; Groups does not own a send command.
 
 Group Lists are gated independently by `group_lists`. They are instance-scoped,
 versioned target sets; eligibility is consumed from the backend and is never

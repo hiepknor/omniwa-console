@@ -3,12 +3,11 @@ import { useApi } from '@/api/ApiProvider';
 import {
   addGroupMember, createGroup, demoteGroupMember, getGroup, getGroupInviteLink, leaveGroup,
   listInstanceGroups, promoteGroupMember, refreshGroupInviteLink, removeGroupMember,
-  sendGroupTextMessage, updateGroup, updateGroupSetting,
-  type GroupCreateRequest, type GroupMetadataRequest, type GroupSetting,
+  updateGroupDescription, updateGroupName, updateGroupSetting,
+  type GroupCreateRequest, type GroupSetting,
 } from '@/api/groups';
 import { queryKeys, SESSION_QUERY_SCOPE } from '@/api/keys';
 import { PROJECTION_READ_POLICY } from '@/lib/query-policy';
-import { invalidateGroupSendProjections } from './cache';
 
 export function useGroups(search: string, cursor: string | undefined, enabled: boolean) {
   const client = useApi();
@@ -31,7 +30,8 @@ function useInvalidateGroup(groupId?: string) {
   };
 }
 export function useCreateGroup() { const client = useApi(); const invalidate = useInvalidateGroup(); return useMutation({ mutationFn: (body: GroupCreateRequest) => createGroup(client, body), onSuccess: invalidate }); }
-export function useUpdateGroup(groupId: string) { const client = useApi(); const invalidate = useInvalidateGroup(groupId); return useMutation({ mutationFn: (body: GroupMetadataRequest) => updateGroup(client, groupId, body), onSuccess: invalidate }); }
+export function useUpdateGroupName(groupId: string) { const client = useApi(); const invalidate = useInvalidateGroup(groupId); return useMutation({ mutationFn: (name: string) => updateGroupName(client, groupId, name), onSuccess: invalidate }); }
+export function useUpdateGroupDescription(groupId: string) { const client = useApi(); const invalidate = useInvalidateGroup(groupId); return useMutation({ mutationFn: (description: string) => updateGroupDescription(client, groupId, description), onSuccess: invalidate }); }
 export function useUpdateGroupSetting(groupId: string) { const client = useApi(); const invalidate = useInvalidateGroup(groupId); return useMutation({ mutationFn: ({ setting, enabled }: { setting: GroupSetting; enabled: boolean }) => updateGroupSetting(client, groupId, setting, enabled), onSuccess: invalidate }); }
 export function useAddGroupMember(groupId: string) { const client = useApi(); const invalidate = useInvalidateGroup(groupId); return useMutation({ mutationFn: (jid: string) => addGroupMember(client, groupId, { jid }), onSuccess: invalidate }); }
 export function usePromoteGroupMember(groupId: string) { const client = useApi(); const invalidate = useInvalidateGroup(groupId); return useMutation({ mutationFn: (jid: string) => promoteGroupMember(client, groupId, jid), onSuccess: invalidate }); }
@@ -39,11 +39,3 @@ export function useDemoteGroupMember(groupId: string) { const client = useApi();
 export function useRemoveGroupMember(groupId: string) { const client = useApi(); const invalidate = useInvalidateGroup(groupId); return useMutation({ mutationFn: (jid: string) => removeGroupMember(client, groupId, jid), onSuccess: invalidate }); }
 export function useLeaveGroup(groupId: string) { const client = useApi(); const invalidate = useInvalidateGroup(); return useMutation({ mutationFn: () => leaveGroup(client, groupId), onSuccess: invalidate }); }
 export function useResetInvite(groupId: string) { const client = useApi(); const queryClient = useQueryClient(); const invalidate = useInvalidateGroup(groupId); return useMutation({ mutationFn: () => refreshGroupInviteLink(client, groupId), onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: queryKeys.groupInvite(SESSION_QUERY_SCOPE, groupId) }); await invalidate(); } }); }
-export function useSendGroupText(groupId: string) {
-  const client = useApi();
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (text: string) => sendGroupTextMessage(client, groupId, { text }),
-    onSuccess: () => invalidateGroupSendProjections(queryClient, groupId),
-  });
-}
