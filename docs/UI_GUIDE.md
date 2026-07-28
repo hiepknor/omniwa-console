@@ -211,9 +211,10 @@ resource models, or rendered diagnostics.
   totals may span pages, while eligibility and selectable-row rules stay in the
   owning feature. When a selection can span pages, the shared `SelectionReview`
   surface exposes retained items outside the current table page and an individual
-  remove action; visible selected rows are not duplicated below the table. Blocked
-  items appear first so a disabled submit never strands the operator. Counts are
-  not operational statuses. Target directories keep
+  remove action; its header reports the retained total with `CountBadge`, while
+  visible selected rows are not duplicated below the table. Blocked items appear
+  first so a disabled submit never strands the operator. Counts are not
+  operational statuses. Target directories keep
   projected member counts factual (`—` when unreported), place group type beside
   identity, and wrap a permission reason below its short eligibility status;
   multiline cells grow vertically instead of widening or clipping the table.

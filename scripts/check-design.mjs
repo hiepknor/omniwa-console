@@ -123,7 +123,7 @@ for (const marker of ['role="group"', '<Checkbox', 'indeterminate={indeterminate
 }
 
 const selectionReview = await read('src/ui/SelectionReview.tsx');
-for (const marker of ['aria-label=', 'aria-live="polite"', 'max-h-56 overflow-y-auto', '<Status', '<Button', 'Remove selected item', 'max-sm:grid-cols-1']) {
+for (const marker of ['aria-label=', 'aria-live="polite"', '<CountBadge', 'selected ${items.length === 1', 'max-h-56 overflow-y-auto', '<Status', '<Button', 'Remove selected item', 'max-sm:grid-cols-1']) {
   if (!selectionReview.includes(marker)) failures.push(`src/ui/SelectionReview.tsx: retained-selection contract is missing ${marker}`);
 }
 

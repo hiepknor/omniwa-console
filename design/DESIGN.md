@@ -262,10 +262,10 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   can span cursor pages. Beside a selectable table it lists only retained choices
   outside the current page; visible choices remain integrated into their table
   rows and are never duplicated below. It uses one bounded square frame, states
-  the retained total without turning it into a status, keeps stable identity
-  metadata visible, and gives every item an explicit Remove action. Domain status
-  remains textual and blocked items sort first in the owning feature so a disabled
-  submit never strands the operator.
+  the retained total through the canonical CountBadge without turning it into a
+  status, keeps stable identity metadata visible, and gives every item an
+  explicit Remove action. Domain status remains textual and blocked items sort
+  first in the owning feature so a disabled submit never strands the operator.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
   list progression. Panel headers place actions and a lone panel-scoped control
