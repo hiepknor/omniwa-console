@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
-import { Button, ButtonLink, Field, FilterToolbar, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { Button, ButtonLink, Field, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
 
 function projectionTone(status: string): Tone {
   if (status === 'healthy' || status === 'ready') return 'ok';
@@ -98,15 +98,17 @@ export function OverviewView(props: OverviewViewProps) {
         <Panel
           title="Persisted metrics"
           description={`${humanizeToken(overview.scope.type)} scope · ${props.window} · generated ${relativeTime(overview.generatedAt) || 'at an unreported time'}`}
+          actions={(
+            <Field label="Metric window" className="w-48 @max-[32rem]:w-full">
+              {(id, labelId) => <Select id={id} aria-labelledby={labelId} value={props.window} onValueChange={props.onWindowChange}>{props.windowOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</Select>}
+            </Field>
+          )}
           bodyPadding="none"
         >
-          <FilterToolbar aria-label="Metric controls">
-            <Field label="Metric window" className="w-full max-w-48">{(id, labelId) => <Select id={id} aria-labelledby={labelId} value={props.window} onValueChange={props.onWindowChange}>{props.windowOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}</Select>}</Field>
-          </FilterToolbar>
           <MetricGrid
             columns={5}
             density="compact"
-            frame="flush-after-content"
+            frame="flush"
             metrics={[
               { label: instanceScope ? 'Instances in scope' : 'Instances', value: formatCount(overview.instances.total) },
               { label: 'Connected', value: formatCount(overview.instances.connected) },

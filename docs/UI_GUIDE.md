@@ -18,6 +18,11 @@ Use the established monochrome, square, dense visual language. Compose Tailwind
 utilities in components; do not add feature CSS files. Extend a shared primitive
 when behavior is repeated across routes.
 
+A single bounded control that changes only one Panel belongs in that Panel's
+header actions and stacks below its title when the Panel is narrow. Use FilterToolbar
+for multi-filter, search/apply, or chip workflows; do not create a full-width
+toolbar row for one compact selector.
+
 The frozen token, geometry, elevation, state, exception, and change-control
 rules live in [`../design/DESIGN.md`](../design/DESIGN.md). Every intentional
 visual-language change updates that contract, `/__ui`, regression coverage, and

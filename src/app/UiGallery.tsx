@@ -389,7 +389,16 @@ export function UiGallery() {
                 { label: 'Last fallback', value: 'Never observed', hint: 'long-value fixture' },
               ]}
             />
-            <Panel title="Compact full-bleed metrics" description="Short numeric facts may retain two columns on narrow viewports." bodyPadding="none">
+            <Panel
+              title="Compact full-bleed metrics"
+              description="One bounded panel-scoped control belongs in the header. It stacks below the heading on narrow viewports."
+              actions={(
+                <Field label="Metric window" className="w-48 @max-[32rem]:w-full">
+                  {(id, labelId) => <Select id={id} aria-labelledby={labelId} defaultValue="24h"><option value="24h">Last 24 hours</option><option value="168h">Last 7 days</option></Select>}
+                </Field>
+              )}
+              bodyPadding="none"
+            >
               <MetricGrid
                 columns={6}
                 density="compact"

@@ -37,13 +37,16 @@ describe('OverviewView header controls', () => {
       recovery="unsupported"
       credentialScope="admin"
     />);
-    const header = html.slice(0, html.indexOf('</header>'));
+    const pageHeader = html.slice(0, html.indexOf('</header>'));
+    const metricsStart = html.indexOf('Persisted metrics');
+    const metricsHeader = html.slice(metricsStart, html.indexOf('</header>', metricsStart));
 
-    expect(header).toContain('Refresh');
-    expect(header).not.toContain('Metric window');
-    expect(html).toContain('Metric window');
-    expect(html).toContain('Last 24 hours');
-    expect(html).toContain('border-t');
+    expect(pageHeader).toContain('Refresh');
+    expect(pageHeader).not.toContain('Metric window');
+    expect(metricsHeader).toContain('Metric window');
+    expect(metricsHeader).toContain('Last 24 hours');
+    expect(html).not.toContain('Metric controls');
+    expect(html).toContain('grid-cols-2 sm:grid-cols-2 lg:grid-cols-5');
   });
 
   it('presents authenticated instance context without exposing admin recovery controls', () => {
