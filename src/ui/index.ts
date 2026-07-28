@@ -27,4 +27,5 @@ export { Panel } from './Panel';
 export { StateNotice } from './StateNotice';
 export { CursorPagination } from './CursorPagination';
 export { SplitWorkspace, WorkspacePaneHeader } from './SplitWorkspace';
+export { WorkspacePageFrame, useWorkspacePageFocus } from './WorkspacePageFrame';
 export { Logo } from './Logo';

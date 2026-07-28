@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { DescriptionItem, DescriptionList } from './DescriptionList';
 import { FilterChip, FilterToolbar } from './Filters';
 import { SplitWorkspace, WorkspacePaneHeader } from './SplitWorkspace';
+import { WorkspacePageFrame } from './WorkspacePageFrame';
 
 describe('composite primitives', () => {
   it('renders semantic, responsive description data', () => {
@@ -50,5 +51,44 @@ describe('composite primitives', () => {
     expect(html).toContain('max-[900px]:hidden');
     expect(html).toContain('grid-cols-[320px_minmax(0,1fr)]');
     expect(html).toContain('Projected history');
+  });
+
+  it('switches a full page header to one compact workspace bar at the shared breakpoint', () => {
+    const html = renderToStaticMarkup(
+      <WorkspacePageFrame
+        eyebrow="Messaging"
+        title="Conversations"
+        description="Review projected chats."
+        secondaryActions={<button type="button">Refresh all</button>}
+        compactTitle="Anna Nguyen"
+        compactDescription="Individual"
+        compactLeadingAction={<button type="button">Back</button>}
+        compactActions={<button type="button">Refresh chat</button>}
+      >
+        <div>Workspace</div>
+      </WorkspacePageFrame>,
+    );
+
+    expect(html).toContain('px-6 pt-6 max-[900px]:hidden');
+    expect(html).toContain('min-h-[57px]');
+    expect(html).toContain('min-[900px]:hidden');
+    expect(html.indexOf('Back')).toBeLessThan(html.indexOf('Anna Nguyen'));
+    expect(html.indexOf('Anna Nguyen')).toBeLessThan(html.indexOf('Refresh chat'));
+    expect(html).toContain('tabindex="-1"');
+  });
+
+  it('lets an attached workspace defer its top divider to the owning page frame', () => {
+    const html = renderToStaticMarkup(
+      <SplitWorkspace
+        frame="attached"
+        detailOpen={false}
+        directory={<span>Directory</span>}
+        detail={<span>Detail</span>}
+      />,
+    );
+    const rootTag = html.slice(0, html.indexOf('>'));
+
+    expect(rootTag).not.toContain('border-t');
+    expect(rootTag).toContain('grid-cols-[320px_minmax(0,1fr)]');
   });
 });

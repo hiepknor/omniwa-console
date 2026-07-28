@@ -17,7 +17,7 @@ import { fleetReadMode } from './fleet-readiness';
 function Blocked({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Platform" title="Instances" description="Fleet metadata, pairing, lifecycle, settings, and credential posture." />
+      <PageHeader eyebrow="Platform" title="Instances" description="Manage instances, credentials, pairing, and lifecycle." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );
@@ -62,7 +62,7 @@ export function InstancesPage() {
   if (readMode === 'discovering') return <Blocked title="Discovering capabilities" detail="Waiting for capability discovery before choosing the credential-safe fleet endpoint." />;
   if (readMode === 'capability-error') return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Platform" title="Instances" description="Fleet metadata, pairing, lifecycle, settings, and credential posture." />
+      <PageHeader eyebrow="Platform" title="Instances" description="Manage instances, credentials, pairing, and lifecycle." />
       <FailureNotice error={capabilities.error} onRetry={() => capabilities.refetch()} />
     </div>
   );

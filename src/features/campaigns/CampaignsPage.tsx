@@ -15,7 +15,7 @@ import { campaignRouteState, setCampaignParam } from './route-state';
 function Blocked({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Messaging" title="Campaigns" description="Server-owned campaign orchestration and durable recipient outcomes." />
+      <PageHeader eyebrow="Messaging" title="Campaigns" description="Create and monitor Group List campaigns with factual progress and outcomes." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );

@@ -41,14 +41,9 @@ export function GroupsView(props: GroupsViewProps) {
       <PageHeader
         eyebrow="Messaging"
         title="Groups"
-        description="Projection-backed group directory and explicit provider commands in the active instance scope."
-        actions={
-          <>
-            <Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>
-            <Button disabled={props.joinEnabled === false} onClick={props.onJoin}>Join group</Button>
-            <Button variant="primary" disabled={props.commandsEnabled === false} onClick={props.onNew}>New group</Button>
-          </>
-        }
+        description="Inspect projected WhatsApp groups and run available management actions."
+        secondaryActions={<><Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button><Button disabled={props.joinEnabled === false} onClick={props.onJoin}>Join group</Button></>}
+        primaryAction={<Button variant="primary" disabled={props.commandsEnabled === false} onClick={props.onNew}>New group</Button>}
       />
 
       {props.sectionNav}

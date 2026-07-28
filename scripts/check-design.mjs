@@ -25,6 +25,14 @@ for (const marker of ['data-variant', 'shrink-0', 'active:translate-x-px', 'focu
   if (!button.includes(marker)) failures.push(`src/ui/Button.tsx: action contract is missing ${marker}`);
 }
 
+const pageHeader = await read('src/ui/PageHeader.tsx');
+for (const marker of ['<header', '<h1', 'secondaryActions', 'primaryAction', 'sm:grid-cols-[minmax(0,1fr)_auto]', 'max-sm:py-2', 'sm:row-start-3', 'max-w-[70ch]']) {
+  if (!pageHeader.includes(marker)) failures.push(`src/ui/PageHeader.tsx: compact page-header contract is missing ${marker}`);
+}
+if (pageHeader.includes('actions?: ReactNode')) {
+  failures.push('src/ui/PageHeader.tsx: generic actions slot would bypass primary/secondary hierarchy');
+}
+
 const connectPage = await read('src/app/ConnectPage.tsx');
 if (connectPage.includes('font-mono text-[11px] opacity')) {
   failures.push('src/app/ConnectPage.tsx: connection-step labels must retain AA contrast');
@@ -149,7 +157,7 @@ for (const marker of ["density = 'default'", "frame = 'standalone'", "density ==
 }
 
 for (const [path, marker] of Object.entries({
-  'src/features/platform/OverviewView.tsx': 'frame="flush"',
+  'src/features/platform/OverviewView.tsx': 'frame="flush-after-content"',
   'src/features/instances/CredentialHealth.tsx': "'flush-after-content' : 'flush'",
 })) {
   const source = await read(path);
@@ -183,25 +191,38 @@ for (const marker of ['placement', 'onMouseEnter', 'onFocusCapture', 'visibility
 }
 
 const shell = await read('src/app/Shell.tsx');
-for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', 'max-[640px]:flex-row', '<NavigationItemContent', 'Compact session utility', 'aria-label="Sign out"']) {
+for (const marker of ['max-[640px]:fixed', 'max-[640px]:bottom-0', 'max-[640px]:pb-[61px]', 'max-[640px]:flex-row', '<NavigationItemContent', 'Compact session utility', 'aria-label="Sign out"', 'min-h-0 flex-1 overflow-auto', '<ConsoleFooter']) {
   if (!shell.includes(marker)) failures.push(`src/app/Shell.tsx: responsive shell contract is missing ${marker}`);
 }
 if (shell.indexOf('Compact session utility') < shell.indexOf('</nav>')) {
   failures.push('src/app/Shell.tsx: compact Sign out utility must remain outside primary navigation');
 }
+if (shell.includes('{/* Context */}') || shell.includes('>Connected</Status>')) {
+  failures.push('src/app/Shell.tsx: runtime context belongs to ConsoleFooter, not the rail');
+}
+
+const consoleFooter = await read('src/app/ConsoleFooter.tsx');
+for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10', 'justify-between', 'border-l border-line pl-3', '<Status', 'max-[900px]:hidden', 'max-[640px]:hidden', 'Memory-only credential']) {
+  if (!consoleFooter.includes(marker)) failures.push(`src/app/ConsoleFooter.tsx: main-column runtime footer is missing ${marker}`);
+}
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<SplitWorkspace', 'detailOpen={Boolean(chat)}', '<WorkspacePaneHeader', '>Back</Button>']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(chat)}', 'className="max-[900px]:hidden"', '>Back</Button>']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
+const workspacePageFrame = await read('src/ui/WorkspacePageFrame.tsx');
+for (const marker of ['<PageHeader', 'px-6 pt-6 max-[900px]:hidden', 'min-h-[57px]', 'min-[900px]:hidden', 'compactLeadingAction', 'compactHeadingRef', 'tabIndex={-1}', 'focus-visible:outline-2', 'useWorkspacePageFocus', 'rememberFocusOrigin', "matchMedia('(width < 900px)'"]) {
+  if (!workspacePageFrame.includes(marker)) failures.push(`src/ui/WorkspacePageFrame.tsx: responsive workspace-page contract is missing ${marker}`);
+}
+
 const splitWorkspace = await read('src/ui/SplitWorkspace.tsx');
-for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-1', "detailOpen && 'max-[900px]:hidden'", "!detailOpen && 'max-[900px]:hidden'", 'WorkspacePaneHeader']) {
+for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-1', "detailOpen && 'max-[900px]:hidden'", "!detailOpen && 'max-[900px]:hidden'", "frame === 'standalone'", 'WorkspacePaneHeader']) {
   if (!splitWorkspace.includes(marker)) failures.push(`src/ui/SplitWorkspace.tsx: split-workspace recipe is missing ${marker}`);
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<SplitWorkspace', '<WorkspacePaneHeader', '>Back</Button>']) {
+for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 

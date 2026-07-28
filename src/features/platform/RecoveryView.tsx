@@ -34,8 +34,8 @@ export function RecoveryView(props: RecoveryViewProps) {
       <PageHeader
         eyebrow="Platform"
         title="Projection recovery"
-        description="Review terminal failures and submit explicit audited replay or discard commands."
-        actions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        description="Review failed projections and submit audited recovery actions."
+        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
       />
 
       {props.notices}

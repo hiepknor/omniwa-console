@@ -9,6 +9,7 @@ export function SplitWorkspace({
   detailLabel = 'Detail',
   directoryFooter,
   detailFooter,
+  frame = 'standalone',
   className,
 }: {
   directory: ReactNode;
@@ -18,10 +19,15 @@ export function SplitWorkspace({
   detailLabel?: string;
   directoryFooter?: ReactNode;
   detailFooter?: ReactNode;
+  frame?: 'standalone' | 'attached';
   className?: string;
 }) {
   return (
-    <div className={cn('min-h-0 flex-1 grid grid-cols-[320px_minmax(0,1fr)] border-t border-line max-[900px]:grid-cols-1', className)}>
+    <div className={cn(
+      'min-h-0 flex-1 grid grid-cols-[320px_minmax(0,1fr)] max-[900px]:grid-cols-1',
+      frame === 'standalone' && 'border-t border-line',
+      className,
+    )}>
       <section
         aria-label={directoryLabel}
         className={cn('flex min-h-0 min-w-0 flex-col border-r border-line max-[900px]:border-r-0', detailOpen && 'max-[900px]:hidden')}
@@ -44,13 +50,15 @@ export function WorkspacePaneHeader({
   title,
   description,
   actions,
+  className,
 }: {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
+  className?: string;
 }) {
   return (
-    <header className="sticky top-0 z-10 flex min-h-[57px] items-center justify-between gap-3 border-b border-line bg-surface px-4">
+    <header className={cn('sticky top-0 z-10 flex min-h-[57px] items-center justify-between gap-3 border-b border-line bg-surface px-4', className)}>
       <div className="grid min-w-0">
         <strong className="truncate text-sm font-semibold text-fg">{title}</strong>
         {description ? <span className="truncate text-xs text-fg-3">{description}</span> : null}
