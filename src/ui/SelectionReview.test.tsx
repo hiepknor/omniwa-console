@@ -15,6 +15,8 @@ describe('SelectionReview', () => {
     expect(html).toContain('Selections can span pages.');
     expect(html).toContain('Send permission denied');
     expect(html).toContain('data-tone="failed"');
+    expect(html).toContain('aria-label="1 selected item"');
+    expect(html).toContain('tabular-nums');
     expect(html).toContain('aria-label="Remove selected item Operations"');
   });
 

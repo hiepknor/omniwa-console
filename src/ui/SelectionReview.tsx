@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { CountBadge } from './Badge';
 import { Button } from './Button';
 import { Status, type Tone } from './Status';
 import { cn } from './cn';
@@ -36,7 +37,13 @@ export function SelectionReview({
           <h3 className="text-sm font-semibold text-fg">{title}</h3>
           {description ? <p className="text-xs text-fg-3">{description}</p> : null}
         </div>
-        <span aria-live="polite" aria-atomic="true" className="shrink-0 font-mono text-xs tabular-nums text-fg-2">{items.length}</span>
+        <CountBadge
+          count={items.length}
+          aria-label={`${items.length.toLocaleString('en-US')} selected ${items.length === 1 ? 'item' : 'items'}`}
+          aria-live="polite"
+          aria-atomic="true"
+          className="shrink-0"
+        />
       </header>
       <ul className="grid max-h-56 overflow-y-auto">
         {items.map((item) => (

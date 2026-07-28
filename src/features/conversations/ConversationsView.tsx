@@ -3,8 +3,19 @@ import type { ContactResource } from '@/api/contacts';
 import type { LabelResource } from '@/api/labels';
 import type { MessageResource } from '@/api/messages';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Status } from '@/ui';
+import { CountBadge, Status } from '@/ui';
 import { cn } from '@/ui/cn';
+
+export function ConversationUnreadCount({ count, context }: { count: number; context: 'directory' | 'detail' }) {
+  if (context === 'directory' && count === 0) return null;
+  const label = `${count.toLocaleString('en-US')} unread ${count === 1 ? 'message' : 'messages'}`;
+
+  if (context === 'directory') {
+    return <CountBadge count={count} aria-label={label} title={label} />;
+  }
+
+  return <span className="inline-flex items-center gap-1.5"><span>Unread</span><CountBadge count={count} /></span>;
+}
 
 function ResourceButton({ selected, onClick, primary, secondary, trailing }: { selected?: boolean; onClick: () => void; primary: string; secondary: string; trailing: React.ReactNode }) {
   return (
@@ -34,7 +45,7 @@ export function ChatList({ items, selectedId, onSelect }: { items: ChatResource[
           onClick={() => onSelect(item.id)}
           primary={item.displayName ?? item.id}
           secondary={`${humanizeToken(item.type)} · ${item.lastActivityAt ? relativeTime(item.lastActivityAt) : 'activity unreported'}`}
-          trailing={<Status tone={item.unreadCount ? 'pending' : 'neutral'}>{item.unreadCount} unread</Status>}
+          trailing={<ConversationUnreadCount count={item.unreadCount} context="directory" />}
         />
       ))}
     </ul>

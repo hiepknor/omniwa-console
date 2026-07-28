@@ -63,6 +63,19 @@ for (const marker of ['data-tone={tone}', 'grid-cols-[20px_minmax(0,1fr)]', 'shr
   if (!status.includes(marker)) failures.push(`src/ui/Status.tsx: status stamp contract is missing ${marker}`);
 }
 
+const badges = await read('src/ui/Badge.tsx');
+for (const marker of ['CountBadge', 'count.toLocaleString', 'tabular-nums', 'MetadataBadge']) {
+  if (!badges.includes(marker)) failures.push(`src/ui/Badge.tsx: count/metadata badge contract is missing ${marker}`);
+}
+
+const tabs = await read('src/ui/Tabs.tsx');
+for (const marker of ['<CountBadge count={tab.count}', "import { CountBadge } from './Badge'"]) {
+  if (!tabs.includes(marker)) failures.push(`src/ui/Tabs.tsx: canonical count badge contract is missing ${marker}`);
+}
+if (tabs.includes('countStyle')) {
+  failures.push('src/ui/Tabs.tsx: feature-selectable count styles would allow count chips to drift');
+}
+
 const statusMarks = await read('src/ui/statusMarks.ts');
 for (const marker of ['StatusMarkTone', 'to bottom', 'radial-gradient', 'repeating-linear-gradient', "border: '1px solid var(--color-fg-3)'"]) {
   if (!statusMarks.includes(marker)) failures.push(`src/ui/statusMarks.ts: shared screentone registry is missing ${marker}`);
@@ -110,7 +123,7 @@ for (const marker of ['role="group"', '<Checkbox', 'indeterminate={indeterminate
 }
 
 const selectionReview = await read('src/ui/SelectionReview.tsx');
-for (const marker of ['aria-label=', 'aria-live="polite"', 'max-h-56 overflow-y-auto', '<Status', '<Button', 'Remove selected item', 'max-sm:grid-cols-1']) {
+for (const marker of ['aria-label=', 'aria-live="polite"', '<CountBadge', 'selected ${items.length === 1', 'max-h-56 overflow-y-auto', '<Status', '<Button', 'Remove selected item', 'max-sm:grid-cols-1']) {
   if (!selectionReview.includes(marker)) failures.push(`src/ui/SelectionReview.tsx: retained-selection contract is missing ${marker}`);
 }
 
@@ -214,7 +227,7 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(chat)}', 'className="max-[900px]:hidden"', '>Back</Button>']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(chat)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={chat.unreadCount} context="detail"']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
@@ -229,8 +242,16 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>']) {
+for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedChat.unreadCount} context="detail"']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
+}
+
+const conversationsView = await read('src/features/conversations/ConversationsView.tsx');
+for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail'", "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>']) {
+  if (!conversationsView.includes(marker)) failures.push(`src/features/conversations/ConversationsView.tsx: unread-count contract is missing ${marker}`);
+}
+if (/<Status\b[^>]*>[^<]*unread/.test(conversationsView) || /<Status\b[^>]*>[^<]*unread/.test(conversationsPage)) {
+  failures.push('Conversations: unread quantities must use ConversationUnreadCount, not operational Status');
 }
 
 const groupsView = await read('src/features/groups/GroupsView.tsx');

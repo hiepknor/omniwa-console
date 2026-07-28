@@ -198,14 +198,23 @@ resource models, or rendered diagnostics.
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.
 - Buttons preserve a clear ghost/primary/danger hierarchy, expose pressed and
   keyboard-focus feedback, and use `ButtonLink` for navigation styled as an action.
+- Count chips use the shared `CountBadge`; count-bearing Tabs apply it
+  automatically. Numeric table cells, metrics, selection prose, and counts stated
+  inside an operational Status remain in their context instead of becoming chips.
+  Framed non-count facts such as resource versions use `MetadataBadge`.
+  Conversation directory rows omit zero unread counts and expose positive counts
+  through an accessible CountBadge; selected-chat facts keep the visible `Unread`
+  label and show zero explicitly. Conversation tabs do not derive totals from a
+  filtered or cursor-bounded page.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the
   owning feature. When a selection can span pages, the shared `SelectionReview`
   surface exposes retained items outside the current table page and an individual
-  remove action; visible selected rows are not duplicated below the table. Blocked
-  items appear first so a disabled submit never strands the operator. Counts are
-  not operational statuses. Target directories keep
+  remove action; its header reports the retained total with `CountBadge`, while
+  visible selected rows are not duplicated below the table. Blocked items appear
+  first so a disabled submit never strands the operator. Counts are not
+  operational statuses. Target directories keep
   projected member counts factual (`—` when unreported), place group type beside
   identity, and wrap a permission reason below its short eligibility status;
   multiline cells grow vertically instead of widening or clipping the table.

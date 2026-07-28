@@ -210,8 +210,10 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   Features never remove individual grid borders or override Panel padding with
   conflicting utilities.
 - **Tabs** — underline tabs; 2px `--color-accent` underline on the active tab.
-  The tab strip may scroll horizontally but always clips vertical overflow so it
-  never becomes a nested vertical scroll target.
+  A reported tab count uses the canonical CountBadge; feature code supplies only
+  the number and never restyles that chip. The tab strip may scroll horizontally
+  but always clips vertical overflow so it never becomes a nested vertical
+  scroll target.
 - **Drawer (inspector)** — right panel, `min(440px,100%)`, paper surface, 1px
   strong left border, and a 60% ink scrim. Header = title + mono ID + square close
   cell. ≤640px becomes an 85dvh full-width bottom sheet. The body scrolls without
@@ -228,7 +230,16 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Toast** — bottom-right, `--color-elevated`, a 2px ink left edge,
   13px/500 title + 12px detail, and **always** the mono `requestId` on API errors.
   Accepted commands say `accepted` and auto-dismiss (6s); errors persist.
-- **Badge** — square count chip, mono 11px, `--color-recessed` bg.
+- **CountBadge / MetadataBadge** — CountBadge is the only non-interactive
+  quantity chip: square, mono 11px with tabular numerals, `--color-recessed` bg,
+  and a default hairline frame. Tabs and explicitly named count contexts pass a
+  number to this primitive, so count-chip changes remain centralized. Ordinary
+  table numbers, metrics, selection sentences, and operational Status labels do
+  not become chips. MetadataBadge retains the same compact framed family for
+  non-quantity facts such as an immutable version, without coupling their future
+  treatment to count chips. Conversations omit zero unread counts in dense
+  directory rows, show positive unread counts as accessible CountBadges, and
+  pair the badge with a visible `Unread` label in the selected-chat facts.
 - **DescriptionList / DescriptionItem** — the only repeated key/value facts
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
   values on wide screens, stacks them at ≤640px, wraps long content, and uses
@@ -251,10 +262,10 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   can span cursor pages. Beside a selectable table it lists only retained choices
   outside the current page; visible choices remain integrated into their table
   rows and are never duplicated below. It uses one bounded square frame, states
-  the retained total without turning it into a status, keeps stable identity
-  metadata visible, and gives every item an explicit Remove action. Domain status
-  remains textual and blocked items sort first in the owning feature so a disabled
-  submit never strands the operator.
+  the retained total through the canonical CountBadge without turning it into a
+  status, keeps stable identity metadata visible, and gives every item an
+  explicit Remove action. Domain status remains textual and blocked items sort
+  first in the owning feature so a disabled submit never strands the operator.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
   list progression. Panel headers place actions and a lone panel-scoped control

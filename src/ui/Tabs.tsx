@@ -1,4 +1,5 @@
 import { cn } from './cn';
+import { CountBadge } from './Badge';
 
 export type Tab = { id: string; label: string; count?: number };
 
@@ -31,7 +32,7 @@ export function Tabs({
           >
             {tab.label}
             {typeof tab.count === 'number' ? (
-              <span className="font-mono text-[11px] text-fg-3 tabular-nums">{tab.count}</span>
+              <CountBadge count={tab.count} />
             ) : null}
           </button>
         );
