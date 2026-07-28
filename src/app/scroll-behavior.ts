@@ -15,6 +15,10 @@ function baseScrollPath(pathname: string): string {
   if (/^\/chats\/[^/]+$/.test(pathname)) return '/chats';
   if (/^\/instances\/[^/]+$/.test(pathname)) return '/instances';
   if (/^\/campaigns\/[^/]+$/.test(pathname) && pathname !== '/campaigns/new') return '/campaigns';
+  // Match the nested collection before the generic `/groups/:groupId` route.
+  // Otherwise `lists` is mistaken for a Group ID and switching sections keeps
+  // the previous page's scroll position.
+  if (pathname === '/groups/lists') return pathname;
   if (/^\/groups\/lists\/[^/]+$/.test(pathname) && pathname !== '/groups/lists/new') return '/groups/lists';
   if (/^\/groups\/[^/]+$/.test(pathname)) return '/groups';
   return pathname;

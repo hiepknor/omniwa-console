@@ -64,18 +64,19 @@ export function GroupsPage() {
   const [ack, setAck] = useState<string>();
   useEffect(() => setSearchDraft(route.search), [route.search]);
   const instanceScope = session.keyKind === 'api';
+  const capabilitiesAuthoritative = !capabilities.isPending && !capabilities.isError;
   const groupsReady = instanceScope && (capabilities.data?.capabilities.includes('groups_projection') ?? false);
   const normalized = capabilities.data?.capabilities.includes('group_management_permissions') ?? false;
   const membersEnabled = normalized && (capabilities.data?.capabilities.includes('group_members_projection') ?? false);
   const normalizedCommands = normalized && (capabilities.data?.capabilities.includes('group_management_commands') ?? false);
-  const commandsEnabled = normalizedCommands;
+  const commandsEnabled = normalizedCommands && capabilitiesAuthoritative;
   const auditEnabled = normalized && (capabilities.data?.capabilities.includes('group_management_audit') ?? false);
-  const photoEnabled = normalizedCommands && (capabilities.data?.capabilities.includes('group_photo_assets') ?? false);
+  const photoEnabled = normalized && (capabilities.data?.capabilities.includes('group_photo_assets') ?? false);
   const summaryEnabled = normalized && (capabilities.data?.capabilities.includes('group_summary') ?? false);
   const filters = { search: route.search, type: route.type, myRole: route.myRole, sendMode: route.sendMode, state: route.state, membershipState: route.membershipState, cursor: route.cursor };
   const list = useGroups(filters, groupsReady, normalized);
   const summary = useGroupSummary(summaryEnabled);
-  const create = useCreateGroup(normalizedCommands);
+  const create = useCreateGroup(commandsEnabled);
   const join = useJoinGroup();
   const groups = useMemo(() => list.data?.resource?.items ?? [], [list.data]);
   const summaryNotReady = summary.error instanceof ApiFailure && summary.error.code === 'projection_not_ready';
@@ -91,7 +92,7 @@ export function GroupsPage() {
 
   if (!instanceScope) return <Blocked title="Instance credential required" detail="Groups requires an instance credential. Admin scope cannot read token-scoped group projections, and no request was sent." />;
   if (capabilities.isPending) return <Blocked title="Discovering capabilities" detail="Discovering instance capabilities before enabling group projection reads." />;
-  if (capabilities.isError && !list.data) return <Blocked title="Unsupported" detail="Capability discovery failed. Groups remains disabled and no live fallback was sent." />;
+  if (capabilities.isError && !list.data) return <Blocked title="Capability discovery failed" detail="Groups remains disabled and no live fallback was sent." />;
   if (!groupsReady && !list.data) return <Blocked title="Projection unavailable" detail="The backend does not currently advertise groups_projection, which may be unsupported or waiting for readiness. Capability polling continues; no live WhatsApp lookup is used." />;
 
   return (
@@ -102,12 +103,12 @@ export function GroupsPage() {
         onRefresh={() => { void list.refetch(); if (summaryEnabled) void summary.refetch(); }}
         onNew={() => { create.reset(); setParam('create', '1'); }}
         onJoin={() => { join.reset(); setParam('join', '1'); }}
-        joinEnabled={normalizedCommands}
+        joinEnabled={commandsEnabled}
         commandsEnabled={commandsEnabled}
         normalized={normalized}
         summary={summary.data?.resource}
-        summaryNotice={!summaryEnabled ? undefined : summary.isPending ? <StateNotice kind="loading" title="Loading Group summary" /> : summaryNotReady ? <StateNotice kind="loading" title={summary.data ? 'Showing last known Group summary' : 'Group summary syncing'} detail={summary.data ? 'The latest refresh is not ready. Cached authoritative metrics remain visible and were not recomputed from this page.' : 'The authoritative instance-wide summary is not ready; no metrics were derived from this directory page.'} /> : summary.error ? <ApiFailureNotice error={summary.error} title={summary.data ? 'Showing last known Group summary' : 'Group summary unavailable'} onRetry={() => summary.refetch()} /> : undefined}
-        ack={ack ? <StateNotice kind="info" title={`${ack} accepted`} detail="The refreshed group projection remains authoritative." /> : undefined}
+        summaryNotice={!summaryEnabled ? undefined : summary.isPending ? <StateNotice kind="loading" title="Loading Group summary" /> : summaryNotReady ? <StateNotice kind="loading" title={summary.data ? 'Showing last known Group summary' : 'Group summary syncing'} detail={summary.data ? 'The latest refresh is not ready. Cached authoritative metrics remain visible and were not recomputed from this page.' : 'The authoritative instance-wide summary is not ready; no metrics were derived from this directory page.'} /> : summary.error ? <ApiFailureNotice error={summary.error} title={summary.data ? 'Showing last known Group summary' : 'Group summary unavailable'} onRetry={() => summary.refetch()} /> : summary.data?.meta?.syncStatus && summary.data.meta.syncStatus !== 'ready' ? <StateNotice kind={summary.data.meta.syncStatus === 'failed' ? 'error' : summary.data.meta.syncStatus === 'syncing' ? 'loading' : 'empty'} title={`Group summary ${summary.data.meta.syncStatus.replace('_', ' ')}`} detail="These backend-owned metrics are not an authoritative current snapshot." /> : undefined}
+        ack={ack ? <StateNotice kind="info" title={`${ack} accepted`} detail="The refreshed group projection remains authoritative." /> : capabilities.isError && list.data ? <StateNotice kind="error" title="Showing last known capabilities" detail="Read-only cached Groups data remains visible. Management commands are disabled until capability discovery succeeds." /> : undefined}
         searchDraft={searchDraft}
         onSearchDraft={setSearchDraft}
         onApply={(e) => { e.preventDefault(); applySearch(); }}
@@ -128,7 +129,7 @@ export function GroupsPage() {
 
       {groupId ? <GroupWorkspace groupId={groupId} readEnabled={groupsReady} normalized={normalized} commandsEnabled={commandsEnabled} membersEnabled={membersEnabled} auditEnabled={auditEnabled} photoEnabled={photoEnabled} activeTab={route.tab} memberSearch={route.memberSearch} memberRole={route.memberRole} memberCursor={route.memberCursor} auditCursor={route.auditCursor} onParam={setParam} onTab={(tab) => setParam('tab', tab === 'overview' ? undefined : tab)} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
       <CreateGroup open={route.create && commandsEnabled} pending={create.isPending} error={create.error} result={create.data} normalized={normalizedCommands} onClose={closeCreate} onCreate={(body) => create.mutate(body)} />
-      <JoinGroup open={route.join && normalizedCommands} pending={join.isPending} error={join.error} result={join.data} onClose={closeJoin} onJoin={(code) => join.mutate(code)} />
+      <JoinGroup open={route.join && commandsEnabled} pending={join.isPending} error={join.error} result={join.data} onClose={closeJoin} onJoin={(code) => join.mutate(code)} />
     </>
   );
 }

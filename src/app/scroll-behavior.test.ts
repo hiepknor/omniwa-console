@@ -5,12 +5,14 @@ import { horizontalRevealScrollLeft, mainScrollScope, scrollTopForNavigation } f
 describe('shell scroll behavior', () => {
   it('keeps list and detail routes in one scope while excluding overlay state', () => {
     expect(mainScrollScope('/groups/group_01', '?search=ops&tab=members&create=1')).toBe('/groups?search=ops');
+    expect(mainScrollScope('/groups/lists/list_01', '?search=ops&tab=audit')).toBe('/groups/lists?search=ops');
     expect(mainScrollScope('/events', '?type=message&event=event_01&cursor=opaque')).toBe('/events?type=message&cursor=opaque');
     expect(mainScrollScope('/chats/chat_01', '?view=chats&cursor=opaque&messageCursor=older&message=msg_01')).toBe('/chats?view=chats&cursor=opaque');
   });
 
   it('treats filters, cursors, and editor routes as new reading contexts', () => {
     expect(mainScrollScope('/groups', '?search=alpha')).not.toBe(mainScrollScope('/groups', '?search=beta'));
+    expect(mainScrollScope('/groups', '')).not.toBe(mainScrollScope('/groups/lists', ''));
     expect(mainScrollScope('/campaigns/new', '')).toBe('/campaigns/new');
     expect(mainScrollScope('/groups/lists/new', '')).toBe('/groups/lists/new');
     expect(mainScrollScope('/groups/lists/list_01/edit', '')).toBe('/groups/lists/list_01/edit');

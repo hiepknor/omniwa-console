@@ -12,8 +12,8 @@ export type GroupListSummary = {
   id: string;
   name: string;
   description?: string;
-  groupCount: number;
-  version: number;
+  groupCount?: number;
+  version?: number;
   authorizationSource?: string;
   authorizedAt?: string;
   createdAt?: string;
@@ -26,18 +26,18 @@ export type GroupListEntry = {
   currentName?: string;
   eligibility: GroupEligibility;
   eligibilityReason?: string;
-  canSend: boolean;
+  canSend?: boolean;
   checkedAt?: string;
 };
 export type GroupEligibilityAggregate = {
   groupListId: string;
-  groupListVersion: number;
-  total: number;
-  eligible: number;
-  unavailable: number;
-  unknown: number;
-  readyToTarget: boolean;
-  byReason: Record<string, number>;
+  groupListVersion?: number;
+  total?: number;
+  eligible?: number;
+  unavailable?: number;
+  unknown?: number;
+  readyToTarget?: boolean;
+  byReason?: Record<string, number>;
   checkedAt?: string;
 };
 export type GroupEligibilityAssessment = { items: GroupListEntry[]; meta?: ProjectionMeta };
@@ -55,12 +55,13 @@ export type GroupListAuthorization = { source: string; evidenceReference: string
 export type GroupListWrite = { name: string; description?: string; groupJids: string[]; authorization: GroupListAuthorization };
 
 const stringValue = (value: string | undefined, fallback = '') => value?.trim() || fallback;
-const countValue = (value: number | undefined) => Math.max(0, value ?? 0);
+const countValue = (value: number | undefined) => typeof value === 'number' && Number.isFinite(value) ? Math.max(0, value) : undefined;
+const versionValue = (value: number | undefined) => typeof value === 'number' && Number.isFinite(value) && value >= 1 ? value : undefined;
 function summary(payload: SummaryPayload | undefined): GroupListSummary {
   return {
     id: stringValue(payload?.id), name: stringValue(payload?.name, 'Untitled group list'),
     description: payload?.description, groupCount: countValue(payload?.groupCount),
-    version: Math.max(1, payload?.version ?? 1), authorizationSource: payload?.authorizationSource,
+    version: versionValue(payload?.version), authorizationSource: payload?.authorizationSource,
     authorizedAt: payload?.authorizedAt, createdAt: payload?.createdAt, updatedAt: payload?.updatedAt,
   };
 }
@@ -69,7 +70,7 @@ function eligibility(payload: EligibilityPayload | undefined): GroupListEntry {
   return {
     groupJid: stringValue(payload?.groupJid), currentName: payload?.currentName,
     eligibility: payload?.eligibility === 'eligible' || payload?.eligibility === 'unavailable' ? payload.eligibility : 'unknown',
-    eligibilityReason: payload?.eligibilityReason, canSend: payload?.canSend === true, checkedAt: payload?.checkedAt,
+    eligibilityReason: payload?.eligibilityReason, canSend: typeof payload?.canSend === 'boolean' ? payload.canSend : undefined, checkedAt: payload?.checkedAt,
   };
 }
 
@@ -95,9 +96,9 @@ export async function getGroupListEligibility(client: ApiClient, id: string, exp
   const result = unwrapProjection<AggregatePayload>(await client.GET('/group-lists/{groupListId}/eligibility', { params: { path: { groupListId: id }, query: { expectedVersion } } }));
   const value = result.resource;
   return { aggregate: {
-    groupListId: stringValue(value?.groupListId, id), groupListVersion: Math.max(1, value?.groupListVersion ?? expectedVersion ?? 1),
+    groupListId: stringValue(value?.groupListId, id), groupListVersion: versionValue(value?.groupListVersion),
     total: countValue(value?.total), eligible: countValue(value?.eligible), unavailable: countValue(value?.unavailable), unknown: countValue(value?.unknown),
-    readyToTarget: value?.readyToTarget === true, byReason: value?.byReason ?? {}, checkedAt: value?.checkedAt,
+    readyToTarget: typeof value?.readyToTarget === 'boolean' ? value.readyToTarget : undefined, byReason: value?.byReason, checkedAt: value?.checkedAt,
   }, meta: result.meta };
 }
 

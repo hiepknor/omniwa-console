@@ -14,6 +14,26 @@ describe('Group Lists adapter', () => {
     expect(result.items[0]).toEqual(expect.objectContaining({ id: 'list-1', groupCount: 2, version: 3 }));
   });
 
+  it('keeps omitted counts and versions unreported', async () => {
+    const GET = vi.fn()
+      .mockResolvedValueOnce(ok({ message: 'success', data: [{ id: 'list-1', name: 'Branches' }], meta: { syncStatus: 'stale' } }))
+      .mockResolvedValueOnce(ok({ message: 'success', data: { groupListId: 'list-1' }, meta: { syncStatus: 'stale' } }));
+    const client = { GET } as unknown as ApiClient;
+
+    const lists = await listGroupLists(client);
+    const assessment = await getGroupListEligibility(client, 'list-1', 4);
+
+    expect(lists.items[0]).toMatchObject({ id: 'list-1', groupCount: undefined, version: undefined });
+    expect(assessment.aggregate).toMatchObject({
+      groupListVersion: undefined,
+      total: undefined,
+      eligible: undefined,
+      unavailable: undefined,
+      unknown: undefined,
+      readyToTarget: undefined,
+    });
+  });
+
   it('uses backend eligibility without inferring from group metadata', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [{ groupJid: '1@g.us', currentName: 'Ops', eligibility: 'unavailable', eligibilityReason: 'send_permission_denied', canSend: false }], meta: {} }));
     const result = await listGroupListEntries({ GET } as unknown as ApiClient, 'list-1');

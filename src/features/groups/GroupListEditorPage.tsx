@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ApiFailure } from '@/api/envelopes';
 import { useApiSession } from '@/api/ApiProvider';
@@ -6,11 +6,13 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { eligibilityIssues, type GroupEligibility, type GroupListEntry } from '@/api/group-lists';
 import { humanizeToken } from '@/lib/format';
+import { omitSearchParams, withSearchParams } from '@/lib/url-search-state';
+import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Badge, Button, Checkbox, CursorPagination, DateTimeInput, Field, FilterToolbar, Input, PageHeader, Panel, ProgressBar, SelectionBar, SelectionReview, StateNotice, Status, Table, Td, Textarea, Th, Tr, type SelectionReviewItem, type Tone } from '@/ui';
 import { GroupSectionTabs } from './GroupSectionTabs';
 import { GroupTargetEligibility, GroupTargetIdentity, ProjectedMemberCount } from './GroupTargetCells';
 import { groupStatusTone } from './group-status-tone';
-import { pageSelectionState, setPageSelection, type GroupSelectionCandidate, type SelectedGroup } from './group-list-selection';
+import { pageSelectionState, selectionsOutsidePage, setPageSelection, type GroupSelectionCandidate, type SelectedGroup } from './group-list-selection';
 import { groupListRouteState, setGroupListParam } from './group-list-route-state';
 import { useGroups } from './hooks';
 import { useAllGroupListEntries, useCreateGroupList, useGroupEligibility, useGroupList, useUpdateGroupList } from '@/api/group-list-hooks';
@@ -25,7 +27,8 @@ export function GroupListEditorPage() {
   const editing = Boolean(groupListId);
   const session = useApiSession();
   const capabilities = useServerCapabilities();
-  const enabled = session.keyKind === 'api' && (capabilities.data?.capabilities.includes('group_lists') ?? false);
+  const readEnabled = session.keyKind === 'api' && (capabilities.data?.capabilities.includes('group_lists') ?? false);
+  const commandsEnabled = readEnabled && !capabilities.isPending && !capabilities.isError;
   const groupsReady = capabilities.data?.capabilities.includes('groups_projection') ?? false;
   const eligibilityEnabled = capabilities.data?.capabilities.includes('group_list_eligibility') ?? false;
   const normalizedGroups = capabilities.data?.capabilities.includes('group_management_permissions') ?? false;
@@ -33,9 +36,9 @@ export function GroupListEditorPage() {
   const [params, setParams] = useSearchParams();
   const route = groupListRouteState(params);
   const [searchDraft, setSearchDraft] = useState(route.groupSearch);
-  const detail = useGroupList(groupListId, enabled && editing);
-  const allEntries = useAllGroupListEntries(groupListId, detail.data?.groupCount ?? 0, enabled && editing && Boolean(detail.data));
-  const groups = useGroups({ search: route.groupSearch, cursor: route.groupSearchCursor }, enabled && groupsReady, normalizedGroups);
+  const detail = useGroupList(groupListId, readEnabled && editing);
+  const allEntries = useAllGroupListEntries(groupListId, detail.data?.groupCount, readEnabled && editing && Boolean(detail.data));
+  const groups = useGroups({ search: route.groupSearch, cursor: route.groupSearchCursor }, readEnabled && groupsReady, normalizedGroups);
   const create = useCreateGroupList();
   const update = useUpdateGroupList(groupListId ?? '');
   const mutation = editing ? update : create;
@@ -47,21 +50,31 @@ export function GroupListEditorPage() {
   const [authorizedAt, setAuthorizedAt] = useState(localNow);
   const [selected, setSelected] = useState<Map<string, SelectedGroup>>(new Map());
   const versionConflict = mutation.error instanceof ApiFailure && mutation.error.code === 'group_list_version_conflict';
+  const directoryParams = omitSearchParams(params, ['groupSearch', 'groupSearchCursor', 'tab', 'groupCursor', 'auditCursor']);
+  const directoryUrl = withSearchParams('/groups/lists', directoryParams);
+  const detailUrl = groupListId ? withSearchParams(`/groups/lists/${encodeURIComponent(groupListId)}`, directoryParams) : directoryUrl;
 
   useEffect(() => setSearchDraft(route.groupSearch), [route.groupSearch]);
   useEffect(() => {
     if (versionConflict) setEvidence('');
   }, [versionConflict]);
 
+  const initializeEditor = useCallback((list: NonNullable<typeof detail.data>, entries: GroupListEntry[]) => {
+    setName(list.name);
+    setDescription(list.description ?? '');
+    setSource(list.authorizationSource ?? 'operator_attestation');
+    setAuthorizedAt(localNow());
+    setSelected(new Map(entries.map((entry) => [entry.groupJid, { label: entry.currentName ?? entry.snapshotName ?? entry.groupJid, eligibility: entry.eligibility, eligibilityReason: entry.eligibilityReason }])));
+  }, []);
+
   useEffect(() => {
     if (!editing || initialized.current || !detail.data || !allEntries.data) return;
     initialized.current = true;
-    setName(detail.data.name); setDescription(detail.data.description ?? ''); setSource(detail.data.authorizationSource ?? 'operator_attestation'); setAuthorizedAt(localNow());
-    setSelected(new Map(allEntries.data.map((entry) => [entry.groupJid, { label: entry.currentName ?? entry.snapshotName ?? entry.groupJid, eligibility: entry.eligibility, eligibilityReason: entry.eligibilityReason }])));
-  }, [allEntries.data, detail.data, editing]);
+    initializeEditor(detail.data, allEntries.data);
+  }, [allEntries.data, detail.data, editing, initializeEditor]);
 
   const groupItems = useMemo(() => groups.data?.resource?.items ?? [], [groups.data]);
-  const eligibility = useGroupEligibility(groupItems.map((group) => group.id), enabled && eligibilityEnabled && groupItems.length > 0);
+  const eligibility = useGroupEligibility(groupItems.map((group) => group.id), readEnabled && eligibilityEnabled && groupItems.length > 0);
   const eligibilityById = useMemo(() => new Map((eligibility.data?.items ?? []).map((item) => [item.groupJid, item])), [eligibility.data]);
   const pageCandidates = useMemo<GroupSelectionCandidate[]>(() => groupItems.map((group) => {
     const assessment = eligibilityById.get(group.id);
@@ -90,9 +103,9 @@ export function GroupListEditorPage() {
       return next;
     });
   }, [mutation.error]);
-  const entriesReady = !editing || Boolean(allEntries.data && detail.data && allEntries.data.length === detail.data.groupCount);
+  const entriesReady = !editing || Boolean(allEntries.data && detail.data?.groupCount !== undefined && detail.data.version !== undefined && allEntries.data.length === detail.data.groupCount);
   const selectedCounts = [...selected.values()].reduce((counts, item) => ({ ...counts, [item.eligibility ?? 'unknown']: counts[item.eligibility ?? 'unknown'] + 1 }), { eligible: 0, unavailable: 0, unknown: 0 } as Record<GroupEligibility, number>);
-  const selectedReviewItems = useMemo<SelectionReviewItem[]>(() => [...selected.entries()]
+  const selectedReviewItems = useMemo<SelectionReviewItem[]>(() => [...selectionsOutsidePage(selected, pageCandidates).entries()]
     .sort(([, left], [, right]) => {
       const leftBlocked = left.eligibility === 'unavailable' || left.eligibility === 'unknown';
       const rightBlocked = right.eligibility === 'unavailable' || right.eligibility === 'unknown';
@@ -106,10 +119,11 @@ export function GroupListEditorPage() {
       detail: item.eligibilityReason ? humanizeToken(item.eligibilityReason) : undefined,
       status: eligibilityEnabled ? humanizeToken(item.eligibility ?? 'unknown') : 'Validated on submit',
       tone: eligibilityEnabled ? item.eligibility === 'eligible' ? 'ok' : item.eligibility === 'unavailable' ? 'failed' : 'degraded' : 'neutral',
-    })), [eligibilityEnabled, selected]);
+    })), [eligibilityEnabled, pageCandidates, selected]);
   const pageSelection = pageSelectionState(selected, pageCandidates);
+  const eligibilityAuthoritative = !eligibilityEnabled || (!eligibility.isPending && !eligibility.error && (!eligibility.data?.meta?.syncStatus || eligibility.data.meta.syncStatus === 'ready'));
   const hasBlockedSelection = eligibilityEnabled && (selectedCounts.unavailable > 0 || selectedCounts.unknown > 0);
-  const canSubmit = enabled && groupsReady && entriesReady && !hasBlockedSelection && !versionConflict && !mutation.isPending && Boolean(name.trim() && source.trim() && evidence.trim() && authorizedAt && selected.size);
+  const canSubmit = commandsEnabled && groupsReady && entriesReady && eligibilityAuthoritative && !hasBlockedSelection && !versionConflict && !mutation.isPending && Boolean(name.trim() && source.trim() && evidence.trim() && authorizedAt && selected.size);
   const clearFailure = () => { if (mutation.error && !versionConflict) mutation.reset(); };
   const toggle = (jid: string, label: string, assessment?: GroupListEntry) => setSelected((current) => { const next = new Map(current); if (next.has(jid)) next.delete(jid); else if (!eligibilityEnabled || assessment?.eligibility === 'eligible') next.set(jid, { label, eligibility: assessment?.eligibility, eligibilityReason: assessment?.eligibilityReason }); return next; });
   const submit = (event: FormEvent) => {
@@ -118,20 +132,35 @@ export function GroupListEditorPage() {
     const timestamp = Date.parse(authorizedAt);
     if (Number.isNaN(timestamp)) return;
     const base = { name: name.trim(), description: description.trim() || undefined, groupJids: [...selected.keys()], authorization: { source: source.trim(), evidenceReference: evidence.trim(), authorizedAt: new Date(timestamp).toISOString() } };
-    const onSuccess = (result: { id: string }) => { setEvidence(''); mutation.reset(); navigate(`/groups/lists/${encodeURIComponent(result.id)}`, { replace: true }); };
-    if (editing && detail.data) update.mutate({ ...base, expectedVersion: detail.data.version }, { onSuccess });
+    const onSuccess = (result: { id: string }) => { setEvidence(''); mutation.reset(); navigate(withSearchParams(`/groups/lists/${encodeURIComponent(result.id)}`, directoryParams), { replace: true }); };
+    if (editing && detail.data?.version !== undefined) update.mutate({ ...base, expectedVersion: detail.data.version }, { onSuccess });
     else create.mutate(base, { onSuccess });
   };
 
-  if (!enabled) return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title={editing ? 'Edit Group List' : 'Create Group List'} description={editing ? 'Review and replace one complete Group List version.' : 'Create an authorized, reusable set of campaign target groups.'} /><GroupSectionTabs /><StateNotice kind="empty" title="Group Lists unavailable" detail={session.keyKind !== 'api' ? 'An instance credential is required.' : 'The backend does not advertise group_lists.'} /></div>;
+  const reloadFromServer = async () => {
+    setEvidence('');
+    mutation.reset();
+    initialized.current = false;
+    const [freshDetail, freshEntries] = await Promise.all([detail.refetch(), allEntries.refetch()]);
+    if (freshDetail.data && freshEntries.data) {
+      initialized.current = true;
+      initializeEditor(freshDetail.data, freshEntries.data);
+    }
+  };
+
+  useInvalidCursorReset(groups.error, route.groupSearchCursor, () => setParams(setGroupListParam(params, 'groupSearchCursor'), { replace: true }));
+
+  if (!readEnabled) return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title={editing ? 'Edit Group List' : 'Create Group List'} description={editing ? 'Review and replace one complete Group List version.' : 'Create an authorized, reusable set of campaign target groups.'} /><GroupSectionTabs /><StateNotice kind="empty" title="Group Lists unavailable" detail={session.keyKind !== 'api' ? 'An instance credential is required.' : capabilities.isError ? 'Capability discovery failed and no cached Group List data is available.' : 'The backend does not advertise group_lists.'} /></div>;
+  if (editing && detail.data && (detail.data.groupCount === undefined || detail.data.version === undefined)) return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title="Edit Group List" description="Review and replace one complete Group List version." /><StateNotice kind="error" title="Group List facts incomplete" detail="The backend did not report both group count and version. The Console will not guess command preconditions." action={<Button onClick={() => void detail.refetch()}>Retry</Button>} /></div>;
   if (editing && (detail.isPending || (detail.data && allEntries.isPending))) return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title="Edit Group List" description="Review and replace one complete Group List version." /><ProgressBar label="Loading complete Group List" value={allEntries.data?.length ?? 0} max={detail.data?.groupCount ?? 1} /><StateNotice kind="loading" title="Loading every group before replacement" detail="Save remains disabled until the complete server-owned entry set is loaded." /></div>;
   if (editing && (detail.error || allEntries.error || !detail.data)) return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title="Edit Group List" description="Review and replace one complete Group List version." /><ApiFailureNotice error={detail.error ?? allEntries.error ?? new Error('Group List unavailable.')} title="Group List load failed" /></div>;
-  if (editing && allEntries.data && detail.data && allEntries.data.length !== detail.data.groupCount) return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title="Edit Group List" description="Review and replace one complete Group List version." /><StateNotice kind="error" title="Group List changed while loading" detail="The complete entry set no longer matches the selected version. Reload and review the current server-owned list before editing." action={<Button onClick={() => window.location.reload()}>Reload</Button>} /></div>;
+  if (editing && allEntries.data && detail.data && allEntries.data.length !== detail.data.groupCount) return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title="Edit Group List" description="Review and replace one complete Group List version." /><StateNotice kind="error" title="Group List changed while loading" detail="The complete entry set no longer matches the selected version. Reload and review the current server-owned list before editing." action={<Button onClick={() => void reloadFromServer()}>Reload from server</Button>} /></div>;
 
   const applyGroupSearch = () => setParams(setGroupListParam(params, 'groupSearch', searchDraft.trim()), { replace: true });
   return <div className="grid gap-6 p-6 max-sm:p-4">
     <PageHeader eyebrow="Messaging" title={editing ? 'Edit Group List' : 'Create Group List'} description={editing ? 'Review and replace one complete Group List version.' : 'Create an authorized, reusable set of campaign target groups.'} />
     <GroupSectionTabs />
+    {!commandsEnabled ? <StateNotice kind="error" title="Commands unavailable" detail="Capability discovery is not authoritative. Cached read-only data remains visible, but this Group List cannot be submitted." /> : null}
     <form className="grid gap-4 xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)] xl:items-start" aria-busy={mutation.isPending} onSubmit={submit}>
       <Panel title="List facts" description="Group membership changes create a new immutable list version for campaign review."><div className="grid gap-4">
         <Field label="Name" required>{(id) => <Input id={id} required maxLength={255} value={name} disabled={mutation.isPending || versionConflict} onChange={(event) => { clearFailure(); setName(event.target.value); }} />}</Field>
@@ -155,7 +184,7 @@ export function GroupListEditorPage() {
             pageSelectableCount={pageSelection.selectableCount}
             checked={pageSelection.checked}
             indeterminate={pageSelection.indeterminate}
-            disabled={!eligibilityEnabled || eligibility.isPending || Boolean(eligibility.error) || !pageSelection.selectableCount || mutation.isPending || versionConflict}
+            disabled={!commandsEnabled || !eligibilityEnabled || !eligibilityAuthoritative || !pageSelection.selectableCount || mutation.isPending || versionConflict}
             clearDisabled={mutation.isPending || versionConflict}
             onTogglePage={(checked) => setSelected((current) => setPageSelection(current, pageCandidates, checked))}
             onClear={() => setSelected(new Map())}
@@ -169,7 +198,7 @@ export function GroupListEditorPage() {
               const eligibilityState = !eligibilityEnabled ? 'validated on submit' : eligibility.isPending ? 'checking' : assessment?.eligibility ?? 'unknown';
               const eligibilityTone: Tone = !eligibilityEnabled ? 'neutral' : eligibility.isPending ? 'pending' : assessment?.eligibility === 'eligible' ? 'ok' : assessment?.eligibility === 'unavailable' ? 'failed' : 'degraded';
               return <Tr key={group.id}>
-                <Td mobileLabel="Select" className="w-12"><Checkbox visuallyHiddenLabel checked={checked} disabled={mutation.isPending || versionConflict || (eligibilityEnabled && !checked && assessment?.eligibility !== 'eligible')} label={<>Select {group.subject ?? group.id}</>} onChange={() => toggle(group.id, group.subject ?? group.id, assessment)} /></Td>
+                <Td mobileLabel="Select" className="w-12"><Checkbox visuallyHiddenLabel checked={checked} disabled={!commandsEnabled || mutation.isPending || versionConflict || (eligibilityEnabled && (!eligibilityAuthoritative || (!checked && assessment?.eligibility !== 'eligible')))} label={<>Select {group.subject ?? group.id}</>} onChange={() => toggle(group.id, group.subject ?? group.id, assessment)} /></Td>
                 <Td mobileLabel="Group" multiline><GroupTargetIdentity id={group.id} name={group.subject} type={group.groupType} /></Td>
                 <Td mobileLabel="Members" className="w-24 min-w-24 text-right"><ProjectedMemberCount count={group.memberCount} /></Td>
                 <Td mobileLabel="State"><Status tone={groupStatusTone(group.status)}>{humanizeToken(groupState)}</Status></Td>
@@ -185,15 +214,15 @@ export function GroupListEditorPage() {
           />
         </div> : null}
         <SelectionReview
-          title="Selected targets"
-          description="Selections can span pages. Unavailable and unknown targets appear first and must be removed before saving."
+          title="Selected outside this page"
+          description="These targets remain selected across search and pagination. Targets visible above are reviewed and removed directly in the table."
           items={selectedReviewItems}
           disabled={mutation.isPending || versionConflict}
           onRemove={(id) => setSelected((current) => { const next = new Map(current); next.delete(id); return next; })}
         />
       </div></Panel>
-      {versionConflict ? <div className="xl:col-span-2"><StateNotice kind="error" title="Group List changed" detail="Reload the current version and review every selection before submitting a new authorization assertion." action={<Button onClick={() => window.location.reload()}>Reload</Button>} /></div> : mutation.error ? <div className="xl:col-span-2 grid gap-3"><ApiFailureNotice error={mutation.error} />{mutationIssues ? <StateNotice kind="error" title={`${mutationIssues.issueCount} selected groups require review`} detail={`${mutationIssues.issues.map((item) => item.currentName || item.groupJid).slice(0, 3).join(', ')}${mutationIssues.truncated || mutationIssues.issueCount > 3 ? '…' : ''}`} /> : null}</div> : null}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 xl:col-span-2"><p className="text-xs text-fg-3">Preflight is advisory. The backend validates the complete selection atomically on submit.</p><div className="flex gap-2 max-sm:w-full"><Button className="max-sm:flex-1" disabled={mutation.isPending} onClick={() => navigate(editing && groupListId ? `/groups/lists/${encodeURIComponent(groupListId)}` : '/groups/lists')}>Cancel</Button><Button className="max-sm:flex-1" type="submit" variant="primary" disabled={!canSubmit}>{mutation.isPending ? 'Submitting…' : editing ? 'Save new version' : 'Create Group List'}</Button></div></div>
+      {versionConflict ? <div className="xl:col-span-2"><StateNotice kind="error" title="Group List changed" detail="Reload the current version and review every selection before submitting a new authorization assertion." action={<Button onClick={() => void reloadFromServer()}>Reload from server</Button>} /></div> : mutation.error ? <div className="xl:col-span-2 grid gap-3"><ApiFailureNotice error={mutation.error} />{mutationIssues ? <StateNotice kind="error" title={`${mutationIssues.issueCount} selected groups require review`} detail={`${mutationIssues.issues.map((item) => item.currentName || item.groupJid).slice(0, 3).join(', ')}${mutationIssues.truncated || mutationIssues.issueCount > 3 ? '…' : ''}`} /> : null}</div> : null}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 xl:col-span-2"><p className="text-xs text-fg-3">Preflight is advisory. The backend validates the complete selection atomically on submit.</p><div className="flex gap-2 max-sm:w-full"><Button className="max-sm:flex-1" disabled={mutation.isPending} onClick={() => navigate(editing ? detailUrl : directoryUrl)}>Cancel</Button><Button className="max-sm:flex-1" type="submit" variant="primary" disabled={!canSubmit}>{mutation.isPending ? 'Submitting…' : editing ? 'Save new version' : 'Create Group List'}</Button></div></div>
     </form>
   </div>;
 }

@@ -205,6 +205,8 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   Features never remove individual grid borders or override Panel padding with
   conflicting utilities.
 - **Tabs** — underline tabs; 2px `--color-accent` underline on the active tab.
+  The tab strip may scroll horizontally but always clips vertical overflow so it
+  never becomes a nested vertical scroll target.
 - **Drawer (inspector)** — right panel, `min(440px,100%)`, paper surface, 1px
   strong left border, and a 60% ink scrim. Header = title + mono ID + square close
   cell. ≤640px becomes an 85dvh full-width bottom sheet. The body scrolls without
@@ -235,11 +237,13 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   Place SelectionBar directly above its canonical Table with one contiguous
   strong frame. Eligibility and other domain rules remain feature-owned.
 - **SelectionReview** — the only retained-selection review surface when choices
-  can span cursor pages. It uses one bounded square frame, states the retained
-  total without turning it into a status, keeps stable identity metadata visible,
-  and gives every item an explicit Remove action. Domain status remains textual
-  and blocked items sort first in the owning feature so a disabled submit never
-  strands the operator.
+  can span cursor pages. Beside a selectable table it lists only retained choices
+  outside the current page; visible choices remain integrated into their table
+  rows and are never duplicated below. It uses one bounded square frame, states
+  the retained total without turning it into a status, keeps stable identity
+  metadata visible, and gives every item an explicit Remove action. Domain status
+  remains textual and blocked items sort first in the owning feature so a disabled
+  submit never strands the operator.
 - **Panel / StateNotice / CursorPagination** — the standard composition layer
   for framed sections, honest loading/empty/stale/error state, and cursor-based
   list progression. Panel body spacing is selected through its named padding

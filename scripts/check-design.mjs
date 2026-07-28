@@ -232,7 +232,7 @@ for (const marker of ['<FilterToolbar as="form"', '<StateNotice kind="loading"',
 }
 
 const groupListEditor = await read('src/features/groups/GroupListEditorPage.tsx');
-for (const marker of ['<SelectionBar', '<SelectionReview', 'Selected targets', 'Select eligible on this page', '<Table', 'border-t-0', 'Selection requires review', 'setPageSelection', '<CursorPagination', '>Members</Th>', '<ProjectedMemberCount', '<GroupTargetIdentity', '<GroupTargetEligibility']) {
+for (const marker of ['<SelectionBar', '<SelectionReview', 'Selected outside this page', 'selectionsOutsidePage', 'Select eligible on this page', '<Table', 'border-t-0', 'Selection requires review', 'setPageSelection', '<CursorPagination', '>Members</Th>', '<ProjectedMemberCount', '<GroupTargetIdentity', '<GroupTargetEligibility']) {
   if (!groupListEditor.includes(marker)) failures.push(`src/features/groups/GroupListEditorPage.tsx: target selection recipe is missing ${marker}`);
 }
 if (groupListEditor.includes('selectedCounts.eligible} eligible ·') || /<Status[^>]*>\{selected\.size\} selected/.test(groupListEditor)) {
