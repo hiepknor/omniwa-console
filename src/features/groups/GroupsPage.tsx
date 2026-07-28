@@ -8,9 +8,10 @@ import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/ur
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { PageHeader, StateNotice, Status, type Tone } from '@/ui';
 import { CreateGroup } from './CreateGroup';
+import { JoinGroup } from './JoinGroup';
 import { GroupsView } from './GroupsView';
 import { GroupWorkspace } from './GroupWorkspace';
-import { useCreateGroup, useGroups } from './hooks';
+import { useCreateGroup, useGroupSummary, useGroups, useJoinGroup } from './hooks';
 import { groupRouteState } from './route-state';
 import { GroupSectionTabs } from './GroupSectionTabs';
 
@@ -64,15 +65,28 @@ export function GroupsPage() {
   useEffect(() => setSearchDraft(route.search), [route.search]);
   const instanceScope = session.keyKind === 'api';
   const groupsReady = instanceScope && (capabilities.data?.capabilities.includes('groups_projection') ?? false);
-  const list = useGroups(route.search, route.cursor, groupsReady);
-  const create = useCreateGroup();
+  const normalized = capabilities.data?.capabilities.includes('group_management_permissions') ?? false;
+  const membersEnabled = normalized && (capabilities.data?.capabilities.includes('group_members_projection') ?? false);
+  const normalizedCommands = normalized && (capabilities.data?.capabilities.includes('group_management_commands') ?? false);
+  const commandsEnabled = normalizedCommands;
+  const auditEnabled = normalized && (capabilities.data?.capabilities.includes('group_management_audit') ?? false);
+  const photoEnabled = normalizedCommands && (capabilities.data?.capabilities.includes('group_photo_assets') ?? false);
+  const summaryEnabled = normalized && (capabilities.data?.capabilities.includes('group_summary') ?? false);
+  const filters = { search: route.search, type: route.type, myRole: route.myRole, sendMode: route.sendMode, state: route.state, membershipState: route.membershipState, cursor: route.cursor };
+  const list = useGroups(filters, groupsReady, normalized);
+  const summary = useGroupSummary(summaryEnabled);
+  const create = useCreateGroup(normalizedCommands);
+  const join = useJoinGroup();
   const groups = useMemo(() => list.data?.resource?.items ?? [], [list.data]);
-  const listParams = omitSearchParams(searchParams, ['create', 'tab']);
+  const summaryNotReady = summary.error instanceof ApiFailure && summary.error.code === 'projection_not_ready';
+  const listParams = omitSearchParams(searchParams, ['create', 'join', 'tab', 'memberSearch', 'memberRole', 'memberCursor', 'auditCursor']);
   const listUrl = withSearchParams('/groups', listParams);
-  const setParam = (key: string, value?: string) => setSearchParams(updateSearchParams(searchParams, { [key]: value }, key === 'search' ? ['cursor'] : []), { replace: true });
-  const applySearch = () => setParam('search', searchDraft.trim());
+  const setParam = (key: string, value?: string, resetKeys: readonly string[] = []) => setSearchParams(updateSearchParams(searchParams, { [key]: value }, resetKeys), { replace: true });
+  const setDirectoryParam = (key: string, value?: string) => setParam(key, value, ['cursor']);
+  const applySearch = () => setDirectoryParam('search', searchDraft.trim());
   const openGroup = (id: string) => navigate(withSearchParams(`/groups/${encodeURIComponent(id)}`, listParams));
   const closeCreate = () => { create.reset(); setParam('create'); };
+  const closeJoin = () => { join.reset(); setParam('join'); };
   useInvalidCursorReset(list.error, route.cursor, () => setParam('cursor'));
 
   if (!instanceScope) return <Blocked title="Instance credential required" detail="Groups requires an instance credential. Admin scope cannot read token-scoped group projections, and no request was sent." />;
@@ -85,14 +99,21 @@ export function GroupsPage() {
       <GroupsView
         refreshing={list.isFetching}
         sectionNav={<GroupSectionTabs />}
-        onRefresh={() => list.refetch()}
+        onRefresh={() => { void list.refetch(); if (summaryEnabled) void summary.refetch(); }}
         onNew={() => { create.reset(); setParam('create', '1'); }}
-        commandsEnabled={groupsReady}
+        onJoin={() => { join.reset(); setParam('join', '1'); }}
+        joinEnabled={normalizedCommands}
+        commandsEnabled={commandsEnabled}
+        normalized={normalized}
+        summary={summary.data?.resource}
+        summaryNotice={!summaryEnabled ? undefined : summary.isPending ? <StateNotice kind="loading" title="Loading Group summary" /> : summaryNotReady ? <StateNotice kind="loading" title={summary.data ? 'Showing last known Group summary' : 'Group summary syncing'} detail={summary.data ? 'The latest refresh is not ready. Cached authoritative metrics remain visible and were not recomputed from this page.' : 'The authoritative instance-wide summary is not ready; no metrics were derived from this directory page.'} /> : summary.error ? <ApiFailureNotice error={summary.error} title={summary.data ? 'Showing last known Group summary' : 'Group summary unavailable'} onRetry={() => summary.refetch()} /> : undefined}
         ack={ack ? <StateNotice kind="info" title={`${ack} accepted`} detail="The refreshed group projection remains authoritative." /> : undefined}
         searchDraft={searchDraft}
         onSearchDraft={setSearchDraft}
         onApply={(e) => { e.preventDefault(); applySearch(); }}
         applyDisabled={searchDraft.trim() === route.search || list.isFetching}
+        filters={{ type: route.type, myRole: route.myRole, sendMode: route.sendMode, state: route.state, membershipState: route.membershipState }}
+        onFilter={setDirectoryParam}
         projectionStatus={list.data ? <><ProjectionStatus meta={list.data.meta} />{!groupsReady ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable group projection visible while capability discovery no longer advertises groups_projection." /> : null}</> : undefined}
         notices={list.error && !list.data ? <Fail error={list.error} onRetry={() => list.refetch()} /> : list.error ? <Fail error={list.error} stale onRetry={() => list.refetch()} /> : undefined}
         initialLoading={list.isPending}
@@ -105,8 +126,9 @@ export function GroupsPage() {
         onCursor={(v) => setParam('cursor', v)}
       />
 
-      {groupId ? <GroupWorkspace groupId={groupId} readEnabled={groupsReady} commandsEnabled={groupsReady} activeTab={route.tab} onTab={(tab) => setParam('tab', tab === 'overview' ? undefined : tab)} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
-      <CreateGroup open={route.create && groupsReady} pending={create.isPending} error={create.error} onClose={closeCreate} onCreate={(body) => create.mutate(body, { onSuccess: () => { setAck('Create group'); closeCreate(); } })} />
+      {groupId ? <GroupWorkspace groupId={groupId} readEnabled={groupsReady} normalized={normalized} commandsEnabled={commandsEnabled} membersEnabled={membersEnabled} auditEnabled={auditEnabled} photoEnabled={photoEnabled} activeTab={route.tab} memberSearch={route.memberSearch} memberRole={route.memberRole} memberCursor={route.memberCursor} auditCursor={route.auditCursor} onParam={setParam} onTab={(tab) => setParam('tab', tab === 'overview' ? undefined : tab)} onClose={() => navigate(listUrl)} onLeft={() => { setAck('Leave group'); navigate(listUrl); }} /> : null}
+      <CreateGroup open={route.create && commandsEnabled} pending={create.isPending} error={create.error} result={create.data} normalized={normalizedCommands} onClose={closeCreate} onCreate={(body) => create.mutate(body)} />
+      <JoinGroup open={route.join && normalizedCommands} pending={join.isPending} error={join.error} result={join.data} onClose={closeJoin} onJoin={(code) => join.mutate(code)} />
     </>
   );
 }

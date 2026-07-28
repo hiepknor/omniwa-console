@@ -56,7 +56,7 @@ export function OverviewView(props: OverviewViewProps) {
           title="Control plane and instance health"
           description={`Generated ${relativeTime(health.generatedAt) || 'at an unreported time'}. Connection, projection, and throttling remain independent.`}
           actions={<Status tone={health.api.status === 'healthy' ? 'ok' : 'degraded'}>{humanizeToken(health.api.status)}</Status>}
-          bodyClassName="p-0"
+          bodyPadding="none"
         >
           {health.instances.length === 0 ? (
             <div className="p-4">
@@ -91,10 +91,12 @@ export function OverviewView(props: OverviewViewProps) {
         <Panel
           title="Persisted metrics"
           description={`${humanizeToken(overview.scope.type)} scope · ${props.window} · generated ${relativeTime(overview.generatedAt) || 'at an unreported time'}`}
-          bodyClassName="p-0"
+          bodyPadding="none"
         >
           <MetricGrid
             columns={5}
+            density="compact"
+            frame="flush"
             metrics={[
               { label: 'Instances', value: formatCount(overview.instances.total) },
               { label: 'Connected', value: formatCount(overview.instances.connected) },
@@ -107,7 +109,6 @@ export function OverviewView(props: OverviewViewProps) {
               { label: 'Contacts', value: formatCount(overview.projections.contacts) },
               { label: 'Events', value: formatCount(overview.projections.events) },
             ]}
-            className="border-t-0 border-l-0"
           />
         </Panel>
       ) : null}
@@ -117,7 +118,7 @@ export function OverviewView(props: OverviewViewProps) {
           title="Projection posture"
           description={`Aggregate snapshot generated ${relativeTime(projection.generatedAt) || 'at an unreported time'}.`}
           actions={<Status tone={projectionTone(projection.status)}>{humanizeToken(projection.status)}</Status>}
-          bodyClassName="p-0"
+          bodyPadding="none"
         >
           {projection.resources.length === 0 ? (
             <div className="p-4">

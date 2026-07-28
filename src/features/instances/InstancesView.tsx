@@ -44,7 +44,7 @@ export function InstancesView(props: InstancesViewProps) {
       <Panel
         title="Fleet metadata"
         description="List and detail use /instance/metadata only; tokens never enter view models or query keys."
-        bodyClassName="p-0"
+        bodyPadding="none"
       >
         <FilterToolbar>
           <Field label="Search" className="min-w-56 flex-1">

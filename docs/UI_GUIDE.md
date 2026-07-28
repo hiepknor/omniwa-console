@@ -84,16 +84,30 @@ refreshed status remains authoritative.
 ### Groups workspace boundaries
 
 `/groups` is the projected WhatsApp group directory and management workspace.
-Its selected resource and `overview`, `members`, or `settings` inspector tab are
+Its selected resource and `overview`, `members`, `settings`, or `activity` inspector tab are
 URL-addressable. Directory rows remain inspectable when a cached projection is
 usable but live group commands have been disabled.
 
-Group state, group type, and send mode are provider facts. They never establish
-the active account's role, management permissions, or campaign eligibility.
-Unknown settings remain visibly unreported and cannot be toggled until the
-backend returns their current state. One-off messaging navigates to Inbox;
-campaign target management navigates to Group Lists. The Groups feature owns
-neither workflow and never sends a message itself.
+Group state, group type, send mode, membership, and role are provider facts.
+They never establish management permission or campaign eligibility. Every
+normalized detail/member command is enabled only by an explicit backend
+`allowed` decision; `denied` explains why and `unknown` remains visibly
+disabled as unsynchronized. Unknown settings remain visibly unreported and
+cannot be toggled until the backend returns their current value.
+Invite-link permission and cached-link availability remain separate. A missing
+cached link is an empty state with the independently gated reset action, not a
+failed read with a retry loop.
+
+The directory exposes all normalized filters, with filter and opaque cursor
+state in the URL. Summary metrics come only from the authoritative global
+summary endpoint. Members and activity are separately paged projections in the
+workspace. Participant commands show each succeeded, failed, or unknown
+outcome, and an unknown command never offers automatic retry. Group photo uses
+the shared image primitive and the upload → processing → ready → apply flow;
+provider photo availability without a managed asset remains a distinct state.
+One-off messaging navigates to Inbox; campaign target management navigates to
+Group Lists. The Groups feature owns neither workflow and never sends a message
+itself.
 
 Never persist credentials or place credential values in URLs, query keys, logs,
 resource models, or rendered diagnostics.

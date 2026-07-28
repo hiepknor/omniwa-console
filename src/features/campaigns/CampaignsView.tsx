@@ -51,7 +51,7 @@ export function CampaignsView(props: CampaignsViewProps) {
 
       {props.notices}
 
-      <Panel title="Campaign directory" description="Status filter, opaque cursor, and selected campaign remain URL-addressable." bodyClassName="p-0">
+      <Panel title="Campaign directory" description="Status filter, opaque cursor, and selected campaign remain URL-addressable." bodyPadding="none">
         <FilterToolbar className="justify-between max-sm:items-stretch">
           <Field label="Status" className="w-full max-w-56">
             {(id, labelId) => (

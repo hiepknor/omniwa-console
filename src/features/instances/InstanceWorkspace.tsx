@@ -122,7 +122,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
           <Status tone={drawerStatus.tone}>{drawerStatus.label}</Status>
           {refreshError ? <FailureNotice error={refreshError} stale onRetry={onRetry} /> : null}
 
-          <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyClassName="pt-2">
+          <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyPadding="compact-top">
             <DescriptionList>
               <DescriptionItem label="Metadata status">{humanizeToken(instance.status)}</DescriptionItem>
               <DescriptionItem label="Metadata connection">{instance.connected ? 'Connected' : 'Disconnected'}</DescriptionItem>

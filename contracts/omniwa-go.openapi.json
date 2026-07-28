@@ -2534,7 +2534,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Create group",
+        "description": "Create a group with bounded typed participant outcomes. The command is journaled before provider admission when group management commands are enabled.",
         "tags": [
           "Group"
         ],
@@ -2552,17 +2552,39 @@
         },
         "responses": {
           "200": {
-            "description": "success",
+            "description": "accepted",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.CreateGroupCommandResult"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
             "description": "Error on validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "idempotency_conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -2601,7 +2623,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Set group description",
+        "description": "Set or clear group description with command-time permission revalidation and a journaled acknowledgement.",
         "tags": [
           "Group"
         ],
@@ -2619,11 +2641,23 @@
         },
         "responses": {
           "200": {
-            "description": "success",
+            "description": "accepted",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -2638,8 +2672,48 @@
               }
             }
           },
+          "403": {
+            "description": "group_permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "group_state_changed or idempotency_conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Mutation rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "projection_not_ready or provider_disconnected",
             "content": {
               "application/json": {
                 "schema": {
@@ -2658,7 +2732,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Get group info",
+        "description": "Get normalized projected group facts and advisory tri-state action decisions without members or live WhatsApp queries. Mutations must revalidate permissions.",
         "tags": [
           "Group"
         ],
@@ -2688,7 +2762,7 @@
                       "type": "object",
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/types.GroupInfo"
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupDetail"
                         }
                       }
                     }
@@ -2698,7 +2772,7 @@
             }
           },
           "400": {
-            "description": "Error on validation",
+            "description": "invalid_filter",
             "content": {
               "application/json": {
                 "schema": {
@@ -2747,7 +2821,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Get group invite link",
+        "description": "Read the cached group invite link from the instance-scoped Groups projection. This endpoint never calls WhatsApp when reset=false. Permission and cache availability are separate facts.",
         "tags": [
           "Group"
         ],
@@ -2765,23 +2839,11 @@
         },
         "responses": {
           "200": {
-            "description": "success",
+            "description": "data is a cached-link string for reset=false or a CommandAcknowledgement for reset=true",
             "content": {
               "application/json": {
                 "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  ]
+                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
                 }
               }
             }
@@ -2796,12 +2858,32 @@
               }
             }
           },
-          "404": {
-            "description": "Cached invite link not found",
+          "403": {
+            "description": "group_permission_denied",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                  "$ref": "#/components/schemas/apidocs.GroupProjectionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "group_not_found or group_invite_link_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupInviteLinkNotFoundErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "group_state_changed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.GroupProjectionErrorResponse"
                 }
               }
             }
@@ -2846,7 +2928,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Join group link",
+        "description": "Join with an invite code and return a typed public-safe outcome without claiming membership when post-command confirmation is unavailable.",
         "tags": [
           "Group"
         ],
@@ -2864,11 +2946,23 @@
         },
         "responses": {
           "200": {
-            "description": "success",
+            "description": "accepted",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.JoinGroupCommandResult"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -2883,8 +2977,38 @@
               }
             }
           },
+          "409": {
+            "description": "idempotency_conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Mutation rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "provider_disconnected",
             "content": {
               "application/json": {
                 "schema": {
@@ -2903,7 +3027,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Leave group",
+        "description": "Leave a group after command-time membership revalidation; unknown provider outcomes are not retried.",
         "tags": [
           "Group"
         ],
@@ -2912,7 +3036,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.LeaveGroupStruct"
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementLeaveGroupRequest"
               }
             }
           },
@@ -2921,11 +3045,23 @@
         },
         "responses": {
           "200": {
-            "description": "success",
+            "description": "accepted",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -2940,8 +3076,48 @@
               }
             }
           },
+          "403": {
+            "description": "group_permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "group_state_changed or idempotency_conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Mutation rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "projection_not_ready or provider_disconnected",
             "content": {
               "application/json": {
                 "schema": {
@@ -2960,11 +3136,32 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "List groups",
+        "description": "List normalized group summaries from the persisted instance projection. This is the unfiltered form of /group/search when group_management_permissions is advertised.",
         "tags": [
           "Group"
         ],
         "summary": "List groups",
+        "parameters": [
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque cursor bound to the instance",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "success",
@@ -2981,12 +3178,22 @@
                         "data": {
                           "type": "array",
                           "items": {
-                            "$ref": "#/components/schemas/types.GroupInfo"
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupSummary"
                           }
                         }
                       }
                     }
                   ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_pagination or invalid_cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
                 }
               }
             }
@@ -3082,7 +3289,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Set group name",
+        "description": "Set group name with command-time permission revalidation and a journaled acknowledgement when group management commands are enabled.",
         "tags": [
           "Group"
         ],
@@ -3100,121 +3307,7 @@
         },
         "responses": {
           "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/group/participant": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Update participant",
-        "tags": [
-          "Group"
-        ],
-        "summary": "Update participant",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.AddParticipantStruct"
-              }
-            }
-          },
-          "description": "Group data",
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/group/photo": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Set group photo",
-        "tags": [
-          "Group"
-        ],
-        "summary": "Set group photo",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoStruct"
-              }
-            }
-          },
-          "description": "Group data",
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "success",
+            "description": "accepted",
             "content": {
               "application/json": {
                 "schema": {
@@ -3226,7 +3319,7 @@
                       "type": "object",
                       "properties": {
                         "data": {
-                          "type": "string"
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"
                         }
                       }
                     }
@@ -3245,8 +3338,296 @@
               }
             }
           },
+          "403": {
+            "description": "group_permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "group_state_changed or idempotency_conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Mutation rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "projection_not_ready or provider_disconnected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/participant": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Execute a bounded participant command. Add accepts canonical user JIDs; remove/promote/demote accept opaque memberId values when group management commands are enabled.",
+        "tags": [
+          "Group"
+        ],
+        "summary": "Update participant",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementParticipantRequest"
+              }
+            }
+          },
+          "description": "Group participant command",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantCommandResult"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error on validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "group_permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "group_state_changed or idempotency_conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Mutation rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "projection_not_ready or provider_disconnected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/photo": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Set a Group photo from an instance-owned ready shared media asset. The normalized contract performs command-time permission revalidation and never accepts a URL or base64 image.",
+        "tags": [
+          "Group"
+        ],
+        "summary": "Set group photo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoAssetRequest"
+              }
+            }
+          },
+          "description": "Group photo asset command",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "group_permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "media_asset_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "group_state_changed, media_asset_not_ready, media_asset_integrity_failed, or idempotency_conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "media_asset_too_large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "media_asset_invalid_type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Mutation rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "projection_not_ready, provider_disconnected, or media_asset_storage_unavailable",
             "content": {
               "application/json": {
                 "schema": {
@@ -3265,7 +3646,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Prefix-search groups from the persisted instance projection without querying WhatsApp",
+        "description": "Search normalized group summaries from the persisted instance projection without participants or live WhatsApp queries. The normalized contract is active when group_management_permissions is advertised.",
         "tags": [
           "Group"
         ],
@@ -3281,6 +3662,78 @@
             }
           },
           {
+            "description": "Group type",
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "group",
+                "community",
+                "subgroup",
+                "unknown"
+              ]
+            }
+          },
+          {
+            "description": "Current instance role",
+            "name": "myRole",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "owner",
+                "superadmin",
+                "admin",
+                "member",
+                "not_member",
+                "unknown"
+              ]
+            }
+          },
+          {
+            "description": "Who may send",
+            "name": "sendMode",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all_members",
+                "admins_only",
+                "unknown"
+              ]
+            }
+          },
+          {
+            "description": "Projected group state",
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "suspended",
+                "dissolved",
+                "unavailable",
+                "unknown"
+              ]
+            }
+          },
+          {
+            "description": "Current instance membership",
+            "name": "membershipState",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "joined",
+                "left",
+                "removed",
+                "unknown"
+              ]
+            }
+          },
+          {
             "description": "Page size (1-200)",
             "name": "limit",
             "in": "query",
@@ -3292,7 +3745,7 @@
             }
           },
           {
-            "description": "Opaque cursor bound to the instance and normalized query",
+            "description": "Opaque cursor bound to the instance and all filters",
             "name": "cursor",
             "in": "query",
             "schema": {
@@ -3316,7 +3769,7 @@
                         "data": {
                           "type": "array",
                           "items": {
-                            "$ref": "#/components/schemas/types.GroupInfo"
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupSummary"
                           }
                         }
                       }
@@ -3327,7 +3780,7 @@
             }
           },
           "400": {
-            "description": "Invalid search or cursor",
+            "description": "invalid_filter, invalid_pagination, or invalid_cursor",
             "content": {
               "application/json": {
                 "schema": {
@@ -3384,11 +3837,23 @@
         },
         "responses": {
           "200": {
-            "description": "success",
+            "description": "accepted",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -3403,8 +3868,361 @@
               }
             }
           },
+          "403": {
+            "description": "group_permission_denied",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "group_state_changed or idempotency_conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Mutation rate limited; see Retry-After header",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.RateLimitResponse"
+                }
+              }
+            }
+          },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "projection_not_ready or provider_disconnected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/summary": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Aggregate the complete normalized Group projection for the authenticated instance. Counts are never derived from a directory page and the endpoint never calls WhatsApp.",
+        "tags": [
+          "Group"
+        ],
+        "summary": "Get authoritative group summary",
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupDirectorySummary"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found when the normalized management contract is disabled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "projection_not_ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/{groupJid}/audit": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "List terminal management command outcomes without provider payloads, aliases, invite links, media, or credentials.",
+        "tags": [
+          "Group"
+        ],
+        "summary": "Get group management audit history",
+        "parameters": [
+          {
+            "description": "Canonical WhatsApp Group JID",
+            "name": "groupJid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque cursor bound to instance and group",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementAuditEvent"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_cursor or invalid_pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/group/{groupJid}/members": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Search current projected members without provider aliases or live WhatsApp queries. Target actions are advisory tri-state decisions and mutations revalidate them.",
+        "tags": [
+          "Group"
+        ],
+        "summary": "List projected group members",
+        "parameters": [
+          {
+            "description": "Canonical WhatsApp Group JID",
+            "name": "groupJid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Case-insensitive display-name prefix",
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 128
+            }
+          },
+          {
+            "description": "Public member role",
+            "name": "role",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "owner",
+                "superadmin",
+                "admin",
+                "member"
+              ]
+            }
+          },
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          },
+          {
+            "description": "Opaque cursor bound to instance, group, and filters",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMember"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_filter, invalid_pagination, or invalid_cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "group_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "group_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "projection_not_ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -9467,6 +10285,38 @@
           }
         }
       },
+      "apidocs.GroupInviteLinkNotFoundDetails": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "example": false
+          },
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
+          }
+        }
+      },
+      "apidocs.GroupInviteLinkNotFoundErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "group_invite_link_not_found"
+          },
+          "details": {
+            "$ref": "#/components/schemas/apidocs.GroupInviteLinkNotFoundDetails"
+          },
+          "error": {
+            "type": "string",
+            "example": "cached group invite link is not available"
+          },
+          "requestId": {
+            "type": "string",
+            "example": "0123456789abcdef0123456789abcdef"
+          }
+        }
+      },
       "apidocs.GroupListAuditEvent": {
         "type": "object",
         "properties": {
@@ -9610,6 +10460,34 @@
           },
           "meta": {
             "$ref": "#/components/schemas/apidocs.ProjectionMeta"
+          }
+        }
+      },
+      "apidocs.GroupProjectionErrorDetails": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/apidocs.ProjectionMeta"
+          }
+        }
+      },
+      "apidocs.GroupProjectionErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "group_permission_denied"
+          },
+          "details": {
+            "$ref": "#/components/schemas/apidocs.GroupProjectionErrorDetails"
+          },
+          "error": {
+            "type": "string",
+            "example": "group management permission denied"
+          },
+          "requestId": {
+            "type": "string",
+            "example": "0123456789abcdef0123456789abcdef"
           }
         }
       },
@@ -10698,20 +11576,128 @@
           }
         }
       },
-      "github_com_evolution-foundation_evolution-go_pkg_group_service.AddParticipantStruct": {
+      "github_com_evolution-foundation_evolution-go_pkg_group_model.ManagementCommandStatus": {
+        "type": "string",
+        "enum": [
+          "requested",
+          "executing",
+          "completed",
+          "partially_completed",
+          "failed",
+          "unknown"
+        ],
+        "x-enum-varnames": [
+          "ManagementCommandRequested",
+          "ManagementCommandExecuting",
+          "ManagementCommandCompleted",
+          "ManagementCommandPartiallyCompleted",
+          "ManagementCommandFailed",
+          "ManagementCommandUnknown"
+        ]
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision": {
         "type": "object",
         "properties": {
-          "action": {
-            "$ref": "#/components/schemas/whatsmeow.ParticipantChange"
+          "checkedAt": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "admin_required",
+              "owner_required",
+              "not_a_member",
+              "group_suspended",
+              "group_unavailable",
+              "protected_member",
+              "self_action_not_allowed",
+              "already_admin",
+              "not_an_admin",
+              "permission_unknown",
+              "projection_not_ready",
+              "provider_disconnected",
+              "unsupported"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "allowed",
+              "denied",
+              "unknown"
+            ]
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.CommandAcknowledgement": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "commandId": {
+            "type": "string",
+            "format": "uuid"
           },
           "groupJid": {
-            "$ref": "#/components/schemas/types.JID"
+            "type": "string"
           },
-          "participants": {
+          "projectionRefreshExpected": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "completed",
+              "partially_completed",
+              "unknown"
+            ]
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.CreateGroupCommandResult": {
+        "type": "object",
+        "properties": {
+          "acknowledgementStatus": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "partially_completed",
+              "failed",
+              "unknown"
+            ]
+          },
+          "commandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "failedCount": {
+            "type": "integer"
+          },
+          "groupJid": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "participantOutcomes": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantOutcome"
             }
+          },
+          "projectionRefreshExpected": {
+            "type": "boolean"
+          },
+          "requestedCount": {
+            "type": "integer"
+          },
+          "succeededCount": {
+            "type": "integer"
+          },
+          "unknownCount": {
+            "type": "integer"
           }
         }
       },
@@ -10748,6 +11734,367 @@
           }
         }
       },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupActions": {
+        "type": "object",
+        "properties": {
+          "addMembers": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "demoteMembers": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "editDescription": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "editName": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "editSettings": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "leaveGroup": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "promoteMembers": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "readInviteLink": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "removeMembers": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "resetInviteLink": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "sendMessage": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "setPhoto": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupDetail": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupActions"
+          },
+          "adminCount": {
+            "type": "integer"
+          },
+          "announce": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "descriptionPreview": {
+            "type": "string"
+          },
+          "ephemeralEnabled": {
+            "type": "boolean"
+          },
+          "ephemeralTimerSeconds": {
+            "type": "integer"
+          },
+          "groupJid": {
+            "type": "string"
+          },
+          "inviteLink": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupInviteLinkMetadata"
+          },
+          "isDefaultSubgroup": {
+            "type": "boolean"
+          },
+          "joinApproval": {
+            "type": "boolean"
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "memberAddMode": {
+            "type": "string",
+            "enum": [
+              "all_members",
+              "admins_only",
+              "unknown"
+            ]
+          },
+          "memberCount": {
+            "type": "integer"
+          },
+          "membershipState": {
+            "type": "string",
+            "enum": [
+              "joined",
+              "left",
+              "removed",
+              "unknown"
+            ]
+          },
+          "myRole": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "superadmin",
+              "admin",
+              "member",
+              "not_member",
+              "unknown"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.SafeMemberReference"
+          },
+          "parentGroupJid": {
+            "type": "string"
+          },
+          "photo": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupPhotoMetadata"
+          },
+          "sendMode": {
+            "type": "string",
+            "enum": [
+              "all_members",
+              "admins_only",
+              "unknown"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "dissolved",
+              "unavailable",
+              "unknown"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "group",
+              "community",
+              "subgroup",
+              "unknown"
+            ]
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupDirectorySummary": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "integer"
+          },
+          "adminsOnlySend": {
+            "type": "integer"
+          },
+          "communities": {
+            "type": "integer"
+          },
+          "subgroups": {
+            "type": "integer"
+          },
+          "suspended": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupInviteLinkMetadata": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMember": {
+        "type": "object",
+        "properties": {
+          "actions": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMemberActions"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "membershipState": {
+            "type": "string",
+            "enum": [
+              "active",
+              "pending",
+              "removed",
+              "unknown"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "superadmin",
+              "admin",
+              "member"
+            ]
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupMemberActions": {
+        "type": "object",
+        "properties": {
+          "demote": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "promote": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          },
+          "remove": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ActionDecision"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupPhotoMetadata": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "mediaAssetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.GroupSummary": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string"
+          },
+          "descriptionPreview": {
+            "type": "string"
+          },
+          "groupJid": {
+            "type": "string"
+          },
+          "isDefaultSubgroup": {
+            "type": "boolean"
+          },
+          "memberCount": {
+            "type": "integer"
+          },
+          "membershipState": {
+            "type": "string",
+            "enum": [
+              "joined",
+              "left",
+              "removed",
+              "unknown"
+            ]
+          },
+          "myRole": {
+            "type": "string",
+            "enum": [
+              "owner",
+              "superadmin",
+              "admin",
+              "member",
+              "not_member",
+              "unknown"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentGroupJid": {
+            "type": "string"
+          },
+          "sendMode": {
+            "type": "string",
+            "enum": [
+              "all_members",
+              "admins_only",
+              "unknown"
+            ]
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended",
+              "dissolved",
+              "unavailable",
+              "unknown"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "group",
+              "community",
+              "subgroup",
+              "unknown"
+            ]
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.JoinGroupCommandResult": {
+        "type": "object",
+        "properties": {
+          "commandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "groupJid": {
+            "type": "string"
+          },
+          "projectionRefreshExpected": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "joined",
+              "already_member",
+              "approval_required",
+              "rejected",
+              "unknown"
+            ]
+          }
+        }
+      },
       "github_com_evolution-foundation_evolution-go_pkg_group_service.JoinGroupStruct": {
         "type": "object",
         "properties": {
@@ -10756,11 +12103,178 @@
           }
         }
       },
-      "github_com_evolution-foundation_evolution-go_pkg_group_service.LeaveGroupStruct": {
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementAuditEvent": {
+        "type": "object",
+        "properties": {
+          "actorType": {
+            "type": "string",
+            "enum": [
+              "instance",
+              "system"
+            ]
+          },
+          "commandStatus": {
+            "enum": [
+              "completed",
+              "partially_completed",
+              "failed",
+              "unknown"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_model.ManagementCommandStatus"
+              }
+            ]
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementAuditSummary"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementAuditSummary": {
+        "type": "object",
+        "properties": {
+          "failureCount": {
+            "type": "integer"
+          },
+          "participantCount": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "setting": {
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementLeaveGroupRequest": {
         "type": "object",
         "properties": {
           "groupJid": {
-            "$ref": "#/components/schemas/types.JID"
+            "type": "string"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.ManagementParticipantRequest": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "add",
+              "remove",
+              "promote",
+              "demote"
+            ]
+          },
+          "groupJid": {
+            "type": "string"
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantCommandResult": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "add",
+              "remove",
+              "promote",
+              "demote"
+            ]
+          },
+          "commandId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "failedCount": {
+            "type": "integer"
+          },
+          "groupJid": {
+            "type": "string"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantOutcome"
+            }
+          },
+          "projectionRefreshExpected": {
+            "type": "boolean"
+          },
+          "requestedCount": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "partially_completed",
+              "failed",
+              "unknown"
+            ]
+          },
+          "succeededCount": {
+            "type": "integer"
+          },
+          "unknownCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.ParticipantOutcome": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "already_member",
+              "not_member",
+              "admin_required",
+              "invalid_participant",
+              "provider_rejected",
+              "unknown_outcome"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "participant": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "succeeded",
+              "failed",
+              "unknown"
+            ]
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.SafeMemberReference": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string"
           }
         }
       },
@@ -10786,14 +12300,15 @@
           }
         }
       },
-      "github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoStruct": {
+      "github_com_evolution-foundation_evolution-go_pkg_group_service.SetGroupPhotoAssetRequest": {
         "type": "object",
         "properties": {
           "groupJid": {
             "type": "string"
           },
-          "image": {
-            "type": "string"
+          "mediaAssetId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -22427,21 +23942,6 @@
             "type": "string"
           }
         }
-      },
-      "whatsmeow.ParticipantChange": {
-        "type": "string",
-        "enum": [
-          "add",
-          "remove",
-          "promote",
-          "demote"
-        ],
-        "x-enum-varnames": [
-          "ParticipantChangeAdd",
-          "ParticipantChangeRemove",
-          "ParticipantChangePromote",
-          "ParticipantChangeDemote"
-        ]
       }
     }
   }

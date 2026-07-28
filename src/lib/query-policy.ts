@@ -4,6 +4,7 @@ export const QUERY_INTERVALS = {
   platform: 30_000,
   projection: 60_000,
   qr: 20_000,
+  mediaAsset: 2_000,
 } as const;
 
 export const CAMPAIGN_READ_POLICY = {
@@ -19,6 +20,11 @@ export const PLATFORM_READ_POLICY = {
 export const PROJECTION_READ_POLICY = {
   staleTime: 30_000,
   refetchInterval: QUERY_INTERVALS.projection,
+} as const;
+
+export const MEDIA_ASSET_READ_POLICY = {
+  staleTime: 0,
+  terminalStaleTime: Number.POSITIVE_INFINITY,
 } as const;
 
 export const FLEET_STALE_TIME = 10_000;

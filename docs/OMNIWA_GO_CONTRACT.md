@@ -106,9 +106,40 @@ projection envelope, but never invents readiness metadata for the raw form.
 
 ### Groups
 
+Normalized Group Management is selected per instance, never by probing an
+endpoint. `group_management_permissions` selects normalized directory/detail
+DTOs; `group_members_projection`, `group_management_commands`,
+`group_management_audit`, `group_photo_assets`, and `group_summary` gate their
+own surfaces. Capability absence is unavailable/not-ready rather than an empty
+projection.
+
+`GET /group/list` is the unfiltered directory. `GET /group/search` owns the
+full `q`, `type`, `myRole`, `sendMode`, `state`, and `membershipState` scope.
+Directory, members, and audit cursors are opaque and reset whenever their bound
+filter scope changes. Detail and members return advisory tri-state actions;
+the client enables only `allowed` and never derives permission from role or
+provider aliases.
+
+Group detail exposes cached invite-link availability independently from
+`readInviteLink` and `resetInviteLink` permission. A missing cached link returns
+`group_invite_link_not_found` and is presented as unavailable without retry;
+it is not a missing Group or a projection-readiness failure. Reset returns a
+typed command acknowledgement and refreshes both detail and cached-link reads.
+
+Management acknowledgements and participant outcomes are public typed facts.
+The client preserves partial/unknown results, does not retry automatically,
+and does not equate `projectionRefreshExpected` with convergence. Remove,
+promote, and demote use opaque member UUIDs; add uses canonical user JIDs.
+Photos cross the contract as shared media asset IDs only. Global group metrics
+come only from `GET /group/summary`, while audit remains history rather than
+current state.
+
 - `GET /group/list`
 - `POST /group/info`
-- `GET /group/search?q=&limit=&cursor=`
+- `GET /group/search?q=&type=&myRole=&sendMode=&state=&membershipState=&limit=&cursor=`
+- `GET /group/{groupJid}/members?q=&role=&limit=&cursor=`
+- `GET /group/{groupJid}/audit?limit=&cursor=`
+- `GET /group/summary`
 
 Reads come from PostgreSQL. Search is case-insensitive prefix matching on group
 JID and name. Invite-link reads use projection/cache; `reset: true` remains a

@@ -101,6 +101,33 @@ for (const marker of ['role="progressbar"', 'aria-valuenow', 'aria-valuetext', '
   if (!progress.includes(marker)) failures.push(`src/ui/ProgressBar.tsx: progress contract is missing ${marker}`);
 }
 
+const panel = await read('src/ui/Panel.tsx');
+for (const marker of ["bodyPadding = 'default'", "'compact-top': 'px-4 pb-4 pt-2'", "none: ''"]) {
+  if (!panel.includes(marker)) failures.push(`src/ui/Panel.tsx: controlled body-spacing contract is missing ${marker}`);
+}
+if (panel.includes('bodyClassName')) {
+  failures.push('src/ui/Panel.tsx: uncontrolled bodyClassName can reintroduce conflicting Panel spacing');
+}
+
+const metricGrid = await read('src/ui/MetricGrid.tsx');
+for (const marker of ["density = 'default'", "frame = 'standalone'", "density === 'compact' ? 'grid-cols-2'", "frame === 'standalone' && 'border-t border-l'", "frame === 'flush-after-content' && 'border-t'", 'break-words']) {
+  if (!metricGrid.includes(marker)) failures.push(`src/ui/MetricGrid.tsx: metric composition contract is missing ${marker}`);
+}
+
+for (const [path, marker] of Object.entries({
+  'src/features/platform/OverviewView.tsx': 'frame="flush"',
+  'src/features/instances/CredentialHealth.tsx': "'flush-after-content' : 'flush'",
+})) {
+  const source = await read(path);
+  if (!source.includes(marker) || source.includes('border-t-0 border-l-0')) {
+    failures.push(`${path}: full-bleed metrics must use the canonical contextual frame`);
+  }
+}
+
+if (!uiGallery.includes('Compact full-bleed metrics') || !uiGallery.includes('density="compact"') || !uiGallery.includes('frame="flush"')) {
+  failures.push('src/app/UiGallery.tsx: locked metrics fixtures must cover compact full-bleed composition');
+}
+
 const image = await read('src/ui/Image.tsx');
 for (const marker of ['alt: string', '<img', 'Loading image…', 'Image unavailable', '<figcaption']) {
   if (!image.includes(marker)) failures.push(`src/ui/Image.tsx: image contract is missing ${marker}`);

@@ -7,6 +7,12 @@ type CapabilitiesData = components['schemas']['apidocs.CapabilitiesData'];
 export const capabilityNames = [
   'rate_limit_retry_after',
   'groups_projection',
+  'group_management_permissions',
+  'group_members_projection',
+  'group_management_commands',
+  'group_management_audit',
+  'group_photo_assets',
+  'group_summary',
   'labels_projection',
   'contacts_projection',
   'chats_projection',

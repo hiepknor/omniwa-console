@@ -27,7 +27,7 @@ export function PreviewInstances() {
         <div className="grid gap-4">
           <Status tone="ok">Paired</Status>
 
-          <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyClassName="pt-2">
+          <Panel title="Instance facts" description="Admin metadata and instance-scoped status remain separate." bodyPadding="compact-top">
             <DescriptionList>
               <DescriptionItem label="Metadata status">Connected</DescriptionItem>
               <DescriptionItem label="Live connection">Connected</DescriptionItem>
