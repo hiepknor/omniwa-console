@@ -160,8 +160,11 @@ for (const marker of ['clearPairingQrCache', 'shouldShowPairingQr', 'shouldPollP
 }
 
 const pairingPage = await read('src/features/instances/PairingPage.tsx');
-for (const marker of ['title="Instance"', '<ConnectionAndPairing', '<Status']) {
+for (const marker of ['title="Instance"', 'whatsappNameWhenLoggedIn', 'label="WhatsApp name"', '<ConnectionAndPairing', '<Status']) {
   if (!pairingPage.includes(marker)) failures.push(`src/features/instances/PairingPage.tsx: direct pairing route is missing ${marker}`);
+}
+if (pairingPage.includes('label="Runtime name"')) {
+  failures.push('src/features/instances/PairingPage.tsx: instance scope must not present status Name as configured runtime identity');
 }
 
 for (const path of [

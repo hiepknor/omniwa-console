@@ -3,6 +3,12 @@ import { SESSION_QUERY_SCOPE } from '@/api/keys';
 import { DescriptionItem, DescriptionList, PageHeader, Panel, StateNotice, Status } from '@/ui';
 import { ConnectionAndPairing, useInstancePairing } from './ConnectionAndPairing';
 
+export function whatsappNameWhenLoggedIn(loggedIn: boolean, name: string | undefined): string | undefined {
+  if (!loggedIn) return undefined;
+  const normalized = name?.trim();
+  return normalized || undefined;
+}
+
 export function PairingPage() {
   const session = useApiSession();
   const token = session.keyKind === 'api' ? session.apiKey : undefined;
@@ -24,6 +30,7 @@ export function PairingPage() {
       : pairing.connected
         ? { tone: 'pending' as const, label: 'Pairing' }
         : { tone: 'failed' as const, label: 'Disconnected' };
+  const whatsappName = whatsappNameWhenLoggedIn(pairing.loggedIn, pairing.status.data?.name);
 
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
@@ -39,7 +46,7 @@ export function PairingPage() {
             <DescriptionList>
               <DescriptionItem label="Connection">{pairing.statusReady ? (pairing.connected ? 'Connected' : 'Disconnected') : 'Not read'}</DescriptionItem>
               <DescriptionItem label="Paired">{pairing.statusReady ? (pairing.loggedIn ? 'Yes' : 'No') : 'Not read'}</DescriptionItem>
-              <DescriptionItem label="Runtime name">{pairing.status.data?.name ?? 'Not reported'}</DescriptionItem>
+              {whatsappName ? <DescriptionItem label="WhatsApp name">{whatsappName}</DescriptionItem> : null}
             </DescriptionList>
             <StateNotice kind="info" title="Memory-only credential" detail="Reload or Sign out clears this credential from Console memory." />
           </div>
