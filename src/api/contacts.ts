@@ -7,7 +7,7 @@ type ContactPayload = components['schemas']['github_com_evolution-foundation_evo
 export type ContactResource = {
   resourceType: 'contact';
   id: string;
-  addressingJid: string;
+  addressingJid?: string;
   aliases: string[];
   identityStatus: 'complete' | 'partial' | 'legacy';
   identityUpdatedAt?: string;
@@ -45,7 +45,9 @@ function toContact(payload: ContactPayload, fallbackId = '', canonicalIdentity =
   const legacyId = nonEmpty(payload.Jid) ?? fallbackId;
   const canonicalId = canonicalIdentity ? nonEmpty(payload.contactId) : undefined;
   const id = canonicalId ?? legacyId;
-  const addressingJid = canonicalIdentity ? nonEmpty(payload.addressingJid) ?? legacyId : legacyId;
+  // A canonical record must never silently fall back to a legacy alias for
+  // commands. Compatibility rows without a canonical ID may keep using Jid.
+  const addressingJid = canonicalId ? nonEmpty(payload.addressingJid) : legacyId;
   const fullName = nonEmpty(payload.FullName);
   const pushName = nonEmpty(payload.PushName);
   const businessName = nonEmpty(payload.BusinessName);

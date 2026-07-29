@@ -208,7 +208,10 @@ resource models, or rendered diagnostics.
   Contact `meta.total` values (including the current normalized Contact search
   scope) and bare-array Label length; they never derive totals from page length.
   Private message images use the shared framed Image language when ready and a
-  stable square Status placeholder while pending, failed, expired, or deleted.
+  stable square Status placeholder while pending, failed, expired, deleted, or
+  capability-gated. `not_ready` remains pending; only the message inspector adds
+  an explicit retry action for recoverable reads. Timeline images load near the
+  viewport without changing this visual language.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the

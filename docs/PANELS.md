@@ -249,7 +249,9 @@ GET /media-assets/{mediaId}/content
 
 With `canonical_contact_identity`, Contacts use returned `contactId` as identity
 and `addressingJid` for sends; aliases never become duplicate rows or a browser
-merge heuristic. Projected Chat names prevent list-level Contact fan-out.
+merge heuristic. A canonical row without `addressingJid` fails closed: the
+Composer stays disabled and exposes the Contact read failure/retry instead of
+falling back to a compatibility alias. Projected Chat names prevent list-level Contact fan-out.
 Contacts use normalized server search and opaque cursors. Chat and Contact
 counts use `meta.total`, while Labels intentionally use bare-array length.
 Labels intentionally keep
@@ -279,10 +281,15 @@ When `conversation_media_assets` is advertised, Conversations uploads a local
 JPEG/PNG, polls shared private metadata, fetches authenticated content only when
 ready, and sends the mutually exclusive `mediaAssetId` image branch. Pending,
 failed, expired, and deleted inbound assets preserve their projected message
-placeholder. `group_photo_assets` and older image flags do not enable this
+placeholder. Timeline metadata/content reads are near-viewport gated, metadata
+polling backs off while non-terminal, and binary cache entries are short-lived.
+A content `media_asset_not_ready` race remains pending and retries only within a
+bounded read policy; the inspector offers an explicit retry for recoverable
+reads. `group_photo_assets` and older image flags do not enable this
 flow. The HTTP(S) URL branch remains a compatibility option. Like text send,
 provider acknowledgement is not delivery; `unknown_send_outcome` has no
-automatic or one-click retry.
+automatic or one-click retry. A reported outbound `Retry-After` disables both
+send actions until its countdown ends and never auto-submits.
 
 Additional commands are not owned until their UI is included and verified:
 

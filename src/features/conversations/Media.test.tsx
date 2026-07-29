@@ -6,7 +6,7 @@ import { ApiFailure } from '@/api/envelopes';
 import { queryKeys, SESSION_QUERY_SCOPE } from '@/api/keys';
 import type { MediaAsset } from '@/api/media-assets';
 import type { MessageResource } from '@/api/messages';
-import { ConversationMessageImage, mediaPlaceholderState } from './Media';
+import { ConversationMessageImage, mediaPlaceholderState, mediaReadCanRetry } from './Media';
 
 const message: MessageResource = {
   resourceType: 'message', id: 'message-1', chatId: 'chat-1', direction: 'incoming',
@@ -19,7 +19,7 @@ function render(enabled: boolean, asset?: MediaAsset) {
   return renderToStaticMarkup(
     <QueryClientProvider client={client}>
       <ApiProvider session={{ baseUrl: 'https://example.invalid', apiKey: 'test', keyKind: 'api', connectedAt: '2026-07-29T00:00:00Z' }}>
-        <ConversationMessageImage message={message} enabled={enabled} />
+        <ConversationMessageImage message={message} enabled={enabled} priority />
       </ApiProvider>
     </QueryClientProvider>,
   );
@@ -52,5 +52,18 @@ describe('ConversationMessageImage', () => {
     expect(mediaPlaceholderState(undefined, undefined, new ApiFailure(
       { error: 'Asset expired', code: 'media_asset_expired' }, 410,
     ))).toEqual({ label: 'Image unavailable', tone: 'failed', detail: 'Media asset expired' });
+  });
+
+  it('keeps a content race pending and permits an explicit inspector retry', () => {
+    const failure = new ApiFailure({ error: 'Not ready', code: 'media_asset_not_ready' }, 409);
+    expect(mediaPlaceholderState('ready', undefined, failure)).toEqual({
+      label: 'Image Processing', tone: 'pending', detail: 'Private content is not ready yet. The projected message remains visible.',
+    });
+    expect(mediaReadCanRetry(failure)).toBe(true);
+  });
+
+  it('does not offer futile retries for terminal private asset errors', () => {
+    expect(mediaReadCanRetry(new ApiFailure({ error: 'Deleted', code: 'media_asset_deleted' }, 410))).toBe(false);
+    expect(mediaReadCanRetry(new ApiFailure({ error: 'Storage unavailable', code: 'media_asset_storage_unavailable' }, 503))).toBe(true);
   });
 });

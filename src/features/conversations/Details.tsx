@@ -40,7 +40,7 @@ export function DirectoryInspector({ contact, label, meta, error, loading, onRet
               <DescriptionItem label="Phone">{contact.redactedPhone ?? 'Not reported'}</DescriptionItem>
               <DescriptionItem label="Business">{contact.businessName ?? 'Not reported'}</DescriptionItem>
               <DescriptionItem label="About">{contact.about ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Known">{contact.found ? 'Yes' : 'No'}</DescriptionItem>
+              <DescriptionItem label="WhatsApp contact found">{contact.found ? 'Yes' : 'No'}</DescriptionItem>
             </DescriptionList>
           </Panel>
         </div>
@@ -86,7 +86,7 @@ export function MessageInspector({ messageId, loadedChat, enabled, mediaEnabled,
           <>
             {message.error ? <FailureNotice error={message.error} stale onRetry={() => message.refetch()} /> : null}
             <ProjectionStatus meta={message.data?.meta} />
-            {resource.mediaAssetId || resource.mediaType === 'image' ? <ConversationMessageImage message={resource} enabled={mediaEnabled} /> : null}
+            {resource.mediaAssetId || resource.mediaType === 'image' ? <ConversationMessageImage message={resource} enabled={mediaEnabled} priority /> : null}
             <Panel title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyPadding="compact-top">
               <DescriptionList>
                 <DescriptionItem label="Chat" mono>{resource.chatId}</DescriptionItem>

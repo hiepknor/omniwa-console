@@ -7,7 +7,8 @@ import { getLabel, listLabels } from '@/api/labels';
 import { getMediaAsset, getMediaAssetContent, uploadMediaAsset } from '@/api/media-assets';
 import { queryKeys, SESSION_QUERY_SCOPE } from '@/api/keys';
 import { getMessage, listMessageReceipts, listMessages, sendMediaMessage, sendTextMessage, type SendMediaInput } from '@/api/messages';
-import { MEDIA_ASSET_READ_POLICY, pollingWhen, PROJECTION_READ_POLICY, QUERY_INTERVALS } from '@/lib/query-policy';
+import { ApiFailure } from '@/api/envelopes';
+import { MEDIA_ASSET_READ_POLICY, mediaAssetPollingInterval, pollingWhen, PROJECTION_READ_POLICY, QUERY_INTERVALS } from '@/lib/query-policy';
 
 export function useChats(cursor: string | undefined, enabled: boolean) {
   const client = useApi();
@@ -103,7 +104,7 @@ export function useConversationMediaAsset(mediaId: string | undefined, enabled: 
     queryFn: () => getMediaAsset(client, mediaId!),
     enabled: enabled && Boolean(mediaId),
     staleTime: MEDIA_ASSET_READ_POLICY.staleTime,
-    refetchInterval: (query) => query.state.data && !['ready', 'failed', 'deleted'].includes(query.state.data.status) ? QUERY_INTERVALS.mediaAsset : false,
+    refetchInterval: (query) => mediaAssetPollingInterval(query.state.data?.status, query.state.dataUpdateCount),
   });
 }
 
@@ -114,5 +115,8 @@ export function useConversationMediaContent(mediaId: string | undefined, enabled
     queryFn: () => getMediaAssetContent(client, mediaId!),
     enabled: enabled && Boolean(mediaId),
     staleTime: MEDIA_ASSET_READ_POLICY.terminalStaleTime,
+    gcTime: 60_000,
+    retry: (failureCount, error) => error instanceof ApiFailure && error.code === 'media_asset_not_ready' && failureCount < 3,
+    retryDelay: (attempt) => Math.min(2_000 * (2 ** attempt), 8_000),
   });
 }

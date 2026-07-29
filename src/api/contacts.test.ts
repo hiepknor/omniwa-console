@@ -68,6 +68,25 @@ describe('contacts projection adapter', () => {
     expect(result.resource).toMatchObject({ id: contact.contactId, addressingJid: contact.addressingJid });
   });
 
+  it('fails closed when a canonical record omits its command address', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: { ...contact, addressingJid: undefined },
+      meta: { syncStatus: 'ready' },
+    }));
+    const result = await getContact({ GET } as unknown as ApiClient, contact.contactId, true);
+    expect(result.resource).toMatchObject({ id: contact.contactId });
+    expect(result.resource.addressingJid).toBeUndefined();
+  });
+
+  it('keeps the legacy JID as the compatibility command address without a canonical ID', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success', data: { ...contact, contactId: undefined, addressingJid: undefined },
+    }));
+    const result = await getContact({ GET } as unknown as ApiClient, contact.Jid, true);
+    expect(result.resource).toMatchObject({ id: contact.Jid, addressingJid: contact.Jid, identityStatus: 'legacy' });
+  });
+
   it('does not merge canonical records that share a display name or alias material', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [
       contact,

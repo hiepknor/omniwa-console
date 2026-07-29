@@ -130,7 +130,7 @@ export function ConversationsPage() {
                 />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
                   <Field label="Search" className="min-w-48 flex-1">
-                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder={route.view === 'contacts' ? 'Search canonical contacts' : 'Filter loaded page'} onChange={(e) => setSearchDraft(e.target.value)} />}
+                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder={route.view === 'contacts' ? 'Search projected contacts' : 'Filter loaded page'} onChange={(e) => setSearchDraft(e.target.value)} />}
                   </Field>
                   <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
                 </FilterToolbar>
@@ -199,7 +199,22 @@ export function ConversationsPage() {
             )}
           </>
         }
-        detailFooter={selectedChat ? <Composer chatId={selectedChat.id} recipient={sendRecipient ?? ''} chatName={selectedChat.displayName ?? `Unknown ${selectedChat.type} chat`} enabled={messagesReady && outboundReady && Boolean(sendRecipient)} mediaEnabled={conversationMedia} unavailableDetail={!sendRecipient && canonicalRecipientRequired ? 'Waiting for the canonical contact addressing JID. Console will not send to a contact ID or inferred recipient.' : undefined} /> : undefined}
+        detailFooter={selectedChat ? <Composer
+          chatId={selectedChat.id}
+          recipient={sendRecipient ?? ''}
+          chatName={selectedChat.displayName ?? `Unknown ${selectedChat.type} chat`}
+          enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
+          mediaEnabled={conversationMedia}
+          unavailableDetail={!sendRecipient && canonicalRecipientRequired
+            ? selectedChatContact.isPending
+              ? 'Waiting for the canonical contact addressing JID. Console will not send to a contact ID or inferred recipient.'
+              : selectedChatContact.error
+                ? 'Canonical contact lookup failed. Retry the identity read before sending; no inferred recipient will be used.'
+                : 'The canonical contact has no addressing JID. Sending remains disabled until the backend publishes one.'
+            : undefined}
+          recipientError={canonicalRecipientRequired ? selectedChatContact.error : undefined}
+          onRetryRecipient={canonicalRecipientRequired ? () => { void selectedChatContact.refetch(); } : undefined}
+        /> : undefined}
         />
       </WorkspacePageFrame>
 

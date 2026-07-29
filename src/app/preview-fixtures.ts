@@ -73,7 +73,10 @@ export const messagesFixture: MessageResource[] = [
   { resourceType: 'message', id: 'msg_2', chatId: '15551230001@s.whatsapp.net', direction: 'outgoing', type: 'text', status: 'delivered', contentText: 'Hello Anna — yes, it shipped this morning. Tracking is on the way.', createdAt: ago(2400), provenance: 'write_through' },
   { resourceType: 'message', id: 'msg_3', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_ready', caption: 'Package at the front desk', status: 'read', createdAt: ago(1800), provenance: 'live' },
   { resourceType: 'message', id: 'msg_4', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_processing', contentSummary: 'Incoming image', status: 'delivered', createdAt: ago(900), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_5', chatId: '15551230001@s.whatsapp.net', direction: 'outgoing', type: 'text', status: 'failed', contentText: 'Let me know if you need anything else.', createdAt: ago(300), provenance: 'write_through' },
+  { resourceType: 'message', id: 'msg_5', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_failed', contentSummary: 'Failed incoming image', status: 'delivered', createdAt: ago(700), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_6', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_expired', contentSummary: 'Expired incoming image', status: 'delivered', createdAt: ago(500), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_7', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', contentSummary: 'Capability-gated image', status: 'delivered', createdAt: ago(400), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_8', chatId: '15551230001@s.whatsapp.net', direction: 'outgoing', type: 'text', status: 'failed', contentText: 'Let me know if you need anything else.', createdAt: ago(300), provenance: 'write_through' },
 ];
 
 export const groupsFixture: GroupResource[] = [

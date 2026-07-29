@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { ApiProvider } from '@/api/ApiProvider';
 import { Composer } from '@/features/conversations/Composer';
 import { ChatList, ContactList, ConversationUnreadCount, LabelList, MessageTimeline } from '@/features/conversations/ConversationsView';
-import { Button, Field, FilterToolbar, Image, Input, SplitWorkspace, Status, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
+import { Button, Field, FilterToolbar, Image, Input, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { chatsFixture, contactsFixture, labelsFixture, messagesFixture } from './preview-fixtures';
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
@@ -56,9 +57,13 @@ export function PreviewConversations() {
               <span>Individual</span>
               <span className="font-mono text-fg-2">{chat.id}</span>
             </div>
-            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} renderMedia={(message) => message.mediaAssetId === 'asset_ready'
-              ? <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />
-              : <div role="img" aria-label="Projected image message" className="grid min-h-24 max-w-80 place-items-center gap-2 border border-line-strong bg-recessed p-3 text-center"><Status tone="pending">Image processing</Status><small className="text-xs text-fg-3">The message remains visible while private content is prepared.</small></div>} />
+            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} renderMedia={(message) => {
+              if (message.mediaAssetId === 'asset_ready') return <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />;
+              if (message.mediaAssetId === 'asset_processing') return <ConversationMediaPlaceholder enabled compact label="Image Processing" tone="pending" detail="The projected message remains visible while private content is prepared." />;
+              if (message.mediaAssetId === 'asset_failed') return <ConversationMediaPlaceholder enabled compact label="Image unavailable" tone="failed" detail="Media asset integrity failed" />;
+              if (message.mediaAssetId === 'asset_expired') return <ConversationMediaPlaceholder enabled compact label="Image unavailable" tone="failed" detail="Media asset expired" />;
+              return <ConversationMediaPlaceholder enabled={false} compact label="Image unavailable" tone="neutral" detail="Managed image content was not reported." />;
+            }} />
           </> : null}
           </>
         }
