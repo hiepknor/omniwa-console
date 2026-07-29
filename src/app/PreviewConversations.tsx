@@ -67,7 +67,7 @@ export function PreviewConversations() {
           </> : null}
           </>
         }
-        detailFooter={chat ? <ApiProvider session={{ baseUrl: 'http://127.0.0.1:1', apiKey: 'preview-only', keyKind: 'api', connectedAt: new Date().toISOString() }}><Composer chatId={chat.id} recipient={chat.id} chatName={chat.displayName ?? 'Unknown chat'} enabled mediaEnabled /></ApiProvider> : undefined}
+        detailFooter={chat ? <ApiProvider session={{ baseUrl: 'http://127.0.0.1:1', apiKey: 'preview-only', keyKind: 'api', connectedAt: new Date().toISOString() }}><Composer chatId={chat.id} recipient={chat.addressingJid ?? chat.id} chatName={chat.displayName ?? 'Unknown chat'} enabled mediaEnabled /></ApiProvider> : undefined}
         />
       </WorkspacePageFrame>
     </main>

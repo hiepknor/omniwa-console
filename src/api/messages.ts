@@ -12,6 +12,7 @@ export type MessageResource = {
   resourceType: 'message';
   id: string;
   chatId: string;
+  conversationId?: string;
   senderJid?: string;
   recipientJid?: string;
   participantJid?: string;
@@ -76,11 +77,14 @@ function provenance(value: string | undefined): MessageProvenance {
   return value === 'live' || value === 'history_sync' || value === 'write_through' ? value : 'unknown';
 }
 
-function toMessage(payload: MessagePayload, fallbackId = ''): MessageResource {
+function toMessage(payload: MessagePayload, fallbackId = '', canonicalChatIdentity = false): MessageResource {
+  const providerChatId = nonEmpty(payload.chatId) ?? '';
+  const conversationId = canonicalChatIdentity ? nonEmpty(payload.conversationId) : undefined;
   return {
     resourceType: 'message',
     id: nonEmpty(payload.messageId) ?? fallbackId,
-    chatId: nonEmpty(payload.chatId) ?? '',
+    chatId: conversationId ?? providerChatId,
+    conversationId,
     senderJid: nonEmpty(payload.senderJid),
     recipientJid: nonEmpty(payload.recipientJid),
     participantJid: nonEmpty(payload.participantJid),
@@ -113,7 +117,7 @@ function toMessage(payload: MessagePayload, fallbackId = ''): MessageResource {
 export async function listMessages(
   client: ApiClient,
   chatId: string,
-  params: { cursor?: string; limit?: number } = {},
+  params: { cursor?: string; limit?: number; canonicalChatIdentity?: boolean } = {},
 ): Promise<MessageReadResult<MessagePage>> {
   const projection = unwrapProjection<MessagePayload[]>(await client.GET('/chat/{chatId}/messages', {
     params: { path: { chatId }, query: { cursor: params.cursor, limit: params.limit ?? 50 } },
@@ -122,7 +126,7 @@ export async function listMessages(
   return {
     resource: {
       items: (projection.resource ?? [])
-        .map((payload) => toMessage(payload))
+        .map((payload) => toMessage(payload, '', params.canonicalChatIdentity ?? false))
         .filter((message) => message.id !== '' && message.chatId !== '' && message.createdAt !== ''),
       pagination: { nextCursor, hasMore: nextCursor !== null },
     },
@@ -130,11 +134,11 @@ export async function listMessages(
   };
 }
 
-export async function getMessage(client: ApiClient, messageId: string): Promise<MessageReadResult<MessageResource>> {
+export async function getMessage(client: ApiClient, messageId: string, canonicalChatIdentity = false): Promise<MessageReadResult<MessageResource>> {
   const projection = unwrapProjection<MessagePayload>(await client.GET('/message/{messageId}', {
     params: { path: { messageId } },
   }));
-  return { resource: toMessage(projection.resource, messageId), meta: projection.meta };
+  return { resource: toMessage(projection.resource, messageId, canonicalChatIdentity), meta: projection.meta };
 }
 
 export async function listMessageReceipts(client: ApiClient, messageId: string): Promise<MessageReadResult<MessageReceiptResource[]>> {

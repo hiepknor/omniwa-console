@@ -7,6 +7,7 @@ import { createSearchParams, omitSearchParams, updateSearchParams, withSearchPar
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
+import { canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
 import { ChatList, ContactList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
 import { DirectoryInspector, MessageInspector } from './Details';
 import { ConversationMessageImage } from './Media';
@@ -43,14 +44,16 @@ export function ConversationsPage() {
   const labelsReady = instanceScope && cap('labels_projection');
   const outboundReady = cap('outbound_rate_limit');
   const canonicalIdentity = cap('canonical_contact_identity');
+  const canonicalChatIdentity = cap('canonical_chat_identity');
   const conversationMedia = cap('conversation_media_assets');
-  const chats = useChats(route.cursor, route.view === 'chats' && chatsReady);
-  const chat = useChat(activeChatId, chatsReady);
+  const chats = useChats(route.cursor, route.view === 'chats' && chatsReady, canonicalChatIdentity);
+  const chat = useChat(activeChatId, chatsReady, canonicalChatIdentity);
   const selectedChat = chat.data?.resource;
-  const selectedChatContact = useContact(selectedChat?.type === 'direct' ? selectedChat.contactId : undefined, contactsReady && canonicalIdentity, canonicalIdentity);
-  const canonicalRecipientRequired = Boolean(canonicalIdentity && selectedChat?.type === 'direct' && selectedChat.contactId);
-  const sendRecipient = canonicalRecipientRequired ? selectedChatContact.data?.resource.addressingJid : selectedChat?.id;
-  const messages = useMessages(activeChatId, route.messageCursor, messagesReady);
+  const selectedChatContact = useContact(selectedChat?.type === 'direct' && !canonicalChatIdentity ? selectedChat.contactId : undefined, contactsReady && canonicalIdentity && !canonicalChatIdentity, canonicalIdentity);
+  const canonicalChatRecipientRequired = Boolean(canonicalChatIdentity && selectedChat?.type === 'direct');
+  const canonicalContactRecipientRequired = Boolean(!canonicalChatIdentity && canonicalIdentity && selectedChat?.type === 'direct' && selectedChat.contactId);
+  const sendRecipient = resolveConversationRecipient(selectedChat, canonicalChatIdentity, canonicalIdentity, selectedChatContact.data?.resource.addressingJid);
+  const messages = useMessages(activeChatId, route.messageCursor, messagesReady, canonicalChatIdentity);
   const contacts = useContacts(route.search, route.cursor, route.view === 'contacts' && contactsReady, canonicalIdentity);
   const labels = useLabels(route.view === 'labels' && labelsReady);
   const contact = useContact(route.view === 'contacts' ? route.selected : undefined, contactsReady, canonicalIdentity);
@@ -60,6 +63,15 @@ export function ConversationsPage() {
   const loadedLabels = labels.data?.resource ?? [];
   const filteredLabels = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedLabels.filter((i) => !term || i.id.toLocaleLowerCase().includes(term) || i.name?.toLocaleLowerCase().includes(term)); }, [loadedLabels, route.search]);
   const loadedMessages = useMemo(() => [...(messages.data?.resource.items ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages.data]);
+  const recipientUnavailableDetail = !sendRecipient && canonicalChatRecipientRequired
+    ? 'The canonical conversation has no addressing JID. Sending remains disabled until the backend publishes its authoritative command target.'
+    : !sendRecipient && canonicalContactRecipientRequired
+      ? selectedChatContact.isPending
+        ? 'Waiting for the canonical contact addressing JID. Console will not send to a contact ID or inferred recipient.'
+        : selectedChatContact.error
+          ? 'Canonical contact lookup failed. Retry the identity read before sending; no inferred recipient will be used.'
+          : 'The canonical contact has no addressing JID. Sending remains disabled until the backend publishes one.'
+      : undefined;
   const chatsSupported = chatsReady || chats.data !== undefined || chat.data !== undefined;
   const messagesSupported = messagesReady || messages.data !== undefined;
 
@@ -81,6 +93,10 @@ export function ConversationsPage() {
   const refresh = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(currentQuery.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined }, ['selected'])));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
+  useEffect(() => {
+    const canonicalId = canonicalConversationRedirect(activeChatId, selectedChat, canonicalChatIdentity);
+    if (canonicalId) navigate(withSearchParams(`/chats/${encodeURIComponent(canonicalId)}`, searchParams), { replace: true });
+  }, [activeChatId, canonicalChatIdentity, navigate, searchParams, selectedChat?.id]);
   useEffect(() => {
     const returnedId = contact.data?.resource.id;
     if (canonicalIdentity && route.view === 'contacts' && route.selected && returnedId && returnedId !== route.selected) {
@@ -205,20 +221,14 @@ export function ConversationsPage() {
           chatName={selectedChat.displayName ?? `Unknown ${selectedChat.type} chat`}
           enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
           mediaEnabled={conversationMedia}
-          unavailableDetail={!sendRecipient && canonicalRecipientRequired
-            ? selectedChatContact.isPending
-              ? 'Waiting for the canonical contact addressing JID. Console will not send to a contact ID or inferred recipient.'
-              : selectedChatContact.error
-                ? 'Canonical contact lookup failed. Retry the identity read before sending; no inferred recipient will be used.'
-                : 'The canonical contact has no addressing JID. Sending remains disabled until the backend publishes one.'
-            : undefined}
-          recipientError={canonicalRecipientRequired ? selectedChatContact.error : undefined}
-          onRetryRecipient={canonicalRecipientRequired ? () => { void selectedChatContact.refetch(); } : undefined}
+          unavailableDetail={recipientUnavailableDetail}
+          recipientError={canonicalContactRecipientRequired ? selectedChatContact.error : undefined}
+          onRetryRecipient={canonicalContactRecipientRequired ? () => { void selectedChatContact.refetch(); } : undefined}
         /> : undefined}
         />
       </WorkspacePageFrame>
 
-      {route.message && activeChatId && messagesSupported ? <MessageInspector messageId={route.message} loadedChat={selectedChat} enabled={messagesReady} mediaEnabled={conversationMedia} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
+      {route.message && activeChatId && messagesSupported ? <MessageInspector messageId={route.message} loadedChat={selectedChat} enabled={messagesReady} mediaEnabled={conversationMedia} canonicalChatIdentity={canonicalChatIdentity} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
       {route.selected && route.view !== 'chats' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} meta={route.view === 'contacts' ? contact.data?.meta : label.data?.meta} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
     </>
   );

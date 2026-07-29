@@ -51,10 +51,10 @@ export const failuresFixture: ProjectionFailure[] = [
 ] as unknown as ProjectionFailure[];
 
 export const chatsFixture: ChatResource[] = [
-  { resourceType: 'chat', id: '15551230001@s.whatsapp.net', contactId: '9c37e2c7-875c-48ff-a298-00b853409cb1', displayName: 'Anna Nguyen', displayNameSource: 'full_name', type: 'direct', unreadCount: 2, lastActivityAt: ago(300) },
-  { resourceType: 'chat', id: '15551230002@s.whatsapp.net', displayName: 'Support escalations', type: 'group', unreadCount: 0, lastActivityAt: ago(3600) },
-  { resourceType: 'chat', id: '15551230003@s.whatsapp.net', contactId: 'b1277eeb-fccb-4909-a514-d4a3ca5f2a26', displayName: 'David Tran', displayNameSource: 'push_name', type: 'direct', unreadCount: 5, lastActivityAt: ago(120) },
-  { resourceType: 'chat', id: '15551230004@s.whatsapp.net', displayName: 'Orders', type: 'group', unreadCount: 0, lastActivityAt: ago(86_400) },
+  { resourceType: 'chat', id: '4c2a5707-95f6-4565-87db-20d983bbd555', conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555', contactId: '9c37e2c7-875c-48ff-a298-00b853409cb1', chatAliases: ['15551230001@s.whatsapp.net', '731002@lid'], addressingJid: '731002@lid', displayName: 'Anna Nguyen', displayNameSource: 'full_name', type: 'direct', unreadCount: 2, lastActivityAt: ago(300) },
+  { resourceType: 'chat', id: '15551230002@s.whatsapp.net', chatAliases: [], displayName: 'Support escalations', type: 'group', unreadCount: 0, lastActivityAt: ago(3600) },
+  { resourceType: 'chat', id: 'd29075b2-3f27-45fb-b7ba-86455871cb53', conversationId: 'd29075b2-3f27-45fb-b7ba-86455871cb53', contactId: 'b1277eeb-fccb-4909-a514-d4a3ca5f2a26', chatAliases: ['15551230003@s.whatsapp.net'], addressingJid: '15551230003@s.whatsapp.net', displayName: 'David Tran', displayNameSource: 'push_name', type: 'direct', unreadCount: 5, lastActivityAt: ago(120) },
+  { resourceType: 'chat', id: '15551230004@s.whatsapp.net', chatAliases: [], displayName: 'Orders', type: 'group', unreadCount: 0, lastActivityAt: ago(86_400) },
 ];
 
 export const contactsFixture: ContactResource[] = [
@@ -68,15 +68,17 @@ export const labelsFixture: LabelResource[] = [
   { resourceType: 'label', id: 'label_2', name: 'Follow up', color: '2' },
 ];
 
+const previewConversationId = chatsFixture[0].id;
+
 export const messagesFixture: MessageResource[] = [
-  { resourceType: 'message', id: 'msg_1', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'text', status: 'read', contentText: 'Hi! Is my order shipped yet?', createdAt: ago(3000), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_2', chatId: '15551230001@s.whatsapp.net', direction: 'outgoing', type: 'text', status: 'delivered', contentText: 'Hello Anna — yes, it shipped this morning. Tracking is on the way.', createdAt: ago(2400), provenance: 'write_through' },
-  { resourceType: 'message', id: 'msg_3', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_ready', caption: 'Package at the front desk', status: 'read', createdAt: ago(1800), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_4', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_processing', contentSummary: 'Incoming image', status: 'delivered', createdAt: ago(900), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_5', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_failed', contentSummary: 'Failed incoming image', status: 'delivered', createdAt: ago(700), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_6', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_expired', contentSummary: 'Expired incoming image', status: 'delivered', createdAt: ago(500), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_7', chatId: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'image', mediaType: 'image', contentSummary: 'Capability-gated image', status: 'delivered', createdAt: ago(400), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_8', chatId: '15551230001@s.whatsapp.net', direction: 'outgoing', type: 'text', status: 'failed', contentText: 'Let me know if you need anything else.', createdAt: ago(300), provenance: 'write_through' },
+  { resourceType: 'message', id: 'msg_1', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'text', status: 'read', contentText: 'Hi! Is my order shipped yet?', createdAt: ago(3000), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_2', chatId: previewConversationId, conversationId: previewConversationId, direction: 'outgoing', type: 'text', status: 'delivered', contentText: 'Hello Anna — yes, it shipped this morning. Tracking is on the way.', createdAt: ago(2400), provenance: 'write_through' },
+  { resourceType: 'message', id: 'msg_3', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_ready', caption: 'Package at the front desk', status: 'read', createdAt: ago(1800), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_4', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_processing', contentSummary: 'Incoming image', status: 'delivered', createdAt: ago(900), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_5', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_failed', contentSummary: 'Failed incoming image', status: 'delivered', createdAt: ago(700), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_6', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_expired', contentSummary: 'Expired incoming image', status: 'delivered', createdAt: ago(500), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_7', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', contentSummary: 'Capability-gated image', status: 'delivered', createdAt: ago(400), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_8', chatId: previewConversationId, conversationId: previewConversationId, direction: 'outgoing', type: 'text', status: 'failed', contentText: 'Let me know if you need anything else.', createdAt: ago(300), provenance: 'write_through' },
 ];
 
 export const groupsFixture: GroupResource[] = [

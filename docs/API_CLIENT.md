@@ -179,10 +179,10 @@ Keys mirror resource and credential scope:
 ['instances', instanceId, 'contact', contactId, { canonicalIdentity }]
 ['instances', instanceId, 'labels']
 ['instances', instanceId, 'label', labelId]
-['instances', instanceId, 'chats', {}] # infinite-query cursors stay in page params
-['instances', instanceId, 'chat', chatId]
-['instances', instanceId, 'chat', chatId, 'messages', {}]
-['instances', instanceId, 'message', messageId]
+['instances', instanceId, 'chats', { cursor, canonicalChatIdentity }]
+['instances', instanceId, 'chat', chatId, { canonicalChatIdentity }]
+['instances', instanceId, 'chat', chatId, 'messages', { cursor, canonicalChatIdentity }]
+['instances', instanceId, 'message', messageId, { canonicalChatIdentity }]
 ['instances', instanceId, 'message', messageId, 'delivery-history']
 ['events', { type, cursor, limit }]
 ```
@@ -253,11 +253,14 @@ Projection readiness makes the write-through result observable; outbound
 capability confirms that message pacing is independent from information-query
 limits.
 The managed upload/inbound-content branch additionally requires
-`conversation_media_assets`. A canonical direct Chat with a projected
-`contactId` resolves that one selected Contact and sends to its
-`addressingJid`; list rendering never performs per-row Contact reads. Missing or
-failed canonical addressing disables the Composer and never falls back to a JID
-alias.
+`conversation_media_assets`. With `canonical_chat_identity`, a direct Chat uses
+its backend-projected `conversationId` for entity, route, cache, and history
+scope and its projected `addressingJid` for commands. Absorbed deep links replace
+to the canonical route. The browser does not group aliases or recompute totals,
+unread, activity, or messages. Without that capability, canonical Contact mode
+may resolve the selected Contact once for its `addressingJid`; provider-chat mode
+otherwise remains unchanged. Missing authoritative addressing always disables
+the Composer rather than falling back to a JID alias.
 
 - Disable duplicate submission while pending.
 - Do not automatically retry mutations.

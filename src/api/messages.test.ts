@@ -9,6 +9,7 @@ function ok(data: unknown) {
 const message = {
   messageId: 'message-1',
   chatId: '100@s.whatsapp.net',
+  conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555',
   senderJid: '100@s.whatsapp.net',
   direction: 'incoming',
   messageType: 'text',
@@ -28,6 +29,22 @@ describe('messages projection adapter', () => {
     expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', contentText: 'Hello', mediaAssetId: 'asset-1', provenance: 'history_sync' })]);
     expect(result.resource.pagination.nextCursor).toBe('opaque/older');
     expect(result.meta?.syncStatus).toBe('stale');
+  });
+
+  it('uses the projected canonical conversation ID only behind its capability gate', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [message], meta: { nextCursor: 'opaque/canonical' } }));
+    const result = await listMessages({ GET } as unknown as ApiClient, message.conversationId, { canonicalChatIdentity: true });
+    expect(result.resource.items[0]).toMatchObject({
+      chatId: message.conversationId,
+      conversationId: message.conversationId,
+    });
+    expect(result.resource.pagination.nextCursor).toBe('opaque/canonical');
+  });
+
+  it('ignores additive canonical message identity while the capability is absent', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: message }));
+    const result = await getMessage({ GET } as unknown as ApiClient, message.messageId, false);
+    expect(result.resource).toMatchObject({ chatId: message.chatId, conversationId: undefined });
   });
 
   it('uses safe detail defaults without exposing unknown fields', async () => {

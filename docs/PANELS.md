@@ -269,6 +269,14 @@ filters. Each message page renders chronologically. Send acknowledgement only
 confirms the action response; projected status and per-recipient receipts
 remain authoritative for delivery.
 
+With `canonical_chat_identity`, direct Chat rows use returned `conversationId`
+as route/entity/cache identity, normalize absorbed provider deep links, and send
+only to projected `addressingJid`. `chatAliases` never become browser rows. The
+backend owns alias collapse, message aggregation/deduplication, unread, last
+activity, totals, and cursor scope; Console performs no grouping or Contact
+matching. Capability-off instances retain provider Chat IDs and existing cursor
+behavior. `conversation_media_assets` remains an independent gate.
+
 Implemented commands owned by the workspace:
 
 ```text

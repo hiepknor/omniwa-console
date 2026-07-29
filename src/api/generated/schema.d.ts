@@ -978,14 +978,14 @@ export interface paths {
         };
         /**
          * Get a projected chat
-         * @description Return a projected chat with locally denormalized contact or type-specific display-name metadata.
+         * @description Return a projected chat with locally denormalized contact or type-specific display-name metadata. With canonical_chat_identity, chatId accepts a canonical conversation UUID or any absorbed provider Chat ID and the response contains the canonical conversationId.
          */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description Chat JID */
+                    /** @description Canonical conversation UUID or provider Chat ID */
                     chatId: string;
                 };
                 cookie?: never;
@@ -1049,7 +1049,7 @@ export interface paths {
         };
         /**
          * List projected chats
-         * @description Cursor-page projected chats without live reads. meta.total is the exact active projected-chat count at request time, not a cross-page snapshot.
+         * @description Cursor-page projected chats without live reads. With canonical_chat_identity, direct aliases collapse to one conversation, meta.total counts canonical conversations, and cursors are conversation-scoped. Without it, legacy provider-chat rows and cursors are preserved.
          */
         get: {
             parameters: {
@@ -1415,7 +1415,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List projected messages for a chat */
+        /**
+         * List projected messages for a chat
+         * @description With canonical_chat_identity, resolves canonical or absorbed Chat IDs and returns deduplicated provider-message history across all aliases. Cursors are opaque and scoped to the canonical conversation.
+         */
         get: {
             parameters: {
                 query?: {
@@ -1426,7 +1429,7 @@ export interface paths {
                 };
                 header?: never;
                 path: {
-                    /** @description Chat JID */
+                    /** @description Canonical conversation UUID or provider Chat ID */
                     chatId: string;
                 };
                 cookie?: never;
@@ -8000,12 +8003,15 @@ export interface paths {
         };
         /**
          * Get server capabilities
-         * @description Authenticates either the global admin key or an instance token and returns an explicit credentialScope. instanceId is present only for an instance credential.
+         * @description Authenticates either the global admin key or an instance token and returns an explicit credentialScope. Admin credentials may target one instance with instanceId; instance credentials are always scoped to their own instance.
          *     Credential scope is independent of capabilities and projection readiness. A missing or invalid credential returns 401; projection infrastructure failures may return 500.
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Target instance UUID (admin credentials only) */
+                    instanceId?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -8021,8 +8027,35 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.CapabilitiesResponse"];
                     };
                 };
+                /** @description Invalid target instance */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Not authorized */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Instance scope mismatch */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Target instance not found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -9523,6 +9556,7 @@ export interface components {
              *       "contacts_projection",
              *       "chats_projection",
              *       "canonical_contact_identity",
+             *       "canonical_chat_identity",
              *       "group_lists",
              *       "group_list_eligibility",
              *       "campaign_group_targets",
@@ -10524,9 +10558,12 @@ export interface components {
             start?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat": {
+            addressingJid?: string;
             archived?: boolean;
+            chatAliases?: string[];
             chatId: string;
             contactId?: string;
+            conversationId?: string;
             disappearingTimer?: number;
             displayName?: string;
             /** @enum {string} */
@@ -10545,6 +10582,7 @@ export interface components {
             chatId: string;
             contentSummary?: string;
             contentText?: string;
+            conversationId?: string;
             deliveredAt?: string;
             direction: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection"];
             historySyncId?: string;

@@ -1,7 +1,8 @@
 # OmniWA GO Public Contract
 
 This is the Console-facing handoff for the OmniWA GO backend at commit
-`b5076a32a9e3f79f21e59f0f93a8afc32677a1a1` (2026-07-29). The vendored machine contract at
+`916e2e78f7753fce06e6511d69ed249763f2b28b` (2026-07-29), described as
+`0.7.2-128-g916e2e7`. The vendored machine contract at
 `contracts/omniwa-go.openapi.json` remains authoritative for paths and schemas;
 this document records cross-cutting semantics that generated types cannot
 express reliably.
@@ -67,6 +68,7 @@ Known capabilities:
 - `instance_token_rotation`
 - `instance_credential_health`
 - `canonical_contact_identity`
+- `canonical_chat_identity`
 - `conversation_media_assets`
 
 Unknown capability strings must be preserved for forward compatibility. A
@@ -217,6 +219,17 @@ retention is 90 days (`2160h`). Timestamp display uses `providerTimestamp`, then
 `sentAt`, then `deliveredAt`; it never invents a timestamp. Media binary is not
 persisted in message projections.
 
+When `canonical_chat_identity` is advertised, direct `chatId` and
+`conversationId` identify the backend-owned canonical conversation. List totals,
+unread counts, last activity, alias collapse, PN/LID message aggregation, and
+provider-message deduplication are already authoritative; the browser performs
+none of them. Chat detail and message history accept a canonical ID or absorbed
+provider Chat ID and normalize responses to the canonical conversation.
+`chatAliases` are lookup material only, while projected `addressingJid` is the
+direct command target. Cursors remain opaque and conversation-scoped;
+`invalid_cursor` resets only its owning pagination state. Without the capability,
+provider Chat IDs and historical cursor behavior remain unchanged.
+
 ### Conversation media assets
 
 `conversation_media_assets` gates the unified Conversations upload/send/inbound
@@ -238,12 +251,12 @@ Managed send uses the mutually exclusive `mediaAssetId` branch of
 acknowledgement only. Send is never automatically retried, especially for
 `unknown_send_outcome`; delivery comes only from projected status/receipts.
 
-Rollout is capability-observed rather than version-inferred. Operations applies
-migrations 34–36 before enabling contact reconciliation, waits for
-`canonical_contact_identity` per instance, provisions the private media bucket
-and descriptor key, enables both Chat and inbound image flags, then waits for
-`conversation_media_assets`. Console does not infer any of these states from a
-version string or migration number.
+Rollout is capability-observed rather than version-inferred. The Console enables
+canonical Contact and Chat modes independently only while
+`canonical_contact_identity` and `canonical_chat_identity` are respectively
+advertised. Private Conversation media remains disabled until
+`conversation_media_assets` appears. Console does not infer any of these states
+from a version string or migration number.
 
 ### Durable events
 

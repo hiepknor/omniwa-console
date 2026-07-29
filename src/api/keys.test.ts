@@ -44,6 +44,12 @@ describe('query key ownership', () => {
       'recipients',
       { cursor: 'opaque' },
     ]);
+    expect(queryKeys.chat('instance-1', 'conversation-1', { canonicalChatIdentity: true })).toEqual([
+      'instances', 'instance-1', 'chat', 'conversation-1', { canonicalChatIdentity: true },
+    ]);
+    expect(queryKeys.instanceMessages('instance-1', 'conversation-1', { cursor: undefined, canonicalChatIdentity: true })).toEqual([
+      'instances', 'instance-1', 'chat', 'conversation-1', 'messages', { cursor: undefined, canonicalChatIdentity: true },
+    ]);
   });
 
   it('invalidates every parameterized page below a resource root without crossing scope', async () => {

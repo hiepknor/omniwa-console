@@ -10,24 +10,26 @@ import { getMessage, listMessageReceipts, listMessages, sendMediaMessage, sendTe
 import { ApiFailure } from '@/api/envelopes';
 import { MEDIA_ASSET_READ_POLICY, mediaAssetPollingInterval, pollingWhen, PROJECTION_READ_POLICY, QUERY_INTERVALS } from '@/lib/query-policy';
 
-export function useChats(cursor: string | undefined, enabled: boolean) {
+export function useChats(cursor: string | undefined, enabled: boolean, canonicalChatIdentity: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.instanceChats(SESSION_QUERY_SCOPE, { cursor }), queryFn: () => listChats(client, { cursor, limit: 50 }), enabled, staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled, QUERY_INTERVALS.projection) });
+  const params = { cursor, canonicalChatIdentity };
+  return useQuery({ queryKey: queryKeys.instanceChats(SESSION_QUERY_SCOPE, params), queryFn: () => listChats(client, { ...params, limit: 50 }), enabled, staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled, QUERY_INTERVALS.projection) });
 }
 
-export function useChat(chatId: string | undefined, enabled: boolean) {
+export function useChat(chatId: string | undefined, enabled: boolean, canonicalChatIdentity: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.chat(SESSION_QUERY_SCOPE, chatId ?? ''), queryFn: () => getChat(client, chatId ?? ''), enabled: enabled && Boolean(chatId), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(chatId), QUERY_INTERVALS.projection) });
+  return useQuery({ queryKey: queryKeys.chat(SESSION_QUERY_SCOPE, chatId ?? '', { canonicalChatIdentity }), queryFn: () => getChat(client, chatId ?? '', canonicalChatIdentity), enabled: enabled && Boolean(chatId), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(chatId), QUERY_INTERVALS.projection) });
 }
 
-export function useMessages(chatId: string | undefined, cursor: string | undefined, enabled: boolean) {
+export function useMessages(chatId: string | undefined, cursor: string | undefined, enabled: boolean, canonicalChatIdentity: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.instanceMessages(SESSION_QUERY_SCOPE, chatId ?? '', { cursor }), queryFn: () => listMessages(client, chatId ?? '', { cursor, limit: 100 }), enabled: enabled && Boolean(chatId), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(chatId), QUERY_INTERVALS.projection) });
+  const params = { cursor, canonicalChatIdentity };
+  return useQuery({ queryKey: queryKeys.instanceMessages(SESSION_QUERY_SCOPE, chatId ?? '', params), queryFn: () => listMessages(client, chatId ?? '', { ...params, limit: 100 }), enabled: enabled && Boolean(chatId), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(chatId), QUERY_INTERVALS.projection) });
 }
 
-export function useMessage(messageId: string | undefined, enabled: boolean) {
+export function useMessage(messageId: string | undefined, enabled: boolean, canonicalChatIdentity: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.message(SESSION_QUERY_SCOPE, messageId ?? ''), queryFn: () => getMessage(client, messageId ?? ''), enabled: enabled && Boolean(messageId), staleTime: PROJECTION_READ_POLICY.staleTime });
+  return useQuery({ queryKey: queryKeys.message(SESSION_QUERY_SCOPE, messageId ?? '', { canonicalChatIdentity }), queryFn: () => getMessage(client, messageId ?? '', canonicalChatIdentity), enabled: enabled && Boolean(messageId), staleTime: PROJECTION_READ_POLICY.staleTime });
 }
 
 export function useReceipts(messageId: string | undefined, enabled: boolean) {

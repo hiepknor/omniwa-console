@@ -12,7 +12,7 @@ describe('capabilities', () => {
           revision: 'abcdef1234567890',
           credentialScope: 'instance',
           instanceId: '0bca2c34-ef2a-463c-98fd-e2afb6978457',
-          capabilities: ['groups_projection', 'canonical_contact_identity', 'conversation_media_assets', 'future_projection', 'groups_projection'],
+          capabilities: ['groups_projection', 'canonical_contact_identity', 'canonical_chat_identity', 'conversation_media_assets', 'future_projection', 'groups_projection'],
         },
       },
       response: new Response(null, { status: 200 }),
@@ -23,9 +23,10 @@ describe('capabilities', () => {
       revision: 'abcdef1234567890',
       credentialScope: 'instance',
       instanceId: '0bca2c34-ef2a-463c-98fd-e2afb6978457',
-      capabilities: ['canonical_contact_identity', 'conversation_media_assets', 'future_projection', 'groups_projection'],
+      capabilities: ['canonical_chat_identity', 'canonical_contact_identity', 'conversation_media_assets', 'future_projection', 'groups_projection'],
     });
     expect(hasCapability(snapshot, 'groups_projection')).toBe(true);
+    expect(hasCapability(snapshot, 'canonical_chat_identity')).toBe(true);
     expect(hasCapability(snapshot, 'messages_projection')).toBe(false);
   });
 });

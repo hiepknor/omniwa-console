@@ -10,7 +10,10 @@ export type ChatDisplayNameSource = 'full_name' | 'business_name' | 'push_name' 
 export type ChatResource = {
   resourceType: 'chat';
   id: string;
+  conversationId?: string;
   contactId?: string;
+  chatAliases: string[];
+  addressingJid?: string;
   type: ChatType;
   displayName?: string;
   displayNameSource?: ChatDisplayNameSource;
@@ -43,12 +46,20 @@ function chatType(value: string | undefined): ChatType {
     : 'unknown';
 }
 
-function toChat(payload: ChatPayload, fallbackId = ''): ChatResource {
+function toChat(payload: ChatPayload, fallbackId = '', canonicalChatIdentity = false): ChatResource {
+  const type = chatType(payload.type);
+  const providerChatId = nonEmpty(payload.chatId) ?? fallbackId;
+  const conversationId = canonicalChatIdentity && type === 'direct' ? nonEmpty(payload.conversationId) ?? providerChatId : undefined;
   return {
     resourceType: 'chat',
-    id: nonEmpty(payload.chatId) ?? fallbackId,
+    id: conversationId ?? providerChatId,
+    conversationId,
     contactId: nonEmpty(payload.contactId),
-    type: chatType(payload.type),
+    chatAliases: canonicalChatIdentity && type === 'direct'
+      ? [...new Set((payload.chatAliases ?? []).map((alias) => alias.trim()).filter(Boolean))]
+      : [],
+    addressingJid: canonicalChatIdentity && type === 'direct' ? nonEmpty(payload.addressingJid) : undefined,
+    type,
     displayName: nonEmpty(payload.displayName),
     displayNameSource: payload.displayNameSource,
     displayNameUpdatedAt: nonEmpty(payload.displayNameUpdatedAt),
@@ -65,7 +76,7 @@ function toChat(payload: ChatPayload, fallbackId = ''): ChatResource {
 
 export async function listChats(
   client: ApiClient,
-  params: { cursor?: string; limit?: number } = {},
+  params: { cursor?: string; limit?: number; canonicalChatIdentity?: boolean } = {},
 ): Promise<ChatReadResult<ChatPage>> {
   const projection = unwrapProjection<ChatPayload[]>(await client.GET('/chat/list', {
     params: { query: { cursor: params.cursor, limit: params.limit ?? 50 } },
@@ -73,7 +84,7 @@ export async function listChats(
   const nextCursor = projection.meta?.nextCursor ?? null;
   return {
     resource: {
-      items: (projection.resource ?? []).map((payload) => toChat(payload)).filter((chat) => chat.id !== ''),
+      items: (projection.resource ?? []).map((payload) => toChat(payload, '', params.canonicalChatIdentity ?? false)).filter((chat) => chat.id !== ''),
       pagination: { nextCursor, hasMore: nextCursor !== null },
       total: projection.meta?.total,
     },
@@ -81,9 +92,9 @@ export async function listChats(
   };
 }
 
-export async function getChat(client: ApiClient, chatId: string): Promise<ChatReadResult<ChatResource>> {
+export async function getChat(client: ApiClient, chatId: string, canonicalChatIdentity = false): Promise<ChatReadResult<ChatResource>> {
   const projection = unwrapProjection<ChatPayload>(await client.GET('/chat/info/{chatId}', {
     params: { path: { chatId } },
   }));
-  return { resource: toChat(projection.resource, chatId), meta: projection.meta };
+  return { resource: toChat(projection.resource, chatId, canonicalChatIdentity), meta: projection.meta };
 }

@@ -64,8 +64,8 @@ export function DirectoryInspector({ contact, label, meta, error, loading, onRet
   );
 }
 
-export function MessageInspector({ messageId, loadedChat, enabled, mediaEnabled, onClose }: { messageId: string; loadedChat?: ChatResource; enabled: boolean; mediaEnabled: boolean; onClose: () => void }) {
-  const message = useMessage(messageId, enabled);
+export function MessageInspector({ messageId, loadedChat, enabled, mediaEnabled, canonicalChatIdentity, onClose }: { messageId: string; loadedChat?: ChatResource; enabled: boolean; mediaEnabled: boolean; canonicalChatIdentity: boolean; onClose: () => void }) {
+  const message = useMessage(messageId, enabled, canonicalChatIdentity);
   const resource = message.data?.resource;
   const matchesChat = resource === undefined || loadedChat === undefined || resource.chatId === loadedChat.id;
   const receipts = useReceipts(messageId, enabled && resource !== undefined && matchesChat);
