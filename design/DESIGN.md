@@ -213,7 +213,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   A reported tab count uses the canonical CountBadge; feature code supplies only
   the number and never restyles that chip. The tab strip may scroll horizontally
   but always clips vertical overflow so it never becomes a nested vertical
-  scroll target.
+  scroll target. One selected tab is in the sequential focus order; Left/Right
+  wrap between tabs and Home/End move to the first/last tab while activating it.
+  A known tab panel is associated through `aria-controls`/`aria-labelledby`.
 - **Drawer (inspector)** — right panel, `min(440px,100%)`, paper surface, 1px
   strong left border, and a 60% ink scrim. Header = title + mono ID + square close
   cell. ≤640px becomes an 85dvh full-width bottom sheet. The body scrolls without

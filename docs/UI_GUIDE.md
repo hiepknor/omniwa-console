@@ -196,6 +196,9 @@ resource models, or rendered diagnostics.
   essential.
 - Custom selectors follow the ARIA combobox/listbox pattern, retain an active
   option, and support arrows, Home/End, typeahead, Enter/Space, Escape, and Tab.
+- Shared horizontal Tabs use one roving tab stop, activate with Left/Right
+  (wrapping), and support Home/End. Callers associate a known panel through the
+  shared `panelId` contract instead of cloning tab keyboard behavior.
 - Buttons preserve a clear ghost/primary/danger hierarchy, expose pressed and
   keyboard-focus feedback, and use `ButtonLink` for navigation styled as an action.
 - Count chips use the shared `CountBadge`; count-bearing Tabs apply it
