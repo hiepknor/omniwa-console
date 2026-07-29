@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { matchRoutes } from 'react-router-dom';
-import { authenticatedRoutes, legacyChatsRedirectLocation } from './App';
+import { authenticatedRoutes } from './App';
 
 describe('authenticated route manifest', () => {
   it('owns campaigns under the canonical campaigns namespace only', () => {
@@ -14,12 +14,9 @@ describe('authenticated route manifest', () => {
     expect(paths.some((path) => path === '/messages' || path.startsWith('/messages/'))).toBe(false);
   });
 
-  it('owns canonical conversation routes and discards legacy cursor state during redirect', () => {
+  it('owns canonical conversation routes', () => {
     const paths = authenticatedRoutes.flatMap((route) => route.path ?? []);
     expect(paths).toEqual(expect.arrayContaining(['/conversations', '/conversations/:conversationRef']));
-    expect(legacyChatsRedirectLocation('123@lid', '?view=chats&cursor=legacy-list&messageCursor=legacy-messages&message=message-1')).toBe(
-      '/conversations/123%40lid?message=message-1',
-    );
   });
 
   it.each([
@@ -32,6 +29,8 @@ describe('authenticated route manifest', () => {
     ['/campaigns/campaign-1', '/campaigns/:campaignId'],
     ['/conversations', '/conversations'],
     ['/conversations/conversation-1', '/conversations/:conversationRef'],
+    ['/chats', '*'],
+    ['/chats/provider-chat-id', '*'],
     ['/messages', '*'],
     ['/messages/campaign-1', '*'],
   ])('matches %s to %s', (location, expectedPath) => {

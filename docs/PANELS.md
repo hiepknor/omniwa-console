@@ -276,9 +276,8 @@ absorbed provider deep links, and send only to projected `addressingJid`.
 only. The backend owns alias collapse, message aggregation/deduplication, unread,
 last activity, totals, and cursor scope; Console performs no grouping or Contact
 matching. Capability-off instances receive no `/chat/*` fallback read. Former
-`/chats` browser URLs redirect to `/conversations` while dropping list/message
-cursors because those cursor formats are incompatible. `conversation_media_assets`
-remains an independent gate.
+browser URLs and their cursors are not supported by the canonical workspace.
+`conversation_media_assets` remains an independent gate.
 
 Implemented commands owned by the workspace:
 

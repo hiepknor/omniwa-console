@@ -1,6 +1,6 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, useMemo, useRef, useState } from 'react';
-import { createBrowserRouter, Navigate, type RouteObject, RouterProvider, useLocation, useParams } from 'react-router-dom';
+import { createBrowserRouter, Navigate, type RouteObject, RouterProvider } from 'react-router-dom';
 import { ApiProvider } from '@/api/ApiProvider';
 import { CapabilitiesProvider } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
@@ -23,26 +23,9 @@ const CampaignsPage = lazy(() => import('@/features/campaigns/CampaignsPage').th
 const CreateCampaignPage = lazy(() => import('@/features/campaigns/CreateCampaign').then((m) => ({ default: m.CreateCampaign })));
 const EventsPage = lazy(() => import('@/features/events/EventsPage').then((m) => ({ default: m.EventsPage })));
 
-export function legacyChatsRedirectLocation(chatId: string | undefined, currentSearch: string): string {
-  const search = new URLSearchParams(currentSearch);
-  search.delete('cursor');
-  search.delete('messageCursor');
-  if (search.get('view') === 'chats') search.delete('view');
-  const pathname = chatId ? `/conversations/${encodeURIComponent(chatId)}` : '/conversations';
-  return `${pathname}${search.size ? `?${search.toString()}` : ''}`;
-}
-
-function LegacyChatsRedirect() {
-  const { chatId } = useParams();
-  const location = useLocation();
-  return <Navigate to={legacyChatsRedirectLocation(chatId, location.search)} replace />;
-}
-
 export const authenticatedRoutes: RouteObject[] = [
   { path: '/conversations', element: <ConversationsPage /> },
   { path: '/conversations/:conversationRef', element: <ConversationsPage /> },
-  { path: '/chats', element: <LegacyChatsRedirect /> },
-  { path: '/chats/:chatId', element: <LegacyChatsRedirect /> },
   { path: '/groups', element: <GroupsPage /> },
   { path: '/groups/lists', element: <GroupListsPage /> },
   { path: '/groups/lists/new', element: <GroupListEditorPage /> },
