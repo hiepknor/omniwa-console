@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { ChatList, ConversationUnreadCount, MessageTimeline } from '@/features/conversations/ConversationsView';
-import { Button, Field, FilterToolbar, Input, SplitWorkspace, Tabs, Textarea, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
-import { chatsFixture, messagesFixture } from './preview-fixtures';
+import { ApiProvider } from '@/api/ApiProvider';
+import { Composer } from '@/features/conversations/Composer';
+import { ChatList, ContactList, ConversationUnreadCount, LabelList, MessageTimeline } from '@/features/conversations/ConversationsView';
+import { Button, Field, FilterToolbar, Image, Input, SplitWorkspace, Status, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { chatsFixture, contactsFixture, labelsFixture, messagesFixture } from './preview-fixtures';
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
 export function PreviewConversations() {
@@ -10,6 +12,7 @@ export function PreviewConversations() {
   const chat = chatsFixture.find((c) => c.id === chatId);
   const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(chatId);
   const openChat = (id: string) => { rememberFocusOrigin(); setChatId(id); };
+  const switchView = (id: string) => { setView(id); setChatId(id === 'chats' ? chatsFixture[0]?.id : undefined); };
   return (
     <main className="h-dvh overflow-hidden bg-bg">
       <WorkspacePageFrame
@@ -31,13 +34,13 @@ export function PreviewConversations() {
           directory={
             <>
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
-                <Tabs active={view} onChange={setView} tabs={[{ id: 'chats', label: 'Chats' }, { id: 'contacts', label: 'Contacts' }, { id: 'labels', label: 'Labels' }]} />
+                <Tabs active={view} onChange={switchView} tabs={[{ id: 'chats', label: 'Chats', count: 217 }, { id: 'contacts', label: 'Contacts', count: 84 }, { id: 'labels', label: 'Labels', count: labelsFixture.length }]} />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => e.preventDefault()}>
                   <Field label="Search" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" placeholder="Filter loaded page" />}</Field>
                   <div className="flex items-end"><Button type="submit">Apply</Button></div>
                 </FilterToolbar>
               </div>
-              <ChatList items={chatsFixture} selectedId={chatId} onSelect={openChat} />
+              {view === 'chats' ? <ChatList items={chatsFixture} selectedId={chatId} onSelect={openChat} /> : view === 'contacts' ? <ContactList items={contactsFixture} onSelect={() => {}} /> : <LabelList items={labelsFixture} onSelect={() => {}} />}
             </>
           }
         detail={
@@ -53,17 +56,13 @@ export function PreviewConversations() {
               <span>Individual</span>
               <span className="font-mono text-fg-2">{chat.id}</span>
             </div>
-            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} />
+            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} renderMedia={(message) => message.mediaAssetId === 'asset_ready'
+              ? <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />
+              : <div role="img" aria-label="Projected image message" className="grid min-h-24 max-w-80 place-items-center gap-2 border border-line-strong bg-recessed p-3 text-center"><Status tone="pending">Image processing</Status><small className="text-xs text-fg-3">The message remains visible while private content is prepared.</small></div>} />
           </> : null}
           </>
         }
-        detailFooter={chat ? <div className="grid gap-2 p-4 border-t border-line bg-surface">
-            <Field label={`Message ${chat.displayName}`}>{(id) => <Textarea id={id} rows={3} placeholder="Type a message…" />}</Field>
-            <div className="flex justify-end gap-2">
-              <Button>Media URL…</Button>
-              <Button variant="primary">Send text</Button>
-            </div>
-          </div> : undefined}
+        detailFooter={chat ? <ApiProvider session={{ baseUrl: 'http://127.0.0.1:1', apiKey: 'preview-only', keyKind: 'api', connectedAt: new Date().toISOString() }}><Composer chatId={chat.id} recipient={chat.id} chatName={chat.displayName ?? 'Unknown chat'} enabled mediaEnabled /></ApiProvider> : undefined}
         />
       </WorkspacePageFrame>
     </main>

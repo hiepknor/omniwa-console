@@ -56,6 +56,10 @@ for that operation; it does not imply availability or readiness.
 | `POST /user/profilePicture` | instance | `none-advertised` | command | contacts-and-labels | deferred-product-workflow |
 | `POST /user/profileStatus` | instance | `none-advertised` | command | contacts-and-labels | deferred-product-workflow |
 | `POST /user/unblock` | instance | `none-advertised` | command | contacts-and-labels | deferred-product-workflow |
+| `POST /media-assets` | instance | `group_photo_assets` or `conversation_media_assets` | command | shared-media-assets | integrated-console |
+| `GET /media-assets/{mediaId}` | instance | `group_photo_assets` or `conversation_media_assets` | control-plane-read | shared-media-assets | integrated-console |
+| `DELETE /media-assets/{mediaId}` | instance | `none-advertised` | command | shared-media-assets | deferred-product-workflow |
+| `GET /media-assets/{mediaId}/content` | instance | `group_photo_assets` or `conversation_media_assets` | binary-read | shared-media-assets | integrated-console |
 | `GET /chat/{chatId}/messages` | instance | `messages_projection` | projection-read | conversations | integrated-console |
 | `GET /chat/info/{chatId}` | instance | `chats_projection` | projection-read | conversations | integrated-console |
 | `GET /chat/list` | instance | `chats_projection` | projection-read | conversations | integrated-console |

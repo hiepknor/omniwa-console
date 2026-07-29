@@ -240,6 +240,12 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   treatment to count chips. Conversations omit zero unread counts in dense
   directory rows, show positive unread counts as accessible CountBadges, and
   pair the badge with a visible `Unread` label in the selected-chat facts.
+- **Conversation image lifecycle** — ready private JPEG/PNG content uses the
+  shared framed Image primitive. Pending/processing and terminal unavailable
+  states retain the message bubble and use a square bordered placeholder with
+  the shared Status treatment; no provider URL or decorative image treatment is
+  introduced. Device upload uses the shared FileUpload inside the canonical
+  Dialog and does not change the page frame.
 - **DescriptionList / DescriptionItem** — the only repeated key/value facts
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
   values on wide screens, stacks them at ≤640px, wraps long content, and uses

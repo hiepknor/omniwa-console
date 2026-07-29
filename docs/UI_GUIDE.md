@@ -204,8 +204,11 @@ resource models, or rendered diagnostics.
   Framed non-count facts such as resource versions use `MetadataBadge`.
   Conversation directory rows omit zero unread counts and expose positive counts
   through an accessible CountBadge; selected-chat facts keep the visible `Unread`
-  label and show zero explicitly. Conversation tabs do not derive totals from a
-  filtered or cursor-bounded page.
+  label and show zero explicitly. Conversation tabs use authoritative Chat and
+  Contact `meta.total` values (including the current normalized Contact search
+  scope) and bare-array Label length; they never derive totals from page length.
+  Private message images use the shared framed Image language when ready and a
+  stable square Status placeholder while pending, failed, expired, or deleted.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the

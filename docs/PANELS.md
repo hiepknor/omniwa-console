@@ -225,8 +225,8 @@ aggregates counts into unique recipients, or uses member count to enable a row.
 
 ## Chats workspace — `/chats/:chatId?`
 
-**Status:** Chat and Message list/detail, delivery receipts, Contacts
-list/search/detail, Labels list/detail, and bounded text/media sends are
+**Status:** Chat and Message list/detail, delivery receipts, canonical Contacts,
+Labels, authoritative totals, and bounded text/private-media sends are
 integrated. The route uses the active instance credential as its scope and never
 calls the admin fleet list.
 
@@ -243,9 +243,16 @@ GET /user/contacts/search?q=&limit=&cursor=
 GET /user/contact/{contactId}
 GET /label/list
 GET /label/info/{labelId}
+GET /media-assets/{mediaId}
+GET /media-assets/{mediaId}/content
 ```
 
-Contacts use server prefix search and opaque cursors. Labels intentionally keep
+With `canonical_contact_identity`, Contacts use returned `contactId` as identity
+and `addressingJid` for sends; aliases never become duplicate rows or a browser
+merge heuristic. Projected Chat names prevent list-level Contact fan-out.
+Contacts use normalized server search and opaque cursors. Chat and Contact
+counts use `meta.total`, while Labels intentionally use bare-array length.
+Labels intentionally keep
 the backend's historical bare-array list; capability readiness distinguishes a valid
 empty label projection from an unavailable one. Label assignments are consumed
 from future Chat/Message projection fields rather than reconstructed in the
@@ -265,12 +272,17 @@ Implemented commands owned by the workspace:
 ```text
 POST /send/text
 POST /send/media
+POST /media-assets
 ```
 
-Media send accepts an HTTP(S) URL plus an explicit `image`, `video`,
-`audio`, or `document` type. Binary upload and base64 input stay outside the
-Console. Like text send, its server acknowledgement is not delivery and an
-uncertain failure has no one-click retry.
+When `conversation_media_assets` is advertised, Conversations uploads a local
+JPEG/PNG, polls shared private metadata, fetches authenticated content only when
+ready, and sends the mutually exclusive `mediaAssetId` image branch. Pending,
+failed, expired, and deleted inbound assets preserve their projected message
+placeholder. `group_photo_assets` and older image flags do not enable this
+flow. The HTTP(S) URL branch remains a compatibility option. Like text send,
+provider acknowledgement is not delivery; `unknown_send_outcome` has no
+automatic or one-click retry.
 
 Additional commands are not owned until their UI is included and verified:
 

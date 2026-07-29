@@ -14,6 +14,7 @@ const message = {
   messageType: 'text',
   contentText: 'Hello',
   contentSummary: 'Hello',
+  mediaAssetId: 'asset-1',
   providerTimestamp: '2026-07-22T08:00:00Z',
   provenance: 'history_sync',
   status: 'delivered',
@@ -24,7 +25,7 @@ describe('messages projection adapter', () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [message], meta: { source: 'projection', syncStatus: 'stale', nextCursor: 'opaque/older' } }));
     const result = await listMessages({ GET } as unknown as ApiClient, message.chatId, { cursor: 'opaque/current', limit: 25 });
     expect(GET).toHaveBeenCalledWith('/chat/{chatId}/messages', { params: { path: { chatId: message.chatId }, query: { cursor: 'opaque/current', limit: 25 } } });
-    expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', contentText: 'Hello', provenance: 'history_sync' })]);
+    expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', contentText: 'Hello', mediaAssetId: 'asset-1', provenance: 'history_sync' })]);
     expect(result.resource.pagination.nextCursor).toBe('opaque/older');
     expect(result.meta?.syncStatus).toBe('stale');
   });
@@ -64,6 +65,7 @@ describe('messages projection adapter', () => {
       Message: { imageMessage: { url: 'provider-private' } },
     } }));
     const result = await sendMediaMessage({ POST } as unknown as ApiClient, message.chatId, {
+      source: 'url',
       url: 'https://example.com/photo.jpg',
       mediaType: 'image',
       caption: 'Launch photo',
@@ -79,5 +81,26 @@ describe('messages projection adapter', () => {
     expect(result.disposition).toBe('completed');
     expect(result.data).toEqual({ messageId: 'message-3', acknowledgedAt: '2026-07-22T08:03:00Z' });
     expect(result.data).not.toHaveProperty('Message');
+  });
+
+  it('sends a managed image asset without URL, base64, or file fields', async () => {
+    const POST = vi.fn().mockResolvedValue(ok({ message: 'success', data: {
+      messageId: 'message-4', timestamp: '2026-07-22T08:04:00Z',
+    } }));
+    const result = await sendMediaMessage({ POST } as unknown as ApiClient, '200@s.whatsapp.net', {
+      source: 'asset', mediaAssetId: 'asset-1', caption: 'Private image',
+    });
+    expect(POST).toHaveBeenCalledWith('/send/media', { body: {
+      number: '200@s.whatsapp.net', type: 'image', mediaAssetId: 'asset-1', caption: 'Private image',
+    } });
+    expect(result.data).toEqual({ messageId: 'message-4', acknowledgedAt: '2026-07-22T08:04:00Z' });
+  });
+
+  it('uses documented timestamp precedence without fabricating a value', async () => {
+    const GET = vi.fn()
+      .mockResolvedValueOnce(ok({ message: 'success', data: { ...message, providerTimestamp: undefined, sentAt: '2026-07-22T08:05:00Z' } }))
+      .mockResolvedValueOnce(ok({ message: 'success', data: { ...message, providerTimestamp: undefined, sentAt: undefined, deliveredAt: '2026-07-22T08:06:00Z' } }));
+    await expect(getMessage({ GET } as unknown as ApiClient, 'message-1')).resolves.toMatchObject({ resource: { createdAt: '2026-07-22T08:05:00Z' } });
+    await expect(getMessage({ GET } as unknown as ApiClient, 'message-1')).resolves.toMatchObject({ resource: { createdAt: '2026-07-22T08:06:00Z' } });
   });
 });

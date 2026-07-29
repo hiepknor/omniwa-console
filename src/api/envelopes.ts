@@ -7,6 +7,7 @@ export type ProjectionMeta = {
   syncStatus?: ProjectionSyncStatus;
   lastSyncedAt?: string;
   nextCursor?: string;
+  total?: number;
 };
 
 export type ProjectionResult<T> = { resource: T; meta?: ProjectionMeta };
@@ -81,14 +82,27 @@ function categoryForCode(code: string | undefined, status: number): ErrorCategor
     case 'outbound_rate_limited':
       return 'rate_limited';
     case 'projection_not_ready':
+    case 'media_asset_storage_unavailable':
+    case 'unknown_send_outcome':
       return 'unavailable';
     case 'invalid_cursor':
     case 'invalid_pagination':
     case 'invalid_filter':
     case 'invalid_window':
+    case 'unsupported_media_asset_type':
+    case 'media_asset_invalid_type':
+    case 'media_asset_too_large':
+    case 'media_asset_integrity_failed':
+    case 'media_asset_instance_mismatch':
       return 'validation';
     case 'not_found':
+    case 'media_asset_not_found':
+    case 'media_asset_expired':
+    case 'media_asset_deleted':
       return 'not_found';
+    case 'media_asset_not_ready':
+    case 'media_asset_failed':
+      return 'conflict';
     default:
       return categoryForStatus(status);
   }
@@ -117,6 +131,9 @@ function normalizeProjectionMeta(value: unknown): ProjectionMeta | undefined {
     syncStatus,
     lastSyncedAt: typeof meta.lastSyncedAt === 'string' ? meta.lastSyncedAt : undefined,
     nextCursor: typeof meta.nextCursor === 'string' ? meta.nextCursor : undefined,
+    total: typeof meta.total === 'number' && Number.isFinite(meta.total) && meta.total >= 0
+      ? Math.floor(meta.total)
+      : undefined,
   };
 }
 
@@ -165,7 +182,8 @@ export class ApiFailure extends Error {
       ? undefined
       : Date.now() + this.retryAfterSeconds * 1_000;
     // A rate-limited condition must NOT be auto-retried (retrying deepens the throttle).
-    const permanentServiceCondition = this.code === 'projection_not_ready';
+    const permanentServiceCondition = this.code === 'projection_not_ready'
+      || this.code === 'unknown_send_outcome';
     this.retryable = !rateLimited && !permanentServiceCondition && (httpStatus >= 500 && httpStatus !== 501);
   }
 }

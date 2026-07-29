@@ -69,6 +69,17 @@ describe('ApiFailure', () => {
     ['invalid_window', 'validation'],
     ['not_found', 'not_found'],
     ['outbound_rate_limited', 'rate_limited'],
+    ['media_asset_not_found', 'not_found'],
+    ['media_asset_not_ready', 'conflict'],
+    ['media_asset_failed', 'conflict'],
+    ['media_asset_expired', 'not_found'],
+    ['media_asset_deleted', 'not_found'],
+    ['unsupported_media_asset_type', 'validation'],
+    ['media_asset_too_large', 'validation'],
+    ['media_asset_integrity_failed', 'validation'],
+    ['media_asset_instance_mismatch', 'validation'],
+    ['media_asset_storage_unavailable', 'unavailable'],
+    ['unknown_send_outcome', 'unavailable'],
   ] as const)('maps error code %s to category %s', (code, category) => {
     const failure = new ApiFailure({ error: code, code }, code === 'projection_not_ready' ? 503 : 400);
     expect(failure.category).toBe(category);
@@ -77,6 +88,13 @@ describe('ApiFailure', () => {
   it('does not retry a projection that is not ready', () => {
     expect(new ApiFailure(
       { error: 'projection_not_ready', code: 'projection_not_ready' },
+      503,
+    ).retryable).toBe(false);
+  });
+
+  it('never automatically retries an unknown send outcome', () => {
+    expect(new ApiFailure(
+      { error: 'Provider outcome is unknown', code: 'unknown_send_outcome' },
       503,
     ).retryable).toBe(false);
   });
@@ -168,6 +186,7 @@ describe('unwrapProjection', () => {
           syncStatus: 'stale',
           lastSyncedAt: '2026-07-22T08:00:00Z',
           nextCursor: 'opaque-value',
+          total: 245,
         },
       },
       response: response(200),
@@ -179,6 +198,7 @@ describe('unwrapProjection', () => {
         syncStatus: 'stale',
         lastSyncedAt: '2026-07-22T08:00:00Z',
         nextCursor: 'opaque-value',
+        total: 245,
       },
     });
   });

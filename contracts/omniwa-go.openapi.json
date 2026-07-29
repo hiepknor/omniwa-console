@@ -83,7 +83,24 @@
           }
         ],
         "requestBody": {
-          "$ref": "#/components/requestBodies/postCampaignMedia"
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "description": "JPEG or PNG image",
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          },
+          "required": true
         },
         "responses": {
           "201": {
@@ -1024,6 +1041,7 @@
             "ApiKeyAuth": []
           }
         ],
+        "description": "Return a projected chat with locally denormalized contact or type-specific display-name metadata.",
         "tags": [
           "Chat"
         ],
@@ -1102,6 +1120,7 @@
             "ApiKeyAuth": []
           }
         ],
+        "description": "Cursor-page projected chats without live reads. meta.total is the exact active projected-chat count at request time, not a cross-page snapshot.",
         "tags": [
           "Chat"
         ],
@@ -5820,6 +5839,7 @@
             "ApiKeyAuth": []
           }
         ],
+        "description": "Accepts one genuine JPEG or PNG up to the server-configured MEDIA_ASSET_MAX_BYTES limit (default 8388608 bytes). The authenticated instance owns the resulting private asset.",
         "tags": [
           "Media Assets"
         ],
@@ -5835,7 +5855,24 @@
           }
         ],
         "requestBody": {
-          "$ref": "#/components/requestBodies/postCampaignMedia"
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "description": "JPEG or PNG image; default maximum 8388608 bytes",
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          },
+          "required": true
         },
         "responses": {
           "201": {
@@ -5934,6 +5971,16 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
@@ -5990,6 +6037,16 @@
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
             "content": {
               "application/json": {
                 "schema": {
@@ -6066,6 +6123,21 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not Found",
             "content": {
@@ -6096,8 +6168,38 @@
               }
             }
           },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
           "416": {
             "description": "Requested Range Not Satisfiable",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "content": {
               "image/jpeg": {
                 "schema": {
@@ -8019,6 +8121,56 @@
               }
             }
           },
+          "403": {
+            "description": "Media asset ownership mismatch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Media asset not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Media asset is not ready or processing failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Media asset expired or was deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Media asset integrity failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
           "429": {
             "description": "Information or outbound rate limited; see Retry-After header",
             "content": {
@@ -8031,6 +8183,16 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Media asset storage unavailable",
             "content": {
               "application/json": {
                 "schema": {
@@ -9296,14 +9458,14 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Get one normalized contact from the persisted instance projection",
+        "description": "Resolve a canonical UUID, permanent absorbed-ID redirect, or JID alias from the persisted instance projection and return the canonical contactId.",
         "tags": [
           "User"
         ],
         "summary": "Get a projected contact",
         "parameters": [
           {
-            "description": "Contact JID",
+            "description": "Canonical contact ID, absorbed contact ID, or contact JID alias",
             "name": "contactId",
             "in": "path",
             "required": true,
@@ -9336,7 +9498,7 @@
             }
           },
           "400": {
-            "description": "Invalid contact JID",
+            "description": "Invalid contact reference",
             "content": {
               "application/json": {
                 "schema": {
@@ -9385,7 +9547,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Get a user's contacts",
+        "description": "Return all canonical contacts without live reads. meta.total counts canonical contacts, never aliases.",
         "tags": [
           "User"
         ],
@@ -9446,7 +9608,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Prefix-search normalized contacts from the persisted instance projection without querying WhatsApp",
+        "description": "Prefix-search canonical contacts without querying WhatsApp. meta.total is the exact normalized-query match count at request time; cursors are opaque and versioned.",
         "tags": [
           "User"
         ],
@@ -10009,26 +10171,6 @@
         "description": "Newsletter data",
         "required": true
       },
-      "postCampaignMedia": {
-        "content": {
-          "multipart/form-data": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "file": {
-                  "description": "JPEG or PNG image",
-                  "type": "string",
-                  "format": "binary"
-                }
-              },
-              "required": [
-                "file"
-              ]
-            }
-          }
-        },
-        "required": true
-      },
       "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
         "content": {
           "application/json": {
@@ -10199,6 +10341,9 @@
               "campaign_orchestration",
               "rate_limit_retry_after",
               "groups_projection",
+              "contacts_projection",
+              "chats_projection",
+              "canonical_contact_identity",
               "group_lists",
               "group_list_eligibility",
               "campaign_group_targets",
@@ -10716,6 +10861,10 @@
           "syncStatus": {
             "type": "string",
             "example": "ready"
+          },
+          "total": {
+            "type": "integer",
+            "example": 1930
           }
         }
       },
@@ -10778,6 +10927,15 @@
             "example": "3EB0C767D26A8D4E2A1B"
           },
           "Timestamp": {
+            "type": "string",
+            "example": "2026-07-21T10:30:00Z"
+          },
+          "messageId": {
+            "description": "Present for the mediaAssetId branch. This is provider acknowledgement,\nnot a WhatsApp delivery receipt.",
+            "type": "string",
+            "example": "3EB0C767D26A8D4E2A1B"
+          },
+          "timestamp": {
             "type": "string",
             "example": "2026-07-21T10:30:00Z"
           }
@@ -12591,6 +12749,14 @@
       },
       "github_com_evolution-foundation_evolution-go_pkg_media_model.Asset": {
         "type": "object",
+        "required": [
+          "createdAt",
+          "id",
+          "mediaType",
+          "origin",
+          "status",
+          "updatedAt"
+        ],
         "properties": {
           "canonical": {
             "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.AssetVariant"
@@ -12611,13 +12777,35 @@
             "type": "string"
           },
           "origin": {
-            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.AssetOrigin"
+            "enum": [
+              "device_upload",
+              "whatsapp_inbound"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.AssetOrigin"
+              }
+            ]
           },
           "readyAt": {
             "type": "string"
           },
           "status": {
-            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.AssetStatus"
+            "enum": [
+              "pending",
+              "uploading",
+              "downloading",
+              "processing",
+              "ready",
+              "failed",
+              "deleting",
+              "deleted"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.AssetStatus"
+              }
+            ]
           },
           "updatedAt": {
             "type": "string"
@@ -12660,6 +12848,15 @@
       },
       "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetVariant": {
         "type": "object",
+        "required": [
+          "createdAt",
+          "height",
+          "mimeType",
+          "sha256",
+          "sizeBytes",
+          "variant",
+          "width"
+        ],
         "properties": {
           "createdAt": {
             "type": "string"
@@ -12668,7 +12865,11 @@
             "type": "integer"
           },
           "mimeType": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png"
+            ]
           },
           "sha256": {
             "type": "string"
@@ -12677,7 +12878,15 @@
             "type": "integer"
           },
           "variant": {
-            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.VariantKind"
+            "enum": [
+              "canonical",
+              "provider_original"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_media_model.VariantKind"
+              }
+            ]
           },
           "width": {
             "type": "integer"
@@ -13100,6 +13309,11 @@
       },
       "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat": {
         "type": "object",
+        "required": [
+          "chatId",
+          "type",
+          "unreadCount"
+        ],
         "properties": {
           "archived": {
             "type": "boolean"
@@ -13114,6 +13328,23 @@
             "type": "integer"
           },
           "displayName": {
+            "type": "string"
+          },
+          "displayNameSource": {
+            "type": "string",
+            "enum": [
+              "full_name",
+              "business_name",
+              "push_name",
+              "first_name",
+              "username",
+              "provider_chat",
+              "group_subject",
+              "newsletter_name",
+              "broadcast_name"
+            ]
+          },
+          "displayNameUpdatedAt": {
             "type": "string"
           },
           "lastActivityAt": {
@@ -13141,6 +13372,14 @@
       },
       "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage": {
         "type": "object",
+        "required": [
+          "chatId",
+          "direction",
+          "messageId",
+          "messageType",
+          "provenance",
+          "providerTimestamp"
+        ],
         "properties": {
           "caption": {
             "type": "string"
@@ -14156,6 +14395,13 @@
       },
       "github_com_evolution-foundation_evolution-go_pkg_user_service.ContactInfo": {
         "type": "object",
+        "required": [
+          "addressingJid",
+          "aliases",
+          "contactId",
+          "identityStatus",
+          "identityUpdatedAt"
+        ],
         "properties": {
           "About": {
             "type": "string"
@@ -14200,6 +14446,41 @@
             "type": "string"
           },
           "Username": {
+            "type": "string"
+          },
+          "addressingJid": {
+            "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contactId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "displayNameSource": {
+            "type": "string",
+            "enum": [
+              "full_name",
+              "business_name",
+              "push_name",
+              "first_name",
+              "username"
+            ]
+          },
+          "identityStatus": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "partial"
+            ]
+          },
+          "identityUpdatedAt": {
             "type": "string"
           }
         }
