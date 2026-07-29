@@ -1,8 +1,8 @@
 import type { ApiClient } from './client';
-import { unwrapCommand, unwrapProjection, type CommandResult, type ProjectionMeta } from './envelopes';
+import { ApiFailure, unwrapCommand, unwrapProjection, type CommandResult, type ProjectionMeta } from './envelopes';
 import type { components as backendComponents } from './generated/schema';
 
-type MessagePayload = backendComponents['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage'];
+type MessagePayload = backendComponents['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage'];
 type ReceiptPayload = backendComponents['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessageReceipt'];
 
 export type MessageDirection = 'incoming' | 'outgoing' | 'system' | 'unknown';
@@ -11,8 +11,9 @@ export type MessageProvenance = 'live' | 'history_sync' | 'write_through' | 'unk
 export type MessageResource = {
   resourceType: 'message';
   id: string;
-  chatId: string;
-  conversationId?: string;
+  conversationId: string;
+  /** Provider Chat ID retained only as backend-reported provenance. */
+  providerChatId?: string;
   senderJid?: string;
   recipientJid?: string;
   participantJid?: string;
@@ -77,14 +78,12 @@ function provenance(value: string | undefined): MessageProvenance {
   return value === 'live' || value === 'history_sync' || value === 'write_through' ? value : 'unknown';
 }
 
-function toMessage(payload: MessagePayload, fallbackId = '', canonicalChatIdentity = false): MessageResource {
-  const providerChatId = nonEmpty(payload.chatId) ?? '';
-  const conversationId = canonicalChatIdentity ? nonEmpty(payload.conversationId) : undefined;
+function toMessage(payload: MessagePayload, fallbackId = ''): MessageResource {
   return {
     resourceType: 'message',
     id: nonEmpty(payload.messageId) ?? fallbackId,
-    chatId: conversationId ?? providerChatId,
-    conversationId,
+    conversationId: nonEmpty(payload.conversationId) ?? '',
+    providerChatId: nonEmpty(payload.providerChatId),
     senderJid: nonEmpty(payload.senderJid),
     recipientJid: nonEmpty(payload.recipientJid),
     participantJid: nonEmpty(payload.participantJid),
@@ -116,29 +115,33 @@ function toMessage(payload: MessagePayload, fallbackId = '', canonicalChatIdenti
 
 export async function listMessages(
   client: ApiClient,
-  chatId: string,
-  params: { cursor?: string; limit?: number; canonicalChatIdentity?: boolean } = {},
+  conversationRef: string,
+  params: { cursor?: string; limit?: number } = {},
 ): Promise<MessageReadResult<MessagePage>> {
-  const projection = unwrapProjection<MessagePayload[]>(await client.GET('/chat/{chatId}/messages', {
-    params: { path: { chatId }, query: { cursor: params.cursor, limit: params.limit ?? 50 } },
+  const projection = unwrapProjection<MessagePayload[]>(await client.GET('/conversations/{conversationRef}/messages', {
+    params: { path: { conversationRef }, query: { cursor: params.cursor, limit: params.limit ?? 50 } },
   }));
   const nextCursor = projection.meta?.nextCursor ?? null;
   return {
     resource: {
       items: (projection.resource ?? [])
-        .map((payload) => toMessage(payload, '', params.canonicalChatIdentity ?? false))
-        .filter((message) => message.id !== '' && message.chatId !== '' && message.createdAt !== ''),
+        .map((payload) => toMessage(payload))
+        .filter((message) => message.id !== '' && message.conversationId !== '' && message.createdAt !== ''),
       pagination: { nextCursor, hasMore: nextCursor !== null },
     },
     meta: projection.meta,
   };
 }
 
-export async function getMessage(client: ApiClient, messageId: string, canonicalChatIdentity = false): Promise<MessageReadResult<MessageResource>> {
-  const projection = unwrapProjection<MessagePayload>(await client.GET('/message/{messageId}', {
-    params: { path: { messageId } },
+export async function getMessage(client: ApiClient, conversationRef: string, messageId: string): Promise<MessageReadResult<MessageResource>> {
+  const projection = unwrapProjection<MessagePayload>(await client.GET('/conversations/{conversationRef}/messages/{messageId}', {
+    params: { path: { conversationRef, messageId } },
   }));
-  return { resource: toMessage(projection.resource, messageId, canonicalChatIdentity), meta: projection.meta };
+  const resource = toMessage(projection.resource, messageId);
+  if (!resource.conversationId) {
+    throw new ApiFailure({ code: 'invalid_response', error: 'Message response did not include its required canonical conversationId.' }, 500);
+  }
+  return { resource, meta: projection.meta };
 }
 
 export async function listMessageReceipts(client: ApiClient, messageId: string): Promise<MessageReadResult<MessageReceiptResource[]>> {
@@ -179,16 +182,16 @@ function safeSendAcknowledgement(result: CommandResult): MessageCommandResult {
   };
 }
 
-export async function sendTextMessage(client: ApiClient, chatId: string, text: string): Promise<MessageCommandResult> {
+export async function sendTextMessage(client: ApiClient, addressingJid: string, text: string): Promise<MessageCommandResult> {
   // Swaggo marks all request fields optional; the handler requires number/text.
   return safeSendAcknowledgement(unwrapCommand(await client.POST('/send/text', {
-    body: { number: chatId, text } as never,
+    body: { number: addressingJid, text } as never,
   })));
 }
 
 export async function sendMediaMessage(
   client: ApiClient,
-  chatId: string,
+  addressingJid: string,
   input: SendMediaInput,
 ): Promise<MessageCommandResult> {
   const source = input.source === 'asset'
@@ -196,7 +199,7 @@ export async function sendMediaMessage(
     : { url: input.url, type: input.mediaType, ...(input.filename ? { filename: input.filename } : {}) };
   return safeSendAcknowledgement(unwrapCommand(await client.POST('/send/media', {
     body: {
-      number: chatId,
+      number: addressingJid,
       ...source,
       ...(input.caption ? { caption: input.caption } : {}),
     } as never,

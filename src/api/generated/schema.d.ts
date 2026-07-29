@@ -969,150 +969,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/chat/info/{chatId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a projected chat
-         * @description Return a projected chat with locally denormalized contact or type-specific display-name metadata. With canonical_chat_identity, chatId accepts a canonical conversation UUID or any absorbed provider Chat ID and the response contains the canonical conversationId.
-         */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Canonical conversation UUID or provider Chat ID */
-                    chatId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat"];
-                        };
-                    };
-                };
-                /** @description Chat not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Projection not ready */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/chat/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List projected chats
-         * @description Cursor-page projected chats without live reads. With canonical_chat_identity, direct aliases collapse to one conversation, meta.total counts canonical conversations, and cursors are conversation-scoped. Without it, legacy provider-chat rows and cursors are preserved.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page size (1-200) */
-                    limit?: number;
-                    /** @description Opaque pagination cursor */
-                    cursor?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat"][];
-                        };
-                    };
-                };
-                /** @description Invalid pagination */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Projection not ready */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/chat/mute": {
         parameters: {
             query?: never;
@@ -1408,82 +1264,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/chat/{chatId}/messages": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List projected messages for a chat
-         * @description With canonical_chat_identity, resolves canonical or absorbed Chat IDs and returns deduplicated provider-message history across all aliases. Cursors are opaque and scoped to the canonical conversation.
-         */
-        get: {
-            parameters: {
-                query?: {
-                    /** @description Page size (1-200) */
-                    limit?: number;
-                    /** @description Opaque pagination cursor */
-                    cursor?: string;
-                };
-                header?: never;
-                path: {
-                    /** @description Canonical conversation UUID or provider Chat ID */
-                    chatId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage"][];
-                        };
-                    };
-                };
-                /** @description Invalid pagination */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Projection not ready */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/community/add": {
         parameters: {
             query?: never;
@@ -1656,6 +1436,86 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List canonical conversations
+         * @description Cursor-page canonical conversations without live WhatsApp reads. conversationId is the entity identity; addressingJid and aliases are provider-addressing metadata. Requires canonical_conversation_identity readiness, and meta.total counts canonical conversations.
+         */
+        get: operations["listConversations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{conversationRef}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a canonical conversation
+         * @description conversationRef accepts a canonical conversation UUID, a current or absorbed provider Chat ID alias, or an absorbed conversation UUID. The response always normalizes identity to conversationId and never uses addressingJid as entity identity.
+         */
+        get: operations["getConversation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{conversationRef}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List messages for a canonical conversation
+         * @description conversationRef accepts a canonical or absorbed identifier. Results aggregate all authoritative provider Chat aliases and deduplicate by instance-scoped provider message identity. conversationId is required; providerChatId is provenance only. Cursors are opaque and scoped to the resolved canonical conversation.
+         */
+        get: operations["listConversationMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{conversationRef}/messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a message in a canonical conversation
+         * @description Resolves conversationRef through the canonical instance-scoped resolver and returns the message only when it belongs to that canonical conversation. conversationId is required and providerChatId is provenance only.
+         */
+        get: operations["getConversationMessage"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -6214,74 +6074,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/message/{messageId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a projected message */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Provider message ID */
-                    messageId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage"];
-                        };
-                    };
-                };
-                /** @description Message not found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Projection not ready */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/message/{messageId}/delivery": {
         parameters: {
             query?: never;
@@ -9556,7 +9348,7 @@ export interface components {
              *       "contacts_projection",
              *       "chats_projection",
              *       "canonical_contact_identity",
-             *       "canonical_chat_identity",
+             *       "canonical_conversation_identity",
              *       "group_lists",
              *       "group_list_eligibility",
              *       "campaign_group_targets",
@@ -10483,8 +10275,6 @@ export interface components {
             jid?: components["schemas"]["types.JID"];
         };
         /** @enum {string} */
-        "github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType": "direct" | "group" | "newsletter" | "broadcast" | "unknown";
-        /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_projection_model.EventFailureClass": "retryable" | "permanent";
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_projection_model.FailureAction": "replay" | "discard";
@@ -10498,6 +10288,8 @@ export interface components {
             connected?: boolean;
             status?: string;
         };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ConversationType": "direct" | "group" | "newsletter" | "broadcast" | "unknown";
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryItem": {
             id?: string;
             ingestedAt?: string;
@@ -10557,13 +10349,14 @@ export interface components {
             end?: string;
             start?: string;
         };
-        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat": {
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversation": {
             addressingJid?: string;
+            aliases?: string[];
             archived?: boolean;
-            chatAliases?: string[];
-            chatId: string;
+            /** Format: uuid */
             contactId?: string;
-            conversationId?: string;
+            /** Format: uuid */
+            conversationId: string;
             disappearingTimer?: number;
             displayName?: string;
             /** @enum {string} */
@@ -10574,18 +10367,20 @@ export interface components {
             lastMessageId?: string;
             mutedUntil?: string;
             pinned?: boolean;
-            type: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType"];
+            /** @enum {unknown} */
+            type: "direct" | "group" | "newsletter" | "broadcast" | "unknown";
             unreadCount: number;
         };
-        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage": {
+        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage": {
             caption?: string;
-            chatId: string;
             contentSummary?: string;
             contentText?: string;
-            conversationId?: string;
+            /** Format: uuid */
+            conversationId: string;
             deliveredAt?: string;
             direction: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection"];
             historySyncId?: string;
+            /** Format: uuid */
             mediaAssetId?: string;
             mediaDurationSeconds?: number;
             mediaFileName?: string;
@@ -10599,6 +10394,7 @@ export interface components {
             participantJid?: string;
             playedAt?: string;
             provenance: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance"];
+            providerChatId?: string;
             providerTimestamp: string;
             quotedMessageId?: string;
             readAt?: string;
@@ -13902,4 +13698,231 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    listConversations: {
+        parameters: {
+            query?: {
+                /** @description Page size (1-200) */
+                limit?: number;
+                /** @description Opaque canonical-conversation cursor */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                        data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversation"][];
+                    };
+                };
+            };
+            /** @description Invalid pagination or cursor */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Canonical conversation projection not ready */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    getConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider Chat ID */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                        data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversation"];
+                    };
+                };
+            };
+            /** @description Conversation not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Canonical conversation projection not ready */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    listConversationMessages: {
+        parameters: {
+            query?: {
+                /** @description Page size (1-200) */
+                limit?: number;
+                /** @description Opaque canonical-conversation message cursor */
+                cursor?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider Chat ID */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                        data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage"][];
+                    };
+                };
+            };
+            /** @description Invalid pagination or cursor */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Conversation not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Canonical conversation projection not ready */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    getConversationMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider Chat ID */
+                conversationRef: string;
+                /** @description Provider message ID scoped to the canonical conversation */
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                        data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage"];
+                    };
+                };
+            };
+            /** @description Conversation or message not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Canonical conversation projection not ready */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+}

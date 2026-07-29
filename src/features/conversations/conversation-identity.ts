@@ -1,23 +1,19 @@
-import type { ChatResource } from '@/api/chats';
+import type { ConversationResource } from '@/api/conversations';
+
+export function canonicalConversationReadsEnabled(instanceScope: boolean, capabilities: readonly string[]): boolean {
+  return instanceScope && capabilities.includes('canonical_conversation_identity');
+}
 
 export function resolveConversationRecipient(
-  chat: ChatResource | undefined,
-  canonicalChatIdentity: boolean,
-  canonicalContactIdentity: boolean,
-  contactAddressingJid: string | undefined,
+  conversation: ConversationResource | undefined,
 ): string | undefined {
-  if (!chat) return undefined;
-  if (chat.type !== 'direct') return chat.id;
-  if (canonicalChatIdentity) return chat.addressingJid;
-  if (canonicalContactIdentity && chat.contactId) return contactAddressingJid;
-  return chat.id;
+  return conversation?.addressingJid;
 }
 
 export function canonicalConversationRedirect(
-  requestedChatId: string | undefined,
-  returnedChat: ChatResource | undefined,
-  canonicalChatIdentity: boolean,
+  requestedConversationRef: string | undefined,
+  returnedConversation: ConversationResource | undefined,
 ): string | undefined {
-  if (!canonicalChatIdentity || !requestedChatId || !returnedChat?.id || returnedChat.id === requestedChatId) return undefined;
-  return returnedChat.id;
+  if (!requestedConversationRef || !returnedConversation?.conversationId || returnedConversation.conversationId === requestedConversationRef) return undefined;
+  return returnedConversation.conversationId;
 }

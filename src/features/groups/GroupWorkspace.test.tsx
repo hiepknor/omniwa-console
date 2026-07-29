@@ -114,7 +114,7 @@ describe('GroupWorkspace capability loss', () => {
     );
 
     expect(html).toContain('Messaging unavailable');
-    expect(html).not.toContain('/chats/120363001%40g.us');
+    expect(html).not.toContain('/conversations/120363001%40g.us');
     expect(html).toContain('Manage campaign targets');
     expect(html).not.toContain('Send group text');
   });

@@ -1,6 +1,6 @@
 /* Dev-only sample data for rendering v3 surfaces without a backend (/__preview). */
 import type { Campaign } from '@/api/campaigns';
-import type { ChatResource } from '@/api/chats';
+import type { ConversationResource } from '@/api/conversations';
 import type { ContactResource } from '@/api/contacts';
 import type { EventResource } from '@/api/events-api';
 import type { GroupResource } from '@/api/groups';
@@ -50,11 +50,11 @@ export const failuresFixture: ProjectionFailure[] = [
   { instanceId: 'inst_02KQP7M4', resource: 'groups', eventKey: 'evt_77aa02fe', eventType: 'group.member.added', failureClass: 'timeout', lastErrorCode: 'downstream_timeout', retryCount: 5, maxAttempts: 5, occurredAt: ago(7200), lastAttemptAt: ago(600), deadLetteredAt: ago(540) },
 ] as unknown as ProjectionFailure[];
 
-export const chatsFixture: ChatResource[] = [
-  { resourceType: 'chat', id: '4c2a5707-95f6-4565-87db-20d983bbd555', conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555', contactId: '9c37e2c7-875c-48ff-a298-00b853409cb1', chatAliases: ['15551230001@s.whatsapp.net', '731002@lid'], addressingJid: '731002@lid', displayName: 'Anna Nguyen', displayNameSource: 'full_name', type: 'direct', unreadCount: 2, lastActivityAt: ago(300) },
-  { resourceType: 'chat', id: '15551230002@s.whatsapp.net', chatAliases: [], displayName: 'Support escalations', type: 'group', unreadCount: 0, lastActivityAt: ago(3600) },
-  { resourceType: 'chat', id: 'd29075b2-3f27-45fb-b7ba-86455871cb53', conversationId: 'd29075b2-3f27-45fb-b7ba-86455871cb53', contactId: 'b1277eeb-fccb-4909-a514-d4a3ca5f2a26', chatAliases: ['15551230003@s.whatsapp.net'], addressingJid: '15551230003@s.whatsapp.net', displayName: 'David Tran', displayNameSource: 'push_name', type: 'direct', unreadCount: 5, lastActivityAt: ago(120) },
-  { resourceType: 'chat', id: '15551230004@s.whatsapp.net', chatAliases: [], displayName: 'Orders', type: 'group', unreadCount: 0, lastActivityAt: ago(86_400) },
+export const conversationsFixture: ConversationResource[] = [
+  { resourceType: 'conversation', conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555', contactId: '9c37e2c7-875c-48ff-a298-00b853409cb1', aliases: ['15551230001@s.whatsapp.net', '731002@lid'], addressingJid: '731002@lid', displayName: 'Anna Nguyen', displayNameSource: 'full_name', type: 'direct', unreadCount: 2, lastActivityAt: ago(300) },
+  { resourceType: 'conversation', conversationId: '2ab8f0b5-07d2-497f-a32d-0453ff16d347', aliases: ['15551230002@g.us'], addressingJid: '15551230002@g.us', displayName: 'Support escalations', type: 'group', unreadCount: 0, lastActivityAt: ago(3600) },
+  { resourceType: 'conversation', conversationId: 'd29075b2-3f27-45fb-b7ba-86455871cb53', contactId: 'b1277eeb-fccb-4909-a514-d4a3ca5f2a26', aliases: ['15551230003@s.whatsapp.net'], addressingJid: '15551230003@s.whatsapp.net', displayName: 'David Tran', displayNameSource: 'push_name', type: 'direct', unreadCount: 5, lastActivityAt: ago(120) },
+  { resourceType: 'conversation', conversationId: 'ea2e52c9-86ca-45af-ae63-337e24e60709', aliases: ['15551230004@g.us'], addressingJid: '15551230004@g.us', displayName: 'Orders', type: 'group', unreadCount: 0, lastActivityAt: ago(86_400) },
 ];
 
 export const contactsFixture: ContactResource[] = [
@@ -68,17 +68,17 @@ export const labelsFixture: LabelResource[] = [
   { resourceType: 'label', id: 'label_2', name: 'Follow up', color: '2' },
 ];
 
-const previewConversationId = chatsFixture[0].id;
+const previewConversationId = conversationsFixture[0].conversationId;
 
 export const messagesFixture: MessageResource[] = [
-  { resourceType: 'message', id: 'msg_1', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'text', status: 'read', contentText: 'Hi! Is my order shipped yet?', createdAt: ago(3000), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_2', chatId: previewConversationId, conversationId: previewConversationId, direction: 'outgoing', type: 'text', status: 'delivered', contentText: 'Hello Anna — yes, it shipped this morning. Tracking is on the way.', createdAt: ago(2400), provenance: 'write_through' },
-  { resourceType: 'message', id: 'msg_3', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_ready', caption: 'Package at the front desk', status: 'read', createdAt: ago(1800), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_4', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_processing', contentSummary: 'Incoming image', status: 'delivered', createdAt: ago(900), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_5', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_failed', contentSummary: 'Failed incoming image', status: 'delivered', createdAt: ago(700), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_6', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_expired', contentSummary: 'Expired incoming image', status: 'delivered', createdAt: ago(500), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_7', chatId: previewConversationId, conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', contentSummary: 'Capability-gated image', status: 'delivered', createdAt: ago(400), provenance: 'live' },
-  { resourceType: 'message', id: 'msg_8', chatId: previewConversationId, conversationId: previewConversationId, direction: 'outgoing', type: 'text', status: 'failed', contentText: 'Let me know if you need anything else.', createdAt: ago(300), provenance: 'write_through' },
+  { resourceType: 'message', id: 'msg_1', conversationId: previewConversationId, providerChatId: '731002@lid', direction: 'incoming', type: 'text', status: 'read', contentText: 'Hi! Is my order shipped yet?', createdAt: ago(3000), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_2', conversationId: previewConversationId, direction: 'outgoing', type: 'text', status: 'delivered', contentText: 'Hello Anna — yes, it shipped this morning. Tracking is on the way.', createdAt: ago(2400), provenance: 'write_through' },
+  { resourceType: 'message', id: 'msg_3', conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_ready', caption: 'Package at the front desk', status: 'read', createdAt: ago(1800), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_4', conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_processing', contentSummary: 'Incoming image', status: 'delivered', createdAt: ago(900), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_5', conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_failed', contentSummary: 'Failed incoming image', status: 'delivered', createdAt: ago(700), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_6', conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_expired', contentSummary: 'Expired incoming image', status: 'delivered', createdAt: ago(500), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_7', conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', contentSummary: 'Capability-gated image', status: 'delivered', createdAt: ago(400), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_8', conversationId: previewConversationId, direction: 'outgoing', type: 'text', status: 'failed', contentText: 'Let me know if you need anything else.', createdAt: ago(300), provenance: 'write_through' },
 ];
 
 export const groupsFixture: GroupResource[] = [

@@ -11,7 +11,7 @@ reintroduced as client-side emulation.
 | Global settings | Per-instance advanced settings exist; no global validate/activate settings API exists | Keep global Settings unavailable; use instance-owned settings only |
 | API-key administration | Global key is deployment configuration and instance tokens come from instance creation | Keep Admin Keys unavailable; never emulate rotation in local storage |
 
-Durable Events, Overview/Health, Chats/Messages, Contacts/Labels, Groups, and
+Durable Events, Overview/Health, Conversations/Messages, Contacts/Labels, Groups, and
 Campaigns are supported by the current backend and belong in the integration
 roadmap. They are not unsupported merely because their Console panel is still
 pending.

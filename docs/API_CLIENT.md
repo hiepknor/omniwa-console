@@ -179,11 +179,11 @@ Keys mirror resource and credential scope:
 ['instances', instanceId, 'contact', contactId, { canonicalIdentity }]
 ['instances', instanceId, 'labels']
 ['instances', instanceId, 'label', labelId]
-['instances', instanceId, 'chats', { cursor, canonicalChatIdentity }]
-['instances', instanceId, 'chat', chatId, { canonicalChatIdentity }]
-['instances', instanceId, 'chat', chatId, 'messages', { cursor, canonicalChatIdentity }]
-['instances', instanceId, 'message', messageId, { canonicalChatIdentity }]
-['instances', instanceId, 'message', messageId, 'delivery-history']
+['instances', instanceId, 'conversations', 'list', { cursor }]
+['instances', instanceId, 'conversations', conversationId]
+['instances', instanceId, 'conversations', conversationId, 'messages', { cursor }]
+['instances', instanceId, 'conversations', conversationId, 'messages', messageId]
+['instances', instanceId, 'conversations', conversationId, 'messages', messageId, 'delivery-history']
 ['events', { type, cursor, limit }]
 ```
 
@@ -203,8 +203,8 @@ JIDs, and never auto-submits a mutation. Whole-list assessment includes the
 reviewed version in its key. Structured eligibility rejection details remain
 inside `src/api/` until narrowed to the public-safe issue shape.
 
-Resource adapters stay split by backend domain. Chat projection DTOs live in
-`src/api/chats.ts`; Message, receipt, and verified send contracts live in
+Resource adapters stay split by backend domain. Conversation projection DTOs live in
+`src/api/conversations.ts`; Message, receipt, and verified send contracts live in
 `src/api/messages.ts`. Do not restore the former cross-domain Platform types,
 add action stubs, or infer fields such as chat-label associations that OmniWA GO
 does not expose.
@@ -253,14 +253,13 @@ Projection readiness makes the write-through result observable; outbound
 capability confirms that message pacing is independent from information-query
 limits.
 The managed upload/inbound-content branch additionally requires
-`conversation_media_assets`. With `canonical_chat_identity`, a direct Chat uses
-its backend-projected `conversationId` for entity, route, cache, and history
-scope and its projected `addressingJid` for commands. Absorbed deep links replace
-to the canonical route. The browser does not group aliases or recompute totals,
-unread, activity, or messages. Without that capability, canonical Contact mode
-may resolve the selected Contact once for its `addressingJid`; provider-chat mode
-otherwise remains unchanged. Missing authoritative addressing always disables
-the Composer rather than falling back to a JID alias.
+`conversation_media_assets`. `canonical_conversation_identity` is the sole gate
+for Conversation reads. The backend-projected `conversationId` owns entity,
+route, cache, and history scope, while projected `addressingJid` is the provider
+command target. Absorbed deep links replace to the canonical route. The browser
+does not group aliases or recompute totals, unread, activity, or messages. It
+does not fall back to `/chat/*` reads, `chatId`, Contact lookup, or a JID alias.
+Missing authoritative addressing always disables the Composer.
 
 - Disable duplicate submission while pending.
 - Do not automatically retry mutations.

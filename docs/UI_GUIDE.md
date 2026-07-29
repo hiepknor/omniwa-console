@@ -206,8 +206,8 @@ resource models, or rendered diagnostics.
   inside an operational Status remain in their context instead of becoming chips.
   Framed non-count facts such as resource versions use `MetadataBadge`.
   Conversation directory rows omit zero unread counts and expose positive counts
-  through an accessible CountBadge; selected-chat facts keep the visible `Unread`
-  label and show zero explicitly. Conversation tabs use authoritative Chat and
+  through an accessible CountBadge; selected-conversation facts keep the visible `Unread`
+  label and show zero explicitly. Conversation tabs use authoritative Conversation and
   Contact `meta.total` values (including the current normalized Contact search
   scope) and bare-array Label length; they never derive totals from page length.
   Private message images use the shared framed Image language when ready and a

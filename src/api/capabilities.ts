@@ -16,7 +16,7 @@ export const capabilityNames = [
   'labels_projection',
   'contacts_projection',
   'canonical_contact_identity',
-  'canonical_chat_identity',
+  'canonical_conversation_identity',
   'chats_projection',
   'messages_projection',
   'conversation_media_assets',

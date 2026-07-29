@@ -1,4 +1,4 @@
-import type { ChatResource } from '@/api/chats';
+import type { ConversationResource } from '@/api/conversations';
 import type { ContactResource } from '@/api/contacts';
 import type { ProjectionMeta } from '@/api/envelopes';
 import type { LabelResource } from '@/api/labels';
@@ -64,11 +64,11 @@ export function DirectoryInspector({ contact, label, meta, error, loading, onRet
   );
 }
 
-export function MessageInspector({ messageId, loadedChat, enabled, mediaEnabled, canonicalChatIdentity, onClose }: { messageId: string; loadedChat?: ChatResource; enabled: boolean; mediaEnabled: boolean; canonicalChatIdentity: boolean; onClose: () => void }) {
-  const message = useMessage(messageId, enabled, canonicalChatIdentity);
+export function MessageInspector({ messageId, loadedConversation, enabled, mediaEnabled, onClose }: { messageId: string; loadedConversation: ConversationResource; enabled: boolean; mediaEnabled: boolean; onClose: () => void }) {
+  const message = useMessage(loadedConversation.conversationId, messageId, enabled);
   const resource = message.data?.resource;
-  const matchesChat = resource === undefined || loadedChat === undefined || resource.chatId === loadedChat.id;
-  const receipts = useReceipts(messageId, enabled && resource !== undefined && matchesChat);
+  const matchesConversation = resource === undefined || resource.conversationId === loadedConversation.conversationId;
+  const receipts = useReceipts(loadedConversation.conversationId, messageId, enabled && resource !== undefined && matchesConversation);
   const statusTone: Tone | undefined = resource?.status
     ? resource.status === 'failed' ? 'failed' : resource.status === 'read' || resource.status === 'delivered' ? 'ok' : 'pending'
     : undefined;
@@ -80,8 +80,8 @@ export function MessageInspector({ messageId, loadedChat, enabled, mediaEnabled,
           <StateNotice kind="loading" title="Loading message" />
         ) : message.error && !resource ? (
           <FailureNotice error={message.error} onRetry={() => message.refetch()} />
-        ) : resource && !matchesChat ? (
-          <StateNotice kind="empty" title="Different chat" detail="The selected message belongs to a different projected chat and is not shown in this context." />
+        ) : resource && !matchesConversation ? (
+          <StateNotice kind="empty" title="Different conversation" detail="The selected message belongs to a different canonical conversation and is not shown in this context." />
         ) : resource ? (
           <>
             {message.error ? <FailureNotice error={message.error} stale onRetry={() => message.refetch()} /> : null}
@@ -89,7 +89,8 @@ export function MessageInspector({ messageId, loadedChat, enabled, mediaEnabled,
             {resource.mediaAssetId || resource.mediaType === 'image' ? <ConversationMessageImage message={resource} enabled={mediaEnabled} priority /> : null}
             <Panel title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyPadding="compact-top">
               <DescriptionList>
-                <DescriptionItem label="Chat" mono>{resource.chatId}</DescriptionItem>
+                <DescriptionItem label="Conversation" mono>{resource.conversationId}</DescriptionItem>
+                <DescriptionItem label="Provider Chat provenance" mono>{resource.providerChatId ?? 'Not reported'}</DescriptionItem>
                 <DescriptionItem label="Direction">{humanizeToken(resource.direction)}</DescriptionItem>
                 <DescriptionItem label="Type">{humanizeToken(resource.type)}</DescriptionItem>
                 <DescriptionItem label="Provenance">{humanizeToken(resource.provenance)}</DescriptionItem>
@@ -112,7 +113,7 @@ export function MessageInspector({ messageId, loadedChat, enabled, mediaEnabled,
           <StateNotice kind="empty" title="Not returned" />
         )}
 
-        {resource && matchesChat ? (
+        {resource && matchesConversation ? (
           <Panel title="Delivery receipts" description="Per-recipient projected receipts.">
             {receipts.isPending ? (
               <StateNotice kind="loading" title="Loading receipts" />

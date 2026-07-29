@@ -8,8 +8,8 @@ function ok(data: unknown) {
 
 const message = {
   messageId: 'message-1',
-  chatId: '100@s.whatsapp.net',
   conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555',
+  providerChatId: '100@s.whatsapp.net',
   senderJid: '100@s.whatsapp.net',
   direction: 'incoming',
   messageType: 'text',
@@ -22,36 +22,33 @@ const message = {
 };
 
 describe('messages projection adapter', () => {
-  it('normalizes chat-scoped history and preserves its opaque cursor', async () => {
+  it('normalizes canonical-conversation history and preserves its opaque cursor', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [message], meta: { source: 'projection', syncStatus: 'stale', nextCursor: 'opaque/older' } }));
-    const result = await listMessages({ GET } as unknown as ApiClient, message.chatId, { cursor: 'opaque/current', limit: 25 });
-    expect(GET).toHaveBeenCalledWith('/chat/{chatId}/messages', { params: { path: { chatId: message.chatId }, query: { cursor: 'opaque/current', limit: 25 } } });
-    expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', contentText: 'Hello', mediaAssetId: 'asset-1', provenance: 'history_sync' })]);
+    const result = await listMessages({ GET } as unknown as ApiClient, message.conversationId, { cursor: 'opaque/current', limit: 25 });
+    expect(GET).toHaveBeenCalledWith('/conversations/{conversationRef}/messages', { params: { path: { conversationRef: message.conversationId }, query: { cursor: 'opaque/current', limit: 25 } } });
+    expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', conversationId: message.conversationId, providerChatId: message.providerChatId, contentText: 'Hello', mediaAssetId: 'asset-1', provenance: 'history_sync' })]);
     expect(result.resource.pagination.nextCursor).toBe('opaque/older');
     expect(result.meta?.syncStatus).toBe('stale');
   });
 
-  it('uses the projected canonical conversation ID only behind its capability gate', async () => {
-    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [message], meta: { nextCursor: 'opaque/canonical' } }));
-    const result = await listMessages({ GET } as unknown as ApiClient, message.conversationId, { canonicalChatIdentity: true });
-    expect(result.resource.items[0]).toMatchObject({
-      chatId: message.conversationId,
-      conversationId: message.conversationId,
-    });
-    expect(result.resource.pagination.nextCursor).toBe('opaque/canonical');
-  });
-
-  it('ignores additive canonical message identity while the capability is absent', async () => {
+  it('uses the conversation-scoped canonical message detail endpoint', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: message }));
-    const result = await getMessage({ GET } as unknown as ApiClient, message.messageId, false);
-    expect(result.resource).toMatchObject({ chatId: message.chatId, conversationId: undefined });
+    const result = await getMessage({ GET } as unknown as ApiClient, message.conversationId, message.messageId);
+    expect(GET).toHaveBeenCalledWith('/conversations/{conversationRef}/messages/{messageId}', { params: { path: { conversationRef: message.conversationId, messageId: message.messageId } } });
+    expect(result.resource).toMatchObject({ conversationId: message.conversationId, providerChatId: message.providerChatId });
+    expect(result.resource).not.toHaveProperty('chatId');
   });
 
   it('uses safe detail defaults without exposing unknown fields', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { ...message, messageId: undefined, direction: 'future', provenance: 'future', SourceEventKey: 'secret' }, meta: { syncStatus: 'ready' } }));
-    const result = await getMessage({ GET } as unknown as ApiClient, 'fallback-message');
+    const result = await getMessage({ GET } as unknown as ApiClient, message.conversationId, 'fallback-message');
     expect(result.resource).toEqual(expect.objectContaining({ id: 'fallback-message', direction: 'unknown', provenance: 'unknown' }));
     expect(result.resource).not.toHaveProperty('SourceEventKey');
+  });
+
+  it('fails closed when canonical message detail omits its required conversationId', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { ...message, conversationId: undefined } }));
+    await expect(getMessage({ GET } as unknown as ApiClient, message.conversationId, message.messageId)).rejects.toMatchObject({ code: 'invalid_response' });
   });
 
   it('normalizes ordered receipt rows and discards malformed rows', async () => {
@@ -68,8 +65,8 @@ describe('messages projection adapter', () => {
       Info: { ID: 'message-2', Timestamp: '2026-07-22T08:02:00Z', Secret: 'must-not-pass' },
       Message: { conversation: 'provider-native-payload' },
     } }));
-    const result = await sendTextMessage({ POST } as unknown as ApiClient, message.chatId, 'Hi');
-    expect(POST).toHaveBeenCalledWith('/send/text', { body: { number: message.chatId, text: 'Hi' } });
+    const result = await sendTextMessage({ POST } as unknown as ApiClient, '123@lid', 'Hi');
+    expect(POST).toHaveBeenCalledWith('/send/text', { body: { number: '123@lid', text: 'Hi' } });
     expect(result.disposition).toBe('completed');
     expect(result.data).toEqual({ messageId: 'message-2', acknowledgedAt: '2026-07-22T08:02:00Z' });
     expect(result.data).not.toHaveProperty('Message');
@@ -81,7 +78,7 @@ describe('messages projection adapter', () => {
       Timestamp: '2026-07-22T08:03:00Z',
       Message: { imageMessage: { url: 'provider-private' } },
     } }));
-    const result = await sendMediaMessage({ POST } as unknown as ApiClient, message.chatId, {
+    const result = await sendMediaMessage({ POST } as unknown as ApiClient, '123@lid', {
       source: 'url',
       url: 'https://example.com/photo.jpg',
       mediaType: 'image',
@@ -89,7 +86,7 @@ describe('messages projection adapter', () => {
       filename: 'photo.jpg',
     });
     expect(POST).toHaveBeenCalledWith('/send/media', { body: {
-      number: message.chatId,
+      number: '123@lid',
       url: 'https://example.com/photo.jpg',
       type: 'image',
       caption: 'Launch photo',
@@ -117,7 +114,7 @@ describe('messages projection adapter', () => {
     const GET = vi.fn()
       .mockResolvedValueOnce(ok({ message: 'success', data: { ...message, providerTimestamp: undefined, sentAt: '2026-07-22T08:05:00Z' } }))
       .mockResolvedValueOnce(ok({ message: 'success', data: { ...message, providerTimestamp: undefined, sentAt: undefined, deliveredAt: '2026-07-22T08:06:00Z' } }));
-    await expect(getMessage({ GET } as unknown as ApiClient, 'message-1')).resolves.toMatchObject({ resource: { createdAt: '2026-07-22T08:05:00Z' } });
-    await expect(getMessage({ GET } as unknown as ApiClient, 'message-1')).resolves.toMatchObject({ resource: { createdAt: '2026-07-22T08:06:00Z' } });
+    await expect(getMessage({ GET } as unknown as ApiClient, message.conversationId, 'message-1')).resolves.toMatchObject({ resource: { createdAt: '2026-07-22T08:05:00Z' } });
+    await expect(getMessage({ GET } as unknown as ApiClient, message.conversationId, 'message-1')).resolves.toMatchObject({ resource: { createdAt: '2026-07-22T08:06:00Z' } });
   });
 });

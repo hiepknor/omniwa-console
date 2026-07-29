@@ -68,7 +68,7 @@ Known capabilities:
 - `instance_token_rotation`
 - `instance_credential_health`
 - `canonical_contact_identity`
-- `canonical_chat_identity`
+- `canonical_conversation_identity`
 - `conversation_media_assets`
 
 Unknown capability strings must be preserved for forward compatibility. A
@@ -117,7 +117,7 @@ cached stale result into an empty/not-implemented state.
 `nextCursor` is opaque and may be bound to instance, filter, and query. Never
 decode, construct, modify, or reuse it after its scope changes. Default page
 size is 50 and the server maximum is 200 unless an endpoint documents otherwise.
-For Chat and Contact list/search reads, `meta.total` is the authoritative total
+For Conversation and Contact list/search reads, `meta.total` is the authoritative total
 for that request scope; it is never derived from page length. A ready empty
 projection reports zero. Search totals do not imply an unfiltered total, and
 totals across separately fetched pages are not a snapshot under concurrent writes.
@@ -200,15 +200,15 @@ wildcard is an ordinary character. `/user/check` may return a complete stale
 identity result for at most 90 seconds when WhatsApp is rate-limited; it never
 returns partial results, and mutations/sends do not use this fallback.
 
-### Chats and messages
+### Conversations and messages
 
-- `GET /chat/list`
-- `GET /chat/info/{chatId}`
-- `GET /chat/{chatId}/messages`
-- `GET /message/{messageId}`
+- `GET /conversations`
+- `GET /conversations/{conversationRef}`
+- `GET /conversations/{conversationRef}/messages`
+- `GET /conversations/{conversationRef}/messages/{messageId}`
 - `GET /message/{messageId}/delivery`
 
-Projected Chats carry display names so directory rendering never fetches one
+Projected Conversations carry display names so directory rendering never fetches one
 Contact per row. Direct names come from canonical Contact identity; group,
 newsletter, and broadcast names come from their type-specific projection. An
 absent name renders as unknown rather than exposing a phone/JID-derived label.
@@ -219,16 +219,17 @@ retention is 90 days (`2160h`). Timestamp display uses `providerTimestamp`, then
 `sentAt`, then `deliveredAt`; it never invents a timestamp. Media binary is not
 persisted in message projections.
 
-When `canonical_chat_identity` is advertised, direct `chatId` and
-`conversationId` identify the backend-owned canonical conversation. List totals,
-unread counts, last activity, alias collapse, PN/LID message aggregation, and
-provider-message deduplication are already authoritative; the browser performs
-none of them. Chat detail and message history accept a canonical ID or absorbed
-provider Chat ID and normalize responses to the canonical conversation.
-`chatAliases` are lookup material only, while projected `addressingJid` is the
-direct command target. Cursors remain opaque and conversation-scoped;
-`invalid_cursor` resets only its owning pagination state. Without the capability,
-provider Chat IDs and historical cursor behavior remain unchanged.
+`canonical_conversation_identity` is the sole gate for Conversation reads.
+`conversationId` is the backend-owned entity, route, and cache identity for every
+conversation type. List totals, unread counts, last activity, alias collapse,
+PN/LID message aggregation, and provider-message deduplication are authoritative;
+the browser performs none of them. Detail and message history accept a canonical
+ID or absorbed provider Chat ID and normalize responses to `conversationId`.
+`aliases` are lookup material only, `providerChatId` is message provenance only,
+and projected `addressingJid` is the provider command target. Cursors remain
+opaque and canonical-conversation-scoped; `invalid_cursor` resets only its owning
+pagination state. The Console sends no `/chat/*` read fallback when the capability
+is absent.
 
 ### Conversation media assets
 
@@ -252,8 +253,8 @@ acknowledgement only. Send is never automatically retried, especially for
 `unknown_send_outcome`; delivery comes only from projected status/receipts.
 
 Rollout is capability-observed rather than version-inferred. The Console enables
-canonical Contact and Chat modes independently only while
-`canonical_contact_identity` and `canonical_chat_identity` are respectively
+canonical Contact and Conversation modes independently only while
+`canonical_contact_identity` and `canonical_conversation_identity` are respectively
 advertised. Private Conversation media remains disabled until
 `conversation_media_assets` appears. Console does not infer any of these states
 from a version string or migration number.

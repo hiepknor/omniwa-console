@@ -39,7 +39,7 @@ It is not:
 ## Backend capabilities
 
 The current backend exposes capability negotiation, projection-backed Groups,
-Contacts, Labels, Chats, Messages, durable Events, Overview/Health, split
+Contacts, Labels, canonical Conversations, Messages, durable Events, Overview/Health, split
 information/outbound rate limiting, and campaign orchestration. The Console
 must gate integrations with `GET /server/capabilities` and preserve projection
 freshness metadata.

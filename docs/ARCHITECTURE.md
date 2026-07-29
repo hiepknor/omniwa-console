@@ -176,7 +176,7 @@ into caches. See `docs/REALTIME.md`.
 /groups/lists/:groupListId?
 /groups/lists/new
 /groups/lists/:groupListId/edit
-/chats/:instanceId?/:chatId?
+/conversations/:conversationRef?
 /campaigns
 /campaigns/new
 /events

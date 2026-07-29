@@ -40,15 +40,15 @@ describe('composite primitives', () => {
         detailOpen
         directoryScrollKey="chats:first-page"
         detailScrollKey="chat_01:first-page"
-        directoryLabel="Chats"
+        directoryLabel="Conversations"
         detailLabel="Timeline"
-        directory={<WorkspacePaneHeader title="Chats" />}
+        directory={<WorkspacePaneHeader title="Conversations" />}
         detail={<WorkspacePaneHeader title="chat_01" description="Projected history" />}
         detailFooter={<button type="button">Send</button>}
       />,
     );
 
-    expect(html).toContain('aria-label="Chats"');
+    expect(html).toContain('aria-label="Conversations"');
     expect(html).toContain('aria-label="Timeline"');
     expect(html).toContain('max-[900px]:hidden');
     expect(html).toContain('grid-cols-[320px_minmax(0,1fr)]');

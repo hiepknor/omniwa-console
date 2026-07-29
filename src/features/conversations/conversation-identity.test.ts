@@ -1,27 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import type { ChatResource } from '@/api/chats';
-import { canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
+import type { ConversationResource } from '@/api/conversations';
+import { canonicalConversationReadsEnabled, canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
 
-const direct: ChatResource = {
-  resourceType: 'chat', id: 'conversation-1', conversationId: 'conversation-1', contactId: 'contact-1',
-  chatAliases: ['100@s.whatsapp.net', '123@lid'], addressingJid: '123@lid', type: 'direct', unreadCount: 0,
+const direct: ConversationResource = {
+  resourceType: 'conversation', conversationId: 'conversation-1', contactId: 'contact-1',
+  aliases: ['100@s.whatsapp.net', '123@lid'], addressingJid: '123@lid', type: 'direct', unreadCount: 0,
 };
 
 describe('canonical conversation identity policy', () => {
-  it('uses only the backend-selected direct-chat command target in canonical chat mode', () => {
-    expect(resolveConversationRecipient(direct, true, true, 'contact-fallback@s.whatsapp.net')).toBe('123@lid');
-    expect(resolveConversationRecipient({ ...direct, addressingJid: undefined }, true, true, 'contact-fallback@s.whatsapp.net')).toBeUndefined();
+  it('enables reads only for instance scope with canonical_conversation_identity', () => {
+    expect(canonicalConversationReadsEnabled(true, ['canonical_conversation_identity'])).toBe(true);
+    expect(canonicalConversationReadsEnabled(true, ['canonical_chat_identity', 'chats_projection'])).toBe(false);
+    expect(canonicalConversationReadsEnabled(false, ['canonical_conversation_identity'])).toBe(false);
   });
 
-  it('preserves canonical-contact and provider-chat compatibility modes', () => {
-    expect(resolveConversationRecipient(direct, false, true, '100@s.whatsapp.net')).toBe('100@s.whatsapp.net');
-    expect(resolveConversationRecipient(direct, false, false, undefined)).toBe('conversation-1');
-    expect(resolveConversationRecipient({ ...direct, id: '120363000@g.us', type: 'group' }, true, true, undefined)).toBe('120363000@g.us');
+  it('uses only the backend-selected provider command target', () => {
+    expect(resolveConversationRecipient(direct)).toBe('123@lid');
+    expect(resolveConversationRecipient({ ...direct, addressingJid: undefined })).toBeUndefined();
   });
 
-  it('normalizes absorbed deep links only when canonical chat capability is active', () => {
-    expect(canonicalConversationRedirect('123@lid', direct, true)).toBe('conversation-1');
-    expect(canonicalConversationRedirect('123@lid', direct, false)).toBeUndefined();
-    expect(canonicalConversationRedirect('conversation-1', direct, true)).toBeUndefined();
+  it('never falls back to the canonical UUID or a provider alias', () => {
+    expect(resolveConversationRecipient({ ...direct, addressingJid: undefined, aliases: ['100@s.whatsapp.net'] })).toBeUndefined();
+  });
+
+  it('normalizes absorbed deep links to the returned canonical conversation ID', () => {
+    expect(canonicalConversationRedirect('123@lid', direct)).toBe('conversation-1');
+    expect(canonicalConversationRedirect('conversation-1', direct)).toBeUndefined();
   });
 });

@@ -5,20 +5,21 @@ import { queryKeys, SESSION_QUERY_SCOPE } from './keys';
 describe('query key ownership', () => {
   it('uses an explicit non-secret scope for session-scoped projections', () => {
     expect(SESSION_QUERY_SCOPE).toBe('session');
-    expect(queryKeys.instanceChats(SESSION_QUERY_SCOPE)).toEqual([
+    expect(queryKeys.instanceConversations(SESSION_QUERY_SCOPE)).toEqual([
       'instances',
       'session',
-      'chats',
+      'conversations',
+      'list',
     ]);
   });
 
   it('keeps list roots free of synthetic parameter objects', () => {
-    expect(queryKeys.instanceChats('instance-1')).toEqual(['instances', 'instance-1', 'chats']);
-    expect(queryKeys.instanceMessages('instance-1', 'chat-1')).toEqual([
+    expect(queryKeys.instanceConversations('instance-1')).toEqual(['instances', 'instance-1', 'conversations', 'list']);
+    expect(queryKeys.conversationMessages('instance-1', 'conversation-1')).toEqual([
       'instances',
       'instance-1',
-      'chat',
-      'chat-1',
+      'conversations',
+      'conversation-1',
       'messages',
     ]);
     expect(queryKeys.instanceCampaigns('instance-1')).toEqual([
@@ -30,10 +31,11 @@ describe('query key ownership', () => {
   });
 
   it('appends normalized read parameters only to concrete cache entries', () => {
-    expect(queryKeys.instanceChats('instance-1', { cursor: 'opaque' })).toEqual([
+    expect(queryKeys.instanceConversations('instance-1', { cursor: 'opaque' })).toEqual([
       'instances',
       'instance-1',
-      'chats',
+      'conversations',
+      'list',
       { cursor: 'opaque' },
     ]);
     expect(queryKeys.campaignRecipients('instance-1', 'campaign-1', { cursor: 'opaque' })).toEqual([
@@ -44,11 +46,11 @@ describe('query key ownership', () => {
       'recipients',
       { cursor: 'opaque' },
     ]);
-    expect(queryKeys.chat('instance-1', 'conversation-1', { canonicalChatIdentity: true })).toEqual([
-      'instances', 'instance-1', 'chat', 'conversation-1', { canonicalChatIdentity: true },
+    expect(queryKeys.conversation('instance-1', 'conversation-1')).toEqual([
+      'instances', 'instance-1', 'conversations', 'conversation-1',
     ]);
-    expect(queryKeys.instanceMessages('instance-1', 'conversation-1', { cursor: undefined, canonicalChatIdentity: true })).toEqual([
-      'instances', 'instance-1', 'chat', 'conversation-1', 'messages', { cursor: undefined, canonicalChatIdentity: true },
+    expect(queryKeys.conversationMessages('instance-1', 'conversation-1', { cursor: undefined })).toEqual([
+      'instances', 'instance-1', 'conversations', 'conversation-1', 'messages', { cursor: undefined },
     ]);
   });
 
@@ -70,6 +72,22 @@ describe('query key ownership', () => {
     expect(cache.getQueryState(firstPage)?.isInvalidated).toBe(true);
     expect(cache.getQueryState(nextPage)?.isInvalidated).toBe(true);
     expect(cache.getQueryState(otherInstance)?.isInvalidated).toBe(false);
+  });
+
+  it('keeps conversation list invalidation separate from detail and message history', async () => {
+    const cache = new QueryClient();
+    const list = queryKeys.instanceConversations('instance-1', { cursor: undefined });
+    const detail = queryKeys.conversation('instance-1', 'conversation-1');
+    const messages = queryKeys.conversationMessages('instance-1', 'conversation-1', { cursor: undefined });
+    cache.setQueryData(list, ['list']);
+    cache.setQueryData(detail, ['detail']);
+    cache.setQueryData(messages, ['messages']);
+
+    await cache.invalidateQueries({ queryKey: queryKeys.instanceConversations('instance-1'), refetchType: 'none' });
+
+    expect(cache.getQueryState(list)?.isInvalidated).toBe(true);
+    expect(cache.getQueryState(detail)?.isInvalidated).toBe(false);
+    expect(cache.getQueryState(messages)?.isInvalidated).toBe(false);
   });
 
   it('provides canonical roots for recovery and invite-link refreshes', () => {

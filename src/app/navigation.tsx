@@ -28,7 +28,7 @@ export function navigationForKeyKind(keyKind: KeyKind, recoveryAvailable = false
       {
         label: 'Messaging',
         items: [
-          { to: '/chats', label: 'Conversations', icon: 'chats' },
+          { to: '/conversations', label: 'Conversations', icon: 'chats' },
           { to: '/groups', label: 'Groups', icon: 'groups' },
           { to: '/campaigns', label: 'Campaigns', icon: 'campaigns' },
         ],

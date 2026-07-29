@@ -7,18 +7,18 @@ import { createSearchParams, omitSearchParams, updateSearchParams, withSearchPar
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
-import { canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
-import { ChatList, ContactList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
+import { canonicalConversationReadsEnabled, canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
+import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
 import { DirectoryInspector, MessageInspector } from './Details';
 import { ConversationMessageImage } from './Media';
-import { useChat, useChats, useContact, useContacts, useLabel, useLabels, useMessages } from './hooks';
+import { useContact, useContacts, useConversation, useConversations, useLabel, useLabels, useMessages } from './hooks';
 import { conversationRouteState, setConversationParam, type ConversationView } from './route-state';
 import { FailureNotice, ProjectionStatus } from './ui';
 
 function BlockedPage({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Messaging" title="Conversations" description="Review projected chats, contacts, labels, and message history." />
+      <PageHeader eyebrow="Messaging" title="Conversations" description="Review projected conversations, contacts, labels, and message history." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );
@@ -27,76 +27,66 @@ function BlockedPage({ detail, title }: { detail: string; title: string }) {
 export function ConversationsPage() {
   const session = useApiSession();
   const capabilities = useServerCapabilities();
-  const { chatId } = useParams();
+  const { conversationRef } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const route = conversationRouteState(searchParams);
-  const activeChatId = route.view === 'chats' ? chatId : undefined;
-  const hasChat = Boolean(activeChatId);
-  const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(activeChatId);
+  const activeConversationRef = route.view === 'conversations' ? conversationRef : undefined;
+  const hasConversation = Boolean(activeConversationRef);
+  const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(activeConversationRef);
   const [searchDraft, setSearchDraft] = useState(route.search);
   useEffect(() => setSearchDraft(route.search), [route.search]);
   const instanceScope = session.keyKind === 'api';
   const cap = (name: string) => capabilities.data?.capabilities.includes(name) ?? false;
-  const chatsReady = instanceScope && cap('chats_projection');
-  const messagesReady = instanceScope && cap('messages_projection');
+  const conversationsReady = canonicalConversationReadsEnabled(instanceScope, capabilities.data?.capabilities ?? []);
+  const messagesReady = conversationsReady && cap('messages_projection');
   const contactsReady = instanceScope && cap('contacts_projection');
   const labelsReady = instanceScope && cap('labels_projection');
   const outboundReady = cap('outbound_rate_limit');
   const canonicalIdentity = cap('canonical_contact_identity');
-  const canonicalChatIdentity = cap('canonical_chat_identity');
   const conversationMedia = cap('conversation_media_assets');
-  const chats = useChats(route.cursor, route.view === 'chats' && chatsReady, canonicalChatIdentity);
-  const chat = useChat(activeChatId, chatsReady, canonicalChatIdentity);
-  const selectedChat = chat.data?.resource;
-  const selectedChatContact = useContact(selectedChat?.type === 'direct' && !canonicalChatIdentity ? selectedChat.contactId : undefined, contactsReady && canonicalIdentity && !canonicalChatIdentity, canonicalIdentity);
-  const canonicalChatRecipientRequired = Boolean(canonicalChatIdentity && selectedChat?.type === 'direct');
-  const canonicalContactRecipientRequired = Boolean(!canonicalChatIdentity && canonicalIdentity && selectedChat?.type === 'direct' && selectedChat.contactId);
-  const sendRecipient = resolveConversationRecipient(selectedChat, canonicalChatIdentity, canonicalIdentity, selectedChatContact.data?.resource.addressingJid);
-  const messages = useMessages(activeChatId, route.messageCursor, messagesReady, canonicalChatIdentity);
+  const conversations = useConversations(route.cursor, route.view === 'conversations' && conversationsReady);
+  const conversation = useConversation(activeConversationRef, conversationsReady);
+  const selectedConversation = conversation.data?.resource;
+  const sendRecipient = resolveConversationRecipient(selectedConversation);
+  const messages = useMessages(activeConversationRef, route.messageCursor, messagesReady);
   const contacts = useContacts(route.search, route.cursor, route.view === 'contacts' && contactsReady, canonicalIdentity);
   const labels = useLabels(route.view === 'labels' && labelsReady);
   const contact = useContact(route.view === 'contacts' ? route.selected : undefined, contactsReady, canonicalIdentity);
   const label = useLabel(route.view === 'labels' ? route.selected : undefined, labelsReady);
-  const loadedChats = chats.data?.resource.items ?? [];
-  const filteredChats = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedChats.filter((i) => !term || i.id.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedChats, route.search]);
+  const loadedConversations = conversations.data?.resource.items ?? [];
+  const filteredConversations = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedConversations.filter((i) => !term || i.conversationId.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedConversations, route.search]);
   const loadedLabels = labels.data?.resource ?? [];
   const filteredLabels = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedLabels.filter((i) => !term || i.id.toLocaleLowerCase().includes(term) || i.name?.toLocaleLowerCase().includes(term)); }, [loadedLabels, route.search]);
   const loadedMessages = useMemo(() => [...(messages.data?.resource.items ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages.data]);
-  const recipientUnavailableDetail = !sendRecipient && canonicalChatRecipientRequired
-    ? 'The canonical conversation has no addressing JID. Sending remains disabled until the backend publishes its authoritative command target.'
-    : !sendRecipient && canonicalContactRecipientRequired
-      ? selectedChatContact.isPending
-        ? 'Waiting for the canonical contact addressing JID. Console will not send to a contact ID or inferred recipient.'
-        : selectedChatContact.error
-          ? 'Canonical contact lookup failed. Retry the identity read before sending; no inferred recipient will be used.'
-          : 'The canonical contact has no addressing JID. Sending remains disabled until the backend publishes one.'
-      : undefined;
-  const chatsSupported = chatsReady || chats.data !== undefined || chat.data !== undefined;
+  const recipientUnavailableDetail = selectedConversation && !sendRecipient
+    ? 'The canonical conversation has no addressing JID. Sending remains disabled until the backend publishes its authoritative provider command target.'
+    : undefined;
+  const conversationsSupported = conversationsReady || conversations.data !== undefined || conversation.data !== undefined;
   const messagesSupported = messagesReady || messages.data !== undefined;
 
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
-  const switchView = (view: ConversationView) => navigate(withSearchParams('/chats', createSearchParams({ view: view === 'chats' ? undefined : view })));
-  const openChat = (id: string) => {
+  const switchView = (view: ConversationView) => navigate(withSearchParams('/conversations', createSearchParams({ view: view === 'conversations' ? undefined : view })));
+  const openConversation = (id: string) => {
     rememberFocusOrigin();
-    navigate(withSearchParams(`/chats/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'selected'])));
+    navigate(withSearchParams(`/conversations/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'selected'])));
   };
-  const closeChat = () => navigate(withSearchParams('/chats', omitSearchParams(searchParams, ['message', 'messageCursor'])));
+  const closeConversation = () => navigate(withSearchParams('/conversations', omitSearchParams(searchParams, ['message', 'messageCursor'])));
   const applySearch = () => replaceParams(updateSearchParams(searchParams, { search: searchDraft.trim() }, ['cursor', 'selected']));
-  const currentQuery = route.view === 'chats' ? chats : route.view === 'contacts' ? contacts : labels;
+  const currentQuery = route.view === 'conversations' ? conversations : route.view === 'contacts' ? contacts : labels;
   const currentMeta = currentQuery.data?.meta;
   const currentAuthoritative = currentMeta?.syncStatus === undefined || currentMeta.syncStatus === 'ready';
-  const detailRefreshing = Boolean(activeChatId) && (chat.isFetching || messages.isFetching);
+  const detailRefreshing = Boolean(activeConversationRef) && (conversation.isFetching || messages.isFetching);
   const routeRefreshing = currentQuery.isFetching || detailRefreshing;
   const refreshDirectory = () => { void currentQuery.refetch(); };
-  const refreshDetail = () => { if (activeChatId) { void chat.refetch(); if (messagesReady) void messages.refetch(); } };
+  const refreshDetail = () => { if (activeConversationRef) { void conversation.refetch(); if (messagesReady) void messages.refetch(); } };
   const refresh = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(currentQuery.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined }, ['selected'])));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
   useEffect(() => {
-    const canonicalId = canonicalConversationRedirect(activeChatId, selectedChat, canonicalChatIdentity);
-    if (canonicalId) navigate(withSearchParams(`/chats/${encodeURIComponent(canonicalId)}`, searchParams), { replace: true });
-  }, [activeChatId, canonicalChatIdentity, navigate, searchParams, selectedChat?.id]);
+    const canonicalId = canonicalConversationRedirect(activeConversationRef, selectedConversation);
+    if (canonicalId) navigate(withSearchParams(`/conversations/${encodeURIComponent(canonicalId)}`, searchParams), { replace: true });
+  }, [activeConversationRef, navigate, searchParams, selectedConversation?.conversationId]);
   useEffect(() => {
     const returnedId = contact.data?.resource.id;
     if (canonicalIdentity && route.view === 'contacts' && route.selected && returnedId && returnedId !== route.selected) {
@@ -108,28 +98,28 @@ export function ConversationsPage() {
   if (capabilities.isPending) return <BlockedPage title="Discovering capabilities" detail="Discovering instance capabilities before enabling projection reads." />;
   if (capabilities.isError && currentQuery.data === undefined) return <BlockedPage title="Unsupported" detail="Capability discovery failed. Conversation projections remain disabled; no fallback read was sent." />;
 
-  const advertised = route.view === 'chats' ? chatsReady : route.view === 'contacts' ? contactsReady : labelsReady;
+  const advertised = route.view === 'conversations' ? conversationsReady : route.view === 'contacts' ? contactsReady : labelsReady;
   const viewSupported = advertised || currentQuery.data !== undefined;
-  const emptyDirectory = viewSupported && currentQuery.data && currentAuthoritative && ((route.view === 'chats' && filteredChats.length === 0) || (route.view === 'contacts' && (contacts.data?.resource.items.length ?? 0) === 0) || (route.view === 'labels' && filteredLabels.length === 0));
+  const emptyDirectory = viewSupported && currentQuery.data && currentAuthoritative && ((route.view === 'conversations' && filteredConversations.length === 0) || (route.view === 'contacts' && (contacts.data?.resource.items.length ?? 0) === 0) || (route.view === 'labels' && filteredLabels.length === 0));
 
   return (
     <>
       <WorkspacePageFrame
         eyebrow="Messaging"
         title="Conversations"
-        description="Review projected chats, contacts, labels, and message history."
+        description="Review projected conversations, contacts, labels, and message history."
         secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
-        compactTitle={hasChat ? selectedChat?.displayName ?? (selectedChat ? `Unknown ${selectedChat.type} chat` : 'Message timeline') : 'Conversations'}
-        compactDescription={hasChat ? (selectedChat ? humanizeToken(selectedChat.type) : 'Message timeline') : undefined}
-        compactLeadingAction={hasChat ? <Button onClick={closeChat}>Back</Button> : undefined}
-        compactActions={<Button disabled={!viewSupported || (hasChat ? detailRefreshing : currentQuery.isFetching)} onClick={hasChat ? refreshDetail : refreshDirectory}>{(hasChat ? detailRefreshing : currentQuery.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
+        compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : 'Conversations'}
+        compactDescription={hasConversation ? (selectedConversation ? humanizeToken(selectedConversation.type) : 'Message timeline') : undefined}
+        compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
+        compactActions={<Button disabled={!viewSupported || (hasConversation ? detailRefreshing : currentQuery.isFetching)} onClick={hasConversation ? refreshDetail : refreshDirectory}>{(hasConversation ? detailRefreshing : currentQuery.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
         compactHeadingRef={compactHeadingRef}
       >
         <SplitWorkspace
           frame="attached"
-          detailOpen={hasChat}
+          detailOpen={hasConversation}
           directoryScrollKey={JSON.stringify([route.view, route.search, route.cursor])}
-          detailScrollKey={JSON.stringify([activeChatId, route.messageCursor])}
+          detailScrollKey={JSON.stringify([activeConversationRef, route.messageCursor])}
           directoryLabel={`${route.view} directory`}
           detailLabel="Message timeline"
           directory={
@@ -139,7 +129,7 @@ export function ConversationsPage() {
                   active={route.view}
                   onChange={(id) => switchView(id as ConversationView)}
                   tabs={[
-                    { id: 'chats', label: 'Chats', count: chats.data?.resource.total },
+                    { id: 'conversations', label: 'Conversations', count: conversations.data?.resource.total },
                     { id: 'contacts', label: 'Contacts', count: contacts.data?.resource.total },
                     { id: 'labels', label: 'Labels', count: labels.data?.resource.length },
                   ]}
@@ -151,7 +141,7 @@ export function ConversationsPage() {
                   <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
                 </FilterToolbar>
               </div>
-            {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail={`The backend does not currently advertise ${route.view === 'chats' ? 'chats_projection' : route.view === 'contacts' ? 'contacts_projection' : 'labels_projection'}; capability polling continues because the projection may be unsupported or waiting for readiness.`} /></div> : null}
+            {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail={`The backend does not currently advertise ${route.view === 'conversations' ? 'canonical_conversation_identity' : route.view === 'contacts' ? 'contacts_projection' : 'labels_projection'}; capability polling continues because the projection may be unsupported or waiting for readiness.`} /></div> : null}
             {viewSupported && !advertised ? <div className="p-3"><StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable projection snapshot visible while capability discovery no longer advertises this resource." /></div> : null}
             {viewSupported && currentQuery.isPending ? <div className="p-3"><StateNotice kind="loading" title="Loading" /></div> : null}
             {viewSupported && currentQuery.error && !currentQuery.data ? <div className="p-3"><FailureNotice error={currentQuery.error} onRetry={refreshDirectory} /></div> : null}
@@ -159,7 +149,7 @@ export function ConversationsPage() {
               <>
                 {currentQuery.error ? <div className="p-3"><FailureNotice error={currentQuery.error} stale onRetry={refreshDirectory} /></div> : null}
                 <div className="px-3"><ProjectionStatus meta={'meta' in currentQuery.data ? currentQuery.data.meta : undefined} /></div>
-                {route.view === 'chats' ? <ChatList items={filteredChats} selectedId={activeChatId} onSelect={openChat} />
+                {route.view === 'conversations' ? <ConversationList items={filteredConversations} selectedId={activeConversationRef} onSelect={openConversation} />
                   : route.view === 'contacts' ? <ContactList items={contacts.data?.resource.items ?? []} selectedId={route.selected} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'selected', id))} />
                     : <LabelList items={filteredLabels} selectedId={route.selected} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'selected', id))} />}
                 {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected item matches the URL-backed search.' : 'The ready projection contains no items.'} /></div> : null}
@@ -168,31 +158,31 @@ export function ConversationsPage() {
             </>
           }
         directoryFooter={route.view !== 'labels' && viewSupported && currentQuery.data ? (
-          <CursorPagination cursor={route.cursor} nextCursor={(route.view === 'chats' ? chats.data?.resource.pagination.nextCursor : contacts.data?.resource.pagination.nextCursor) ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }, ['selected']))} />
+          <CursorPagination cursor={route.cursor} nextCursor={(route.view === 'conversations' ? conversations.data?.resource.pagination.nextCursor : contacts.data?.resource.pagination.nextCursor) ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }, ['selected']))} />
         ) : undefined}
         detail={
           <>
             <WorkspacePaneHeader
               className="max-[900px]:hidden"
-              title={selectedChat?.displayName ?? (selectedChat ? `Unknown ${selectedChat.type} chat` : 'Message timeline')}
-              description={activeChatId ? 'Persisted projection history' : 'Select a projected chat to inspect its history'}
+              title={selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline')}
+              description={activeConversationRef ? 'Persisted projection history' : 'Select a projected conversation to inspect its history'}
             />
-            {!activeChatId ? (
-              <div className="p-4"><StateNotice kind="empty" title="No chat selected" detail="Select a chat from the projected directory." /></div>
-            ) : !chatsSupported ? (
+            {!activeConversationRef ? (
+              <div className="p-4"><StateNotice kind="empty" title="No conversation selected" detail="Select a conversation from the projected directory." /></div>
+            ) : !conversationsSupported ? (
               <div className="p-4"><StateNotice kind="empty" title="Unsupported" /></div>
-            ) : chat.isPending ? (
-              <div className="p-4"><StateNotice kind="loading" title="Reading chat" /></div>
-            ) : chat.error && !selectedChat ? (
-              <div className="p-4"><FailureNotice error={chat.error} onRetry={() => chat.refetch()} /></div>
-            ) : selectedChat ? (
+            ) : conversation.isPending ? (
+              <div className="p-4"><StateNotice kind="loading" title="Reading conversation" /></div>
+            ) : conversation.error && !selectedConversation ? (
+              <div className="p-4"><FailureNotice error={conversation.error} onRetry={() => conversation.refetch()} /></div>
+            ) : selectedConversation ? (
               <>
-                {chat.error ? <div className="px-4 pt-3"><FailureNotice error={chat.error} stale onRetry={() => chat.refetch()} /></div> : null}
-                <div className="px-4"><ProjectionStatus meta={chat.data?.meta} /></div>
+                {conversation.error ? <div className="px-4 pt-3"><FailureNotice error={conversation.error} stale onRetry={() => conversation.refetch()} /></div> : null}
+                <div className="px-4"><ProjectionStatus meta={conversation.data?.meta} /></div>
                 <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
-                  <ConversationUnreadCount count={selectedChat.unreadCount} context="detail" />
-                  <span>{humanizeToken(selectedChat.type)}</span>
-                  <span className="font-mono text-fg-2">{selectedChat.id}</span>
+                  <ConversationUnreadCount count={selectedConversation.unreadCount} context="detail" />
+                  <span>{humanizeToken(selectedConversation.type)}</span>
+                  <span className="font-mono text-fg-2">{selectedConversation.conversationId}</span>
                 </div>
                 {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>
@@ -211,25 +201,23 @@ export function ConversationsPage() {
                 ) : null}
               </>
             ) : (
-              <div className="p-4"><StateNotice kind="empty" title="Not returned" detail="The projected chat detail was not returned." /></div>
+              <div className="p-4"><StateNotice kind="empty" title="Not returned" detail="The projected conversation detail was not returned." /></div>
             )}
           </>
         }
-        detailFooter={selectedChat ? <Composer
-          chatId={selectedChat.id}
-          recipient={sendRecipient ?? ''}
-          chatName={selectedChat.displayName ?? `Unknown ${selectedChat.type} chat`}
+        detailFooter={selectedConversation ? <Composer
+          conversationId={selectedConversation.conversationId}
+          addressingJid={sendRecipient ?? ''}
+          conversationName={selectedConversation.displayName ?? `Unknown ${selectedConversation.type} conversation`}
           enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
           mediaEnabled={conversationMedia}
           unavailableDetail={recipientUnavailableDetail}
-          recipientError={canonicalContactRecipientRequired ? selectedChatContact.error : undefined}
-          onRetryRecipient={canonicalContactRecipientRequired ? () => { void selectedChatContact.refetch(); } : undefined}
         /> : undefined}
         />
       </WorkspacePageFrame>
 
-      {route.message && activeChatId && messagesSupported ? <MessageInspector messageId={route.message} loadedChat={selectedChat} enabled={messagesReady} mediaEnabled={conversationMedia} canonicalChatIdentity={canonicalChatIdentity} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
-      {route.selected && route.view !== 'chats' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} meta={route.view === 'contacts' ? contact.data?.meta : label.data?.meta} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
+      {route.message && selectedConversation && messagesSupported ? <MessageInspector messageId={route.message} loadedConversation={selectedConversation} enabled={messagesReady} mediaEnabled={conversationMedia} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
+      {route.selected && route.view !== 'conversations' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} meta={route.view === 'contacts' ? contact.data?.meta : label.data?.meta} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
     </>
   );
 }
