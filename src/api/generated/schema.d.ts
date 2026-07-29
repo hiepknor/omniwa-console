@@ -80,7 +80,17 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody: components["requestBodies"]["postCampaignMedia"];
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        /**
+                         * Format: binary
+                         * @description JPEG or PNG image
+                         */
+                        file: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Created */
                 201: {
@@ -966,7 +976,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a projected chat */
+        /**
+         * Get a projected chat
+         * @description Return a projected chat with locally denormalized contact or type-specific display-name metadata.
+         */
         get: {
             parameters: {
                 query?: never;
@@ -1034,7 +1047,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List projected chats */
+        /**
+         * List projected chats
+         * @description Cursor-page projected chats without live reads. meta.total is the exact active projected-chat count at request time, not a cross-page snapshot.
+         */
         get: {
             parameters: {
                 query?: {
@@ -5322,7 +5338,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Upload shared image asset */
+        /**
+         * Upload shared image asset
+         * @description Accepts one genuine JPEG or PNG up to the server-configured MEDIA_ASSET_MAX_BYTES limit (default 8388608 bytes). The authenticated instance owns the resulting private asset.
+         */
         post: {
             parameters: {
                 query?: never;
@@ -5333,7 +5352,17 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody: components["requestBodies"]["postCampaignMedia"];
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        /**
+                         * Format: binary
+                         * @description JPEG or PNG image; default maximum 8388608 bytes
+                         */
+                        file: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Created */
                 201: {
@@ -5426,6 +5455,15 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.MediaAssetResponse"];
                     };
                 };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Not Found */
                 404: {
                     headers: {
@@ -5472,6 +5510,15 @@ export interface paths {
                 };
                 /** @description Conflict */
                 409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5529,6 +5576,16 @@ export interface paths {
                         "image/png": string;
                     };
                 };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": components["schemas"]["apidocs.ErrorResponse"];
+                        "image/png": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Not Found */
                 404: {
                     headers: {
@@ -5549,8 +5606,28 @@ export interface paths {
                         "image/png": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Gone */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": components["schemas"]["apidocs.ErrorResponse"];
+                        "image/png": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Requested Range Not Satisfiable */
                 416: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "image/jpeg": components["schemas"]["apidocs.ErrorResponse"];
+                        "image/png": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unprocessable Entity */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -7466,6 +7543,51 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Media asset ownership mismatch */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Media asset not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Media asset is not ready or processing failed */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Media asset expired or was deleted */
+                410: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Media asset integrity failure */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Information or outbound rate limited; see Retry-After header */
                 429: {
                     headers: {
@@ -7477,6 +7599,15 @@ export interface paths {
                 };
                 /** @description Internal server error */
                 500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Media asset storage unavailable */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -8720,14 +8851,14 @@ export interface paths {
         };
         /**
          * Get a projected contact
-         * @description Get one normalized contact from the persisted instance projection
+         * @description Resolve a canonical UUID, permanent absorbed-ID redirect, or JID alias from the persisted instance projection and return the canonical contactId.
          */
         get: {
             parameters: {
                 query?: never;
                 header?: never;
                 path: {
-                    /** @description Contact JID */
+                    /** @description Canonical contact ID, absorbed contact ID, or contact JID alias */
                     contactId: string;
                 };
                 cookie?: never;
@@ -8745,7 +8876,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Invalid contact JID */
+                /** @description Invalid contact reference */
                 400: {
                     headers: {
                         [name: string]: unknown;
@@ -8800,7 +8931,7 @@ export interface paths {
         };
         /**
          * Get a user's contacts
-         * @description Get a user's contacts
+         * @description Return all canonical contacts without live reads. meta.total counts canonical contacts, never aliases.
          */
         get: {
             parameters: {
@@ -8859,7 +8990,7 @@ export interface paths {
         };
         /**
          * Search projected contacts
-         * @description Prefix-search normalized contacts from the persisted instance projection without querying WhatsApp
+         * @description Prefix-search canonical contacts without querying WhatsApp. meta.total is the exact normalized-query match count at request time; cursors are opaque and versioned.
          */
         get: {
             parameters: {
@@ -9389,6 +9520,9 @@ export interface components {
              *       "campaign_orchestration",
              *       "rate_limit_retry_after",
              *       "groups_projection",
+             *       "contacts_projection",
+             *       "chats_projection",
+             *       "canonical_contact_identity",
              *       "group_lists",
              *       "group_list_eligibility",
              *       "campaign_group_targets",
@@ -9609,6 +9743,8 @@ export interface components {
             source?: string;
             /** @example ready */
             syncStatus?: string;
+            /** @example 1930 */
+            total?: number;
         };
         "apidocs.QRCodeData": {
             /** @example 2@abc123... */
@@ -9637,6 +9773,14 @@ export interface components {
             ID?: string;
             /** @example 2026-07-21T10:30:00Z */
             Timestamp?: string;
+            /**
+             * @description Present for the mediaAssetId branch. This is provider acknowledgement,
+             *     not a WhatsApp delivery receipt.
+             * @example 3EB0C767D26A8D4E2A1B
+             */
+            messageId?: string;
+            /** @example 2026-07-21T10:30:00Z */
+            timestamp?: string;
         };
         "apidocs.SendMessageResponse": {
             data?: components["schemas"]["apidocs.SendMessageData"];
@@ -10219,28 +10363,32 @@ export interface components {
         };
         "github_com_evolution-foundation_evolution-go_pkg_media_model.Asset": {
             canonical?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.AssetVariant"];
-            createdAt?: string;
+            createdAt: string;
             expiresAt?: string;
             failureCode?: string;
-            id?: string;
-            mediaType?: string;
-            origin?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.AssetOrigin"];
+            id: string;
+            mediaType: string;
+            /** @enum {unknown} */
+            origin: "device_upload" | "whatsapp_inbound";
             readyAt?: string;
-            status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.AssetStatus"];
-            updatedAt?: string;
+            /** @enum {unknown} */
+            status: "pending" | "uploading" | "downloading" | "processing" | "ready" | "failed" | "deleting" | "deleted";
+            updatedAt: string;
         };
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetOrigin": "device_upload" | "whatsapp_inbound";
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetStatus": "pending" | "uploading" | "downloading" | "processing" | "ready" | "failed" | "deleting" | "deleted";
         "github_com_evolution-foundation_evolution-go_pkg_media_model.AssetVariant": {
-            createdAt?: string;
-            height?: number;
-            mimeType?: string;
-            sha256?: string;
-            sizeBytes?: number;
-            variant?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_media_model.VariantKind"];
-            width?: number;
+            createdAt: string;
+            height: number;
+            /** @enum {string} */
+            mimeType: "image/jpeg" | "image/png";
+            sha256: string;
+            sizeBytes: number;
+            /** @enum {unknown} */
+            variant: "canonical" | "provider_original";
+            width: number;
         };
         /** @enum {string} */
         "github_com_evolution-foundation_evolution-go_pkg_media_model.VariantKind": "provider_original" | "canonical";
@@ -10377,25 +10525,28 @@ export interface components {
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat": {
             archived?: boolean;
-            chatId?: string;
+            chatId: string;
             contactId?: string;
             disappearingTimer?: number;
             displayName?: string;
+            /** @enum {string} */
+            displayNameSource?: "full_name" | "business_name" | "push_name" | "first_name" | "username" | "provider_chat" | "group_subject" | "newsletter_name" | "broadcast_name";
+            displayNameUpdatedAt?: string;
             lastActivityAt?: string;
             lastMessageAt?: string;
             lastMessageId?: string;
             mutedUntil?: string;
             pinned?: boolean;
-            type?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType"];
-            unreadCount?: number;
+            type: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType"];
+            unreadCount: number;
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage": {
             caption?: string;
-            chatId?: string;
+            chatId: string;
             contentSummary?: string;
             contentText?: string;
             deliveredAt?: string;
-            direction?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection"];
+            direction: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageDirection"];
             historySyncId?: string;
             mediaAssetId?: string;
             mediaDurationSeconds?: number;
@@ -10405,12 +10556,12 @@ export interface components {
             mediaSize?: number;
             mediaType?: string;
             mediaWidth?: number;
-            messageId?: string;
-            messageType?: string;
+            messageId: string;
+            messageType: string;
             participantJid?: string;
             playedAt?: string;
-            provenance?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance"];
-            providerTimestamp?: string;
+            provenance: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance"];
+            providerTimestamp: string;
             quotedMessageId?: string;
             readAt?: string;
             recipientJid?: string;
@@ -10862,6 +11013,15 @@ export interface components {
             PushName?: string;
             RedactedPhone?: string;
             Username?: string;
+            addressingJid: string;
+            aliases: string[];
+            contactId: string;
+            displayName?: string;
+            /** @enum {string} */
+            displayNameSource?: "full_name" | "business_name" | "push_name" | "first_name" | "username";
+            /** @enum {string} */
+            identityStatus: "complete" | "partial";
+            identityUpdatedAt: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_user_service.GetAvatarStruct": {
             number?: string;
@@ -13667,17 +13827,6 @@ export interface components {
         "github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct": {
             content: {
                 "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct"];
-            };
-        };
-        postCampaignMedia: {
-            content: {
-                "multipart/form-data": {
-                    /**
-                     * Format: binary
-                     * @description JPEG or PNG image
-                     */
-                    file: string;
-                };
             };
         };
         /** @description Chat */

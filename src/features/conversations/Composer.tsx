@@ -1,90 +1,180 @@
-import { useState } from 'react';
-import type { MediaType } from '@/api/messages';
-import { Button, Dialog, Field, Input, Select, StateNotice, Textarea } from '@/ui';
-import { useSendMedia, useSendText } from './hooks';
+import { useEffect, useMemo, useState } from 'react';
+import { ApiFailure } from '@/api/envelopes';
+import type { MediaType, MessageCommandResult } from '@/api/messages';
+import { relativeTime } from '@/lib/format';
+import { Button, Dialog, Field, FileUpload, Input, Select, StateNotice, Tabs, Textarea } from '@/ui';
+import { useConversationMediaAsset, useSendMedia, useSendText, useUploadConversationImage } from './hooks';
+import { commandCooldown, shouldPreserveCommandError } from './send-policy';
 import { FailureNotice } from './ui';
+
+const HARD_MEDIA_CEILING = 67_108_864;
 
 function validHttpUrl(value: string): boolean {
   try { return ['http:', 'https:'].includes(new URL(value).protocol); } catch { return false; }
 }
 
-export function Composer({ chatId, chatName, enabled }: { chatId: string; chatName: string; enabled: boolean }) {
+function fileError(file: File | undefined): string | undefined {
+  if (!file) return undefined;
+  if (!['image/jpeg', 'image/png'].includes(file.type)) return 'Choose a JPEG or PNG image.';
+  if (file.size > HARD_MEDIA_CEILING) return 'The image exceeds the 64 MiB client safety ceiling.';
+  return undefined;
+}
+
+function acknowledgementDetail(result: MessageCommandResult): string {
+  const parts = [
+    result.data.messageId ? `Message ${result.data.messageId}` : undefined,
+    result.data.acknowledgedAt ? `acknowledged ${relativeTime(result.data.acknowledgedAt) || result.data.acknowledgedAt}` : undefined,
+  ].filter(Boolean);
+  return `${parts.length ? `${parts.join(' · ')}. ` : ''}This is provider acknowledgement, not WhatsApp delivery. Projected status and receipts remain authoritative.`;
+}
+
+function unknownSendOutcome(error: unknown): boolean {
+  return error instanceof ApiFailure && error.code === 'unknown_send_outcome';
+}
+
+export function Composer({ chatId, recipient, chatName, enabled, mediaEnabled, unavailableDetail, recipientError, onRetryRecipient }: {
+  chatId: string;
+  recipient: string;
+  chatName: string;
+  enabled: boolean;
+  mediaEnabled: boolean;
+  unavailableDetail?: string;
+  recipientError?: unknown;
+  onRetryRecipient?: () => void;
+}) {
   const [text, setText] = useState('');
   const [mediaOpen, setMediaOpen] = useState(false);
+  const [source, setSource] = useState<'device' | 'url'>('device');
+  const [file, setFile] = useState<File>();
   const [mediaUrl, setMediaUrl] = useState('');
   const [mediaType, setMediaType] = useState<MediaType>('image');
   const [caption, setCaption] = useState('');
   const [filename, setFilename] = useState('');
-  const sendText = useSendText(chatId);
-  const sendMedia = useSendMedia(chatId);
-  const pending = sendText.isPending || sendMedia.isPending;
+  const sendText = useSendText(chatId, recipient);
+  const sendMedia = useSendMedia(chatId, recipient);
+  const upload = useUploadConversationImage();
+  const asset = useConversationMediaAsset(upload.data?.id, mediaEnabled && Boolean(upload.data?.id));
+  const uploadedAsset = asset.data ?? upload.data;
+  const selectedFileError = useMemo(() => fileError(file), [file]);
+  const pending = sendText.isPending || sendMedia.isPending || upload.isPending;
+  const textOutcomeUnknown = unknownSendOutcome(sendText.error);
+  const mediaOutcomeUnknown = unknownSendOutcome(sendMedia.error);
+  const [cooldownNow, setCooldownNow] = useState(Date.now());
+  const textCooldown = commandCooldown(sendText.error, cooldownNow);
+  const mediaCooldown = commandCooldown(sendMedia.error, cooldownNow);
+  const cooldownSeconds = Math.max(textCooldown.remainingSeconds, mediaCooldown.remainingSeconds);
+  const sendCooldown = cooldownSeconds > 0;
+  const retryAt = Math.max(
+    sendText.error instanceof ApiFailure && sendText.error.category === 'rate_limited' ? sendText.error.retryAt ?? 0 : 0,
+    sendMedia.error instanceof ApiFailure && sendMedia.error.category === 'rate_limited' ? sendMedia.error.retryAt ?? 0 : 0,
+  );
+  useEffect(() => {
+    if (retryAt <= Date.now()) return;
+    setCooldownNow(Date.now());
+    const interval = window.setInterval(() => setCooldownNow(Date.now()), 1_000);
+    return () => window.clearInterval(interval);
+  }, [retryAt]);
 
   const submitText = () => {
     const value = text.trim();
-    if (!enabled || !value || pending) return;
+    if (!enabled || !value || pending || sendCooldown) return;
     sendText.reset();
     sendText.mutate(value, { onSuccess: () => setText('') });
   };
-  const closeMedia = () => {
-    if (sendMedia.isPending) return;
-    setMediaOpen(false);
-    setMediaUrl(''); setCaption(''); setFilename(''); setMediaType('image');
-    sendMedia.reset();
+  const resetMediaForm = () => {
+    setFile(undefined); setMediaUrl(''); setCaption(''); setFilename(''); setMediaType('image'); setSource('device');
+    upload.reset();
+    if (!shouldPreserveCommandError(sendMedia.error)) sendMedia.reset();
   };
+  const closeMedia = () => {
+    if (pending) return;
+    setMediaOpen(false);
+    resetMediaForm();
+  };
+  const chooseFile = (next: File | undefined) => {
+    setFile(next);
+    upload.reset();
+    if (!shouldPreserveCommandError(sendMedia.error)) sendMedia.reset();
+  };
+  const sendSelectedMedia = () => {
+    if (!enabled || sendMedia.isPending || sendCooldown) return;
+    sendMedia.reset();
+    if (source === 'device' && uploadedAsset?.status === 'ready') {
+      sendMedia.mutate({ source: 'asset', mediaAssetId: uploadedAsset.id, caption: caption.trim() || undefined });
+    } else if (source === 'url' && validHttpUrl(mediaUrl)) {
+      sendMedia.mutate({ source: 'url', url: mediaUrl.trim(), mediaType, caption: caption.trim() || undefined, filename: filename.trim() || undefined });
+    }
+  };
+  const assetPending = uploadedAsset && !['ready', 'failed', 'deleted'].includes(uploadedAsset.status);
+  const canSendMedia = enabled && (source === 'device'
+    ? mediaEnabled && uploadedAsset?.status === 'ready'
+    : validHttpUrl(mediaUrl));
 
   return (
-    <div className="grid gap-3 p-4 border-t border-line bg-surface">
-      {sendText.data ? <StateNotice kind="info" title="Text send accepted" detail="Acknowledged by the server. This is not WhatsApp delivery; projected status and receipts remain authoritative." /> : null}
+    <div className="grid gap-3 border-t border-line bg-surface p-4">
+      {sendText.data ? <StateNotice kind="info" title="Text send accepted" detail={acknowledgementDetail(sendText.data)} /> : null}
       {sendText.error ? <FailureNotice error={sendText.error} command /> : null}
-      {!enabled ? <StateNotice kind="empty" title="Sending unavailable" detail="Sending requires both messages_projection and outbound_rate_limit. No send request is available." /> : null}
+      {recipientError ? <FailureNotice error={recipientError} onRetry={onRetryRecipient} /> : null}
+      {!enabled ? <StateNotice kind="empty" title="Sending unavailable" detail={unavailableDetail ?? 'Sending requires both messages_projection and outbound_rate_limit. No send request is available.'} /> : null}
 
-      <form className="grid gap-2" onSubmit={(e) => { e.preventDefault(); submitText(); }}>
+      <form className="grid gap-2" onSubmit={(event) => { event.preventDefault(); submitText(); }}>
         <Field label={`Message ${chatName}`}>
-          {(id) => <Textarea
-            id={id}
-            rows={3}
-            value={text}
-            disabled={!enabled || pending}
-            maxLength={10_000}
-            onChange={(e) => setText(e.target.value)}
-          />}
+          {(id) => <Textarea id={id} rows={3} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
         </Field>
         <div className="flex justify-end gap-2">
-          <Button disabled={!enabled || pending} onClick={() => { sendMedia.reset(); setMediaOpen(true); }}>Media URL…</Button>
-          <Button variant="primary" type="submit" disabled={!enabled || !text.trim() || pending}>{sendText.isPending ? 'Submitting…' : 'Send text'}</Button>
+          <Button disabled={!enabled || pending} onClick={() => { resetMediaForm(); setMediaOpen(true); }}>Image or media…</Button>
+          <Button variant="primary" type="submit" disabled={!enabled || !text.trim() || pending || textOutcomeUnknown || sendCooldown}>{sendText.isPending ? 'Submitting…' : sendCooldown ? `Retry in ${cooldownSeconds}s` : 'Send text'}</Button>
         </div>
       </form>
 
       <Dialog
         open={mediaOpen}
         onClose={closeMedia}
-        closeDisabled={sendMedia.isPending}
-        title="Send media from URL"
+        closeDisabled={pending}
+        title="Send image or media"
         footer={sendMedia.data
           ? <Button variant="primary" onClick={closeMedia}>Close acknowledgement</Button>
-          : <><Button disabled={sendMedia.isPending} onClick={closeMedia}>Cancel</Button><Button variant="primary" disabled={!validHttpUrl(mediaUrl) || sendMedia.isPending} onClick={() => sendMedia.mutate({ url: mediaUrl.trim(), mediaType, caption: caption.trim() || undefined, filename: filename.trim() || undefined })}>{sendMedia.isPending ? 'Submitting…' : 'Send media'}</Button></>}
+          : <><Button disabled={pending} onClick={closeMedia}>Cancel</Button><Button variant="primary" disabled={!canSendMedia || pending || mediaOutcomeUnknown || sendCooldown} onClick={sendSelectedMedia}>{sendMedia.isPending ? 'Submitting…' : sendCooldown ? `Retry in ${cooldownSeconds}s` : 'Send media'}</Button></>}
       >
-        <div className="grid gap-3">
-          <p className="text-sm text-fg-2">Console sends a remote HTTP(S) URL. It never retains binary or base64 media.</p>
-          {sendMedia.data ? <StateNotice kind="info" title="Media send accepted" detail="Delivery remains unconfirmed until it appears in projected status and receipts." /> : null}
+        <div className="grid gap-4">
+          <Tabs active={source} onChange={(id) => { setSource(id as 'device' | 'url'); if (!shouldPreserveCommandError(sendMedia.error)) sendMedia.reset(); }} tabs={[{ id: 'device', label: 'Device image' }, { id: 'url', label: 'Remote URL' }]} />
+          {sendMedia.data ? <StateNotice kind="info" title="Media send accepted" detail={acknowledgementDetail(sendMedia.data)} /> : null}
           {sendMedia.error ? <FailureNotice error={sendMedia.error} command /> : null}
-          {!sendMedia.data ? (
+          {!sendMedia.data && source === 'device' ? (
             <>
+              {!mediaEnabled ? <StateNotice kind="empty" title="Managed image upload unavailable" detail="This instance does not advertise conversation_media_assets. Text and the legacy remote URL path remain available." /> : null}
+              <FileUpload
+                label="JPEG or PNG image"
+                accept="image/jpeg,image/png"
+                file={file}
+                disabled={!mediaEnabled || pending || Boolean(uploadedAsset)}
+                error={selectedFileError}
+                description="The server default limit is 8 MiB and may vary by deployment. Console enforces a 64 MiB hard safety ceiling."
+                onFileChange={chooseFile}
+              />
+              {upload.error ? <FailureNotice error={upload.error} command /> : null}
+              {asset.error ? <FailureNotice error={asset.error} onRetry={() => asset.refetch()} /> : null}
+              {uploadedAsset ? (
+                <StateNotice
+                  kind={uploadedAsset.status === 'ready' ? 'info' : uploadedAsset.status === 'failed' || uploadedAsset.status === 'deleted' ? 'error' : 'loading'}
+                  title={uploadedAsset.status === 'ready' ? 'Image ready to send' : uploadedAsset.status === 'failed' || uploadedAsset.status === 'deleted' ? 'Image unavailable' : 'Preparing private image'}
+                  detail={uploadedAsset.failureCode ?? (assetPending ? 'Waiting for authoritative asset metadata. The send action remains disabled.' : `Asset ${uploadedAsset.id}`)}
+                />
+              ) : null}
+              {!uploadedAsset ? <div className="flex justify-end"><Button disabled={!mediaEnabled || !file || Boolean(selectedFileError) || pending} onClick={() => file && upload.mutate(file)}>{upload.isPending ? 'Uploading…' : 'Upload image'}</Button></div> : null}
+              <Field label="Caption (optional)">{(id) => <Input id={id} value={caption} maxLength={4_096} disabled={pending} onChange={(event) => setCaption(event.target.value)} />}</Field>
+            </>
+          ) : !sendMedia.data ? (
+            <>
+              <p className="text-sm text-fg-2">Compatibility path for a remote HTTP(S) media URL. No URL, base64, or file is combined with a managed media asset.</p>
               <Field label="HTTP(S) media URL" error={mediaUrl && !validHttpUrl(mediaUrl) ? 'Enter an HTTP(S) URL.' : undefined}>
-                {(id) => <Input id={id} type="url" value={mediaUrl} autoComplete="off" spellCheck={false} onChange={(e) => setMediaUrl(e.target.value)} />}
+                {(id) => <Input id={id} type="url" value={mediaUrl} autoComplete="off" spellCheck={false} onChange={(event) => setMediaUrl(event.target.value)} />}
               </Field>
               <Field label="Media type">
-                {(id, labelId) => (
-                  <Select id={id} aria-labelledby={labelId} value={mediaType} onValueChange={(value) => setMediaType(value as MediaType)}>
-                    <option value="image">Image</option>
-                    <option value="video">Video</option>
-                    <option value="audio">Audio</option>
-                    <option value="document">Document</option>
-                  </Select>
-                )}
+                {(id, labelId) => <Select id={id} aria-labelledby={labelId} value={mediaType} onValueChange={(value) => setMediaType(value as MediaType)}><option value="image">Image</option><option value="video">Video</option><option value="audio">Audio</option><option value="document">Document</option></Select>}
               </Field>
-              <Field label="Caption (optional)">{(id) => <Input id={id} value={caption} maxLength={4_096} onChange={(e) => setCaption(e.target.value)} />}</Field>
-              <Field label="Filename (optional)">{(id) => <Input id={id} value={filename} maxLength={255} onChange={(e) => setFilename(e.target.value)} />}</Field>
+              <Field label="Caption (optional)">{(id) => <Input id={id} value={caption} maxLength={4_096} onChange={(event) => setCaption(event.target.value)} />}</Field>
+              <Field label="Filename (optional)">{(id) => <Input id={id} value={filename} maxLength={255} onChange={(event) => setFilename(event.target.value)} />}</Field>
             </>
           ) : null}
         </div>

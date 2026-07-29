@@ -9,6 +9,7 @@ import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, Spli
 import { Composer } from './Composer';
 import { ChatList, ContactList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
 import { DirectoryInspector, MessageInspector } from './Details';
+import { ConversationMessageImage } from './Media';
 import { useChat, useChats, useContact, useContacts, useLabel, useLabels, useMessages } from './hooks';
 import { conversationRouteState, setConversationParam, type ConversationView } from './route-state';
 import { FailureNotice, ProjectionStatus } from './ui';
@@ -41,19 +42,24 @@ export function ConversationsPage() {
   const contactsReady = instanceScope && cap('contacts_projection');
   const labelsReady = instanceScope && cap('labels_projection');
   const outboundReady = cap('outbound_rate_limit');
+  const canonicalIdentity = cap('canonical_contact_identity');
+  const conversationMedia = cap('conversation_media_assets');
   const chats = useChats(route.cursor, route.view === 'chats' && chatsReady);
   const chat = useChat(activeChatId, chatsReady);
+  const selectedChat = chat.data?.resource;
+  const selectedChatContact = useContact(selectedChat?.type === 'direct' ? selectedChat.contactId : undefined, contactsReady && canonicalIdentity, canonicalIdentity);
+  const canonicalRecipientRequired = Boolean(canonicalIdentity && selectedChat?.type === 'direct' && selectedChat.contactId);
+  const sendRecipient = canonicalRecipientRequired ? selectedChatContact.data?.resource.addressingJid : selectedChat?.id;
   const messages = useMessages(activeChatId, route.messageCursor, messagesReady);
-  const contacts = useContacts(route.search, route.cursor, route.view === 'contacts' && contactsReady);
+  const contacts = useContacts(route.search, route.cursor, route.view === 'contacts' && contactsReady, canonicalIdentity);
   const labels = useLabels(route.view === 'labels' && labelsReady);
-  const contact = useContact(route.view === 'contacts' ? route.selected : undefined, contactsReady);
+  const contact = useContact(route.view === 'contacts' ? route.selected : undefined, contactsReady, canonicalIdentity);
   const label = useLabel(route.view === 'labels' ? route.selected : undefined, labelsReady);
   const loadedChats = chats.data?.resource.items ?? [];
   const filteredChats = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedChats.filter((i) => !term || i.id.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedChats, route.search]);
   const loadedLabels = labels.data?.resource ?? [];
   const filteredLabels = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedLabels.filter((i) => !term || i.id.toLocaleLowerCase().includes(term) || i.name?.toLocaleLowerCase().includes(term)); }, [loadedLabels, route.search]);
   const loadedMessages = useMemo(() => [...(messages.data?.resource.items ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages.data]);
-  const selectedChat = chat.data?.resource;
   const chatsSupported = chatsReady || chats.data !== undefined || chat.data !== undefined;
   const messagesSupported = messagesReady || messages.data !== undefined;
 
@@ -75,6 +81,12 @@ export function ConversationsPage() {
   const refresh = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(currentQuery.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined }, ['selected'])));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
+  useEffect(() => {
+    const returnedId = contact.data?.resource.id;
+    if (canonicalIdentity && route.view === 'contacts' && route.selected && returnedId && returnedId !== route.selected) {
+      setSearchParams(setConversationParam(searchParams, 'selected', returnedId), { replace: true });
+    }
+  }, [canonicalIdentity, contact.data?.resource.id, route.selected, route.view, searchParams, setSearchParams]);
 
   if (!instanceScope) return <BlockedPage title="Instance credential required" detail="Conversations requires an instance credential. Admin scope cannot read token-scoped projections, and no request was sent." />;
   if (capabilities.isPending) return <BlockedPage title="Discovering capabilities" detail="Discovering instance capabilities before enabling projection reads." />;
@@ -91,7 +103,7 @@ export function ConversationsPage() {
         title="Conversations"
         description="Review projected chats, contacts, labels, and message history."
         secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
-        compactTitle={hasChat ? selectedChat?.displayName ?? activeChatId ?? 'Message timeline' : 'Conversations'}
+        compactTitle={hasChat ? selectedChat?.displayName ?? (selectedChat ? `Unknown ${selectedChat.type} chat` : 'Message timeline') : 'Conversations'}
         compactDescription={hasChat ? (selectedChat ? humanizeToken(selectedChat.type) : 'Message timeline') : undefined}
         compactLeadingAction={hasChat ? <Button onClick={closeChat}>Back</Button> : undefined}
         compactActions={<Button disabled={!viewSupported || (hasChat ? detailRefreshing : currentQuery.isFetching)} onClick={hasChat ? refreshDetail : refreshDirectory}>{(hasChat ? detailRefreshing : currentQuery.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
@@ -110,11 +122,15 @@ export function ConversationsPage() {
                 <Tabs
                   active={route.view}
                   onChange={(id) => switchView(id as ConversationView)}
-                  tabs={[{ id: 'chats', label: 'Chats' }, { id: 'contacts', label: 'Contacts' }, { id: 'labels', label: 'Labels' }]}
+                  tabs={[
+                    { id: 'chats', label: 'Chats', count: chats.data?.resource.total },
+                    { id: 'contacts', label: 'Contacts', count: contacts.data?.resource.total },
+                    { id: 'labels', label: 'Labels', count: labels.data?.resource.length },
+                  ]}
                 />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
                   <Field label="Search" className="min-w-48 flex-1">
-                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder={route.view === 'contacts' ? 'Server prefix search' : 'Filter loaded page'} onChange={(e) => setSearchDraft(e.target.value)} />}
+                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder={route.view === 'contacts' ? 'Search projected contacts' : 'Filter loaded page'} onChange={(e) => setSearchDraft(e.target.value)} />}
                   </Field>
                   <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
                 </FilterToolbar>
@@ -142,7 +158,7 @@ export function ConversationsPage() {
           <>
             <WorkspacePaneHeader
               className="max-[900px]:hidden"
-              title={selectedChat?.displayName ?? selectedChat?.id ?? 'Message timeline'}
+              title={selectedChat?.displayName ?? (selectedChat ? `Unknown ${selectedChat.type} chat` : 'Message timeline')}
               description={activeChatId ? 'Persisted projection history' : 'Select a projected chat to inspect its history'}
             />
             {!activeChatId ? (
@@ -155,6 +171,7 @@ export function ConversationsPage() {
               <div className="p-4"><FailureNotice error={chat.error} onRetry={() => chat.refetch()} /></div>
             ) : selectedChat ? (
               <>
+                {chat.error ? <div className="px-4 pt-3"><FailureNotice error={chat.error} stale onRetry={() => chat.refetch()} /></div> : null}
                 <div className="px-4"><ProjectionStatus meta={chat.data?.meta} /></div>
                 <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
                   <ConversationUnreadCount count={selectedChat.unreadCount} context="detail" />
@@ -169,7 +186,9 @@ export function ConversationsPage() {
                   <div className="p-4"><FailureNotice error={messages.error} onRetry={() => messages.refetch()} /></div>
                 ) : messages.data ? (
                   <>
-                    <MessageTimeline items={loadedMessages} selectedId={route.message} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'message', id))} />
+                    {messages.error ? <div className="px-4 pt-3"><FailureNotice error={messages.error} stale onRetry={() => messages.refetch()} /></div> : null}
+                    <div className="px-4"><ProjectionStatus meta={messages.data.meta} /></div>
+                    <MessageTimeline items={loadedMessages} selectedId={route.message} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'message', id))} renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />} />
                     {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No messages" detail="The ready message projection contains no messages." /></div> : null}
                     <CursorPagination cursor={route.messageCursor} nextCursor={messages.data.resource.pagination.nextCursor ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))} />
                   </>
@@ -180,12 +199,27 @@ export function ConversationsPage() {
             )}
           </>
         }
-        detailFooter={selectedChat ? <Composer chatId={selectedChat.id} chatName={selectedChat.displayName ?? selectedChat.id} enabled={messagesReady && outboundReady} /> : undefined}
+        detailFooter={selectedChat ? <Composer
+          chatId={selectedChat.id}
+          recipient={sendRecipient ?? ''}
+          chatName={selectedChat.displayName ?? `Unknown ${selectedChat.type} chat`}
+          enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
+          mediaEnabled={conversationMedia}
+          unavailableDetail={!sendRecipient && canonicalRecipientRequired
+            ? selectedChatContact.isPending
+              ? 'Waiting for the canonical contact addressing JID. Console will not send to a contact ID or inferred recipient.'
+              : selectedChatContact.error
+                ? 'Canonical contact lookup failed. Retry the identity read before sending; no inferred recipient will be used.'
+                : 'The canonical contact has no addressing JID. Sending remains disabled until the backend publishes one.'
+            : undefined}
+          recipientError={canonicalRecipientRequired ? selectedChatContact.error : undefined}
+          onRetryRecipient={canonicalRecipientRequired ? () => { void selectedChatContact.refetch(); } : undefined}
+        /> : undefined}
         />
       </WorkspacePageFrame>
 
-      {route.message && activeChatId && messagesSupported ? <MessageInspector messageId={route.message} loadedChat={selectedChat} enabled={messagesReady} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
-      {route.selected && route.view !== 'chats' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
+      {route.message && activeChatId && messagesSupported ? <MessageInspector messageId={route.message} loadedChat={selectedChat} enabled={messagesReady} mediaEnabled={conversationMedia} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
+      {route.selected && route.view !== 'chats' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} meta={route.view === 'contacts' ? contact.data?.meta : label.data?.meta} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
     </>
   );
 }

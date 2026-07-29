@@ -11,6 +11,8 @@ const chat = {
   contactId: 'contact-1',
   type: 'direct',
   displayName: 'Ada',
+  displayNameSource: 'full_name',
+  displayNameUpdatedAt: '2026-07-22T07:59:00Z',
   lastMessageId: 'message-1',
   lastMessageAt: '2026-07-22T08:00:00Z',
   lastActivityAt: '2026-07-22T08:00:01Z',
@@ -24,16 +26,17 @@ describe('chats projection adapter', () => {
     const GET = vi.fn().mockResolvedValue(ok({
       message: 'success',
       data: [chat],
-      meta: { source: 'projection', syncStatus: 'stale', nextCursor: 'opaque/next' },
+      meta: { source: 'projection', syncStatus: 'stale', nextCursor: 'opaque/next', total: 217 },
     }));
 
     const result = await listChats({ GET } as unknown as ApiClient, { cursor: 'opaque/current', limit: 25 });
 
     expect(GET).toHaveBeenCalledWith('/chat/list', { params: { query: { cursor: 'opaque/current', limit: 25 } } });
     expect(result.resource.items).toEqual([expect.objectContaining({
-      resourceType: 'chat', id: chat.chatId, type: 'direct', unreadCount: 2,
+      resourceType: 'chat', id: chat.chatId, contactId: 'contact-1', type: 'direct', displayNameSource: 'full_name', unreadCount: 2,
     })]);
     expect(result.resource.pagination).toEqual({ nextCursor: 'opaque/next', hasMore: true });
+    expect(result.resource.total).toBe(217);
     expect(result.meta?.syncStatus).toBe('stale');
   });
 

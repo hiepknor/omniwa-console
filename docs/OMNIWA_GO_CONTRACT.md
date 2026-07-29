@@ -1,7 +1,7 @@
 # OmniWA GO Public Contract
 
 This is the Console-facing handoff for the OmniWA GO backend at commit
-`ede042a33042bce50868339c1293973713ac0919` (2026-07-28). The vendored machine contract at
+`b5076a32a9e3f79f21e59f0f93a8afc32677a1a1` (2026-07-29). The vendored machine contract at
 `contracts/omniwa-go.openapi.json` remains authoritative for paths and schemas;
 this document records cross-cutting semantics that generated types cannot
 express reliably.
@@ -66,6 +66,8 @@ Known capabilities:
 - `instance_metadata_views`
 - `instance_token_rotation`
 - `instance_credential_health`
+- `canonical_contact_identity`
+- `conversation_media_assets`
 
 Unknown capability strings must be preserved for forward compatibility. A
 projection capability is an initial-readiness/feature-negotiation signal, not a
@@ -87,7 +89,8 @@ Projection reads use the compatible success envelope:
     "source": "projection",
     "syncStatus": "ready",
     "lastSyncedAt": "2026-07-22T08:00:00Z",
-    "nextCursor": "opaque-value"
+    "nextCursor": "opaque-value",
+    "total": 245
   }
 }
 ```
@@ -112,6 +115,10 @@ cached stale result into an empty/not-implemented state.
 `nextCursor` is opaque and may be bound to instance, filter, and query. Never
 decode, construct, modify, or reuse it after its scope changes. Default page
 size is 50 and the server maximum is 200 unless an endpoint documents otherwise.
+For Chat and Contact list/search reads, `meta.total` is the authoritative total
+for that request scope; it is never derived from page length. A ready empty
+projection reports zero. Search totals do not imply an unfiltered total, and
+totals across separately fetched pages are not a snapshot under concurrent writes.
 
 Historical response exception: `GET /label/list` remains a bare array. Do not force
 it through the projection envelope adapter. The Groups client temporarily
@@ -177,7 +184,16 @@ public-safe `details.issues` when state changes after preflight.
 - `GET /label/list`
 - `GET /label/info/{labelId}`
 
-Contact search covers JID, names, username, and normalized/redacted phone. A
+When `canonical_contact_identity` is advertised, `contactId` is the sole
+person/entity/cache identity and `addressingJid` is the send target. Aliases are
+lookup material only. The browser never merges contacts by name, phone text, or
+heuristic, including records whose `identityStatus` is `partial`. Detail reads
+accept canonical/absorbed IDs and JID aliases but normalize back to the returned
+canonical ID. During mixed rollout, historical PascalCase fields remain supported;
+canonical fields are ignored until the capability is present.
+
+Contact search covers canonical and absorbed IDs, aliases, JID, names, and
+username using backend normalization. A
 wildcard is an ordinary character. `/user/check` may return a complete stale
 identity result for at most 90 seconds when WhatsApp is rate-limited; it never
 returns partial results, and mutations/sends do not use this fallback.
@@ -190,9 +206,44 @@ returns partial results, and mutations/sends do not use this fallback.
 - `GET /message/{messageId}`
 - `GET /message/{messageId}/delivery`
 
+Projected Chats carry display names so directory rendering never fetches one
+Contact per row. Direct names come from canonical Contact identity; group,
+newsletter, and broadcast names come from their type-specific projection. An
+absent name renders as unknown rather than exposing a phone/JID-derived label.
+
 Message pagination uses keyset cursors. New messages do not shift pages already
 read. Successful sends write through to the projection. Default message
-retention is 90 days (`2160h`); media binary is not persisted in projections.
+retention is 90 days (`2160h`). Timestamp display uses `providerTimestamp`, then
+`sentAt`, then `deliveredAt`; it never invents a timestamp. Media binary is not
+persisted in message projections.
+
+### Conversation media assets
+
+`conversation_media_assets` gates the unified Conversations upload/send/inbound
+flow. Neither `group_photo_assets` nor the older image capability flags enable
+this flow. Device upload uses authenticated multipart `POST /media-assets` with
+one JPEG/PNG `file` and a stable `Idempotency-Key`; Console enforces the 64 MiB
+hard ceiling while explaining that the deployment default is 8 MiB and may vary.
+
+Metadata is polled at `GET /media-assets/{mediaId}` only until `ready`, `failed`,
+or `deleted`. Authenticated binary content is fetched from
+`GET /media-assets/{mediaId}/content` only after ready and is rendered from an
+ephemeral browser blob URL. Provider/private URLs never cross the UI boundary.
+An incoming projected message remains visible while its asset is pending or
+after failure, expiry, or deletion. History-sync media is not downloaded through
+the older `/message/downloadmedia` path.
+
+Managed send uses the mutually exclusive `mediaAssetId` branch of
+`POST /send/media`; its returned `messageId` and `timestamp` are provider
+acknowledgement only. Send is never automatically retried, especially for
+`unknown_send_outcome`; delivery comes only from projected status/receipts.
+
+Rollout is capability-observed rather than version-inferred. Operations applies
+migrations 34–36 before enabling contact reconciliation, waits for
+`canonical_contact_identity` per instance, provisions the private media bucket
+and descriptor key, enables both Chat and inbound image flags, then waits for
+`conversation_media_assets`. Console does not infer any of these states from a
+version string or migration number.
 
 ### Durable events
 
@@ -225,6 +276,17 @@ The shared adapter recognizes:
 - `invalid_filter`
 - `invalid_window`
 - `not_found`
+- `media_asset_not_found`
+- `media_asset_not_ready`
+- `media_asset_failed`
+- `media_asset_expired`
+- `media_asset_deleted`
+- `unsupported_media_asset_type`
+- `media_asset_too_large`
+- `media_asset_integrity_failed`
+- `media_asset_instance_mismatch`
+- `media_asset_storage_unavailable`
+- `unknown_send_outcome`
 - campaign HTTP `409` invalid transitions
 
 For HTTP `429`, prefer the `Retry-After` response header and fall back to the

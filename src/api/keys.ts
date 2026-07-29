@@ -69,7 +69,10 @@ export const queryKeys = {
     params === undefined
       ? ['instances', instanceId, 'contacts'] as const
       : ['instances', instanceId, 'contacts', params] as const,
-  contact: (instanceId: string, contactId: string) => ['instances', instanceId, 'contact', contactId] as const,
+  contact: (instanceId: string, contactId: string, params?: Record<string, unknown>) =>
+    params === undefined
+      ? ['instances', instanceId, 'contact', contactId] as const
+      : ['instances', instanceId, 'contact', contactId, params] as const,
   instanceLabels: (instanceId: string) => ['instances', instanceId, 'labels'] as const,
   label: (instanceId: string, labelId: string) => ['instances', instanceId, 'label', labelId] as const,
   instanceCampaigns: (instanceId: string, params?: Record<string, unknown>) =>

@@ -7,19 +7,26 @@ type ApiAsset = components['schemas']['github_com_evolution-foundation_evolution
 export type MediaAsset = {
   id: string;
   status: 'pending' | 'uploading' | 'downloading' | 'processing' | 'ready' | 'failed' | 'deleting' | 'deleted';
+  mediaType: string;
+  origin: 'device_upload' | 'whatsapp_inbound';
   mimeType?: string;
   size?: number;
   width?: number;
   height?: number;
-  createdAt?: string;
+  createdAt: string;
+  updatedAt: string;
   readyAt?: string;
+  expiresAt?: string;
+  failureCode?: string;
 };
 
 function toAsset(raw: ApiAsset): MediaAsset {
   return {
-    id: raw.id ?? '', status: raw.status ?? 'pending', mimeType: raw.canonical?.mimeType || undefined,
+    id: raw.id, status: raw.status, mediaType: raw.mediaType, origin: raw.origin,
+    mimeType: raw.canonical?.mimeType || undefined,
     size: raw.canonical?.sizeBytes, width: raw.canonical?.width, height: raw.canonical?.height,
-    createdAt: raw.createdAt || undefined, readyAt: raw.readyAt || undefined,
+    createdAt: raw.createdAt, updatedAt: raw.updatedAt, readyAt: raw.readyAt || undefined,
+    expiresAt: raw.expiresAt || undefined, failureCode: raw.failureCode || undefined,
   };
 }
 

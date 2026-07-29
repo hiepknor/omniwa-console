@@ -7,6 +7,13 @@ function ok(data: unknown) {
 }
 
 const contact = {
+  contactId: '24e3f5ce-52ce-4222-9590-d53af6d38ec8',
+  addressingJid: '100@s.whatsapp.net',
+  aliases: ['100@s.whatsapp.net', '123@lid'],
+  identityStatus: 'complete',
+  identityUpdatedAt: '2026-07-22T07:59:00Z',
+  displayName: 'Ada Canonical',
+  displayNameSource: 'full_name',
   Jid: '100@s.whatsapp.net',
   Found: true,
   FullName: 'Ada Lovelace',
@@ -23,7 +30,7 @@ describe('contacts projection adapter', () => {
     const GET = vi.fn().mockResolvedValue(ok({
       message: 'success',
       data: [contact],
-      meta: { source: 'projection', syncStatus: 'stale', lastSyncedAt: '2026-07-22T08:00:00Z' },
+      meta: { source: 'projection', syncStatus: 'stale', lastSyncedAt: '2026-07-22T08:00:00Z', total: 84 },
     }));
 
     const result = await listContacts({ GET } as unknown as ApiClient);
@@ -37,6 +44,56 @@ describe('contacts projection adapter', () => {
       redactedPhone: '+•••100',
     })]);
     expect(result.meta?.syncStatus).toBe('stale');
+    expect(result.resource.total).toBe(84);
+    expect(result.resource.items[0]).toMatchObject({ id: contact.Jid, identityStatus: 'legacy', aliases: [] });
+  });
+
+  it('uses backend-owned canonical identity only when its capability gate is active', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [contact], meta: { total: 1 } }));
+    const result = await listContacts({ GET } as unknown as ApiClient, { canonicalIdentity: true });
+    expect(result.resource.items[0]).toMatchObject({
+      id: contact.contactId,
+      addressingJid: contact.addressingJid,
+      aliases: contact.aliases,
+      identityStatus: 'complete',
+      displayName: 'Ada Canonical',
+      displayNameSource: 'full_name',
+    });
+  });
+
+  it('normalizes an absorbed-ID or alias lookup to the returned canonical contact ID', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: contact, meta: { syncStatus: 'ready' } }));
+    const result = await getContact({ GET } as unknown as ApiClient, 'absorbed-contact-id', true);
+    expect(GET).toHaveBeenCalledWith('/user/contact/{contactId}', { params: { path: { contactId: 'absorbed-contact-id' } } });
+    expect(result.resource).toMatchObject({ id: contact.contactId, addressingJid: contact.addressingJid });
+  });
+
+  it('fails closed when a canonical record omits its command address', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: { ...contact, addressingJid: undefined },
+      meta: { syncStatus: 'ready' },
+    }));
+    const result = await getContact({ GET } as unknown as ApiClient, contact.contactId, true);
+    expect(result.resource).toMatchObject({ id: contact.contactId });
+    expect(result.resource.addressingJid).toBeUndefined();
+  });
+
+  it('keeps the legacy JID as the compatibility command address without a canonical ID', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success', data: { ...contact, contactId: undefined, addressingJid: undefined },
+    }));
+    const result = await getContact({ GET } as unknown as ApiClient, contact.Jid, true);
+    expect(result.resource).toMatchObject({ id: contact.Jid, addressingJid: contact.Jid, identityStatus: 'legacy' });
+  });
+
+  it('does not merge canonical records that share a display name or alias material', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [
+      contact,
+      { ...contact, contactId: 'f4016373-9299-4e2f-90f7-60746f4a19f3', identityStatus: 'partial' },
+    ], meta: { total: 2 } }));
+    const result = await listContacts({ GET } as unknown as ApiClient, { canonicalIdentity: true });
+    expect(result.resource.items.map((item) => item.id)).toEqual([contact.contactId, 'f4016373-9299-4e2f-90f7-60746f4a19f3']);
   });
 
   it('passes a normalized prefix and opaque cursor through unchanged', async () => {
@@ -65,7 +122,7 @@ describe('contacts projection adapter', () => {
       meta: { source: 'projection', syncStatus: 'ready' },
     }));
 
-    const result = await getContact({ GET } as unknown as ApiClient, contact.Jid);
+    const result = await getContact({ GET } as unknown as ApiClient, contact.Jid, false);
 
     expect(GET).toHaveBeenCalledWith('/user/contact/{contactId}', { params: { path: { contactId: contact.Jid } } });
     expect(result.resource.displayName).toBe('Preferred push');

@@ -5,6 +5,7 @@ import type { components } from './generated/schema';
 type ChatPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat'];
 
 export type ChatType = 'direct' | 'group' | 'newsletter' | 'broadcast' | 'unknown';
+export type ChatDisplayNameSource = 'full_name' | 'business_name' | 'push_name' | 'first_name' | 'username' | 'provider_chat' | 'group_subject' | 'newsletter_name' | 'broadcast_name';
 
 export type ChatResource = {
   resourceType: 'chat';
@@ -12,6 +13,8 @@ export type ChatResource = {
   contactId?: string;
   type: ChatType;
   displayName?: string;
+  displayNameSource?: ChatDisplayNameSource;
+  displayNameUpdatedAt?: string;
   lastMessageId?: string;
   lastMessageAt?: string;
   lastActivityAt?: string;
@@ -25,6 +28,7 @@ export type ChatResource = {
 export type ChatPage = {
   items: ChatResource[];
   pagination: { nextCursor: string | null; hasMore: boolean };
+  total?: number;
 };
 
 export type ChatReadResult<T> = { resource: T; meta?: ProjectionMeta };
@@ -46,6 +50,8 @@ function toChat(payload: ChatPayload, fallbackId = ''): ChatResource {
     contactId: nonEmpty(payload.contactId),
     type: chatType(payload.type),
     displayName: nonEmpty(payload.displayName),
+    displayNameSource: payload.displayNameSource,
+    displayNameUpdatedAt: nonEmpty(payload.displayNameUpdatedAt),
     lastMessageId: nonEmpty(payload.lastMessageId),
     lastMessageAt: nonEmpty(payload.lastMessageAt),
     lastActivityAt: nonEmpty(payload.lastActivityAt),
@@ -69,6 +75,7 @@ export async function listChats(
     resource: {
       items: (projection.resource ?? []).map((payload) => toChat(payload)).filter((chat) => chat.id !== ''),
       pagination: { nextCursor, hasMore: nextCursor !== null },
+      total: projection.meta?.total,
     },
     meta: projection.meta,
   };

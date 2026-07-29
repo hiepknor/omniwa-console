@@ -7,7 +7,12 @@ type ContactPayload = components['schemas']['github_com_evolution-foundation_evo
 export type ContactResource = {
   resourceType: 'contact';
   id: string;
+  addressingJid?: string;
+  aliases: string[];
+  identityStatus: 'complete' | 'partial' | 'legacy';
+  identityUpdatedAt?: string;
   displayName?: string;
+  displayNameSource?: 'full_name' | 'business_name' | 'push_name' | 'first_name' | 'username';
   found: boolean;
   firstName?: string;
   fullName?: string;
@@ -27,6 +32,7 @@ export type ContactResource = {
 export type ContactPage = {
   items: ContactResource[];
   pagination: { nextCursor: string | null; hasMore: boolean };
+  total?: number;
 };
 
 export type ContactReadResult<T> = { resource: T; meta?: ProjectionMeta };
@@ -35,8 +41,13 @@ function nonEmpty(value: string | undefined): string | undefined {
   return value?.trim() || undefined;
 }
 
-function toContact(payload: ContactPayload, fallbackId = ''): ContactResource {
-  const id = nonEmpty(payload.Jid) ?? fallbackId;
+function toContact(payload: ContactPayload, fallbackId = '', canonicalIdentity = false): ContactResource {
+  const legacyId = nonEmpty(payload.Jid) ?? fallbackId;
+  const canonicalId = canonicalIdentity ? nonEmpty(payload.contactId) : undefined;
+  const id = canonicalId ?? legacyId;
+  // A canonical record must never silently fall back to a legacy alias for
+  // commands. Compatibility rows without a canonical ID may keep using Jid.
+  const addressingJid = canonicalId ? nonEmpty(payload.addressingJid) : legacyId;
   const fullName = nonEmpty(payload.FullName);
   const pushName = nonEmpty(payload.PushName);
   const businessName = nonEmpty(payload.BusinessName);
@@ -46,7 +57,12 @@ function toContact(payload: ContactPayload, fallbackId = ''): ContactResource {
   return {
     resourceType: 'contact',
     id,
-    displayName: fullName ?? pushName ?? businessName ?? firstName ?? username ?? redactedPhone ?? id,
+    addressingJid,
+    aliases: canonicalIdentity ? [...new Set((payload.aliases ?? []).map((alias) => alias.trim()).filter(Boolean))] : [],
+    identityStatus: canonicalId && payload.identityStatus ? payload.identityStatus : 'legacy',
+    identityUpdatedAt: canonicalId ? nonEmpty(payload.identityUpdatedAt) : undefined,
+    displayName: (canonicalId ? nonEmpty(payload.displayName) : undefined) ?? fullName ?? businessName ?? pushName ?? firstName ?? username ?? redactedPhone,
+    displayNameSource: canonicalId ? payload.displayNameSource : undefined,
     found: payload.Found ?? false,
     firstName,
     fullName,
@@ -64,15 +80,15 @@ function toContact(payload: ContactPayload, fallbackId = ''): ContactResource {
   };
 }
 
-function normalizeContacts(payloads: ContactPayload[]): ContactResource[] {
-  // A stable JID is the instance-scoped projection identity. Ignore malformed
-  // rows instead of introducing duplicate empty React/query identities.
-  return payloads.map((payload) => toContact(payload)).filter((contact) => contact.id !== '');
+function normalizeContacts(payloads: ContactPayload[], canonicalIdentity: boolean): ContactResource[] {
+  // Canonical identity is backend-owned. Never merge rows heuristically in the
+  // browser; during mixed rollout, fall back to the legacy JID per row.
+  return payloads.map((payload) => toContact(payload, '', canonicalIdentity)).filter((contact) => contact.id !== '');
 }
 
 export async function listContacts(
   client: ApiClient,
-  params: { search?: string; cursor?: string; limit?: number } = {},
+  params: { search?: string; cursor?: string; limit?: number; canonicalIdentity?: boolean } = {},
 ): Promise<ContactReadResult<ContactPage>> {
   const search = params.search?.trim() ?? '';
   const result = search || params.cursor
@@ -84,8 +100,9 @@ export async function listContacts(
   const nextCursor = projection.meta?.nextCursor ?? null;
   return {
     resource: {
-      items: normalizeContacts(projection.resource ?? []),
+      items: normalizeContacts(projection.resource ?? [], params.canonicalIdentity ?? false),
       pagination: { nextCursor, hasMore: nextCursor !== null },
+      total: projection.meta?.total,
     },
     meta: projection.meta,
   };
@@ -94,9 +111,10 @@ export async function listContacts(
 export async function getContact(
   client: ApiClient,
   contactId: string,
+  canonicalIdentity = false,
 ): Promise<ContactReadResult<ContactResource>> {
   const projection = unwrapProjection<ContactPayload>(await client.GET('/user/contact/{contactId}', {
     params: { path: { contactId } },
   }));
-  return { resource: toContact(projection.resource, contactId), meta: projection.meta };
+  return { resource: toContact(projection.resource, contactId, canonicalIdentity), meta: projection.meta };
 }

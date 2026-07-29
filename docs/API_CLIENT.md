@@ -175,8 +175,8 @@ Keys mirror resource and credential scope:
 ['instances', instanceId, 'group-lists', groupListId, 'audit', { cursor, limit }]
 ['instances', instanceId, 'group-list-eligibility', { groupJids }]
 ['instances', instanceId, 'group-lists', groupListId, 'eligibility', { expectedVersion }]
-['instances', instanceId, 'contacts', { search, cursor, limit }]
-['instances', instanceId, 'contact', contactId]
+['instances', instanceId, 'contacts', { search, cursor, limit, canonicalIdentity }]
+['instances', instanceId, 'contact', contactId, { canonicalIdentity }]
 ['instances', instanceId, 'labels']
 ['instances', instanceId, 'label', labelId]
 ['instances', instanceId, 'chats', {}] # infinite-query cursors stay in page params
@@ -219,11 +219,20 @@ Do not offer one-click retry after an uncertain send failure. A transport/5xx
 failure can occur after WhatsApp accepted the message, and neither `/send/text`
 nor `/send/media` has a Console-owned idempotency contract. Operators must
 inspect projected history before submitting again. Rate-limit cooldown handling
-remains visible but does not auto-resubmit a send.
+remains visible, disables both Conversation send actions for the reported
+`Retry-After` window, and does not auto-resubmit a send. Without server timing,
+the UI does not invent a cooldown.
 
-Media sends use the JSON URL branch with an explicit supported media type. The
-Console does not retain binary uploads or base64 media in component, mutation,
-or query state.
+Conversation media retains the compatibility JSON URL branch, but the preferred
+capability-gated image path uploads authenticated JPEG/PNG multipart data,
+polls private asset metadata to a terminal state, and sends only the opaque
+`mediaAssetId`. A managed asset request never includes URL, base64, or file
+fields. Binary response blobs and their temporary object URLs are revoked by
+the rendering lifecycle and never enter persistent storage or URL state.
+Timeline reads start only near the viewport (the open inspector is priority),
+non-terminal metadata polling backs off, and binary query entries are collected
+after a short inactive window. `media_asset_not_ready` is a bounded read retry
+and remains visually pending rather than becoming a false terminal failure.
 
 Normalized Group Management commands are the idempotent exception to the
 older provider mutation model. Generate one `Idempotency-Key` per operator
@@ -243,6 +252,12 @@ The Composer requires both `messages_projection` and `outbound_rate_limit`.
 Projection readiness makes the write-through result observable; outbound
 capability confirms that message pacing is independent from information-query
 limits.
+The managed upload/inbound-content branch additionally requires
+`conversation_media_assets`. A canonical direct Chat with a projected
+`contactId` resolves that one selected Contact and sends to its
+`addressingJid`; list rendering never performs per-row Contact reads. Missing or
+failed canonical addressing disables the Composer and never falls back to a JID
+alias.
 
 - Disable duplicate submission while pending.
 - Do not automatically retry mutations.

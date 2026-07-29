@@ -2,6 +2,7 @@ import type { ChatResource } from '@/api/chats';
 import type { ContactResource } from '@/api/contacts';
 import type { LabelResource } from '@/api/labels';
 import type { MessageResource } from '@/api/messages';
+import type { ReactNode } from 'react';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { CountBadge, Status } from '@/ui';
 import { cn } from '@/ui/cn';
@@ -43,7 +44,7 @@ export function ChatList({ items, selectedId, onSelect }: { items: ChatResource[
           key={item.id}
           selected={item.id === selectedId}
           onClick={() => onSelect(item.id)}
-          primary={item.displayName ?? item.id}
+          primary={item.displayName ?? `Unknown ${humanizeToken(item.type)} chat`}
           secondary={`${humanizeToken(item.type)} · ${item.lastActivityAt ? relativeTime(item.lastActivityAt) : 'activity unreported'}`}
           trailing={<ConversationUnreadCount count={item.unreadCount} context="directory" />}
         />
@@ -60,9 +61,9 @@ export function ContactList({ items, selectedId, onSelect }: { items: ContactRes
           key={item.id}
           selected={item.id === selectedId}
           onClick={() => onSelect(item.id)}
-          primary={item.displayName ?? item.id}
-          secondary={item.id}
-          trailing={<Status tone={item.found ? 'ok' : 'neutral'}>{item.found ? 'Known' : 'Unknown'}</Status>}
+          primary={item.displayName ?? 'Unknown contact'}
+          secondary={item.identityStatus === 'legacy' ? 'Legacy identity' : `${humanizeToken(item.identityStatus)} identity`}
+          trailing={<Status tone={item.found ? 'ok' : 'neutral'}>{item.found ? 'Found' : 'Not found'}</Status>}
         />
       ))}
     </ul>
@@ -86,7 +87,7 @@ export function LabelList({ items, selectedId, onSelect }: { items: LabelResourc
   );
 }
 
-export function MessageTimeline({ items, selectedId, onSelect }: { items: MessageResource[]; selectedId?: string; onSelect: (id: string) => void }) {
+export function MessageTimeline({ items, selectedId, onSelect, renderMedia }: { items: MessageResource[]; selectedId?: string; onSelect: (id: string) => void; renderMedia?: (message: MessageResource) => ReactNode }) {
   return (
     <ol className="grid gap-3 p-4" aria-label="Projected message history">
       {items.map((item) => {
@@ -104,6 +105,7 @@ export function MessageTimeline({ items, selectedId, onSelect }: { items: Messag
                 failed && 'border-l-2 border-l-fg-3',
               )}
             >
+              {item.mediaAssetId || item.mediaType === 'image' ? renderMedia?.(item) : null}
               <span className="text-[13px] break-words">{item.contentText ?? item.caption ?? item.contentSummary ?? `[${humanizeToken(item.type)}]`}</span>
               <small className={cn('flex items-center justify-between gap-4 text-[11px]', outgoing ? 'text-bg/70' : 'text-fg-3')}>
                 <span>{item.status ? humanizeToken(item.status) : 'Status unreported'}</span>
