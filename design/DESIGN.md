@@ -260,6 +260,19 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   recoverable read. Timeline loading is near-viewport gated without changing
   geometry. Device upload uses the shared FileUpload inside the canonical Dialog
   and does not change the page frame.
+- **Conversation message timeline** — the timeline uses the full detail pane so
+  incoming and outgoing messages align to its opposite edges. Individual bubbles
+  remain capped at `min(78%,42rem)` to preserve a readable line length; system
+  and unknown directions use a centered neutral treatment. Every message exposes direction
+  in its accessible name and visible metadata, chronological day changes insert
+  hairline separators, and absent text says `Text content not reported` rather
+  than displaying a backend token as content. Group messages never derive a
+  sender from JID: until an authoritative participant display identity exists,
+  incoming group messages say `Participant not identified` and raw identifiers
+  remain inspector-only. Opening a newest cursor page anchors its scroll
+  container to the end; older cursor pages start at their beginning. New items
+  follow only while the operator remains near the end, so active history review
+  is never interrupted.
 - **Conversation details and send availability** — the selected Conversation keeps
   unread, type, and a visible `Details` action in its dense summary when the
   inspector is not docked. Canonical and provider identifiers stay out of the
@@ -314,6 +327,10 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   history page overrides those labels with `Newest` / `Older messages` and says
   that one page is shown, because moving an opaque cursor replaces rather than
   appends the rendered history.
+  Conversation and Messages projection health share one scoped happy-state row
+  only when both are ready. Any differing, syncing, stale, not-ready, or failed
+  state remains a separately labelled status; consolidation never hides degraded
+  observability.
 - **ProgressBar** — an 8px square framed track with an ink fill and explicit
   text label. Determinate progress exposes its bounded numeric value;
   indeterminate progress uses the allowlisted diagonal operational screentone
@@ -433,7 +450,7 @@ or `border-*` utilities and rely on generated CSS order.
 | Image | loading, ready, contain/cover, long caption, missing/error fallback |
 | Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav, pinned instance Connection, admin/unknown Session utility + dialog |
 | Console footer | ready capabilities, discovery pending, discovery failure, version absent, compact tablet, hidden mobile |
-| Workspace page / split workspace | PageHeader + two panes ≥900px, optional third inspector at ≥1560px container width, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px |
+| Workspace page / split workspace | PageHeader + two panes ≥900px, optional third inspector at ≥1560px container width, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px, newest/older scroll alignment |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer / responsive inspector | 1920px docked third column, 1440px desktop Drawer, tablet Drawer, 390px bottom sheet, bounded scroll, pending-close, one-time-secret dismissal, Conversation/Message replacement |
 

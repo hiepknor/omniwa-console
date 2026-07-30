@@ -267,7 +267,16 @@ next direction `Older messages`; it never calls a page replacement `Load more`.
 An invalid opaque cursor
 resets its own query to the first page. The public Conversation DTO currently has no
 label association field, so the Console does not show or infer chat-label
-filters. Each message page renders chronologically. Send acknowledgement only
+filters. Each message page renders chronologically across the full detail pane,
+aligns incoming/outgoing messages to opposite edges, caps bubble line length,
+and preserves day separators plus explicit incoming/outgoing/system direction. A
+newest page anchors to its end; an older cursor page starts at its beginning,
+and appended messages follow only while the operator remains near the end.
+Missing text is reported as missing rather than rendered as a type token. Group
+participants remain unidentified in the timeline until the public projection
+publishes authoritative participant display identity; Console never derives it
+from JID or Contact matching. Conversation and Messages ready states may share
+one scoped status row, but differing/non-ready states remain separate. Send acknowledgement only
 confirms the action response; projected status and per-recipient receipts
 remain authoritative for delivery.
 

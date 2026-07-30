@@ -67,6 +67,7 @@ describe('composite primitives', () => {
         detailOpen
         directoryScrollKey="chats:first-page"
         detailScrollKey="chat_01:first-page"
+        detailInitialPosition="end"
         directoryLabel="Conversations"
         detailLabel="Timeline"
         directory={<WorkspacePaneHeader title="Conversations" />}
