@@ -1,4 +1,4 @@
-import type { ChatResource } from '@/api/chats';
+import type { ConversationResource } from '@/api/conversations';
 import type { ContactResource } from '@/api/contacts';
 import type { LabelResource } from '@/api/labels';
 import type { MessageResource } from '@/api/messages';
@@ -36,15 +36,15 @@ function ResourceButton({ selected, onClick, primary, secondary, trailing }: { s
   );
 }
 
-export function ChatList({ items, selectedId, onSelect }: { items: ChatResource[]; selectedId?: string; onSelect: (id: string) => void }) {
+export function ConversationList({ items, selectedId, onSelect }: { items: ConversationResource[]; selectedId?: string; onSelect: (id: string) => void }) {
   return (
     <ul className="grid">
       {items.map((item) => (
         <ResourceButton
-          key={item.id}
-          selected={item.id === selectedId}
-          onClick={() => onSelect(item.id)}
-          primary={item.displayName ?? `Unknown ${humanizeToken(item.type)} chat`}
+          key={item.conversationId}
+          selected={item.conversationId === selectedId}
+          onClick={() => onSelect(item.conversationId)}
+          primary={item.displayName ?? `Unknown ${humanizeToken(item.type)} conversation`}
           secondary={`${humanizeToken(item.type)} · ${item.lastActivityAt ? relativeTime(item.lastActivityAt) : 'activity unreported'}`}
           trailing={<ConversationUnreadCount count={item.unreadCount} context="directory" />}
         />

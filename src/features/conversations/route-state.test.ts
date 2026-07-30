@@ -4,7 +4,7 @@ import { conversationRouteState, setConversationParam } from './route-state';
 describe('Conversations route state', () => {
   it('preserves opaque cursors and normalizes unknown views', () => {
     expect(conversationRouteState(new URLSearchParams('view=unknown&cursor=opaque%3A1&messageCursor=opaque%3A2'))).toEqual({
-      view: 'chats', search: '', cursor: 'opaque:1', messageCursor: 'opaque:2', selected: undefined, message: undefined,
+      view: 'conversations', search: '', cursor: 'opaque:1', messageCursor: 'opaque:2', selected: undefined, message: undefined,
     });
   });
 

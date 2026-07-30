@@ -24,8 +24,8 @@ const CreateCampaignPage = lazy(() => import('@/features/campaigns/CreateCampaig
 const EventsPage = lazy(() => import('@/features/events/EventsPage').then((m) => ({ default: m.EventsPage })));
 
 export const authenticatedRoutes: RouteObject[] = [
-  { path: '/chats', element: <ConversationsPage /> },
-  { path: '/chats/:chatId', element: <ConversationsPage /> },
+  { path: '/conversations', element: <ConversationsPage /> },
+  { path: '/conversations/:conversationRef', element: <ConversationsPage /> },
   { path: '/groups', element: <GroupsPage /> },
   { path: '/groups/lists', element: <GroupListsPage /> },
   { path: '/groups/lists/new', element: <GroupListEditorPage /> },

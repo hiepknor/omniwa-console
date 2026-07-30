@@ -241,7 +241,7 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   non-quantity facts such as an immutable version, without coupling their future
   treatment to count chips. Conversations omit zero unread counts in dense
   directory rows, show positive unread counts as accessible CountBadges, and
-  pair the badge with a visible `Unread` label in the selected-chat facts.
+  pair the badge with a visible `Unread` label in the selected-conversation facts.
 - **Conversation image lifecycle** — ready private JPEG/PNG content uses the
   shared framed Image primitive. Pending/processing and terminal unavailable
   states retain the message bubble and use a square bordered placeholder with

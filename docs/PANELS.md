@@ -19,10 +19,10 @@ Rules:
 | Shared capability/error/projection layer | Available | Integrated |
 | Instances | Available | Integrated |
 | Groups | Normalized management available | Capability-gated directory, detail, members, commands, photo, audit, and summary integrated |
-| Chats | Projection available | Projection list/detail integrated |
+| Conversations | Canonical projection available | Projection list/detail integrated |
 | Messages and delivery | Projection available | History/detail/receipts and text send integrated |
-| Contacts | Projection available | Directory list/search/detail integrated in Chats workspace |
-| Labels | Projection available | Directory list/detail integrated in Chats workspace |
+| Contacts | Projection available | Directory list/search/detail integrated in Conversations workspace |
+| Labels | Projection available | Directory list/detail integrated in Conversations workspace |
 | Events | Durable history available | Integrated with retention and no-backfill metadata |
 | Overview and Health | Persisted/split APIs available | Integrated |
 | Projection Recovery | Admin failure operations available | Integrated when capability is advertised |
@@ -193,7 +193,7 @@ global total. Audit is terminal history and never a source of current state.
 The Groups directory distinguishes projected group state from WhatsApp send
 mode and does not infer the active account's management permissions or campaign
 eligibility. Its URL-backed inspector owns overview, member, and settings
-contexts. One-off messaging is handed to the Chats workspace, and campaign
+contexts. One-off messaging is handed to the Conversations workspace, and campaign
 target management is handed to Group Lists; Groups does not own a send command.
 
 Group Lists are gated independently by `group_lists`. They are instance-scoped,
@@ -223,9 +223,9 @@ from eligibility, preserve an unreported count as `—`, and place normalized
 group type beside the stable Group JID. The Console never expands members,
 aggregates counts into unique recipients, or uses member count to enable a row.
 
-## Chats workspace — `/chats/:chatId?`
+## Conversations workspace — `/conversations/:conversationRef?`
 
-**Status:** Chat and Message list/detail, delivery receipts, canonical Contacts,
+**Status:** canonical Conversation and Message list/detail, delivery receipts, Contacts,
 Labels, authoritative totals, and bounded text/private-media sends are
 integrated. The route uses the active instance credential as its scope and never
 calls the admin fleet list.
@@ -233,10 +233,10 @@ calls the admin fleet list.
 Core projection ownership:
 
 ```text
-GET /chat/list
-GET /chat/info/{chatId}
-GET /chat/{chatId}/messages
-GET /message/{messageId}
+GET /conversations
+GET /conversations/{conversationRef}
+GET /conversations/{conversationRef}/messages
+GET /conversations/{conversationRef}/messages/{messageId}
 GET /message/{messageId}/delivery
 GET /user/contacts
 GET /user/contacts/search?q=&limit=&cursor=
@@ -251,23 +251,33 @@ With `canonical_contact_identity`, Contacts use returned `contactId` as identity
 and `addressingJid` for sends; aliases never become duplicate rows or a browser
 merge heuristic. A canonical row without `addressingJid` fails closed: the
 Composer stays disabled and exposes the Contact read failure/retry instead of
-falling back to a compatibility alias. Projected Chat names prevent list-level Contact fan-out.
-Contacts use normalized server search and opaque cursors. Chat and Contact
+falling back to a compatibility alias. Projected Conversation names prevent list-level Contact fan-out.
+Contacts use normalized server search and opaque cursors. Conversation and Contact
 counts use `meta.total`, while Labels intentionally use bare-array length.
 Labels intentionally keep
 the backend's historical bare-array list; capability readiness distinguishes a valid
 empty label projection from an unavailable one. Label assignments are consumed
-from future Chat/Message projection fields rather than reconstructed in the
+from future Conversation/Message projection fields rather than reconstructed in the
 browser.
 
-The current Chat and Message cursors stay in the URL. Each view renders one
+The current Conversation and Message cursors stay in the URL. Each view renders one
 bounded page and uses browser
 history or “Start over” rather than decoding a cursor. An invalid opaque cursor
-resets its own query to the first page. The public Chat DTO currently has no
+resets its own query to the first page. The public Conversation DTO currently has no
 label association field, so the Console does not show or infer chat-label
 filters. Each message page renders chronologically. Send acknowledgement only
 confirms the action response; projected status and per-recipient receipts
 remain authoritative for delivery.
+
+`canonical_conversation_identity` is the sole Conversation-read capability.
+Rows use returned `conversationId` as route/entity/cache identity, normalize
+absorbed provider deep links, and send only to projected `addressingJid`.
+`aliases` never become browser rows and message `providerChatId` is provenance
+only. The backend owns alias collapse, message aggregation/deduplication, unread,
+last activity, totals, and cursor scope; Console performs no grouping or Contact
+matching. Capability-off instances receive no `/chat/*` fallback read. Former
+browser URLs and their cursors are not supported by the canonical workspace.
+`conversation_media_assets` remains an independent gate.
 
 Implemented commands owned by the workspace:
 

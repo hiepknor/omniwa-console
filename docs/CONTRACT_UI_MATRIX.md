@@ -60,10 +60,10 @@ for that operation; it does not imply availability or readiness.
 | `GET /media-assets/{mediaId}` | instance | `group_photo_assets` or `conversation_media_assets` | control-plane-read | shared-media-assets | integrated-console |
 | `DELETE /media-assets/{mediaId}` | instance | `none-advertised` | command | shared-media-assets | deferred-product-workflow |
 | `GET /media-assets/{mediaId}/content` | instance | `group_photo_assets` or `conversation_media_assets` | binary-read | shared-media-assets | integrated-console |
-| `GET /chat/{chatId}/messages` | instance | `messages_projection` | projection-read | conversations | integrated-console |
-| `GET /chat/info/{chatId}` | instance | `chats_projection` | projection-read | conversations | integrated-console |
-| `GET /chat/list` | instance | `chats_projection` | projection-read | conversations | integrated-console |
-| `GET /message/{messageId}` | instance | `messages_projection` | projection-read | conversations | integrated-console |
+| `GET /conversations` | instance | `canonical_conversation_identity` | projection-read | conversations | integrated-console |
+| `GET /conversations/{conversationRef}` | instance | `canonical_conversation_identity` | projection-read | conversations | integrated-console |
+| `GET /conversations/{conversationRef}/messages` | instance | `canonical_conversation_identity` + `messages_projection` | projection-read | conversations | integrated-console |
+| `GET /conversations/{conversationRef}/messages/{messageId}` | instance | `canonical_conversation_identity` + `messages_projection` | projection-read | conversations | integrated-console |
 | `GET /message/{messageId}/delivery` | instance | `messages_projection` | projection-read | conversations | integrated-console |
 | `GET /polls/{pollMessageId}/results` | instance | `none-advertised` | live-read | conversations | deferred-product-workflow |
 | `POST /chat/archive` | instance | `none-advertised` | command | conversations | deferred-backend-risk |

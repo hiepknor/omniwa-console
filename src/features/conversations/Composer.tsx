@@ -32,10 +32,10 @@ function unknownSendOutcome(error: unknown): boolean {
   return error instanceof ApiFailure && error.code === 'unknown_send_outcome';
 }
 
-export function Composer({ chatId, recipient, chatName, enabled, mediaEnabled, unavailableDetail, recipientError, onRetryRecipient }: {
-  chatId: string;
-  recipient: string;
-  chatName: string;
+export function Composer({ conversationId, addressingJid, conversationName, enabled, mediaEnabled, unavailableDetail, recipientError, onRetryRecipient }: {
+  conversationId: string;
+  addressingJid: string;
+  conversationName: string;
   enabled: boolean;
   mediaEnabled: boolean;
   unavailableDetail?: string;
@@ -50,8 +50,8 @@ export function Composer({ chatId, recipient, chatName, enabled, mediaEnabled, u
   const [mediaType, setMediaType] = useState<MediaType>('image');
   const [caption, setCaption] = useState('');
   const [filename, setFilename] = useState('');
-  const sendText = useSendText(chatId, recipient);
-  const sendMedia = useSendMedia(chatId, recipient);
+  const sendText = useSendText(conversationId, addressingJid);
+  const sendMedia = useSendMedia(conversationId, addressingJid);
   const upload = useUploadConversationImage();
   const asset = useConversationMediaAsset(upload.data?.id, mediaEnabled && Boolean(upload.data?.id));
   const uploadedAsset = asset.data ?? upload.data;
@@ -118,7 +118,7 @@ export function Composer({ chatId, recipient, chatName, enabled, mediaEnabled, u
       {!enabled ? <StateNotice kind="empty" title="Sending unavailable" detail={unavailableDetail ?? 'Sending requires both messages_projection and outbound_rate_limit. No send request is available.'} /> : null}
 
       <form className="grid gap-2" onSubmit={(event) => { event.preventDefault(); submitText(); }}>
-        <Field label={`Message ${chatName}`}>
+        <Field label={`Message ${conversationName}`}>
           {(id) => <Textarea id={id} rows={3} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
         </Field>
         <div className="flex justify-end gap-2">

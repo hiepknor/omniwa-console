@@ -561,9 +561,9 @@ export function UiGallery() {
             <WorkspacePageFrame
               eyebrow="Messaging"
               title="Conversations"
-              description="Review projected chats, contacts, labels, and message history."
+              description="Review projected conversations, contacts, labels, and message history."
               secondaryActions={<Button>Refresh</Button>}
-              compactTitle={workspaceDetail ? 'chat_01' : 'Conversations'}
+              compactTitle={workspaceDetail ? 'conversation_01' : 'Conversations'}
               compactDescription={workspaceDetail ? 'Projected detail' : undefined}
               compactLeadingAction={workspaceDetail ? <Button onClick={() => setWorkspaceDetail(false)}>Back</Button> : undefined}
               compactActions={<Button>Refresh</Button>}
@@ -576,13 +576,13 @@ export function UiGallery() {
                 directory={
                   <>
                     <WorkspacePaneHeader className="max-[900px]:hidden" title="Directory" description="Select a projected resource" />
-                    {['chat_01', 'chat_02', 'chat_03'].map((id) => <button key={id} type="button" className="flex min-h-14 w-full items-center border-b border-line px-3 text-left text-[13px] hover:bg-elevated" onClick={() => setWorkspaceDetail(true)}><span className="font-mono">{id}</span></button>)}
+                    {['conversation_01', 'conversation_02', 'conversation_03'].map((id) => <button key={id} type="button" className="flex min-h-14 w-full items-center border-b border-line px-3 text-left text-[13px] hover:bg-elevated" onClick={() => setWorkspaceDetail(true)}><span className="font-mono">{id}</span></button>)}
                   </>
                 }
                 detail={
                   <>
-                    <WorkspacePaneHeader className="max-[900px]:hidden" title="chat_01" description="Projected detail" />
-                    <div className="grid gap-3 p-4"><Status tone="ok">Ready</Status><DescriptionList><DescriptionItem label="Identifier" mono>chat_01</DescriptionItem><DescriptionItem label="Updated">Just now</DescriptionItem></DescriptionList></div>
+                    <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Projected detail" />
+                    <div className="grid gap-3 p-4"><Status tone="ok">Ready</Status><DescriptionList><DescriptionItem label="Identifier" mono>conversation_01</DescriptionItem><DescriptionItem label="Updated">Just now</DescriptionItem></DescriptionList></div>
                   </>
                 }
                 detailFooter={<div className="flex justify-end border-t border-line p-3"><Button variant="primary">Narrow action</Button></div>}

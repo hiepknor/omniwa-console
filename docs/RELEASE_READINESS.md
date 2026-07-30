@@ -15,7 +15,7 @@ representative projection and mutation staging acceptance remains required.**
 | Compatibility OmniWA GO servers could not open the fleet panel even though credential-stripping adapters existed. | Capability discovery now selects metadata views when advertised and the compatibility adapter otherwise; no fleet read starts before discovery succeeds. | `fleet-readiness.test.ts`, `instances.test.ts`, credential gate |
 | Group detail disappeared when `groups_projection` temporarily vanished. | Cached detail remains visible while all provider commands are disabled until capability readiness returns. | `GroupWorkspace.test.tsx` |
 | Group sends did not refresh projected conversation history. | Acknowledged group sends invalidate the chat directory and only that group's message pages. | `cache.test.ts`, query-key tests |
-| Chat-directory invalidation also matched every message-history cache. | Message history moved from the `chats` directory namespace to the singular `chat` resource namespace. | `keys.test.ts`, `cache.test.ts` |
+| Conversation-directory invalidation also matched every message-history cache. | Canonical conversation list and per-conversation message roots are distinct while sharing one scoped namespace. | `keys.test.ts`, `cache.test.ts` |
 | Token rotation could refetch status/settings with the replaced token. | Token-authenticated capability, status, QR, and settings entries are removed before installing a replacement credential. | `credential-cache.test.ts` |
 | Backend correlation IDs were discarded. | `ApiFailure` now prefers `X-Request-ID`, falls back to body `requestId`, and every error detail includes its code/category. | `envelopes.test.ts`, `connect-flow.test.ts` |
 | Rate-limited feature errors did not consistently expose cooldown timing or suppress retry. | A shared failure notice now shows the countdown, disables automatic retry, and permits one jittered manual retry after cooldown. | `ApiFailureNotice.test.tsx`, rate-limit contract |
@@ -35,7 +35,7 @@ representative projection and mutation staging acceptance remains required.**
   overflow, clipped control label, or unnamed disabled button was found.
 - Chrome Lighthouse on `/connect`: Accessibility 100 and Best Practices 100.
 - The locally built `dist/` ran under the production nginx base as UID 101.
-  `/healthz` and `/connect`, `/overview`, `/instances`, `/recovery`, `/chats`,
+  `/healthz` and `/connect`, `/overview`, `/instances`, `/recovery`, `/conversations`,
   `/groups`, the then-current Campaigns route, and `/events` all returned HTTP
   200 with SPA fallback.
   CSP, frame denial, no-sniff, referrer, permissions, and no-store headers were
@@ -65,7 +65,7 @@ therefore still required on a non-production runtime with representative data:
 
 1. Exercise compatibility fleet mode against a runtime that does not advertise
    `instance_metadata_views`; the current runtime advertised metadata views.
-2. Exercise Chats/Messages/Contacts/Labels, Groups, Campaigns, and Events
+2. Exercise Conversations/Messages/Contacts/Labels, Groups, Campaigns, and Events
    across ready, empty, syncing/stale/not-ready, rate-limited, and error states.
 3. Commands: pending lock, duplicate-submit prevention, server acknowledgement,
    targeted projection refresh, uncertain-failure handling, and destructive

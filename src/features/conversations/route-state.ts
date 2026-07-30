@@ -1,10 +1,10 @@
 import { readOptionalSearchParam, readSearchEnum, readSearchText, updateSearchParams } from '@/lib/url-search-state';
 
-export type ConversationView = 'chats' | 'contacts' | 'labels';
+export type ConversationView = 'conversations' | 'contacts' | 'labels';
 
 export function conversationRouteState(searchParams: URLSearchParams) {
   return {
-    view: readSearchEnum(searchParams, 'view', ['chats', 'contacts', 'labels'], 'chats') as ConversationView,
+    view: readSearchEnum(searchParams, 'view', ['conversations', 'contacts', 'labels'], 'conversations') as ConversationView,
     search: readSearchText(searchParams, 'search'),
     cursor: readOptionalSearchParam(searchParams, 'cursor'),
     messageCursor: readOptionalSearchParam(searchParams, 'messageCursor'),

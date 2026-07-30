@@ -17,10 +17,10 @@ export const queryKeys = {
   instanceQr: (instanceId: string) => ['instances', instanceId, 'qr'] as const,
   instanceAdvancedSettings: (instanceId: string) =>
     ['instances', instanceId, 'advanced-settings'] as const,
-  instanceChats: (instanceId: string, params?: Record<string, unknown>) =>
+  instanceConversations: (instanceId: string, params?: Record<string, unknown>) =>
     params === undefined
-      ? ['instances', instanceId, 'chats'] as const
-      : ['instances', instanceId, 'chats', params] as const,
+      ? ['instances', instanceId, 'conversations', 'list'] as const
+      : ['instances', instanceId, 'conversations', 'list', params] as const,
   instanceGroups: (instanceId: string, params?: Record<string, unknown>) =>
     params === undefined
       ? ['instances', instanceId, 'groups'] as const
@@ -57,14 +57,16 @@ export const queryKeys = {
       : ['instances', instanceId, 'group', groupId, 'audit', params] as const,
   mediaAsset: (instanceId: string, mediaId: string) => ['instances', instanceId, 'media-assets', mediaId] as const,
   mediaAssetContent: (instanceId: string, mediaId: string) => ['instances', instanceId, 'media-assets', mediaId, 'content'] as const,
-  chat: (instanceId: string, chatId: string) => ['instances', instanceId, 'chat', chatId] as const,
-  instanceMessages: (instanceId: string, chatId: string, params?: Record<string, unknown>) =>
+  conversation: (instanceId: string, conversationId: string) =>
+    ['instances', instanceId, 'conversations', conversationId] as const,
+  conversationMessages: (instanceId: string, conversationId: string, params?: Record<string, unknown>) =>
     params === undefined
-      ? ['instances', instanceId, 'chat', chatId, 'messages'] as const
-      : ['instances', instanceId, 'chat', chatId, 'messages', params] as const,
-  message: (instanceId: string, messageId: string) => ['instances', instanceId, 'message', messageId] as const,
-  messageDeliveryHistory: (instanceId: string, messageId: string) =>
-    ['instances', instanceId, 'message', messageId, 'delivery-history'] as const,
+      ? ['instances', instanceId, 'conversations', conversationId, 'messages'] as const
+      : ['instances', instanceId, 'conversations', conversationId, 'messages', params] as const,
+  conversationMessage: (instanceId: string, conversationId: string, messageId: string) =>
+    ['instances', instanceId, 'conversations', conversationId, 'messages', messageId] as const,
+  messageDeliveryHistory: (instanceId: string, conversationId: string, messageId: string) =>
+    ['instances', instanceId, 'conversations', conversationId, 'messages', messageId, 'delivery-history'] as const,
   instanceContacts: (instanceId: string, params?: Record<string, unknown>) =>
     params === undefined
       ? ['instances', instanceId, 'contacts'] as const

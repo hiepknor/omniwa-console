@@ -9,6 +9,7 @@ describe('scope navigation', () => {
     expect(routes).toContain('/campaigns');
     expect(routes).not.toContain('/instances');
     expect(routes).not.toContain('/messages');
+    expect(routes).toContain('/conversations');
     expect(pinnedNavigationForKeyKind('api')).toEqual({ to: '/connection', label: 'Connection', icon: 'connection', end: true });
     expect(items.find((item) => item.to === '/campaigns')?.label).toBe('Campaigns');
   });

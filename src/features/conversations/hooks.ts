@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
-import { getChat, listChats } from '@/api/chats';
+import { getConversation, listConversations } from '@/api/conversations';
 import { getContact, listContacts } from '@/api/contacts';
 import { getLabel, listLabels } from '@/api/labels';
 import { getMediaAsset, getMediaAssetContent, uploadMediaAsset } from '@/api/media-assets';
@@ -10,29 +10,31 @@ import { getMessage, listMessageReceipts, listMessages, sendMediaMessage, sendTe
 import { ApiFailure } from '@/api/envelopes';
 import { MEDIA_ASSET_READ_POLICY, mediaAssetPollingInterval, pollingWhen, PROJECTION_READ_POLICY, QUERY_INTERVALS } from '@/lib/query-policy';
 
-export function useChats(cursor: string | undefined, enabled: boolean) {
+export function useConversations(cursor: string | undefined, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.instanceChats(SESSION_QUERY_SCOPE, { cursor }), queryFn: () => listChats(client, { cursor, limit: 50 }), enabled, staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled, QUERY_INTERVALS.projection) });
+  const params = { cursor };
+  return useQuery({ queryKey: queryKeys.instanceConversations(SESSION_QUERY_SCOPE, params), queryFn: () => listConversations(client, { ...params, limit: 50 }), enabled, staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled, QUERY_INTERVALS.projection) });
 }
 
-export function useChat(chatId: string | undefined, enabled: boolean) {
+export function useConversation(conversationRef: string | undefined, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.chat(SESSION_QUERY_SCOPE, chatId ?? ''), queryFn: () => getChat(client, chatId ?? ''), enabled: enabled && Boolean(chatId), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(chatId), QUERY_INTERVALS.projection) });
+  return useQuery({ queryKey: queryKeys.conversation(SESSION_QUERY_SCOPE, conversationRef ?? ''), queryFn: () => getConversation(client, conversationRef ?? ''), enabled: enabled && Boolean(conversationRef), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(conversationRef), QUERY_INTERVALS.projection) });
 }
 
-export function useMessages(chatId: string | undefined, cursor: string | undefined, enabled: boolean) {
+export function useMessages(conversationRef: string | undefined, cursor: string | undefined, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.instanceMessages(SESSION_QUERY_SCOPE, chatId ?? '', { cursor }), queryFn: () => listMessages(client, chatId ?? '', { cursor, limit: 100 }), enabled: enabled && Boolean(chatId), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(chatId), QUERY_INTERVALS.projection) });
+  const params = { cursor };
+  return useQuery({ queryKey: queryKeys.conversationMessages(SESSION_QUERY_SCOPE, conversationRef ?? '', params), queryFn: () => listMessages(client, conversationRef ?? '', { ...params, limit: 100 }), enabled: enabled && Boolean(conversationRef), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(conversationRef), QUERY_INTERVALS.projection) });
 }
 
-export function useMessage(messageId: string | undefined, enabled: boolean) {
+export function useMessage(conversationId: string | undefined, messageId: string | undefined, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.message(SESSION_QUERY_SCOPE, messageId ?? ''), queryFn: () => getMessage(client, messageId ?? ''), enabled: enabled && Boolean(messageId), staleTime: PROJECTION_READ_POLICY.staleTime });
+  return useQuery({ queryKey: queryKeys.conversationMessage(SESSION_QUERY_SCOPE, conversationId ?? '', messageId ?? ''), queryFn: () => getMessage(client, conversationId ?? '', messageId ?? ''), enabled: enabled && Boolean(conversationId) && Boolean(messageId), staleTime: PROJECTION_READ_POLICY.staleTime });
 }
 
-export function useReceipts(messageId: string | undefined, enabled: boolean) {
+export function useReceipts(conversationId: string | undefined, messageId: string | undefined, enabled: boolean) {
   const client = useApi();
-  return useQuery({ queryKey: queryKeys.messageDeliveryHistory(SESSION_QUERY_SCOPE, messageId ?? ''), queryFn: () => listMessageReceipts(client, messageId ?? ''), enabled: enabled && Boolean(messageId), staleTime: PROJECTION_READ_POLICY.staleTime });
+  return useQuery({ queryKey: queryKeys.messageDeliveryHistory(SESSION_QUERY_SCOPE, conversationId ?? '', messageId ?? ''), queryFn: () => listMessageReceipts(client, messageId ?? ''), enabled: enabled && Boolean(conversationId) && Boolean(messageId), staleTime: PROJECTION_READ_POLICY.staleTime });
 }
 
 export function useContacts(search: string, cursor: string | undefined, enabled: boolean, canonicalIdentity: boolean) {
@@ -56,29 +58,29 @@ export function useLabel(labelId: string | undefined, enabled: boolean) {
   return useQuery({ queryKey: queryKeys.label(SESSION_QUERY_SCOPE, labelId ?? ''), queryFn: () => getLabel(client, labelId ?? ''), enabled: enabled && Boolean(labelId), staleTime: PROJECTION_READ_POLICY.staleTime });
 }
 
-export function useSendText(chatId: string, recipient = chatId) {
+export function useSendText(conversationId: string, addressingJid: string) {
   const client = useApi();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (text: string) => sendTextMessage(client, recipient, text),
+    mutationFn: (text: string) => sendTextMessage(client, addressingJid, text),
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.instanceChats(SESSION_QUERY_SCOPE) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(SESSION_QUERY_SCOPE, chatId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.instanceConversations(SESSION_QUERY_SCOPE) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversationMessages(SESSION_QUERY_SCOPE, conversationId) }),
       ]);
     },
   });
 }
 
-export function useSendMedia(chatId: string, recipient = chatId) {
+export function useSendMedia(conversationId: string, addressingJid: string) {
   const client = useApi();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: SendMediaInput) => sendMediaMessage(client, recipient, input),
+    mutationFn: (input: SendMediaInput) => sendMediaMessage(client, addressingJid, input),
     onSuccess: async () => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.instanceChats(SESSION_QUERY_SCOPE) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.instanceMessages(SESSION_QUERY_SCOPE, chatId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.instanceConversations(SESSION_QUERY_SCOPE) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.conversationMessages(SESSION_QUERY_SCOPE, conversationId) }),
       ]);
     },
   });

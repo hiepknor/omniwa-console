@@ -9,7 +9,7 @@ import type { MessageResource } from '@/api/messages';
 import { ConversationMessageImage, mediaPlaceholderState, mediaReadCanRetry } from './Media';
 
 const message: MessageResource = {
-  resourceType: 'message', id: 'message-1', chatId: 'chat-1', direction: 'incoming',
+  resourceType: 'message', id: 'message-1', conversationId: 'conversation-1', direction: 'incoming',
   type: 'image', mediaType: 'image', mediaAssetId: 'asset-1', createdAt: '2026-07-29T00:00:00Z', provenance: 'live',
 };
 

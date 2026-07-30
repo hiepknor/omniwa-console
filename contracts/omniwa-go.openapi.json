@@ -1034,174 +1034,6 @@
         }
       }
     },
-    "/chat/info/{chatId}": {
-      "get": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Return a projected chat with locally denormalized contact or type-specific display-name metadata.",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Get a projected chat",
-        "parameters": [
-          {
-            "description": "Chat JID",
-            "name": "chatId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Chat not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Projection not ready",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/list": {
-      "get": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Cursor-page projected chats without live reads. meta.total is the exact active projected-chat count at request time, not a cross-page snapshot.",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "List projected chats",
-        "parameters": [
-          {
-            "description": "Page size (1-200)",
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Opaque pagination cursor",
-            "name": "cursor",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid pagination",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Projection not ready",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/chat/mute": {
       "post": {
         "security": [
@@ -1507,103 +1339,6 @@
         }
       }
     },
-    "/chat/{chatId}/messages": {
-      "get": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "tags": [
-          "Chat"
-        ],
-        "summary": "List projected messages for a chat",
-        "parameters": [
-          {
-            "description": "Chat JID",
-            "name": "chatId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Page size (1-200)",
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Opaque pagination cursor",
-            "name": "cursor",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid pagination",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Projection not ready",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/community/add": {
       "post": {
         "security": [
@@ -1760,6 +1495,374 @@
           },
           "500": {
             "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Cursor-page canonical conversations without live WhatsApp reads. conversationId is the entity identity; addressingJid and aliases are provider-addressing metadata. Requires canonical_conversation_identity readiness, and meta.total counts canonical conversations.",
+        "tags": [
+          "Conversation"
+        ],
+        "summary": "List canonical conversations",
+        "operationId": "listConversations",
+        "parameters": [
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque canonical-conversation cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversation"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination or cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Canonical conversation projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationRef}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "conversationRef accepts a canonical conversation UUID, a current or absorbed provider Chat ID alias, or an absorbed conversation UUID. The response always normalizes identity to conversationId and never uses addressingJid as entity identity.",
+        "tags": [
+          "Conversation"
+        ],
+        "summary": "Get a canonical conversation",
+        "operationId": "getConversation",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider Chat ID",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversation"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Canonical conversation projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationRef}/messages": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "conversationRef accepts a canonical or absorbed identifier. Results aggregate all authoritative provider Chat aliases and deduplicate by instance-scoped provider message identity. conversationId is required; providerChatId is provenance only. Cursors are opaque and scoped to the resolved canonical conversation.",
+        "tags": [
+          "Conversation"
+        ],
+        "summary": "List messages for a canonical conversation",
+        "operationId": "listConversationMessages",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider Chat ID",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size (1-200)",
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque canonical-conversation message cursor",
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid pagination or cursor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Canonical conversation projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationRef}/messages/{messageId}": {
+      "get": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Resolves conversationRef through the canonical instance-scoped resolver and returns the message only when it belongs to that canonical conversation. conversationId is required and providerChatId is provenance only.",
+        "tags": [
+          "Conversation"
+        ],
+        "summary": "Get a message in a canonical conversation",
+        "operationId": "getConversationMessage",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider Chat ID",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Provider message ID scoped to the canonical conversation",
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation or message not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Canonical conversation projection not ready",
             "content": {
               "application/json": {
                 "schema": {
@@ -6821,84 +6924,6 @@
         }
       }
     },
-    "/message/{messageId}": {
-      "get": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "tags": [
-          "Message"
-        ],
-        "summary": "Get a projected message",
-        "parameters": [
-          {
-            "description": "Provider message ID",
-            "name": "messageId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Message not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Projection not ready",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/message/{messageId}/delivery": {
       "get": {
         "security": [
@@ -8571,11 +8596,21 @@
             "ApiKeyAuth": []
           }
         ],
-        "description": "Authenticates either the global admin key or an instance token and returns an explicit credentialScope. instanceId is present only for an instance credential.\nCredential scope is independent of capabilities and projection readiness. A missing or invalid credential returns 401; projection infrastructure failures may return 500.",
+        "description": "Authenticates either the global admin key or an instance token and returns an explicit credentialScope. Admin credentials may target one instance with instanceId; instance credentials are always scoped to their own instance.\nCredential scope is independent of capabilities and projection readiness. A missing or invalid credential returns 401; projection infrastructure failures may return 500.",
         "tags": [
           "Server"
         ],
         "summary": "Get server capabilities",
+        "parameters": [
+          {
+            "description": "Target instance UUID (admin credentials only)",
+            "name": "instanceId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "success",
@@ -8587,8 +8622,38 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid target instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Instance scope mismatch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Target instance not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -10344,6 +10409,7 @@
               "contacts_projection",
               "chats_projection",
               "canonical_contact_identity",
+              "canonical_conversation_identity",
               "group_lists",
               "group_list_eligibility",
               "campaign_group_targets",
@@ -13052,23 +13118,6 @@
           }
         }
       },
-      "github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType": {
-        "type": "string",
-        "enum": [
-          "direct",
-          "group",
-          "newsletter",
-          "broadcast",
-          "unknown"
-        ],
-        "x-enum-varnames": [
-          "ChatTypeDirect",
-          "ChatTypeGroup",
-          "ChatTypeNewsletter",
-          "ChatTypeBroadcast",
-          "ChatTypeUnknown"
-        ]
-      },
       "github_com_evolution-foundation_evolution-go_pkg_projection_model.EventFailureClass": {
         "type": "string",
         "enum": [
@@ -13144,6 +13193,23 @@
             "type": "string"
           }
         }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ConversationType": {
+        "type": "string",
+        "enum": [
+          "direct",
+          "group",
+          "newsletter",
+          "broadcast",
+          "unknown"
+        ],
+        "x-enum-varnames": [
+          "ConversationTypeDirect",
+          "ConversationTypeGroup",
+          "ConversationTypeNewsletter",
+          "ConversationTypeBroadcast",
+          "ConversationTypeUnknown"
+        ]
       },
       "github_com_evolution-foundation_evolution-go_pkg_projection_service.DurableEventHistoryItem": {
         "type": "object",
@@ -13307,22 +13373,33 @@
           }
         }
       },
-      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedChat": {
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversation": {
         "type": "object",
         "required": [
-          "chatId",
+          "conversationId",
           "type",
           "unreadCount"
         ],
         "properties": {
+          "addressingJid": {
+            "type": "string"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "archived": {
             "type": "boolean"
           },
-          "chatId": {
-            "type": "string"
-          },
           "contactId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
           },
           "disappearingTimer": {
             "type": "integer"
@@ -13363,17 +13440,28 @@
             "type": "boolean"
           },
           "type": {
-            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.ChatType"
+            "enum": [
+              "direct",
+              "group",
+              "newsletter",
+              "broadcast",
+              "unknown"
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ConversationType"
+              }
+            ]
           },
           "unreadCount": {
             "type": "integer"
           }
         }
       },
-      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessage": {
+      "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage": {
         "type": "object",
         "required": [
-          "chatId",
+          "conversationId",
           "direction",
           "messageId",
           "messageType",
@@ -13384,14 +13472,15 @@
           "caption": {
             "type": "string"
           },
-          "chatId": {
-            "type": "string"
-          },
           "contentSummary": {
             "type": "string"
           },
           "contentText": {
             "type": "string"
+          },
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
           },
           "deliveredAt": {
             "type": "string"
@@ -13403,7 +13492,8 @@
             "type": "string"
           },
           "mediaAssetId": {
-            "type": "string"
+            "type": "string",
+            "format": "uuid"
           },
           "mediaDurationSeconds": {
             "type": "integer"
@@ -13440,6 +13530,9 @@
           },
           "provenance": {
             "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance"
+          },
+          "providerChatId": {
+            "type": "string"
           },
           "providerTimestamp": {
             "type": "string"
