@@ -21,8 +21,8 @@ Rules:
 | Groups | Normalized management available | Capability-gated directory, detail, members, commands, photo, audit, and summary integrated |
 | Conversations | Canonical projection available | Projection list/detail integrated |
 | Messages and delivery | Projection available | History/detail/receipts and text send integrated |
-| Contacts | Projection available | Directory list/search/detail integrated in Conversations workspace |
-| Labels | Projection available | Directory list/detail integrated in Conversations workspace |
+| Contacts | Projection available | Directory list/search/detail integrated in Directory workspace |
+| Labels | Projection available | Directory list/detail integrated in Directory workspace |
 | Events | Durable history available | Integrated with retention and no-backfill metadata |
 | Overview and Health | Persisted/split APIs available | Integrated |
 | Projection Recovery | Admin failure operations available | Integrated when capability is advertised |
@@ -223,12 +223,49 @@ from eligibility, preserve an unreported count as `—`, and place normalized
 group type beside the stable Group JID. The Console never expands members,
 aggregates counts into unique recipients, or uses member count to enable a row.
 
+## Messaging Directory — `/directory/contacts/:contactId?`, `/directory/labels/:labelId?`
+
+**Status:** canonical Contact list/search/detail and projected Label list/detail are
+integrated as an instance-scoped read-only resource workspace.
+
+Operation ownership:
+
+```text
+GET /user/contacts
+GET /user/contacts/search?q=&limit=&cursor=
+GET /user/contact/{contactId}
+GET /label/list
+GET /label/info/{labelId}
+```
+
+The workspace calls only the active resource projection. It does not fetch an
+inactive directory merely to populate navigation counts. Contacts use returned
+`contactId` as identity when `canonical_contact_identity` is advertised and
+retain the explicit compatibility representation during mixed rollout.
+Aliases are lookup material, never separate rows or browser merge input.
+Canonical Contacts preserve absent `Found` as unreported and never derive a
+canonical display name from compatibility fields.
+Normalized Contact search and its opaque cursor remain URL-backed; changing the
+query or page clears selection, and `invalid_cursor` returns to the first page.
+The active Contact result count comes from `meta.total`, including normalized
+search scope. Labels retain the backend's historical bare-array list and use
+`array.length`; filtering applies to that complete returned array and has no
+cursor. Projection readiness distinguishes a valid empty list from unavailable,
+syncing, stale, or failed state.
+
+At 900px and wider the shared split workspace gives the list 320px and the
+selected resource the remaining detail pane. Below 900px detail replaces the
+list and exposes Back; resource selection remains deep-linkable rather than
+opening a secondary Drawer. Label definitions remain read-only because the
+public Conversation and Message projections do not publish authoritative label
+associations and mutation operations have no advertised product capability.
+
 ## Conversations workspace — `/conversations/:conversationRef?`
 
-**Status:** canonical Conversation and Message list/detail, delivery receipts, Contacts,
-Labels, authoritative totals, and bounded text/private-media sends are
-integrated. The route uses the active instance credential as its scope and never
-calls the admin fleet list.
+**Status:** canonical Conversation and Message list/detail, delivery receipts,
+authoritative totals, and bounded text/private-media sends are integrated. The
+route uses the active instance credential as its scope and never calls the admin
+fleet list.
 
 Core projection ownership:
 
@@ -238,29 +275,16 @@ GET /conversations/{conversationRef}
 GET /conversations/{conversationRef}/messages
 GET /conversations/{conversationRef}/messages/{messageId}
 GET /message/{messageId}/delivery
-GET /user/contacts
-GET /user/contacts/search?q=&limit=&cursor=
-GET /user/contact/{contactId}
-GET /label/list
-GET /label/info/{labelId}
 GET /media-assets/{mediaId}
 GET /media-assets/{mediaId}/content
 ```
 
-With `canonical_contact_identity`, Contacts use returned `contactId` as identity
-and `addressingJid` for sends; aliases never become duplicate rows or a browser
-merge heuristic. A canonical row without `addressingJid` fails closed: the
-Composer stays disabled and exposes the Contact read failure/retry instead of
-falling back to a compatibility alias. Projected Conversation names prevent list-level Contact fan-out.
-Contacts use normalized server search and opaque cursors. Conversation and Contact
-counts use `meta.total`, while Labels intentionally use bare-array length.
-Labels intentionally keep
-the backend's historical bare-array list; capability readiness distinguishes a valid
-empty label projection from an unavailable one. Label assignments are consumed
-from future Conversation/Message projection fields rather than reconstructed in the
-browser.
+Projected Conversation names prevent list-level Contact fan-out. The inspector
+may link a reported `contactId` to the Directory, but Conversations never fetches
+Contacts to render names, routing targets, or counts. A Conversation without its
+authoritative `addressingJid` fails closed and keeps the Composer unavailable.
 
-The current Conversation and Message cursors stay in the URL. Each view renders one
+The current Conversation and Message cursors stay in the URL. Each list renders one
 bounded page and uses browser
 history or `Newest` rather than decoding a cursor. Message pagination names the
 next direction `Older messages`; it never calls a page replacement `Load more`.
@@ -303,8 +327,7 @@ the Composer is replaced by one compact unavailable notice rather than a disable
 form. When available, its shared Textarea auto-grows from one through four lines
 and stays in one bottom-aligned row with `Media…` and `Send text`; notices above
 the row retain command error, cooldown, unknown-outcome, and acknowledgement
-semantics. Canonical Contacts preserve absent `Found` as unreported and never derive a
-canonical display name from compatibility fields.
+semantics.
 
 Implemented commands owned by the workspace:
 

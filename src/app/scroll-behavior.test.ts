@@ -8,6 +8,8 @@ describe('shell scroll behavior', () => {
     expect(mainScrollScope('/groups/lists/list_01', '?search=ops&tab=audit')).toBe('/groups/lists?search=ops');
     expect(mainScrollScope('/events', '?type=message&event=event_01&cursor=opaque')).toBe('/events?type=message&cursor=opaque');
     expect(mainScrollScope('/conversations/conversation_01', '?cursor=opaque&messageCursor=older&message=msg_01')).toBe('/conversations?cursor=opaque');
+    expect(mainScrollScope('/directory/contacts/contact_01', '?search=anna&cursor=opaque')).toBe('/directory/contacts?search=anna&cursor=opaque');
+    expect(mainScrollScope('/directory/labels/label_01', '?search=priority&cursor=ignored')).toBe('/directory/labels?search=priority');
   });
 
   it('treats filters, cursors, and editor routes as new reading contexts', () => {

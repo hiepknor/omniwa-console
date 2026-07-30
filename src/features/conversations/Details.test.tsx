@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import type { ConversationResource } from '@/api/conversations';
 import { ConversationDetailsContent } from './Details';
 
@@ -23,9 +24,13 @@ const conversation: ConversationResource = {
   lastActivityAt: '2026-07-30T07:11:00Z',
 };
 
+function renderDetails(value: ConversationResource): string {
+  return renderToStaticMarkup(<MemoryRouter><ConversationDetailsContent conversation={value} /></MemoryRouter>);
+}
+
 describe('ConversationDetailsContent', () => {
   it('organizes canonical identity, provider routing, and projected state in shared panels', () => {
-    const html = renderToStaticMarkup(<ConversationDetailsContent conversation={conversation} />);
+    const html = renderDetails(conversation);
 
     expect(html).toContain('Canonical identity');
     expect(html).toContain('Provider routing');
@@ -37,13 +42,19 @@ describe('ConversationDetailsContent', () => {
     expect(html).toContain('<h3');
     expect(html).toContain('aria-label="Copy Conversation ID"');
     expect(html).toContain('aria-label="Copy Provider aliases"');
+    expect(html).toContain('href="/directory/contacts/9c37e2c7-875c-48ff-a298-00b853409cb1"');
   });
 
   it('keeps missing optional provider and state fields unreported', () => {
-    const html = renderToStaticMarkup(<ConversationDetailsContent conversation={{ ...conversation, aliases: [], aliasesReported: false, addressingJid: undefined, archived: undefined }} />);
+    const html = renderDetails({ ...conversation, aliases: [], aliasesReported: false, addressingJid: undefined, archived: undefined });
 
     expect(html).toContain('Unreported');
     expect(html).toContain('Not reported');
     expect(html).not.toContain('>0</dd>');
+  });
+
+  it('does not invent a Contact destination when contactId is absent', () => {
+    const html = renderDetails({ ...conversation, contactId: undefined });
+    expect(html).not.toContain('Open contact');
   });
 });

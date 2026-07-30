@@ -16,6 +16,7 @@ const RecoveryPage = lazy(() => import('@/features/platform/RecoveryPage').then(
 const InstancesPage = lazy(() => import('@/features/instances/InstancesPage').then((m) => ({ default: m.InstancesPage })));
 const PairingPage = lazy(() => import('@/features/instances/PairingPage').then((m) => ({ default: m.PairingPage })));
 const ConversationsPage = lazy(() => import('@/features/conversations/ConversationsPage').then((m) => ({ default: m.ConversationsPage })));
+const DirectoryPage = lazy(() => import('@/features/directory/DirectoryPage').then((m) => ({ default: m.DirectoryPage })));
 const GroupsPage = lazy(() => import('@/features/groups/GroupsPage').then((m) => ({ default: m.GroupsPage })));
 const GroupListsPage = lazy(() => import('@/features/groups/GroupListsPage').then((m) => ({ default: m.GroupListsPage })));
 const GroupListEditorPage = lazy(() => import('@/features/groups/GroupListEditorPage').then((m) => ({ default: m.GroupListEditorPage })));
@@ -26,6 +27,11 @@ const EventsPage = lazy(() => import('@/features/events/EventsPage').then((m) =>
 export const authenticatedRoutes: RouteObject[] = [
   { path: '/conversations', element: <ConversationsPage /> },
   { path: '/conversations/:conversationRef', element: <ConversationsPage /> },
+  { path: '/directory', element: <Navigate to="/directory/contacts" replace /> },
+  { path: '/directory/contacts', element: <DirectoryPage /> },
+  { path: '/directory/contacts/:contactId', element: <DirectoryPage /> },
+  { path: '/directory/labels', element: <DirectoryPage /> },
+  { path: '/directory/labels/:labelId', element: <DirectoryPage /> },
   { path: '/groups', element: <GroupsPage /> },
   { path: '/groups/lists', element: <GroupListsPage /> },
   { path: '/groups/lists/new', element: <GroupListEditorPage /> },
@@ -88,6 +94,13 @@ const developmentRoutes = import.meta.env.DEV
         lazy: async () => {
           const { PreviewConversations } = await import('./PreviewConversations');
           return { Component: PreviewConversations };
+        },
+      },
+      {
+        path: '/__preview/directory',
+        lazy: async () => {
+          const { PreviewDirectory } = await import('./PreviewDirectory');
+          return { Component: PreviewDirectory };
         },
       },
       {
