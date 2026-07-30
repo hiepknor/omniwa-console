@@ -12,6 +12,7 @@ export type ConversationResource = {
   conversationId: string;
   contactId?: string;
   aliases: string[];
+  aliasesReported: boolean;
   addressingJid?: string;
   type: ConversationType;
   displayName?: string;
@@ -51,6 +52,7 @@ function toConversation(payload: ConversationPayload): ConversationResource {
     conversationId: nonEmpty(payload.conversationId) ?? '',
     contactId: nonEmpty(payload.contactId),
     aliases: [...new Set((payload.aliases ?? []).map((alias) => alias.trim()).filter(Boolean))],
+    aliasesReported: payload.aliases !== undefined,
     addressingJid: nonEmpty(payload.addressingJid),
     type: conversationType(payload.type),
     displayName: nonEmpty(payload.displayName),

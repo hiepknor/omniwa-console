@@ -262,7 +262,9 @@ browser.
 
 The current Conversation and Message cursors stay in the URL. Each view renders one
 bounded page and uses browser
-history or “Start over” rather than decoding a cursor. An invalid opaque cursor
+history or `Newest` rather than decoding a cursor. Message pagination names the
+next direction `Older messages`; it never calls a page replacement `Load more`.
+An invalid opaque cursor
 resets its own query to the first page. The public Conversation DTO currently has no
 label association field, so the Console does not show or infer chat-label
 filters. Each message page renders chronologically. Send acknowledgement only
@@ -278,6 +280,16 @@ last activity, totals, and cursor scope; Console performs no grouping or Contact
 matching. Capability-off instances receive no `/chat/*` fallback read. Former
 browser URLs and their cursors are not supported by the canonical workspace.
 `conversation_media_assets` remains an independent gate.
+
+The selected Conversation keeps scan-critical facts in the timeline summary and
+opens backend-reported identity, provider routing, and projected state in the
+shared Drawer/Panel/DescriptionList composition. Raw aliases and addressing JID
+remain inside that inspector. Conversation and Message inspectors are mutually
+exclusive URL-backed states. If
+the authoritative command target or required send capabilities are unavailable,
+the Composer is replaced by one compact unavailable notice rather than a disabled
+form. Canonical Contacts preserve absent `Found` as unreported and never derive a
+canonical display name from compatibility fields.
 
 Implemented commands owned by the workspace:
 

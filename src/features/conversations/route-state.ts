@@ -10,6 +10,7 @@ export function conversationRouteState(searchParams: URLSearchParams) {
     messageCursor: readOptionalSearchParam(searchParams, 'messageCursor'),
     selected: readOptionalSearchParam(searchParams, 'selected'),
     message: readOptionalSearchParam(searchParams, 'message'),
+    details: searchParams.get('details') === 'conversation' ? 'conversation' as const : undefined,
   };
 }
 

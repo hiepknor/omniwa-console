@@ -7,12 +7,14 @@ export function CursorPagination({
   nextCursor,
   onCursor,
   resetLabel = 'First page',
+  nextLabel = 'Load more',
   info,
 }: {
   cursor?: string;
   nextCursor?: string;
   onCursor: (cursor?: string) => void;
   resetLabel?: string;
+  nextLabel?: string;
   info?: ReactNode;
 }) {
   if (!cursor && !nextCursor && !info) return null;
@@ -21,7 +23,7 @@ export function CursorPagination({
       <div className="text-xs text-fg-3">{info}</div>
       <div className="flex gap-2 max-sm:grid max-sm:grid-cols-2">
         <Button disabled={!cursor} onClick={() => onCursor(undefined)}>{resetLabel}</Button>
-        <Button disabled={!nextCursor} onClick={() => onCursor(nextCursor)}>Load more</Button>
+        <Button disabled={!nextCursor} onClick={() => onCursor(nextCursor)}>{nextLabel}</Button>
       </div>
     </div>
   );

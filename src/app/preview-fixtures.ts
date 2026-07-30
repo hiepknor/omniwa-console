@@ -51,16 +51,16 @@ export const failuresFixture: ProjectionFailure[] = [
 ] as unknown as ProjectionFailure[];
 
 export const conversationsFixture: ConversationResource[] = [
-  { resourceType: 'conversation', conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555', contactId: '9c37e2c7-875c-48ff-a298-00b853409cb1', aliases: ['15551230001@s.whatsapp.net', '731002@lid'], addressingJid: '731002@lid', displayName: 'Anna Nguyen', displayNameSource: 'full_name', type: 'direct', unreadCount: 2, lastActivityAt: ago(300) },
-  { resourceType: 'conversation', conversationId: '2ab8f0b5-07d2-497f-a32d-0453ff16d347', aliases: ['15551230002@g.us'], addressingJid: '15551230002@g.us', displayName: 'Support escalations', type: 'group', unreadCount: 0, lastActivityAt: ago(3600) },
-  { resourceType: 'conversation', conversationId: 'd29075b2-3f27-45fb-b7ba-86455871cb53', contactId: 'b1277eeb-fccb-4909-a514-d4a3ca5f2a26', aliases: ['15551230003@s.whatsapp.net'], addressingJid: '15551230003@s.whatsapp.net', displayName: 'David Tran', displayNameSource: 'push_name', type: 'direct', unreadCount: 5, lastActivityAt: ago(120) },
-  { resourceType: 'conversation', conversationId: 'ea2e52c9-86ca-45af-ae63-337e24e60709', aliases: ['15551230004@g.us'], addressingJid: '15551230004@g.us', displayName: 'Orders', type: 'group', unreadCount: 0, lastActivityAt: ago(86_400) },
+  { resourceType: 'conversation', conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555', contactId: '9c37e2c7-875c-48ff-a298-00b853409cb1', aliases: ['15551230001@s.whatsapp.net', '731002@lid'], aliasesReported: true, addressingJid: '731002@lid', displayName: 'Anna Nguyen', displayNameSource: 'full_name', displayNameUpdatedAt: ago(900), type: 'direct', unreadCount: 2, lastActivityAt: ago(300), archived: false, pinned: true, disappearingTimer: 86_400 },
+  { resourceType: 'conversation', conversationId: '2ab8f0b5-07d2-497f-a32d-0453ff16d347', aliases: ['15551230002@g.us'], aliasesReported: true, addressingJid: '15551230002@g.us', displayName: 'Support escalations', type: 'group', unreadCount: 0, lastActivityAt: ago(3600) },
+  { resourceType: 'conversation', conversationId: 'd29075b2-3f27-45fb-b7ba-86455871cb53', contactId: 'b1277eeb-fccb-4909-a514-d4a3ca5f2a26', aliases: ['15551230003@s.whatsapp.net'], aliasesReported: true, addressingJid: '15551230003@s.whatsapp.net', displayName: 'David Tran', displayNameSource: 'push_name', type: 'direct', unreadCount: 5, lastActivityAt: ago(120) },
+  { resourceType: 'conversation', conversationId: 'ea2e52c9-86ca-45af-ae63-337e24e60709', aliases: ['15551230004@g.us'], aliasesReported: true, addressingJid: '15551230004@g.us', displayName: 'Orders', type: 'group', unreadCount: 0, lastActivityAt: ago(86_400) },
 ];
 
 export const contactsFixture: ContactResource[] = [
   { resourceType: 'contact', id: '9c37e2c7-875c-48ff-a298-00b853409cb1', addressingJid: '15551230001@s.whatsapp.net', aliases: ['15551230001@s.whatsapp.net', '731002@lid'], identityStatus: 'complete', identityUpdatedAt: ago(900), displayName: 'Anna Nguyen', displayNameSource: 'full_name', found: true },
   { resourceType: 'contact', id: 'b1277eeb-fccb-4909-a514-d4a3ca5f2a26', addressingJid: '15551230003@s.whatsapp.net', aliases: ['15551230003@s.whatsapp.net'], identityStatus: 'partial', identityUpdatedAt: ago(120), displayName: 'David Tran', displayNameSource: 'push_name', found: true },
-  { resourceType: 'contact', id: 'c7a3486f-b861-4aa4-8565-43170f33dde0', addressingJid: '15551230005@s.whatsapp.net', aliases: [], identityStatus: 'partial', identityUpdatedAt: ago(60), found: false },
+  { resourceType: 'contact', id: 'c7a3486f-b861-4aa4-8565-43170f33dde0', addressingJid: '15551230005@s.whatsapp.net', aliases: [], identityStatus: 'partial', identityUpdatedAt: ago(60) },
 ];
 
 export const labelsFixture: LabelResource[] = [

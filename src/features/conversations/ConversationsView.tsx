@@ -63,7 +63,7 @@ export function ContactList({ items, selectedId, onSelect }: { items: ContactRes
           onClick={() => onSelect(item.id)}
           primary={item.displayName ?? 'Unknown contact'}
           secondary={item.identityStatus === 'legacy' ? 'Legacy identity' : `${humanizeToken(item.identityStatus)} identity`}
-          trailing={<Status tone={item.found ? 'ok' : 'neutral'}>{item.found ? 'Found' : 'Not found'}</Status>}
+          trailing={<Status tone={item.found === true ? 'ok' : 'neutral'}>{item.found === undefined ? 'Unreported' : item.found ? 'Found' : 'Not found'}</Status>}
         />
       ))}
     </ul>

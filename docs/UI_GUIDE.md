@@ -50,6 +50,11 @@ command. A failed capability refresh may retain read-only data from the last
 successful snapshot, but live commands remain disabled until discovery is
 authoritative again.
 
+Canonical Contact presentation follows the same rule: an absent compatibility `Found`
+field is **Unreported**, not `Not found`, and a missing canonical `displayName`
+does not authorize the browser to promote a compatibility name or redacted phone into
+the canonical display name.
+
 Commands disable duplicate submission and render only the server
 acknowledgement. They must not imply WhatsApp delivery, projection convergence,
 or campaign completion. Refresh the narrowest affected query after success.
@@ -215,6 +220,17 @@ resource models, or rendered diagnostics.
   capability-gated. `not_ready` remains pending; only the message inspector adds
   an explicit retry action for recoverable reads. Timeline images load near the
   viewport without changing this visual language.
+  The selected Conversation keeps only scan-critical facts and a visible
+  `Details` action in its timeline summary. That action opens the shared Drawer,
+  where canonical identity, provider routing, and projected state are grouped in
+  framed Panels and DescriptionLists. Raw provider aliases and target JIDs stay
+  inside this inspector. Conversation and Message drawers are mutually exclusive
+  URL-backed states. Message cursor pages
+  use directional `Newest` / `Older messages` labels and explicitly remain one
+  bounded page; `Load more` is reserved for list progression that does not claim
+  chat-history accumulation. When sending is unavailable, one compact notice
+  replaces the Composer fields and actions instead of rendering disabled input
+  controls.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the

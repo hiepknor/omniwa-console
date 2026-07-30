@@ -9,7 +9,7 @@ import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, Spli
 import { Composer } from './Composer';
 import { canonicalConversationReadsEnabled, canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
 import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
-import { DirectoryInspector, MessageInspector } from './Details';
+import { ConversationDetailsDrawer, DirectoryInspector, MessageInspector } from './Details';
 import { ConversationMessageImage } from './Media';
 import { useContact, useContacts, useConversation, useConversations, useLabel, useLabels, useMessages } from './hooks';
 import { conversationRouteState, setConversationParam, type ConversationView } from './route-state';
@@ -69,9 +69,12 @@ export function ConversationsPage() {
   const switchView = (view: ConversationView) => navigate(withSearchParams('/conversations', createSearchParams({ view: view === 'conversations' ? undefined : view })));
   const openConversation = (id: string) => {
     rememberFocusOrigin();
-    navigate(withSearchParams(`/conversations/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'selected'])));
+    navigate(withSearchParams(`/conversations/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'selected', 'details'])));
   };
-  const closeConversation = () => navigate(withSearchParams('/conversations', omitSearchParams(searchParams, ['message', 'messageCursor'])));
+  const closeConversation = () => navigate(withSearchParams('/conversations', omitSearchParams(searchParams, ['message', 'messageCursor', 'details'])));
+  const openConversationDetails = () => replaceParams(updateSearchParams(searchParams, { details: 'conversation', message: undefined }));
+  const closeConversationDetails = () => replaceParams(updateSearchParams(searchParams, { details: undefined }));
+  const openMessage = (id: string) => replaceParams(updateSearchParams(searchParams, { message: id, details: undefined }));
   const applySearch = () => replaceParams(updateSearchParams(searchParams, { search: searchDraft.trim() }, ['cursor', 'selected']));
   const currentQuery = route.view === 'conversations' ? conversations : route.view === 'contacts' ? contacts : labels;
   const currentMeta = currentQuery.data?.meta;
@@ -83,6 +86,9 @@ export function ConversationsPage() {
   const refresh = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(currentQuery.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined }, ['selected'])));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
+  useEffect(() => {
+    if (route.message && route.details) replaceParams(updateSearchParams(searchParams, { details: undefined }));
+  }, [route.details, route.message]);
   useEffect(() => {
     const canonicalId = canonicalConversationRedirect(activeConversationRef, selectedConversation);
     if (canonicalId) navigate(withSearchParams(`/conversations/${encodeURIComponent(canonicalId)}`, searchParams), { replace: true });
@@ -182,7 +188,8 @@ export function ConversationsPage() {
                 <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
                   <ConversationUnreadCount count={selectedConversation.unreadCount} context="detail" />
                   <span>{humanizeToken(selectedConversation.type)}</span>
-                  <span className="font-mono text-fg-2">{selectedConversation.conversationId}</span>
+                  <span className="font-mono text-fg-2 max-sm:order-2 max-sm:w-full max-sm:break-all">{selectedConversation.conversationId}</span>
+                  <Button className="ml-auto" onClick={openConversationDetails}>Details</Button>
                 </div>
                 {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>
@@ -194,9 +201,16 @@ export function ConversationsPage() {
                   <>
                     {messages.error ? <div className="px-4 pt-3"><FailureNotice error={messages.error} stale onRetry={() => messages.refetch()} /></div> : null}
                     <div className="px-4"><ProjectionStatus meta={messages.data.meta} /></div>
-                    <MessageTimeline items={loadedMessages} selectedId={route.message} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'message', id))} renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />} />
+                    <MessageTimeline items={loadedMessages} selectedId={route.message} onSelect={openMessage} renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />} />
                     {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No messages" detail="The ready message projection contains no messages." /></div> : null}
-                    <CursorPagination cursor={route.messageCursor} nextCursor={messages.data.resource.pagination.nextCursor ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))} />
+                    <CursorPagination
+                      cursor={route.messageCursor}
+                      nextCursor={messages.data.resource.pagination.nextCursor ?? undefined}
+                      resetLabel="Newest"
+                      nextLabel="Older messages"
+                      info="Showing one bounded message page."
+                      onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))}
+                    />
                   </>
                 ) : null}
               </>
@@ -217,6 +231,7 @@ export function ConversationsPage() {
       </WorkspacePageFrame>
 
       {route.message && selectedConversation && messagesSupported ? <MessageInspector messageId={route.message} loadedConversation={selectedConversation} enabled={messagesReady} mediaEnabled={conversationMedia} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
+      {!route.message && route.details === 'conversation' && selectedConversation ? <ConversationDetailsDrawer conversation={selectedConversation} onClose={closeConversationDetails} /> : null}
       {route.selected && route.view !== 'conversations' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} meta={route.view === 'contacts' ? contact.data?.meta : label.data?.meta} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
     </>
   );

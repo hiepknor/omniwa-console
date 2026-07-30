@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { DescriptionItem, DescriptionList } from './DescriptionList';
+import { CursorPagination } from './CursorPagination';
 import { FilterChip, FilterToolbar } from './Filters';
 import { SplitWorkspace, WorkspacePaneHeader } from './SplitWorkspace';
 import { WorkspacePageFrame } from './WorkspacePageFrame';
@@ -32,6 +33,24 @@ describe('composite primitives', () => {
     expect(html).not.toContain('aria-label=');
     expect(html).toContain('connected');
     expect(html).toContain('focus-visible:outline-2');
+  });
+
+  it('lets bounded history pages state their direction without changing cursor behavior', () => {
+    const html = renderToStaticMarkup(
+      <CursorPagination
+        cursor="opaque-current"
+        nextCursor="opaque-older"
+        resetLabel="Newest"
+        nextLabel="Older messages"
+        info="Showing one bounded message page."
+        onCursor={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('Newest');
+    expect(html).toContain('Older messages');
+    expect(html).toContain('Showing one bounded message page.');
+    expect(html).not.toContain('Load more');
   });
 
   it('keeps directory and detail in one responsive workspace contract', () => {
