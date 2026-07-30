@@ -3,7 +3,7 @@ import type { ContactResource } from '@/api/contacts';
 import type { ProjectionMeta } from '@/api/envelopes';
 import type { LabelResource } from '@/api/labels';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { CountBadge, DescriptionItem, DescriptionList, Drawer, Panel, StateNotice, Status, type Tone } from '@/ui';
+import { CopyValue, CountBadge, DescriptionItem, DescriptionList, Drawer, Panel, StateNotice, Status, type Tone } from '@/ui';
 import { useMessage, useReceipts } from './hooks';
 import { ConversationMessageImage } from './Media';
 import { FailureNotice, ProjectionStatus } from './ui';
@@ -20,6 +20,18 @@ function ReportedTime({ value }: { value?: string }) {
   return value ? <time title={value}>{relativeTime(value) || value}</time> : <>Not reported</>;
 }
 
+function CopyableFact({ value, label }: { value?: string; label: string }) {
+  return value ? <CopyValue value={value} label={label} /> : <>Not reported</>;
+}
+
+function projectedDuration(seconds: number): string {
+  const exact = `${seconds.toLocaleString('en-US')}s`;
+  if (seconds > 0 && seconds % 86_400 === 0) return `${(seconds / 86_400).toLocaleString('en-US')} ${seconds === 86_400 ? 'day' : 'days'} · ${exact}`;
+  if (seconds > 0 && seconds % 3_600 === 0) return `${(seconds / 3_600).toLocaleString('en-US')} ${seconds === 3_600 ? 'hour' : 'hours'} · ${exact}`;
+  if (seconds > 0 && seconds % 60 === 0) return `${(seconds / 60).toLocaleString('en-US')} ${seconds === 60 ? 'minute' : 'minutes'} · ${exact}`;
+  return exact;
+}
+
 export function ConversationDetailsContent({ conversation }: { conversation: ConversationResource }) {
   const aliases = !conversation.aliasesReported
     ? 'Not reported'
@@ -28,52 +40,39 @@ export function ConversationDetailsContent({ conversation }: { conversation: Con
       : 'None';
   return (
     <div className="grid gap-4">
-      <Panel title="Canonical identity" description="Backend-projected identity; Console does not merge Conversations or derive a display name." bodyPadding="compact-top">
+      <Panel headingLevel={3} title="Canonical identity" description="Backend-projected identity; Console does not merge Conversations or derive a display name." bodyPadding="compact-top">
         <DescriptionList>
           <DescriptionItem label="Display name">{conversation.displayName ?? 'Not reported'}</DescriptionItem>
           <DescriptionItem label="Name source">{conversation.displayNameSource ? humanizeToken(conversation.displayNameSource) : 'Not reported'}</DescriptionItem>
           <DescriptionItem label="Name updated"><ReportedTime value={conversation.displayNameUpdatedAt} /></DescriptionItem>
           <DescriptionItem label="Type">{humanizeToken(conversation.type)}</DescriptionItem>
-          <DescriptionItem label="Conversation ID" mono>{conversation.conversationId}</DescriptionItem>
-          <DescriptionItem label="Contact ID" mono>{conversation.contactId ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Conversation ID" mono><CopyableFact value={conversation.conversationId} label="Conversation ID" /></DescriptionItem>
+          <DescriptionItem label="Contact ID" mono><CopyableFact value={conversation.contactId} label="Contact ID" /></DescriptionItem>
         </DescriptionList>
       </Panel>
 
-      <Panel title="Provider routing" description="Provider identifiers are diagnostic material. Commands use only the authoritative addressing target." bodyPadding="compact-top">
+      <Panel headingLevel={3} title="Provider routing" description="Provider identifiers are diagnostic material. Commands use only the authoritative addressing target." bodyPadding="compact-top">
         <DescriptionList>
           <DescriptionItem label="Command target"><Status tone={conversation.addressingJid ? 'ok' : 'neutral'}>{conversation.addressingJid ? 'Available' : 'Unreported'}</Status></DescriptionItem>
-          <DescriptionItem label="Addressing JID" mono>{conversation.addressingJid ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Addressing JID" mono><CopyableFact value={conversation.addressingJid} label="Addressing JID" /></DescriptionItem>
           <DescriptionItem label="Alias count">{conversation.aliasesReported ? conversation.aliases.length.toLocaleString('en-US') : 'Not reported'}</DescriptionItem>
-          <DescriptionItem label="Provider aliases" mono>{aliases}</DescriptionItem>
+          <DescriptionItem label="Provider aliases" mono>{conversation.aliasesReported && conversation.aliases.length ? <CopyValue value={aliases} label="Provider aliases" /> : aliases}</DescriptionItem>
         </DescriptionList>
       </Panel>
 
-      <Panel title="Projected state" description="Read-only Conversation state and activity reported by the projection." bodyPadding="compact-top">
+      <Panel headingLevel={3} title="Projected state" description="Read-only Conversation state and activity reported by the projection." bodyPadding="compact-top">
         <DescriptionList>
           <DescriptionItem label="Unread"><CountBadge count={conversation.unreadCount} /></DescriptionItem>
           <DescriptionItem label="Archived">{reportedBoolean(conversation.archived)}</DescriptionItem>
           <DescriptionItem label="Pinned">{reportedBoolean(conversation.pinned)}</DescriptionItem>
           <DescriptionItem label="Muted until"><ReportedTime value={conversation.mutedUntil} /></DescriptionItem>
-          <DescriptionItem label="Disappearing timer">{conversation.disappearingTimer === undefined ? 'Not reported' : `${conversation.disappearingTimer.toLocaleString('en-US')}s`}</DescriptionItem>
-          <DescriptionItem label="Last message ID" mono>{conversation.lastMessageId ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Disappearing timer">{conversation.disappearingTimer === undefined ? 'Not reported' : projectedDuration(conversation.disappearingTimer)}</DescriptionItem>
+          <DescriptionItem label="Last message ID" mono><CopyableFact value={conversation.lastMessageId} label="Last message ID" /></DescriptionItem>
           <DescriptionItem label="Last message"><ReportedTime value={conversation.lastMessageAt} /></DescriptionItem>
           <DescriptionItem label="Last activity"><ReportedTime value={conversation.lastActivityAt} /></DescriptionItem>
         </DescriptionList>
       </Panel>
     </div>
-  );
-}
-
-export function ConversationDetailsDrawer({ conversation, onClose }: { conversation: ConversationResource; onClose: () => void }) {
-  return (
-    <Drawer
-      open
-      onClose={onClose}
-      title={conversation.displayName ?? `Unknown ${humanizeToken(conversation.type)} conversation`}
-      subtitle={conversation.conversationId}
-    >
-      <ConversationDetailsContent conversation={conversation} />
-    </Drawer>
   );
 }
 
@@ -90,6 +89,7 @@ export function DirectoryInspector({ contact, label, meta, error, loading, onRet
           {error ? <FailureNotice error={error} stale onRetry={onRetry} /> : null}
           <ProjectionStatus meta={meta} />
           <Panel
+            headingLevel={3}
             title={contact.identityStatus === 'legacy' ? 'Normalized identity' : 'Canonical identity'}
             description={contact.identityStatus === 'legacy' ? 'Compatibility projection fields; canonical reconciliation is not active for this instance.' : 'The backend owns reconciliation. Aliases are lookup material, not separate contacts.'}
             bodyPadding="compact-top"
@@ -113,7 +113,7 @@ export function DirectoryInspector({ contact, label, meta, error, loading, onRet
         <div className="grid gap-4">
           {error ? <FailureNotice error={error} stale onRetry={onRetry} /> : null}
           <ProjectionStatus meta={meta} />
-          <Panel title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments." bodyPadding="compact-top">
+          <Panel headingLevel={3} title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments." bodyPadding="compact-top">
             <DescriptionList>
               <DescriptionItem label="Label ID" mono>{label.id}</DescriptionItem>
               <DescriptionItem label="Name">{label.name ?? 'Not reported'}</DescriptionItem>
@@ -129,7 +129,7 @@ export function DirectoryInspector({ contact, label, meta, error, loading, onRet
   );
 }
 
-export function MessageInspector({ messageId, loadedConversation, enabled, mediaEnabled, onClose }: { messageId: string; loadedConversation: ConversationResource; enabled: boolean; mediaEnabled: boolean; onClose: () => void }) {
+export function MessageInspectorContent({ messageId, loadedConversation, enabled, mediaEnabled }: { messageId: string; loadedConversation: ConversationResource; enabled: boolean; mediaEnabled: boolean }) {
   const message = useMessage(loadedConversation.conversationId, messageId, enabled);
   const resource = message.data?.resource;
   const matchesConversation = resource === undefined || resource.conversationId === loadedConversation.conversationId;
@@ -138,8 +138,7 @@ export function MessageInspector({ messageId, loadedConversation, enabled, media
     ? resource.status === 'failed' ? 'failed' : resource.status === 'read' || resource.status === 'delivered' ? 'ok' : 'pending'
     : undefined;
   return (
-    <Drawer open onClose={onClose} title="Message details" subtitle={messageId}>
-      <div className="grid gap-4">
+    <div className="grid gap-4">
         {statusTone ? <Status tone={statusTone}>{humanizeToken(resource!.status!)}</Status> : null}
         {message.isPending ? (
           <StateNotice kind="loading" title="Loading message" />
@@ -152,9 +151,10 @@ export function MessageInspector({ messageId, loadedConversation, enabled, media
             {message.error ? <FailureNotice error={message.error} stale onRetry={() => message.refetch()} /> : null}
             <ProjectionStatus meta={message.data?.meta} />
             {resource.mediaAssetId || resource.mediaType === 'image' ? <ConversationMessageImage message={resource} enabled={mediaEnabled} priority /> : null}
-            <Panel title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyPadding="compact-top">
+            <Panel headingLevel={3} title="Message facts" description="Projected status is authoritative; command acknowledgement is not delivery." bodyPadding="compact-top">
               <DescriptionList>
-                <DescriptionItem label="Conversation" mono>{resource.conversationId}</DescriptionItem>
+                <DescriptionItem label="Message ID" mono><CopyableFact value={resource.id} label="Message ID" /></DescriptionItem>
+                <DescriptionItem label="Conversation" mono><CopyableFact value={resource.conversationId} label="Conversation ID" /></DescriptionItem>
                 <DescriptionItem label="Provider Chat provenance" mono>{resource.providerChatId ?? 'Not reported'}</DescriptionItem>
                 <DescriptionItem label="Direction">{humanizeToken(resource.direction)}</DescriptionItem>
                 <DescriptionItem label="Type">{humanizeToken(resource.type)}</DescriptionItem>
@@ -179,7 +179,7 @@ export function MessageInspector({ messageId, loadedConversation, enabled, media
         )}
 
         {resource && matchesConversation ? (
-          <Panel title="Delivery receipts" description="Per-recipient projected receipts.">
+          <Panel headingLevel={3} title="Delivery receipts" description="Per-recipient projected receipts.">
             {receipts.isPending ? (
               <StateNotice kind="loading" title="Loading receipts" />
             ) : receipts.error && !receipts.data ? (
@@ -205,7 +205,6 @@ export function MessageInspector({ messageId, loadedConversation, enabled, media
             ) : null}
           </Panel>
         ) : null}
-      </div>
-    </Drawer>
+    </div>
   );
 }

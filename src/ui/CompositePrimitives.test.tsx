@@ -3,10 +3,18 @@ import { describe, expect, it, vi } from 'vitest';
 import { DescriptionItem, DescriptionList } from './DescriptionList';
 import { CursorPagination } from './CursorPagination';
 import { FilterChip, FilterToolbar } from './Filters';
+import { Panel } from './Panel';
 import { SplitWorkspace, WorkspacePaneHeader } from './SplitWorkspace';
 import { WorkspacePageFrame } from './WorkspacePageFrame';
 
 describe('composite primitives', () => {
+  it('lets an inspector preserve heading hierarchy without cloning Panel', () => {
+    const html = renderToStaticMarkup(<Panel headingLevel={3} title="Canonical identity">Facts</Panel>);
+
+    expect(html).toContain('<h3');
+    expect(html).not.toContain('<h2');
+  });
+
   it('renders semantic, responsive description data', () => {
     const html = renderToStaticMarkup(
       <DescriptionList>

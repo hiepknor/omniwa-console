@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { ApiProvider } from '@/api/ApiProvider';
 import { Composer } from '@/features/conversations/Composer';
 import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from '@/features/conversations/ConversationsView';
-import { ConversationDetailsDrawer } from '@/features/conversations/Details';
+import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
-import { Button, CursorPagination, Field, FilterToolbar, Image, Input, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { contactsFixture, conversationsFixture, labelsFixture, messagesFixture } from './preview-fixtures';
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
@@ -30,7 +30,14 @@ export function PreviewConversations() {
         compactActions={<Button>Refresh</Button>}
         compactHeadingRef={compactHeadingRef}
       >
-        <SplitWorkspace
+        <ResponsiveInspector
+          open={detailsOpen}
+          persistent={Boolean(conversation)}
+          onClose={() => setDetailsOpen(false)}
+          title={conversation?.displayName ?? 'Conversation details'}
+          inspector={conversation ? <ConversationDetailsContent conversation={conversation} /> : null}
+        >
+          <SplitWorkspace
           frame="attached"
           detailOpen={Boolean(conversation)}
           directoryLabel="Conversation directory preview"
@@ -58,8 +65,7 @@ export function PreviewConversations() {
             <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
               <ConversationUnreadCount count={conversation.unreadCount} context="detail" />
               <span>Individual</span>
-              <span className="font-mono text-fg-2 max-sm:order-2 max-sm:w-full max-sm:break-all">{conversation.conversationId}</span>
-              <Button className="ml-auto" onClick={() => setDetailsOpen(true)}>Details</Button>
+              <Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={() => setDetailsOpen(true)}>Details</Button>
             </div>
             <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} renderMedia={(message) => {
               if (message.mediaAssetId === 'asset_ready') return <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />;
@@ -73,10 +79,10 @@ export function PreviewConversations() {
           </>
         }
         detailFooter={conversation ? <ApiProvider session={{ baseUrl: 'http://127.0.0.1:1', apiKey: 'preview-only', keyKind: 'api', connectedAt: new Date().toISOString() }}><Composer conversationId={conversation.conversationId} addressingJid={conversation.addressingJid ?? ''} conversationName={conversation.displayName ?? 'Unknown conversation'} enabled mediaEnabled /></ApiProvider> : undefined}
-        />
+          />
+        </ResponsiveInspector>
         </WorkspacePageFrame>
       </main>
-      {detailsOpen && conversation ? <ConversationDetailsDrawer conversation={conversation} onClose={() => setDetailsOpen(false)} /> : null}
     </>
   );
 }

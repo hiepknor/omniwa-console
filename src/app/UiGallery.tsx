@@ -4,7 +4,7 @@ import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { ToastViewport } from '@/components/feedback/ToastViewport';
 import { ComposerUnavailable } from '@/features/conversations/Composer';
-import { ConversationDetailsDrawer } from '@/features/conversations/Details';
+import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConsoleFooter } from './ConsoleFooter';
 import { conversationsFixture } from './preview-fixtures';
 import {
@@ -36,6 +36,7 @@ import {
   Panel,
   ProgressBar,
   Radio,
+  ResponsiveInspector,
   Select,
   SelectionBar,
   SelectionReview,
@@ -569,10 +570,17 @@ export function UiGallery() {
               secondaryActions={<Button>Refresh</Button>}
               compactTitle={workspaceDetail ? 'conversation_01' : 'Conversations'}
               compactDescription={workspaceDetail ? 'Projected detail' : undefined}
-              compactLeadingAction={workspaceDetail ? <Button onClick={() => setWorkspaceDetail(false)}>Back</Button> : undefined}
+              compactLeadingAction={workspaceDetail ? <Button onClick={() => { setWorkspaceDetail(false); setConversationDetailsOpen(false); }}>Back</Button> : undefined}
               compactActions={<Button>Refresh</Button>}
             >
-              <SplitWorkspace
+              <ResponsiveInspector
+                open={conversationDetailsOpen}
+                persistent={workspaceDetail}
+                onClose={() => setConversationDetailsOpen(false)}
+                title="conversation_01"
+                inspector={<ConversationDetailsContent conversation={conversationsFixture[0]} />}
+              >
+                <SplitWorkspace
                 frame="attached"
                 detailOpen={workspaceDetail}
                 directoryLabel="Sample directory"
@@ -586,12 +594,13 @@ export function UiGallery() {
                 detail={
                   <>
                     <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Projected detail" />
-                    <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs text-fg-3"><span>Unread</span><CountBadge count={2} /><span>Individual</span><span className="font-mono text-fg-2 max-sm:order-2 max-sm:w-full max-sm:break-all">{conversationsFixture[0].conversationId}</span><Button className="ml-auto" onClick={() => setConversationDetailsOpen(true)}>Details</Button></div>
+                    <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs text-fg-3"><span>Unread</span><CountBadge count={2} /><span>Individual</span><Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={() => setConversationDetailsOpen(true)}>Details</Button></div>
                     <CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." onCursor={() => {}} />
                   </>
                 }
                 detailFooter={<ComposerUnavailable detail="No authoritative command target is available." />}
-              />
+                />
+              </ResponsiveInspector>
             </WorkspacePageFrame>
           </div>
         </Section>
@@ -626,7 +635,6 @@ export function UiGallery() {
           {Array.from({ length: 16 }, (_, index) => <p key={index} className="border-t border-line pt-3 text-sm text-fg-2">Bounded inspector content row {index + 1}.</p>)}
         </div>
       </Drawer>
-      {conversationDetailsOpen ? <ConversationDetailsDrawer conversation={conversationsFixture[0]} onClose={() => setConversationDetailsOpen(false)} /> : null}
 
       <Dialog
         open={dialogMode !== undefined}
