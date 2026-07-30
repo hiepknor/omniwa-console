@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ApiProvider } from '@/api/ApiProvider';
 import { Composer } from '@/features/conversations/Composer';
-import { ContactList, ConversationFacts, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from '@/features/conversations/ConversationsView';
+import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from '@/features/conversations/ConversationsView';
+import { ConversationDetailsDrawer } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
 import { Button, CursorPagination, Field, FilterToolbar, Image, Input, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { contactsFixture, conversationsFixture, labelsFixture, messagesFixture } from './preview-fixtures';
@@ -10,13 +11,15 @@ import { contactsFixture, conversationsFixture, labelsFixture, messagesFixture }
 export function PreviewConversations() {
   const [view, setView] = useState('conversations');
   const [conversationId, setConversationId] = useState<string | undefined>(conversationsFixture[0].conversationId);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const conversation = conversationsFixture.find((item) => item.conversationId === conversationId);
   const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(conversationId);
-  const openConversation = (id: string) => { rememberFocusOrigin(); setConversationId(id); };
-  const switchView = (id: string) => { setView(id); setConversationId(id === 'conversations' ? conversationsFixture[0]?.conversationId : undefined); };
+  const openConversation = (id: string) => { rememberFocusOrigin(); setConversationId(id); setDetailsOpen(false); };
+  const switchView = (id: string) => { setView(id); setConversationId(id === 'conversations' ? conversationsFixture[0]?.conversationId : undefined); setDetailsOpen(false); };
   return (
-    <main className="h-dvh overflow-hidden bg-bg">
-      <WorkspacePageFrame
+    <>
+      <main className="h-dvh overflow-hidden bg-bg">
+        <WorkspacePageFrame
         eyebrow="Messaging"
         title="Conversations"
         description="Review projected conversations, contacts, labels, and message history."
@@ -55,9 +58,9 @@ export function PreviewConversations() {
             <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
               <ConversationUnreadCount count={conversation.unreadCount} context="detail" />
               <span>Individual</span>
-              <span className="font-mono text-fg-2">{conversation.conversationId}</span>
+              <span className="font-mono text-fg-2 max-sm:order-2 max-sm:w-full max-sm:break-all">{conversation.conversationId}</span>
+              <Button className="ml-auto" onClick={() => setDetailsOpen(true)}>Details</Button>
             </div>
-            <ConversationFacts conversation={conversation} />
             <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} renderMedia={(message) => {
               if (message.mediaAssetId === 'asset_ready') return <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />;
               if (message.mediaAssetId === 'asset_processing') return <ConversationMediaPlaceholder enabled compact label="Image Processing" tone="pending" detail="The projected message remains visible while private content is prepared." />;
@@ -71,7 +74,9 @@ export function PreviewConversations() {
         }
         detailFooter={conversation ? <ApiProvider session={{ baseUrl: 'http://127.0.0.1:1', apiKey: 'preview-only', keyKind: 'api', connectedAt: new Date().toISOString() }}><Composer conversationId={conversation.conversationId} addressingJid={conversation.addressingJid ?? ''} conversationName={conversation.displayName ?? 'Unknown conversation'} enabled mediaEnabled /></ApiProvider> : undefined}
         />
-      </WorkspacePageFrame>
-    </main>
+        </WorkspacePageFrame>
+      </main>
+      {detailsOpen && conversation ? <ConversationDetailsDrawer conversation={conversation} onClose={() => setDetailsOpen(false)} /> : null}
+    </>
   );
 }

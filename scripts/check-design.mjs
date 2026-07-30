@@ -101,6 +101,9 @@ if (!uiGallery.includes("['connection', 'Connection']") || !uiGallery.includes("
 if (!uiGallery.includes('const sessionUtilityItems') || !uiGallery.includes('Mobile navigation example')) {
   failures.push('src/app/UiGallery.tsx: compact session utilities must remain separate from navigation fixtures');
 }
+for (const marker of ['<ConversationDetailsDrawer', 'setConversationDetailsOpen(true)', '>Details</Button>']) {
+  if (!uiGallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: Conversation details Drawer fixture is missing ${marker}`);
+}
 
 const input = await read('src/ui/Input.tsx');
 for (const marker of ['aria-describedby', 'aria-invalid', 'aria-required', 'max-sm:h-10']) {
@@ -227,7 +230,7 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '<ConversationFacts conversation={conversation}', 'nextLabel="Older messages"']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '>Details</Button>', '<ConversationDetailsDrawer', 'nextLabel="Older messages"']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
@@ -242,13 +245,18 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '<ConversationFacts conversation={selectedConversation}', 'resetLabel="Newest"', 'nextLabel="Older messages"']) {
+for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '>Details</Button>', '<ConversationDetailsDrawer', "details: 'conversation'", 'resetLabel="Newest"', 'nextLabel="Older messages"']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 
 const conversationsView = await read('src/features/conversations/ConversationsView.tsx');
-for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail'", "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>', 'ConversationFacts', '<DescriptionList', 'Provider aliases']) {
+for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail'", "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>']) {
   if (!conversationsView.includes(marker)) failures.push(`src/features/conversations/ConversationsView.tsx: unread-count contract is missing ${marker}`);
+}
+
+const conversationDetails = await read('src/features/conversations/Details.tsx');
+for (const marker of ['ConversationDetailsDrawer', '<Drawer', 'Canonical identity', 'Provider routing', 'Projected state', '<DescriptionList', '<Panel']) {
+  if (!conversationDetails.includes(marker)) failures.push(`src/features/conversations/Details.tsx: Conversation details inspector is missing ${marker}`);
 }
 
 const conversationsComposer = await read('src/features/conversations/Composer.tsx');

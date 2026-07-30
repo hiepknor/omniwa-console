@@ -220,8 +220,12 @@ resource models, or rendered diagnostics.
   capability-gated. `not_ready` remains pending; only the message inspector adds
   an explicit retry action for recoverable reads. Timeline images load near the
   viewport without changing this visual language.
-  The selected Conversation adds a compact DescriptionList of projected facts
-  below its summary without expanding provider aliases. Message cursor pages
+  The selected Conversation keeps only scan-critical facts and a visible
+  `Details` action in its timeline summary. That action opens the shared Drawer,
+  where canonical identity, provider routing, and projected state are grouped in
+  framed Panels and DescriptionLists. Raw provider aliases and target JIDs stay
+  inside this inspector. Conversation and Message drawers are mutually exclusive
+  URL-backed states. Message cursor pages
   use directional `Newest` / `Older messages` labels and explicitly remain one
   bounded page; `Load more` is reserved for list progression that does not claim
   chat-history accumulation. When sending is unavailable, one compact notice

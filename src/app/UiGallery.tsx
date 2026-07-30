@@ -4,7 +4,7 @@ import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { ToastViewport } from '@/components/feedback/ToastViewport';
 import { ComposerUnavailable } from '@/features/conversations/Composer';
-import { ConversationFacts } from '@/features/conversations/ConversationsView';
+import { ConversationDetailsDrawer } from '@/features/conversations/Details';
 import { ConsoleFooter } from './ConsoleFooter';
 import { conversationsFixture } from './preview-fixtures';
 import {
@@ -183,6 +183,7 @@ export function UiGallery() {
   const [notificationVisible, setNotificationVisible] = useState(true);
   const [cursor, setCursor] = useState<string>();
   const [workspaceDetail, setWorkspaceDetail] = useState(true);
+  const [conversationDetailsOpen, setConversationDetailsOpen] = useState(false);
   const [galleryFile, setGalleryFile] = useState<File | undefined>(() => new File(['locked upload fixture'], 'group-photo.png', { type: 'image/png' }));
   const [selectionCount, setSelectionCount] = useState(1);
   const tabRows = tab === 'attention' ? listRows.filter((row) => row.tone !== 'ok') : listRows;
@@ -585,8 +586,7 @@ export function UiGallery() {
                 detail={
                   <>
                     <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Projected detail" />
-                    <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs text-fg-3"><span>Unread</span><CountBadge count={2} /><span>Individual</span><span className="font-mono text-fg-2">{conversationsFixture[0].conversationId}</span></div>
-                    <ConversationFacts conversation={conversationsFixture[0]} />
+                    <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs text-fg-3"><span>Unread</span><CountBadge count={2} /><span>Individual</span><span className="font-mono text-fg-2 max-sm:order-2 max-sm:w-full max-sm:break-all">{conversationsFixture[0].conversationId}</span><Button className="ml-auto" onClick={() => setConversationDetailsOpen(true)}>Details</Button></div>
                     <CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." onCursor={() => {}} />
                   </>
                 }
@@ -626,6 +626,7 @@ export function UiGallery() {
           {Array.from({ length: 16 }, (_, index) => <p key={index} className="border-t border-line pt-3 text-sm text-fg-2">Bounded inspector content row {index + 1}.</p>)}
         </div>
       </Drawer>
+      {conversationDetailsOpen ? <ConversationDetailsDrawer conversation={conversationsFixture[0]} onClose={() => setConversationDetailsOpen(false)} /> : null}
 
       <Dialog
         open={dialogMode !== undefined}

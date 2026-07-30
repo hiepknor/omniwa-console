@@ -251,11 +251,13 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   recoverable read. Timeline loading is near-viewport gated without changing
   geometry. Device upload uses the shared FileUpload inside the canonical Dialog
   and does not change the page frame.
-- **Conversation facts and send availability** — the selected Conversation keeps
-  unread, type, and canonical ID in its dense summary, then uses the shared
-  DescriptionList for backend-reported identity provenance and state. The facts
-  expose only an alias count and command-target availability on the primary
-  surface; raw provider aliases and target JIDs remain inspector/debug material.
+- **Conversation details and send availability** — the selected Conversation keeps
+  unread, type, canonical ID, and a visible `Details` action in its dense summary.
+  `Details` opens the canonical Drawer and groups backend-reported identity,
+  provider routing, and projected state in framed Panels with DescriptionLists.
+  Raw provider aliases and target JIDs remain inside that inspector rather than
+  competing with message history on the primary surface. Conversation details
+  and Message details are mutually exclusive URL-backed inspectors.
   A missing command target or send capability replaces the entire Composer form
   with one compact StateNotice, so an unavailable command never leaves a large
   disabled textarea occupying the workspace footer.
@@ -416,7 +418,7 @@ or `border-*` utilities and rely on generated CSS order.
 | Console footer | ready capabilities, discovery pending, discovery failure, version absent, compact tablet, hidden mobile |
 | Workspace page / split workspace | PageHeader + two panes ≥900px, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
-| Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close, one-time-secret dismissal |
+| Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close, one-time-secret dismissal, Conversation/Message exclusivity |
 
 Hover never hides a label or icon. Inverted surfaces always use paper-colored
 foregrounds. Motion may reinforce state, but color/border/fill must communicate

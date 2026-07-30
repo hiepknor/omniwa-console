@@ -3,13 +3,78 @@ import type { ContactResource } from '@/api/contacts';
 import type { ProjectionMeta } from '@/api/envelopes';
 import type { LabelResource } from '@/api/labels';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { DescriptionItem, DescriptionList, Drawer, Panel, StateNotice, Status, type Tone } from '@/ui';
+import { CountBadge, DescriptionItem, DescriptionList, Drawer, Panel, StateNotice, Status, type Tone } from '@/ui';
 import { useMessage, useReceipts } from './hooks';
 import { ConversationMessageImage } from './Media';
 import { FailureNotice, ProjectionStatus } from './ui';
 
 function receiptTone(type: string): Tone {
   return type === 'read' || type === 'delivered' ? 'ok' : 'pending';
+}
+
+function reportedBoolean(value: boolean | undefined): string {
+  return value === undefined ? 'Not reported' : value ? 'Yes' : 'No';
+}
+
+function ReportedTime({ value }: { value?: string }) {
+  return value ? <time title={value}>{relativeTime(value) || value}</time> : <>Not reported</>;
+}
+
+export function ConversationDetailsContent({ conversation }: { conversation: ConversationResource }) {
+  const aliases = !conversation.aliasesReported
+    ? 'Not reported'
+    : conversation.aliases.length
+      ? conversation.aliases.join(', ')
+      : 'None';
+  return (
+    <div className="grid gap-4">
+      <Panel title="Canonical identity" description="Backend-projected identity; Console does not merge Conversations or derive a display name." bodyPadding="compact-top">
+        <DescriptionList>
+          <DescriptionItem label="Display name">{conversation.displayName ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Name source">{conversation.displayNameSource ? humanizeToken(conversation.displayNameSource) : 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Name updated"><ReportedTime value={conversation.displayNameUpdatedAt} /></DescriptionItem>
+          <DescriptionItem label="Type">{humanizeToken(conversation.type)}</DescriptionItem>
+          <DescriptionItem label="Conversation ID" mono>{conversation.conversationId}</DescriptionItem>
+          <DescriptionItem label="Contact ID" mono>{conversation.contactId ?? 'Not reported'}</DescriptionItem>
+        </DescriptionList>
+      </Panel>
+
+      <Panel title="Provider routing" description="Provider identifiers are diagnostic material. Commands use only the authoritative addressing target." bodyPadding="compact-top">
+        <DescriptionList>
+          <DescriptionItem label="Command target"><Status tone={conversation.addressingJid ? 'ok' : 'neutral'}>{conversation.addressingJid ? 'Available' : 'Unreported'}</Status></DescriptionItem>
+          <DescriptionItem label="Addressing JID" mono>{conversation.addressingJid ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Alias count">{conversation.aliasesReported ? conversation.aliases.length.toLocaleString('en-US') : 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Provider aliases" mono>{aliases}</DescriptionItem>
+        </DescriptionList>
+      </Panel>
+
+      <Panel title="Projected state" description="Read-only Conversation state and activity reported by the projection." bodyPadding="compact-top">
+        <DescriptionList>
+          <DescriptionItem label="Unread"><CountBadge count={conversation.unreadCount} /></DescriptionItem>
+          <DescriptionItem label="Archived">{reportedBoolean(conversation.archived)}</DescriptionItem>
+          <DescriptionItem label="Pinned">{reportedBoolean(conversation.pinned)}</DescriptionItem>
+          <DescriptionItem label="Muted until"><ReportedTime value={conversation.mutedUntil} /></DescriptionItem>
+          <DescriptionItem label="Disappearing timer">{conversation.disappearingTimer === undefined ? 'Not reported' : `${conversation.disappearingTimer.toLocaleString('en-US')}s`}</DescriptionItem>
+          <DescriptionItem label="Last message ID" mono>{conversation.lastMessageId ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Last message"><ReportedTime value={conversation.lastMessageAt} /></DescriptionItem>
+          <DescriptionItem label="Last activity"><ReportedTime value={conversation.lastActivityAt} /></DescriptionItem>
+        </DescriptionList>
+      </Panel>
+    </div>
+  );
+}
+
+export function ConversationDetailsDrawer({ conversation, onClose }: { conversation: ConversationResource; onClose: () => void }) {
+  return (
+    <Drawer
+      open
+      onClose={onClose}
+      title={conversation.displayName ?? `Unknown ${humanizeToken(conversation.type)} conversation`}
+      subtitle={conversation.conversationId}
+    >
+      <ConversationDetailsContent conversation={conversation} />
+    </Drawer>
+  );
 }
 
 export function DirectoryInspector({ contact, label, meta, error, loading, onRetry, onClose }: { contact?: ContactResource; label?: LabelResource; meta?: ProjectionMeta; error?: unknown; loading: boolean; onRetry: () => void; onClose: () => void }) {
