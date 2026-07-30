@@ -13,7 +13,7 @@ import { ConversationDetailsContent, DirectoryInspector, MessageInspectorContent
 import { ConversationMessageImage } from './Media';
 import { useContact, useContacts, useConversation, useConversations, useLabel, useLabels, useMessages } from './hooks';
 import { conversationRouteState, setConversationParam, type ConversationView } from './route-state';
-import { FailureNotice, ProjectionStatus } from './ui';
+import { FailureNotice, ProjectionStatus, ProjectionStatusGroup } from './ui';
 
 function BlockedPage({ detail, title }: { detail: string; title: string }) {
   return (
@@ -141,6 +141,7 @@ export function ConversationsPage() {
           detailOpen={hasConversation}
           directoryScrollKey={JSON.stringify([route.view, route.search, route.cursor])}
           detailScrollKey={JSON.stringify([activeConversationRef, route.messageCursor])}
+          detailInitialPosition={route.messageCursor ? 'start' : 'end'}
           directoryLabel={`${route.view} directory`}
           detailLabel="Message timeline"
           directory={
@@ -199,12 +200,12 @@ export function ConversationsPage() {
             ) : selectedConversation ? (
               <>
                 {conversation.error ? <div className="px-4 pt-3"><FailureNotice error={conversation.error} stale onRetry={() => conversation.refetch()} /></div> : null}
-                <div className="px-4"><ProjectionStatus meta={conversation.data?.meta} /></div>
                 <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
                   <ConversationUnreadCount count={selectedConversation.unreadCount} context="detail" />
                   <span>{humanizeToken(selectedConversation.type)}</span>
                   <Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={openConversationDetails}>Details</Button>
                 </div>
+                <div className="px-4"><ProjectionStatusGroup entries={[{ label: 'Conversation', meta: conversation.data?.meta }, { label: 'Messages', meta: messages.data?.meta }]} /></div>
                 {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>
                 ) : messages.isPending ? (
@@ -214,8 +215,15 @@ export function ConversationsPage() {
                 ) : messages.data ? (
                   <>
                     {messages.error ? <div className="px-4 pt-3"><FailureNotice error={messages.error} stale onRetry={() => messages.refetch()} /></div> : null}
-                    <div className="px-4"><ProjectionStatus meta={messages.data.meta} /></div>
-                    <MessageTimeline items={loadedMessages} selectedId={route.message} onSelect={openMessage} renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />} />
+                    <MessageTimeline
+                      items={loadedMessages}
+                      selectedId={route.message}
+                      onSelect={openMessage}
+                      renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />}
+                      conversationType={selectedConversation.type}
+                      scrollKey={JSON.stringify([selectedConversation.conversationId, route.messageCursor])}
+                      anchorToEnd={!route.messageCursor}
+                    />
                     {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No messages" detail="The ready message projection contains no messages." /></div> : null}
                     <CursorPagination
                       cursor={route.messageCursor}

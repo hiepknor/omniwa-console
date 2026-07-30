@@ -40,6 +40,8 @@ export function PreviewConversations() {
           <SplitWorkspace
           frame="attached"
           detailOpen={Boolean(conversation)}
+          detailScrollKey={conversation?.conversationId}
+          detailInitialPosition="end"
           directoryLabel="Conversation directory preview"
           detailLabel="Message timeline preview"
           directory={
@@ -67,7 +69,7 @@ export function PreviewConversations() {
               <span>Individual</span>
               <Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={() => setDetailsOpen(true)}>Details</Button>
             </div>
-            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} renderMedia={(message) => {
+            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} conversationType={conversation.type} scrollKey={`${conversation.conversationId}:newest`} anchorToEnd renderMedia={(message) => {
               if (message.mediaAssetId === 'asset_ready') return <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />;
               if (message.mediaAssetId === 'asset_processing') return <ConversationMediaPlaceholder enabled compact label="Image Processing" tone="pending" detail="The projected message remains visible while private content is prepared." />;
               if (message.mediaAssetId === 'asset_failed') return <ConversationMediaPlaceholder enabled compact label="Image unavailable" tone="failed" detail="Media asset integrity failed" />;

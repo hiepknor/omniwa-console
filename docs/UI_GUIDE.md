@@ -220,6 +220,16 @@ resource models, or rendered diagnostics.
   capability-gated. `not_ready` remains pending; only the message inspector adds
   an explicit retry action for recoverable reads. Timeline images load near the
   viewport without changing this visual language.
+  Message history aligns incoming/outgoing messages to the two edges of the full
+  detail pane while capping each bubble at `min(78%,42rem)` for readable text.
+  Direction remains visible and accessible without adding consumer-chat color, rounding, or
+  avatars; system/unknown messages stay centered and neutral. Day separators
+  preserve chronological orientation, absent text is explicitly unreported, and
+  an incoming Group participant remains unidentified until the backend projects
+  an authoritative display identity. Newest pages anchor to the end; older pages
+  start at their beginning, and new messages follow only while the operator is
+  already near the end. Conversation and Messages projection health combines
+  only when both scopes are ready; all non-ready scopes remain separate.
   The selected Conversation keeps unread and type as scan-critical facts. Below
   1560px of actual workspace width it also exposes `Details`, which opens the
   shared Drawer. At or above that container threshold the same inspector content

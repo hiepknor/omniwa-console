@@ -1,14 +1,14 @@
 import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { cn } from './cn';
 
-function useScrollReset(ref: RefObject<HTMLDivElement | null>, key: string | undefined) {
-  const previousKey = useRef(key);
+function useScrollReset(ref: RefObject<HTMLDivElement | null>, key: string | undefined, position: 'start' | 'end' = 'start') {
+  const previousKey = useRef<string>();
   useLayoutEffect(() => {
     if (previousKey.current !== key) {
-      if (ref.current) ref.current.scrollTop = 0;
+      if (ref.current) ref.current.scrollTop = position === 'end' ? ref.current.scrollHeight : 0;
       previousKey.current = key;
     }
-  }, [key, ref]);
+  }, [key, position, ref]);
 }
 
 export function SplitWorkspace({
@@ -21,6 +21,7 @@ export function SplitWorkspace({
   detailFooter,
   directoryScrollKey,
   detailScrollKey,
+  detailInitialPosition = 'start',
   frame = 'standalone',
   className,
 }: {
@@ -33,13 +34,14 @@ export function SplitWorkspace({
   detailFooter?: ReactNode;
   directoryScrollKey?: string;
   detailScrollKey?: string;
+  detailInitialPosition?: 'start' | 'end';
   frame?: 'standalone' | 'attached';
   className?: string;
 }) {
   const directoryScrollRef = useRef<HTMLDivElement>(null);
   const detailScrollRef = useRef<HTMLDivElement>(null);
   useScrollReset(directoryScrollRef, directoryScrollKey);
-  useScrollReset(detailScrollRef, detailScrollKey);
+  useScrollReset(detailScrollRef, detailScrollKey, detailInitialPosition);
 
   return (
     <div className={cn(

@@ -230,7 +230,7 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', 'nextLabel="Older messages"']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', 'conversationType={conversation.type}', 'anchorToEnd', 'nextLabel="Older messages"']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
@@ -250,17 +250,17 @@ for (const marker of ['<PageHeader', 'px-6 pt-6 max-[900px]:hidden', 'min-h-[57p
 }
 
 const splitWorkspace = await read('src/ui/SplitWorkspace.tsx');
-for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-1', "detailOpen && 'max-[900px]:hidden'", "!detailOpen && 'max-[900px]:hidden'", "frame === 'standalone'", 'WorkspacePaneHeader']) {
+for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-1', "detailOpen && 'max-[900px]:hidden'", "!detailOpen && 'max-[900px]:hidden'", "detailInitialPosition = 'start'", "position === 'end' ? ref.current.scrollHeight : 0", "frame === 'standalone'", 'WorkspacePaneHeader']) {
   if (!splitWorkspace.includes(marker)) failures.push(`src/ui/SplitWorkspace.tsx: split-workspace recipe is missing ${marker}`);
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', "details: 'conversation'", 'resetLabel="Newest"', 'nextLabel="Older messages"']) {
+for (const marker of ['<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', '<ProjectionStatusGroup', 'conversationType={selectedConversation.type}', 'anchorToEnd={!route.messageCursor}', "details: 'conversation'", 'resetLabel="Newest"', 'nextLabel="Older messages"']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 
 const conversationsView = await read('src/features/conversations/ConversationsView.tsx');
-for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail'", "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>']) {
+for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail'", "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>', 'max-w-[min(78%,42rem)]', 'calendarDayLabel', 'Text content not reported', 'Participant not identified', 'isNearScrollEnd', 'anchorToEnd']) {
   if (!conversationsView.includes(marker)) failures.push(`src/features/conversations/ConversationsView.tsx: unread-count contract is missing ${marker}`);
 }
 
