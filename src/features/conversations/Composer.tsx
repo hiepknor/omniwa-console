@@ -125,16 +125,16 @@ export function Composer({ conversationId, addressingJid, conversationName, enab
   if (!enabled) return <ComposerUnavailable detail={unavailableDetail} />;
 
   return (
-    <div className="grid gap-3 border-t border-line bg-surface p-4">
+    <div className="grid gap-3 border-t border-line bg-surface p-3">
       {sendText.data ? <StateNotice kind="info" title="Text send accepted" detail={acknowledgementDetail(sendText.data)} /> : null}
       {sendText.error ? <FailureNotice error={sendText.error} command /> : null}
       {recipientError ? <FailureNotice error={recipientError} onRetry={onRetryRecipient} /> : null}
-      <form className="grid gap-2" onSubmit={(event) => { event.preventDefault(); submitText(); }}>
+      <form className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2" onSubmit={(event) => { event.preventDefault(); submitText(); }}>
         <Field label={`Message ${conversationName}`}>
-          {(id) => <Textarea id={id} rows={3} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
+          {(id) => <Textarea id={id} autoGrow maxRows={4} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
         </Field>
-        <div className="flex justify-end gap-2">
-          <Button disabled={!enabled || pending} onClick={() => { resetMediaForm(); setMediaOpen(true); }}>Image or media…</Button>
+        <div className="flex items-center justify-end gap-2">
+          <Button aria-label="Choose image or media" disabled={!enabled || pending} onClick={() => { resetMediaForm(); setMediaOpen(true); }}>Media…</Button>
           <Button variant="primary" type="submit" disabled={!enabled || !text.trim() || pending || textOutcomeUnknown || sendCooldown}>{sendText.isPending ? 'Submitting…' : sendCooldown ? `Retry in ${cooldownSeconds}s` : 'Send text'}</Button>
         </div>
       </form>

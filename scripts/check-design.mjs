@@ -111,8 +111,13 @@ for (const marker of ['aria-describedby', 'aria-invalid', 'aria-required', 'max-
 }
 
 const textarea = await read('src/ui/Textarea.tsx');
-for (const marker of ['fieldControlClassName', 'resize-y', 'min-h-20']) {
+for (const marker of ['fieldControlClassName', 'resize-y', 'min-h-20', 'autoGrow = false', 'maxRows = 4', "autoGrow ? 'min-h-9 resize-none overflow-y-hidden max-sm:min-h-10'", "node.style.height = 'auto'", 'node.scrollHeight > maximum']) {
   if (!textarea.includes(marker)) failures.push(`src/ui/Textarea.tsx: textarea contract is missing ${marker}`);
+}
+
+const conversationComposer = await read('src/features/conversations/Composer.tsx');
+for (const marker of ['autoGrow', 'maxRows={4}', 'grid-cols-[minmax(0,1fr)_auto]', 'aria-label="Choose image or media"', '>Media…</Button>', ": 'Send text'}"]) {
+  if (!conversationComposer.includes(marker)) failures.push(`src/features/conversations/Composer.tsx: compact composer contract is missing ${marker}`);
 }
 
 const choices = await read('src/ui/ChoiceControls.tsx');

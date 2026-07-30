@@ -288,7 +288,10 @@ remain inside that inspector. Conversation and Message inspectors are mutually
 exclusive URL-backed states. If
 the authoritative command target or required send capabilities are unavailable,
 the Composer is replaced by one compact unavailable notice rather than a disabled
-form. Canonical Contacts preserve absent `Found` as unreported and never derive a
+form. When available, its shared Textarea auto-grows from one through four lines
+and stays in one bottom-aligned row with `Media…` and `Send text`; notices above
+the row retain command error, cooldown, unknown-outcome, and acknowledgement
+semantics. Canonical Contacts preserve absent `Found` as unreported and never derive a
 canonical display name from compatibility fields.
 
 Implemented commands owned by the workspace:

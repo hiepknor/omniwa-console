@@ -23,9 +23,13 @@ describe('form controls', () => {
 
   it('renders standardized textarea and date-time controls', () => {
     const textarea = renderToStaticMarkup(<Textarea aria-label="Message" />);
+    const compactTextarea = renderToStaticMarkup(<Textarea aria-label="Compact message" autoGrow maxRows={4} />);
     const dateTime = renderToStaticMarkup(<DateTimeInput aria-label="Start time" />);
     expect(textarea).toContain('<textarea');
     expect(textarea).toContain('min-h-20');
+    expect(compactTextarea).toContain('rows="1"');
+    expect(compactTextarea).toContain('resize-none');
+    expect(compactTextarea).toContain('min-h-9');
     expect(dateTime).toContain('type="datetime-local"');
     expect(dateTime).toContain('max-sm:h-10');
   });
