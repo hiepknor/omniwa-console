@@ -222,6 +222,15 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   moving the page. An optional contextual-action footer remains outside that
   scroll container, so the primary next action is visible without competing with
   destructive actions at the end of long inspector content.
+- **ResponsiveInspector** — one shared inspector slot that measures its owning
+  workspace rather than the browser viewport. At 1560px of available workspace
+  width it docks as a non-modal 440px third column beside the 320px directory
+  and a timeline of at least 800px. It uses `aside`/region semantics, has its own
+  bounded scroll, and never renders a scrim, focus trap, or body scroll lock.
+  Below that container threshold it mounts the canonical Drawer; ≤640px therefore
+  retains the 85dvh bottom sheet. Conversation facts persist in the docked slot,
+  selected Message facts replace them, and closing Message facts restores the
+  Conversation inspector.
 - **Dialog** — `min(560px,100%)`, paper surface, 1px strong frame, square close
   cell, bounded body, and elevated action footer over a 60% ink scrim. ≤640px
   docks to the bottom and gives footer actions equal 40px targets. Destructive
@@ -252,8 +261,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   geometry. Device upload uses the shared FileUpload inside the canonical Dialog
   and does not change the page frame.
 - **Conversation details and send availability** — the selected Conversation keeps
-  unread, type, canonical ID, and a visible `Details` action in its dense summary.
-  `Details` opens the canonical Drawer and groups backend-reported identity,
+  unread, type, and a visible `Details` action in its dense summary when the
+  inspector is not docked. Canonical and provider identifiers stay out of the
+  primary timeline summary. `Details` opens the canonical Drawer below the
+  responsive-inspector threshold; at or above that threshold the same content
+  remains visible as the third column. It groups backend-reported identity,
   provider routing, and projected state in framed Panels with DescriptionLists.
   Raw provider aliases and target JIDs remain inside that inspector rather than
   competing with message history on the primary surface. Conversation details
@@ -265,6 +277,8 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
   values on wide screens, stacks them at ≤640px, wraps long content, and uses
   mono explicitly for identifiers. Features do not clone fact-row helpers.
+  Copyable diagnostic identifiers compose the shared CopyValue action, which
+  keeps the complete value visible and announces copy success or failure.
 - **FilterToolbar / FilterChip** — the canonical list-filter frame and removable
   active-filter token. Toolbars wrap without horizontal page overflow; chips
   stay square, show label and value, and expose an explicit remove name. Filter
@@ -384,6 +398,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
 - **Split workspaces:** directory + detail use two panes at 900px and wider.
   Below 900px the selected detail replaces the directory and exposes a
   full `Back` action; neither pane may remain positioned outside the viewport.
+  Conversations add the shared non-modal third inspector only when their actual
+  workspace container reaches 1560px; desktop below that threshold, tablet, and
+  mobile retain Drawer disclosure.
 - **Feedback placement:** `SurfaceNotice` is the framed inline/workspace banner;
   `ToastViewport` is fixed bottom-right and becomes full inset-width on mobile.
   Its inline placement exists only for deterministic `/__ui` review. Toast
@@ -416,9 +433,9 @@ or `border-*` utilities and rely on generated CSS order.
 | Image | loading, ready, contain/cover, long caption, missing/error fallback |
 | Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav, pinned instance Connection, admin/unknown Session utility + dialog |
 | Console footer | ready capabilities, discovery pending, discovery failure, version absent, compact tablet, hidden mobile |
-| Workspace page / split workspace | PageHeader + two panes ≥900px, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px |
+| Workspace page / split workspace | PageHeader + two panes ≥900px, optional third inspector at ≥1560px container width, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
-| Dialog / Drawer | desktop, 390px mobile, bounded scroll, pending-close, one-time-secret dismissal, Conversation/Message exclusivity |
+| Dialog / Drawer / responsive inspector | 1920px docked third column, 1440px desktop Drawer, tablet Drawer, 390px bottom sheet, bounded scroll, pending-close, one-time-secret dismissal, Conversation/Message replacement |
 
 Hover never hides a label or icon. Inverted surfaces always use paper-colored
 foregrounds. Motion may reinforce state, but color/border/fill must communicate
@@ -433,11 +450,11 @@ a parts bin:
 1. **List:** filter toolbar → active chips → honest projection state → table →
    cursor pagination. Loading, empty, stale/syncing, not-ready, error, and ready
    are mutually exclusive render paths in product panels.
-2. **Inspector:** selection → Drawer → identity/status → DescriptionList → only
+2. **Inspector:** selection → responsive docked column or Drawer → identity/status → DescriptionList → only
    the narrow actions owned by that panel. Fact groups and action groups use
    canonical framed Panel surfaces rather than floating directly in the Drawer
-   body. Long identifiers remain fully available in the body even when repeated
-   as a compact header subtitle. Long content remains body-scrollable.
+   body. Long identifiers remain fully available with the shared copy action;
+   long content remains independently scrollable.
 3. **Command:** consequence notice → required fields/confirmation → explicit
    readiness review → stable footer. Duplicate submission is disabled; pending
    commands lock dismissal; dirty editors confirm destructive navigation;
@@ -448,8 +465,9 @@ a parts bin:
    intent → refreshed narrow projection. It never infers success from aggregate
    health.
 5. **Split workspace:** directory → selection → detail with sticky identity →
-   narrow footer action. Above 900px both panes remain visible; at tablet/mobile
-   the detail replaces the directory and exposes Back.
+   narrow footer action. Above 900px both panes remain visible; an actual
+   workspace width of 1560px adds the Conversation inspector as a third column.
+   At tablet/mobile the detail replaces the directory and exposes Back.
 
 Production work should start from one of these recipes and delete inapplicable
 pieces, rather than inventing new local frames or interaction language.

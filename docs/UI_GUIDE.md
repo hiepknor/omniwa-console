@@ -185,10 +185,10 @@ resource models, or rendered diagnostics.
 - One-time credentials cannot be dismissed implicitly after reveal. The
   operator must explicitly confirm storage or pass a second destructive
   confirmation to discard the reveal; a copy acknowledgement is informational.
-- Inspector drawers place full identifiers in a semantic DescriptionList and
+- Inspectors place full identifiers in a semantic DescriptionList and
   place facts and commands in separate canonical Panel surfaces. Preview
   fixtures reuse the same production inspector composition and may not invent
-  contradictory live states.
+  contradictory live states. Copyable diagnostics use the shared CopyValue.
 - Interactive table rows support keyboard activation and expose selection.
 - Responsive tables use the shared container-width contract: compact records at
   640px table width and below, essential columns through 768px, supporting facts
@@ -220,12 +220,17 @@ resource models, or rendered diagnostics.
   capability-gated. `not_ready` remains pending; only the message inspector adds
   an explicit retry action for recoverable reads. Timeline images load near the
   viewport without changing this visual language.
-  The selected Conversation keeps only scan-critical facts and a visible
-  `Details` action in its timeline summary. That action opens the shared Drawer,
-  where canonical identity, provider routing, and projected state are grouped in
+  The selected Conversation keeps unread and type as scan-critical facts. Below
+  1560px of actual workspace width it also exposes `Details`, which opens the
+  shared Drawer. At or above that container threshold the same inspector content
+  remains visible as a non-modal 440px third column beside a 320px directory and
+  a timeline of at least 800px. Canonical identity, provider routing, and
+  projected state are grouped in
   framed Panels and DescriptionLists. Raw provider aliases and target JIDs stay
-  inside this inspector. Conversation and Message drawers are mutually exclusive
-  URL-backed states. Message cursor pages
+  inside this inspector. Selected Message details replace Conversation details
+  in the shared slot and closing them restores Conversation details in docked
+  mode. Desktop below the threshold, tablet, and mobile retain mutually exclusive
+  URL-backed Drawers. Message cursor pages
   use directional `Newest` / `Older messages` labels and explicitly remain one
   bounded page; `Load more` is reserved for list progression that does not claim
   chat-history accumulation. When sending is unavailable, one compact notice

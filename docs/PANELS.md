@@ -281,11 +281,14 @@ matching. Capability-off instances receive no `/chat/*` fallback read. Former
 browser URLs and their cursors are not supported by the canonical workspace.
 `conversation_media_assets` remains an independent gate.
 
-The selected Conversation keeps scan-critical facts in the timeline summary and
-opens backend-reported identity, provider routing, and projected state in the
-shared Drawer/Panel/DescriptionList composition. Raw aliases and addressing JID
-remain inside that inspector. Conversation and Message inspectors are mutually
-exclusive URL-backed states. If
+The selected Conversation keeps unread and type in the timeline summary. At
+1560px of actual workspace width, backend-reported identity, provider routing,
+and projected state persist in a non-modal 440px third inspector column; selected
+Message details replace that content and closing them restores Conversation
+details. Desktop below that threshold, tablet, and mobile use the shared
+Drawer/Panel/DescriptionList composition through the URL-backed `details` or
+`message` state. Raw aliases and addressing JID remain inside that inspector,
+and diagnostic identifiers use the shared copy action. If
 the authoritative command target or required send capabilities are unavailable,
 the Composer is replaced by one compact unavailable notice rather than a disabled
 form. Canonical Contacts preserve absent `Found` as unreported and never derive a

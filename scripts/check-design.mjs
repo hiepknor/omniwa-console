@@ -101,8 +101,8 @@ if (!uiGallery.includes("['connection', 'Connection']") || !uiGallery.includes("
 if (!uiGallery.includes('const sessionUtilityItems') || !uiGallery.includes('Mobile navigation example')) {
   failures.push('src/app/UiGallery.tsx: compact session utilities must remain separate from navigation fixtures');
 }
-for (const marker of ['<ConversationDetailsDrawer', 'setConversationDetailsOpen(true)', '>Details</Button>']) {
-  if (!uiGallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: Conversation details Drawer fixture is missing ${marker}`);
+for (const marker of ['<ResponsiveInspector', '<ConversationDetailsContent', 'setConversationDetailsOpen(true)', '>Details</Button>']) {
+  if (!uiGallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: responsive Conversation inspector fixture is missing ${marker}`);
 }
 
 const input = await read('src/ui/Input.tsx');
@@ -170,7 +170,7 @@ for (const marker of ['role="progressbar"', 'aria-valuenow', 'aria-valuetext', '
 }
 
 const panel = await read('src/ui/Panel.tsx');
-for (const marker of ["bodyPadding = 'default'", "'compact-top': 'px-4 pb-4 pt-2'", "none: ''", '@container', 'grid-cols-[minmax(0,1fr)_auto]', '@max-[32rem]:grid-cols-1', '@max-[32rem]:justify-start']) {
+for (const marker of ["bodyPadding = 'default'", "headingLevel = 2", "headingLevel?: 2 | 3", "'compact-top': 'px-4 pb-4 pt-2'", "none: ''", '@container', 'grid-cols-[minmax(0,1fr)_auto]', '@max-[32rem]:grid-cols-1', '@max-[32rem]:justify-start']) {
   if (!panel.includes(marker)) failures.push(`src/ui/Panel.tsx: controlled body-spacing contract is missing ${marker}`);
 }
 if (panel.includes('bodyClassName')) {
@@ -230,8 +230,18 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '>Details</Button>', '<ConversationDetailsDrawer', 'nextLabel="Older messages"']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', 'nextLabel="Older messages"']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
+}
+
+const responsiveInspector = await read('src/ui/ResponsiveInspector.tsx');
+for (const marker of ['DOCKED_INSPECTOR_MIN_WIDTH = 1560', 'ResizeObserver', '@container/responsive-inspector', '<aside', 'aria-labelledby', '<Drawer', 'w-[440px]', 'overflow-y-auto', 'dockedClose']) {
+  if (!responsiveInspector.includes(marker)) failures.push(`src/ui/ResponsiveInspector.tsx: responsive inspector contract is missing ${marker}`);
+}
+
+const copyValue = await read('src/ui/CopyValue.tsx');
+for (const marker of ['navigator.clipboard.writeText', 'aria-live="polite"', 'Retry copy', 'Copy ${label}']) {
+  if (!copyValue.includes(marker)) failures.push(`src/ui/CopyValue.tsx: shared diagnostic copy contract is missing ${marker}`);
 }
 
 const workspacePageFrame = await read('src/ui/WorkspacePageFrame.tsx');
@@ -245,7 +255,7 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '>Details</Button>', '<ConversationDetailsDrawer', "details: 'conversation'", 'resetLabel="Newest"', 'nextLabel="Older messages"']) {
+for (const marker of ['<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', "details: 'conversation'", 'resetLabel="Newest"', 'nextLabel="Older messages"']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 
@@ -255,7 +265,7 @@ for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail
 }
 
 const conversationDetails = await read('src/features/conversations/Details.tsx');
-for (const marker of ['ConversationDetailsDrawer', '<Drawer', 'Canonical identity', 'Provider routing', 'Projected state', '<DescriptionList', '<Panel']) {
+for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '<CopyValue', 'headingLevel={3}', 'Canonical identity', 'Provider routing', 'Projected state', '<DescriptionList', '<Panel']) {
   if (!conversationDetails.includes(marker)) failures.push(`src/features/conversations/Details.tsx: Conversation details inspector is missing ${marker}`);
 }
 

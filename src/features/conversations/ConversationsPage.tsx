@@ -5,11 +5,11 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken } from '@/lib/format';
 import { createSearchParams, omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
 import { canonicalConversationReadsEnabled, canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
 import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
-import { ConversationDetailsDrawer, DirectoryInspector, MessageInspector } from './Details';
+import { ConversationDetailsContent, DirectoryInspector, MessageInspectorContent } from './Details';
 import { ConversationMessageImage } from './Media';
 import { useContact, useContacts, useConversation, useConversations, useLabel, useLabels, useMessages } from './hooks';
 import { conversationRouteState, setConversationParam, type ConversationView } from './route-state';
@@ -107,6 +107,7 @@ export function ConversationsPage() {
   const advertised = route.view === 'conversations' ? conversationsReady : route.view === 'contacts' ? contactsReady : labelsReady;
   const viewSupported = advertised || currentQuery.data !== undefined;
   const emptyDirectory = viewSupported && currentQuery.data && currentAuthoritative && ((route.view === 'conversations' && filteredConversations.length === 0) || (route.view === 'contacts' && (contacts.data?.resource.items.length ?? 0) === 0) || (route.view === 'labels' && filteredLabels.length === 0));
+  const inspectedMessageId = route.message && selectedConversation && messagesSupported ? route.message : undefined;
 
   return (
     <>
@@ -121,7 +122,21 @@ export function ConversationsPage() {
         compactActions={<Button disabled={!viewSupported || (hasConversation ? detailRefreshing : currentQuery.isFetching)} onClick={hasConversation ? refreshDetail : refreshDirectory}>{(hasConversation ? detailRefreshing : currentQuery.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
         compactHeadingRef={compactHeadingRef}
       >
-        <SplitWorkspace
+        <ResponsiveInspector
+          open={Boolean(inspectedMessageId || (route.details === 'conversation' && selectedConversation))}
+          persistent={Boolean(selectedConversation)}
+          onClose={() => inspectedMessageId ? replaceParams(setConversationParam(searchParams, 'message')) : closeConversationDetails()}
+          title={inspectedMessageId ? 'Message details' : selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${humanizeToken(selectedConversation.type)} conversation` : 'Conversation details')}
+          subtitle={inspectedMessageId}
+          inspector={inspectedMessageId && selectedConversation
+            ? <MessageInspectorContent messageId={inspectedMessageId} loadedConversation={selectedConversation} enabled={messagesReady} mediaEnabled={conversationMedia} />
+            : selectedConversation
+              ? <ConversationDetailsContent conversation={selectedConversation} />
+              : null}
+          focusKey={inspectedMessageId ? `message:${inspectedMessageId}` : undefined}
+          dockedClose={Boolean(inspectedMessageId)}
+        >
+          <SplitWorkspace
           frame="attached"
           detailOpen={hasConversation}
           directoryScrollKey={JSON.stringify([route.view, route.search, route.cursor])}
@@ -188,8 +203,7 @@ export function ConversationsPage() {
                 <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
                   <ConversationUnreadCount count={selectedConversation.unreadCount} context="detail" />
                   <span>{humanizeToken(selectedConversation.type)}</span>
-                  <span className="font-mono text-fg-2 max-sm:order-2 max-sm:w-full max-sm:break-all">{selectedConversation.conversationId}</span>
-                  <Button className="ml-auto" onClick={openConversationDetails}>Details</Button>
+                  <Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={openConversationDetails}>Details</Button>
                 </div>
                 {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>
@@ -227,11 +241,10 @@ export function ConversationsPage() {
           mediaEnabled={conversationMedia}
           unavailableDetail={recipientUnavailableDetail}
         /> : undefined}
-        />
+          />
+        </ResponsiveInspector>
       </WorkspacePageFrame>
 
-      {route.message && selectedConversation && messagesSupported ? <MessageInspector messageId={route.message} loadedConversation={selectedConversation} enabled={messagesReady} mediaEnabled={conversationMedia} onClose={() => replaceParams(setConversationParam(searchParams, 'message'))} /> : null}
-      {!route.message && route.details === 'conversation' && selectedConversation ? <ConversationDetailsDrawer conversation={selectedConversation} onClose={closeConversationDetails} /> : null}
       {route.selected && route.view !== 'conversations' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} meta={route.view === 'contacts' ? contact.data?.meta : label.data?.meta} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
     </>
   );

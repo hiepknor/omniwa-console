@@ -32,8 +32,11 @@ describe('ConversationDetailsContent', () => {
     expect(html).toContain('Projected state');
     expect(html).toContain('731002@lid');
     expect(html).toContain('15551230001@s.whatsapp.net');
-    expect(html).toContain('86,400s');
+    expect(html).toContain('1 day · 86,400s');
     expect(html).toContain('>2</span>');
+    expect(html).toContain('<h3');
+    expect(html).toContain('aria-label="Copy Conversation ID"');
+    expect(html).toContain('aria-label="Copy Provider aliases"');
   });
 
   it('keeps missing optional provider and state fields unreported', () => {
