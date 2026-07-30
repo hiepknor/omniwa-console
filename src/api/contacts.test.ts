@@ -61,6 +61,20 @@ describe('contacts projection adapter', () => {
     });
   });
 
+  it('does not invent a canonical display name or found state from legacy fields', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: [{ ...contact, displayName: undefined, Found: undefined }],
+      meta: { total: 1 },
+    }));
+
+    const result = await listContacts({ GET } as unknown as ApiClient, { canonicalIdentity: true });
+
+    expect(result.resource.items[0]).toMatchObject({ id: contact.contactId });
+    expect(result.resource.items[0]?.displayName).toBeUndefined();
+    expect(result.resource.items[0]?.found).toBeUndefined();
+  });
+
   it('normalizes an absorbed-ID or alias lookup to the returned canonical contact ID', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: contact, meta: { syncStatus: 'ready' } }));
     const result = await getContact({ GET } as unknown as ApiClient, 'absorbed-contact-id', true);

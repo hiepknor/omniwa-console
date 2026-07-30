@@ -227,7 +227,7 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '<ConversationFacts conversation={conversation}', 'nextLabel="Older messages"']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
@@ -242,13 +242,18 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"']) {
+for (const marker of ['<WorkspacePageFrame', '<SplitWorkspace', 'frame="attached"', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '<ConversationFacts conversation={selectedConversation}', 'resetLabel="Newest"', 'nextLabel="Older messages"']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 
 const conversationsView = await read('src/features/conversations/ConversationsView.tsx');
-for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail'", "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>']) {
+for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail'", "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>', 'ConversationFacts', '<DescriptionList', 'Provider aliases']) {
   if (!conversationsView.includes(marker)) failures.push(`src/features/conversations/ConversationsView.tsx: unread-count contract is missing ${marker}`);
+}
+
+const conversationsComposer = await read('src/features/conversations/Composer.tsx');
+for (const marker of ['ComposerUnavailable', 'if (!enabled) return <ComposerUnavailable', 'title="Sending unavailable"']) {
+  if (!conversationsComposer.includes(marker)) failures.push(`src/features/conversations/Composer.tsx: compact unavailable composer is missing ${marker}`);
 }
 if (/<Status\b[^>]*>[^<]*unread/.test(conversationsView) || /<Status\b[^>]*>[^<]*unread/.test(conversationsPage)) {
   failures.push('Conversations: unread quantities must use ConversationUnreadCount, not operational Status');

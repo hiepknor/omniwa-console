@@ -251,6 +251,14 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   recoverable read. Timeline loading is near-viewport gated without changing
   geometry. Device upload uses the shared FileUpload inside the canonical Dialog
   and does not change the page frame.
+- **Conversation facts and send availability** — the selected Conversation keeps
+  unread, type, and canonical ID in its dense summary, then uses the shared
+  DescriptionList for backend-reported identity provenance and state. The facts
+  expose only an alias count and command-target availability on the primary
+  surface; raw provider aliases and target JIDs remain inspector/debug material.
+  A missing command target or send capability replaces the entire Composer form
+  with one compact StateNotice, so an unavailable command never leaves a large
+  disabled textarea occupying the workspace footer.
 - **DescriptionList / DescriptionItem** — the only repeated key/value facts
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
   values on wide screens, stacks them at ≤640px, wraps long content, and uses
@@ -286,6 +294,10 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   modes (`default`, `none`, or `compact-top`), never through a free-form body
   class escape hatch. API errors include normalized detail and `requestId` when
   present; pagination never suggests an unavailable page.
+  Ordinary directories retain `First page` / `Load more`. A bounded Conversation
+  history page overrides those labels with `Newest` / `Older messages` and says
+  that one page is shown, because moving an opaque cursor replaces rather than
+  appends the rendered history.
 - **ProgressBar** — an 8px square framed track with an ink fill and explicit
   text label. Determinate progress exposes its bounded numeric value;
   indeterminate progress uses the allowlisted diagonal operational screentone

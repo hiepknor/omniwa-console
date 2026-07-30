@@ -13,7 +13,7 @@ export type ContactResource = {
   identityUpdatedAt?: string;
   displayName?: string;
   displayNameSource?: 'full_name' | 'business_name' | 'push_name' | 'first_name' | 'username';
-  found: boolean;
+  found?: boolean;
   firstName?: string;
   fullName?: string;
   pushName?: string;
@@ -61,9 +61,11 @@ function toContact(payload: ContactPayload, fallbackId = '', canonicalIdentity =
     aliases: canonicalIdentity ? [...new Set((payload.aliases ?? []).map((alias) => alias.trim()).filter(Boolean))] : [],
     identityStatus: canonicalId && payload.identityStatus ? payload.identityStatus : 'legacy',
     identityUpdatedAt: canonicalId ? nonEmpty(payload.identityUpdatedAt) : undefined,
-    displayName: (canonicalId ? nonEmpty(payload.displayName) : undefined) ?? fullName ?? businessName ?? pushName ?? firstName ?? username ?? redactedPhone,
+    displayName: canonicalId
+      ? nonEmpty(payload.displayName)
+      : fullName ?? businessName ?? pushName ?? firstName ?? username ?? redactedPhone,
     displayNameSource: canonicalId ? payload.displayNameSource : undefined,
-    found: payload.Found ?? false,
+    found: payload.Found,
     firstName,
     fullName,
     pushName,

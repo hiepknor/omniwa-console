@@ -39,6 +39,7 @@ describe('canonical conversations projection adapter', () => {
       conversationId: conversation.conversationId,
       contactId: conversation.contactId,
       aliases: ['100@s.whatsapp.net', '123@lid'],
+      aliasesReported: true,
       addressingJid: conversation.addressingJid,
       type: 'direct',
       unreadCount: 2,
@@ -46,6 +47,19 @@ describe('canonical conversations projection adapter', () => {
     expect(result.resource.pagination).toEqual({ nextCursor: 'opaque/next', hasMore: true });
     expect(result.resource.total).toBe(217);
     expect(result.meta?.syncStatus).toBe('stale');
+  });
+
+  it('preserves whether provider aliases were reported instead of turning absence into zero', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: { ...conversation, aliases: undefined },
+      meta: { syncStatus: 'ready' },
+    }));
+
+    const result = await getConversation({ GET } as unknown as ApiClient, conversation.conversationId);
+
+    expect(result.resource.aliases).toEqual([]);
+    expect(result.resource.aliasesReported).toBe(false);
   });
 
   it('normalizes an absorbed provider Chat alias to the returned canonical conversation ID', async () => {

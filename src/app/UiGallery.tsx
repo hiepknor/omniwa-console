@@ -3,7 +3,10 @@ import { ApiFailure } from '@/api/envelopes';
 import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import { SurfaceNotice } from '@/components/feedback/SurfaceNotice';
 import { ToastViewport } from '@/components/feedback/ToastViewport';
+import { ComposerUnavailable } from '@/features/conversations/Composer';
+import { ConversationFacts } from '@/features/conversations/ConversationsView';
 import { ConsoleFooter } from './ConsoleFooter';
+import { conversationsFixture } from './preview-fixtures';
 import {
   Button,
   ButtonLink,
@@ -582,10 +585,12 @@ export function UiGallery() {
                 detail={
                   <>
                     <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Projected detail" />
-                    <div className="grid gap-3 p-4"><Status tone="ok">Ready</Status><DescriptionList><DescriptionItem label="Identifier" mono>conversation_01</DescriptionItem><DescriptionItem label="Updated">Just now</DescriptionItem></DescriptionList></div>
+                    <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs text-fg-3"><span>Unread</span><CountBadge count={2} /><span>Individual</span><span className="font-mono text-fg-2">{conversationsFixture[0].conversationId}</span></div>
+                    <ConversationFacts conversation={conversationsFixture[0]} />
+                    <CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." onCursor={() => {}} />
                   </>
                 }
-                detailFooter={<div className="flex justify-end border-t border-line p-3"><Button variant="primary">Narrow action</Button></div>}
+                detailFooter={<ComposerUnavailable detail="No authoritative command target is available." />}
               />
             </WorkspacePageFrame>
           </div>

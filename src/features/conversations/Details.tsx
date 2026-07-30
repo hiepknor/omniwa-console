@@ -40,7 +40,7 @@ export function DirectoryInspector({ contact, label, meta, error, loading, onRet
               <DescriptionItem label="Phone">{contact.redactedPhone ?? 'Not reported'}</DescriptionItem>
               <DescriptionItem label="Business">{contact.businessName ?? 'Not reported'}</DescriptionItem>
               <DescriptionItem label="About">{contact.about ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="WhatsApp contact found">{contact.found ? 'Yes' : 'No'}</DescriptionItem>
+              <DescriptionItem label="WhatsApp contact found">{contact.found === undefined ? 'Not reported' : contact.found ? 'Yes' : 'No'}</DescriptionItem>
             </DescriptionList>
           </Panel>
         </div>

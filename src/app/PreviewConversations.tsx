@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { ApiProvider } from '@/api/ApiProvider';
 import { Composer } from '@/features/conversations/Composer';
-import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from '@/features/conversations/ConversationsView';
+import { ContactList, ConversationFacts, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from '@/features/conversations/ConversationsView';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
-import { Button, Field, FilterToolbar, Image, Input, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, Image, Input, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { contactsFixture, conversationsFixture, labelsFixture, messagesFixture } from './preview-fixtures';
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
@@ -57,6 +57,7 @@ export function PreviewConversations() {
               <span>Individual</span>
               <span className="font-mono text-fg-2">{conversation.conversationId}</span>
             </div>
+            <ConversationFacts conversation={conversation} />
             <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} renderMedia={(message) => {
               if (message.mediaAssetId === 'asset_ready') return <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />;
               if (message.mediaAssetId === 'asset_processing') return <ConversationMediaPlaceholder enabled compact label="Image Processing" tone="pending" detail="The projected message remains visible while private content is prepared." />;
@@ -64,6 +65,7 @@ export function PreviewConversations() {
               if (message.mediaAssetId === 'asset_expired') return <ConversationMediaPlaceholder enabled compact label="Image unavailable" tone="failed" detail="Media asset expired" />;
               return <ConversationMediaPlaceholder enabled={false} compact label="Image unavailable" tone="neutral" detail="Managed image content was not reported." />;
             }} />
+            <CursorPagination nextCursor="preview-older" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." onCursor={() => {}} />
           </> : null}
           </>
         }

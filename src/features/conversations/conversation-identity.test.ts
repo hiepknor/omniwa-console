@@ -4,7 +4,7 @@ import { canonicalConversationReadsEnabled, canonicalConversationRedirect, resol
 
 const direct: ConversationResource = {
   resourceType: 'conversation', conversationId: 'conversation-1', contactId: 'contact-1',
-  aliases: ['100@s.whatsapp.net', '123@lid'], addressingJid: '123@lid', type: 'direct', unreadCount: 0,
+  aliases: ['100@s.whatsapp.net', '123@lid'], aliasesReported: true, addressingJid: '123@lid', type: 'direct', unreadCount: 0,
 };
 
 describe('canonical conversation identity policy', () => {

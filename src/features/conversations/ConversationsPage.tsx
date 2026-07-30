@@ -8,7 +8,7 @@ import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
 import { canonicalConversationReadsEnabled, canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
-import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
+import { ContactList, ConversationFacts, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
 import { DirectoryInspector, MessageInspector } from './Details';
 import { ConversationMessageImage } from './Media';
 import { useContact, useContacts, useConversation, useConversations, useLabel, useLabels, useMessages } from './hooks';
@@ -184,6 +184,7 @@ export function ConversationsPage() {
                   <span>{humanizeToken(selectedConversation.type)}</span>
                   <span className="font-mono text-fg-2">{selectedConversation.conversationId}</span>
                 </div>
+                <ConversationFacts conversation={selectedConversation} />
                 {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>
                 ) : messages.isPending ? (
@@ -196,7 +197,14 @@ export function ConversationsPage() {
                     <div className="px-4"><ProjectionStatus meta={messages.data.meta} /></div>
                     <MessageTimeline items={loadedMessages} selectedId={route.message} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'message', id))} renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />} />
                     {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No messages" detail="The ready message projection contains no messages." /></div> : null}
-                    <CursorPagination cursor={route.messageCursor} nextCursor={messages.data.resource.pagination.nextCursor ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))} />
+                    <CursorPagination
+                      cursor={route.messageCursor}
+                      nextCursor={messages.data.resource.pagination.nextCursor ?? undefined}
+                      resetLabel="Newest"
+                      nextLabel="Older messages"
+                      info="Showing one bounded message page."
+                      onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))}
+                    />
                   </>
                 ) : null}
               </>

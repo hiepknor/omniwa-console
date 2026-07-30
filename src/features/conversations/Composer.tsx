@@ -32,6 +32,18 @@ function unknownSendOutcome(error: unknown): boolean {
   return error instanceof ApiFailure && error.code === 'unknown_send_outcome';
 }
 
+export function ComposerUnavailable({ detail }: { detail?: string }) {
+  return (
+    <div className="border-t border-line bg-surface p-3">
+      <StateNotice
+        kind="empty"
+        title="Sending unavailable"
+        detail={detail ?? 'Sending requires both messages_projection and outbound_rate_limit. No send request is available.'}
+      />
+    </div>
+  );
+}
+
 export function Composer({ conversationId, addressingJid, conversationName, enabled, mediaEnabled, unavailableDetail, recipientError, onRetryRecipient }: {
   conversationId: string;
   addressingJid: string;
@@ -110,13 +122,13 @@ export function Composer({ conversationId, addressingJid, conversationName, enab
     ? mediaEnabled && uploadedAsset?.status === 'ready'
     : validHttpUrl(mediaUrl));
 
+  if (!enabled) return <ComposerUnavailable detail={unavailableDetail} />;
+
   return (
     <div className="grid gap-3 border-t border-line bg-surface p-4">
       {sendText.data ? <StateNotice kind="info" title="Text send accepted" detail={acknowledgementDetail(sendText.data)} /> : null}
       {sendText.error ? <FailureNotice error={sendText.error} command /> : null}
       {recipientError ? <FailureNotice error={recipientError} onRetry={onRetryRecipient} /> : null}
-      {!enabled ? <StateNotice kind="empty" title="Sending unavailable" detail={unavailableDetail ?? 'Sending requires both messages_projection and outbound_rate_limit. No send request is available.'} /> : null}
-
       <form className="grid gap-2" onSubmit={(event) => { event.preventDefault(); submitText(); }}>
         <Field label={`Message ${conversationName}`}>
           {(id) => <Textarea id={id} rows={3} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
