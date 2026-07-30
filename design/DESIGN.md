@@ -286,6 +286,15 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   A missing command target or send capability replaces the entire Composer form
   with one compact StateNotice, so an unavailable command never leaves a large
   disabled textarea occupying the workspace footer.
+- **Conversation Composer** — the available send surface uses the shared
+  Textarea in auto-grow mode: one line initially, bounded to four lines before
+  internal scrolling. The field, `Media…`, and `Send text` actions share one
+  bottom-aligned row at every viewport; mobile retains 40px action/control
+  targets without reserving a three-row textarea. Command failure, cooldown,
+  unknown outcome, recipient error, and provider acknowledgement remain above
+  that row and may expand the footer only while reported. Auto-grow changes
+  geometry only; it does not introduce Enter-to-send or change submission,
+  capability, retry, or acknowledgement semantics.
 - **DescriptionList / DescriptionItem** — the only repeated key/value facts
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
   values on wide screens, stacks them at ≤640px, wraps long content, and uses

@@ -245,7 +245,11 @@ resource models, or rendered diagnostics.
   bounded page; `Load more` is reserved for list progression that does not claim
   chat-history accumulation. When sending is unavailable, one compact notice
   replaces the Composer fields and actions instead of rendering disabled input
-  controls.
+  controls. When sending is available, the shared Textarea starts at one line,
+  grows through four lines, then scrolls internally. Text, `Media…`, and
+  `Send text` remain one bottom-aligned row, including mobile; command errors,
+  cooldown, unknown outcome, and acknowledgement stay in the explicit notices
+  above it.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the
