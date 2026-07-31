@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus, ProjectionStatusGroup } from '@/components/ProjectionReadState';
-import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { Button, CountBadge, CursorPagination, Dialog, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
+import { composerNavigationBlock, IDLE_COMPOSER_STATE, shouldBlockConversationNavigation, type ComposerInteractionState, type ComposerNavigationBlock } from './composer-state';
 import { canonicalConversationLocation, canonicalConversationReadsEnabled, resolveConversationRecipient } from './conversation-identity';
 import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, MessageTimeline } from './ConversationsView';
 import { ConversationDetailsContent, MessageInspectorContent } from './Details';
@@ -35,6 +36,8 @@ function ConversationWorkspace() {
   const hasConversation = Boolean(activeConversationRef);
   const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(activeConversationRef);
   const [searchDraft, setSearchDraft] = useState(route.search);
+  const [composerState, setComposerState] = useState<ComposerInteractionState>(IDLE_COMPOSER_STATE);
+  const [blockedReason, setBlockedReason] = useState<Exclude<ComposerNavigationBlock, undefined>>();
   useEffect(() => setSearchDraft(route.search), [route.search]);
   const instanceScope = session.keyKind === 'api';
   const cap = (name: string) => capabilities.data?.capabilities.includes(name) ?? false;
@@ -47,6 +50,12 @@ function ConversationWorkspace() {
   const selectedConversation = conversation.data?.resource;
   const sendRecipient = resolveConversationRecipient(selectedConversation);
   const canonicalConversationId = selectedConversation?.conversationId;
+  const navigationBlocker = useBlocker(({ currentLocation, nextLocation }) => shouldBlockConversationNavigation({
+    currentPath: currentLocation.pathname,
+    nextPath: nextLocation.pathname,
+    canonicalConversationId,
+    state: composerState,
+  }));
   const messages = useMessages(canonicalConversationId, route.messageCursor, messagesReady);
   const loadedConversations = conversations.data?.resource.items ?? [];
   const filteredConversations = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedConversations.filter((i) => !term || i.conversationId.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedConversations, route.search]);
@@ -57,8 +66,14 @@ function ConversationWorkspace() {
   const conversationsSupported = conversationsReady || conversations.data !== undefined || conversation.data !== undefined;
   const messagesSupported = messagesReady || messages.data !== undefined;
 
+  useEffect(() => {
+    if (navigationBlocker.state === 'blocked') setBlockedReason(composerNavigationBlock(composerState));
+    else setBlockedReason(undefined);
+  }, [navigationBlocker.state]);
+
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
   const openConversation = (id: string) => {
+    if (id === canonicalConversationId) return;
     rememberFocusOrigin();
     navigate(withSearchParams(`/conversations/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'details'])));
   };
@@ -216,16 +231,35 @@ function ConversationWorkspace() {
           </>
         }
         detailFooter={selectedConversation ? <Composer
+          key={selectedConversation.conversationId}
           conversationId={selectedConversation.conversationId}
           addressingJid={sendRecipient ?? ''}
           conversationName={selectedConversation.displayName ?? `Unknown ${selectedConversation.type} conversation`}
           enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
           mediaEnabled={conversationMedia}
           unavailableDetail={recipientUnavailableDetail}
+          onInteractionStateChange={setComposerState}
         /> : undefined}
           />
         </ResponsiveInspector>
       </WorkspacePageFrame>
+
+      <Dialog
+        open={navigationBlocker.state === 'blocked'}
+        onClose={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}
+        title={blockedReason === 'dirty' ? 'Discard unsent message?' : blockedReason === 'pending' ? 'Message submission in progress' : 'Review unknown send outcome'}
+        footer={blockedReason === 'dirty'
+          ? <><Button onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}>Stay</Button><Button variant="danger" onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.proceed()}>Discard and continue</Button></>
+          : <Button variant="primary" onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}>Stay with Conversation</Button>}
+      >
+        <p className="text-sm text-fg-2">
+          {blockedReason === 'dirty'
+            ? 'Changing Conversation will discard the current text or media draft.'
+            : blockedReason === 'pending'
+              ? 'Wait for the current provider command acknowledgement before changing Conversation.'
+              : 'The send outcome is unknown. Keep this Conversation open and review the command state before taking another action.'}
+        </p>
+      </Dialog>
 
     </>
   );
