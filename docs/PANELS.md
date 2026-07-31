@@ -314,6 +314,12 @@ matching. Capability-off instances receive no `/chat/*` fallback read. Former
 browser URLs and their cursors are not supported by the canonical workspace.
 `conversation_media_assets` remains an independent gate.
 
+`authoritative_conversation_unread` is an independent fleet-wide quality signal,
+not a Conversation-read gate. Each required `unreadAuthoritative` field controls
+its own row: authoritative counts render normally, while non-authoritative counts
+remain best-known data and render as syncing without a numeric badge. The Console
+does not coerce them to zero, hide the Conversation, or reconcile alias totals.
+
 The selected Conversation keeps unread and type in the timeline summary. At
 1560px of actual workspace width, backend-reported identity, provider routing,
 and projected state persist in a non-modal 440px third inspector column; selected
@@ -359,12 +365,13 @@ POST /message/markread
 POST /message/markplayed
 POST /message/edit
 POST /message/delete
-POST /chat/archive
-POST /chat/unarchive
-POST /chat/mute
-POST /chat/unmute
-POST /chat/pin
-POST /chat/unpin
+POST /conversations/{conversationRef}/archive
+DELETE /conversations/{conversationRef}/archive
+PUT /conversations/{conversationRef}/mute
+DELETE /conversations/{conversationRef}/mute
+POST /conversations/{conversationRef}/pin
+DELETE /conversations/{conversationRef}/pin
+POST /conversations/{conversationRef}/history-sync
 ```
 
 ## Campaigns — `/campaigns`, `/campaigns/new`, `/campaigns/:campaignId`

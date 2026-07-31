@@ -8,7 +8,7 @@ import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus, ProjectionStatusGroup } from '@/components/ProjectionReadState';
 import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
-import { canonicalConversationReadsEnabled, canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
+import { canonicalConversationLocation, canonicalConversationReadsEnabled, resolveConversationRecipient } from './conversation-identity';
 import { ConversationList, ConversationUnreadCount, MessageTimeline } from './ConversationsView';
 import { ConversationDetailsContent, MessageInspectorContent } from './Details';
 import { ConversationMessageImage } from './Media';
@@ -46,7 +46,8 @@ function ConversationWorkspace() {
   const conversation = useConversation(activeConversationRef, conversationsReady);
   const selectedConversation = conversation.data?.resource;
   const sendRecipient = resolveConversationRecipient(selectedConversation);
-  const messages = useMessages(activeConversationRef, route.messageCursor, messagesReady);
+  const canonicalConversationId = selectedConversation?.conversationId;
+  const messages = useMessages(canonicalConversationId, route.messageCursor, messagesReady);
   const loadedConversations = conversations.data?.resource.items ?? [];
   const filteredConversations = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedConversations.filter((i) => !term || i.conversationId.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedConversations, route.search]);
   const loadedMessages = useMemo(() => [...(messages.data?.resource.items ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages.data]);
@@ -71,7 +72,7 @@ function ConversationWorkspace() {
   const detailRefreshing = Boolean(activeConversationRef) && (conversation.isFetching || messages.isFetching);
   const routeRefreshing = conversations.isFetching || detailRefreshing;
   const refreshDirectory = () => { void conversations.refetch(); };
-  const refreshDetail = () => { if (activeConversationRef) { void conversation.refetch(); if (messagesReady) void messages.refetch(); } };
+  const refreshDetail = () => { if (activeConversationRef) { void conversation.refetch(); if (messagesReady && canonicalConversationId) void messages.refetch(); } };
   const refresh = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(conversations.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined })));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
@@ -79,8 +80,8 @@ function ConversationWorkspace() {
     if (route.message && route.details) replaceParams(updateSearchParams(searchParams, { details: undefined }));
   }, [route.details, route.message]);
   useEffect(() => {
-    const canonicalId = canonicalConversationRedirect(activeConversationRef, selectedConversation);
-    if (canonicalId) navigate(withSearchParams(`/conversations/${encodeURIComponent(canonicalId)}`, searchParams), { replace: true });
+    const canonicalLocation = canonicalConversationLocation(activeConversationRef, selectedConversation, searchParams);
+    if (canonicalLocation) navigate(canonicalLocation, { replace: true });
   }, [activeConversationRef, navigate, searchParams, selectedConversation?.conversationId]);
   if (!instanceScope) return <BlockedPage title="Instance credential required" detail="Conversations requires an instance credential. Admin scope cannot read token-scoped projections, and no request was sent." />;
   if (capabilities.isPending) return <BlockedPage title="Discovering capabilities" detail="Discovering instance capabilities before enabling projection reads." />;
@@ -148,7 +149,7 @@ function ConversationWorkspace() {
               <>
                 {conversations.error ? <div className="p-3"><FailureNotice error={conversations.error} stale onRetry={refreshDirectory} /></div> : null}
                 <div className="px-3"><ProjectionStatus meta={conversations.data.meta} /></div>
-                <ConversationList items={filteredConversations} selectedId={activeConversationRef} onSelect={openConversation} />
+                <ConversationList items={filteredConversations} selectedId={canonicalConversationId ?? activeConversationRef} onSelect={openConversation} />
                 {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected Conversation on this loaded page matches the URL-backed filter.' : 'The ready Conversation projection contains no items.'} /></div> : null}
               </>
             ) : null}
@@ -176,7 +177,7 @@ function ConversationWorkspace() {
               <>
                 {conversation.error ? <div className="px-4 pt-3"><FailureNotice error={conversation.error} stale onRetry={() => conversation.refetch()} /></div> : null}
                 <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
-                  <ConversationUnreadCount count={selectedConversation.unreadCount} context="detail" />
+                  <ConversationUnreadCount count={selectedConversation.unreadCount} authoritative={selectedConversation.unreadAuthoritative} context="detail" />
                   <span>{humanizeToken(selectedConversation.type)}</span>
                   <Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={openConversationDetails}>Details</Button>
                 </div>

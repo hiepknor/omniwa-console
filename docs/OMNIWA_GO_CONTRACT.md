@@ -69,6 +69,7 @@ Known capabilities:
 - `instance_credential_health`
 - `canonical_contact_identity`
 - `canonical_conversation_identity`
+- `authoritative_conversation_unread`
 - `conversation_media_assets`
 
 Unknown capability strings must be preserved for forward compatibility. A
@@ -230,6 +231,12 @@ and projected `addressingJid` is the provider command target. Cursors remain
 opaque and canonical-conversation-scoped; `invalid_cursor` resets only its owning
 pagination state. The Console sends no `/chat/*` read fallback when the capability
 is absent.
+
+`authoritative_conversation_unread` is independent from canonical identity and
+means unread is authoritative across all active Conversations. It does not gate
+list/detail rendering. The required row-level `unreadAuthoritative` flag remains
+the presentation authority: false preserves the best-known `unreadCount` in data
+but shows pending treatment instead of a guaranteed number or a fabricated zero.
 
 ### Conversation media assets
 

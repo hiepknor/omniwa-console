@@ -11,8 +11,16 @@ const base = {
 };
 
 describe('projectionCollectionState', () => {
+  it('keeps projection_not_ready distinct from a successful empty collection', () => {
+    expect(projectionCollectionState({
+      ...base,
+      hasResource: false,
+      errorCode: 'projection_not_ready',
+      hasInitialError: true,
+    })).toBe('not_ready');
+  });
+
   it.each([
-    [{ ...base, hasResource: false, errorCode: 'projection_not_ready', hasInitialError: true }, 'not_ready'],
     [{ ...base, errorCode: 'projection_not_ready' }, 'ready'],
     [{ ...base, hasInitialError: true }, 'error'],
     [{ ...base, hasResource: false, isInitialLoading: true, itemCount: 0 }, 'loading'],

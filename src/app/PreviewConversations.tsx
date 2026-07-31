@@ -4,6 +4,7 @@ import { Composer } from '@/features/conversations/Composer';
 import { ConversationList, ConversationUnreadCount, MessageTimeline } from '@/features/conversations/ConversationsView';
 import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
+import { humanizeToken } from '@/lib/format';
 import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { conversationsFixture, messagesFixture } from './preview-fixtures';
 
@@ -23,7 +24,7 @@ export function PreviewConversations() {
         description="Review canonical conversations and projected message history."
         secondaryActions={<Button>Refresh</Button>}
         compactTitle={conversation?.displayName ?? 'Conversations'}
-        compactDescription={conversation ? 'Individual' : undefined}
+        compactDescription={conversation ? humanizeToken(conversation.type) : undefined}
         compactLeadingAction={conversation ? <Button onClick={() => setConversationId(undefined)}>Back</Button> : undefined}
         compactActions={<Button>Refresh</Button>}
         compactHeadingRef={compactHeadingRef}
@@ -63,8 +64,8 @@ export function PreviewConversations() {
             />
           {conversation ? <>
             <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
-              <ConversationUnreadCount count={conversation.unreadCount} context="detail" />
-              <span>Individual</span>
+              <ConversationUnreadCount count={conversation.unreadCount} authoritative={conversation.unreadAuthoritative} context="detail" />
+              <span>{humanizeToken(conversation.type)}</span>
               <Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={() => setDetailsOpen(true)}>Details</Button>
             </div>
             <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} conversationType={conversation.type} scrollKey={`${conversation.conversationId}:newest`} anchorToEnd renderMedia={(message) => {

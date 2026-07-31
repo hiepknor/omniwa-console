@@ -16,6 +16,7 @@ const conversation: ConversationResource = {
   displayNameSource: 'full_name',
   displayNameUpdatedAt: '2026-07-30T07:00:00Z',
   unreadCount: 2,
+  unreadAuthoritative: true,
   archived: false,
   pinned: true,
   disappearingTimer: 86_400,
@@ -56,5 +57,11 @@ describe('ConversationDetailsContent', () => {
   it('does not invent a Contact destination when contactId is absent', () => {
     const html = renderDetails({ ...conversation, contactId: undefined });
     expect(html).not.toContain('Open contact');
+  });
+
+  it('marks non-authoritative unread as syncing without rendering its best-known count', () => {
+    const html = renderDetails({ ...conversation, unreadCount: 0, unreadAuthoritative: false });
+    expect(html).toContain('Syncing');
+    expect(html).not.toContain('>0</span>');
   });
 });

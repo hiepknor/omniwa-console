@@ -20,11 +20,11 @@ not Console backlog.
 | --- | --- | --- | --- | ---: |
 | `product-call-control` | deferred-product-workflow | Product | `awaiting-workflow-approval` | 1 |
 | `product-contacts-and-labels` | deferred-product-workflow | Product | `awaiting-workflow-approval` | 16 |
-| `product-conversations` | deferred-product-workflow | Product | `awaiting-workflow-approval` | 20 |
+| `product-conversations` | deferred-product-workflow | Product | `awaiting-workflow-approval` | 19 |
 | `product-groups-and-communities` | deferred-product-workflow | Product | `awaiting-workflow-approval` | 5 |
 | `product-instance-fleet` | deferred-product-workflow | Product | `awaiting-workflow-approval` | 7 |
 | `product-newsletters` | deferred-product-workflow | Product | `awaiting-workflow-approval` | 6 |
-| `backend-chat-state-commands` | deferred-backend-risk | Backend | `blocked-backend-verification` | 6 |
+| `product-conversation-state-commands` | deferred-product-workflow | Product | `awaiting-workflow-approval` | 7 |
 | `backend-live-group-list` | deferred-backend-risk | Backend | `blocked-backend-verification` | 1 |
 | `external-passkey-helper` | external-client | External client | `out-of-console-scope` | 3 |
 
@@ -62,7 +62,6 @@ Exit: Approve coherent privacy, profile, blocklist, and label-management journey
 Exit: Approve bounded message actions, rich outbound types, history sync, polls, and delivery semantics as complete operator workflows.
 
 - `GET /polls/{pollMessageId}/results`
-- `POST /chat/history-sync`
 - `POST /message/delete`
 - `POST /message/downloadmedia`
 - `POST /message/edit`
@@ -115,16 +114,17 @@ Exit: Approve newsletter discovery, creation, membership, and message inspection
 - `POST /newsletter/messages`
 - `POST /newsletter/subscribe`
 
-### `backend-chat-state-commands`
+### `product-conversation-state-commands`
 
-Exit: Document and verify idempotency, acknowledgement, projection write-through, and machine-readable failures for chat-state commands.
+Exit: Approve operator workflows for the capability-gated canonical Conversation app-state and history-sync commands.
 
-- `POST /chat/archive`
-- `POST /chat/mute`
-- `POST /chat/pin`
-- `POST /chat/unarchive`
-- `POST /chat/unmute`
-- `POST /chat/unpin`
+- `POST /conversations/{conversationRef}/archive`
+- `DELETE /conversations/{conversationRef}/archive`
+- `PUT /conversations/{conversationRef}/mute`
+- `DELETE /conversations/{conversationRef}/mute`
+- `POST /conversations/{conversationRef}/pin`
+- `DELETE /conversations/{conversationRef}/pin`
+- `POST /conversations/{conversationRef}/history-sync`
 
 ### `backend-live-group-list`
 

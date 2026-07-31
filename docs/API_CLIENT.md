@@ -260,6 +260,10 @@ command target. Absorbed deep links replace to the canonical route. The browser
 does not group aliases or recompute totals, unread, activity, or messages. It
 does not fall back to `/chat/*` reads, `chatId`, Contact lookup, or a JID alias.
 Missing authoritative addressing always disables the Composer.
+`authoritative_conversation_unread` is independent and never gates the list.
+The required per-Conversation `unreadAuthoritative` field decides whether the
+numeric unread count may be presented as authoritative; false uses pending-data
+treatment without rewriting the best-known count to zero.
 
 - Disable duplicate submission while pending.
 - Do not automatically retry mutations.
