@@ -19,6 +19,7 @@ const conversation = {
   lastMessageAt: '2026-07-22T08:00:00Z',
   lastActivityAt: '2026-07-22T08:00:01Z',
   unreadCount: 2,
+  unreadAuthoritative: true,
   archived: false,
   pinned: true,
 };
@@ -43,6 +44,7 @@ describe('canonical conversations projection adapter', () => {
       addressingJid: conversation.addressingJid,
       type: 'direct',
       unreadCount: 2,
+      unreadAuthoritative: true,
     })]);
     expect(result.resource.pagination).toEqual({ nextCursor: 'opaque/next', hasMore: true });
     expect(result.resource.total).toBe(217);
@@ -75,6 +77,29 @@ describe('canonical conversations projection adapter', () => {
     const result = await listConversations({ GET } as unknown as ApiClient);
     expect(result.resource.items.map((item) => item.conversationId)).toEqual([conversation.conversationId, second.conversationId]);
     expect(result.resource.total).toBe(2);
+  });
+
+  it('deduplicates repeated aliases only by canonical conversationId and keeps non-direct identities distinct', async () => {
+    const duplicateAlias = { ...conversation, aliases: ['100@s.whatsapp.net'] };
+    const group = { ...conversation, conversationId: '71e75e2c-77a8-48f0-9fc8-99bc3e5c9694', type: 'group', addressingJid: 'shared@broadcast' };
+    const newsletter = { ...conversation, conversationId: 'dc5ba585-7325-4a91-9ac7-cfab4d5c2226', type: 'newsletter', addressingJid: 'shared@broadcast' };
+    const broadcast = { ...conversation, conversationId: 'f1e45f7b-e1cd-4fc3-bf70-12eeb58637e6', type: 'broadcast', addressingJid: 'shared@broadcast' };
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [conversation, duplicateAlias, group, newsletter, broadcast], meta: { total: 4 } }));
+
+    const result = await listConversations({ GET } as unknown as ApiClient);
+
+    expect(result.resource.items.map(({ conversationId, type }) => [conversationId, type])).toEqual([
+      [conversation.conversationId, 'direct'],
+      [group.conversationId, 'group'],
+      [newsletter.conversationId, 'newsletter'],
+      [broadcast.conversationId, 'broadcast'],
+    ]);
+  });
+
+  it('preserves a non-authoritative unread count as best-known data instead of coercing it to zero', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { ...conversation, unreadCount: 7, unreadAuthoritative: false } }));
+    const result = await getConversation({ GET } as unknown as ApiClient, conversation.conversationId);
+    expect(result.resource).toMatchObject({ unreadCount: 7, unreadAuthoritative: false });
   });
 
   it('uses safe presentation defaults without exposing unknown provider fields', async () => {

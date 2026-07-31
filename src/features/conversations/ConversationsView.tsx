@@ -2,10 +2,11 @@ import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { calendarDayKey, calendarDayLabel, humanizeToken, relativeTime } from '@/lib/format';
-import { CountBadge } from '@/ui';
+import { CountBadge, Status } from '@/ui';
 import { cn } from '@/ui/cn';
 
-export function ConversationUnreadCount({ count, context }: { count: number; context: 'directory' | 'detail' }) {
+export function ConversationUnreadCount({ count, authoritative, context }: { count: number; authoritative: boolean; context: 'directory' | 'detail' }) {
+  if (!authoritative) return <Status tone="pending">Unread syncing</Status>;
   if (context === 'directory' && count === 0) return null;
   const label = `${count.toLocaleString('en-US')} unread ${count === 1 ? 'message' : 'messages'}`;
 
@@ -44,7 +45,7 @@ export function ConversationList({ items, selectedId, onSelect }: { items: Conve
           onClick={() => onSelect(item.conversationId)}
           primary={item.displayName ?? `Unknown ${humanizeToken(item.type)} conversation`}
           secondary={`${humanizeToken(item.type)} · ${item.lastActivityAt ? relativeTime(item.lastActivityAt) : 'activity unreported'}`}
-          trailing={<ConversationUnreadCount count={item.unreadCount} context="directory" />}
+          trailing={<ConversationUnreadCount count={item.unreadCount} authoritative={item.unreadAuthoritative} context="directory" />}
         />
       ))}
     </ul>

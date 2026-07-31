@@ -839,431 +839,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/chat/archive": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Archive a chat
-         * @description Archive a chat
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["apidocs.TimestampData"];
-                        };
-                    };
-                };
-                /** @description Error on validation */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/chat/history-sync": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * HistorySyncRequest a chat
-         * @description HistorySyncRequest a chat
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            /** @description Chat */
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.HistorySyncRequestStruct"];
-                };
-            };
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"];
-                    };
-                };
-                /** @description Error on validation */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Outbound rate limited */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/chat/mute": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Mute a chat
-         * @description Mute a chat
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["apidocs.TimestampData"];
-                        };
-                    };
-                };
-                /** @description Error on validation */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/chat/pin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Pin a chat
-         * @description Pin a chat
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["apidocs.TimestampData"];
-                        };
-                    };
-                };
-                /** @description Error on validation */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/chat/unarchive": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Unarchive a chat
-         * @description Unarchive a chat
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["apidocs.TimestampData"];
-                        };
-                    };
-                };
-                /** @description Error on validation */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/chat/unmute": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Unmute a chat
-         * @description Unmute a chat
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["apidocs.TimestampData"];
-                        };
-                    };
-                };
-                /** @description Error on validation */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/chat/unpin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Unpin a chat
-         * @description Unpin a chat
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: components["requestBodies"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
-            responses: {
-                /** @description success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["apidocs.TimestampData"];
-                        };
-                    };
-                };
-                /** @description Error on validation */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-                /** @description Internal server error */
-                500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/community/add": {
         parameters: {
             query?: never;
@@ -1482,6 +1057,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/conversations/{conversationRef}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Archive a canonical conversation
+         * @description Resolves a canonical or absorbed conversation reference to its authoritative provider addressing JID. Direct and group conversations are supported; projection state is refreshed from provider app-state events.
+         */
+        post: operations["archiveConversation"];
+        /**
+         * Unarchive a canonical conversation
+         * @description Resolves a canonical or absorbed conversation reference to its authoritative provider addressing JID.
+         */
+        delete: operations["unarchiveConversation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{conversationRef}/history-sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request history sync for a canonical conversation
+         * @description The anchor message must belong to the resolved canonical conversation. The backend derives provider Chat JID, direction, group status, and timestamp; callers never supply provider addressing metadata.
+         */
+        post: operations["requestConversationHistorySync"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/conversations/{conversationRef}/messages": {
         parameters: {
             query?: never;
@@ -1517,6 +1136,45 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{conversationRef}/mute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Mute a canonical conversation
+         * @description durationSeconds must be between 60 and 31536000. Infinite mute is deliberately not exposed because the canonical projection does not represent it authoritatively.
+         */
+        put: operations["muteConversation"];
+        post?: never;
+        /** Unmute a canonical conversation */
+        delete: operations["unmuteConversation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conversations/{conversationRef}/pin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pin a canonical conversation */
+        post: operations["pinConversation"];
+        /** Unpin a canonical conversation */
+        delete: operations["unpinConversation"];
         options?: never;
         head?: never;
         patch?: never;
@@ -9349,6 +9007,9 @@ export interface components {
              *       "chats_projection",
              *       "canonical_contact_identity",
              *       "canonical_conversation_identity",
+             *       "authoritative_conversation_unread",
+             *       "conversation_app_state_commands",
+             *       "conversation_history_sync",
              *       "group_lists",
              *       "group_list_eligibility",
              *       "campaign_group_targets",
@@ -9391,6 +9052,11 @@ export interface components {
             data?: components["schemas"]["apidocs.ConnectData"];
             /** @example success */
             message?: string;
+        };
+        "apidocs.ConversationCommandResponse": {
+            data: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationCommandResult"];
+            /** @example accepted */
+            message: string;
         };
         "apidocs.DownloadMediaData": {
             /** @example data:image/jpeg;base64,/9j/4AAQ... */
@@ -9803,12 +9469,20 @@ export interface components {
             total?: number;
             updatedAt?: string;
         };
-        "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
-            chat?: string;
+        "github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationCommandResult": {
+            /** Format: uuid */
+            conversationId: string;
+            /** @enum {string} */
+            operation: "archive" | "unarchive" | "pin" | "unpin" | "mute" | "unmute" | "history_sync";
+            /** @enum {string} */
+            status: "accepted";
         };
-        "github_com_evolution-foundation_evolution-go_pkg_chat_service.HistorySyncRequestStruct": {
-            count?: number;
-            messageInfo?: components["schemas"]["types.MessageInfo"];
+        "github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationHistorySyncInput": {
+            anchorMessageId: string;
+            count: number;
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationMuteInput": {
+            durationSeconds: number;
         };
         "github_com_evolution-foundation_evolution-go_pkg_community_service.AddParticipantStruct": {
             communityJid?: string;
@@ -10369,6 +10043,8 @@ export interface components {
             pinned?: boolean;
             /** @enum {unknown} */
             type: "direct" | "group" | "newsletter" | "broadcast" | "unknown";
+            /** @description UnreadAuthoritative is false when unreadCount is only the best-known projected count because no complete provider snapshot is available. */
+            unreadAuthoritative: boolean;
             unreadCount: number;
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage": {
@@ -11013,19 +10689,6 @@ export interface components {
             dhash?: string;
             jids?: components["schemas"]["types.JID"][];
         };
-        /** @enum {string} */
-        "types.BotEditType": "first" | "inner" | "last";
-        "types.BroadcastRecipient": {
-            lid?: components["schemas"]["types.JID"];
-            pn?: components["schemas"]["types.JID"];
-        };
-        "types.DeviceSentMeta": {
-            /** @description The destination user. This should match the MessageInfo.Recipient field. */
-            destinationJID?: string;
-            phash?: string;
-        };
-        /** @enum {string} */
-        "types.EditAttribute": "" | "1" | "2" | "3" | "7" | "8";
         "types.GroupInfo": {
             addressingMode?: components["schemas"]["types.AddressingMode"];
             announceVersionID?: string;
@@ -11093,56 +10756,6 @@ export interface components {
             rawAgent?: number;
             server?: string;
             user?: string;
-        };
-        "types.MessageInfo": {
-            /** @description The addressing mode of the message (phone number or LID) */
-            addressingMode?: components["schemas"]["types.AddressingMode"];
-            /**
-             * @description When sending a read receipt to a broadcast list message, the Chat is the broadcast list
-             *     and Sender is you, so this field contains the recipient of the read receipt.
-             */
-            broadcastListOwner?: components["schemas"]["types.JID"];
-            broadcastRecipients?: components["schemas"]["types.BroadcastRecipient"][];
-            category?: string;
-            /** @description The chat where the message was sent. */
-            chat?: components["schemas"]["types.JID"];
-            /** @description Metadata for direct messages sent from another one of the user's own devices. */
-            deviceSentMeta?: components["schemas"]["types.DeviceSentMeta"];
-            edit?: components["schemas"]["types.EditAttribute"];
-            id?: string;
-            /** @description Whether the message was sent by the current user instead of someone else. */
-            isFromMe?: boolean;
-            /** @description Whether the chat is a group chat or broadcast list. */
-            isGroup?: boolean;
-            mediaType?: string;
-            msgBotInfo?: components["schemas"]["types.MsgBotInfo"];
-            msgMetaInfo?: components["schemas"]["types.MsgMetaInfo"];
-            multicast?: boolean;
-            pushName?: string;
-            /** @description The alternative address of the recipient of the message for DMs. */
-            recipientAlt?: components["schemas"]["types.JID"];
-            /** @description The user who sent the message. */
-            sender?: components["schemas"]["types.JID"];
-            /** @description The alternative address of the user who sent the message */
-            senderAlt?: components["schemas"]["types.JID"];
-            serverID?: number;
-            timestamp?: string;
-            type?: string;
-            verifiedName?: components["schemas"]["types.VerifiedName"];
-        };
-        "types.MsgBotInfo": {
-            editSenderTimestampMS?: string;
-            editTargetID?: string;
-            editType?: components["schemas"]["types.BotEditType"];
-        };
-        "types.MsgMetaInfo": {
-            deprecatedLIDSession?: boolean;
-            targetChat?: components["schemas"]["types.JID"];
-            /** @description Bot things */
-            targetID?: string;
-            targetSender?: components["schemas"]["types.JID"];
-            threadMessageID?: string;
-            threadMessageSenderJID?: components["schemas"]["types.JID"];
         };
         "types.NewsletterMessage": {
             /** @description This is only present when fetching messages, not in live updates */
@@ -13663,12 +13276,6 @@ export interface components {
                 "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_newsletter_service.GetNewsletterStruct"];
             };
         };
-        /** @description Chat */
-        "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
-            content: {
-                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"];
-            };
-        };
         /** @description Participant data */
         "github_com_evolution-foundation_evolution-go_pkg_community_service.AddParticipantStruct": {
             content: {
@@ -13805,6 +13412,251 @@ export interface operations {
             };
         };
     };
+    archiveConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider identifier */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ConversationCommandResponse"];
+                };
+            };
+            /** @description Conversation not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Unsupported conversation type */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Outbound rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Provider command failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Projection not ready */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    unarchiveConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider identifier */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ConversationCommandResponse"];
+                };
+            };
+            /** @description Conversation not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Unsupported conversation type */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Outbound rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                };
+            };
+            /** @description Internal server error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Provider command failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Projection not ready */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    requestConversationHistorySync: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider identifier */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        /** @description Projected anchor message and bounded count */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationHistorySyncInput"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ConversationCommandResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
     listConversationMessages: {
         parameters: {
             query?: {
@@ -13915,6 +13767,328 @@ export interface operations {
                 };
             };
             /** @description Canonical conversation projection not ready */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    muteConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider identifier */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        /** @description Finite mute duration */
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationMuteInput"];
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ConversationCommandResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    unmuteConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider identifier */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ConversationCommandResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    pinConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider identifier */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ConversationCommandResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+        };
+    };
+    unpinConversation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Canonical conversation UUID or absorbed provider identifier */
+                conversationRef: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ConversationCommandResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.OutboundRateLimitResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Bad Gateway */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                };
+            };
+            /** @description Service Unavailable */
             503: {
                 headers: {
                     [name: string]: unknown;

@@ -906,439 +906,6 @@
         }
       }
     },
-    "/chat/archive": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Archive a chat",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Archive a chat",
-        "requestBody": {
-          "$ref": "#/components/requestBodies/github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"
-        },
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/apidocs.TimestampData"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/history-sync": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "HistorySyncRequest a chat",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "HistorySyncRequest a chat",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_chat_service.HistorySyncRequestStruct"
-              }
-            }
-          },
-          "description": "Chat",
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Outbound rate limited",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/mute": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Mute a chat",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Mute a chat",
-        "requestBody": {
-          "$ref": "#/components/requestBodies/github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"
-        },
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/apidocs.TimestampData"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/pin": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Pin a chat",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Pin a chat",
-        "requestBody": {
-          "$ref": "#/components/requestBodies/github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"
-        },
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/apidocs.TimestampData"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/unarchive": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Unarchive a chat",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Unarchive a chat",
-        "requestBody": {
-          "$ref": "#/components/requestBodies/github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"
-        },
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/apidocs.TimestampData"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/unmute": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Unmute a chat",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Unmute a chat",
-        "requestBody": {
-          "$ref": "#/components/requestBodies/github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"
-        },
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/apidocs.TimestampData"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/chat/unpin": {
-      "post": {
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "description": "Unpin a chat",
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Unpin a chat",
-        "requestBody": {
-          "$ref": "#/components/requestBodies/github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"
-        },
-        "responses": {
-          "200": {
-            "description": "success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/apidocs.SuccessResponse"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/apidocs.TimestampData"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Error on validation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/community/add": {
       "post": {
         "security": [
@@ -1676,6 +1243,319 @@
         }
       }
     },
+    "/conversations/{conversationRef}/archive": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Resolves a canonical or absorbed conversation reference to its authoritative provider addressing JID. Direct and group conversations are supported; projection state is refreshed from provider app-state events.",
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Archive a canonical conversation",
+        "operationId": "archiveConversation",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider identifier",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ConversationCommandResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unsupported conversation type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Outbound rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Provider command failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "Resolves a canonical or absorbed conversation reference to its authoritative provider addressing JID.",
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Unarchive a canonical conversation",
+        "operationId": "unarchiveConversation",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider identifier",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ConversationCommandResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Conversation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unsupported conversation type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Outbound rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Provider command failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationRef}/history-sync": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "The anchor message must belong to the resolved canonical conversation. The backend derives provider Chat JID, direction, group status, and timestamp; callers never supply provider addressing metadata.",
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Request history sync for a canonical conversation",
+        "operationId": "requestConversationHistorySync",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider identifier",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationHistorySyncInput"
+              }
+            }
+          },
+          "description": "Projected anchor message and bounded count",
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ConversationCommandResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/conversations/{conversationRef}/messages": {
       "get": {
         "security": [
@@ -1863,6 +1743,412 @@
           },
           "503": {
             "description": "Canonical conversation projection not ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationRef}/mute": {
+      "put": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "description": "durationSeconds must be between 60 and 31536000. Infinite mute is deliberately not exposed because the canonical projection does not represent it authoritatively.",
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Mute a canonical conversation",
+        "operationId": "muteConversation",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider identifier",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationMuteInput"
+              }
+            }
+          },
+          "description": "Finite mute duration",
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ConversationCommandResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Unmute a canonical conversation",
+        "operationId": "unmuteConversation",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider identifier",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ConversationCommandResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/conversations/{conversationRef}/pin": {
+      "post": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Pin a canonical conversation",
+        "operationId": "pinConversation",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider identifier",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ConversationCommandResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Unpin a canonical conversation",
+        "operationId": "unpinConversation",
+        "parameters": [
+          {
+            "description": "Canonical conversation UUID or absorbed provider identifier",
+            "name": "conversationRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ConversationCommandResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.OutboundRateLimitResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/apidocs.ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
             "content": {
               "application/json": {
                 "schema": {
@@ -10236,17 +10522,6 @@
         "description": "Newsletter data",
         "required": true
       },
-      "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct"
-            }
-          }
-        },
-        "description": "Chat",
-        "required": true
-      },
       "github_com_evolution-foundation_evolution-go_pkg_community_service.AddParticipantStruct": {
         "content": {
           "application/json": {
@@ -10410,6 +10685,9 @@
               "chats_projection",
               "canonical_contact_identity",
               "canonical_conversation_identity",
+              "authoritative_conversation_unread",
+              "conversation_app_state_commands",
+              "conversation_history_sync",
               "group_lists",
               "group_list_eligibility",
               "campaign_group_targets",
@@ -10480,6 +10758,22 @@
           "message": {
             "type": "string",
             "example": "success"
+          }
+        }
+      },
+      "apidocs.ConversationCommandResponse": {
+        "type": "object",
+        "required": [
+          "data",
+          "message"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationCommandResult"
+          },
+          "message": {
+            "type": "string",
+            "example": "accepted"
           }
         }
       },
@@ -11603,22 +11897,65 @@
           }
         }
       },
-      "github_com_evolution-foundation_evolution-go_pkg_chat_service.BodyStruct": {
+      "github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationCommandResult": {
         "type": "object",
+        "required": [
+          "conversationId",
+          "operation",
+          "status"
+        ],
         "properties": {
-          "chat": {
-            "type": "string"
+          "conversationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "archive",
+              "unarchive",
+              "pin",
+              "unpin",
+              "mute",
+              "unmute",
+              "history_sync"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted"
+            ]
           }
         }
       },
-      "github_com_evolution-foundation_evolution-go_pkg_chat_service.HistorySyncRequestStruct": {
+      "github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationHistorySyncInput": {
         "type": "object",
+        "required": [
+          "anchorMessageId",
+          "count"
+        ],
         "properties": {
-          "count": {
-            "type": "integer"
+          "anchorMessageId": {
+            "type": "string"
           },
-          "messageInfo": {
-            "$ref": "#/components/schemas/types.MessageInfo"
+          "count": {
+            "type": "integer",
+            "maximum": 1000,
+            "minimum": 1
+          }
+        }
+      },
+      "github_com_evolution-foundation_evolution-go_pkg_chat_service.ConversationMuteInput": {
+        "type": "object",
+        "required": [
+          "durationSeconds"
+        ],
+        "properties": {
+          "durationSeconds": {
+            "type": "integer",
+            "maximum": 31536000,
+            "minimum": 60
           }
         }
       },
@@ -13378,6 +13715,7 @@
         "required": [
           "conversationId",
           "type",
+          "unreadAuthoritative",
           "unreadCount"
         ],
         "properties": {
@@ -13452,6 +13790,10 @@
                 "$ref": "#/components/schemas/github_com_evolution-foundation_evolution-go_pkg_projection_service.ConversationType"
               }
             ]
+          },
+          "unreadAuthoritative": {
+            "description": "UnreadAuthoritative is false when unreadCount is only the best-known projected count because no complete provider snapshot is available.",
+            "type": "boolean"
           },
           "unreadCount": {
             "type": "integer"
@@ -15059,64 +15401,6 @@
           }
         }
       },
-      "types.BotEditType": {
-        "type": "string",
-        "enum": [
-          "first",
-          "inner",
-          "last"
-        ],
-        "x-enum-varnames": [
-          "EditTypeFirst",
-          "EditTypeInner",
-          "EditTypeLast"
-        ]
-      },
-      "types.BroadcastRecipient": {
-        "type": "object",
-        "properties": {
-          "lid": {
-            "$ref": "#/components/schemas/types.JID"
-          },
-          "pn": {
-            "$ref": "#/components/schemas/types.JID"
-          }
-        }
-      },
-      "types.DeviceSentMeta": {
-        "type": "object",
-        "properties": {
-          "destinationJID": {
-            "description": "The destination user. This should match the MessageInfo.Recipient field.",
-            "type": "string"
-          },
-          "phash": {
-            "type": "string"
-          }
-        }
-      },
-      "types.EditAttribute": {
-        "type": "string",
-        "enum": [
-          "",
-          "1",
-          "2",
-          "3",
-          "7",
-          "8"
-        ],
-        "x-enum-comments": {
-          "EditAttributeAdminEdit": "only used in newsletters"
-        },
-        "x-enum-varnames": [
-          "EditAttributeEmpty",
-          "EditAttributeMessageEdit",
-          "EditAttributePinInChat",
-          "EditAttributeAdminEdit",
-          "EditAttributeSenderRevoke",
-          "EditAttributeAdminRevoke"
-        ]
-      },
       "types.GroupInfo": {
         "type": "object",
         "properties": {
@@ -15298,155 +15582,6 @@
           },
           "user": {
             "type": "string"
-          }
-        }
-      },
-      "types.MessageInfo": {
-        "type": "object",
-        "properties": {
-          "addressingMode": {
-            "description": "The addressing mode of the message (phone number or LID)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/types.AddressingMode"
-              }
-            ]
-          },
-          "broadcastListOwner": {
-            "description": "When sending a read receipt to a broadcast list message, the Chat is the broadcast list\nand Sender is you, so this field contains the recipient of the read receipt.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/types.JID"
-              }
-            ]
-          },
-          "broadcastRecipients": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/types.BroadcastRecipient"
-            }
-          },
-          "category": {
-            "type": "string"
-          },
-          "chat": {
-            "description": "The chat where the message was sent.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/types.JID"
-              }
-            ]
-          },
-          "deviceSentMeta": {
-            "description": "Metadata for direct messages sent from another one of the user's own devices.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/types.DeviceSentMeta"
-              }
-            ]
-          },
-          "edit": {
-            "$ref": "#/components/schemas/types.EditAttribute"
-          },
-          "id": {
-            "type": "string"
-          },
-          "isFromMe": {
-            "description": "Whether the message was sent by the current user instead of someone else.",
-            "type": "boolean"
-          },
-          "isGroup": {
-            "description": "Whether the chat is a group chat or broadcast list.",
-            "type": "boolean"
-          },
-          "mediaType": {
-            "type": "string"
-          },
-          "msgBotInfo": {
-            "$ref": "#/components/schemas/types.MsgBotInfo"
-          },
-          "msgMetaInfo": {
-            "$ref": "#/components/schemas/types.MsgMetaInfo"
-          },
-          "multicast": {
-            "type": "boolean"
-          },
-          "pushName": {
-            "type": "string"
-          },
-          "recipientAlt": {
-            "description": "The alternative address of the recipient of the message for DMs.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/types.JID"
-              }
-            ]
-          },
-          "sender": {
-            "description": "The user who sent the message.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/types.JID"
-              }
-            ]
-          },
-          "senderAlt": {
-            "description": "The alternative address of the user who sent the message",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/types.JID"
-              }
-            ]
-          },
-          "serverID": {
-            "type": "integer"
-          },
-          "timestamp": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "verifiedName": {
-            "$ref": "#/components/schemas/types.VerifiedName"
-          }
-        }
-      },
-      "types.MsgBotInfo": {
-        "type": "object",
-        "properties": {
-          "editSenderTimestampMS": {
-            "type": "string"
-          },
-          "editTargetID": {
-            "type": "string"
-          },
-          "editType": {
-            "$ref": "#/components/schemas/types.BotEditType"
-          }
-        }
-      },
-      "types.MsgMetaInfo": {
-        "type": "object",
-        "properties": {
-          "deprecatedLIDSession": {
-            "type": "boolean"
-          },
-          "targetChat": {
-            "$ref": "#/components/schemas/types.JID"
-          },
-          "targetID": {
-            "description": "Bot things",
-            "type": "string"
-          },
-          "targetSender": {
-            "$ref": "#/components/schemas/types.JID"
-          },
-          "threadMessageID": {
-            "type": "string"
-          },
-          "threadMessageSenderJID": {
-            "$ref": "#/components/schemas/types.JID"
           }
         }
       },

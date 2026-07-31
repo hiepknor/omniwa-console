@@ -210,9 +210,11 @@ resource models, or rendered diagnostics.
   automatically. Numeric table cells, metrics, selection prose, and counts stated
   inside an operational Status remain in their context instead of becoming chips.
   Framed non-count facts such as resource versions use `MetadataBadge`.
-  Conversation directory rows omit zero unread counts and expose positive counts
-  through an accessible CountBadge; selected-conversation facts keep the visible `Unread`
-  label and show zero explicitly. Conversation and Directory list headers place
+  Conversation directory rows omit authoritative zero unread counts and expose
+  authoritative positive counts through an accessible CountBadge;
+  selected-conversation facts keep the visible `Unread` label and show an
+  authoritative zero explicitly. When `unreadAuthoritative` is false, both
+  contexts show a pending syncing status and no numeric badge. Conversation and Directory list headers place
   the active authoritative total beside the resource label. Conversation and
   Contact totals use `meta.total` (including the current normalized Contact
   search scope), while Labels use the bare-array length; none derive totals from

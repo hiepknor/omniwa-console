@@ -1,7 +1,7 @@
-import { useRef } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useApi } from '@/api/ApiProvider';
-import { getConversation, listConversations } from '@/api/conversations';
+import { getConversation, listConversations, type ConversationReadResult, type ConversationResource } from '@/api/conversations';
 import { getMediaAsset, getMediaAssetContent, uploadMediaAsset } from '@/api/media-assets';
 import { queryKeys, SESSION_QUERY_SCOPE } from '@/api/keys';
 import { getMessage, listMessageReceipts, listMessages, sendMediaMessage, sendTextMessage, type SendMediaInput } from '@/api/messages';
@@ -14,15 +14,42 @@ export function useConversations(cursor: string | undefined, enabled: boolean) {
   return useQuery({ queryKey: queryKeys.instanceConversations(SESSION_QUERY_SCOPE, params), queryFn: () => listConversations(client, { ...params, limit: 50 }), enabled, staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled, QUERY_INTERVALS.projection) });
 }
 
-export function useConversation(conversationRef: string | undefined, enabled: boolean) {
-  const client = useApi();
-  return useQuery({ queryKey: queryKeys.conversation(SESSION_QUERY_SCOPE, conversationRef ?? ''), queryFn: () => getConversation(client, conversationRef ?? ''), enabled: enabled && Boolean(conversationRef), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(conversationRef), QUERY_INTERVALS.projection) });
+export function cacheCanonicalConversation(
+  queryClient: QueryClient,
+  result: ConversationReadResult<ConversationResource>,
+) {
+  queryClient.setQueryData(
+    queryKeys.conversation(SESSION_QUERY_SCOPE, result.resource.conversationId),
+    result,
+  );
 }
 
-export function useMessages(conversationRef: string | undefined, cursor: string | undefined, enabled: boolean) {
+export function removeResolvedConversationRef(queryClient: QueryClient, conversationRef: string) {
+  queryClient.removeQueries({
+    queryKey: queryKeys.conversation(SESSION_QUERY_SCOPE, conversationRef),
+    exact: true,
+  });
+}
+
+export function useConversation(conversationRef: string | undefined, enabled: boolean) {
+  const client = useApi();
+  const queryClient = useQueryClient();
+  const query = useQuery({ queryKey: queryKeys.conversation(SESSION_QUERY_SCOPE, conversationRef ?? ''), queryFn: () => getConversation(client, conversationRef ?? ''), enabled: enabled && Boolean(conversationRef), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(conversationRef), QUERY_INTERVALS.projection) });
+  const canonicalConversationId = query.data?.resource.conversationId;
+
+  useEffect(() => {
+    if (!conversationRef || !query.data || !canonicalConversationId || canonicalConversationId === conversationRef) return;
+    cacheCanonicalConversation(queryClient, query.data);
+    return () => removeResolvedConversationRef(queryClient, conversationRef);
+  }, [canonicalConversationId, conversationRef, query.data, queryClient]);
+
+  return query;
+}
+
+export function useMessages(conversationId: string | undefined, cursor: string | undefined, enabled: boolean) {
   const client = useApi();
   const params = { cursor };
-  return useQuery({ queryKey: queryKeys.conversationMessages(SESSION_QUERY_SCOPE, conversationRef ?? '', params), queryFn: () => listMessages(client, conversationRef ?? '', { ...params, limit: 100 }), enabled: enabled && Boolean(conversationRef), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(conversationRef), QUERY_INTERVALS.projection) });
+  return useQuery({ queryKey: queryKeys.conversationMessages(SESSION_QUERY_SCOPE, conversationId ?? '', params), queryFn: () => listMessages(client, conversationId ?? '', { ...params, limit: 100 }), enabled: enabled && Boolean(conversationId), staleTime: PROJECTION_READ_POLICY.staleTime, refetchInterval: pollingWhen(enabled && Boolean(conversationId), QUERY_INTERVALS.projection) });
 }
 
 export function useMessage(conversationId: string | undefined, messageId: string | undefined, enabled: boolean) {

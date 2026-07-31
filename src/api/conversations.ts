@@ -22,6 +22,7 @@ export type ConversationResource = {
   lastMessageAt?: string;
   lastActivityAt?: string;
   unreadCount: number;
+  unreadAuthoritative: boolean;
   archived?: boolean;
   pinned?: boolean;
   mutedUntil?: string;
@@ -62,6 +63,7 @@ function toConversation(payload: ConversationPayload): ConversationResource {
     lastMessageAt: nonEmpty(payload.lastMessageAt),
     lastActivityAt: nonEmpty(payload.lastActivityAt),
     unreadCount: Math.max(0, payload.unreadCount ?? 0),
+    unreadAuthoritative: payload.unreadAuthoritative === true,
     archived: payload.archived,
     pinned: payload.pinned,
     mutedUntil: nonEmpty(payload.mutedUntil),
@@ -77,9 +79,16 @@ export async function listConversations(
     params: { query: { cursor: params.cursor, limit: params.limit ?? 50 } },
   }));
   const nextCursor = projection.meta?.nextCursor ?? null;
+  const conversationsById = new Map<string, ConversationResource>();
+  for (const payload of projection.resource ?? []) {
+    const conversation = toConversation(payload);
+    if (conversation.conversationId && !conversationsById.has(conversation.conversationId)) {
+      conversationsById.set(conversation.conversationId, conversation);
+    }
+  }
   return {
     resource: {
-      items: (projection.resource ?? []).map(toConversation).filter((conversation) => conversation.conversationId !== ''),
+      items: [...conversationsById.values()],
       pagination: { nextCursor, hasMore: nextCursor !== null },
       total: projection.meta?.total,
     },
