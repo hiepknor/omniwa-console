@@ -320,8 +320,10 @@ its own row: authoritative counts render normally, while non-authoritative count
 remain best-known data and render as syncing without a numeric badge. The Console
 does not coerce them to zero, hide the Conversation, or reconcile alias totals.
 
-The selected Conversation keeps unread and type in the timeline summary. At
-1560px of actual workspace width, backend-reported identity, provider routing,
+The selected Conversation header keeps display identity, type, last activity,
+pane-owned refresh, and `Details`; unread attention remains in the Conversation
+directory and is a plain fact in the inspector. At 1560px of actual workspace
+width, backend-reported identity, provider routing,
 and projected state persist in a non-modal 440px third inspector column; selected
 Message details replace that content and closing them restores Conversation
 details. Desktop below that threshold, tablet, and mobile use the shared
@@ -330,10 +332,11 @@ Drawer/Panel/DescriptionList composition through the URL-backed `details` or
 and diagnostic identifiers use the shared copy action. If
 the authoritative command target or required send capabilities are unavailable,
 the Composer is replaced by one compact unavailable notice rather than a disabled
-form. When available, its shared Textarea auto-grows from one through four lines
-and stays in one bottom-aligned row with `Media…` and `Send text`; notices above
-the row retain command error, cooldown, unknown-outcome, and acknowledgement
-semantics.
+form. When available, the selected header supplies visible target context; the
+shared Textarea auto-grows from one through four lines and stays in one
+bottom-aligned row with `Media…` and `Send`; its accessible name and Media dialog
+retain the selected Conversation name. Notices above the row retain command
+error, cooldown, unknown-outcome, and acknowledgement semantics.
 
 Implemented commands owned by the workspace:
 

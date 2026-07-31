@@ -2,30 +2,23 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
-import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline } from './ConversationsView';
+import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline, SelectedConversationHeader } from './ConversationsView';
 
 describe('ConversationUnreadCount', () => {
   it('omits a zero count from dense directory rows', () => {
-    expect(renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative context="directory" />)).toBe('');
+    expect(renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative />)).toBe('');
   });
 
   it('uses the canonical accessible count badge for unread directory items', () => {
-    const html = renderToStaticMarkup(<ConversationUnreadCount count={1_284} authoritative context="directory" />);
+    const html = renderToStaticMarkup(<ConversationUnreadCount count={1_284} authoritative />);
 
     expect(html).toContain('aria-label="1,284 unread messages"');
     expect(html).toContain('title="1,284 unread messages"');
     expect(html).toContain('>1,284</span>');
   });
 
-  it('keeps the unread label and zero count explicit in detail facts', () => {
-    const html = renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative context="detail" />);
-
-    expect(html).toContain('<span>Unread</span>');
-    expect(html).toContain('>0</span>');
-  });
-
   it('shows a syncing state without presenting a non-authoritative number as zero', () => {
-    const html = renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative={false} context="detail" />);
+    const html = renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative={false} />);
     expect(html).toContain('Unread syncing');
     expect(html).not.toContain('>0</span>');
   });
@@ -55,6 +48,28 @@ describe('ConversationList', () => {
 
     expect(html).toContain('border-l-transparent');
     expect(html).not.toContain('aria-current');
+  });
+});
+
+describe('SelectedConversationHeader', () => {
+  it('keeps target identity, activity, and pane-owned actions in the selected header without an unread badge', () => {
+    const html = renderToStaticMarkup(<SelectedConversationHeader conversation={{
+      resourceType: 'conversation',
+      conversationId: 'conversation-1',
+      aliases: [],
+      aliasesReported: true,
+      displayName: 'Operations',
+      type: 'group',
+      unreadCount: 12,
+      unreadAuthoritative: true,
+    }} refreshing={false} onRefresh={() => {}} onDetails={() => {}} />);
+
+    expect(html).toContain('Operations');
+    expect(html).toContain('Group · Last activity activity unreported');
+    expect(html).toContain('Refresh');
+    expect(html).toContain('Details');
+    expect(html).not.toContain('12 unread');
+    expect(html).not.toContain('>12</span>');
   });
 });
 

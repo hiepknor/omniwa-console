@@ -2,19 +2,38 @@ import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { calendarDayKey, calendarDayLabel, humanizeToken, relativeTime } from '@/lib/format';
-import { CountBadge, CursorPagination, Status } from '@/ui';
+import { Button, CountBadge, CursorPagination, Status, WorkspacePaneHeader } from '@/ui';
 import { cn } from '@/ui/cn';
 
-export function ConversationUnreadCount({ count, authoritative, context }: { count: number; authoritative: boolean; context: 'directory' | 'detail' }) {
+export function ConversationUnreadCount({ count, authoritative }: { count: number; authoritative: boolean }) {
   if (!authoritative) return <Status tone="pending">Unread syncing</Status>;
-  if (context === 'directory' && count === 0) return null;
+  if (count === 0) return null;
   const label = `${count.toLocaleString('en-US')} unread ${count === 1 ? 'message' : 'messages'}`;
+  return <CountBadge count={count} aria-label={label} title={label} />;
+}
 
-  if (context === 'directory') {
-    return <CountBadge count={count} aria-label={label} title={label} />;
-  }
-
-  return <span className="inline-flex items-center gap-1.5"><span>Unread</span><CountBadge count={count} /></span>;
+export function SelectedConversationHeader({ conversation, refreshing, onRefresh, onDetails, className }: {
+  conversation: ConversationResource;
+  refreshing: boolean;
+  onRefresh: () => void;
+  onDetails: () => void;
+  className?: string;
+}) {
+  const name = conversation.displayName ?? `Unknown ${humanizeToken(conversation.type)} conversation`;
+  const activity = conversation.lastActivityAt ? relativeTime(conversation.lastActivityAt) : 'activity unreported';
+  return (
+    <WorkspacePaneHeader
+      className={className}
+      title={name}
+      description={`${humanizeToken(conversation.type)} · Last activity ${activity}`}
+      actions={(
+        <>
+          <Button disabled={refreshing} onClick={onRefresh}>{refreshing ? 'Refreshing…' : 'Refresh'}</Button>
+          <Button className="@min-[1560px]/responsive-inspector:hidden" onClick={onDetails}>Details</Button>
+        </>
+      )}
+    />
+  );
 }
 
 function ResourceButton({ selected, onClick, primary, secondary, trailing }: { selected?: boolean; onClick: () => void; primary: string; secondary: string; trailing: React.ReactNode }) {
@@ -46,7 +65,7 @@ export function ConversationList({ items, selectedId, onSelect }: { items: Conve
           onClick={() => onSelect(item.conversationId)}
           primary={item.displayName ?? `Unknown ${humanizeToken(item.type)} conversation`}
           secondary={`${humanizeToken(item.type)} · ${item.lastActivityAt ? relativeTime(item.lastActivityAt) : 'activity unreported'}`}
-          trailing={<ConversationUnreadCount count={item.unreadCount} authoritative={item.unreadAuthoritative} context="directory" />}
+          trailing={<ConversationUnreadCount count={item.unreadCount} authoritative={item.unreadAuthoritative} />}
         />
       ))}
     </ul>

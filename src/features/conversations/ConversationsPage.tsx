@@ -10,7 +10,7 @@ import { Button, CountBadge, CursorPagination, Dialog, Field, FilterToolbar, Inp
 import { Composer } from './Composer';
 import { composerNavigationBlock, IDLE_COMPOSER_STATE, shouldBlockConversationNavigation, type ComposerInteractionState, type ComposerNavigationBlock } from './composer-state';
 import { canonicalConversationLocation, canonicalConversationReadsEnabled, resolveConversationRecipient } from './conversation-identity';
-import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, MessageTimeline } from './ConversationsView';
+import { ConversationList, ConversationMessagePagination, MessageTimeline, SelectedConversationHeader } from './ConversationsView';
 import { ConversationDetailsContent, MessageInspectorContent } from './Details';
 import { ConversationMessageImage } from './Media';
 import { useConversation, useConversations, useMessages } from './hooks';
@@ -19,7 +19,7 @@ import { conversationRouteState, legacyDirectoryTarget, setConversationParam } f
 function BlockedPage({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Messaging" title="Conversations" description="Review canonical conversations and projected message history." />
+      <PageHeader eyebrow="Messaging" title="Conversations" description="Review projected history and submit outbound messages." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );
@@ -59,6 +59,7 @@ function ConversationWorkspace() {
   const messages = useMessages(canonicalConversationId, route.messageCursor, messagesReady);
   const loadedConversations = conversations.data?.resource.items ?? [];
   const filteredConversations = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedConversations.filter((i) => !term || i.conversationId.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedConversations, route.search]);
+  const selectedOutsidePage = Boolean(canonicalConversationId && conversations.data && !filteredConversations.some((item) => item.conversationId === canonicalConversationId));
   const loadedMessages = useMemo(() => [...(messages.data?.resource.items ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages.data]);
   const recipientUnavailableDetail = selectedConversation && !sendRecipient
     ? 'The canonical conversation has no addressing JID. Sending remains disabled until the backend publishes its authoritative provider command target.'
@@ -85,10 +86,8 @@ function ConversationWorkspace() {
   const currentMeta = conversations.data?.meta;
   const currentAuthoritative = currentMeta?.syncStatus === undefined || currentMeta.syncStatus === 'ready';
   const detailRefreshing = Boolean(activeConversationRef) && (conversation.isFetching || messages.isFetching);
-  const routeRefreshing = conversations.isFetching || detailRefreshing;
   const refreshDirectory = () => { void conversations.refetch(); };
   const refreshDetail = () => { if (activeConversationRef) { void conversation.refetch(); if (messagesReady && canonicalConversationId) void messages.refetch(); } };
-  const refresh = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(conversations.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined })));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
   useEffect(() => {
@@ -112,12 +111,13 @@ function ConversationWorkspace() {
       <WorkspacePageFrame
         eyebrow="Messaging"
         title="Conversations"
-        description="Review canonical conversations and projected message history."
-        secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        description="Review projected history and submit outbound messages."
         compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : 'Conversations'}
         compactDescription={hasConversation ? (selectedConversation ? humanizeToken(selectedConversation.type) : 'Message timeline') : undefined}
         compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
-        compactActions={<Button disabled={!viewSupported || (hasConversation ? detailRefreshing : conversations.isFetching)} onClick={hasConversation ? refreshDetail : refreshDirectory}>{(hasConversation ? detailRefreshing : conversations.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
+        compactActions={hasConversation && selectedConversation
+          ? <><Button disabled={!viewSupported || detailRefreshing} onClick={refreshDetail}>{detailRefreshing ? 'Refreshing…' : 'Refresh'}</Button><Button onClick={openConversationDetails}>Details</Button></>
+          : <Button disabled={!viewSupported || conversations.isFetching} onClick={refreshDirectory}>{conversations.isFetching ? 'Refreshing…' : 'Refresh'}</Button>}
         compactHeadingRef={compactHeadingRef}
       >
         <ResponsiveInspector
@@ -147,7 +147,8 @@ function ConversationWorkspace() {
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
                 <WorkspacePaneHeader
                   title={<span className="inline-flex items-center gap-2">Conversations{typeof conversations.data?.resource.total === 'number' ? <CountBadge count={conversations.data.resource.total} /> : null}</span>}
-                  description={route.search ? `Loaded-page filter for “${route.search}”` : 'Canonical projected conversations'}
+                  description={route.search ? `${filteredConversations.length} shown on this page for “${route.search}”` : 'Canonical projected conversations'}
+                  actions={<Button disabled={!viewSupported || conversations.isFetching} onClick={refreshDirectory}>{conversations.isFetching ? 'Refreshing…' : 'Refresh'}</Button>}
                 />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
                   <Field label="Filter conversations" className="min-w-48 flex-1">
@@ -164,6 +165,7 @@ function ConversationWorkspace() {
               <>
                 {conversations.error ? <div className="p-3"><FailureNotice error={conversations.error} stale onRetry={refreshDirectory} /></div> : null}
                 <div className="px-3"><ProjectionStatus meta={conversations.data.meta} /></div>
+                {selectedOutsidePage ? <div className="px-3 pb-3"><StateNotice kind="info" title="Selected Conversation is outside this page" detail="The selected canonical Conversation remains open while the directory shows a different bounded page or filter." action={route.search ? <Button onClick={() => { setSearchDraft(''); replaceParams(updateSearchParams(searchParams, { search: undefined, cursor: undefined })); }}>Clear filter</Button> : route.cursor ? <Button onClick={() => replaceParams(updateSearchParams(searchParams, { cursor: undefined }))}>First page</Button> : undefined} /></div> : null}
                 <ConversationList items={filteredConversations} selectedId={canonicalConversationId ?? activeConversationRef} onSelect={openConversation} />
                 {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected Conversation on this loaded page matches the URL-backed filter.' : 'The ready Conversation projection contains no items.'} /></div> : null}
               </>
@@ -171,15 +173,11 @@ function ConversationWorkspace() {
             </>
           }
         directoryFooter={viewSupported && conversations.data ? (
-          <CursorPagination cursor={route.cursor} nextCursor={conversations.data.resource.pagination.nextCursor ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }))} />
+          <CursorPagination cursor={route.cursor} nextCursor={conversations.data.resource.pagination.nextCursor ?? undefined} nextLabel="Next page" info={`${filteredConversations.length} shown on this page`} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }))} />
         ) : undefined}
         detail={
           <>
-            <WorkspacePaneHeader
-              className="max-[900px]:hidden"
-              title={selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline')}
-              description={activeConversationRef ? 'Persisted projection history' : 'Select a projected conversation to inspect its history'}
-            />
+            {selectedConversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={selectedConversation} refreshing={detailRefreshing} onRefresh={refreshDetail} onDetails={openConversationDetails} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description={activeConversationRef ? 'Reading projected Conversation' : 'Select a projected Conversation to inspect its history'} />}
             {!activeConversationRef ? (
               <div className="p-4"><StateNotice kind="empty" title="No conversation selected" detail="Select a conversation from the projected directory." /></div>
             ) : !conversationsSupported ? (
@@ -191,11 +189,6 @@ function ConversationWorkspace() {
             ) : selectedConversation ? (
               <div className="flex min-h-full flex-col">
                 {conversation.error ? <div className="px-4 pt-3"><FailureNotice error={conversation.error} stale onRetry={() => conversation.refetch()} /></div> : null}
-                <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
-                  <ConversationUnreadCount count={selectedConversation.unreadCount} authoritative={selectedConversation.unreadAuthoritative} context="detail" />
-                  <span>{humanizeToken(selectedConversation.type)}</span>
-                  <Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={openConversationDetails}>Details</Button>
-                </div>
                 <div className="px-4"><ProjectionStatusGroup entries={[{ label: 'Conversation', meta: conversation.data?.meta }, { label: 'Messages', meta: messages.data?.meta }]} /></div>
                 {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>

@@ -143,12 +143,12 @@ export function Composer({ conversationId, addressingJid, conversationName, enab
       {sendText.error ? <FailureNotice error={sendText.error} command /> : null}
       {recipientError ? <FailureNotice error={recipientError} onRetry={onRetryRecipient} /> : null}
       <form className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2" onSubmit={(event) => { event.preventDefault(); submitText(); }}>
-        <Field label={`Message ${conversationName}`}>
-          {(id) => <Textarea id={id} autoGrow maxRows={4} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
+        <Field label="Message">
+          {(id) => <Textarea id={id} aria-label={`Message ${conversationName}`} placeholder="Write a message…" autoGrow maxRows={4} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
         </Field>
         <div className="flex items-center justify-end gap-2">
           <Button aria-label="Choose image or media" disabled={!enabled || pending} onClick={() => { resetMediaForm(); setMediaOpen(true); }}>Media…</Button>
-          <Button variant="primary" type="submit" disabled={!enabled || !text.trim() || pending || textOutcomeUnknown || sendCooldown}>{sendText.isPending ? 'Submitting…' : sendCooldown ? `Retry in ${cooldownSeconds}s` : 'Send text'}</Button>
+          <Button variant="primary" type="submit" disabled={!enabled || !text.trim() || pending || textOutcomeUnknown || sendCooldown}>{sendText.isPending ? 'Submitting…' : sendCooldown ? `Retry in ${cooldownSeconds}s` : 'Send'}</Button>
         </div>
       </form>
 

@@ -125,7 +125,7 @@ for (const marker of ['fieldControlClassName', 'resize-y', 'min-h-20', 'autoGrow
 }
 
 const conversationComposer = await read('src/features/conversations/Composer.tsx');
-for (const marker of ['autoGrow', 'maxRows={4}', 'grid-cols-[minmax(0,1fr)_auto]', 'aria-label="Choose image or media"', '>Media…</Button>', ": 'Send text'}"]) {
+for (const marker of ['autoGrow', 'maxRows={4}', 'grid-cols-[minmax(0,1fr)_auto]', 'aria-label={`Message ${conversationName}`}', 'placeholder="Write a message…"', 'aria-label="Choose image or media"', '>Media…</Button>', ": 'Send'}"]) {
   if (!conversationComposer.includes(marker)) failures.push(`src/features/conversations/Composer.tsx: compact composer contract is missing ${marker}`);
 }
 
@@ -244,7 +244,7 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', '<CountBadge count={217}', 'placeholder="Name or ID on this page"', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} authoritative={conversation.unreadAuthoritative} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', 'className="flex min-h-full flex-col"', 'conversationType={conversation.type}', 'anchorToEnd', '<ConversationMessagePagination']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', '<CountBadge count={217}', 'placeholder="Name or ID on this page"', 'actions={<Button>Refresh</Button>}', '<SelectedConversationHeader', 'className="max-[900px]:hidden"', '>Back</Button>', '>Details</Button>', '<ConversationDetailsContent', 'className="flex min-h-full flex-col"', 'conversationType={conversation.type}', 'anchorToEnd', '<ConversationMessagePagination']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
@@ -269,17 +269,17 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', '<WorkspacePaneHeader', '<CountBadge count={conversations.data.resource.total}', 'Filter conversations', 'placeholder="Name or ID on this page"', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} authoritative={selectedConversation.unreadAuthoritative} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', '<ProjectionStatusGroup', 'className="flex min-h-full flex-col"', 'conversationType={selectedConversation.type}', 'anchorToEnd={!route.messageCursor}', 'No projected messages', "details: 'conversation'", '<ConversationMessagePagination', '<Navigate replace to={target}']) {
+for (const marker of ['<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', '<WorkspacePaneHeader', '<CountBadge count={conversations.data.resource.total}', 'Filter conversations', 'placeholder="Name or ID on this page"', 'nextLabel="Next page"', 'Selected Conversation is outside this page', '<SelectedConversationHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', '<ProjectionStatusGroup', 'className="flex min-h-full flex-col"', 'conversationType={selectedConversation.type}', 'anchorToEnd={!route.messageCursor}', 'No projected messages', "details: 'conversation'", '<ConversationMessagePagination', '<Navigate replace to={target}']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 
 const conversationsView = await read('src/features/conversations/ConversationsView.tsx');
-for (const marker of ['ConversationUnreadCount', 'authoritative: boolean', 'if (!authoritative)', 'Unread syncing', "context === 'directory' && count === 0", '<CountBadge count={count}', 'aria-label={label}', '<span>Unread</span>', 'ConversationMessagePagination', 'className="mt-auto"', 'resetLabel="Newest"', 'nextLabel="Older messages"', 'max-w-[min(78%,42rem)]', 'calendarDayLabel', 'Text content not reported', 'Participant not identified', 'isNearScrollEnd', 'anchorToEnd']) {
+for (const marker of ['ConversationUnreadCount', 'authoritative: boolean', 'if (!authoritative)', 'Unread syncing', 'if (count === 0) return null', '<CountBadge count={count}', 'aria-label={label}', 'SelectedConversationHeader', 'Last activity ${activity}', 'ConversationMessagePagination', 'className="mt-auto"', 'resetLabel="Newest"', 'nextLabel="Older messages"', 'max-w-[min(78%,42rem)]', 'calendarDayLabel', 'Text content not reported', 'Participant not identified', 'isNearScrollEnd', 'anchorToEnd']) {
   if (!conversationsView.includes(marker)) failures.push(`src/features/conversations/ConversationsView.tsx: Conversation view contract is missing ${marker}`);
 }
 
 const conversationDetails = await read('src/features/conversations/Details.tsx');
-for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '<CopyValue', 'headingLevel={3}', 'Canonical identity', 'Provider routing', 'Projected state', '<DescriptionList', '<Panel', 'Open contact', '/directory/contacts/']) {
+for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '<CopyValue', 'headingLevel={3}', 'Canonical identity', 'Provider routing', 'Projected state', 'conversation.unreadCount.toLocaleString', '<DescriptionList', '<Panel', 'Open contact', '/directory/contacts/']) {
   if (!conversationDetails.includes(marker)) failures.push(`src/features/conversations/Details.tsx: Conversation details inspector is missing ${marker}`);
 }
 

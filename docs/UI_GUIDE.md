@@ -211,10 +211,10 @@ resource models, or rendered diagnostics.
   inside an operational Status remain in their context instead of becoming chips.
   Framed non-count facts such as resource versions use `MetadataBadge`.
   Conversation directory rows omit authoritative zero unread counts and expose
-  authoritative positive counts through an accessible CountBadge;
-  selected-conversation facts keep the visible `Unread` label and show an
-  authoritative zero explicitly. When `unreadAuthoritative` is false, both
-  contexts show a pending syncing status and no numeric badge. Conversation and Directory list headers place
+  authoritative positive counts through an accessible CountBadge. The selected
+  header does not repeat unread attention; the inspector reports an authoritative
+  value as a plain fact. When `unreadAuthoritative` is false, the directory and
+  inspector show a pending syncing status and no numeric badge. Conversation and Directory list headers place
   the active authoritative total beside the resource label. Conversation and
   Contact totals use `meta.total` (including the current normalized Contact
   search scope), while Labels use the bare-array length; none derive totals from
@@ -235,8 +235,9 @@ resource models, or rendered diagnostics.
   start at their beginning, and new messages follow only while the operator is
   already near the end. Conversation and Messages projection health combines
   only when both scopes are ready; all non-ready scopes remain separate.
-  The selected Conversation keeps unread and type as scan-critical facts. Below
-  1560px of actual workspace width it also exposes `Details`, which opens the
+  The selected Conversation header keeps display identity, type, last activity,
+  pane-owned refresh, and `Details` as scan-critical context. Below 1560px of
+  actual workspace width `Details` opens the
   shared Drawer. At or above that container threshold the same inspector content
   remains visible as a non-modal 440px third column beside a 320px directory and
   a timeline of at least 800px. Canonical identity, provider routing, and
@@ -253,9 +254,11 @@ resource models, or rendered diagnostics.
   and remains available on a cursor-addressed empty page so the operator can
   return to `Newest`. When sending is unavailable, one compact notice
   replaces the Composer fields and actions instead of rendering disabled input
-  controls. When sending is available, the shared Textarea starts at one line,
-  grows through four lines, then scrolls internally. Text, `Media…`, and
-  `Send text` remain one bottom-aligned row, including mobile; command errors,
+  controls. When sending is available, the selected header carries visible target
+  context and the shared Textarea starts at one line, grows through four lines,
+  then scrolls internally. `Message`, `Media…`, and `Send` remain one
+  bottom-aligned row, including mobile; the accessible field name and Media dialog
+  retain the selected Conversation name. Command errors,
   cooldown, unknown outcome, and acknowledgement stay in the explicit notices
   above it.
 - The Messaging Directory owns Contacts and Labels as page-level resource tabs,

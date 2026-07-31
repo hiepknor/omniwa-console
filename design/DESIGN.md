@@ -250,10 +250,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   not become chips. MetadataBadge retains the same compact framed family for
   non-quantity facts such as an immutable version, without coupling their future
   treatment to count chips. Conversations with authoritative unread omit zero
-  counts in dense directory rows, show positive counts as accessible CountBadges,
-  and pair the badge with a visible `Unread` label in selected-conversation facts.
-  Non-authoritative unread never renders a numeric badge; it uses the existing
-  pending Status treatment with an explicit syncing label.
+  counts in dense directory rows and show positive counts there as accessible
+  CountBadges. The selected header never repeats the attention badge; the
+  inspector reports authoritative unread as a plain fact. Non-authoritative
+  unread never renders a numeric badge; it uses the existing pending Status
+  treatment with an explicit syncing label.
 - **Conversation image lifecycle** — ready private JPEG/PNG content uses the
   shared framed Image primitive. Pending/processing and terminal unavailable
   states retain the message bubble and use a square bordered placeholder with
@@ -276,10 +277,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   container to the end; older cursor pages start at their beginning. New items
   follow only while the operator remains near the end, so active history review
   is never interrupted.
-- **Conversation details and send availability** — the selected Conversation keeps
-  unread, type, and a visible `Details` action in its dense summary when the
-  inspector is not docked. Canonical and provider identifiers stay out of the
-  primary timeline summary. `Details` opens the canonical Drawer below the
+- **Conversation details and send availability** — the selected Conversation
+  header keeps display identity, type, last activity, pane-owned refresh, and a
+  visible `Details` action when the inspector is not docked. Unread attention
+  stays in the directory; canonical and provider identifiers stay out of the
+  primary timeline header. `Details` opens the canonical Drawer below the
   responsive-inspector threshold; at or above that threshold the same content
   remains visible as the third column. It groups backend-reported identity,
   provider routing, and projected state in framed Panels with DescriptionLists.
@@ -289,14 +291,16 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   A missing command target or send capability replaces the entire Composer form
   with one compact StateNotice, so an unavailable command never leaves a large
   disabled textarea occupying the workspace footer.
-- **Conversation Composer** — the available send surface uses the shared
+- **Conversation Composer** — the available send surface uses the selected
+  header as its visible target context and the shared
   Textarea in auto-grow mode: one line initially, bounded to four lines before
-  internal scrolling. The field, `Media…`, and `Send text` actions share one
+  internal scrolling. The generic `Message` field, `Media…`, and `Send` actions share one
   bottom-aligned row at every viewport; mobile retains 40px action/control
   targets without reserving a three-row textarea. Command failure, cooldown,
   unknown outcome, recipient error, and provider acknowledgement remain above
   that row and may expand the footer only while reported. Auto-grow changes
-  geometry only; it does not introduce Enter-to-send or change submission,
+  geometry only; its accessible name and Media dialog retain the selected
+  Conversation name. It does not introduce Enter-to-send or change submission,
   capability, retry, or acknowledgement semantics.
 - **DescriptionList / DescriptionItem** — the only repeated key/value facts
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
