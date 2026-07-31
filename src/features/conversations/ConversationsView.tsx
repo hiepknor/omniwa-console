@@ -1,10 +1,8 @@
 import type { ConversationResource } from '@/api/conversations';
-import type { ContactResource } from '@/api/contacts';
-import type { LabelResource } from '@/api/labels';
 import type { MessageResource } from '@/api/messages';
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { calendarDayKey, calendarDayLabel, humanizeToken, relativeTime } from '@/lib/format';
-import { CountBadge, Status } from '@/ui';
+import { CountBadge } from '@/ui';
 import { cn } from '@/ui/cn';
 
 export function ConversationUnreadCount({ count, context }: { count: number; context: 'directory' | 'detail' }) {
@@ -47,40 +45,6 @@ export function ConversationList({ items, selectedId, onSelect }: { items: Conve
           primary={item.displayName ?? `Unknown ${humanizeToken(item.type)} conversation`}
           secondary={`${humanizeToken(item.type)} · ${item.lastActivityAt ? relativeTime(item.lastActivityAt) : 'activity unreported'}`}
           trailing={<ConversationUnreadCount count={item.unreadCount} context="directory" />}
-        />
-      ))}
-    </ul>
-  );
-}
-
-export function ContactList({ items, selectedId, onSelect }: { items: ContactResource[]; selectedId?: string; onSelect: (id: string) => void }) {
-  return (
-    <ul className="grid">
-      {items.map((item) => (
-        <ResourceButton
-          key={item.id}
-          selected={item.id === selectedId}
-          onClick={() => onSelect(item.id)}
-          primary={item.displayName ?? 'Unknown contact'}
-          secondary={item.identityStatus === 'legacy' ? 'Legacy identity' : `${humanizeToken(item.identityStatus)} identity`}
-          trailing={<Status tone={item.found === true ? 'ok' : 'neutral'}>{item.found === undefined ? 'Unreported' : item.found ? 'Found' : 'Not found'}</Status>}
-        />
-      ))}
-    </ul>
-  );
-}
-
-export function LabelList({ items, selectedId, onSelect }: { items: LabelResource[]; selectedId?: string; onSelect: (id: string) => void }) {
-  return (
-    <ul className="grid">
-      {items.map((item) => (
-        <ResourceButton
-          key={item.id}
-          selected={item.id === selectedId}
-          onClick={() => onSelect(item.id)}
-          primary={item.name ?? 'Unnamed label'}
-          secondary={item.id}
-          trailing={<span className="text-xs text-fg-3">{item.color ?? 'Color unreported'}</span>}
         />
       ))}
     </ul>

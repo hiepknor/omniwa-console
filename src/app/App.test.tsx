@@ -19,6 +19,11 @@ describe('authenticated route manifest', () => {
     expect(paths).toEqual(expect.arrayContaining(['/conversations', '/conversations/:conversationRef']));
   });
 
+  it('owns canonical Directory resource routes', () => {
+    const paths = authenticatedRoutes.flatMap((route) => route.path ?? []);
+    expect(paths).toEqual(expect.arrayContaining(['/directory', '/directory/contacts', '/directory/contacts/:contactId', '/directory/labels', '/directory/labels/:labelId']));
+  });
+
   it.each([
     ['/groups/lists', '/groups/lists'],
     ['/groups/lists/new', '/groups/lists/new'],
@@ -29,6 +34,11 @@ describe('authenticated route manifest', () => {
     ['/campaigns/campaign-1', '/campaigns/:campaignId'],
     ['/conversations', '/conversations'],
     ['/conversations/conversation-1', '/conversations/:conversationRef'],
+    ['/directory', '/directory'],
+    ['/directory/contacts', '/directory/contacts'],
+    ['/directory/contacts/contact-1', '/directory/contacts/:contactId'],
+    ['/directory/labels', '/directory/labels'],
+    ['/directory/labels/label-1', '/directory/labels/:labelId'],
     ['/chats', '*'],
     ['/chats/provider-chat-id', '*'],
     ['/messages', '*'],

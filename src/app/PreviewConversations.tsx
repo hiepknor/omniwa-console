@@ -1,28 +1,26 @@
 import { useState } from 'react';
 import { ApiProvider } from '@/api/ApiProvider';
 import { Composer } from '@/features/conversations/Composer';
-import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from '@/features/conversations/ConversationsView';
+import { ConversationList, ConversationUnreadCount, MessageTimeline } from '@/features/conversations/ConversationsView';
 import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
-import { Button, CursorPagination, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
-import { contactsFixture, conversationsFixture, labelsFixture, messagesFixture } from './preview-fixtures';
+import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { conversationsFixture, messagesFixture } from './preview-fixtures';
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
 export function PreviewConversations() {
-  const [view, setView] = useState('conversations');
   const [conversationId, setConversationId] = useState<string | undefined>(conversationsFixture[0].conversationId);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const conversation = conversationsFixture.find((item) => item.conversationId === conversationId);
   const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(conversationId);
   const openConversation = (id: string) => { rememberFocusOrigin(); setConversationId(id); setDetailsOpen(false); };
-  const switchView = (id: string) => { setView(id); setConversationId(id === 'conversations' ? conversationsFixture[0]?.conversationId : undefined); setDetailsOpen(false); };
   return (
     <>
       <main className="h-dvh overflow-hidden bg-bg">
         <WorkspacePageFrame
         eyebrow="Messaging"
         title="Conversations"
-        description="Review projected conversations, contacts, labels, and message history."
+        description="Review canonical conversations and projected message history."
         secondaryActions={<Button>Refresh</Button>}
         compactTitle={conversation?.displayName ?? 'Conversations'}
         compactDescription={conversation ? 'Individual' : undefined}
@@ -47,13 +45,13 @@ export function PreviewConversations() {
           directory={
             <>
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
-                <Tabs active={view} onChange={switchView} tabs={[{ id: 'conversations', label: 'Conversations', count: 217 }, { id: 'contacts', label: 'Contacts', count: 84 }, { id: 'labels', label: 'Labels', count: labelsFixture.length }]} />
+                <WorkspacePaneHeader title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>} description="Canonical projected conversations" />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => e.preventDefault()}>
-                  <Field label="Search" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" placeholder="Filter loaded page" />}</Field>
+                  <Field label="Filter conversations" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" placeholder="Name or Conversation ID on this page" />}</Field>
                   <div className="flex items-end"><Button type="submit">Apply</Button></div>
                 </FilterToolbar>
               </div>
-              {view === 'conversations' ? <ConversationList items={conversationsFixture} selectedId={conversationId} onSelect={openConversation} /> : view === 'contacts' ? <ContactList items={contactsFixture} onSelect={() => {}} /> : <LabelList items={labelsFixture} onSelect={() => {}} />}
+              <ConversationList items={conversationsFixture} selectedId={conversationId} onSelect={openConversation} />
             </>
           }
         detail={

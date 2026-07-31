@@ -54,7 +54,7 @@ for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10', '<I
 }
 
 const icon = await read('src/ui/Icon.tsx');
-for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 'connection:', 'session:', 'strokeWidth="1.75"', 'aria-hidden']) {
+for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 'connection:', 'directory:', 'session:', 'strokeWidth="1.75"', 'aria-hidden']) {
   if (!icon.includes(marker)) failures.push(`src/ui/Icon.tsx: iconography contract is missing ${marker}`);
 }
 
@@ -235,7 +235,7 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', 'conversationType={conversation.type}', 'anchorToEnd', 'nextLabel="Older messages"']) {
+for (const marker of ['<main', '<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', '<CountBadge count={217}', 'className="max-[900px]:hidden"', '>Back</Button>', '<ConversationUnreadCount count={conversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', 'conversationType={conversation.type}', 'anchorToEnd', 'nextLabel="Older messages"']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 
@@ -260,7 +260,7 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', '<WorkspacePaneHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', '<ProjectionStatusGroup', 'conversationType={selectedConversation.type}', 'anchorToEnd={!route.messageCursor}', "details: 'conversation'", 'resetLabel="Newest"', 'nextLabel="Older messages"']) {
+for (const marker of ['<WorkspacePageFrame', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', '<WorkspacePaneHeader', '<CountBadge count={conversations.data.resource.total}', 'Filter conversations', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '<ConversationUnreadCount count={selectedConversation.unreadCount} context="detail"', '@min-[1560px]/responsive-inspector:hidden', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', '<ProjectionStatusGroup', 'conversationType={selectedConversation.type}', 'anchorToEnd={!route.messageCursor}', "details: 'conversation'", 'resetLabel="Newest"', 'nextLabel="Older messages"', '<Navigate replace to={target}']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 
@@ -270,8 +270,23 @@ for (const marker of ['ConversationUnreadCount', "context: 'directory' | 'detail
 }
 
 const conversationDetails = await read('src/features/conversations/Details.tsx');
-for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '<CopyValue', 'headingLevel={3}', 'Canonical identity', 'Provider routing', 'Projected state', '<DescriptionList', '<Panel']) {
+for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '<CopyValue', 'headingLevel={3}', 'Canonical identity', 'Provider routing', 'Projected state', '<DescriptionList', '<Panel', 'Open contact', '/directory/contacts/']) {
   if (!conversationDetails.includes(marker)) failures.push(`src/features/conversations/Details.tsx: Conversation details inspector is missing ${marker}`);
+}
+
+const directoryPreview = await read('src/app/PreviewDirectory.tsx');
+for (const marker of ['<WorkspacePageFrame', 'title="Directory"', '<Tabs', 'panelId: \'directory-preview\'', '<SplitWorkspace', 'detailOpen={Boolean(selectedId)}', '>Back</Button>', '<CountBadge count={filtered.length}', '<ContactList', '<LabelList', '<DirectoryDetails']) {
+  if (!directoryPreview.includes(marker)) failures.push(`src/app/PreviewDirectory.tsx: Messaging Directory preview is missing ${marker}`);
+}
+
+const directoryPage = await read('src/features/directory/DirectoryPage.tsx');
+for (const marker of ['<WorkspacePageFrame', 'title="Directory"', '<Tabs', 'panelId: \'directory-panel\'', 'role="tabpanel"', '<SplitWorkspace', 'detailOpen={Boolean(selectedId)}', '>Back</Button>', '<CountBadge count={total}', 'Search contacts', 'Filter labels', '<ContactList', '<LabelList', '<DirectoryDetails', "cap('contacts_projection')", "cap('labels_projection')", "cap('canonical_contact_identity')"]) {
+  if (!directoryPage.includes(marker)) failures.push(`src/features/directory/DirectoryPage.tsx: Messaging Directory workspace is missing ${marker}`);
+}
+
+const directoryDetails = await read('src/features/directory/Details.tsx');
+for (const marker of ['DirectoryDetails', '<CopyValue', 'Canonical identity', 'Projected definition', 'headingLevel={2}', '<DescriptionList']) {
+  if (!directoryDetails.includes(marker)) failures.push(`src/features/directory/Details.tsx: projected resource detail is missing ${marker}`);
 }
 
 const conversationsComposer = await read('src/features/conversations/Composer.tsx');

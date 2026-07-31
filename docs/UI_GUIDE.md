@@ -212,9 +212,12 @@ resource models, or rendered diagnostics.
   Framed non-count facts such as resource versions use `MetadataBadge`.
   Conversation directory rows omit zero unread counts and expose positive counts
   through an accessible CountBadge; selected-conversation facts keep the visible `Unread`
-  label and show zero explicitly. Conversation tabs use authoritative Conversation and
-  Contact `meta.total` values (including the current normalized Contact search
-  scope) and bare-array Label length; they never derive totals from page length.
+  label and show zero explicitly. Conversation and Directory list headers place
+  the active authoritative total beside the resource label. Conversation and
+  Contact totals use `meta.total` (including the current normalized Contact
+  search scope), while Labels use the bare-array length; none derive totals from
+  page length. Directory resource tabs intentionally omit counts so inactive
+  projections are not fetched merely to populate navigation.
   Private message images use the shared framed Image language when ready and a
   stable square Status placeholder while pending, failed, expired, deleted, or
   capability-gated. `not_ready` remains pending; only the message inspector adds
@@ -250,6 +253,14 @@ resource models, or rendered diagnostics.
   `Send text` remain one bottom-aligned row, including mobile; command errors,
   cooldown, unknown outcome, and acknowledgement stay in the explicit notices
   above it.
+- The Messaging Directory owns Contacts and Labels as page-level resource tabs,
+  not modes inside the Conversation list. Only the active resource projection is
+  queried. At 900px and wider it uses the shared 320px list + remaining detail
+  split; below 900px the selected resource replaces the list with a full Back
+  action. Contact search/cursor/selection and Label filter/selection remain
+  URL-backed. Contact detail preserves canonical/compatibility rollout semantics; Label
+  detail remains a read-only projected definition and never infers Conversation
+  or Message associations.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the

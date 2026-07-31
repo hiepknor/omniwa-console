@@ -5,7 +5,7 @@ import { relativeTime } from '@/lib/format';
 import { Button, Dialog, Field, FileUpload, Input, Select, StateNotice, Tabs, Textarea } from '@/ui';
 import { useConversationMediaAsset, useSendMedia, useSendText, useUploadConversationImage } from './hooks';
 import { commandCooldown, shouldPreserveCommandError } from './send-policy';
-import { FailureNotice } from './ui';
+import { ProjectionFailureNotice as FailureNotice } from '@/components/ProjectionReadState';
 
 const HARD_MEDIA_CEILING = 67_108_864;
 

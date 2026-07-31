@@ -1,37 +1,37 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken } from '@/lib/format';
-import { createSearchParams, omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
+import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { ProjectionFailureNotice as FailureNotice, ProjectionStatus, ProjectionStatusGroup } from '@/components/ProjectionReadState';
+import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
 import { canonicalConversationReadsEnabled, canonicalConversationRedirect, resolveConversationRecipient } from './conversation-identity';
-import { ContactList, ConversationList, ConversationUnreadCount, LabelList, MessageTimeline } from './ConversationsView';
-import { ConversationDetailsContent, DirectoryInspector, MessageInspectorContent } from './Details';
+import { ConversationList, ConversationUnreadCount, MessageTimeline } from './ConversationsView';
+import { ConversationDetailsContent, MessageInspectorContent } from './Details';
 import { ConversationMessageImage } from './Media';
-import { useContact, useContacts, useConversation, useConversations, useLabel, useLabels, useMessages } from './hooks';
-import { conversationRouteState, setConversationParam, type ConversationView } from './route-state';
-import { FailureNotice, ProjectionStatus, ProjectionStatusGroup } from './ui';
+import { useConversation, useConversations, useMessages } from './hooks';
+import { conversationRouteState, legacyDirectoryTarget, setConversationParam } from './route-state';
 
 function BlockedPage({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Messaging" title="Conversations" description="Review projected conversations, contacts, labels, and message history." />
+      <PageHeader eyebrow="Messaging" title="Conversations" description="Review canonical conversations and projected message history." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );
 }
 
-export function ConversationsPage() {
+function ConversationWorkspace() {
   const session = useApiSession();
   const capabilities = useServerCapabilities();
   const { conversationRef } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const route = conversationRouteState(searchParams);
-  const activeConversationRef = route.view === 'conversations' ? conversationRef : undefined;
+  const activeConversationRef = conversationRef;
   const hasConversation = Boolean(activeConversationRef);
   const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(activeConversationRef);
   const [searchDraft, setSearchDraft] = useState(route.search);
@@ -40,24 +40,15 @@ export function ConversationsPage() {
   const cap = (name: string) => capabilities.data?.capabilities.includes(name) ?? false;
   const conversationsReady = canonicalConversationReadsEnabled(instanceScope, capabilities.data?.capabilities ?? []);
   const messagesReady = conversationsReady && cap('messages_projection');
-  const contactsReady = instanceScope && cap('contacts_projection');
-  const labelsReady = instanceScope && cap('labels_projection');
   const outboundReady = cap('outbound_rate_limit');
-  const canonicalIdentity = cap('canonical_contact_identity');
   const conversationMedia = cap('conversation_media_assets');
-  const conversations = useConversations(route.cursor, route.view === 'conversations' && conversationsReady);
+  const conversations = useConversations(route.cursor, conversationsReady);
   const conversation = useConversation(activeConversationRef, conversationsReady);
   const selectedConversation = conversation.data?.resource;
   const sendRecipient = resolveConversationRecipient(selectedConversation);
   const messages = useMessages(activeConversationRef, route.messageCursor, messagesReady);
-  const contacts = useContacts(route.search, route.cursor, route.view === 'contacts' && contactsReady, canonicalIdentity);
-  const labels = useLabels(route.view === 'labels' && labelsReady);
-  const contact = useContact(route.view === 'contacts' ? route.selected : undefined, contactsReady, canonicalIdentity);
-  const label = useLabel(route.view === 'labels' ? route.selected : undefined, labelsReady);
   const loadedConversations = conversations.data?.resource.items ?? [];
   const filteredConversations = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedConversations.filter((i) => !term || i.conversationId.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedConversations, route.search]);
-  const loadedLabels = labels.data?.resource ?? [];
-  const filteredLabels = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedLabels.filter((i) => !term || i.id.toLocaleLowerCase().includes(term) || i.name?.toLocaleLowerCase().includes(term)); }, [loadedLabels, route.search]);
   const loadedMessages = useMemo(() => [...(messages.data?.resource.items ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages.data]);
   const recipientUnavailableDetail = selectedConversation && !sendRecipient
     ? 'The canonical conversation has no addressing JID. Sending remains disabled until the backend publishes its authoritative provider command target.'
@@ -66,25 +57,23 @@ export function ConversationsPage() {
   const messagesSupported = messagesReady || messages.data !== undefined;
 
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
-  const switchView = (view: ConversationView) => navigate(withSearchParams('/conversations', createSearchParams({ view: view === 'conversations' ? undefined : view })));
   const openConversation = (id: string) => {
     rememberFocusOrigin();
-    navigate(withSearchParams(`/conversations/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'selected', 'details'])));
+    navigate(withSearchParams(`/conversations/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'details'])));
   };
   const closeConversation = () => navigate(withSearchParams('/conversations', omitSearchParams(searchParams, ['message', 'messageCursor', 'details'])));
   const openConversationDetails = () => replaceParams(updateSearchParams(searchParams, { details: 'conversation', message: undefined }));
   const closeConversationDetails = () => replaceParams(updateSearchParams(searchParams, { details: undefined }));
   const openMessage = (id: string) => replaceParams(updateSearchParams(searchParams, { message: id, details: undefined }));
-  const applySearch = () => replaceParams(updateSearchParams(searchParams, { search: searchDraft.trim() }, ['cursor', 'selected']));
-  const currentQuery = route.view === 'conversations' ? conversations : route.view === 'contacts' ? contacts : labels;
-  const currentMeta = currentQuery.data?.meta;
+  const applySearch = () => replaceParams(updateSearchParams(searchParams, { search: searchDraft.trim() }, ['cursor']));
+  const currentMeta = conversations.data?.meta;
   const currentAuthoritative = currentMeta?.syncStatus === undefined || currentMeta.syncStatus === 'ready';
   const detailRefreshing = Boolean(activeConversationRef) && (conversation.isFetching || messages.isFetching);
-  const routeRefreshing = currentQuery.isFetching || detailRefreshing;
-  const refreshDirectory = () => { void currentQuery.refetch(); };
+  const routeRefreshing = conversations.isFetching || detailRefreshing;
+  const refreshDirectory = () => { void conversations.refetch(); };
   const refreshDetail = () => { if (activeConversationRef) { void conversation.refetch(); if (messagesReady) void messages.refetch(); } };
   const refresh = () => { refreshDirectory(); refreshDetail(); };
-  useInvalidCursorReset(currentQuery.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined }, ['selected'])));
+  useInvalidCursorReset(conversations.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined })));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
   useEffect(() => {
     if (route.message && route.details) replaceParams(updateSearchParams(searchParams, { details: undefined }));
@@ -93,20 +82,13 @@ export function ConversationsPage() {
     const canonicalId = canonicalConversationRedirect(activeConversationRef, selectedConversation);
     if (canonicalId) navigate(withSearchParams(`/conversations/${encodeURIComponent(canonicalId)}`, searchParams), { replace: true });
   }, [activeConversationRef, navigate, searchParams, selectedConversation?.conversationId]);
-  useEffect(() => {
-    const returnedId = contact.data?.resource.id;
-    if (canonicalIdentity && route.view === 'contacts' && route.selected && returnedId && returnedId !== route.selected) {
-      setSearchParams(setConversationParam(searchParams, 'selected', returnedId), { replace: true });
-    }
-  }, [canonicalIdentity, contact.data?.resource.id, route.selected, route.view, searchParams, setSearchParams]);
-
   if (!instanceScope) return <BlockedPage title="Instance credential required" detail="Conversations requires an instance credential. Admin scope cannot read token-scoped projections, and no request was sent." />;
   if (capabilities.isPending) return <BlockedPage title="Discovering capabilities" detail="Discovering instance capabilities before enabling projection reads." />;
-  if (capabilities.isError && currentQuery.data === undefined) return <BlockedPage title="Unsupported" detail="Capability discovery failed. Conversation projections remain disabled; no fallback read was sent." />;
+  if (capabilities.isError && conversations.data === undefined) return <BlockedPage title="Unsupported" detail="Capability discovery failed. Conversation projections remain disabled; no fallback read was sent." />;
 
-  const advertised = route.view === 'conversations' ? conversationsReady : route.view === 'contacts' ? contactsReady : labelsReady;
-  const viewSupported = advertised || currentQuery.data !== undefined;
-  const emptyDirectory = viewSupported && currentQuery.data && currentAuthoritative && ((route.view === 'conversations' && filteredConversations.length === 0) || (route.view === 'contacts' && (contacts.data?.resource.items.length ?? 0) === 0) || (route.view === 'labels' && filteredLabels.length === 0));
+  const advertised = conversationsReady;
+  const viewSupported = advertised || conversations.data !== undefined;
+  const emptyDirectory = Boolean(viewSupported && conversations.data && currentAuthoritative && filteredConversations.length === 0);
   const inspectedMessageId = route.message && selectedConversation && messagesSupported ? route.message : undefined;
 
   return (
@@ -114,12 +96,12 @@ export function ConversationsPage() {
       <WorkspacePageFrame
         eyebrow="Messaging"
         title="Conversations"
-        description="Review projected conversations, contacts, labels, and message history."
+        description="Review canonical conversations and projected message history."
         secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
         compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : 'Conversations'}
         compactDescription={hasConversation ? (selectedConversation ? humanizeToken(selectedConversation.type) : 'Message timeline') : undefined}
         compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
-        compactActions={<Button disabled={!viewSupported || (hasConversation ? detailRefreshing : currentQuery.isFetching)} onClick={hasConversation ? refreshDetail : refreshDirectory}>{(hasConversation ? detailRefreshing : currentQuery.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
+        compactActions={<Button disabled={!viewSupported || (hasConversation ? detailRefreshing : conversations.isFetching)} onClick={hasConversation ? refreshDetail : refreshDirectory}>{(hasConversation ? detailRefreshing : conversations.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
         compactHeadingRef={compactHeadingRef}
       >
         <ResponsiveInspector
@@ -139,48 +121,41 @@ export function ConversationsPage() {
           <SplitWorkspace
           frame="attached"
           detailOpen={hasConversation}
-          directoryScrollKey={JSON.stringify([route.view, route.search, route.cursor])}
+          directoryScrollKey={JSON.stringify([route.search, route.cursor])}
           detailScrollKey={JSON.stringify([activeConversationRef, route.messageCursor])}
           detailInitialPosition={route.messageCursor ? 'start' : 'end'}
-          directoryLabel={`${route.view} directory`}
+          directoryLabel="Conversation directory"
           detailLabel="Message timeline"
           directory={
             <>
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
-                <Tabs
-                  active={route.view}
-                  onChange={(id) => switchView(id as ConversationView)}
-                  tabs={[
-                    { id: 'conversations', label: 'Conversations', count: conversations.data?.resource.total },
-                    { id: 'contacts', label: 'Contacts', count: contacts.data?.resource.total },
-                    { id: 'labels', label: 'Labels', count: labels.data?.resource.length },
-                  ]}
+                <WorkspacePaneHeader
+                  title={<span className="inline-flex items-center gap-2">Conversations{typeof conversations.data?.resource.total === 'number' ? <CountBadge count={conversations.data.resource.total} /> : null}</span>}
+                  description={route.search ? `Loaded-page filter for “${route.search}”` : 'Canonical projected conversations'}
                 />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
-                  <Field label="Search" className="min-w-48 flex-1">
-                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder={route.view === 'contacts' ? 'Search projected contacts' : 'Filter loaded page'} onChange={(e) => setSearchDraft(e.target.value)} />}
+                  <Field label="Filter conversations" className="min-w-48 flex-1">
+                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name or Conversation ID on this page" onChange={(e) => setSearchDraft(e.target.value)} />}
                   </Field>
                   <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
                 </FilterToolbar>
               </div>
-            {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail={`The backend does not currently advertise ${route.view === 'conversations' ? 'canonical_conversation_identity' : route.view === 'contacts' ? 'contacts_projection' : 'labels_projection'}; capability polling continues because the projection may be unsupported or waiting for readiness.`} /></div> : null}
+            {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail="The backend does not currently advertise canonical_conversation_identity; capability polling continues because the projection may be unsupported or waiting for readiness." /></div> : null}
             {viewSupported && !advertised ? <div className="p-3"><StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable projection snapshot visible while capability discovery no longer advertises this resource." /></div> : null}
-            {viewSupported && currentQuery.isPending ? <div className="p-3"><StateNotice kind="loading" title="Loading" /></div> : null}
-            {viewSupported && currentQuery.error && !currentQuery.data ? <div className="p-3"><FailureNotice error={currentQuery.error} onRetry={refreshDirectory} /></div> : null}
-            {viewSupported && currentQuery.data ? (
+            {viewSupported && conversations.isPending ? <div className="p-3"><StateNotice kind="loading" title="Loading conversations" /></div> : null}
+            {viewSupported && conversations.error && !conversations.data ? <div className="p-3"><FailureNotice error={conversations.error} onRetry={refreshDirectory} /></div> : null}
+            {viewSupported && conversations.data ? (
               <>
-                {currentQuery.error ? <div className="p-3"><FailureNotice error={currentQuery.error} stale onRetry={refreshDirectory} /></div> : null}
-                <div className="px-3"><ProjectionStatus meta={'meta' in currentQuery.data ? currentQuery.data.meta : undefined} /></div>
-                {route.view === 'conversations' ? <ConversationList items={filteredConversations} selectedId={activeConversationRef} onSelect={openConversation} />
-                  : route.view === 'contacts' ? <ContactList items={contacts.data?.resource.items ?? []} selectedId={route.selected} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'selected', id))} />
-                    : <LabelList items={filteredLabels} selectedId={route.selected} onSelect={(id) => replaceParams(setConversationParam(searchParams, 'selected', id))} />}
-                {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected item matches the URL-backed search.' : 'The ready projection contains no items.'} /></div> : null}
+                {conversations.error ? <div className="p-3"><FailureNotice error={conversations.error} stale onRetry={refreshDirectory} /></div> : null}
+                <div className="px-3"><ProjectionStatus meta={conversations.data.meta} /></div>
+                <ConversationList items={filteredConversations} selectedId={activeConversationRef} onSelect={openConversation} />
+                {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected Conversation on this loaded page matches the URL-backed filter.' : 'The ready Conversation projection contains no items.'} /></div> : null}
               </>
             ) : null}
             </>
           }
-        directoryFooter={route.view !== 'labels' && viewSupported && currentQuery.data ? (
-          <CursorPagination cursor={route.cursor} nextCursor={(route.view === 'conversations' ? conversations.data?.resource.pagination.nextCursor : contacts.data?.resource.pagination.nextCursor) ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }, ['selected']))} />
+        directoryFooter={viewSupported && conversations.data ? (
+          <CursorPagination cursor={route.cursor} nextCursor={conversations.data.resource.pagination.nextCursor ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }))} />
         ) : undefined}
         detail={
           <>
@@ -253,7 +228,12 @@ export function ConversationsPage() {
         </ResponsiveInspector>
       </WorkspacePageFrame>
 
-      {route.selected && route.view !== 'conversations' && viewSupported ? <DirectoryInspector contact={contact.data?.resource} label={label.data?.resource} meta={route.view === 'contacts' ? contact.data?.meta : label.data?.meta} error={route.view === 'contacts' ? contact.error : label.error} loading={route.view === 'contacts' ? contact.isPending : label.isPending} onRetry={() => route.view === 'contacts' ? contact.refetch() : label.refetch()} onClose={() => replaceParams(setConversationParam(searchParams, 'selected'))} /> : null}
     </>
   );
+}
+
+export function ConversationsPage() {
+  const [searchParams] = useSearchParams();
+  const target = legacyDirectoryTarget(searchParams);
+  return target ? <Navigate replace to={target} /> : <ConversationWorkspace />;
 }

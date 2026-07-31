@@ -2,7 +2,9 @@ import type { NavigationType } from 'react-router-dom';
 
 const listScopeParams: Record<string, readonly string[]> = {
   '/campaigns': ['status', 'cursor'],
-  '/conversations': ['view', 'search', 'cursor'],
+  '/conversations': ['search', 'cursor'],
+  '/directory/contacts': ['search', 'cursor'],
+  '/directory/labels': ['search'],
   '/events': ['type', 'cursor'],
   '/groups': ['search', 'type', 'myRole', 'sendMode', 'state', 'membershipState', 'cursor'],
   '/groups/lists': ['search', 'cursor'],
@@ -13,6 +15,8 @@ const listScopeParams: Record<string, readonly string[]> = {
 
 function baseScrollPath(pathname: string): string {
   if (/^\/conversations\/[^/]+$/.test(pathname)) return '/conversations';
+  if (/^\/directory\/contacts\/[^/]+$/.test(pathname)) return '/directory/contacts';
+  if (/^\/directory\/labels\/[^/]+$/.test(pathname)) return '/directory/labels';
   if (/^\/instances\/[^/]+$/.test(pathname)) return '/instances';
   if (/^\/campaigns\/[^/]+$/.test(pathname) && pathname !== '/campaigns/new') return '/campaigns';
   // Match the nested collection before the generic `/groups/:groupId` route.

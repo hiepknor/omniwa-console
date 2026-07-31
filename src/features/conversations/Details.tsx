@@ -1,12 +1,9 @@
 import type { ConversationResource } from '@/api/conversations';
-import type { ContactResource } from '@/api/contacts';
-import type { ProjectionMeta } from '@/api/envelopes';
-import type { LabelResource } from '@/api/labels';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { CopyValue, CountBadge, DescriptionItem, DescriptionList, Drawer, Panel, StateNotice, Status, type Tone } from '@/ui';
+import { ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
+import { ButtonLink, CopyValue, CountBadge, DescriptionItem, DescriptionList, Panel, StateNotice, Status, type Tone } from '@/ui';
 import { useMessage, useReceipts } from './hooks';
 import { ConversationMessageImage } from './Media';
-import { FailureNotice, ProjectionStatus } from './ui';
 
 function receiptTone(type: string): Tone {
   return type === 'read' || type === 'delivered' ? 'ok' : 'pending';
@@ -40,7 +37,7 @@ export function ConversationDetailsContent({ conversation }: { conversation: Con
       : 'None';
   return (
     <div className="grid gap-4">
-      <Panel headingLevel={3} title="Canonical identity" description="Backend-projected identity; Console does not merge Conversations or derive a display name." bodyPadding="compact-top">
+      <Panel headingLevel={3} title="Canonical identity" description="Backend-projected identity; Console does not merge Conversations or derive a display name." actions={conversation.contactId ? <ButtonLink to={`/directory/contacts/${encodeURIComponent(conversation.contactId)}`}>Open contact</ButtonLink> : undefined} bodyPadding="compact-top">
         <DescriptionList>
           <DescriptionItem label="Display name">{conversation.displayName ?? 'Not reported'}</DescriptionItem>
           <DescriptionItem label="Name source">{conversation.displayNameSource ? humanizeToken(conversation.displayNameSource) : 'Not reported'}</DescriptionItem>
@@ -73,59 +70,6 @@ export function ConversationDetailsContent({ conversation }: { conversation: Con
         </DescriptionList>
       </Panel>
     </div>
-  );
-}
-
-export function DirectoryInspector({ contact, label, meta, error, loading, onRetry, onClose }: { contact?: ContactResource; label?: LabelResource; meta?: ProjectionMeta; error?: unknown; loading: boolean; onRetry: () => void; onClose: () => void }) {
-  const title = contact?.displayName ?? label?.name ?? (contact ? 'Unknown contact' : label?.id) ?? 'Directory details';
-  return (
-    <Drawer open onClose={onClose} title={title} subtitle={contact ? 'Projected contact' : 'Projected label'}>
-      {loading ? (
-        <StateNotice kind="loading" title="Loading" />
-      ) : error && !contact && !label ? (
-        <FailureNotice error={error} onRetry={onRetry} />
-      ) : contact ? (
-        <div className="grid gap-4">
-          {error ? <FailureNotice error={error} stale onRetry={onRetry} /> : null}
-          <ProjectionStatus meta={meta} />
-          <Panel
-            headingLevel={3}
-            title={contact.identityStatus === 'legacy' ? 'Normalized identity' : 'Canonical identity'}
-            description={contact.identityStatus === 'legacy' ? 'Compatibility projection fields; canonical reconciliation is not active for this instance.' : 'The backend owns reconciliation. Aliases are lookup material, not separate contacts.'}
-            bodyPadding="compact-top"
-          >
-            <DescriptionList>
-              <DescriptionItem label="Contact ID" mono>{contact.id}</DescriptionItem>
-              <DescriptionItem label="Addressing JID" mono>{contact.addressingJid || 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Identity status">{humanizeToken(contact.identityStatus)}</DescriptionItem>
-              <DescriptionItem label="Identity updated">{contact.identityUpdatedAt ? (relativeTime(contact.identityUpdatedAt) || contact.identityUpdatedAt) : 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Display source">{contact.displayNameSource ? humanizeToken(contact.displayNameSource) : 'Compatibility projection'}</DescriptionItem>
-              <DescriptionItem label="Aliases" mono>{contact.aliases.length ? contact.aliases.join(', ') : 'None reported'}</DescriptionItem>
-              <DescriptionItem label="Username">{contact.username ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Phone">{contact.redactedPhone ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Business">{contact.businessName ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="About">{contact.about ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="WhatsApp contact found">{contact.found === undefined ? 'Not reported' : contact.found ? 'Yes' : 'No'}</DescriptionItem>
-            </DescriptionList>
-          </Panel>
-        </div>
-      ) : label ? (
-        <div className="grid gap-4">
-          {error ? <FailureNotice error={error} stale onRetry={onRetry} /> : null}
-          <ProjectionStatus meta={meta} />
-          <Panel headingLevel={3} title="Projected definition" description="Definitions are read-only; Console does not infer chat-label assignments." bodyPadding="compact-top">
-            <DescriptionList>
-              <DescriptionItem label="Label ID" mono>{label.id}</DescriptionItem>
-              <DescriptionItem label="Name">{label.name ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Color">{label.color ?? 'Not reported'}</DescriptionItem>
-              <DescriptionItem label="Predefined ID">{label.predefinedId ?? 'Not reported'}</DescriptionItem>
-            </DescriptionList>
-          </Panel>
-        </div>
-      ) : (
-        <StateNotice kind="empty" title="Not found" detail="The selected projected definition was not returned." />
-      )}
-    </Drawer>
   );
 }
 
