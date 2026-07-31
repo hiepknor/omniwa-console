@@ -50,10 +50,11 @@ export function ConversationMediaPlaceholder({ enabled, compact = false, label, 
   tone: 'pending' | 'failed' | 'neutral';
   detail: string;
 }) {
+  const visibleDetail = enabled ? detail : 'conversation_media_assets is not advertised for this instance.';
   return (
-    <div role="img" aria-label={label} className={cn('grid min-h-24 place-items-center gap-2 border border-line-strong bg-recessed p-3 text-center', compact && 'max-w-80')}>
+    <div role="img" aria-label={`${label}. ${visibleDetail}`} className={cn('grid min-h-24 place-items-center gap-2 border border-line-strong bg-recessed p-3 text-center', compact && 'max-w-80')}>
       <Status tone={tone}>{label}</Status>
-      <small className="text-xs text-fg-3">{enabled ? detail : 'conversation_media_assets is not advertised for this instance.'}</small>
+      <small className="text-xs text-fg-3">{visibleDetail}</small>
     </div>
   );
 }

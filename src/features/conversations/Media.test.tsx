@@ -27,7 +27,9 @@ function render(enabled: boolean, asset?: MediaAsset) {
 
 describe('ConversationMessageImage', () => {
   it('keeps a capability-off placeholder without fetching private content', () => {
-    expect(render(false)).toContain('conversation_media_assets is not advertised');
+    const html = render(false);
+    expect(html).toContain('conversation_media_assets is not advertised');
+    expect(html).toContain('aria-label="Image unavailable. conversation_media_assets is not advertised for this instance."');
   });
 
   it('keeps a projected message visible while its asset is pending', () => {
@@ -37,6 +39,7 @@ describe('ConversationMessageImage', () => {
     });
     expect(html).toContain('Image Processing');
     expect(html).toContain('remains visible');
+    expect(html).toContain('aria-label="Image Processing. The projected message remains visible while private content is prepared."');
   });
 
   it('retains a terminal placeholder and failure code', () => {
@@ -46,6 +49,7 @@ describe('ConversationMessageImage', () => {
     });
     expect(html).toContain('Image unavailable');
     expect(html).toContain('Media asset integrity failed');
+    expect(html).toContain('aria-label="Image unavailable. Media asset integrity failed"');
   });
 
   it('treats an expired private asset as unavailable without removing the message', () => {

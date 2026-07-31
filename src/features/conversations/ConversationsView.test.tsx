@@ -125,7 +125,8 @@ describe('MessageTimeline', () => {
     expect(html).toContain('Participant not identified');
     expect(html).toContain('Incoming · Unreported');
     expect(html).toContain('System · Failed');
-    expect(html).toContain('aria-label="Incoming group message from unidentified participant: Text content not reported Status: Unreported. Time:');
+    expect(html).toContain('<span class="sr-only">Message: </span>');
+    expect(html).not.toContain('aria-label="Incoming group message');
     expect(html).toContain('role="separator" aria-label=');
     expect(html.match(/role="separator"/g)).toHaveLength(2);
   });
