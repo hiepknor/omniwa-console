@@ -9,7 +9,7 @@ const overview: OverviewResource = {
   scope: { type: 'server' },
   window: { start: '2026-07-27T12:00:00Z', end: '2026-07-28T12:00:00Z', durationSeconds: 86_400 },
   instances: { total: 3, connected: 2, disconnected: 1 },
-  projections: { groups: 12, contacts: 18, chats: 9, messages: 120, events: 44 },
+  projections: { groups: 12, contacts: 18, conversations: 9, messages: 120, events: 44 },
   messages: { total: 120, incoming: 70, outgoing: 50 },
 };
 

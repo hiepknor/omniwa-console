@@ -1,8 +1,8 @@
 # OmniWA GO Public Contract
 
 This is the Console-facing handoff for the OmniWA GO backend at commit
-`916e2e78f7753fce06e6511d69ed249763f2b28b` (2026-07-29), described as
-`0.7.2-128-g916e2e7`. The vendored machine contract at
+`d82d56df3bb74b175ffd4ba2dc478c38b631a0f4` (2026-07-31), described as
+`0.7.2-148-gd82d56d`. The vendored machine contract at
 `contracts/omniwa-go.openapi.json` remains authoritative for paths and schemas;
 this document records cross-cutting semantics that generated types cannot
 express reliably.
@@ -56,7 +56,6 @@ Known capabilities:
 - `groups_projection`
 - `labels_projection`
 - `contacts_projection`
-- `chats_projection`
 - `messages_projection`
 - `events_projection`
 - `outbound_rate_limit`
@@ -216,9 +215,9 @@ absent name renders as unknown rather than exposing a phone/JID-derived label.
 
 Message pagination uses keyset cursors. New messages do not shift pages already
 read. Successful sends write through to the projection. Default message
-retention is 90 days (`2160h`). Timestamp display uses `providerTimestamp`, then
-`sentAt`, then `deliveredAt`; it never invents a timestamp. Media binary is not
-persisted in message projections.
+retention is 90 days (`2160h`). Every projected Message requires its authoritative
+`providerTimestamp`; lifecycle timestamps do not substitute for it. Media binary
+is not persisted in message projections.
 
 `canonical_conversation_identity` is the sole gate for Conversation reads.
 `conversationId` is the backend-owned entity, route, and cache identity for every
@@ -284,6 +283,12 @@ Overview is computed only from persisted projections and accepts a window up to
 rate-limit/circuit-breaker states. The runtime also exposes an undocumented
 `GET /server/ok`; it is liveness only, is not part of the vendored contract, and
 must not be consumed to infer WhatsApp connection status.
+
+The Overview wire DTO publishes canonical `projections.conversations` and the
+deprecated provider-row count `projections.chats`, which may be larger. The
+Console prefers `conversations` and falls back to `chats` only for older backend
+revisions during mixed rollout. Product-facing code sees only Conversations.
+Remove the fallback after every backend deployment has the canonical field.
 
 ## Errors and rate limits
 

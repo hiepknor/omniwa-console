@@ -116,7 +116,7 @@ export function OverviewView(props: OverviewViewProps) {
               { label: 'Messages', value: formatCount(overview.messages.total) },
               { label: 'Incoming', value: formatCount(overview.messages.incoming) },
               { label: 'Outgoing', value: formatCount(overview.messages.outgoing) },
-              { label: 'Conversations', value: formatCount(overview.projections.chats) },
+              { label: 'Conversations', value: formatCount(overview.projections.conversations) },
               { label: 'Groups', value: formatCount(overview.projections.groups) },
               { label: 'Contacts', value: formatCount(overview.projections.contacts) },
               { label: 'Events', value: formatCount(overview.projections.events) },

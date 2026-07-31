@@ -8,7 +8,7 @@ cookie, refresh token, or JWT flow.
 | Credential | Scope | Console use |
 | --- | --- | --- |
 | Global admin key | Server-wide and instance lifecycle operations | Active session client for instance administration, server capabilities, overview, and health |
-| Instance token | One WhatsApp account | Scoped client for groups, contacts, labels, chats, messages, sends, and other instance resources |
+| Instance token | One WhatsApp account | Scoped client for groups, contacts, labels, Conversations, Messages, sends, and other instance resources |
 
 Route middleware and the OpenAPI contract remain authoritative for exact scope.
 The Console does not broaden a token by proxying through the admin client.

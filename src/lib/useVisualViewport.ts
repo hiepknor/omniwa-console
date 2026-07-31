@@ -17,7 +17,7 @@ export function dismissVirtualKeyboard() {
 }
 
 /**
- * Turns the chat route into one visual-viewport stage.
+ * Turns the Conversation route into one visual-viewport stage.
  *
  * Safari may pan the document while focusing an editable control and may
  * publish its final keyboard geometry after the focus event. Keeping the
@@ -40,7 +40,7 @@ export function useVisualViewport<T extends HTMLElement>(rootRef: RefObject<T | 
     let releaseTimer = 0;
     const settleTimers = new Set<number>();
 
-    documentElement.classList.add('chat-viewport-lock');
+    documentElement.classList.add('conversation-viewport-lock');
     root.setAttribute('data-visual-viewport-managed', '');
 
     const readHeight = () => Math.max(1, Math.round(viewport?.height ?? window.innerHeight));
@@ -69,7 +69,7 @@ export function useVisualViewport<T extends HTMLElement>(rootRef: RefObject<T | 
         if (!editingSession) baselineHeight = Math.max(baselineHeight, height);
       }
 
-      documentElement.style.setProperty('--chat-visual-viewport-height', `${height}px`);
+      documentElement.style.setProperty('--conversation-visual-viewport-height', `${height}px`);
       root.toggleAttribute('data-keyboard-open', keyboardOpen);
     };
 
@@ -139,8 +139,8 @@ export function useVisualViewport<T extends HTMLElement>(rootRef: RefObject<T | 
       window.cancelAnimationFrame(frame);
       window.clearTimeout(releaseTimer);
       for (const timer of settleTimers) window.clearTimeout(timer);
-      documentElement.style.removeProperty('--chat-visual-viewport-height');
-      documentElement.classList.remove('chat-viewport-lock');
+      documentElement.style.removeProperty('--conversation-visual-viewport-height');
+      documentElement.classList.remove('conversation-viewport-lock');
       root.removeAttribute('data-visual-viewport-managed');
       root.removeAttribute('data-keyboard-open');
     };

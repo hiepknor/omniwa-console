@@ -97,7 +97,7 @@ const inkRamp = [
 const navigationItems = [
   ['overview', 'Overview'],
   ['connection', 'Connection'],
-  ['chats', 'Conversations'],
+  ['conversations', 'Conversations'],
   ['directory', 'Directory'],
   ['groups', 'Groups'],
   ['campaigns', 'Campaigns'],

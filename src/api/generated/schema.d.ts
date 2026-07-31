@@ -10008,8 +10008,11 @@ export interface components {
             total?: number;
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.OverviewProjectionCounts": {
+            /** @description Chats is the deprecated provider Chat projection-row count retained for compatibility; it can exceed Conversations. */
             chats?: number;
             contacts?: number;
+            /** @description Conversations counts canonical public Conversation entities. */
+            conversations?: number;
             events?: number;
             groups?: number;
             messages?: number;

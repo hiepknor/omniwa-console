@@ -18,7 +18,7 @@ export const overviewFixture: OverviewResource = {
   scope: { type: 'server' },
   window: { start: ago(86_400), end: ago(0), durationSeconds: 86_400 },
   instances: { total: 18, connected: 15, disconnected: 3 },
-  projections: { groups: 214, contacts: 8_642, chats: 1_930, messages: 482_119, events: 91_004 },
+  projections: { groups: 214, contacts: 8_642, conversations: 1_930, messages: 482_119, events: 91_004 },
   messages: { total: 482_119, incoming: 301_442, outgoing: 180_677 },
 };
 
@@ -29,7 +29,7 @@ export const projectionFixture: ProjectionHealthResource = {
   byStatus: { ready: 4, syncing: 1, failed: 1 },
   resources: [
     { resource: 'messages', instanceId: 'inst_01HZX', syncStatus: 'ready', pendingEvents: 0, deadLetterEvents: 0, eventLagSeconds: 1 },
-    { resource: 'chats', instanceId: 'inst_01HZX', syncStatus: 'ready', pendingEvents: 3, deadLetterEvents: 0, eventLagSeconds: 2 },
+    { resource: 'conversations', instanceId: 'inst_01HZX', syncStatus: 'ready', pendingEvents: 3, deadLetterEvents: 0, eventLagSeconds: 2 },
     { resource: 'groups', instanceId: 'inst_02KQP', syncStatus: 'syncing', pendingEvents: 142, deadLetterEvents: 0, eventLagSeconds: 38 },
     { resource: 'contacts', instanceId: 'inst_02KQP', syncStatus: 'ready', pendingEvents: 0, deadLetterEvents: 0, eventLagSeconds: 0 },
     { resource: 'events', instanceId: 'inst_07TMR', syncStatus: 'failed', pendingEvents: 12, deadLetterEvents: 4, eventLagSeconds: 611 },
@@ -46,7 +46,7 @@ export const instancesFixture: InstanceResource[] = [
 
 export const failuresFixture: ProjectionFailure[] = [
   { instanceId: 'inst_07TMR3B9', resource: 'events', eventKey: 'evt_9f21c7a4', eventType: 'message.received', failureClass: 'deserialize_error', lastErrorCode: 'schema_mismatch', retryCount: 5, maxAttempts: 5, occurredAt: ago(900), lastAttemptAt: ago(120), deadLetteredAt: ago(90) },
-  { instanceId: 'inst_02KQP7M4', resource: 'chats', eventKey: 'evt_4b0e1d92', eventType: 'chat.updated', failureClass: 'constraint_violation', lastErrorCode: 'fk_missing', retryCount: 3, maxAttempts: 5, occurredAt: ago(3600), lastAttemptAt: ago(1800), deadLetteredAt: ago(1700) },
+  { instanceId: 'inst_02KQP7M4', resource: 'conversations', eventKey: 'evt_4b0e1d92', eventType: 'conversation.updated', failureClass: 'constraint_violation', lastErrorCode: 'fk_missing', retryCount: 3, maxAttempts: 5, occurredAt: ago(3600), lastAttemptAt: ago(1800), deadLetteredAt: ago(1700) },
   { instanceId: 'inst_02KQP7M4', resource: 'groups', eventKey: 'evt_77aa02fe', eventType: 'group.member.added', failureClass: 'timeout', lastErrorCode: 'downstream_timeout', retryCount: 5, maxAttempts: 5, occurredAt: ago(7200), lastAttemptAt: ago(600), deadLetteredAt: ago(540) },
 ] as unknown as ProjectionFailure[];
 
@@ -144,7 +144,7 @@ export const campaignDetailFixture = {
 };
 
 export const eventsFixture: EventResource[] = [
-  { id: 'evt_01HZX9', type: 'message.received', occurredAt: ago(60), ingestedAt: ago(59), summary: { chatId: '15551230001@s.whatsapp.net', direction: 'incoming', messageType: 'text' } },
+  { id: 'evt_01HZX9', type: 'message.received', occurredAt: ago(60), ingestedAt: ago(59), summary: { conversationId: previewConversationId, direction: 'incoming', messageType: 'text' } },
   { id: 'evt_02KQP7', type: 'instance.connected', occurredAt: ago(300), ingestedAt: ago(300), summary: { instanceId: 'inst_01HZX', connected: true } },
   { id: 'evt_03TMR3', type: 'campaign.transition', occurredAt: ago(900), ingestedAt: ago(899), summary: { campaignId: 'cmp_01HB', fromStatus: 'scheduled', toStatus: 'running' } },
   { id: 'evt_04WLK1', type: 'message.status', occurredAt: ago(1200), ingestedAt: ago(1200), summary: { messageId: 'msg_2', status: 'delivered' } },
