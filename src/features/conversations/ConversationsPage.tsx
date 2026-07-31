@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { ProjectionFailureNotice as FailureNotice, ProjectionStatus, ProjectionStatusGroup } from '@/components/ProjectionReadState';
+import { projectionAttentionLabel, ProjectionAttentionStatus, ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
 import { Button, CountBadge, CursorPagination, Dialog, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
 import { composerNavigationBlock, IDLE_COMPOSER_STATE, resolveComposerBlocker, shouldBlockConversationNavigation, type ComposerInteractionState, type ComposerNavigationBlock } from './composer-state';
@@ -118,6 +118,8 @@ function ConversationWorkspace() {
   const emptyDirectory = Boolean(viewSupported && conversations.data && currentAuthoritative && filteredConversations.length === 0);
   const inspectedMessageId = route.message && selectedConversation && messagesSupported ? route.message : undefined;
   const pageTitle = <span className="inline-flex items-center gap-2">Conversations{typeof conversations.data?.resource.total === 'number' ? <CountBadge count={conversations.data.resource.total} /> : null}</span>;
+  const selectedProjectionEntries = [{ label: 'Conversation', meta: conversation.data?.meta }, { label: 'Messages', meta: messages.data?.meta }];
+  const selectedProjectionAttention = projectionAttentionLabel(selectedProjectionEntries);
 
   return (
     <>
@@ -127,7 +129,7 @@ function ConversationWorkspace() {
         description="Review projected history and submit outbound messages."
         secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
         compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : pageTitle}
-        compactDescription={hasConversation ? (selectedConversation ? `${humanizeToken(selectedConversation.type)} · Last activity ${selectedConversation.lastActivityAt ? relativeTime(selectedConversation.lastActivityAt) : 'unreported'}` : 'Message timeline') : undefined}
+        compactDescription={hasConversation ? (selectedConversation ? `${humanizeToken(selectedConversation.type)} · ${selectedProjectionAttention ?? `Last activity ${selectedConversation.lastActivityAt ? relativeTime(selectedConversation.lastActivityAt) : 'unreported'}`}` : 'Message timeline') : undefined}
         compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
         compactActions={hasConversation && selectedConversation
           ? <><Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button><Button onClick={openConversationDetails}>Details</Button></>
@@ -187,7 +189,7 @@ function ConversationWorkspace() {
         ) : undefined}
         detail={
           <>
-            {selectedConversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={selectedConversation} onDetails={openConversationDetails} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description={activeConversationRef ? 'Reading projected Conversation' : 'Select a projected Conversation to inspect its history'} />}
+            {selectedConversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={selectedConversation} projectionAttention={<ProjectionAttentionStatus entries={selectedProjectionEntries} />} onDetails={openConversationDetails} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description={activeConversationRef ? 'Reading projected Conversation' : 'Select a projected Conversation to inspect its history'} />}
             {!activeConversationRef ? (
               <div className="p-4"><StateNotice kind="empty" title="No conversation selected" detail="Select a conversation from the projected directory." /></div>
             ) : !conversationsSupported ? (
@@ -199,7 +201,6 @@ function ConversationWorkspace() {
             ) : selectedConversation ? (
               <div className="flex min-h-full flex-col">
                 {conversation.error ? <div className="px-4 pt-3"><FailureNotice error={conversation.error} stale onRetry={() => conversation.refetch()} /></div> : null}
-                <div className="px-4"><ProjectionStatusGroup entries={[{ label: 'Conversation', meta: conversation.data?.meta }, { label: 'Messages', meta: messages.data?.meta }]} /></div>
                 {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>
                 ) : messages.isPending ? (
@@ -220,12 +221,6 @@ function ConversationWorkspace() {
                       anchorToEnd={!route.messageCursor}
                     />
                     {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No projected messages" detail="The ready Message projection returned no messages for this Conversation." /></div> : null}
-                    <ConversationMessagePagination
-                      itemCount={loadedMessages.length}
-                      cursor={route.messageCursor}
-                      nextCursor={messages.data.resource.pagination.nextCursor ?? undefined}
-                      onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))}
-                    />
                   </>
                 ) : null}
               </div>
@@ -234,16 +229,24 @@ function ConversationWorkspace() {
             )}
           </>
         }
-        detailFooter={selectedConversation ? <Composer
-          key={selectedConversation.conversationId}
-          conversationId={selectedConversation.conversationId}
-          addressingJid={sendRecipient ?? ''}
-          conversationName={selectedConversation.displayName ?? `Unknown ${selectedConversation.type} conversation`}
-          enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
-          mediaEnabled={conversationMedia}
-          unavailableDetail={recipientUnavailableDetail}
-          onInteractionStateChange={setComposerState}
-        /> : undefined}
+        detailFooter={selectedConversation ? <>
+          {messages.data ? <ConversationMessagePagination
+            itemCount={loadedMessages.length}
+            cursor={route.messageCursor}
+            nextCursor={messages.data.resource.pagination.nextCursor ?? undefined}
+            onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))}
+          /> : null}
+          <Composer
+            key={selectedConversation.conversationId}
+            conversationId={selectedConversation.conversationId}
+            addressingJid={sendRecipient ?? ''}
+            conversationName={selectedConversation.displayName ?? `Unknown ${selectedConversation.type} conversation`}
+            enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
+            mediaEnabled={conversationMedia}
+            unavailableDetail={recipientUnavailableDetail}
+            onInteractionStateChange={setComposerState}
+          />
+        </> : undefined}
           />
         </ResponsiveInspector>
       </WorkspacePageFrame>

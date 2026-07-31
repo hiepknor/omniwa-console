@@ -80,6 +80,7 @@ describe('ConversationMessagePagination', () => {
     expect(html).toContain('class="mt-auto"');
     expect(html).toContain('Showing one bounded message page.');
     expect(html).toContain('Older messages');
+    expect(html).toContain('max-sm:sr-only');
   });
 
   it('is hidden for a fresh empty history', () => {
@@ -127,6 +128,15 @@ describe('MessageTimeline', () => {
     expect(html).toContain('aria-label="Incoming group message from unidentified participant: Text content not reported Status: Unreported. Time:');
     expect(html).toContain('role="separator" aria-label=');
     expect(html.match(/role="separator"/g)).toHaveLength(2);
+  });
+
+  it('bottom-aligns a short newest page without changing older-page alignment', () => {
+    const newest = renderToStaticMarkup(<MessageTimeline items={[message({})]} onSelect={() => {}} anchorToEnd />);
+    const older = renderToStaticMarkup(<MessageTimeline items={[message({})]} onSelect={() => {}} />);
+
+    expect(newest).toContain('grid w-full gap-3 p-4 mt-auto');
+    expect(older).toContain('grid w-full gap-3 p-4"');
+    expect(older).not.toContain('grid w-full gap-3 p-4 mt-auto');
   });
 
   it('keeps following new messages bounded to operators already near the end', () => {

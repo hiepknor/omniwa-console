@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { ProjectionStatusGroup } from './ProjectionReadState';
+import { projectionAttentionLabel, ProjectionAttentionStatus, ProjectionStatusGroup } from './ProjectionReadState';
 
 describe('ProjectionStatusGroup', () => {
   it('combines only the fully ready happy state while retaining exact scope', () => {
@@ -16,5 +16,15 @@ describe('ProjectionStatusGroup', () => {
     expect(html).toContain('Conversation projection ready');
     expect(html).toContain('Messages projection stale');
     expect(html).not.toContain('Conversation + Messages ready');
+  });
+
+  it('keeps healthy header status quiet while preserving degraded scope labels', () => {
+    const readyEntries = [{ label: 'Conversation', meta: { syncStatus: 'ready' as const } }, { label: 'Messages', meta: { syncStatus: 'ready' as const } }];
+    const staleEntries = [{ label: 'Conversation', meta: { syncStatus: 'ready' as const } }, { label: 'Messages', meta: { syncStatus: 'stale' as const } }];
+
+    expect(renderToStaticMarkup(<ProjectionAttentionStatus entries={readyEntries} />)).toBe('');
+    expect(projectionAttentionLabel(readyEntries)).toBeUndefined();
+    expect(renderToStaticMarkup(<ProjectionAttentionStatus entries={staleEntries} />)).toContain('Messages stale');
+    expect(projectionAttentionLabel(staleEntries)).toBe('Messages stale');
   });
 });

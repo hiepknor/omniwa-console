@@ -598,10 +598,9 @@ export function UiGallery() {
                 detail={
                   <>
                     <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Individual · Last activity 2m ago" actions={<Button className="@min-[1560px]/responsive-inspector:hidden" onClick={() => setConversationDetailsOpen(true)}>Details</Button>} />
-                    <CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." onCursor={() => {}} />
                   </>
                 }
-                detailFooter={<ComposerUnavailable detail="No authoritative command target is available." />}
+                detailFooter={<><CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." compactOnSmall onCursor={() => {}} /><ComposerUnavailable detail="No authoritative command target is available." /></>}
                 />
               </ResponsiveInspector>
             </WorkspacePageFrame>

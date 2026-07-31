@@ -236,8 +236,15 @@ resource models, or rendered diagnostics.
   at their beginning, and a newer authoritative timestamp follows only
   while the operator is already near the end. Backfilled history never moves the
   viewport. Otherwise a compact `Latest messages` action appears
-  without moving the explicit detail scroller. Conversation and Messages projection health combines
-  only when both scopes are ready; all non-ready scopes remain separate.
+  without moving the explicit detail scroller. Healthy Conversation and Messages
+  projection status stays quiet; degraded or pending scope remains explicit and
+  separate in the selected Conversation header. Compact layouts prioritize that
+  attention label in the header subtitle. Bounded-page pagination stays in the
+  fixed detail footer immediately above Composer instead of moving with the
+  timeline, and remains absent for a fresh empty history. At mobile width its
+  informational sentence remains accessible but visually hides so the cursor
+  actions stay in one compact row. A short newest page aligns its message lane
+  to the bottom; older cursor pages remain top-aligned.
   The page header owns the authoritative Conversation total and the single
   Refresh action; the directory begins with its sticky filter and does not repeat
   a list header. The selected Conversation header keeps display identity, type,

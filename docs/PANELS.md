@@ -299,8 +299,9 @@ and appended messages follow only while the operator remains near the end.
 Missing text is reported as missing rather than rendered as a type token. Group
 participants remain unidentified in the timeline until the public projection
 publishes authoritative participant display identity; Console never derives it
-from JID or Contact matching. Conversation and Messages ready states may share
-one scoped status row, but differing/non-ready states remain separate. Send acknowledgement only
+from JID or Contact matching. Healthy Conversation and Messages projection
+status stays quiet, while differing/non-ready states remain explicit and
+separate in the selected Conversation header. Send acknowledgement only
 confirms the action response; projected status and per-recipient receipts
 remain authoritative for delivery.
 
@@ -347,7 +348,12 @@ including when its first data arrives after the route transition. A same-page
 authoritative newest timestamp moving forward follows only when the
 operator is already near the end; projection backfill never moves the viewport.
 Otherwise `Latest messages` appears without interrupting history review. Older
-cursor pages start at the beginning and never claim accumulated history.
+cursor pages start at the beginning and never claim accumulated history. The
+bounded-page paginator stays in the fixed detail footer immediately above
+Composer and remains absent for a fresh empty history. At mobile width its
+informational sentence remains accessible but visually hides so both cursor
+actions stay in one compact row. A short newest page aligns its message lane to
+the bottom; older cursor pages remain top-aligned.
 
 Implemented commands owned by the workspace:
 

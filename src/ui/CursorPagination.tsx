@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Button } from './Button';
+import { cn } from './cn';
 
 /** Cursor pager: freshness/shown text on the left, First-page + Load-more on the right. */
 export function CursorPagination({
@@ -9,6 +10,7 @@ export function CursorPagination({
   resetLabel = 'First page',
   nextLabel = 'Load more',
   info,
+  compactOnSmall = false,
 }: {
   cursor?: string;
   nextCursor?: string;
@@ -16,12 +18,13 @@ export function CursorPagination({
   resetLabel?: string;
   nextLabel?: string;
   info?: ReactNode;
+  compactOnSmall?: boolean;
 }) {
   if (!cursor && !nextCursor && !info) return null;
   return (
-    <div className="flex items-center justify-between gap-3 p-3 border-t border-line max-sm:flex-col max-sm:items-stretch">
-      <div className="text-xs text-fg-3">{info}</div>
-      <div className="flex gap-2 max-sm:grid max-sm:grid-cols-2">
+    <div className={cn('flex items-center justify-between gap-3 p-3 border-t border-line', compactOnSmall ? 'max-sm:flex-row' : 'max-sm:flex-col max-sm:items-stretch')}>
+      <div className={cn('text-xs text-fg-3', compactOnSmall && 'max-sm:sr-only')}>{info}</div>
+      <div className={cn('flex gap-2 max-sm:grid max-sm:grid-cols-2', compactOnSmall && 'max-sm:flex-1')}>
         <Button disabled={!cursor} onClick={() => onCursor(undefined)}>{resetLabel}</Button>
         <Button disabled={!nextCursor} onClick={() => onCursor(nextCursor)}>{nextLabel}</Button>
       </div>

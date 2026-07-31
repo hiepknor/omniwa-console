@@ -12,8 +12,9 @@ export function ConversationUnreadCount({ count, authoritative }: { count: numbe
   return <CountBadge count={count} aria-label={label} title={label} />;
 }
 
-export function SelectedConversationHeader({ conversation, onDetails, className }: {
+export function SelectedConversationHeader({ conversation, projectionAttention, onDetails, className }: {
   conversation: ConversationResource;
+  projectionAttention?: ReactNode;
   onDetails: () => void;
   className?: string;
 }) {
@@ -24,7 +25,7 @@ export function SelectedConversationHeader({ conversation, onDetails, className 
       className={className}
       title={name}
       description={`${humanizeToken(conversation.type)} · Last activity ${activity}`}
-      actions={<Button className="@min-[1560px]/responsive-inspector:hidden" onClick={onDetails}>Details</Button>}
+      actions={<>{projectionAttention}<Button className="@min-[1560px]/responsive-inspector:hidden" onClick={onDetails}>Details</Button></>}
     />
   );
 }
@@ -81,6 +82,7 @@ export function ConversationMessagePagination({ itemCount, cursor, nextCursor, o
         resetLabel="Newest"
         nextLabel="Older messages"
         info="Showing one bounded message page."
+        compactOnSmall
         onCursor={onCursor}
       />
     </div>
@@ -177,7 +179,7 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
 
   return (
     <>
-      <ol ref={timelineRef} className="grid w-full gap-3 p-4" aria-label="Projected message history">
+      <ol ref={timelineRef} className={cn('grid w-full gap-3 p-4', anchorToEnd && 'mt-auto')} aria-label="Projected message history">
       {items.map((item, index) => {
         const outgoing = item.direction === 'outgoing';
         const failed = item.status === 'failed';

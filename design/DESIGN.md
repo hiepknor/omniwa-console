@@ -276,10 +276,17 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   remain inspector-only. Opening a newest cursor page anchors its scroll
   container to the end, including when its first data arrives after the route
   transition; older cursor pages start at their beginning. New items
-  follow only while the operator remains near the end. Only an authoritative
+  follow only while the operator remains near the end. Healthy Conversation and
+  Messages projection status stays quiet; degraded or pending scope moves into
+  the selected Conversation header. Only an authoritative
   newest timestamp moving forward counts as an append; projection backfill does
   not move the viewport. While the operator reads earlier history, appended items expose a compact `Latest messages` action
   instead of moving the explicit detail scroller, so review is never interrupted.
+  Bounded-page pagination is a fixed detail footer immediately above Composer;
+  it never overlays messages and remains absent for a fresh empty history. At
+  mobile width its informational sentence stays accessible but visually hides,
+  keeping both cursor actions in one compact row. A short newest page aligns its
+  message lane to the bottom; older cursor pages remain top-aligned.
 - **Conversation details and send availability** — the selected Conversation
   header keeps display identity, type, last activity, and a visible `Details`
   action when the inspector is not docked. The page header owns the single
@@ -353,9 +360,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   timeline, disappears for a fresh ready history with no projected messages, and
   remains available on a cursor-addressed empty page so `Newest` can recover the
   operator to the current history.
-  Conversation and Messages projection health share one scoped happy-state row
-  only when both are ready. Any differing, syncing, stale, not-ready, or failed
-  state remains a separately labelled status; consolidation never hides degraded
+  Healthy Conversation and Messages projection status stays quiet. Any
+  differing, syncing, stale, not-ready, or failed state remains separately
+  labelled in the selected Conversation header; quiet success never hides degraded
   observability.
 - **ProgressBar** — an 8px square framed track with an ink fill and explicit
   text label. Determinate progress exposes its bounded numeric value;

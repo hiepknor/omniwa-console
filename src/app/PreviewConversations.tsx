@@ -67,11 +67,10 @@ export function PreviewConversations() {
               if (message.mediaAssetId === 'asset_expired') return <ConversationMediaPlaceholder enabled compact label="Image unavailable" tone="failed" detail="Media asset expired" />;
               return <ConversationMediaPlaceholder enabled={false} compact label="Image unavailable" tone="neutral" detail="Managed image content was not reported." />;
             }} />
-            <ConversationMessagePagination itemCount={messagesFixture.length} nextCursor="preview-older" onCursor={() => {}} />
           </div> : null}
           </>
         }
-        detailFooter={conversation ? <ApiProvider session={{ baseUrl: 'http://127.0.0.1:1', apiKey: 'preview-only', keyKind: 'api', connectedAt: new Date().toISOString() }}><Composer key={conversation.conversationId} conversationId={conversation.conversationId} addressingJid={conversation.addressingJid ?? ''} conversationName={conversation.displayName ?? 'Unknown conversation'} enabled mediaEnabled /></ApiProvider> : undefined}
+        detailFooter={conversation ? <><ConversationMessagePagination itemCount={messagesFixture.length} nextCursor="preview-older" onCursor={() => {}} /><ApiProvider session={{ baseUrl: 'http://127.0.0.1:1', apiKey: 'preview-only', keyKind: 'api', connectedAt: new Date().toISOString() }}><Composer key={conversation.conversationId} conversationId={conversation.conversationId} addressingJid={conversation.addressingJid ?? ''} conversationName={conversation.displayName ?? 'Unknown conversation'} enabled mediaEnabled /></ApiProvider></> : undefined}
           />
         </ResponsiveInspector>
         </WorkspacePageFrame>
