@@ -299,8 +299,10 @@ and appended messages follow only while the operator remains near the end.
 Missing text is reported as missing rather than rendered as a type token. Group
 participants remain unidentified in the timeline until the public projection
 publishes authoritative participant display identity; Console never derives it
-from JID or Contact matching. Healthy Conversation and Messages projection
-status stays quiet, while differing/non-ready states remain explicit and
+from JID or Contact matching. Message controls derive accessible names from
+their visible content, media state, direction, status, and time; custom labels
+never hide visible operational copy. Healthy Conversation and Messages
+projection status stays quiet, while differing/non-ready states remain explicit and
 separate in the selected Conversation header. Send acknowledgement only
 confirms the action response; projected status and per-recipient receipts
 remain authoritative for delivery.

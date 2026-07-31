@@ -280,10 +280,11 @@ if (conversationsPage.includes('<WorkspacePaneHeader\n                  title={<
 }
 
 const conversationsView = await read('src/features/conversations/ConversationsView.tsx');
-for (const marker of ['ConversationUnreadCount', 'authoritative: boolean', 'if (!authoritative)', 'Unread syncing', 'if (count === 0) return null', '<CountBadge count={count}', 'aria-label={label}', 'SelectedConversationHeader', 'Last activity ${activity}', 'ConversationMessagePagination', 'className="mt-auto"', 'resetLabel="Newest"', 'nextLabel="Older messages"', 'compactOnSmall', "anchorToEnd && 'mt-auto'", 'max-w-[min(78%,42rem)]', 'calendarDayLabel', 'Text content not reported', 'Participant not identified', 'isNearScrollEnd', 'appendedMessageScrollAction', 'shouldAnchorInitialMessagePage', 'initialLatestPending', 'previousNewestAt', 'nextNewestAt <= previousNewestAt', 'scrollContainerRef', 'Latest messages', 'anchorToEnd']) {
+for (const marker of ['ConversationUnreadCount', 'authoritative: boolean', 'if (!authoritative)', 'Unread syncing', 'if (count === 0) return null', '<CountBadge count={count}', 'aria-label={label}', 'SelectedConversationHeader', 'Last activity ${activity}', 'ConversationMessagePagination', 'className="mt-auto"', 'resetLabel="Newest"', 'nextLabel="Older messages"', 'compactOnSmall', "anchorToEnd && 'mt-auto'", 'max-w-[min(78%,42rem)]', 'calendarDayLabel', 'Text content not reported', 'Participant not identified', '<span className="sr-only">Message: </span>', 'isNearScrollEnd', 'appendedMessageScrollAction', 'shouldAnchorInitialMessagePage', 'initialLatestPending', 'previousNewestAt', 'nextNewestAt <= previousNewestAt', 'scrollContainerRef', 'Latest messages', 'anchorToEnd']) {
   if (!conversationsView.includes(marker)) failures.push(`src/features/conversations/ConversationsView.tsx: Conversation view contract is missing ${marker}`);
 }
 if (conversationsView.includes('Refreshing…')) failures.push('src/features/conversations/ConversationsView.tsx: selected Conversation header must not own page Refresh');
+if (conversationsView.includes('aria-label={`${directionLabel}')) failures.push('src/features/conversations/ConversationsView.tsx: message controls must not replace visible content with a divergent custom accessible name');
 
 const conversationComposerState = await read('src/features/conversations/composer-state.ts');
 for (const marker of ['resolveComposerBlocker', "blockerState !== 'blocked'", "{ action: 'show', reason }", "{ action: 'reset' }"]) {

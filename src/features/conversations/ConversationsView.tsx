@@ -185,8 +185,6 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
         const failed = item.status === 'failed';
         const content = projectedMessageContent(item);
         const hasMedia = Boolean(item.mediaAssetId || item.mediaType === 'image');
-        const reportedContent = item.contentText ?? item.caption ?? item.contentSummary;
-        const accessibleContent = reportedContent ?? (hasMedia ? `${humanizeToken(item.type)} attachment` : content);
         const showDay = index === 0 || calendarDayKey(items[index - 1]?.createdAt) !== calendarDayKey(item.createdAt);
         const directionLabel = humanizeToken(item.direction);
         const statusLabel = item.status ? humanizeToken(item.status) : 'Unreported';
@@ -203,7 +201,6 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
             <div className={cn('flex', outgoing ? 'justify-end' : item.direction === 'incoming' ? 'justify-start' : 'justify-center')}>
               <button
                 type="button"
-                aria-label={`${directionLabel}${unidentifiedGroupParticipant ? ' group' : ''} message${unidentifiedGroupParticipant ? ' from unidentified participant' : ''}: ${accessibleContent} Status: ${statusLabel}. Time: ${relativeTime(item.createdAt) || item.createdAt}`}
                 onClick={() => onSelect(item.id)}
                 className={cn(
                   'grid w-fit max-w-[min(78%,42rem)] gap-1.5 border p-3 text-left',
@@ -212,6 +209,7 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
                   failed && 'border-l-2 border-l-fg-3',
                 )}
               >
+                <span className="sr-only">Message: </span>
                 {unidentifiedGroupParticipant ? <small className="text-[11px] text-fg-3">Participant not identified</small> : null}
                 {hasMedia ? renderMedia?.(item) : null}
                 {!hasMedia || item.contentText || item.caption || item.contentSummary ? <span className="break-words text-[13px]">{content}</span> : null}
