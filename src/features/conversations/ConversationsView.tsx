@@ -2,7 +2,7 @@ import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { calendarDayKey, calendarDayLabel, humanizeToken, relativeTime } from '@/lib/format';
-import { CountBadge, Status } from '@/ui';
+import { CountBadge, CursorPagination, Status } from '@/ui';
 import { cn } from '@/ui/cn';
 
 export function ConversationUnreadCount({ count, authoritative, context }: { count: number; authoritative: boolean; context: 'directory' | 'detail' }) {
@@ -19,9 +19,10 @@ export function ConversationUnreadCount({ count, authoritative, context }: { cou
 
 function ResourceButton({ selected, onClick, primary, secondary, trailing }: { selected?: boolean; onClick: () => void; primary: string; secondary: string; trailing: React.ReactNode }) {
   return (
-    <li className={cn('border-b border-line last:border-b-0', selected && 'bg-elevated')}>
+    <li className={cn('border-b border-b-line border-l-2 last:border-b-0', selected ? 'border-l-line-strong bg-elevated' : 'border-l-transparent')}>
       <button
         type="button"
+        aria-current={selected ? 'page' : undefined}
         onClick={onClick}
         className="flex w-full items-center justify-between gap-3 min-h-[64px] px-3 text-left hover:bg-elevated"
       >
@@ -49,6 +50,28 @@ export function ConversationList({ items, selectedId, onSelect }: { items: Conve
         />
       ))}
     </ul>
+  );
+}
+
+export function ConversationMessagePagination({ itemCount, cursor, nextCursor, onCursor }: {
+  itemCount: number;
+  cursor?: string;
+  nextCursor?: string;
+  onCursor: (cursor?: string) => void;
+}) {
+  if (itemCount === 0 && !cursor && !nextCursor) return null;
+
+  return (
+    <div className="mt-auto">
+      <CursorPagination
+        cursor={cursor}
+        nextCursor={nextCursor}
+        resetLabel="Newest"
+        nextLabel="Older messages"
+        info="Showing one bounded message page."
+        onCursor={onCursor}
+      />
+    </div>
   );
 }
 

@@ -338,7 +338,10 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   Ordinary directories retain `First page` / `Load more`. A bounded Conversation
   history page overrides those labels with `Newest` / `Older messages` and says
   that one page is shown, because moving an opaque cursor replaces rather than
-  appends the rendered history.
+  appends the rendered history. The history pager stays at the bottom of a short
+  timeline, disappears for a fresh ready history with no projected messages, and
+  remains available on a cursor-addressed empty page so `Newest` can recover the
+  operator to the current history.
   Conversation and Messages projection health share one scoped happy-state row
   only when both are ready. Any differing, syncing, stale, not-ready, or failed
   state remains a separately labelled status; consolidation never hides degraded
