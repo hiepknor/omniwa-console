@@ -11,7 +11,7 @@ export type OverviewResource = {
   scope: { type: 'server' | 'instance' | 'unknown'; instanceId?: string };
   window: { start?: string; end?: string; durationSeconds?: number };
   instances: { total?: number; connected?: number; disconnected?: number };
-  projections: { groups?: number; contacts?: number; chats?: number; messages?: number; events?: number };
+  projections: { groups?: number; contacts?: number; conversations?: number; messages?: number; events?: number };
   messages: { total?: number; incoming?: number; outgoing?: number };
 };
 
@@ -107,7 +107,9 @@ export async function getOverview(client: ApiClient, window = '24h'): Promise<Ov
     projections: {
       groups: optionalCount(payload?.projections?.groups),
       contacts: optionalCount(payload?.projections?.contacts),
-      chats: optionalCount(payload?.projections?.chats),
+      // The backend wire contract still calls this aggregate `chats`. Keep that
+      // compatibility spelling contained at the API boundary.
+      conversations: optionalCount(payload?.projections?.chats),
       messages: optionalCount(payload?.projections?.messages),
       events: optionalCount(payload?.projections?.events),
     },

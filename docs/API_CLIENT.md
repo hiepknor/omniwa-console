@@ -209,6 +209,11 @@ Resource adapters stay split by backend domain. Conversation projection DTOs liv
 add action stubs, or infer fields such as chat-label associations that OmniWA GO
 does not expose.
 
+Overview is the deliberate compatibility exception: its current wire DTO still
+publishes `projections.chats`. `src/api/overview.ts` contains that historical field
+and exposes `projections.conversations` to product code. Generated contract
+types remain unchanged until the backend publishes a canonical replacement.
+
 ## Mutation semantics
 
 Current OmniWA GO mutation responses are synchronous at the HTTP boundary. A

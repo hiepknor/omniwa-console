@@ -49,7 +49,9 @@ jobs:
             sleep 1
           done
           test "$(curl --silent "http://127.0.0.1:$host_port/healthz")" = ok
-          for route in /connect /overview /instances /recovery /chats /groups /messages /events; do
+          # Nginx's SPA fallback proves static asset delivery only. The React
+          # route-manifest tests remain authoritative for application routing.
+          for route in /connect /overview /instances /recovery /conversations /conversations/example-conversation /directory/contacts /directory/labels /groups /campaigns /events; do
             curl --silent --fail "http://127.0.0.1:$host_port$route" | grep -F '<div id="root"></div>'
           done
           entrypoint="$(curl --silent --fail "http://127.0.0.1:$host_port/" | sed -n 's/.*src="\([^"]*\.js\)".*/\1/p')"

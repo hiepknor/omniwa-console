@@ -56,7 +56,6 @@ Known capabilities:
 - `groups_projection`
 - `labels_projection`
 - `contacts_projection`
-- `chats_projection`
 - `messages_projection`
 - `events_projection`
 - `outbound_rate_limit`
@@ -216,9 +215,9 @@ absent name renders as unknown rather than exposing a phone/JID-derived label.
 
 Message pagination uses keyset cursors. New messages do not shift pages already
 read. Successful sends write through to the projection. Default message
-retention is 90 days (`2160h`). Timestamp display uses `providerTimestamp`, then
-`sentAt`, then `deliveredAt`; it never invents a timestamp. Media binary is not
-persisted in message projections.
+retention is 90 days (`2160h`). Every projected Message requires its authoritative
+`providerTimestamp`; lifecycle timestamps do not substitute for it. Media binary
+is not persisted in message projections.
 
 `canonical_conversation_identity` is the sole gate for Conversation reads.
 `conversationId` is the backend-owned entity, route, and cache identity for every
@@ -284,6 +283,11 @@ Overview is computed only from persisted projections and accepts a window up to
 rate-limit/circuit-breaker states. The runtime also exposes an undocumented
 `GET /server/ok`; it is liveness only, is not part of the vendored contract, and
 must not be consumed to infer WhatsApp connection status.
+
+The Overview wire DTO still publishes the historical aggregate field
+`projections.chats`. The Console adapts that field once at `src/api/overview.ts`
+and exposes only `projections.conversations` to product-facing code. This does
+not add a field to the generated schema or change the public backend contract.
 
 ## Errors and rate limits
 

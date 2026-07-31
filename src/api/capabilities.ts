@@ -18,7 +18,6 @@ export const capabilityNames = [
   'canonical_contact_identity',
   'canonical_conversation_identity',
   'authoritative_conversation_unread',
-  'chats_projection',
   'messages_projection',
   'conversation_media_assets',
   'events_projection',

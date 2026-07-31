@@ -1,7 +1,7 @@
 import { cn } from './cn';
 
 /**
- * OmniWA logomark (chat bubble + activity pulse) as a square ink tile with a
+ * OmniWA logomark (conversation bubble + activity pulse) as a square ink tile with a
  * paper-white glyph — the brand mark rendered in the manga theme.
  * Glyph paths mirror design/logo.svg.
  */

@@ -1,12 +1,12 @@
 import type { ApiClient } from './client';
-import { ApiFailure, unwrapCommand, unwrapProjection, type CommandResult, type ProjectionMeta } from './envelopes';
+import { invalidResponse, unwrapCommand, unwrapProjection, type CommandResult, type ProjectionMeta } from './envelopes';
 import type { components as backendComponents } from './generated/schema';
 
-type MessagePayload = backendComponents['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage'];
 type ReceiptPayload = backendComponents['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedMessageReceipt'];
+type MessagePayload = backendComponents['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectedConversationMessage'];
 
-export type MessageDirection = 'incoming' | 'outgoing' | 'system' | 'unknown';
-export type MessageProvenance = 'live' | 'history_sync' | 'write_through' | 'unknown';
+export type MessageDirection = MessagePayload['direction'] | 'unknown';
+export type MessageProvenance = MessagePayload['provenance'] | 'unknown';
 
 export type MessageResource = {
   resourceType: 'message';
@@ -70,46 +70,82 @@ function nonEmpty(value: string | undefined): string | undefined {
   return value?.trim() || undefined;
 }
 
-function direction(value: string | undefined): MessageDirection {
+function recordOf(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' ? nonEmpty(value) : undefined;
+}
+
+function optionalNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function isCanonicalConversationId(value: string | undefined): value is string {
+  return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value));
+}
+
+function isTimestamp(value: string | undefined): value is string {
+  return Boolean(value && !Number.isNaN(Date.parse(value)));
+}
+
+function direction(value: unknown): MessageDirection {
   return value === 'incoming' || value === 'outgoing' || value === 'system' ? value : 'unknown';
 }
 
-function provenance(value: string | undefined): MessageProvenance {
+function provenance(value: unknown): MessageProvenance {
   return value === 'live' || value === 'history_sync' || value === 'write_through' ? value : 'unknown';
 }
 
-function toMessage(payload: MessagePayload, fallbackId = ''): MessageResource {
+function toMessage(value: unknown, fail: (message: string) => never): MessageResource {
+  const payload = recordOf(value);
+  if (!payload) fail('Message response contained a row that was not an object.');
+
+  const messageId = optionalString(payload.messageId);
+  if (!messageId) fail('Message response did not include its required messageId.');
+  const conversationId = optionalString(payload.conversationId);
+  if (!isCanonicalConversationId(conversationId)) {
+    fail(`Message ${messageId} did not include a valid canonical conversationId.`);
+  }
+  const providerTimestamp = optionalString(payload.providerTimestamp);
+  if (!isTimestamp(providerTimestamp)) {
+    fail(`Message ${messageId} did not include a valid authoritative providerTimestamp.`);
+  }
+
   return {
     resourceType: 'message',
-    id: nonEmpty(payload.messageId) ?? fallbackId,
-    conversationId: nonEmpty(payload.conversationId) ?? '',
-    providerChatId: nonEmpty(payload.providerChatId),
-    senderJid: nonEmpty(payload.senderJid),
-    recipientJid: nonEmpty(payload.recipientJid),
-    participantJid: nonEmpty(payload.participantJid),
+    id: messageId,
+    conversationId,
+    providerChatId: optionalString(payload.providerChatId),
+    senderJid: optionalString(payload.senderJid),
+    recipientJid: optionalString(payload.recipientJid),
+    participantJid: optionalString(payload.participantJid),
     direction: direction(payload.direction),
-    type: nonEmpty(payload.messageType) ?? 'unknown',
-    contentText: nonEmpty(payload.contentText),
-    caption: nonEmpty(payload.caption),
-    contentSummary: nonEmpty(payload.contentSummary),
-    quotedMessageId: nonEmpty(payload.quotedMessageId),
-    mediaType: nonEmpty(payload.mediaType),
-    mediaAssetId: nonEmpty(payload.mediaAssetId),
-    mediaMimeType: nonEmpty(payload.mediaMimeType),
-    mediaFileName: nonEmpty(payload.mediaFileName),
-    mediaSize: payload.mediaSize,
-    mediaDurationSeconds: payload.mediaDurationSeconds,
-    mediaWidth: payload.mediaWidth,
-    mediaHeight: payload.mediaHeight,
-    status: nonEmpty(payload.status),
-    createdAt: nonEmpty(payload.providerTimestamp) ?? nonEmpty(payload.sentAt) ?? nonEmpty(payload.deliveredAt) ?? '',
-    sentAt: nonEmpty(payload.sentAt),
-    deliveredAt: nonEmpty(payload.deliveredAt),
-    readAt: nonEmpty(payload.readAt),
-    playedAt: nonEmpty(payload.playedAt),
+    type: optionalString(payload.messageType) ?? 'unknown',
+    contentText: optionalString(payload.contentText),
+    caption: optionalString(payload.caption),
+    contentSummary: optionalString(payload.contentSummary),
+    quotedMessageId: optionalString(payload.quotedMessageId),
+    mediaType: optionalString(payload.mediaType),
+    mediaAssetId: optionalString(payload.mediaAssetId),
+    mediaMimeType: optionalString(payload.mediaMimeType),
+    mediaFileName: optionalString(payload.mediaFileName),
+    mediaSize: optionalNumber(payload.mediaSize),
+    mediaDurationSeconds: optionalNumber(payload.mediaDurationSeconds),
+    mediaWidth: optionalNumber(payload.mediaWidth),
+    mediaHeight: optionalNumber(payload.mediaHeight),
+    status: optionalString(payload.status),
+    createdAt: providerTimestamp,
+    sentAt: optionalString(payload.sentAt),
+    deliveredAt: optionalString(payload.deliveredAt),
+    readAt: optionalString(payload.readAt),
+    playedAt: optionalString(payload.playedAt),
     provenance: provenance(payload.provenance),
-    historySyncId: nonEmpty(payload.historySyncId),
-    retentionExpiresAt: nonEmpty(payload.retentionExpiresAt),
+    historySyncId: optionalString(payload.historySyncId),
+    retentionExpiresAt: optionalString(payload.retentionExpiresAt),
   };
 }
 
@@ -118,15 +154,17 @@ export async function listMessages(
   conversationRef: string,
   params: { cursor?: string; limit?: number } = {},
 ): Promise<MessageReadResult<MessagePage>> {
-  const projection = unwrapProjection<MessagePayload[]>(await client.GET('/conversations/{conversationRef}/messages', {
+  const response = await client.GET('/conversations/{conversationRef}/messages', {
     params: { path: { conversationRef }, query: { cursor: params.cursor, limit: params.limit ?? 50 } },
-  }));
+  });
+  const projection = unwrapProjection<unknown>(response);
+  const fail = (message: string): never => { throw invalidResponse(response, message); };
+  const payloads = projection.resource;
+  if (!Array.isArray(payloads)) throw invalidResponse(response, 'Message list response data was not an array.');
   const nextCursor = projection.meta?.nextCursor ?? null;
   return {
     resource: {
-      items: (projection.resource ?? [])
-        .map((payload) => toMessage(payload))
-        .filter((message) => message.id !== '' && message.conversationId !== '' && message.createdAt !== ''),
+      items: payloads.map((payload) => toMessage(payload, fail)),
       pagination: { nextCursor, hasMore: nextCursor !== null },
     },
     meta: projection.meta,
@@ -134,13 +172,11 @@ export async function listMessages(
 }
 
 export async function getMessage(client: ApiClient, conversationRef: string, messageId: string): Promise<MessageReadResult<MessageResource>> {
-  const projection = unwrapProjection<MessagePayload>(await client.GET('/conversations/{conversationRef}/messages/{messageId}', {
+  const response = await client.GET('/conversations/{conversationRef}/messages/{messageId}', {
     params: { path: { conversationRef, messageId } },
-  }));
-  const resource = toMessage(projection.resource, messageId);
-  if (!resource.conversationId) {
-    throw new ApiFailure({ code: 'invalid_response', error: 'Message response did not include its required canonical conversationId.' }, 500);
-  }
+  });
+  const projection = unwrapProjection<unknown>(response);
+  const resource = toMessage(projection.resource, (message) => { throw invalidResponse(response, message); });
   return { resource, meta: projection.meta };
 }
 

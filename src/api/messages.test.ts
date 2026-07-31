@@ -39,16 +39,28 @@ describe('messages projection adapter', () => {
     expect(result.resource).not.toHaveProperty('chatId');
   });
 
-  it('uses safe detail defaults without exposing unknown fields', async () => {
+  it('does not use the requested ref as a fallback message identity', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { ...message, messageId: undefined, direction: 'future', provenance: 'future', SourceEventKey: 'secret' }, meta: { syncStatus: 'ready' } }));
-    const result = await getMessage({ GET } as unknown as ApiClient, message.conversationId, 'fallback-message');
-    expect(result.resource).toEqual(expect.objectContaining({ id: 'fallback-message', direction: 'unknown', provenance: 'unknown' }));
-    expect(result.resource).not.toHaveProperty('SourceEventKey');
+    await expect(getMessage({ GET } as unknown as ApiClient, message.conversationId, 'fallback-message')).rejects.toMatchObject({ code: 'invalid_response' });
   });
 
   it('fails closed when canonical message detail omits its required conversationId', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { ...message, conversationId: undefined } }));
     await expect(getMessage({ GET } as unknown as ApiClient, message.conversationId, message.messageId)).rejects.toMatchObject({ code: 'invalid_response' });
+  });
+
+  it.each([
+    ['messageId', { messageId: undefined }],
+    ['conversationId', { conversationId: undefined, providerChatId: 'provider-fallback' }],
+    ['providerTimestamp', { providerTimestamp: undefined, sentAt: '2026-07-22T08:05:00Z' }],
+  ])('fails the whole Message list when a row has an invalid required %s', async (_field, replacement) => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: [message, { ...message, ...replacement }],
+      meta: { syncStatus: 'ready' },
+    }));
+
+    await expect(listMessages({ GET } as unknown as ApiClient, message.conversationId)).rejects.toMatchObject({ code: 'invalid_response' });
   });
 
   it('normalizes ordered receipt rows and discards malformed rows', async () => {
@@ -110,11 +122,11 @@ describe('messages projection adapter', () => {
     expect(result.data).toEqual({ messageId: 'message-4', acknowledgedAt: '2026-07-22T08:04:00Z' });
   });
 
-  it('uses documented timestamp precedence without fabricating a value', async () => {
-    const GET = vi.fn()
-      .mockResolvedValueOnce(ok({ message: 'success', data: { ...message, providerTimestamp: undefined, sentAt: '2026-07-22T08:05:00Z' } }))
-      .mockResolvedValueOnce(ok({ message: 'success', data: { ...message, providerTimestamp: undefined, sentAt: undefined, deliveredAt: '2026-07-22T08:06:00Z' } }));
-    await expect(getMessage({ GET } as unknown as ApiClient, message.conversationId, 'message-1')).resolves.toMatchObject({ resource: { createdAt: '2026-07-22T08:05:00Z' } });
-    await expect(getMessage({ GET } as unknown as ApiClient, message.conversationId, 'message-1')).resolves.toMatchObject({ resource: { createdAt: '2026-07-22T08:06:00Z' } });
+  it('requires the authoritative provider timestamp instead of falling back to lifecycle timestamps', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: { ...message, providerTimestamp: undefined, sentAt: '2026-07-22T08:05:00Z', deliveredAt: '2026-07-22T08:06:00Z' },
+    }));
+    await expect(getMessage({ GET } as unknown as ApiClient, message.conversationId, 'message-1')).rejects.toMatchObject({ code: 'invalid_response' });
   });
 });

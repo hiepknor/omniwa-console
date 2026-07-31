@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ApiClient } from './client';
 import { getConversation, listConversations } from './conversations';
 
-function ok(data: unknown) {
-  return { data, response: new Response(null, { status: 200 }) };
+function ok(data: unknown, headers?: HeadersInit) {
+  return { data, response: new Response(null, { status: 200, headers }) };
 }
 
 const conversation = {
@@ -39,7 +39,7 @@ describe('canonical conversations projection adapter', () => {
       resourceType: 'conversation',
       conversationId: conversation.conversationId,
       contactId: conversation.contactId,
-      aliases: ['100@s.whatsapp.net', '123@lid'],
+      aliases: ['100@s.whatsapp.net', '123@lid', '100@s.whatsapp.net'],
       aliasesReported: true,
       addressingJid: conversation.addressingJid,
       type: 'direct',
@@ -79,12 +79,11 @@ describe('canonical conversations projection adapter', () => {
     expect(result.resource.total).toBe(2);
   });
 
-  it('deduplicates repeated aliases only by canonical conversationId and keeps non-direct identities distinct', async () => {
-    const duplicateAlias = { ...conversation, aliases: ['100@s.whatsapp.net'] };
+  it('keeps group, newsletter, and broadcast identities distinct even when provider targets match', async () => {
     const group = { ...conversation, conversationId: '71e75e2c-77a8-48f0-9fc8-99bc3e5c9694', type: 'group', addressingJid: 'shared@broadcast' };
     const newsletter = { ...conversation, conversationId: 'dc5ba585-7325-4a91-9ac7-cfab4d5c2226', type: 'newsletter', addressingJid: 'shared@broadcast' };
     const broadcast = { ...conversation, conversationId: 'f1e45f7b-e1cd-4fc3-bf70-12eeb58637e6', type: 'broadcast', addressingJid: 'shared@broadcast' };
-    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [conversation, duplicateAlias, group, newsletter, broadcast], meta: { total: 4 } }));
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [conversation, group, newsletter, broadcast], meta: { total: 4 } }));
 
     const result = await listConversations({ GET } as unknown as ApiClient);
 
@@ -96,31 +95,58 @@ describe('canonical conversations projection adapter', () => {
     ]);
   });
 
+  it('fails closed instead of hiding a duplicate canonical conversationId', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: [conversation, { ...conversation, aliases: ['another@lid'], addressingJid: 'another@lid' }],
+      meta: { total: 2 },
+    }));
+
+    await expect(listConversations({ GET } as unknown as ApiClient)).rejects.toMatchObject({
+      code: 'invalid_response',
+      message: expect.stringContaining('repeated canonical conversationId'),
+    });
+  });
+
   it('preserves a non-authoritative unread count as best-known data instead of coercing it to zero', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { ...conversation, unreadCount: 7, unreadAuthoritative: false } }));
     const result = await getConversation({ GET } as unknown as ApiClient, conversation.conversationId);
     expect(result.resource).toMatchObject({ unreadCount: 7, unreadAuthoritative: false });
   });
 
-  it('uses safe presentation defaults without exposing unknown provider fields', async () => {
+  it('fails closed when required unread data is negative instead of coercing it to zero', async () => {
     const GET = vi.fn().mockResolvedValue(ok({
       message: 'success',
       data: { ...conversation, type: 'provider-new-type', unreadCount: -2, SourceEventKey: 'secret' },
       meta: { source: 'projection', syncStatus: 'ready' },
     }));
-    const result = await getConversation({ GET } as unknown as ApiClient, conversation.conversationId);
-    expect(result.resource).toEqual(expect.objectContaining({ conversationId: conversation.conversationId, type: 'unknown', unreadCount: 0 }));
-    expect(result.resource).not.toHaveProperty('SourceEventKey');
+    await expect(getConversation({ GET } as unknown as ApiClient, conversation.conversationId)).rejects.toMatchObject({ code: 'invalid_response' });
   });
 
-  it('drops malformed list rows instead of using an alias or requested ref as identity', async () => {
-    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [{ aliases: ['fallback@lid'] }, conversation], meta: { syncStatus: 'ready' } }));
-    const result = await listConversations({ GET } as unknown as ApiClient);
-    expect(result.resource.items.map((item) => item.conversationId)).toEqual([conversation.conversationId]);
+  it('fails the whole list when a row lacks conversationId instead of dropping it or falling back', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: [{ ...conversation, conversationId: undefined, aliases: ['fallback@lid'], addressingJid: 'fallback@lid', providerChatId: 'provider-id' }, conversation],
+      meta: { syncStatus: 'ready', total: 2 },
+    }));
+    await expect(listConversations({ GET } as unknown as ApiClient)).rejects.toMatchObject({ code: 'invalid_response' });
   });
 
   it('fails closed when canonical detail omits its required conversationId', async () => {
-    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { addressingJid: '123@lid', type: 'direct', unreadCount: 0 } }));
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { ...conversation, conversationId: undefined, addressingJid: '123@lid' } }));
     await expect(getConversation({ GET } as unknown as ApiClient, '123@lid')).rejects.toMatchObject({ code: 'invalid_response' });
+  });
+
+  it('requires unreadAuthoritative and preserves the successful envelope request ID on failure', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      requestId: 'body-request-id',
+      data: { ...conversation, unreadAuthoritative: undefined },
+    }));
+
+    await expect(getConversation({ GET } as unknown as ApiClient, conversation.conversationId)).rejects.toMatchObject({
+      code: 'invalid_response',
+      requestId: 'body-request-id',
+    });
   });
 });

@@ -23,6 +23,7 @@ describe('persisted overview adapters', () => {
       window: expect.objectContaining({ durationSeconds: 86_400 }),
       instances: { total: 2, connected: 1, disconnected: 1 },
       messages: { total: 6, incoming: 4, outgoing: 2 },
+      projections: { groups: 3, contacts: 4, conversations: 5, messages: 6, events: 7 },
     }));
   });
 

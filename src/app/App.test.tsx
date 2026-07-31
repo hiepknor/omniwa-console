@@ -42,7 +42,7 @@ describe('authenticated route manifest', () => {
     ['/chats', '*'],
     ['/chats/provider-chat-id', '*'],
     ['/messages', '*'],
-    ['/messages/campaign-1', '*'],
+    ['/messages/example', '*'],
   ])('matches %s to %s', (location, expectedPath) => {
     expect(matchRoutes(authenticatedRoutes, location)?.at(-1)?.route.path).toBe(expectedPath);
   });

@@ -14,7 +14,7 @@ representative projection and mutation staging acceptance remains required.**
 | --- | --- | --- |
 | Compatibility OmniWA GO servers could not open the fleet panel even though credential-stripping adapters existed. | Capability discovery now selects metadata views when advertised and the compatibility adapter otherwise; no fleet read starts before discovery succeeds. | `fleet-readiness.test.ts`, `instances.test.ts`, credential gate |
 | Group detail disappeared when `groups_projection` temporarily vanished. | Cached detail remains visible while all provider commands are disabled until capability readiness returns. | `GroupWorkspace.test.tsx` |
-| Group sends did not refresh projected conversation history. | Acknowledged group sends invalidate the chat directory and only that group's message pages. | `cache.test.ts`, query-key tests |
+| Group sends did not refresh projected Conversation history. | Acknowledged group sends invalidate the Conversation directory and only that group's Message pages. | `cache.test.ts`, query-key tests |
 | Conversation-directory invalidation also matched every message-history cache. | Canonical conversation list and per-conversation message roots are distinct while sharing one scoped namespace. | `keys.test.ts`, `cache.test.ts` |
 | Token rotation could refetch status/settings with the replaced token. | Token-authenticated capability, status, QR, and settings entries are removed before installing a replacement credential. | `credential-cache.test.ts` |
 | Backend correlation IDs were discarded. | `ApiFailure` now prefers `X-Request-ID`, falls back to body `requestId`, and every error detail includes its code/category. | `envelopes.test.ts`, `connect-flow.test.ts` |

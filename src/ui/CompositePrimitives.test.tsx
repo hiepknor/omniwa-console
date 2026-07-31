@@ -65,13 +65,13 @@ describe('composite primitives', () => {
     const html = renderToStaticMarkup(
       <SplitWorkspace
         detailOpen
-        directoryScrollKey="chats:first-page"
-        detailScrollKey="chat_01:first-page"
+        directoryScrollKey="conversations:first-page"
+        detailScrollKey="conversation_01:first-page"
         detailInitialPosition="end"
         directoryLabel="Conversations"
         detailLabel="Timeline"
         directory={<WorkspacePaneHeader title="Conversations" />}
-        detail={<WorkspacePaneHeader title="chat_01" description="Projected history" />}
+        detail={<WorkspacePaneHeader title="conversation_01" description="Projected history" />}
         detailFooter={<button type="button">Send</button>}
       />,
     );
@@ -89,12 +89,12 @@ describe('composite primitives', () => {
       <WorkspacePageFrame
         eyebrow="Messaging"
         title="Conversations"
-        description="Review projected chats."
+        description="Review projected conversations."
         secondaryActions={<button type="button">Refresh all</button>}
         compactTitle="Anna Nguyen"
         compactDescription="Individual"
         compactLeadingAction={<button type="button">Back</button>}
-        compactActions={<button type="button">Refresh chat</button>}
+        compactActions={<button type="button">Refresh conversation</button>}
       >
         <div>Workspace</div>
       </WorkspacePageFrame>,
@@ -104,7 +104,7 @@ describe('composite primitives', () => {
     expect(html).toContain('min-h-[57px]');
     expect(html).toContain('min-[900px]:hidden');
     expect(html.indexOf('Back')).toBeLessThan(html.indexOf('Anna Nguyen'));
-    expect(html.indexOf('Anna Nguyen')).toBeLessThan(html.indexOf('Refresh chat'));
+    expect(html.indexOf('Anna Nguyen')).toBeLessThan(html.indexOf('Refresh conversation'));
     expect(html).toContain('tabindex="-1"');
   });
 

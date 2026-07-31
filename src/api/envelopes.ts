@@ -245,6 +245,18 @@ export function unwrapProjection<T>(result: FetchResult): ProjectionResult<T> {
   throw new ApiFailure(result.error, result.response.status, result.response.headers, credentialScopeForResponse(result.response));
 }
 
+/** Build a normalized failure when a successful response violates its public contract. */
+export function invalidResponse(result: FetchResult, error: string): ApiFailure {
+  const body = recordOf(result.data);
+  const requestId = typeof body?.requestId === 'string' ? body.requestId : undefined;
+  return new ApiFailure(
+    { code: 'invalid_response', error, requestId },
+    500,
+    result.response.headers,
+    credentialScopeForResponse(result.response),
+  );
+}
+
 /** Command variant: preserves the envelope message alongside the completed disposition. */
 export function unwrapCommand(result: FetchResult): CommandResult {
   if (result.data !== undefined) {

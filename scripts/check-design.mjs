@@ -54,8 +54,17 @@ for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10', '<I
 }
 
 const icon = await read('src/ui/Icon.tsx');
-for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 'connection:', 'directory:', 'session:', 'strokeWidth="1.75"', 'aria-hidden']) {
+for (const marker of ['NavigationIconName', "close: <path", "'chevron-down'", 'connection:', 'conversations:', 'directory:', 'session:', 'strokeWidth="1.75"', 'aria-hidden']) {
   if (!icon.includes(marker)) failures.push(`src/ui/Icon.tsx: iconography contract is missing ${marker}`);
+}
+if (icon.includes('chats:')) failures.push('src/ui/Icon.tsx: product navigation icon keys must use Conversation terminology');
+
+const visualViewport = await read('src/lib/useVisualViewport.ts');
+for (const marker of ['conversation-viewport-lock', '--conversation-visual-viewport-height']) {
+  if (!visualViewport.includes(marker)) failures.push(`src/lib/useVisualViewport.ts: Conversation viewport contract is missing ${marker}`);
+}
+if (visualViewport.includes('chat-viewport-lock') || visualViewport.includes('--chat-visual-viewport-height')) {
+  failures.push('src/lib/useVisualViewport.ts: stale Chat viewport identifiers must not return');
 }
 
 const status = await read('src/ui/Status.tsx');
