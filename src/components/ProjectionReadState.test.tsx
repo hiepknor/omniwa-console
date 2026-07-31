@@ -6,8 +6,8 @@ describe('ProjectionStatusGroup', () => {
   it('combines only the fully ready happy state while retaining exact scope', () => {
     const html = renderToStaticMarkup(<ProjectionStatusGroup entries={[{ label: 'Conversation', meta: { syncStatus: 'ready', lastSyncedAt: '2026-07-30T08:00:00Z' } }, { label: 'Messages', meta: { syncStatus: 'ready', lastSyncedAt: '2026-07-30T08:01:00Z' } }]} />);
     expect(html).toContain('Conversation + Messages ready');
-    expect(html).toContain('Conversation ');
-    expect(html).toContain('Messages ');
+    expect(html).toContain('Conversation sync ');
+    expect(html).toContain('Messages sync ');
     expect(html.match(/data-tone="ok"/g)).toHaveLength(1);
   });
 

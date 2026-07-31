@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { ApiProvider } from '@/api/ApiProvider';
 import { Composer } from '@/features/conversations/Composer';
-import { ConversationList, ConversationUnreadCount, MessageTimeline } from '@/features/conversations/ConversationsView';
+import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, MessageTimeline } from '@/features/conversations/ConversationsView';
 import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
 import { humanizeToken } from '@/lib/format';
-import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { Button, CountBadge, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { conversationsFixture, messagesFixture } from './preview-fixtures';
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
@@ -48,7 +48,7 @@ export function PreviewConversations() {
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
                 <WorkspacePaneHeader title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>} description="Canonical projected conversations" />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => e.preventDefault()}>
-                  <Field label="Filter conversations" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" placeholder="Name or Conversation ID on this page" />}</Field>
+                  <Field label="Filter conversations" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" placeholder="Name or ID on this page" />}</Field>
                   <div className="flex items-end"><Button type="submit">Apply</Button></div>
                 </FilterToolbar>
               </div>
@@ -62,7 +62,7 @@ export function PreviewConversations() {
               title={conversation?.displayName ?? 'Message timeline'}
               description={conversation ? 'Persisted projection history' : 'Select a projected conversation'}
             />
-          {conversation ? <>
+          {conversation ? <div className="flex min-h-full flex-col">
             <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
               <ConversationUnreadCount count={conversation.unreadCount} authoritative={conversation.unreadAuthoritative} context="detail" />
               <span>{humanizeToken(conversation.type)}</span>
@@ -75,8 +75,8 @@ export function PreviewConversations() {
               if (message.mediaAssetId === 'asset_expired') return <ConversationMediaPlaceholder enabled compact label="Image unavailable" tone="failed" detail="Media asset expired" />;
               return <ConversationMediaPlaceholder enabled={false} compact label="Image unavailable" tone="neutral" detail="Managed image content was not reported." />;
             }} />
-            <CursorPagination nextCursor="preview-older" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." onCursor={() => {}} />
-          </> : null}
+            <ConversationMessagePagination itemCount={messagesFixture.length} nextCursor="preview-older" onCursor={() => {}} />
+          </div> : null}
           </>
         }
         detailFooter={conversation ? <ApiProvider session={{ baseUrl: 'http://127.0.0.1:1', apiKey: 'preview-only', keyKind: 'api', connectedAt: new Date().toISOString() }}><Composer conversationId={conversation.conversationId} addressingJid={conversation.addressingJid ?? ''} conversationName={conversation.displayName ?? 'Unknown conversation'} enabled mediaEnabled /></ApiProvider> : undefined}

@@ -248,7 +248,10 @@ resource models, or rendered diagnostics.
   URL-backed Drawers. Message cursor pages
   use directional `Newest` / `Older messages` labels and explicitly remain one
   bounded page; `Load more` is reserved for list progression that does not claim
-  Conversation-history accumulation. When sending is unavailable, one compact notice
+  Conversation-history accumulation. The pager stays at the bottom of short
+  timelines, is omitted for a fresh ready history with no projected messages,
+  and remains available on a cursor-addressed empty page so the operator can
+  return to `Newest`. When sending is unavailable, one compact notice
   replaces the Composer fields and actions instead of rendering disabled input
   controls. When sending is available, the shared Textarea starts at one line,
   grows through four lines, then scrolls internally. Text, `Media…`, and

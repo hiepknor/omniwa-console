@@ -20,7 +20,7 @@ export function ProjectionStatusGroup({ entries }: { entries: { label: string; m
   const reported = entries.filter((entry): entry is { label: string; meta: ProjectionMeta } => Boolean(entry.meta?.syncStatus));
   if (!reported.length) return null;
   if (reported.length > 1 && reported.every((entry) => entry.meta.syncStatus === 'ready')) {
-    return <div className="flex flex-wrap items-center justify-between gap-3 py-2 text-xs text-fg-3"><Status tone="ok">{reported.map((entry) => entry.label).join(' + ')} ready</Status><span>{reported.map((entry) => `${entry.label} ${entry.meta.lastSyncedAt ? relativeTime(entry.meta.lastSyncedAt) : 'sync time unreported'}`).join(' · ')}</span></div>;
+    return <div className="flex flex-wrap items-center justify-between gap-3 py-2 text-xs text-fg-3"><Status tone="ok">{reported.map((entry) => entry.label).join(' + ')} ready</Status><span>{reported.map((entry) => `${entry.label} sync ${entry.meta.lastSyncedAt ? relativeTime(entry.meta.lastSyncedAt) : 'time unreported'}`).join(' · ')}</span></div>;
   }
   return <div className="grid">{reported.map((entry) => <ProjectionStatus key={entry.label} label={`${entry.label} projection`} meta={entry.meta} />)}</div>;
 }

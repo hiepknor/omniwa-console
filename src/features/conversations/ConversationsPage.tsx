@@ -9,7 +9,7 @@ import { ProjectionFailureNotice as FailureNotice, ProjectionStatus, ProjectionS
 import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
 import { canonicalConversationLocation, canonicalConversationReadsEnabled, resolveConversationRecipient } from './conversation-identity';
-import { ConversationList, ConversationUnreadCount, MessageTimeline } from './ConversationsView';
+import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, MessageTimeline } from './ConversationsView';
 import { ConversationDetailsContent, MessageInspectorContent } from './Details';
 import { ConversationMessageImage } from './Media';
 import { useConversation, useConversations, useMessages } from './hooks';
@@ -136,7 +136,7 @@ function ConversationWorkspace() {
                 />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
                   <Field label="Filter conversations" className="min-w-48 flex-1">
-                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name or Conversation ID on this page" onChange={(e) => setSearchDraft(e.target.value)} />}
+                    {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name or ID on this page" onChange={(e) => setSearchDraft(e.target.value)} />}
                   </Field>
                   <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
                 </FilterToolbar>
@@ -174,7 +174,7 @@ function ConversationWorkspace() {
             ) : conversation.error && !selectedConversation ? (
               <div className="p-4"><FailureNotice error={conversation.error} onRetry={() => conversation.refetch()} /></div>
             ) : selectedConversation ? (
-              <>
+              <div className="flex min-h-full flex-col">
                 {conversation.error ? <div className="px-4 pt-3"><FailureNotice error={conversation.error} stale onRetry={() => conversation.refetch()} /></div> : null}
                 <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
                   <ConversationUnreadCount count={selectedConversation.unreadCount} authoritative={selectedConversation.unreadAuthoritative} context="detail" />
@@ -200,18 +200,16 @@ function ConversationWorkspace() {
                       scrollKey={JSON.stringify([selectedConversation.conversationId, route.messageCursor])}
                       anchorToEnd={!route.messageCursor}
                     />
-                    {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No messages" detail="The ready message projection contains no messages." /></div> : null}
-                    <CursorPagination
+                    {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No projected messages" detail="The ready Message projection returned no messages for this Conversation." /></div> : null}
+                    <ConversationMessagePagination
+                      itemCount={loadedMessages.length}
                       cursor={route.messageCursor}
                       nextCursor={messages.data.resource.pagination.nextCursor ?? undefined}
-                      resetLabel="Newest"
-                      nextLabel="Older messages"
-                      info="Showing one bounded message page."
                       onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))}
                     />
                   </>
                 ) : null}
-              </>
+              </div>
             ) : (
               <div className="p-4"><StateNotice kind="empty" title="Not returned" detail="The projected conversation detail was not returned." /></div>
             )}

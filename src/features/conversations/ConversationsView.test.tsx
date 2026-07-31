@@ -1,7 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
-import { ConversationUnreadCount, isNearScrollEnd, MessageTimeline } from './ConversationsView';
+import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline } from './ConversationsView';
 
 describe('ConversationUnreadCount', () => {
   it('omits a zero count from dense directory rows', () => {
@@ -27,6 +28,54 @@ describe('ConversationUnreadCount', () => {
     const html = renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative={false} context="detail" />);
     expect(html).toContain('Unread syncing');
     expect(html).not.toContain('>0</span>');
+  });
+});
+
+describe('ConversationList', () => {
+  const conversation: ConversationResource = {
+    resourceType: 'conversation',
+    conversationId: 'conversation-1',
+    aliases: [],
+    aliasesReported: true,
+    displayName: 'Operations',
+    type: 'group',
+    unreadCount: 0,
+    unreadAuthoritative: true,
+  };
+
+  it('marks the canonical selected Conversation with an ink edge and current-page semantics', () => {
+    const html = renderToStaticMarkup(<ConversationList items={[conversation]} selectedId="conversation-1" onSelect={() => {}} />);
+
+    expect(html).toContain('border-l-line-strong bg-elevated');
+    expect(html).toContain('aria-current="page"');
+  });
+
+  it('reserves the selection edge without exposing current-page semantics on other rows', () => {
+    const html = renderToStaticMarkup(<ConversationList items={[conversation]} selectedId="conversation-2" onSelect={() => {}} />);
+
+    expect(html).toContain('border-l-transparent');
+    expect(html).not.toContain('aria-current');
+  });
+});
+
+describe('ConversationMessagePagination', () => {
+  it('stays anchored to the bottom for a populated bounded page', () => {
+    const html = renderToStaticMarkup(<ConversationMessagePagination itemCount={1} nextCursor="older" onCursor={() => {}} />);
+
+    expect(html).toContain('class="mt-auto"');
+    expect(html).toContain('Showing one bounded message page.');
+    expect(html).toContain('Older messages');
+  });
+
+  it('is hidden for a fresh empty history', () => {
+    expect(renderToStaticMarkup(<ConversationMessagePagination itemCount={0} onCursor={() => {}} />)).toBe('');
+  });
+
+  it('retains the Newest recovery action for an empty cursor-addressed page', () => {
+    const html = renderToStaticMarkup(<ConversationMessagePagination itemCount={0} cursor="empty-page" onCursor={() => {}} />);
+
+    expect(html).toContain('Newest');
+    expect(html).toContain('class="mt-auto"');
   });
 });
 
