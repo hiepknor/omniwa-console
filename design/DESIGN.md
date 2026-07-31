@@ -250,10 +250,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   not become chips. MetadataBadge retains the same compact framed family for
   non-quantity facts such as an immutable version, without coupling their future
   treatment to count chips. Conversations with authoritative unread omit zero
-  counts in dense directory rows, show positive counts as accessible CountBadges,
-  and pair the badge with a visible `Unread` label in selected-conversation facts.
-  Non-authoritative unread never renders a numeric badge; it uses the existing
-  pending Status treatment with an explicit syncing label.
+  counts in dense directory rows and show positive counts there as accessible
+  CountBadges. The selected header never repeats the attention badge; the
+  inspector reports authoritative unread as a plain fact. Non-authoritative
+  unread never renders a numeric badge; it uses the existing pending Status
+  treatment with an explicit syncing label.
 - **Conversation image lifecycle** — ready private JPEG/PNG content uses the
   shared framed Image primitive. Pending/processing and terminal unavailable
   states retain the message bubble and use a square bordered placeholder with
@@ -273,13 +274,26 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   sender from JID: until an authoritative participant display identity exists,
   incoming group messages say `Participant not identified` and raw identifiers
   remain inspector-only. Opening a newest cursor page anchors its scroll
-  container to the end; older cursor pages start at their beginning. New items
-  follow only while the operator remains near the end, so active history review
-  is never interrupted.
-- **Conversation details and send availability** — the selected Conversation keeps
-  unread, type, and a visible `Details` action in its dense summary when the
-  inspector is not docked. Canonical and provider identifiers stay out of the
-  primary timeline summary. `Details` opens the canonical Drawer below the
+  container to the end, including when its first data arrives after the route
+  transition; older cursor pages start at their beginning. New items
+  follow only while the operator remains near the end. Healthy Conversation and
+  Messages projection status stays quiet; degraded or pending scope moves into
+  the selected Conversation header. Only an authoritative
+  newest timestamp moving forward counts as an append; projection backfill does
+  not move the viewport. While the operator reads earlier history, appended items expose a compact `Latest messages` action
+  instead of moving the explicit detail scroller, so review is never interrupted.
+  Bounded-page pagination is a fixed detail footer immediately above Composer;
+  it never overlays messages and remains absent for a fresh empty history. At
+  mobile width its informational sentence stays accessible but visually hides,
+  keeping both cursor actions in one compact row. A short newest page aligns its
+  message lane to the bottom; older cursor pages remain top-aligned.
+- **Conversation details and send availability** — the selected Conversation
+  header keeps display identity, type, last activity, and a visible `Details`
+  action when the inspector is not docked. The page header owns the single
+  Refresh action and authoritative Conversation total; the directory starts
+  directly with its sticky filter instead of repeating a list header. Unread attention
+  stays in the directory; canonical and provider identifiers stay out of the
+  primary timeline header. `Details` opens the canonical Drawer below the
   responsive-inspector threshold; at or above that threshold the same content
   remains visible as the third column. It groups backend-reported identity,
   provider routing, and projected state in framed Panels with DescriptionLists.
@@ -289,15 +303,19 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   A missing command target or send capability replaces the entire Composer form
   with one compact StateNotice, so an unavailable command never leaves a large
   disabled textarea occupying the workspace footer.
-- **Conversation Composer** — the available send surface uses the shared
+- **Conversation Composer** — the available send surface uses the selected
+  header as its visible target context and the shared
   Textarea in auto-grow mode: one line initially, bounded to four lines before
-  internal scrolling. The field, `Media…`, and `Send text` actions share one
+  internal scrolling. The generic `Message` field, `Media…`, and `Send` actions share one
   bottom-aligned row at every viewport; mobile retains 40px action/control
   targets without reserving a three-row textarea. Command failure, cooldown,
   unknown outcome, recipient error, and provider acknowledgement remain above
   that row and may expand the footer only while reported. Auto-grow changes
-  geometry only; it does not introduce Enter-to-send or change submission,
-  capability, retry, or acknowledgement semantics.
+  geometry only; its accessible name and Media dialog retain the selected
+  Conversation name. It does not introduce Enter-to-send or change submission,
+  capability, retry, or acknowledgement semantics. Dirty drafts confirm before
+  route changes, pending and unknown outcomes keep the selected Conversation in
+  place, and a pending navigation block resets once the Composer becomes clean.
 - **DescriptionList / DescriptionItem** — the only repeated key/value facts
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
   values on wide screens, stacks them at ≤640px, wraps long content, and uses
@@ -342,9 +360,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   timeline, disappears for a fresh ready history with no projected messages, and
   remains available on a cursor-addressed empty page so `Newest` can recover the
   operator to the current history.
-  Conversation and Messages projection health share one scoped happy-state row
-  only when both are ready. Any differing, syncing, stale, not-ready, or failed
-  state remains a separately labelled status; consolidation never hides degraded
+  Healthy Conversation and Messages projection status stays quiet. Any
+  differing, syncing, stale, not-ready, or failed state remains separately
+  labelled in the selected Conversation header; quiet success never hides degraded
   observability.
 - **ProgressBar** — an 8px square framed track with an ink fill and explicit
   text label. Determinate progress exposes its bounded numeric value;

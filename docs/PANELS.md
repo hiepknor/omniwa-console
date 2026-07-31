@@ -299,8 +299,9 @@ and appended messages follow only while the operator remains near the end.
 Missing text is reported as missing rather than rendered as a type token. Group
 participants remain unidentified in the timeline until the public projection
 publishes authoritative participant display identity; Console never derives it
-from JID or Contact matching. Conversation and Messages ready states may share
-one scoped status row, but differing/non-ready states remain separate. Send acknowledgement only
+from JID or Contact matching. Healthy Conversation and Messages projection
+status stays quiet, while differing/non-ready states remain explicit and
+separate in the selected Conversation header. Send acknowledgement only
 confirms the action response; projected status and per-recipient receipts
 remain authoritative for delivery.
 
@@ -320,8 +321,12 @@ its own row: authoritative counts render normally, while non-authoritative count
 remain best-known data and render as syncing without a numeric badge. The Console
 does not coerce them to zero, hide the Conversation, or reconcile alias totals.
 
-The selected Conversation keeps unread and type in the timeline summary. At
-1560px of actual workspace width, backend-reported identity, provider routing,
+The page header owns the authoritative Conversation total and the single Refresh
+action; the directory starts directly with its sticky filter. The selected
+Conversation header keeps display identity, type, last activity, and `Details`;
+unread attention remains in the Conversation directory and is a plain fact in
+the inspector. At 1560px of actual workspace
+width, backend-reported identity, provider routing,
 and projected state persist in a non-modal 440px third inspector column; selected
 Message details replace that content and closing them restores Conversation
 details. Desktop below that threshold, tablet, and mobile use the shared
@@ -330,10 +335,25 @@ Drawer/Panel/DescriptionList composition through the URL-backed `details` or
 and diagnostic identifiers use the shared copy action. If
 the authoritative command target or required send capabilities are unavailable,
 the Composer is replaced by one compact unavailable notice rather than a disabled
-form. When available, its shared Textarea auto-grows from one through four lines
-and stays in one bottom-aligned row with `Media…` and `Send text`; notices above
-the row retain command error, cooldown, unknown-outcome, and acknowledgement
-semantics.
+form. When available, the selected header supplies visible target context; the
+shared Textarea auto-grows from one through four lines and stays in one
+bottom-aligned row with `Media…` and `Send`; its accessible name and Media dialog
+retain the selected Conversation name. Notices above the row retain command
+error, cooldown, unknown-outcome, and acknowledgement semantics. Dirty drafts
+confirm before navigation; pending and unknown outcomes remain on the selected
+Conversation. A blocked navigation resets when the Composer becomes clean.
+
+The newest Message page starts at the end of the explicit detail scroller,
+including when its first data arrives after the route transition. A same-page
+authoritative newest timestamp moving forward follows only when the
+operator is already near the end; projection backfill never moves the viewport.
+Otherwise `Latest messages` appears without interrupting history review. Older
+cursor pages start at the beginning and never claim accumulated history. The
+bounded-page paginator stays in the fixed detail footer immediately above
+Composer and remains absent for a fresh empty history. At mobile width its
+informational sentence remains accessible but visually hides so both cursor
+actions stay in one compact row. A short newest page aligns its message lane to
+the bottom; older cursor pages remain top-aligned.
 
 Implemented commands owned by the workspace:
 

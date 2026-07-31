@@ -6,6 +6,7 @@ import { Button, Dialog, Field, FileUpload, Input, Select, StateNotice, Tabs, Te
 import { useConversationMediaAsset, useSendMedia, useSendText, useUploadConversationImage } from './hooks';
 import { commandCooldown, shouldPreserveCommandError } from './send-policy';
 import { ProjectionFailureNotice as FailureNotice } from '@/components/ProjectionReadState';
+import type { ComposerInteractionState } from './composer-state';
 
 const HARD_MEDIA_CEILING = 67_108_864;
 
@@ -20,12 +21,12 @@ function fileError(file: File | undefined): string | undefined {
   return undefined;
 }
 
-function acknowledgementDetail(result: MessageCommandResult): string {
+export function acknowledgementDetail(result: MessageCommandResult, conversationName: string): string {
   const parts = [
     result.data.messageId ? `Message ${result.data.messageId}` : undefined,
     result.data.acknowledgedAt ? `acknowledged ${relativeTime(result.data.acknowledgedAt) || result.data.acknowledgedAt}` : undefined,
   ].filter(Boolean);
-  return `${parts.length ? `${parts.join(' · ')}. ` : ''}This is provider acknowledgement, not WhatsApp delivery. Projected status and receipts remain authoritative.`;
+  return `${parts.length ? `${parts.join(' · ')}. ` : ''}Accepted for ${conversationName}. This is provider acknowledgement, not WhatsApp delivery. Projected status and receipts remain authoritative.`;
 }
 
 function unknownSendOutcome(error: unknown): boolean {
@@ -44,7 +45,7 @@ export function ComposerUnavailable({ detail }: { detail?: string }) {
   );
 }
 
-export function Composer({ conversationId, addressingJid, conversationName, enabled, mediaEnabled, unavailableDetail, recipientError, onRetryRecipient }: {
+export function Composer({ conversationId, addressingJid, conversationName, enabled, mediaEnabled, unavailableDetail, recipientError, onRetryRecipient, onInteractionStateChange }: {
   conversationId: string;
   addressingJid: string;
   conversationName: string;
@@ -53,6 +54,7 @@ export function Composer({ conversationId, addressingJid, conversationName, enab
   unavailableDetail?: string;
   recipientError?: unknown;
   onRetryRecipient?: () => void;
+  onInteractionStateChange?: (state: ComposerInteractionState) => void;
 }) {
   const [text, setText] = useState('');
   const [mediaOpen, setMediaOpen] = useState(false);
@@ -121,21 +123,32 @@ export function Composer({ conversationId, addressingJid, conversationName, enab
   const canSendMedia = enabled && (source === 'device'
     ? mediaEnabled && uploadedAsset?.status === 'ready'
     : validHttpUrl(mediaUrl));
+  const dirty = Boolean(text.trim() || file || mediaUrl.trim() || caption.trim() || filename.trim() || uploadedAsset);
+
+  useEffect(() => {
+    onInteractionStateChange?.({
+      dirty,
+      pending: Boolean(pending),
+      unknownOutcome: textOutcomeUnknown || mediaOutcomeUnknown,
+    });
+  }, [dirty, mediaOutcomeUnknown, onInteractionStateChange, pending, textOutcomeUnknown]);
+
+  useEffect(() => () => onInteractionStateChange?.({ dirty: false, pending: false, unknownOutcome: false }), [onInteractionStateChange]);
 
   if (!enabled) return <ComposerUnavailable detail={unavailableDetail} />;
 
   return (
     <div className="grid gap-3 border-t border-line bg-surface p-3">
-      {sendText.data ? <StateNotice kind="info" title="Text send accepted" detail={acknowledgementDetail(sendText.data)} /> : null}
+      {sendText.data ? <StateNotice kind="info" title="Text send accepted" detail={acknowledgementDetail(sendText.data, conversationName)} /> : null}
       {sendText.error ? <FailureNotice error={sendText.error} command /> : null}
       {recipientError ? <FailureNotice error={recipientError} onRetry={onRetryRecipient} /> : null}
       <form className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2" onSubmit={(event) => { event.preventDefault(); submitText(); }}>
-        <Field label={`Message ${conversationName}`}>
-          {(id) => <Textarea id={id} autoGrow maxRows={4} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
+        <Field label="Message">
+          {(id) => <Textarea id={id} aria-label={`Message ${conversationName}`} placeholder="Write a message…" autoGrow maxRows={4} value={text} disabled={!enabled || pending} maxLength={10_000} onChange={(event) => { setText(event.target.value); if (sendText.error && !shouldPreserveCommandError(sendText.error)) sendText.reset(); }} />}
         </Field>
         <div className="flex items-center justify-end gap-2">
           <Button aria-label="Choose image or media" disabled={!enabled || pending} onClick={() => { resetMediaForm(); setMediaOpen(true); }}>Media…</Button>
-          <Button variant="primary" type="submit" disabled={!enabled || !text.trim() || pending || textOutcomeUnknown || sendCooldown}>{sendText.isPending ? 'Submitting…' : sendCooldown ? `Retry in ${cooldownSeconds}s` : 'Send text'}</Button>
+          <Button variant="primary" type="submit" disabled={!enabled || !text.trim() || pending || textOutcomeUnknown || sendCooldown}>{sendText.isPending ? 'Submitting…' : sendCooldown ? `Retry in ${cooldownSeconds}s` : 'Send'}</Button>
         </div>
       </form>
 
@@ -149,8 +162,9 @@ export function Composer({ conversationId, addressingJid, conversationName, enab
           : <><Button disabled={pending} onClick={closeMedia}>Cancel</Button><Button variant="primary" disabled={!canSendMedia || pending || mediaOutcomeUnknown || sendCooldown} onClick={sendSelectedMedia}>{sendMedia.isPending ? 'Submitting…' : sendCooldown ? `Retry in ${cooldownSeconds}s` : 'Send media'}</Button></>}
       >
         <div className="grid gap-4">
+          <p className="text-sm text-fg-2">Conversation: <strong className="font-semibold text-fg">{conversationName}</strong></p>
           <Tabs active={source} onChange={(id) => { setSource(id as 'device' | 'url'); if (!shouldPreserveCommandError(sendMedia.error)) sendMedia.reset(); }} tabs={[{ id: 'device', label: 'Device image' }, { id: 'url', label: 'Remote URL' }]} />
-          {sendMedia.data ? <StateNotice kind="info" title="Media send accepted" detail={acknowledgementDetail(sendMedia.data)} /> : null}
+          {sendMedia.data ? <StateNotice kind="info" title="Media send accepted" detail={acknowledgementDetail(sendMedia.data, conversationName)} /> : null}
           {sendMedia.error ? <FailureNotice error={sendMedia.error} command /> : null}
           {!sendMedia.data && source === 'device' ? (
             <>

@@ -211,10 +211,10 @@ resource models, or rendered diagnostics.
   inside an operational Status remain in their context instead of becoming chips.
   Framed non-count facts such as resource versions use `MetadataBadge`.
   Conversation directory rows omit authoritative zero unread counts and expose
-  authoritative positive counts through an accessible CountBadge;
-  selected-conversation facts keep the visible `Unread` label and show an
-  authoritative zero explicitly. When `unreadAuthoritative` is false, both
-  contexts show a pending syncing status and no numeric badge. Conversation and Directory list headers place
+  authoritative positive counts through an accessible CountBadge. The selected
+  header does not repeat unread attention; the inspector reports an authoritative
+  value as a plain fact. When `unreadAuthoritative` is false, the directory and
+  inspector show a pending syncing status and no numeric badge. Conversation and Directory list headers place
   the active authoritative total beside the resource label. Conversation and
   Contact totals use `meta.total` (including the current normalized Contact
   search scope), while Labels use the bare-array length; none derive totals from
@@ -231,12 +231,25 @@ resource models, or rendered diagnostics.
   avatars; system/unknown messages stay centered and neutral. Day separators
   preserve chronological orientation, absent text is explicitly unreported, and
   an incoming Group participant remains unidentified until the backend projects
-  an authoritative display identity. Newest pages anchor to the end; older pages
-  start at their beginning, and new messages follow only while the operator is
-  already near the end. Conversation and Messages projection health combines
-  only when both scopes are ready; all non-ready scopes remain separate.
-  The selected Conversation keeps unread and type as scan-critical facts. Below
-  1560px of actual workspace width it also exposes `Details`, which opens the
+  an authoritative display identity. Newest pages anchor to the end, including
+  when their first data arrives after the route transition; older pages start
+  at their beginning, and a newer authoritative timestamp follows only
+  while the operator is already near the end. Backfilled history never moves the
+  viewport. Otherwise a compact `Latest messages` action appears
+  without moving the explicit detail scroller. Healthy Conversation and Messages
+  projection status stays quiet; degraded or pending scope remains explicit and
+  separate in the selected Conversation header. Compact layouts prioritize that
+  attention label in the header subtitle. Bounded-page pagination stays in the
+  fixed detail footer immediately above Composer instead of moving with the
+  timeline, and remains absent for a fresh empty history. At mobile width its
+  informational sentence remains accessible but visually hides so the cursor
+  actions stay in one compact row. A short newest page aligns its message lane
+  to the bottom; older cursor pages remain top-aligned.
+  The page header owns the authoritative Conversation total and the single
+  Refresh action; the directory begins with its sticky filter and does not repeat
+  a list header. The selected Conversation header keeps display identity, type,
+  last activity, and `Details` as scan-critical context. Below 1560px of
+  actual workspace width `Details` opens the
   shared Drawer. At or above that container threshold the same inspector content
   remains visible as a non-modal 440px third column beside a 320px directory and
   a timeline of at least 800px. Canonical identity, provider routing, and
@@ -253,11 +266,16 @@ resource models, or rendered diagnostics.
   and remains available on a cursor-addressed empty page so the operator can
   return to `Newest`. When sending is unavailable, one compact notice
   replaces the Composer fields and actions instead of rendering disabled input
-  controls. When sending is available, the shared Textarea starts at one line,
-  grows through four lines, then scrolls internally. Text, `Media…`, and
-  `Send text` remain one bottom-aligned row, including mobile; command errors,
+  controls. When sending is available, the selected header carries visible target
+  context and the shared Textarea starts at one line, grows through four lines,
+  then scrolls internally. `Message`, `Media…`, and `Send` remain one
+  bottom-aligned row, including mobile; the accessible field name and Media dialog
+  retain the selected Conversation name. Command errors,
   cooldown, unknown outcome, and acknowledgement stay in the explicit notices
-  above it.
+  above it. Dirty drafts confirm before route changes; pending and unknown
+  outcomes keep the selected Conversation in place. If a pending navigation
+  finishes with a clean Composer, the stale block resets instead of being
+  mislabeled as an unknown outcome.
 - The Messaging Directory owns Contacts and Labels as page-level resource tabs,
   not modes inside the Conversation list. Only the active resource projection is
   queried. At 900px and wider it uses the shared 320px list + remaining detail

@@ -1,7 +1,7 @@
 import type { ConversationResource } from '@/api/conversations';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
-import { ButtonLink, CopyValue, CountBadge, DescriptionItem, DescriptionList, Panel, StateNotice, Status, type Tone } from '@/ui';
+import { ButtonLink, CopyValue, DescriptionItem, DescriptionList, Panel, StateNotice, Status, type Tone } from '@/ui';
 import { useMessage, useReceipts } from './hooks';
 import { ConversationMessageImage } from './Media';
 
@@ -59,7 +59,7 @@ export function ConversationDetailsContent({ conversation }: { conversation: Con
 
       <Panel headingLevel={3} title="Projected state" description="Read-only Conversation state and activity reported by the projection." bodyPadding="compact-top">
         <DescriptionList>
-          <DescriptionItem label="Unread">{conversation.unreadAuthoritative ? <CountBadge count={conversation.unreadCount} /> : <Status tone="pending">Syncing</Status>}</DescriptionItem>
+          <DescriptionItem label="Unread">{conversation.unreadAuthoritative ? conversation.unreadCount.toLocaleString('en-US') : <Status tone="pending">Syncing</Status>}</DescriptionItem>
           <DescriptionItem label="Archived">{reportedBoolean(conversation.archived)}</DescriptionItem>
           <DescriptionItem label="Pinned">{reportedBoolean(conversation.pinned)}</DescriptionItem>
           <DescriptionItem label="Muted until"><ReportedTime value={conversation.mutedUntil} /></DescriptionItem>

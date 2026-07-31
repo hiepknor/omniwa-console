@@ -2,30 +2,23 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
-import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline } from './ConversationsView';
+import { appendedMessageScrollAction, ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline, SelectedConversationHeader, shouldAnchorInitialMessagePage } from './ConversationsView';
 
 describe('ConversationUnreadCount', () => {
   it('omits a zero count from dense directory rows', () => {
-    expect(renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative context="directory" />)).toBe('');
+    expect(renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative />)).toBe('');
   });
 
   it('uses the canonical accessible count badge for unread directory items', () => {
-    const html = renderToStaticMarkup(<ConversationUnreadCount count={1_284} authoritative context="directory" />);
+    const html = renderToStaticMarkup(<ConversationUnreadCount count={1_284} authoritative />);
 
     expect(html).toContain('aria-label="1,284 unread messages"');
     expect(html).toContain('title="1,284 unread messages"');
     expect(html).toContain('>1,284</span>');
   });
 
-  it('keeps the unread label and zero count explicit in detail facts', () => {
-    const html = renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative context="detail" />);
-
-    expect(html).toContain('<span>Unread</span>');
-    expect(html).toContain('>0</span>');
-  });
-
   it('shows a syncing state without presenting a non-authoritative number as zero', () => {
-    const html = renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative={false} context="detail" />);
+    const html = renderToStaticMarkup(<ConversationUnreadCount count={0} authoritative={false} />);
     expect(html).toContain('Unread syncing');
     expect(html).not.toContain('>0</span>');
   });
@@ -58,6 +51,28 @@ describe('ConversationList', () => {
   });
 });
 
+describe('SelectedConversationHeader', () => {
+  it('keeps target identity, activity, and pane-owned actions in the selected header without an unread badge', () => {
+    const html = renderToStaticMarkup(<SelectedConversationHeader conversation={{
+      resourceType: 'conversation',
+      conversationId: 'conversation-1',
+      aliases: [],
+      aliasesReported: true,
+      displayName: 'Operations',
+      type: 'group',
+      unreadCount: 12,
+      unreadAuthoritative: true,
+    }} onDetails={() => {}} />);
+
+    expect(html).toContain('Operations');
+    expect(html).toContain('Group · Last activity unreported');
+    expect(html).not.toContain('Refresh');
+    expect(html).toContain('Details');
+    expect(html).not.toContain('12 unread');
+    expect(html).not.toContain('>12</span>');
+  });
+});
+
 describe('ConversationMessagePagination', () => {
   it('stays anchored to the bottom for a populated bounded page', () => {
     const html = renderToStaticMarkup(<ConversationMessagePagination itemCount={1} nextCursor="older" onCursor={() => {}} />);
@@ -65,6 +80,7 @@ describe('ConversationMessagePagination', () => {
     expect(html).toContain('class="mt-auto"');
     expect(html).toContain('Showing one bounded message page.');
     expect(html).toContain('Older messages');
+    expect(html).toContain('max-sm:sr-only');
   });
 
   it('is hidden for a fresh empty history', () => {
@@ -114,8 +130,31 @@ describe('MessageTimeline', () => {
     expect(html.match(/role="separator"/g)).toHaveLength(2);
   });
 
+  it('bottom-aligns a short newest page without changing older-page alignment', () => {
+    const newest = renderToStaticMarkup(<MessageTimeline items={[message({})]} onSelect={() => {}} anchorToEnd />);
+    const older = renderToStaticMarkup(<MessageTimeline items={[message({})]} onSelect={() => {}} />);
+
+    expect(newest).toContain('grid w-full gap-3 p-4 mt-auto');
+    expect(older).toContain('grid w-full gap-3 p-4"');
+    expect(older).not.toContain('grid w-full gap-3 p-4 mt-auto');
+  });
+
   it('keeps following new messages bounded to operators already near the end', () => {
     expect(isNearScrollEnd({ scrollHeight: 1_000, scrollTop: 420, clientHeight: 500 })).toBe(true);
     expect(isNearScrollEnd({ scrollHeight: 1_000, scrollTop: 200, clientHeight: 500 })).toBe(false);
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, previousNewestAt: 100, nextNewestAt: 200, nearEnd: true })).toBe('follow');
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, previousNewestAt: 100, nextNewestAt: 200, nearEnd: false })).toBe('offer-latest');
+  });
+
+  it('anchors the newest page when its first data arrives after the route transition', () => {
+    expect(shouldAnchorInitialMessagePage({ anchorToEnd: true, keyChanged: true, initialLatestPending: true, itemCount: 0 })).toBe(false);
+    expect(shouldAnchorInitialMessagePage({ anchorToEnd: true, keyChanged: false, initialLatestPending: true, itemCount: 2 })).toBe(true);
+    expect(shouldAnchorInitialMessagePage({ anchorToEnd: false, keyChanged: true, initialLatestPending: false, itemCount: 2 })).toBe(false);
+  });
+
+  it('does not offer or follow backfilled items or changes between bounded pages', () => {
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, previousNewestAt: 200, nextNewestAt: 200, nearEnd: false })).toBe('none');
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: true, previousNewestAt: 100, nextNewestAt: 200, nearEnd: false })).toBe('none');
+    expect(appendedMessageScrollAction({ anchorToEnd: false, keyChanged: false, previousNewestAt: 100, nextNewestAt: 200, nearEnd: true })).toBe('none');
   });
 });

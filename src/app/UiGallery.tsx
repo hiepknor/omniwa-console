@@ -570,10 +570,10 @@ export function UiGallery() {
           <div className="h-[34rem] min-h-0 overflow-hidden border border-line-strong">
             <WorkspacePageFrame
               eyebrow="Messaging"
-              title="Conversations"
-              description="Review canonical conversations and projected message history."
+              title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
+              description="Review projected history and submit outbound messages."
               secondaryActions={<Button>Refresh</Button>}
-              compactTitle={workspaceDetail ? 'conversation_01' : 'Conversations'}
+              compactTitle={workspaceDetail ? 'conversation_01' : <span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
               compactDescription={workspaceDetail ? 'Projected detail' : undefined}
               compactLeadingAction={workspaceDetail ? <Button onClick={() => { setWorkspaceDetail(false); setConversationDetailsOpen(false); }}>Back</Button> : undefined}
               compactActions={<Button>Refresh</Button>}
@@ -592,18 +592,15 @@ export function UiGallery() {
                 detailLabel="Sample detail"
                 directory={
                   <>
-                    <WorkspacePaneHeader className="max-[900px]:hidden" title="Directory" description="Select a projected resource" />
                     {['conversation_01', 'conversation_02', 'conversation_03'].map((id) => <button key={id} type="button" className="flex min-h-14 w-full items-center border-b border-line px-3 text-left text-[13px] hover:bg-elevated" onClick={() => setWorkspaceDetail(true)}><span className="font-mono">{id}</span></button>)}
                   </>
                 }
                 detail={
                   <>
-                    <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Projected detail" />
-                    <div className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-2 text-xs text-fg-3"><span>Unread</span><CountBadge count={2} /><span>Individual</span><Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={() => setConversationDetailsOpen(true)}>Details</Button></div>
-                    <CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." onCursor={() => {}} />
+                    <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Individual · Last activity 2m ago" actions={<Button className="@min-[1560px]/responsive-inspector:hidden" onClick={() => setConversationDetailsOpen(true)}>Details</Button>} />
                   </>
                 }
-                detailFooter={<ComposerUnavailable detail="No authoritative command target is available." />}
+                detailFooter={<><CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." compactOnSmall onCursor={() => {}} /><ComposerUnavailable detail="No authoritative command target is available." /></>}
                 />
               </ResponsiveInspector>
             </WorkspacePageFrame>

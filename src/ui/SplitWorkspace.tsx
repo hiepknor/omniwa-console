@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
+import { useCallback, useLayoutEffect, useRef, type MutableRefObject, type ReactNode, type RefObject } from 'react';
 import { cn } from './cn';
 
 function useScrollReset(ref: RefObject<HTMLDivElement | null>, key: string | undefined, position: 'start' | 'end' = 'start') {
@@ -21,6 +21,7 @@ export function SplitWorkspace({
   detailFooter,
   directoryScrollKey,
   detailScrollKey,
+  detailScrollerRef,
   detailInitialPosition = 'start',
   frame = 'standalone',
   className,
@@ -34,12 +35,17 @@ export function SplitWorkspace({
   detailFooter?: ReactNode;
   directoryScrollKey?: string;
   detailScrollKey?: string;
+  detailScrollerRef?: MutableRefObject<HTMLDivElement | null>;
   detailInitialPosition?: 'start' | 'end';
   frame?: 'standalone' | 'attached';
   className?: string;
 }) {
   const directoryScrollRef = useRef<HTMLDivElement>(null);
-  const detailScrollRef = useRef<HTMLDivElement>(null);
+  const detailScrollRef = useRef<HTMLDivElement | null>(null);
+  const setDetailScroller = useCallback((node: HTMLDivElement | null) => {
+    detailScrollRef.current = node;
+    if (detailScrollerRef) detailScrollerRef.current = node;
+  }, [detailScrollerRef]);
   useScrollReset(directoryScrollRef, directoryScrollKey);
   useScrollReset(detailScrollRef, detailScrollKey, detailInitialPosition);
 
@@ -60,7 +66,7 @@ export function SplitWorkspace({
         aria-label={detailLabel}
         className={cn('flex min-h-0 min-w-0 flex-col', !detailOpen && 'max-[900px]:hidden')}
       >
-        <div ref={detailScrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">{detail}</div>
+        <div ref={setDetailScroller} className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">{detail}</div>
         {detailFooter ? <div className="shrink-0">{detailFooter}</div> : null}
       </section>
     </div>

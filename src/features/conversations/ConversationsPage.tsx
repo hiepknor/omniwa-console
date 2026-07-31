@@ -1,15 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, useBeforeUnload, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { humanizeToken } from '@/lib/format';
+import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { ProjectionFailureNotice as FailureNotice, ProjectionStatus, ProjectionStatusGroup } from '@/components/ProjectionReadState';
-import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { projectionAttentionLabel, ProjectionAttentionStatus, ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
+import { Button, CountBadge, CursorPagination, Dialog, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
+import { composerNavigationBlock, IDLE_COMPOSER_STATE, resolveComposerBlocker, shouldBlockConversationNavigation, type ComposerInteractionState, type ComposerNavigationBlock } from './composer-state';
 import { canonicalConversationLocation, canonicalConversationReadsEnabled, resolveConversationRecipient } from './conversation-identity';
-import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, MessageTimeline } from './ConversationsView';
+import { ConversationList, ConversationMessagePagination, MessageTimeline, SelectedConversationHeader } from './ConversationsView';
 import { ConversationDetailsContent, MessageInspectorContent } from './Details';
 import { ConversationMessageImage } from './Media';
 import { useConversation, useConversations, useMessages } from './hooks';
@@ -18,7 +19,7 @@ import { conversationRouteState, legacyDirectoryTarget, setConversationParam } f
 function BlockedPage({ detail, title }: { detail: string; title: string }) {
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
-      <PageHeader eyebrow="Messaging" title="Conversations" description="Review canonical conversations and projected message history." />
+      <PageHeader eyebrow="Messaging" title="Conversations" description="Review projected history and submit outbound messages." />
       <StateNotice kind="empty" title={title} detail={detail} />
     </div>
   );
@@ -35,6 +36,9 @@ function ConversationWorkspace() {
   const hasConversation = Boolean(activeConversationRef);
   const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(activeConversationRef);
   const [searchDraft, setSearchDraft] = useState(route.search);
+  const [composerState, setComposerState] = useState<ComposerInteractionState>(IDLE_COMPOSER_STATE);
+  const messageScrollerRef = useRef<HTMLDivElement | null>(null);
+  const [blockedReason, setBlockedReason] = useState<Exclude<ComposerNavigationBlock, undefined>>();
   useEffect(() => setSearchDraft(route.search), [route.search]);
   const instanceScope = session.keyKind === 'api';
   const cap = (name: string) => capabilities.data?.capabilities.includes(name) ?? false;
@@ -47,9 +51,21 @@ function ConversationWorkspace() {
   const selectedConversation = conversation.data?.resource;
   const sendRecipient = resolveConversationRecipient(selectedConversation);
   const canonicalConversationId = selectedConversation?.conversationId;
+  const navigationBlocker = useBlocker(({ currentLocation, nextLocation }) => shouldBlockConversationNavigation({
+    currentPath: currentLocation.pathname,
+    nextPath: nextLocation.pathname,
+    canonicalConversationId,
+    state: composerState,
+  }));
+  useBeforeUnload(useCallback((event) => {
+    if (!composerNavigationBlock(composerState)) return;
+    event.preventDefault();
+    event.returnValue = '';
+  }, [composerState]), { capture: true });
   const messages = useMessages(canonicalConversationId, route.messageCursor, messagesReady);
   const loadedConversations = conversations.data?.resource.items ?? [];
   const filteredConversations = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedConversations.filter((i) => !term || i.conversationId.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedConversations, route.search]);
+  const selectedOutsidePage = Boolean(canonicalConversationId && conversations.data && !filteredConversations.some((item) => item.conversationId === canonicalConversationId));
   const loadedMessages = useMemo(() => [...(messages.data?.resource.items ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)), [messages.data]);
   const recipientUnavailableDetail = selectedConversation && !sendRecipient
     ? 'The canonical conversation has no addressing JID. Sending remains disabled until the backend publishes its authoritative provider command target.'
@@ -57,8 +73,18 @@ function ConversationWorkspace() {
   const conversationsSupported = conversationsReady || conversations.data !== undefined || conversation.data !== undefined;
   const messagesSupported = messagesReady || messages.data !== undefined;
 
+  useEffect(() => {
+    const resolution = resolveComposerBlocker(navigationBlocker.state, composerState);
+    if (resolution.action === 'show') setBlockedReason(resolution.reason);
+    else {
+      setBlockedReason(undefined);
+      if (resolution.action === 'reset' && navigationBlocker.state === 'blocked') navigationBlocker.reset();
+    }
+  }, [composerState, navigationBlocker.state]);
+
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
   const openConversation = (id: string) => {
+    if (id === canonicalConversationId) return;
     rememberFocusOrigin();
     navigate(withSearchParams(`/conversations/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['message', 'messageCursor', 'details'])));
   };
@@ -73,7 +99,7 @@ function ConversationWorkspace() {
   const routeRefreshing = conversations.isFetching || detailRefreshing;
   const refreshDirectory = () => { void conversations.refetch(); };
   const refreshDetail = () => { if (activeConversationRef) { void conversation.refetch(); if (messagesReady && canonicalConversationId) void messages.refetch(); } };
-  const refresh = () => { refreshDirectory(); refreshDetail(); };
+  const refreshPage = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(conversations.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined })));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
   useEffect(() => {
@@ -91,18 +117,23 @@ function ConversationWorkspace() {
   const viewSupported = advertised || conversations.data !== undefined;
   const emptyDirectory = Boolean(viewSupported && conversations.data && currentAuthoritative && filteredConversations.length === 0);
   const inspectedMessageId = route.message && selectedConversation && messagesSupported ? route.message : undefined;
+  const pageTitle = <span className="inline-flex items-center gap-2">Conversations{typeof conversations.data?.resource.total === 'number' ? <CountBadge count={conversations.data.resource.total} /> : null}</span>;
+  const selectedProjectionEntries = [{ label: 'Conversation', meta: conversation.data?.meta }, { label: 'Messages', meta: messages.data?.meta }];
+  const selectedProjectionAttention = projectionAttentionLabel(selectedProjectionEntries);
 
   return (
     <>
       <WorkspacePageFrame
         eyebrow="Messaging"
-        title="Conversations"
-        description="Review canonical conversations and projected message history."
-        secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refresh}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
-        compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : 'Conversations'}
-        compactDescription={hasConversation ? (selectedConversation ? humanizeToken(selectedConversation.type) : 'Message timeline') : undefined}
+        title={pageTitle}
+        description="Review projected history and submit outbound messages."
+        secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : pageTitle}
+        compactDescription={hasConversation ? (selectedConversation ? `${humanizeToken(selectedConversation.type)} · ${selectedProjectionAttention ?? `Last activity ${selectedConversation.lastActivityAt ? relativeTime(selectedConversation.lastActivityAt) : 'unreported'}`}` : 'Message timeline') : undefined}
         compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
-        compactActions={<Button disabled={!viewSupported || (hasConversation ? detailRefreshing : conversations.isFetching)} onClick={hasConversation ? refreshDetail : refreshDirectory}>{(hasConversation ? detailRefreshing : conversations.isFetching) ? 'Refreshing…' : 'Refresh'}</Button>}
+        compactActions={hasConversation && selectedConversation
+          ? <><Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button><Button onClick={openConversationDetails}>Details</Button></>
+          : <Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
         compactHeadingRef={compactHeadingRef}
       >
         <ResponsiveInspector
@@ -124,16 +155,13 @@ function ConversationWorkspace() {
           detailOpen={hasConversation}
           directoryScrollKey={JSON.stringify([route.search, route.cursor])}
           detailScrollKey={JSON.stringify([activeConversationRef, route.messageCursor])}
+          detailScrollerRef={messageScrollerRef}
           detailInitialPosition={route.messageCursor ? 'start' : 'end'}
           directoryLabel="Conversation directory"
           detailLabel="Message timeline"
           directory={
             <>
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
-                <WorkspacePaneHeader
-                  title={<span className="inline-flex items-center gap-2">Conversations{typeof conversations.data?.resource.total === 'number' ? <CountBadge count={conversations.data.resource.total} /> : null}</span>}
-                  description={route.search ? `Loaded-page filter for “${route.search}”` : 'Canonical projected conversations'}
-                />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
                   <Field label="Filter conversations" className="min-w-48 flex-1">
                     {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name or ID on this page" onChange={(e) => setSearchDraft(e.target.value)} />}
@@ -149,6 +177,7 @@ function ConversationWorkspace() {
               <>
                 {conversations.error ? <div className="p-3"><FailureNotice error={conversations.error} stale onRetry={refreshDirectory} /></div> : null}
                 <div className="px-3"><ProjectionStatus meta={conversations.data.meta} /></div>
+                {selectedOutsidePage ? <div className="px-3 pb-3"><StateNotice kind="info" title="Selected Conversation is outside this page" detail="The selected canonical Conversation remains open while the directory shows a different bounded page or filter." action={route.search ? <Button onClick={() => { setSearchDraft(''); replaceParams(updateSearchParams(searchParams, { search: undefined, cursor: undefined })); }}>Clear filter</Button> : route.cursor ? <Button onClick={() => replaceParams(updateSearchParams(searchParams, { cursor: undefined }))}>First page</Button> : undefined} /></div> : null}
                 <ConversationList items={filteredConversations} selectedId={canonicalConversationId ?? activeConversationRef} onSelect={openConversation} />
                 {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected Conversation on this loaded page matches the URL-backed filter.' : 'The ready Conversation projection contains no items.'} /></div> : null}
               </>
@@ -156,15 +185,11 @@ function ConversationWorkspace() {
             </>
           }
         directoryFooter={viewSupported && conversations.data ? (
-          <CursorPagination cursor={route.cursor} nextCursor={conversations.data.resource.pagination.nextCursor ?? undefined} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }))} />
+          <CursorPagination cursor={route.cursor} nextCursor={conversations.data.resource.pagination.nextCursor ?? undefined} nextLabel="Next page" info={`${filteredConversations.length} shown on this page`} onCursor={(v) => replaceParams(updateSearchParams(searchParams, { cursor: v }))} />
         ) : undefined}
         detail={
           <>
-            <WorkspacePaneHeader
-              className="max-[900px]:hidden"
-              title={selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline')}
-              description={activeConversationRef ? 'Persisted projection history' : 'Select a projected conversation to inspect its history'}
-            />
+            {selectedConversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={selectedConversation} projectionAttention={<ProjectionAttentionStatus entries={selectedProjectionEntries} />} onDetails={openConversationDetails} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description={activeConversationRef ? 'Reading projected Conversation' : 'Select a projected Conversation to inspect its history'} />}
             {!activeConversationRef ? (
               <div className="p-4"><StateNotice kind="empty" title="No conversation selected" detail="Select a conversation from the projected directory." /></div>
             ) : !conversationsSupported ? (
@@ -176,12 +201,6 @@ function ConversationWorkspace() {
             ) : selectedConversation ? (
               <div className="flex min-h-full flex-col">
                 {conversation.error ? <div className="px-4 pt-3"><FailureNotice error={conversation.error} stale onRetry={() => conversation.refetch()} /></div> : null}
-                <div className="flex flex-wrap items-center gap-3 px-4 py-2 border-b border-line text-xs text-fg-3">
-                  <ConversationUnreadCount count={selectedConversation.unreadCount} authoritative={selectedConversation.unreadAuthoritative} context="detail" />
-                  <span>{humanizeToken(selectedConversation.type)}</span>
-                  <Button className="ml-auto @min-[1560px]/responsive-inspector:hidden" onClick={openConversationDetails}>Details</Button>
-                </div>
-                <div className="px-4"><ProjectionStatusGroup entries={[{ label: 'Conversation', meta: conversation.data?.meta }, { label: 'Messages', meta: messages.data?.meta }]} /></div>
                 {!messagesSupported ? (
                   <div className="p-4"><StateNotice kind="empty" title="Unsupported" detail="The backend does not advertise messages_projection." /></div>
                 ) : messages.isPending ? (
@@ -198,15 +217,10 @@ function ConversationWorkspace() {
                       renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />}
                       conversationType={selectedConversation.type}
                       scrollKey={JSON.stringify([selectedConversation.conversationId, route.messageCursor])}
+                      scrollContainerRef={messageScrollerRef}
                       anchorToEnd={!route.messageCursor}
                     />
                     {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No projected messages" detail="The ready Message projection returned no messages for this Conversation." /></div> : null}
-                    <ConversationMessagePagination
-                      itemCount={loadedMessages.length}
-                      cursor={route.messageCursor}
-                      nextCursor={messages.data.resource.pagination.nextCursor ?? undefined}
-                      onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))}
-                    />
                   </>
                 ) : null}
               </div>
@@ -215,17 +229,44 @@ function ConversationWorkspace() {
             )}
           </>
         }
-        detailFooter={selectedConversation ? <Composer
-          conversationId={selectedConversation.conversationId}
-          addressingJid={sendRecipient ?? ''}
-          conversationName={selectedConversation.displayName ?? `Unknown ${selectedConversation.type} conversation`}
-          enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
-          mediaEnabled={conversationMedia}
-          unavailableDetail={recipientUnavailableDetail}
-        /> : undefined}
+        detailFooter={selectedConversation ? <>
+          {messages.data ? <ConversationMessagePagination
+            itemCount={loadedMessages.length}
+            cursor={route.messageCursor}
+            nextCursor={messages.data.resource.pagination.nextCursor ?? undefined}
+            onCursor={(v) => replaceParams(updateSearchParams(searchParams, { messageCursor: v }, ['message']))}
+          /> : null}
+          <Composer
+            key={selectedConversation.conversationId}
+            conversationId={selectedConversation.conversationId}
+            addressingJid={sendRecipient ?? ''}
+            conversationName={selectedConversation.displayName ?? `Unknown ${selectedConversation.type} conversation`}
+            enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
+            mediaEnabled={conversationMedia}
+            unavailableDetail={recipientUnavailableDetail}
+            onInteractionStateChange={setComposerState}
+          />
+        </> : undefined}
           />
         </ResponsiveInspector>
       </WorkspacePageFrame>
+
+      <Dialog
+        open={navigationBlocker.state === 'blocked' && blockedReason !== undefined}
+        onClose={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}
+        title={blockedReason === 'dirty' ? 'Discard unsent message?' : blockedReason === 'pending' ? 'Message submission in progress' : blockedReason === 'unknown_outcome' ? 'Review unknown send outcome' : ''}
+        footer={blockedReason === 'dirty'
+          ? <><Button onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}>Stay</Button><Button variant="danger" onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.proceed()}>Discard and continue</Button></>
+          : blockedReason ? <Button variant="primary" onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}>Stay with Conversation</Button> : null}
+      >
+        <p className="text-sm text-fg-2">
+          {blockedReason === 'dirty'
+            ? 'Changing Conversation will discard the current text or media draft.'
+            : blockedReason === 'pending'
+              ? 'Wait for the current provider command acknowledgement before changing Conversation.'
+              : blockedReason === 'unknown_outcome' ? 'The send outcome is unknown. Keep this Conversation open and review the command state before taking another action.' : ''}
+        </p>
+      </Dialog>
 
     </>
   );
