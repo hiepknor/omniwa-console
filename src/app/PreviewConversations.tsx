@@ -4,7 +4,7 @@ import { Composer } from '@/features/conversations/Composer';
 import { ConversationList, ConversationMessagePagination, MessageTimeline, SelectedConversationHeader } from '@/features/conversations/ConversationsView';
 import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
-import { humanizeToken } from '@/lib/format';
+import { humanizeToken, relativeTime } from '@/lib/format';
 import { Button, CountBadge, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { conversationsFixture, messagesFixture } from './preview-fixtures';
 
@@ -24,7 +24,7 @@ export function PreviewConversations() {
         title="Conversations"
         description="Review projected history and submit outbound messages."
         compactTitle={conversation?.displayName ?? 'Conversations'}
-        compactDescription={conversation ? humanizeToken(conversation.type) : undefined}
+        compactDescription={conversation ? `${humanizeToken(conversation.type)} · Last activity ${conversation.lastActivityAt ? relativeTime(conversation.lastActivityAt) : 'unreported'}` : undefined}
         compactLeadingAction={conversation ? <Button onClick={() => setConversationId(undefined)}>Back</Button> : undefined}
         compactActions={conversation ? <><Button>Refresh</Button><Button onClick={() => setDetailsOpen(true)}>Details</Button></> : <Button>Refresh</Button>}
         compactHeadingRef={compactHeadingRef}

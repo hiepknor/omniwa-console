@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Navigate, useBeforeUnload, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
-import { humanizeToken } from '@/lib/format';
+import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus, ProjectionStatusGroup } from '@/components/ProjectionReadState';
@@ -57,6 +57,11 @@ function ConversationWorkspace() {
     canonicalConversationId,
     state: composerState,
   }));
+  useBeforeUnload(useCallback((event) => {
+    if (!composerNavigationBlock(composerState)) return;
+    event.preventDefault();
+    event.returnValue = '';
+  }, [composerState]), { capture: true });
   const messages = useMessages(canonicalConversationId, route.messageCursor, messagesReady);
   const loadedConversations = conversations.data?.resource.items ?? [];
   const filteredConversations = useMemo(() => { const term = route.search.trim().toLocaleLowerCase(); return loadedConversations.filter((i) => !term || i.conversationId.toLocaleLowerCase().includes(term) || i.displayName?.toLocaleLowerCase().includes(term)); }, [loadedConversations, route.search]);
@@ -71,7 +76,7 @@ function ConversationWorkspace() {
   useEffect(() => {
     if (navigationBlocker.state === 'blocked') setBlockedReason(composerNavigationBlock(composerState));
     else setBlockedReason(undefined);
-  }, [navigationBlocker.state]);
+  }, [composerState, navigationBlocker.state]);
 
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
   const openConversation = (id: string) => {
@@ -114,7 +119,7 @@ function ConversationWorkspace() {
         title="Conversations"
         description="Review projected history and submit outbound messages."
         compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : 'Conversations'}
-        compactDescription={hasConversation ? (selectedConversation ? humanizeToken(selectedConversation.type) : 'Message timeline') : undefined}
+        compactDescription={hasConversation ? (selectedConversation ? `${humanizeToken(selectedConversation.type)} · Last activity ${selectedConversation.lastActivityAt ? relativeTime(selectedConversation.lastActivityAt) : 'unreported'}` : 'Message timeline') : undefined}
         compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
         compactActions={hasConversation && selectedConversation
           ? <><Button disabled={!viewSupported || detailRefreshing} onClick={refreshDetail}>{detailRefreshing ? 'Refreshing…' : 'Refresh'}</Button><Button onClick={openConversationDetails}>Details</Button></>
