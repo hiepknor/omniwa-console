@@ -80,6 +80,12 @@ function optionalString(value: unknown): string | undefined {
   return typeof value === 'string' ? nonEmpty(value) : undefined;
 }
 
+function exactNonEmptyString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 && value === value.trim()
+    ? value
+    : undefined;
+}
+
 function optionalNumber(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 }
@@ -104,13 +110,13 @@ function toMessage(value: unknown, fail: (message: string) => never): MessageRes
   const payload = recordOf(value);
   if (!payload) fail('Message response contained a row that was not an object.');
 
-  const messageId = optionalString(payload.messageId);
+  const messageId = exactNonEmptyString(payload.messageId);
   if (!messageId) fail('Message response did not include its required messageId.');
-  const conversationId = optionalString(payload.conversationId);
+  const conversationId = exactNonEmptyString(payload.conversationId);
   if (!isCanonicalConversationId(conversationId)) {
     fail(`Message ${messageId} did not include a valid canonical conversationId.`);
   }
-  const providerTimestamp = optionalString(payload.providerTimestamp);
+  const providerTimestamp = exactNonEmptyString(payload.providerTimestamp);
   if (!isTimestamp(providerTimestamp)) {
     fail(`Message ${messageId} did not include a valid authoritative providerTimestamp.`);
   }

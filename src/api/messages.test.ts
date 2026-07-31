@@ -53,6 +53,9 @@ describe('messages projection adapter', () => {
     ['messageId', { messageId: undefined }],
     ['conversationId', { conversationId: undefined, providerChatId: 'provider-fallback' }],
     ['providerTimestamp', { providerTimestamp: undefined, sentAt: '2026-07-22T08:05:00Z' }],
+    ['whitespace-padded messageId', { messageId: ' message-1 ' }],
+    ['whitespace-padded conversationId', { conversationId: ` ${message.conversationId} ` }],
+    ['whitespace-padded providerTimestamp', { providerTimestamp: ' 2026-07-22T08:00:00Z ' }],
   ])('fails the whole Message list when a row has an invalid required %s', async (_field, replacement) => {
     const GET = vi.fn().mockResolvedValue(ok({
       message: 'success',

@@ -107,9 +107,10 @@ export async function getOverview(client: ApiClient, window = '24h'): Promise<Ov
     projections: {
       groups: optionalCount(payload?.projections?.groups),
       contacts: optionalCount(payload?.projections?.contacts),
-      // The backend wire contract still calls this aggregate `chats`. Keep that
-      // compatibility spelling contained at the API boundary.
-      conversations: optionalCount(payload?.projections?.chats),
+      // Prefer the canonical entity count. `chats` is a temporary fallback for
+      // older backends whose provider-row count was the only published field.
+      conversations: optionalCount(payload?.projections?.conversations)
+        ?? optionalCount(payload?.projections?.chats),
       messages: optionalCount(payload?.projections?.messages),
       events: optionalCount(payload?.projections?.events),
     },

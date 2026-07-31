@@ -132,6 +132,19 @@ describe('canonical conversations projection adapter', () => {
     await expect(listConversations({ GET } as unknown as ApiClient)).rejects.toMatchObject({ code: 'invalid_response' });
   });
 
+  it.each([
+    ['conversationId', { conversationId: ` ${conversation.conversationId} ` }],
+    ['alias', { aliases: [' 100@s.whatsapp.net'] }],
+  ])('rejects whitespace-padded required %s instead of normalizing it', async (_field, replacement) => {
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: [{ ...conversation, ...replacement }],
+      meta: { syncStatus: 'ready', total: 1 },
+    }));
+
+    await expect(listConversations({ GET } as unknown as ApiClient)).rejects.toMatchObject({ code: 'invalid_response' });
+  });
+
   it('fails closed when canonical detail omits its required conversationId', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: { ...conversation, conversationId: undefined, addressingJid: '123@lid' } }));
     await expect(getConversation({ GET } as unknown as ApiClient, '123@lid')).rejects.toMatchObject({ code: 'invalid_response' });

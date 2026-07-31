@@ -1,8 +1,8 @@
 # OmniWA GO Public Contract
 
 This is the Console-facing handoff for the OmniWA GO backend at commit
-`916e2e78f7753fce06e6511d69ed249763f2b28b` (2026-07-29), described as
-`0.7.2-128-g916e2e7`. The vendored machine contract at
+`d82d56df3bb74b175ffd4ba2dc478c38b631a0f4` (2026-07-31), described as
+`0.7.2-148-gd82d56d`. The vendored machine contract at
 `contracts/omniwa-go.openapi.json` remains authoritative for paths and schemas;
 this document records cross-cutting semantics that generated types cannot
 express reliably.
@@ -284,10 +284,11 @@ rate-limit/circuit-breaker states. The runtime also exposes an undocumented
 `GET /server/ok`; it is liveness only, is not part of the vendored contract, and
 must not be consumed to infer WhatsApp connection status.
 
-The Overview wire DTO still publishes the historical aggregate field
-`projections.chats`. The Console adapts that field once at `src/api/overview.ts`
-and exposes only `projections.conversations` to product-facing code. This does
-not add a field to the generated schema or change the public backend contract.
+The Overview wire DTO publishes canonical `projections.conversations` and the
+deprecated provider-row count `projections.chats`, which may be larger. The
+Console prefers `conversations` and falls back to `chats` only for older backend
+revisions during mixed rollout. Product-facing code sees only Conversations.
+Remove the fallback after every backend deployment has the canonical field.
 
 ## Errors and rate limits
 

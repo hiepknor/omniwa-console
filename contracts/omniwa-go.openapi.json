@@ -13669,9 +13669,14 @@
         "type": "object",
         "properties": {
           "chats": {
+            "description": "Chats is the deprecated provider Chat projection-row count retained for compatibility; it can exceed Conversations.",
             "type": "integer"
           },
           "contacts": {
+            "type": "integer"
+          },
+          "conversations": {
+            "description": "Conversations counts canonical public Conversation entities.",
             "type": "integer"
           },
           "events": {

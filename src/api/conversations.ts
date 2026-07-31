@@ -51,6 +51,12 @@ function optionalString(value: unknown): string | undefined {
   return typeof value === 'string' ? nonEmpty(value) : undefined;
 }
 
+function exactNonEmptyString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.length > 0 && value === value.trim()
+    ? value
+    : undefined;
+}
+
 function optionalBoolean(value: unknown): boolean | undefined {
   return typeof value === 'boolean' ? value : undefined;
 }
@@ -81,7 +87,7 @@ function toConversation(value: unknown, fail: (message: string) => never): Conve
   const payload = recordOf(value);
   if (!payload) fail('Conversation response contained a row that was not an object.');
 
-  const conversationId = optionalString(payload.conversationId);
+  const conversationId = exactNonEmptyString(payload.conversationId);
   if (!isCanonicalConversationId(conversationId)) {
     fail('Conversation response did not include a valid canonical conversationId.');
   }
@@ -99,9 +105,9 @@ function toConversation(value: unknown, fail: (message: string) => never): Conve
   if (aliasesReported) {
     if (!Array.isArray(payload.aliases)) fail(`Conversation ${conversationId} included invalid aliases.`);
     aliases = payload.aliases.map((alias) => {
-      const normalized = optionalString(alias);
-      if (!normalized) fail(`Conversation ${conversationId} included an invalid alias.`);
-      return normalized;
+      const exactAlias = exactNonEmptyString(alias);
+      if (!exactAlias) fail(`Conversation ${conversationId} included an invalid alias.`);
+      return exactAlias;
     });
   }
 
