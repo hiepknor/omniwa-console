@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
-import { appendedMessageScrollAction, ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline, SelectedConversationHeader } from './ConversationsView';
+import { appendedMessageScrollAction, ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline, SelectedConversationHeader, shouldAnchorInitialMessagePage } from './ConversationsView';
 
 describe('ConversationUnreadCount', () => {
   it('omits a zero count from dense directory rows', () => {
@@ -62,11 +62,11 @@ describe('SelectedConversationHeader', () => {
       type: 'group',
       unreadCount: 12,
       unreadAuthoritative: true,
-    }} refreshing={false} onRefresh={() => {}} onDetails={() => {}} />);
+    }} onDetails={() => {}} />);
 
     expect(html).toContain('Operations');
-    expect(html).toContain('Group · Last activity activity unreported');
-    expect(html).toContain('Refresh');
+    expect(html).toContain('Group · Last activity unreported');
+    expect(html).not.toContain('Refresh');
     expect(html).toContain('Details');
     expect(html).not.toContain('12 unread');
     expect(html).not.toContain('>12</span>');
@@ -132,12 +132,19 @@ describe('MessageTimeline', () => {
   it('keeps following new messages bounded to operators already near the end', () => {
     expect(isNearScrollEnd({ scrollHeight: 1_000, scrollTop: 420, clientHeight: 500 })).toBe(true);
     expect(isNearScrollEnd({ scrollHeight: 1_000, scrollTop: 200, clientHeight: 500 })).toBe(false);
-    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, added: true, nearEnd: true })).toBe('follow');
-    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, added: true, nearEnd: false })).toBe('offer-latest');
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, previousNewestAt: 100, nextNewestAt: 200, nearEnd: true })).toBe('follow');
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, previousNewestAt: 100, nextNewestAt: 200, nearEnd: false })).toBe('offer-latest');
   });
 
-  it('does not offer or follow new items while changing bounded pages', () => {
-    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: true, added: true, nearEnd: false })).toBe('none');
-    expect(appendedMessageScrollAction({ anchorToEnd: false, keyChanged: false, added: true, nearEnd: true })).toBe('none');
+  it('anchors the newest page when its first data arrives after the route transition', () => {
+    expect(shouldAnchorInitialMessagePage({ anchorToEnd: true, keyChanged: true, initialLatestPending: true, itemCount: 0 })).toBe(false);
+    expect(shouldAnchorInitialMessagePage({ anchorToEnd: true, keyChanged: false, initialLatestPending: true, itemCount: 2 })).toBe(true);
+    expect(shouldAnchorInitialMessagePage({ anchorToEnd: false, keyChanged: true, initialLatestPending: false, itemCount: 2 })).toBe(false);
+  });
+
+  it('does not offer or follow backfilled items or changes between bounded pages', () => {
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, previousNewestAt: 200, nextNewestAt: 200, nearEnd: false })).toBe('none');
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: true, previousNewestAt: 100, nextNewestAt: 200, nearEnd: false })).toBe('none');
+    expect(appendedMessageScrollAction({ anchorToEnd: false, keyChanged: false, previousNewestAt: 100, nextNewestAt: 200, nearEnd: true })).toBe('none');
   });
 });

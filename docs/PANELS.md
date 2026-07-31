@@ -320,9 +320,11 @@ its own row: authoritative counts render normally, while non-authoritative count
 remain best-known data and render as syncing without a numeric badge. The Console
 does not coerce them to zero, hide the Conversation, or reconcile alias totals.
 
-The selected Conversation header keeps display identity, type, last activity,
-pane-owned refresh, and `Details`; unread attention remains in the Conversation
-directory and is a plain fact in the inspector. At 1560px of actual workspace
+The page header owns the authoritative Conversation total and the single Refresh
+action; the directory starts directly with its sticky filter. The selected
+Conversation header keeps display identity, type, last activity, and `Details`;
+unread attention remains in the Conversation directory and is a plain fact in
+the inspector. At 1560px of actual workspace
 width, backend-reported identity, provider routing,
 and projected state persist in a non-modal 440px third inspector column; selected
 Message details replace that content and closing them restores Conversation
@@ -336,11 +338,15 @@ form. When available, the selected header supplies visible target context; the
 shared Textarea auto-grows from one through four lines and stays in one
 bottom-aligned row with `Media…` and `Send`; its accessible name and Media dialog
 retain the selected Conversation name. Notices above the row retain command
-error, cooldown, unknown-outcome, and acknowledgement semantics.
+error, cooldown, unknown-outcome, and acknowledgement semantics. Dirty drafts
+confirm before navigation; pending and unknown outcomes remain on the selected
+Conversation. A blocked navigation resets when the Composer becomes clean.
 
-The newest Message page starts at the end of the explicit detail scroller. A
-same-page append follows only when the operator is already near the end;
-otherwise `Latest messages` appears without interrupting history review. Older
+The newest Message page starts at the end of the explicit detail scroller,
+including when its first data arrives after the route transition. A same-page
+authoritative newest timestamp moving forward follows only when the
+operator is already near the end; projection backfill never moves the viewport.
+Otherwise `Latest messages` appears without interrupting history review. Older
 cursor pages start at the beginning and never claim accumulated history.
 
 Implemented commands owned by the workspace:

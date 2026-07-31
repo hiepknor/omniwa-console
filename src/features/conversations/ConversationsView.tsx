@@ -12,26 +12,19 @@ export function ConversationUnreadCount({ count, authoritative }: { count: numbe
   return <CountBadge count={count} aria-label={label} title={label} />;
 }
 
-export function SelectedConversationHeader({ conversation, refreshing, onRefresh, onDetails, className }: {
+export function SelectedConversationHeader({ conversation, onDetails, className }: {
   conversation: ConversationResource;
-  refreshing: boolean;
-  onRefresh: () => void;
   onDetails: () => void;
   className?: string;
 }) {
   const name = conversation.displayName ?? `Unknown ${humanizeToken(conversation.type)} conversation`;
-  const activity = conversation.lastActivityAt ? relativeTime(conversation.lastActivityAt) : 'activity unreported';
+  const activity = conversation.lastActivityAt ? relativeTime(conversation.lastActivityAt) : 'unreported';
   return (
     <WorkspacePaneHeader
       className={className}
       title={name}
       description={`${humanizeToken(conversation.type)} · Last activity ${activity}`}
-      actions={(
-        <>
-          <Button disabled={refreshing} onClick={onRefresh}>{refreshing ? 'Refreshing…' : 'Refresh'}</Button>
-          <Button className="@min-[1560px]/responsive-inspector:hidden" onClick={onDetails}>Details</Button>
-        </>
-      )}
+      actions={<Button className="@min-[1560px]/responsive-inspector:hidden" onClick={onDetails}>Details</Button>}
     />
   );
 }
@@ -98,14 +91,29 @@ export function isNearScrollEnd({ scrollHeight, scrollTop, clientHeight }: Pick<
   return scrollHeight - scrollTop - clientHeight <= threshold;
 }
 
-export function appendedMessageScrollAction({ anchorToEnd, keyChanged, added, nearEnd }: {
+export function appendedMessageScrollAction({ anchorToEnd, keyChanged, previousNewestAt, nextNewestAt, nearEnd }: {
   anchorToEnd: boolean;
   keyChanged: boolean;
-  added: boolean;
+  previousNewestAt?: number;
+  nextNewestAt?: number;
   nearEnd: boolean;
 }): 'follow' | 'offer-latest' | 'none' {
-  if (!anchorToEnd || keyChanged || !added) return 'none';
+  if (!anchorToEnd || keyChanged || previousNewestAt === undefined || nextNewestAt === undefined || nextNewestAt <= previousNewestAt) return 'none';
   return nearEnd ? 'follow' : 'offer-latest';
+}
+
+export function shouldAnchorInitialMessagePage({ anchorToEnd, keyChanged, initialLatestPending, itemCount }: {
+  anchorToEnd: boolean;
+  keyChanged: boolean;
+  initialLatestPending: boolean;
+  itemCount: number;
+}): boolean {
+  return anchorToEnd && itemCount > 0 && (keyChanged || initialLatestPending);
+}
+
+function newestMessageTimestamp(items: MessageResource[]): number | undefined {
+  if (!items.length) return undefined;
+  return Math.max(...items.map((item) => Date.parse(item.createdAt)));
 }
 
 function projectedMessageContent(item: MessageResource): string {
@@ -125,7 +133,8 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
   const timelineRef = useRef<HTMLOListElement>(null);
   const nearEndRef = useRef(true);
   const previousScrollKey = useRef<string | undefined | null>(null);
-  const previousItemIds = useRef<Set<string>>(new Set());
+  const previousNewestAt = useRef<number>();
+  const initialLatestPending = useRef(false);
   const [hasNewerItems, setHasNewerItems] = useState(false);
 
   useEffect(() => {
@@ -143,20 +152,27 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
   useLayoutEffect(() => {
     const scroller = scrollContainerRef?.current;
     const keyChanged = previousScrollKey.current !== scrollKey;
-    const added = items.some((item) => !previousItemIds.current.has(item.id));
-    const action = appendedMessageScrollAction({ anchorToEnd, keyChanged, added, nearEnd: nearEndRef.current });
+    const nextNewestAt = newestMessageTimestamp(items);
+    const action = appendedMessageScrollAction({ anchorToEnd, keyChanged, previousNewestAt: previousNewestAt.current, nextNewestAt, nearEnd: nearEndRef.current });
     if (keyChanged) {
+      initialLatestPending.current = anchorToEnd;
       nearEndRef.current = anchorToEnd;
       setHasNewerItems(false);
-    } else if (scroller && action === 'follow') {
+    }
+    if (scroller && shouldAnchorInitialMessagePage({ anchorToEnd, keyChanged, initialLatestPending: initialLatestPending.current, itemCount: items.length })) {
+      scroller.scrollTop = scroller.scrollHeight;
+      initialLatestPending.current = false;
+      nearEndRef.current = true;
+      setHasNewerItems(false);
+    } else if (!keyChanged && scroller && action === 'follow') {
       scroller.scrollTop = scroller.scrollHeight;
       nearEndRef.current = true;
       setHasNewerItems(false);
-    } else if (action === 'offer-latest') {
+    } else if (!keyChanged && action === 'offer-latest') {
       setHasNewerItems(true);
     }
     previousScrollKey.current = scrollKey;
-    previousItemIds.current = new Set(items.map((item) => item.id));
+    previousNewestAt.current = nextNewestAt;
   }, [anchorToEnd, items, scrollContainerRef, scrollKey]);
 
   return (

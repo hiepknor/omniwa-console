@@ -231,13 +231,17 @@ resource models, or rendered diagnostics.
   avatars; system/unknown messages stay centered and neutral. Day separators
   preserve chronological orientation, absent text is explicitly unreported, and
   an incoming Group participant remains unidentified until the backend projects
-  an authoritative display identity. Newest pages anchor to the end; older pages
-  start at their beginning, and new messages follow only while the operator is
-  already near the end. Otherwise a compact `Latest messages` action appears
+  an authoritative display identity. Newest pages anchor to the end, including
+  when their first data arrives after the route transition; older pages start
+  at their beginning, and a newer authoritative timestamp follows only
+  while the operator is already near the end. Backfilled history never moves the
+  viewport. Otherwise a compact `Latest messages` action appears
   without moving the explicit detail scroller. Conversation and Messages projection health combines
   only when both scopes are ready; all non-ready scopes remain separate.
-  The selected Conversation header keeps display identity, type, last activity,
-  pane-owned refresh, and `Details` as scan-critical context. Below 1560px of
+  The page header owns the authoritative Conversation total and the single
+  Refresh action; the directory begins with its sticky filter and does not repeat
+  a list header. The selected Conversation header keeps display identity, type,
+  last activity, and `Details` as scan-critical context. Below 1560px of
   actual workspace width `Details` opens the
   shared Drawer. At or above that container threshold the same inspector content
   remains visible as a non-modal 440px third column beside a 320px directory and
@@ -261,7 +265,10 @@ resource models, or rendered diagnostics.
   bottom-aligned row, including mobile; the accessible field name and Media dialog
   retain the selected Conversation name. Command errors,
   cooldown, unknown outcome, and acknowledgement stay in the explicit notices
-  above it.
+  above it. Dirty drafts confirm before route changes; pending and unknown
+  outcomes keep the selected Conversation in place. If a pending navigation
+  finishes with a clean Composer, the stale block resets instead of being
+  mislabeled as an unknown outcome.
 - The Messaging Directory owns Contacts and Labels as page-level resource tabs,
   not modes inside the Conversation list. Only the active resource projection is
   queried. At 900px and wider it uses the shared 320px list + remaining detail

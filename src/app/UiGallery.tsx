@@ -570,9 +570,10 @@ export function UiGallery() {
           <div className="h-[34rem] min-h-0 overflow-hidden border border-line-strong">
             <WorkspacePageFrame
               eyebrow="Messaging"
-              title="Conversations"
+              title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
               description="Review projected history and submit outbound messages."
-              compactTitle={workspaceDetail ? 'conversation_01' : 'Conversations'}
+              secondaryActions={<Button>Refresh</Button>}
+              compactTitle={workspaceDetail ? 'conversation_01' : <span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
               compactDescription={workspaceDetail ? 'Projected detail' : undefined}
               compactLeadingAction={workspaceDetail ? <Button onClick={() => { setWorkspaceDetail(false); setConversationDetailsOpen(false); }}>Back</Button> : undefined}
               compactActions={<Button>Refresh</Button>}
@@ -591,13 +592,12 @@ export function UiGallery() {
                 detailLabel="Sample detail"
                 directory={
                   <>
-                    <WorkspacePaneHeader className="max-[900px]:hidden" title="Directory" description="Select a projected resource" actions={<Button>Refresh</Button>} />
                     {['conversation_01', 'conversation_02', 'conversation_03'].map((id) => <button key={id} type="button" className="flex min-h-14 w-full items-center border-b border-line px-3 text-left text-[13px] hover:bg-elevated" onClick={() => setWorkspaceDetail(true)}><span className="font-mono">{id}</span></button>)}
                   </>
                 }
                 detail={
                   <>
-                    <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Individual · Last activity 2m ago" actions={<><Button>Refresh</Button><Button className="@min-[1560px]/responsive-inspector:hidden" onClick={() => setConversationDetailsOpen(true)}>Details</Button></>} />
+                    <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Individual · Last activity 2m ago" actions={<Button className="@min-[1560px]/responsive-inspector:hidden" onClick={() => setConversationDetailsOpen(true)}>Details</Button>} />
                     <CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." onCursor={() => {}} />
                   </>
                 }

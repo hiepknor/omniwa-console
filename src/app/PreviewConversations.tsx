@@ -21,9 +21,10 @@ export function PreviewConversations() {
       <main className="h-dvh overflow-hidden bg-bg">
         <WorkspacePageFrame
         eyebrow="Messaging"
-        title="Conversations"
+        title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
         description="Review projected history and submit outbound messages."
-        compactTitle={conversation?.displayName ?? 'Conversations'}
+        secondaryActions={<Button>Refresh</Button>}
+        compactTitle={conversation?.displayName ?? <span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
         compactDescription={conversation ? `${humanizeToken(conversation.type)} · Last activity ${conversation.lastActivityAt ? relativeTime(conversation.lastActivityAt) : 'unreported'}` : undefined}
         compactLeadingAction={conversation ? <Button onClick={() => setConversationId(undefined)}>Back</Button> : undefined}
         compactActions={conversation ? <><Button>Refresh</Button><Button onClick={() => setDetailsOpen(true)}>Details</Button></> : <Button>Refresh</Button>}
@@ -47,7 +48,6 @@ export function PreviewConversations() {
           directory={
             <>
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
-                <WorkspacePaneHeader title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>} description="Canonical projected conversations" actions={<Button>Refresh</Button>} />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => e.preventDefault()}>
                   <Field label="Filter conversations" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" placeholder="Name or ID on this page" />}</Field>
                   <div className="flex items-end"><Button type="submit">Apply</Button></div>
@@ -58,7 +58,7 @@ export function PreviewConversations() {
           }
         detail={
           <>
-            {conversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={conversation} refreshing={false} onRefresh={() => {}} onDetails={() => setDetailsOpen(true)} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description="Select a projected Conversation" />}
+            {conversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={conversation} onDetails={() => setDetailsOpen(true)} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description="Select a projected Conversation" />}
           {conversation ? <div className="flex min-h-full flex-col">
             <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} conversationType={conversation.type} scrollKey={`${conversation.conversationId}:newest`} scrollContainerRef={messageScrollerRef} anchorToEnd renderMedia={(message) => {
               if (message.mediaAssetId === 'asset_ready') return <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />;

@@ -274,13 +274,17 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   sender from JID: until an authoritative participant display identity exists,
   incoming group messages say `Participant not identified` and raw identifiers
   remain inspector-only. Opening a newest cursor page anchors its scroll
-  container to the end; older cursor pages start at their beginning. New items
-  follow only while the operator remains near the end. While the operator reads
-  earlier history, appended items expose a compact `Latest messages` action
+  container to the end, including when its first data arrives after the route
+  transition; older cursor pages start at their beginning. New items
+  follow only while the operator remains near the end. Only an authoritative
+  newest timestamp moving forward counts as an append; projection backfill does
+  not move the viewport. While the operator reads earlier history, appended items expose a compact `Latest messages` action
   instead of moving the explicit detail scroller, so review is never interrupted.
 - **Conversation details and send availability** — the selected Conversation
-  header keeps display identity, type, last activity, pane-owned refresh, and a
-  visible `Details` action when the inspector is not docked. Unread attention
+  header keeps display identity, type, last activity, and a visible `Details`
+  action when the inspector is not docked. The page header owns the single
+  Refresh action and authoritative Conversation total; the directory starts
+  directly with its sticky filter instead of repeating a list header. Unread attention
   stays in the directory; canonical and provider identifiers stay out of the
   primary timeline header. `Details` opens the canonical Drawer below the
   responsive-inspector threshold; at or above that threshold the same content
@@ -302,7 +306,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   that row and may expand the footer only while reported. Auto-grow changes
   geometry only; its accessible name and Media dialog retain the selected
   Conversation name. It does not introduce Enter-to-send or change submission,
-  capability, retry, or acknowledgement semantics.
+  capability, retry, or acknowledgement semantics. Dirty drafts confirm before
+  route changes, pending and unknown outcomes keep the selected Conversation in
+  place, and a pending navigation block resets once the Composer becomes clean.
 - **DescriptionList / DescriptionItem** — the only repeated key/value facts
   treatment. It preserves native `dl`/`dt`/`dd` semantics, right-aligns dense
   values on wide screens, stacks them at ≤640px, wraps long content, and uses

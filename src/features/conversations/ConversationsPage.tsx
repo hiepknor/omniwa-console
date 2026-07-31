@@ -8,7 +8,7 @@ import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus, ProjectionStatusGroup } from '@/components/ProjectionReadState';
 import { Button, CountBadge, CursorPagination, Dialog, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
-import { composerNavigationBlock, IDLE_COMPOSER_STATE, shouldBlockConversationNavigation, type ComposerInteractionState, type ComposerNavigationBlock } from './composer-state';
+import { composerNavigationBlock, IDLE_COMPOSER_STATE, resolveComposerBlocker, shouldBlockConversationNavigation, type ComposerInteractionState, type ComposerNavigationBlock } from './composer-state';
 import { canonicalConversationLocation, canonicalConversationReadsEnabled, resolveConversationRecipient } from './conversation-identity';
 import { ConversationList, ConversationMessagePagination, MessageTimeline, SelectedConversationHeader } from './ConversationsView';
 import { ConversationDetailsContent, MessageInspectorContent } from './Details';
@@ -74,8 +74,12 @@ function ConversationWorkspace() {
   const messagesSupported = messagesReady || messages.data !== undefined;
 
   useEffect(() => {
-    if (navigationBlocker.state === 'blocked') setBlockedReason(composerNavigationBlock(composerState));
-    else setBlockedReason(undefined);
+    const resolution = resolveComposerBlocker(navigationBlocker.state, composerState);
+    if (resolution.action === 'show') setBlockedReason(resolution.reason);
+    else {
+      setBlockedReason(undefined);
+      if (resolution.action === 'reset' && navigationBlocker.state === 'blocked') navigationBlocker.reset();
+    }
   }, [composerState, navigationBlocker.state]);
 
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
@@ -92,8 +96,10 @@ function ConversationWorkspace() {
   const currentMeta = conversations.data?.meta;
   const currentAuthoritative = currentMeta?.syncStatus === undefined || currentMeta.syncStatus === 'ready';
   const detailRefreshing = Boolean(activeConversationRef) && (conversation.isFetching || messages.isFetching);
+  const routeRefreshing = conversations.isFetching || detailRefreshing;
   const refreshDirectory = () => { void conversations.refetch(); };
   const refreshDetail = () => { if (activeConversationRef) { void conversation.refetch(); if (messagesReady && canonicalConversationId) void messages.refetch(); } };
+  const refreshPage = () => { refreshDirectory(); refreshDetail(); };
   useInvalidCursorReset(conversations.error, route.cursor, () => replaceParams(updateSearchParams(searchParams, { cursor: undefined })));
   useInvalidCursorReset(messages.error, route.messageCursor, () => replaceParams(updateSearchParams(searchParams, { messageCursor: undefined }, ['message'])));
   useEffect(() => {
@@ -111,19 +117,21 @@ function ConversationWorkspace() {
   const viewSupported = advertised || conversations.data !== undefined;
   const emptyDirectory = Boolean(viewSupported && conversations.data && currentAuthoritative && filteredConversations.length === 0);
   const inspectedMessageId = route.message && selectedConversation && messagesSupported ? route.message : undefined;
+  const pageTitle = <span className="inline-flex items-center gap-2">Conversations{typeof conversations.data?.resource.total === 'number' ? <CountBadge count={conversations.data.resource.total} /> : null}</span>;
 
   return (
     <>
       <WorkspacePageFrame
         eyebrow="Messaging"
-        title="Conversations"
+        title={pageTitle}
         description="Review projected history and submit outbound messages."
-        compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : 'Conversations'}
+        secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : pageTitle}
         compactDescription={hasConversation ? (selectedConversation ? `${humanizeToken(selectedConversation.type)} · Last activity ${selectedConversation.lastActivityAt ? relativeTime(selectedConversation.lastActivityAt) : 'unreported'}` : 'Message timeline') : undefined}
         compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
         compactActions={hasConversation && selectedConversation
-          ? <><Button disabled={!viewSupported || detailRefreshing} onClick={refreshDetail}>{detailRefreshing ? 'Refreshing…' : 'Refresh'}</Button><Button onClick={openConversationDetails}>Details</Button></>
-          : <Button disabled={!viewSupported || conversations.isFetching} onClick={refreshDirectory}>{conversations.isFetching ? 'Refreshing…' : 'Refresh'}</Button>}
+          ? <><Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button><Button onClick={openConversationDetails}>Details</Button></>
+          : <Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
         compactHeadingRef={compactHeadingRef}
       >
         <ResponsiveInspector
@@ -152,11 +160,6 @@ function ConversationWorkspace() {
           directory={
             <>
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
-                <WorkspacePaneHeader
-                  title={<span className="inline-flex items-center gap-2">Conversations{typeof conversations.data?.resource.total === 'number' ? <CountBadge count={conversations.data.resource.total} /> : null}</span>}
-                  description={route.search ? `${filteredConversations.length} shown on this page for “${route.search}”` : 'Canonical projected conversations'}
-                  actions={<Button disabled={!viewSupported || conversations.isFetching} onClick={refreshDirectory}>{conversations.isFetching ? 'Refreshing…' : 'Refresh'}</Button>}
-                />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => { e.preventDefault(); applySearch(); }}>
                   <Field label="Filter conversations" className="min-w-48 flex-1">
                     {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name or ID on this page" onChange={(e) => setSearchDraft(e.target.value)} />}
@@ -184,7 +187,7 @@ function ConversationWorkspace() {
         ) : undefined}
         detail={
           <>
-            {selectedConversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={selectedConversation} refreshing={detailRefreshing} onRefresh={refreshDetail} onDetails={openConversationDetails} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description={activeConversationRef ? 'Reading projected Conversation' : 'Select a projected Conversation to inspect its history'} />}
+            {selectedConversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={selectedConversation} onDetails={openConversationDetails} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description={activeConversationRef ? 'Reading projected Conversation' : 'Select a projected Conversation to inspect its history'} />}
             {!activeConversationRef ? (
               <div className="p-4"><StateNotice kind="empty" title="No conversation selected" detail="Select a conversation from the projected directory." /></div>
             ) : !conversationsSupported ? (
@@ -246,19 +249,19 @@ function ConversationWorkspace() {
       </WorkspacePageFrame>
 
       <Dialog
-        open={navigationBlocker.state === 'blocked'}
+        open={navigationBlocker.state === 'blocked' && blockedReason !== undefined}
         onClose={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}
-        title={blockedReason === 'dirty' ? 'Discard unsent message?' : blockedReason === 'pending' ? 'Message submission in progress' : 'Review unknown send outcome'}
+        title={blockedReason === 'dirty' ? 'Discard unsent message?' : blockedReason === 'pending' ? 'Message submission in progress' : blockedReason === 'unknown_outcome' ? 'Review unknown send outcome' : ''}
         footer={blockedReason === 'dirty'
           ? <><Button onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}>Stay</Button><Button variant="danger" onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.proceed()}>Discard and continue</Button></>
-          : <Button variant="primary" onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}>Stay with Conversation</Button>}
+          : blockedReason ? <Button variant="primary" onClick={() => navigationBlocker.state === 'blocked' && navigationBlocker.reset()}>Stay with Conversation</Button> : null}
       >
         <p className="text-sm text-fg-2">
           {blockedReason === 'dirty'
             ? 'Changing Conversation will discard the current text or media draft.'
             : blockedReason === 'pending'
               ? 'Wait for the current provider command acknowledgement before changing Conversation.'
-              : 'The send outcome is unknown. Keep this Conversation open and review the command state before taking another action.'}
+              : blockedReason === 'unknown_outcome' ? 'The send outcome is unknown. Keep this Conversation open and review the command state before taking another action.' : ''}
         </p>
       </Dialog>
 

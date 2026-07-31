@@ -11,12 +11,22 @@ export const IDLE_COMPOSER_STATE: ComposerInteractionState = {
 };
 
 export type ComposerNavigationBlock = 'pending' | 'unknown_outcome' | 'dirty' | undefined;
+export type ComposerBlockerResolution =
+  | { action: 'none' }
+  | { action: 'reset' }
+  | { action: 'show'; reason: Exclude<ComposerNavigationBlock, undefined> };
 
 export function composerNavigationBlock(state: ComposerInteractionState): ComposerNavigationBlock {
   if (state.pending) return 'pending';
   if (state.unknownOutcome) return 'unknown_outcome';
   if (state.dirty) return 'dirty';
   return undefined;
+}
+
+export function resolveComposerBlocker(blockerState: 'blocked' | 'proceeding' | 'unblocked', state: ComposerInteractionState): ComposerBlockerResolution {
+  if (blockerState !== 'blocked') return { action: 'none' };
+  const reason = composerNavigationBlock(state);
+  return reason ? { action: 'show', reason } : { action: 'reset' };
 }
 
 function conversationRefFromPath(pathname: string): string | undefined {

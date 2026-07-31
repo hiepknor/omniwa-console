@@ -244,8 +244,11 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', 'compactDescription={conversation ?', 'Last activity ${conversation.lastActivityAt ?', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', 'detailScrollerRef={messageScrollerRef}', '<CountBadge count={217}', 'placeholder="Name or ID on this page"', 'actions={<Button>Refresh</Button>}', '<SelectedConversationHeader', 'className="max-[900px]:hidden"', '>Back</Button>', '>Details</Button>', '<ConversationDetailsContent', 'className="flex min-h-full flex-col"', 'conversationType={conversation.type}', 'scrollContainerRef={messageScrollerRef}', 'anchorToEnd', '<ConversationMessagePagination']) {
+for (const marker of ['<main', '<WorkspacePageFrame', 'secondaryActions={<Button>Refresh</Button>}', 'compactDescription={conversation ?', 'Last activity ${conversation.lastActivityAt ?', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', 'detailScrollerRef={messageScrollerRef}', '<CountBadge count={217}', 'placeholder="Name or ID on this page"', '<SelectedConversationHeader', 'className="max-[900px]:hidden"', '>Back</Button>', '>Details</Button>', '<ConversationDetailsContent', 'className="flex min-h-full flex-col"', 'conversationType={conversation.type}', 'scrollContainerRef={messageScrollerRef}', 'anchorToEnd', '<ConversationMessagePagination']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
+}
+if (conversationsPreview.includes('WorkspacePaneHeader title={<span className="inline-flex items-center gap-2">Conversations')) {
+  failures.push('src/app/PreviewConversations.tsx: Conversation total and Refresh belong to the page header, not a repeated directory header');
 }
 
 const responsiveInspector = await read('src/ui/ResponsiveInspector.tsx');
@@ -269,13 +272,22 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', 'compactDescription={hasConversation ?', 'Last activity ${selectedConversation.lastActivityAt ?', 'useBeforeUnload', 'useBlocker', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', 'detailScrollerRef={messageScrollerRef}', '<WorkspacePaneHeader', '<CountBadge count={conversations.data.resource.total}', 'Filter conversations', 'placeholder="Name or ID on this page"', 'nextLabel="Next page"', 'Selected Conversation is outside this page', '<SelectedConversationHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', '<ProjectionStatusGroup', 'className="flex min-h-full flex-col"', 'conversationType={selectedConversation.type}', 'scrollContainerRef={messageScrollerRef}', 'anchorToEnd={!route.messageCursor}', 'No projected messages', "details: 'conversation'", '<ConversationMessagePagination', '<Navigate replace to={target}']) {
+for (const marker of ['<WorkspacePageFrame', 'const pageTitle =', 'secondaryActions={<Button', 'onClick={refreshPage}', "omitSearchParams(searchParams, ['message', 'messageCursor', 'details'])", 'compactDescription={hasConversation ?', 'Last activity ${selectedConversation.lastActivityAt ?', 'useBeforeUnload', 'useBlocker', 'resolveComposerBlocker', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', 'detailScrollerRef={messageScrollerRef}', '<WorkspacePaneHeader', '<CountBadge count={conversations.data.resource.total}', 'Filter conversations', 'placeholder="Name or ID on this page"', 'nextLabel="Next page"', 'Selected Conversation is outside this page', '<SelectedConversationHeader', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', '<ProjectionStatusGroup', 'className="flex min-h-full flex-col"', 'conversationType={selectedConversation.type}', 'scrollContainerRef={messageScrollerRef}', 'anchorToEnd={!route.messageCursor}', 'No projected messages', "details: 'conversation'", '<ConversationMessagePagination', '<Navigate replace to={target}']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
+}
+if (conversationsPage.includes('<WorkspacePaneHeader\n                  title={<span className="inline-flex items-center gap-2">Conversations')) {
+  failures.push('src/features/conversations/ConversationsPage.tsx: directory must not repeat the page-level Conversation title or Refresh action');
 }
 
 const conversationsView = await read('src/features/conversations/ConversationsView.tsx');
-for (const marker of ['ConversationUnreadCount', 'authoritative: boolean', 'if (!authoritative)', 'Unread syncing', 'if (count === 0) return null', '<CountBadge count={count}', 'aria-label={label}', 'SelectedConversationHeader', 'Last activity ${activity}', 'ConversationMessagePagination', 'className="mt-auto"', 'resetLabel="Newest"', 'nextLabel="Older messages"', 'max-w-[min(78%,42rem)]', 'calendarDayLabel', 'Text content not reported', 'Participant not identified', 'isNearScrollEnd', 'appendedMessageScrollAction', 'scrollContainerRef', 'Latest messages', 'anchorToEnd']) {
+for (const marker of ['ConversationUnreadCount', 'authoritative: boolean', 'if (!authoritative)', 'Unread syncing', 'if (count === 0) return null', '<CountBadge count={count}', 'aria-label={label}', 'SelectedConversationHeader', 'Last activity ${activity}', 'ConversationMessagePagination', 'className="mt-auto"', 'resetLabel="Newest"', 'nextLabel="Older messages"', 'max-w-[min(78%,42rem)]', 'calendarDayLabel', 'Text content not reported', 'Participant not identified', 'isNearScrollEnd', 'appendedMessageScrollAction', 'shouldAnchorInitialMessagePage', 'initialLatestPending', 'previousNewestAt', 'nextNewestAt <= previousNewestAt', 'scrollContainerRef', 'Latest messages', 'anchorToEnd']) {
   if (!conversationsView.includes(marker)) failures.push(`src/features/conversations/ConversationsView.tsx: Conversation view contract is missing ${marker}`);
+}
+if (conversationsView.includes('Refreshing…')) failures.push('src/features/conversations/ConversationsView.tsx: selected Conversation header must not own page Refresh');
+
+const conversationComposerState = await read('src/features/conversations/composer-state.ts');
+for (const marker of ['resolveComposerBlocker', "blockerState !== 'blocked'", "{ action: 'show', reason }", "{ action: 'reset' }"]) {
+  if (!conversationComposerState.includes(marker)) failures.push(`src/features/conversations/composer-state.ts: navigation blocker resolution is missing ${marker}`);
 }
 
 const conversationDetails = await read('src/features/conversations/Details.tsx');
