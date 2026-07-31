@@ -338,6 +338,11 @@ bottom-aligned row with `Media…` and `Send`; its accessible name and Media dia
 retain the selected Conversation name. Notices above the row retain command
 error, cooldown, unknown-outcome, and acknowledgement semantics.
 
+The newest Message page starts at the end of the explicit detail scroller. A
+same-page append follows only when the operator is already near the end;
+otherwise `Latest messages` appears without interrupting history review. Older
+cursor pages start at the beginning and never claim accumulated history.
+
 Implemented commands owned by the workspace:
 
 ```text

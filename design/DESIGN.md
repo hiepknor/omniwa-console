@@ -275,8 +275,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   incoming group messages say `Participant not identified` and raw identifiers
   remain inspector-only. Opening a newest cursor page anchors its scroll
   container to the end; older cursor pages start at their beginning. New items
-  follow only while the operator remains near the end, so active history review
-  is never interrupted.
+  follow only while the operator remains near the end. While the operator reads
+  earlier history, appended items expose a compact `Latest messages` action
+  instead of moving the explicit detail scroller, so review is never interrupted.
 - **Conversation details and send availability** — the selected Conversation
   header keeps display identity, type, last activity, pane-owned refresh, and a
   visible `Details` action when the inspector is not docked. Unread attention

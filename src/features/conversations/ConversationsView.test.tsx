@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
-import { ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline, SelectedConversationHeader } from './ConversationsView';
+import { appendedMessageScrollAction, ConversationList, ConversationMessagePagination, ConversationUnreadCount, isNearScrollEnd, MessageTimeline, SelectedConversationHeader } from './ConversationsView';
 
 describe('ConversationUnreadCount', () => {
   it('omits a zero count from dense directory rows', () => {
@@ -132,5 +132,12 @@ describe('MessageTimeline', () => {
   it('keeps following new messages bounded to operators already near the end', () => {
     expect(isNearScrollEnd({ scrollHeight: 1_000, scrollTop: 420, clientHeight: 500 })).toBe(true);
     expect(isNearScrollEnd({ scrollHeight: 1_000, scrollTop: 200, clientHeight: 500 })).toBe(false);
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, added: true, nearEnd: true })).toBe('follow');
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: false, added: true, nearEnd: false })).toBe('offer-latest');
+  });
+
+  it('does not offer or follow new items while changing bounded pages', () => {
+    expect(appendedMessageScrollAction({ anchorToEnd: true, keyChanged: true, added: true, nearEnd: false })).toBe('none');
+    expect(appendedMessageScrollAction({ anchorToEnd: false, keyChanged: false, added: true, nearEnd: true })).toBe('none');
   });
 });

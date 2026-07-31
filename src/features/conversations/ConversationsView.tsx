@@ -1,6 +1,6 @@
 import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { calendarDayKey, calendarDayLabel, humanizeToken, relativeTime } from '@/lib/format';
 import { Button, CountBadge, CursorPagination, Status, WorkspacePaneHeader } from '@/ui';
 import { cn } from '@/ui/cn';
@@ -98,47 +98,70 @@ export function isNearScrollEnd({ scrollHeight, scrollTop, clientHeight }: Pick<
   return scrollHeight - scrollTop - clientHeight <= threshold;
 }
 
+export function appendedMessageScrollAction({ anchorToEnd, keyChanged, added, nearEnd }: {
+  anchorToEnd: boolean;
+  keyChanged: boolean;
+  added: boolean;
+  nearEnd: boolean;
+}): 'follow' | 'offer-latest' | 'none' {
+  if (!anchorToEnd || keyChanged || !added) return 'none';
+  return nearEnd ? 'follow' : 'offer-latest';
+}
+
 function projectedMessageContent(item: MessageResource): string {
   return item.contentText ?? item.caption ?? item.contentSummary ?? (item.type === 'text' ? 'Text content not reported' : 'Message content not reported');
 }
 
-export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conversationType, scrollKey, anchorToEnd = false }: {
+export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conversationType, scrollKey, scrollContainerRef, anchorToEnd = false }: {
   items: MessageResource[];
   selectedId?: string;
   onSelect: (id: string) => void;
   renderMedia?: (message: MessageResource) => ReactNode;
   conversationType?: ConversationResource['type'];
   scrollKey?: string;
+  scrollContainerRef?: MutableRefObject<HTMLDivElement | null>;
   anchorToEnd?: boolean;
 }) {
   const timelineRef = useRef<HTMLOListElement>(null);
   const nearEndRef = useRef(true);
-  const previousScrollKey = useRef<string>();
-  const previousItemCount = useRef(0);
+  const previousScrollKey = useRef<string | undefined | null>(null);
+  const previousItemIds = useRef<Set<string>>(new Set());
+  const [hasNewerItems, setHasNewerItems] = useState(false);
 
   useEffect(() => {
-    const scroller = timelineRef.current?.parentElement;
+    const scroller = scrollContainerRef?.current;
     if (!scroller) return;
-    const update = () => { nearEndRef.current = isNearScrollEnd(scroller); };
+    const update = () => {
+      nearEndRef.current = isNearScrollEnd(scroller);
+      if (nearEndRef.current) setHasNewerItems(false);
+    };
     update();
     scroller.addEventListener('scroll', update, { passive: true });
     return () => scroller.removeEventListener('scroll', update);
-  }, []);
+  }, [scrollContainerRef]);
 
   useLayoutEffect(() => {
-    const scroller = timelineRef.current?.parentElement;
+    const scroller = scrollContainerRef?.current;
     const keyChanged = previousScrollKey.current !== scrollKey;
-    const appended = items.length > previousItemCount.current;
-    if (scroller && anchorToEnd && (keyChanged || (appended && nearEndRef.current))) {
+    const added = items.some((item) => !previousItemIds.current.has(item.id));
+    const action = appendedMessageScrollAction({ anchorToEnd, keyChanged, added, nearEnd: nearEndRef.current });
+    if (keyChanged) {
+      nearEndRef.current = anchorToEnd;
+      setHasNewerItems(false);
+    } else if (scroller && action === 'follow') {
       scroller.scrollTop = scroller.scrollHeight;
       nearEndRef.current = true;
+      setHasNewerItems(false);
+    } else if (action === 'offer-latest') {
+      setHasNewerItems(true);
     }
     previousScrollKey.current = scrollKey;
-    previousItemCount.current = items.length;
-  }, [anchorToEnd, items.length, scrollKey]);
+    previousItemIds.current = new Set(items.map((item) => item.id));
+  }, [anchorToEnd, items, scrollContainerRef, scrollKey]);
 
   return (
-    <ol ref={timelineRef} className="grid w-full gap-3 p-4" aria-label="Projected message history">
+    <>
+      <ol ref={timelineRef} className="grid w-full gap-3 p-4" aria-label="Projected message history">
       {items.map((item, index) => {
         const outgoing = item.direction === 'outgoing';
         const failed = item.status === 'failed';
@@ -183,6 +206,13 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
           </li>
         );
       })}
-    </ol>
+      </ol>
+      {hasNewerItems ? <div className="sticky bottom-3 z-10 flex justify-center px-4" aria-live="polite"><Button onClick={() => {
+        const scroller = scrollContainerRef?.current;
+        if (scroller) scroller.scrollTop = scroller.scrollHeight;
+        nearEndRef.current = true;
+        setHasNewerItems(false);
+      }}>Latest messages</Button></div> : null}
+    </>
   );
 }

@@ -233,7 +233,8 @@ resource models, or rendered diagnostics.
   an incoming Group participant remains unidentified until the backend projects
   an authoritative display identity. Newest pages anchor to the end; older pages
   start at their beginning, and new messages follow only while the operator is
-  already near the end. Conversation and Messages projection health combines
+  already near the end. Otherwise a compact `Latest messages` action appears
+  without moving the explicit detail scroller. Conversation and Messages projection health combines
   only when both scopes are ready; all non-ready scopes remain separate.
   The selected Conversation header keeps display identity, type, last activity,
   pane-owned refresh, and `Details` as scan-critical context. Below 1560px of

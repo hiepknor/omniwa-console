@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ApiProvider } from '@/api/ApiProvider';
 import { Composer } from '@/features/conversations/Composer';
 import { ConversationList, ConversationMessagePagination, MessageTimeline, SelectedConversationHeader } from '@/features/conversations/ConversationsView';
@@ -12,6 +12,7 @@ import { conversationsFixture, messagesFixture } from './preview-fixtures';
 export function PreviewConversations() {
   const [conversationId, setConversationId] = useState<string | undefined>(conversationsFixture[0].conversationId);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const messageScrollerRef = useRef<HTMLDivElement | null>(null);
   const conversation = conversationsFixture.find((item) => item.conversationId === conversationId);
   const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(conversationId);
   const openConversation = (id: string) => { rememberFocusOrigin(); setConversationId(id); setDetailsOpen(false); };
@@ -39,6 +40,7 @@ export function PreviewConversations() {
           frame="attached"
           detailOpen={Boolean(conversation)}
           detailScrollKey={conversation?.conversationId}
+          detailScrollerRef={messageScrollerRef}
           detailInitialPosition="end"
           directoryLabel="Conversation directory preview"
           detailLabel="Message timeline preview"
@@ -58,7 +60,7 @@ export function PreviewConversations() {
           <>
             {conversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={conversation} refreshing={false} onRefresh={() => {}} onDetails={() => setDetailsOpen(true)} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description="Select a projected Conversation" />}
           {conversation ? <div className="flex min-h-full flex-col">
-            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} conversationType={conversation.type} scrollKey={`${conversation.conversationId}:newest`} anchorToEnd renderMedia={(message) => {
+            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} conversationType={conversation.type} scrollKey={`${conversation.conversationId}:newest`} scrollContainerRef={messageScrollerRef} anchorToEnd renderMedia={(message) => {
               if (message.mediaAssetId === 'asset_ready') return <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />;
               if (message.mediaAssetId === 'asset_processing') return <ConversationMediaPlaceholder enabled compact label="Image Processing" tone="pending" detail="The projected message remains visible while private content is prepared." />;
               if (message.mediaAssetId === 'asset_failed') return <ConversationMediaPlaceholder enabled compact label="Image unavailable" tone="failed" detail="Media asset integrity failed" />;

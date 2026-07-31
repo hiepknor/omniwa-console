@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
@@ -37,6 +37,7 @@ function ConversationWorkspace() {
   const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(activeConversationRef);
   const [searchDraft, setSearchDraft] = useState(route.search);
   const [composerState, setComposerState] = useState<ComposerInteractionState>(IDLE_COMPOSER_STATE);
+  const messageScrollerRef = useRef<HTMLDivElement | null>(null);
   const [blockedReason, setBlockedReason] = useState<Exclude<ComposerNavigationBlock, undefined>>();
   useEffect(() => setSearchDraft(route.search), [route.search]);
   const instanceScope = session.keyKind === 'api';
@@ -139,6 +140,7 @@ function ConversationWorkspace() {
           detailOpen={hasConversation}
           directoryScrollKey={JSON.stringify([route.search, route.cursor])}
           detailScrollKey={JSON.stringify([activeConversationRef, route.messageCursor])}
+          detailScrollerRef={messageScrollerRef}
           detailInitialPosition={route.messageCursor ? 'start' : 'end'}
           directoryLabel="Conversation directory"
           detailLabel="Message timeline"
@@ -206,6 +208,7 @@ function ConversationWorkspace() {
                       renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />}
                       conversationType={selectedConversation.type}
                       scrollKey={JSON.stringify([selectedConversation.conversationId, route.messageCursor])}
+                      scrollContainerRef={messageScrollerRef}
                       anchorToEnd={!route.messageCursor}
                     />
                     {loadedMessages.length === 0 && (messages.data.meta?.syncStatus === undefined || messages.data.meta.syncStatus === 'ready') ? <div className="p-4"><StateNotice kind="empty" title="No projected messages" detail="The ready Message projection returned no messages for this Conversation." /></div> : null}
