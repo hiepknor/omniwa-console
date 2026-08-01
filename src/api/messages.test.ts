@@ -11,6 +11,7 @@ const message = {
   conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555',
   providerChatId: '100@s.whatsapp.net',
   senderJid: '100@s.whatsapp.net',
+  participantJid: '731002@lid',
   direction: 'incoming',
   messageType: 'text',
   contentText: 'Hello',
@@ -26,7 +27,7 @@ describe('messages projection adapter', () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [message], meta: { source: 'projection', syncStatus: 'stale', nextCursor: 'opaque/older' } }));
     const result = await listMessages({ GET } as unknown as ApiClient, message.conversationId, { cursor: 'opaque/current', limit: 25 });
     expect(GET).toHaveBeenCalledWith('/conversations/{conversationRef}/messages', { params: { path: { conversationRef: message.conversationId }, query: { cursor: 'opaque/current', limit: 25 } } });
-    expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', conversationId: message.conversationId, providerChatId: message.providerChatId, contentText: 'Hello', mediaAssetId: 'asset-1', provenance: 'history_sync' })]);
+    expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', conversationId: message.conversationId, providerChatId: message.providerChatId, participantJid: message.participantJid, contentText: 'Hello', mediaAssetId: 'asset-1', provenance: 'history_sync' })]);
     expect(result.resource.pagination.nextCursor).toBe('opaque/older');
     expect(result.meta?.syncStatus).toBe('stale');
   });

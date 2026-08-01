@@ -28,6 +28,8 @@ describe('query key ownership', () => {
       'campaigns',
     ]);
     expect(queryKeys.instanceEvents('instance-1')).toEqual(['instances', 'instance-1', 'events']);
+    expect(queryKeys.instanceContacts('instance-1')).toEqual(['instances', 'instance-1', 'contacts']);
+    expect(queryKeys.instanceContacts('instance-2')).not.toEqual(queryKeys.instanceContacts('instance-1'));
   });
 
   it('appends normalized read parameters only to concrete cache entries', () => {

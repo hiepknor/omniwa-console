@@ -72,8 +72,8 @@ export const labelsFixture: LabelResource[] = [
 const previewConversationId = conversationsFixture[0].conversationId;
 
 export const messagesFixture: MessageResource[] = [
-  { resourceType: 'message', id: 'msg_0', conversationId: previewConversationId, direction: 'incoming', type: 'text', createdAt: ago(172_800), provenance: 'history_sync' },
-  { resourceType: 'message', id: 'msg_1', conversationId: previewConversationId, providerChatId: '731002@lid', direction: 'incoming', type: 'text', status: 'read', contentText: 'Hi! Is my order shipped yet?', createdAt: ago(3000), provenance: 'live' },
+  { resourceType: 'message', id: 'msg_0', conversationId: previewConversationId, participantJid: '731002@lid', direction: 'incoming', type: 'text', createdAt: ago(172_800), provenance: 'history_sync' },
+  { resourceType: 'message', id: 'msg_1', conversationId: previewConversationId, providerChatId: '731002@lid', participantJid: '15551230001@s.whatsapp.net', direction: 'incoming', type: 'text', status: 'read', contentText: 'Hi! Is my order shipped yet?', createdAt: ago(3000), provenance: 'live' },
   { resourceType: 'message', id: 'msg_2', conversationId: previewConversationId, direction: 'outgoing', type: 'text', status: 'delivered', contentText: 'Hello Anna — yes, it shipped this morning. Tracking is on the way.', createdAt: ago(2400), provenance: 'write_through' },
   { resourceType: 'message', id: 'msg_3', conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_ready', caption: 'Package at the front desk', status: 'read', createdAt: ago(1800), provenance: 'live' },
   { resourceType: 'message', id: 'msg_4', conversationId: previewConversationId, direction: 'incoming', type: 'image', mediaType: 'image', mediaAssetId: 'asset_processing', contentSummary: 'Incoming image', status: 'delivered', createdAt: ago(900), provenance: 'live' },
