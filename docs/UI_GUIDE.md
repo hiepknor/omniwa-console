@@ -230,8 +230,11 @@ resource models, or rendered diagnostics.
   Direction remains visible and accessible without adding consumer-chat color, rounding, or
   avatars; system/unknown messages stay centered and neutral. Day separators
   preserve chronological orientation, absent text is explicitly unreported, and
-  an incoming Group participant remains unidentified until the backend projects
-  an authoritative display identity. Message controls derive their accessible
+  an incoming Group participant uses the canonical Contact display name only
+  when `participantJid` exactly matches a backend-reported Contact alias. PN and
+  LID aliases may resolve to the same Contact; unmatched, ambiguous, and unnamed
+  identities remain `Unknown participant` without exposing a raw JID. Message
+  controls derive their accessible
   name from visible content, media state, direction, status, and time so voice
   control can use the label the operator sees. Newest pages anchor to the end,
   including when their first data arrives after the route transition; older pages start
