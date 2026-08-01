@@ -61,6 +61,19 @@ describe('contacts projection adapter', () => {
     });
   });
 
+  it('preserves canonical aliases without normalizing malformed identity material', async () => {
+    const aliases = [' 100@s.whatsapp.net ', '123@lid', ''];
+    const GET = vi.fn().mockResolvedValue(ok({
+      message: 'success',
+      data: [{ ...contact, aliases }],
+      meta: { total: 1 },
+    }));
+
+    const result = await listContacts({ GET } as unknown as ApiClient, { canonicalIdentity: true });
+
+    expect(result.resource.items[0]?.aliases).toEqual(aliases);
+  });
+
   it('does not invent a canonical display name or found state from legacy fields', async () => {
     const GET = vi.fn().mockResolvedValue(ok({
       message: 'success',
