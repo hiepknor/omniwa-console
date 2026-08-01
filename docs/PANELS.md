@@ -275,14 +275,19 @@ GET /conversations/{conversationRef}
 GET /conversations/{conversationRef}/messages
 GET /conversations/{conversationRef}/messages/{messageId}
 GET /message/{messageId}/delivery
+GET /user/contacts
 GET /media-assets/{mediaId}
 GET /media-assets/{mediaId}/content
 ```
 
 Projected Conversation names prevent list-level Contact fan-out. The inspector
-may link a reported `contactId` to the Directory, but Conversations never fetches
-Contacts to render names, routing targets, or counts. A Conversation without its
-authoritative `addressingJid` fails closed and keeps the Composer unavailable.
+may link a reported `contactId` to the Directory. For incoming Group participant
+labels only, Conversations reuses one complete canonical Contact projection read
+when both `contacts_projection` and `canonical_contact_identity` are advertised.
+It indexes exact backend-reported Contact aliases, performs no per-Message fetch,
+and never uses Contacts for Conversation names, routing targets, or counts. A
+Conversation without its authoritative `addressingJid` fails closed and keeps
+the Composer unavailable.
 
 The current Conversation and Message cursors stay in the URL. Each list renders one
 bounded page and uses browser
@@ -296,10 +301,13 @@ aligns incoming/outgoing messages to opposite edges, caps bubble line length,
 and preserves day separators plus explicit incoming/outgoing/system direction. A
 newest page anchors to its end; an older cursor page starts at its beginning,
 and appended messages follow only while the operator remains near the end.
-Missing text is reported as missing rather than rendered as a type token. Group
-participants remain unidentified in the timeline until the public projection
-publishes authoritative participant display identity; Console never derives it
-from JID or Contact matching. Message controls derive accessible names from
+Missing text is reported as missing rather than rendered as a type token. An
+incoming Group `participantJid` resolves only through exact equality with a
+canonical Contact alias and uses that Contact's backend-projected `displayName`.
+PN and LID aliases can therefore resolve to the same canonical Contact without
+browser reconciliation. An absent, ambiguous, or unnamed match renders `Unknown
+participant`; raw JIDs and compatibility/provider fields are never promoted to a
+display label. Message controls derive accessible names from
 their visible content, media state, direction, status, and time; custom labels
 never hide visible operational copy. Healthy Conversation and Messages
 projection status stays quiet, while differing/non-ready states remain explicit and
@@ -311,9 +319,11 @@ remain authoritative for delivery.
 Rows use returned `conversationId` as route/entity/cache identity, normalize
 absorbed provider deep links, and send only to projected `addressingJid`.
 `aliases` never become browser rows and message `providerChatId` is provenance
-only. The backend owns alias collapse, message aggregation/deduplication, unread,
-last activity, totals, and cursor scope; Console performs no grouping or Contact
-matching. Capability-off instances receive no `/chat/*` fallback read. Former
+only. The backend owns Conversation alias collapse, message
+aggregation/deduplication, unread, last activity, totals, and cursor scope;
+participant presentation performs only the separately gated exact canonical
+Contact-alias lookup described above. Capability-off instances receive no
+`/chat/*` fallback read. Former
 browser URLs and their cursors are not supported by the canonical workspace.
 `conversation_media_assets` remains an independent gate.
 

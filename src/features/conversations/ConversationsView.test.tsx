@@ -122,13 +122,92 @@ describe('MessageTimeline', () => {
     expect(html).toContain('max-w-[min(78%,42rem)]');
     expect(html).not.toContain('max-w-[960px]');
     expect(html).toContain('Text content not reported');
-    expect(html).toContain('Participant not identified');
+    expect(html).toContain('Unknown participant');
     expect(html).toContain('Incoming · Unreported');
     expect(html).toContain('System · Failed');
     expect(html).toContain('<span class="sr-only">Message: </span>');
     expect(html).not.toContain('aria-label="Incoming group message');
     expect(html).toContain('role="separator" aria-label=');
     expect(html.match(/role="separator"/g)).toHaveLength(2);
+  });
+
+  it('renders exact canonical Contact alias matches for incoming PN and LID Group participants', () => {
+    const html = renderToStaticMarkup(
+      <MessageTimeline
+        items={[
+          message({ id: 'pn-message', participantJid: '15551230001@s.whatsapp.net', contentText: 'PN message' }),
+          message({ id: 'lid-message', participantJid: '731002@lid', contentText: 'LID message' }),
+        ]}
+        conversationType="group"
+        participantDisplayIndex={new Map([
+          ['15551230001@s.whatsapp.net', 'Anna Nguyen'],
+          ['731002@lid', 'Anna Nguyen'],
+        ])}
+        onSelect={() => {}}
+      />,
+    );
+
+    expect(html.match(/Anna Nguyen/g)).toHaveLength(2);
+    expect(html).not.toContain('Unknown participant');
+  });
+
+  it('keeps unknown Group participants visible with a neutral fallback', () => {
+    const html = renderToStaticMarkup(
+      <MessageTimeline
+        items={[message({ participantJid: 'unmatched@lid', contentText: 'Still visible' })]}
+        conversationType="group"
+        participantDisplayIndex={new Map()}
+        onSelect={() => {}}
+      />,
+    );
+
+    expect(html).toContain('Unknown participant');
+    expect(html).toContain('Still visible');
+    expect(html).not.toContain('unmatched@lid');
+  });
+
+  it.each(['direct', 'newsletter', 'broadcast'] as const)('does not apply Group participant labels to %s Conversations', (conversationType) => {
+    const html = renderToStaticMarkup(
+      <MessageTimeline
+        items={[message({ participantJid: '731002@lid', contentText: 'Scoped message' })]}
+        conversationType={conversationType}
+        participantDisplayIndex={new Map([['731002@lid', 'Anna Nguyen']])}
+        onSelect={() => {}}
+      />,
+    );
+
+    expect(html).not.toContain('Anna Nguyen');
+    expect(html).not.toContain('Unknown participant');
+  });
+
+  it('does not label outgoing Group messages as incoming participants', () => {
+    const html = renderToStaticMarkup(
+      <MessageTimeline
+        items={[message({ direction: 'outgoing', participantJid: '731002@lid', contentText: 'Outgoing' })]}
+        conversationType="group"
+        participantDisplayIndex={new Map([['731002@lid', 'Anna Nguyen']])}
+        onSelect={() => {}}
+      />,
+    );
+
+    expect(html).not.toContain('Anna Nguyen');
+    expect(html).not.toContain('Unknown participant');
+  });
+
+  it('keeps distinct canonical Messages with identical text as separate rows', () => {
+    const html = renderToStaticMarkup(
+      <MessageTimeline
+        items={[
+          message({ id: 'message-1', contentText: 'Same text' }),
+          message({ id: 'message-2', contentText: 'Same text' }),
+        ]}
+        conversationType="group"
+        onSelect={() => {}}
+      />,
+    );
+
+    expect(html.match(/Same text/g)).toHaveLength(2);
+    expect(html.match(/<li/g)).toHaveLength(2);
   });
 
   it('bottom-aligns a short newest page without changing older-page alignment', () => {

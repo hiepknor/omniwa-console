@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useBeforeUnload, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
+import { useContactsProjection } from '@/api/contact-hooks';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
@@ -14,6 +15,7 @@ import { ConversationList, ConversationMessagePagination, MessageTimeline, Selec
 import { ConversationDetailsContent, MessageInspectorContent } from './Details';
 import { ConversationMessageImage } from './Media';
 import { useConversation, useConversations, useMessages } from './hooks';
+import { buildParticipantDisplayIndex, participantIdentityReadsEnabled } from './participant-identity';
 import { conversationRouteState, legacyDirectoryTarget, setConversationParam } from './route-state';
 
 function BlockedPage({ detail, title }: { detail: string; title: string }) {
@@ -51,6 +53,15 @@ function ConversationWorkspace() {
   const selectedConversation = conversation.data?.resource;
   const sendRecipient = resolveConversationRecipient(selectedConversation);
   const canonicalConversationId = selectedConversation?.conversationId;
+  const participantContactsEnabled = participantIdentityReadsEnabled(
+    selectedConversation?.type,
+    capabilities.data?.capabilities ?? [],
+  );
+  const participantContacts = useContactsProjection('', undefined, participantContactsEnabled, true);
+  const participantDisplayIndex = useMemo(
+    () => buildParticipantDisplayIndex(participantContacts.data?.resource.items ?? []),
+    [participantContacts.data],
+  );
   const navigationBlocker = useBlocker(({ currentLocation, nextLocation }) => shouldBlockConversationNavigation({
     currentPath: currentLocation.pathname,
     nextPath: nextLocation.pathname,
@@ -216,6 +227,7 @@ function ConversationWorkspace() {
                       onSelect={openMessage}
                       renderMedia={(message) => <ConversationMessageImage message={message} enabled={conversationMedia} compact />}
                       conversationType={selectedConversation.type}
+                      participantDisplayIndex={participantDisplayIndex}
                       scrollKey={JSON.stringify([selectedConversation.conversationId, route.messageCursor])}
                       scrollContainerRef={messageScrollerRef}
                       anchorToEnd={!route.messageCursor}

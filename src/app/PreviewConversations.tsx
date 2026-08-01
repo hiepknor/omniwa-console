@@ -4,9 +4,12 @@ import { Composer } from '@/features/conversations/Composer';
 import { ConversationList, ConversationMessagePagination, MessageTimeline, SelectedConversationHeader } from '@/features/conversations/ConversationsView';
 import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
+import { buildParticipantDisplayIndex } from '@/features/conversations/participant-identity';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { Button, CountBadge, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
-import { conversationsFixture, messagesFixture } from './preview-fixtures';
+import { contactsFixture, conversationsFixture, messagesFixture } from './preview-fixtures';
+
+const participantDisplayIndex = buildParticipantDisplayIndex(contactsFixture);
 
 /** Dev-only: Conversations workspace (directory + thread) with sample data. */
 export function PreviewConversations() {
@@ -60,7 +63,7 @@ export function PreviewConversations() {
           <>
             {conversation ? <SelectedConversationHeader className="max-[900px]:hidden" conversation={conversation} onDetails={() => setDetailsOpen(true)} /> : <WorkspacePaneHeader className="max-[900px]:hidden" title="Message timeline" description="Select a projected Conversation" />}
           {conversation ? <div className="flex min-h-full flex-col">
-            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} conversationType={conversation.type} scrollKey={`${conversation.conversationId}:newest`} scrollContainerRef={messageScrollerRef} anchorToEnd renderMedia={(message) => {
+            <MessageTimeline items={messagesFixture} selectedId="msg_2" onSelect={() => {}} conversationType={conversation.type} participantDisplayIndex={participantDisplayIndex} scrollKey={`${conversation.conversationId}:newest`} scrollContainerRef={messageScrollerRef} anchorToEnd renderMedia={(message) => {
               if (message.mediaAssetId === 'asset_ready') return <Image src="/ui-image-sample.svg" alt="Projected image message" aspect="video" fit="contain" className="max-w-80" />;
               if (message.mediaAssetId === 'asset_processing') return <ConversationMediaPlaceholder enabled compact label="Image Processing" tone="pending" detail="The projected message remains visible while private content is prepared." />;
               if (message.mediaAssetId === 'asset_failed') return <ConversationMediaPlaceholder enabled compact label="Image unavailable" tone="failed" detail="Media asset integrity failed" />;

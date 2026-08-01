@@ -58,7 +58,9 @@ function toContact(payload: ContactPayload, fallbackId = '', canonicalIdentity =
     resourceType: 'contact',
     id,
     addressingJid,
-    aliases: canonicalIdentity ? [...new Set((payload.aliases ?? []).map((alias) => alias.trim()).filter(Boolean))] : [],
+    // Canonical aliases are backend-owned identity material. Preserve them
+    // byte-for-byte so malformed whitespace cannot become an exact JID match.
+    aliases: canonicalIdentity ? [...new Set(payload.aliases ?? [])] : [],
     identityStatus: canonicalId && payload.identityStatus ? payload.identityStatus : 'legacy',
     identityUpdatedAt: canonicalId ? nonEmpty(payload.identityUpdatedAt) : undefined,
     displayName: canonicalId

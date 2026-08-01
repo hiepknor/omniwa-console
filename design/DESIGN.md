@@ -271,9 +271,11 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   in its accessible name and visible metadata, chronological day changes insert
   hairline separators, and absent text says `Text content not reported` rather
   than displaying a backend token as content. Group messages never derive a
-  sender from JID: until an authoritative participant display identity exists,
-  incoming group messages say `Participant not identified` and raw identifiers
-  remain inspector-only. Message controls derive their accessible name from the
+  sender from provider fields. When canonical Contact identity is available, an
+  incoming Group `participantJid` may resolve only by exact match against a
+  backend-reported Contact alias and displays that Contact's projected name.
+  Unmatched, ambiguous, or unnamed identities say `Unknown participant`; raw
+  identifiers remain inspector-only. Message controls derive their accessible name from the
   visible content, media state, direction, status, and time; a custom label may
   never hide visible failure or processing copy. Opening a newest cursor page
   anchors its scroll container to the end, including when its first data arrives after the route

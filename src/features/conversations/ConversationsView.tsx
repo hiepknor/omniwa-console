@@ -4,6 +4,9 @@ import { useEffect, useLayoutEffect, useRef, useState, type MutableRefObject, ty
 import { calendarDayKey, calendarDayLabel, humanizeToken, relativeTime } from '@/lib/format';
 import { Button, CountBadge, CursorPagination, Status, WorkspacePaneHeader } from '@/ui';
 import { cn } from '@/ui/cn';
+import { resolveParticipantDisplay, type ParticipantDisplayIndex } from './participant-identity';
+
+const EMPTY_PARTICIPANT_DISPLAY_INDEX: ParticipantDisplayIndex = new Map();
 
 export function ConversationUnreadCount({ count, authoritative }: { count: number; authoritative: boolean }) {
   if (!authoritative) return <Status tone="pending">Unread syncing</Status>;
@@ -122,12 +125,13 @@ function projectedMessageContent(item: MessageResource): string {
   return item.contentText ?? item.caption ?? item.contentSummary ?? (item.type === 'text' ? 'Text content not reported' : 'Message content not reported');
 }
 
-export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conversationType, scrollKey, scrollContainerRef, anchorToEnd = false }: {
+export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conversationType, participantDisplayIndex = EMPTY_PARTICIPANT_DISPLAY_INDEX, scrollKey, scrollContainerRef, anchorToEnd = false }: {
   items: MessageResource[];
   selectedId?: string;
   onSelect: (id: string) => void;
   renderMedia?: (message: MessageResource) => ReactNode;
   conversationType?: ConversationResource['type'];
+  participantDisplayIndex?: ParticipantDisplayIndex;
   scrollKey?: string;
   scrollContainerRef?: MutableRefObject<HTMLDivElement | null>;
   anchorToEnd?: boolean;
@@ -188,7 +192,9 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
         const showDay = index === 0 || calendarDayKey(items[index - 1]?.createdAt) !== calendarDayKey(item.createdAt);
         const directionLabel = humanizeToken(item.direction);
         const statusLabel = item.status ? humanizeToken(item.status) : 'Unreported';
-        const unidentifiedGroupParticipant = conversationType === 'group' && item.direction === 'incoming';
+        const groupParticipantLabel = conversationType === 'group' && item.direction === 'incoming'
+          ? resolveParticipantDisplay(item.participantJid, participantDisplayIndex) ?? 'Unknown participant'
+          : undefined;
         return (
           <li key={item.id} className="grid gap-3">
             {showDay ? (
@@ -210,7 +216,7 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
                 )}
               >
                 <span className="sr-only">Message: </span>
-                {unidentifiedGroupParticipant ? <small className="text-[11px] text-fg-3">Participant not identified</small> : null}
+                {groupParticipantLabel ? <small className="text-[11px] text-fg-3">{groupParticipantLabel}</small> : null}
                 {hasMedia ? renderMedia?.(item) : null}
                 {!hasMedia || item.contentText || item.caption || item.contentSummary ? <span className="break-words text-[13px]">{content}</span> : null}
                 <small className={cn('flex items-center justify-between gap-4 text-[11px]', outgoing ? 'text-bg/70' : 'text-fg-3')}>
