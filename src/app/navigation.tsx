@@ -29,7 +29,7 @@ export function navigationForKeyKind(keyKind: KeyKind, recoveryAvailable = false
         label: 'Messaging',
         items: [
           { to: '/conversations', label: 'Conversations', icon: 'conversations' },
-          { to: '/directory', label: 'Directory', icon: 'directory' },
+          { to: '/contacts', label: 'Contacts', icon: 'directory' },
           { to: '/groups', label: 'Groups', icon: 'groups' },
           { to: '/campaigns', label: 'Campaigns', icon: 'campaigns' },
         ],

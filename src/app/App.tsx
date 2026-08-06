@@ -1,6 +1,6 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, useMemo, useRef, useState } from 'react';
-import { createBrowserRouter, Navigate, type RouteObject, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, type RouteObject, RouterProvider, useLocation, useParams } from 'react-router-dom';
 import { ApiProvider } from '@/api/ApiProvider';
 import { CapabilitiesProvider } from '@/api/CapabilitiesProvider';
 import { ApiFailure } from '@/api/envelopes';
@@ -16,7 +16,7 @@ const RecoveryPage = lazy(() => import('@/features/platform/RecoveryPage').then(
 const InstancesPage = lazy(() => import('@/features/instances/InstancesPage').then((m) => ({ default: m.InstancesPage })));
 const PairingPage = lazy(() => import('@/features/instances/PairingPage').then((m) => ({ default: m.PairingPage })));
 const ConversationsPage = lazy(() => import('@/features/conversations/ConversationsPage').then((m) => ({ default: m.ConversationsPage })));
-const DirectoryPage = lazy(() => import('@/features/directory/DirectoryPage').then((m) => ({ default: m.DirectoryPage })));
+const ContactsPage = lazy(() => import('@/features/directory/DirectoryPage').then((m) => ({ default: m.ContactsPage })));
 const GroupsPage = lazy(() => import('@/features/groups/GroupsPage').then((m) => ({ default: m.GroupsPage })));
 const GroupListsPage = lazy(() => import('@/features/groups/GroupListsPage').then((m) => ({ default: m.GroupListsPage })));
 const GroupListEditorPage = lazy(() => import('@/features/groups/GroupListEditorPage').then((m) => ({ default: m.GroupListEditorPage })));
@@ -24,14 +24,38 @@ const CampaignsPage = lazy(() => import('@/features/campaigns/CampaignsPage').th
 const CreateCampaignPage = lazy(() => import('@/features/campaigns/CreateCampaign').then((m) => ({ default: m.CreateCampaign })));
 const EventsPage = lazy(() => import('@/features/events/EventsPage').then((m) => ({ default: m.EventsPage })));
 
+export function legacyDirectoryLocation(resource: 'contacts' | 'labels' | undefined, id: string | undefined, search: string): string {
+  const params = new URLSearchParams(search);
+  let path = '/contacts';
+  if (resource === 'contacts' && id) path = `/contacts/${encodeURIComponent(id)}`;
+  if (resource === 'labels') {
+    params.set('panel', 'labels');
+    if (id) params.set('label', id);
+    params.delete('cursor');
+    const legacySearch = params.get('search');
+    if (legacySearch && !params.has('labelSearch')) params.set('labelSearch', legacySearch);
+    params.delete('search');
+  }
+  const nextSearch = params.toString();
+  return nextSearch ? `${path}?${nextSearch}` : path;
+}
+
+function LegacyDirectoryRedirect({ resource }: { resource?: 'contacts' | 'labels' }) {
+  const location = useLocation();
+  const { contactId, labelId } = useParams();
+  return <Navigate to={legacyDirectoryLocation(resource, contactId ?? labelId, location.search)} replace />;
+}
+
 export const authenticatedRoutes: RouteObject[] = [
   { path: '/conversations', element: <ConversationsPage /> },
   { path: '/conversations/:conversationRef', element: <ConversationsPage /> },
-  { path: '/directory', element: <Navigate to="/directory/contacts" replace /> },
-  { path: '/directory/contacts', element: <DirectoryPage /> },
-  { path: '/directory/contacts/:contactId', element: <DirectoryPage /> },
-  { path: '/directory/labels', element: <DirectoryPage /> },
-  { path: '/directory/labels/:labelId', element: <DirectoryPage /> },
+  { path: '/contacts', element: <ContactsPage /> },
+  { path: '/contacts/:contactId', element: <ContactsPage /> },
+  { path: '/directory', element: <LegacyDirectoryRedirect /> },
+  { path: '/directory/contacts', element: <LegacyDirectoryRedirect resource="contacts" /> },
+  { path: '/directory/contacts/:contactId', element: <LegacyDirectoryRedirect resource="contacts" /> },
+  { path: '/directory/labels', element: <LegacyDirectoryRedirect resource="labels" /> },
+  { path: '/directory/labels/:labelId', element: <LegacyDirectoryRedirect resource="labels" /> },
   { path: '/groups', element: <GroupsPage /> },
   { path: '/groups/lists', element: <GroupListsPage /> },
   { path: '/groups/lists/new', element: <GroupListEditorPage /> },
@@ -97,7 +121,7 @@ const developmentRoutes = import.meta.env.DEV
         },
       },
       {
-        path: '/__preview/directory',
+        path: '/__preview/contacts',
         lazy: async () => {
           const { PreviewDirectory } = await import('./PreviewDirectory');
           return { Component: PreviewDirectory };

@@ -6,7 +6,7 @@ import { ToastViewport } from '@/components/feedback/ToastViewport';
 import { ComposerUnavailable } from '@/features/conversations/Composer';
 import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { DirectoryDetails } from '@/features/directory/Details';
-import { ContactList, LabelList } from '@/features/directory/DirectoryView';
+import { ContactTable, LabelList } from '@/features/directory/DirectoryView';
 import { ConsoleFooter } from './ConsoleFooter';
 import { contactsFixture, conversationsFixture, labelsFixture } from './preview-fixtures';
 import {
@@ -189,8 +189,9 @@ export function UiGallery() {
   const [cursor, setCursor] = useState<string>();
   const [workspaceDetail, setWorkspaceDetail] = useState(true);
   const [conversationDetailsOpen, setConversationDetailsOpen] = useState(false);
-  const [directoryView, setDirectoryView] = useState<'contacts' | 'labels'>('contacts');
   const [directorySelection, setDirectorySelection] = useState<string>();
+  const [directoryLabelsOpen, setDirectoryLabelsOpen] = useState(false);
+  const [directoryLabelSelection, setDirectoryLabelSelection] = useState<string>();
   const [galleryFile, setGalleryFile] = useState<File | undefined>(() => new File(['locked upload fixture'], 'group-photo.png', { type: 'image/png' }));
   const [selectionCount, setSelectionCount] = useState(1);
   const tabRows = tab === 'attention' ? listRows.filter((row) => row.tone !== 'ok') : listRows;
@@ -613,37 +614,22 @@ export function UiGallery() {
           </div>
         </Section>
 
-        <Section title="Messaging Directory recipe">
+        <Section title="Contacts workspace recipe">
           <div className="h-[34rem] min-h-0 overflow-hidden border border-line-strong">
             <WorkspacePageFrame
               eyebrow="Messaging"
-              title="Directory"
-              description="Inspect canonical contacts and projected label definitions."
-              secondaryActions={<IconButton icon="refresh" label="Refresh directory" />}
-              compactTitle={directorySelection ? (directoryView === 'contacts' ? contactsFixture.find((item) => item.id === directorySelection)?.displayName : labelsFixture.find((item) => item.id === directorySelection)?.name) ?? 'Directory details' : 'Directory'}
-              compactDescription={directorySelection ? `Projected ${directoryView === 'contacts' ? 'contact' : 'label'}` : directoryView === 'contacts' ? 'Contacts' : 'Labels'}
-              compactLeadingAction={directorySelection ? <IconButton icon="arrow-left" label="Back to directory" onClick={() => setDirectorySelection(undefined)} /> : undefined}
-              compactActions={<IconButton icon="refresh" label="Refresh directory" />}
+              title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>}
+              description="Inspect canonical contacts and consult projected label definitions."
+              secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setDirectoryLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}
+              compactTitle={directorySelection ? contactsFixture.find((item) => item.id === directorySelection)?.displayName ?? 'Contact details' : 'Contacts'}
+              compactDescription={directorySelection ? 'Projected contact identity' : 'Canonical projected identities'}
+              compactLeadingAction={directorySelection ? <IconButton icon="arrow-left" label="Back to contacts" onClick={() => setDirectorySelection(undefined)} /> : undefined}
+              compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setDirectoryLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}
             >
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                <Tabs active={directoryView} onChange={(id) => { setDirectoryView(id as 'contacts' | 'labels'); setDirectorySelection(undefined); }} tabs={[{ id: 'contacts', label: 'Contacts', panelId: 'gallery-directory' }, { id: 'labels', label: 'Labels', panelId: 'gallery-directory' }]} />
-                <div id="gallery-directory" role="tabpanel" aria-labelledby={`gallery-directory-${directoryView}-tab`} className="flex min-h-0 min-w-0 flex-1">
-                  <SplitWorkspace
-                    frame="attached"
-                    detailOpen={Boolean(directorySelection)}
-                    directoryLabel={`${directoryView} gallery directory`}
-                    detailLabel={`${directoryView} gallery detail`}
-                    directory={<>
-                      <WorkspacePaneHeader title={<span className="inline-flex items-center gap-2">{directoryView === 'contacts' ? 'Contacts' : 'Labels'}<CountBadge count={directoryView === 'contacts' ? contactsFixture.length : labelsFixture.length} /></span>} description={directoryView === 'contacts' ? 'Canonical projected identities' : 'Projected definitions'} />
-                      {directoryView === 'contacts' ? <ContactList items={contactsFixture} selectedId={directorySelection} onSelect={setDirectorySelection} /> : <LabelList items={labelsFixture} selectedId={directorySelection} onSelect={setDirectorySelection} />}
-                    </>}
-                    detail={<>
-                      <WorkspacePaneHeader className="max-[900px]:hidden" title="Directory details" description="Selected projected resource" />
-                      {directorySelection ? <DirectoryDetails contact={directoryView === 'contacts' ? contactsFixture.find((item) => item.id === directorySelection) : undefined} label={directoryView === 'labels' ? labelsFixture.find((item) => item.id === directorySelection) : undefined} loading={false} onRetry={() => {}} /> : <div className="p-4"><StateNotice kind="empty" title="No resource selected" /></div>}
-                    </>}
-                  />
-                </div>
-              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto p-4"><ContactTable items={contactsFixture} selectedId={directorySelection} onSelect={(id) => { setDirectoryLabelsOpen(false); setDirectorySelection(id); }} /></div>
+              <Drawer open={directoryLabelsOpen || Boolean(directorySelection)} onClose={() => { if (directoryLabelsOpen) { setDirectoryLabelsOpen(false); setDirectoryLabelSelection(undefined); } else setDirectorySelection(undefined); }} title={directoryLabelsOpen ? labelsFixture.find((item) => item.id === directoryLabelSelection)?.name ?? 'Label catalog' : contactsFixture.find((item) => item.id === directorySelection)?.displayName ?? 'Contact details'}>
+                {directoryLabelsOpen ? directoryLabelSelection ? <div className="grid gap-4"><IconButton icon="arrow-left" label="Back to labels" onClick={() => setDirectoryLabelSelection(undefined)} /><DirectoryDetails label={labelsFixture.find((item) => item.id === directoryLabelSelection)} loading={false} onRetry={() => {}} /></div> : <div className="grid gap-3"><div className="flex items-center justify-between border-b border-line pb-2"><strong className="text-sm">Label definitions</strong><CountBadge count={labelsFixture.length} /></div><LabelList items={labelsFixture} onSelect={setDirectoryLabelSelection} /></div> : <DirectoryDetails contact={contactsFixture.find((item) => item.id === directorySelection)} loading={false} onRetry={() => {}} />}
+              </Drawer>
             </WorkspacePageFrame>
           </div>
         </Section>

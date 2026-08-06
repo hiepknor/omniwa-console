@@ -21,8 +21,8 @@ Rules:
 | Groups | Normalized management available | Capability-gated directory, detail, members, commands, photo, audit, and summary integrated |
 | Conversations | Canonical projection available | Projection list/detail integrated |
 | Messages and delivery | Projection available | History/detail/receipts and text send integrated |
-| Contacts | Projection available | Directory list/search/detail integrated in Directory workspace |
-| Labels | Projection available | Directory list/detail integrated in Directory workspace |
+| Contacts | Projection available | Primary list/search/detail integrated at `/contacts` |
+| Labels | Projection available | Read-only catalog integrated as a capability-gated Contacts inspector |
 | Events | Durable history available | Integrated with retention and no-backfill metadata |
 | Overview and Health | Persisted/split APIs available | Integrated |
 | Projection Recovery | Admin failure operations available | Integrated when capability is advertised |
@@ -223,10 +223,11 @@ from eligibility, preserve an unreported count as `—`, and place normalized
 group type beside the stable Group JID. The Console never expands members,
 aggregates counts into unique recipients, or uses member count to enable a row.
 
-## Messaging Directory — `/directory/contacts/:contactId?`, `/directory/labels/:labelId?`
+## Contacts workspace — `/contacts/:contactId?`
 
-**Status:** canonical Contact list/search/detail and projected Label list/detail are
-integrated as an instance-scoped read-only resource workspace.
+**Status:** canonical Contact list/search/detail is the primary instance-scoped
+workspace. Projected Label list/detail is integrated as an on-demand read-only
+catalog inspector.
 
 Operation ownership:
 
@@ -238,14 +239,17 @@ GET /label/list
 GET /label/info/{labelId}
 ```
 
-The workspace calls only the active resource projection. It does not fetch an
-inactive directory merely to populate navigation counts. Contacts use returned
+Contacts are always the primary resource. The Label projection is fetched only
+while the URL-backed catalog inspector is open; it is never fetched merely to
+populate navigation counts. Contacts use returned
 `contactId` as identity when `canonical_contact_identity` is advertised and
 retain the explicit compatibility representation during mixed rollout.
 Aliases are lookup material, never separate rows or browser merge input.
 Canonical Contacts preserve absent `Found` as unreported and never derive a
 canonical display name from compatibility fields.
-Normalized Contact search and its opaque cursor remain URL-backed; changing the
+Normalized Contact search, its opaque cursor, Contact selection, and Label catalog
+state remain URL-backed. The catalog uses `panel=labels`, `label`, and
+`labelSearch` without changing the Contact search or selection. Changing the
 query or page clears selection, and `invalid_cursor` returns to the first page.
 The active Contact result count comes from `meta.total`, including normalized
 search scope. Labels retain the backend's historical bare-array list and use
@@ -253,11 +257,14 @@ search scope. Labels retain the backend's historical bare-array list and use
 cursor. Projection readiness distinguishes a valid empty list from unavailable,
 syncing, stale, or failed state.
 
-At 900px and wider the shared split workspace gives the list 320px and the
-selected resource the remaining detail pane. Below 900px detail replaces the
-list and exposes Back; resource selection remains deep-linkable rather than
-opening a secondary Drawer. Label definitions remain read-only because the
-public Conversation and Message projections do not publish authoritative label
+Contacts render as a full-width responsive registry table rather than the
+Conversation-style directory/detail split. Selecting a row opens URL-backed
+Contact detail in the shared Drawer; compact tables become labelled records.
+The Label catalog uses the same bounded Drawer as a mutually exclusive utility
+view, with list/detail navigation inside it. Compatibility `/directory/*` routes redirect to the canonical Contacts URL
+while preserving applicable search context. Label definitions remain read-only
+and Contact detail states that associations are unavailable because the public
+Contact and Conversation projections do not publish authoritative label
 associations and mutation operations have no advertised product capability.
 
 ## Conversations workspace — `/conversations/:conversationRef?`

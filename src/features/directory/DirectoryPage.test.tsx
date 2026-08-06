@@ -3,7 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { ContactResource } from '@/api/contacts';
 import type { LabelResource } from '@/api/labels';
-import { DirectoryPage } from './DirectoryPage';
+import { ContactsPage } from './DirectoryPage';
+
+vi.mock('react-dom', async (importOriginal) => ({
+  ...await importOriginal<typeof import('react-dom')>(),
+  createPortal: (children: React.ReactNode) => children,
+}));
+Object.defineProperty(globalThis, 'document', { value: { body: {} }, configurable: true });
 
 let advertised = ['contacts_projection', 'labels_projection', 'canonical_contact_identity'];
 const useContacts = vi.fn();
@@ -28,7 +34,7 @@ const labels: LabelResource[] = [
 const idle = { isPending: false, isFetching: false, error: null, data: undefined, refetch: vi.fn() };
 
 function renderRoute(path: string): string {
-  return renderToStaticMarkup(<MemoryRouter initialEntries={[path]}><Routes><Route path="/directory/contacts/:contactId?" element={<DirectoryPage />} /><Route path="/directory/labels/:labelId?" element={<DirectoryPage />} /></Routes></MemoryRouter>);
+  return renderToStaticMarkup(<MemoryRouter initialEntries={[path]}><Routes><Route path="/contacts/:contactId?" element={<ContactsPage />} /></Routes></MemoryRouter>);
 }
 
 beforeEach(() => {
@@ -40,29 +46,40 @@ beforeEach(() => {
   useLabel.mockReturnValue(idle);
 });
 
-describe('DirectoryPage', () => {
-  it('queries only Contacts and renders its authoritative meta.total', () => {
-    const html = renderRoute('/directory/contacts');
+describe('ContactsPage', () => {
+  it('queries Contacts without fetching the closed Label catalog', () => {
+    const html = renderRoute('/contacts');
     expect(useContacts).toHaveBeenCalledWith('', undefined, true, true);
     expect(useLabels).toHaveBeenCalledWith(false);
     expect(html).toContain('>84</span>');
     expect(html).toContain('Search contacts');
-    expect(html).not.toContain('Labels 2');
+    expect(html).toContain('Label catalog');
+    expect(html).not.toContain('Label definitions');
   });
 
-  it('queries only Labels and renders bare-array length', () => {
-    const html = renderRoute('/directory/labels');
-    expect(useContacts).toHaveBeenCalledWith('', undefined, false, true);
+  it('keeps Contacts active while the URL-backed Label catalog is open', () => {
+    const html = renderRoute('/contacts/contact-1?panel=labels');
+    expect(useContacts).toHaveBeenCalledWith('', undefined, true, true);
     expect(useLabels).toHaveBeenCalledWith(true);
     expect(html).toContain('>2</span>');
     expect(html).toContain('Filter labels');
+    expect(html).toContain('Anna Nguyen');
   });
 
   it('does not enable a projection read when its capability is absent', () => {
     advertised = [];
-    const html = renderRoute('/directory/contacts');
+    const html = renderRoute('/contacts');
     expect(useContacts).toHaveBeenCalledWith('', undefined, false, false);
     expect(html).toContain('Projection unavailable');
     expect(html).toContain('disabled=""');
+  });
+
+  it('does not let a missing Label capability block Contacts', () => {
+    advertised = ['contacts_projection', 'canonical_contact_identity'];
+    const html = renderRoute('/contacts?panel=labels');
+    expect(useContacts).toHaveBeenCalledWith('', undefined, true, true);
+    expect(useLabels).toHaveBeenCalledWith(false);
+    expect(html).toContain('Label projection unavailable');
+    expect(html).toContain('Anna Nguyen');
   });
 });

@@ -219,12 +219,12 @@ resource models, or rendered diagnostics.
   authoritative positive counts through an accessible CountBadge. The selected
   header does not repeat unread attention; the inspector reports an authoritative
   value as a plain fact. When `unreadAuthoritative` is false, the directory and
-  inspector show a pending syncing status and no numeric badge. Conversation and Directory list headers place
+  inspector show a pending syncing status and no numeric badge. Conversation and Contacts list headers place
   the active authoritative total beside the resource label. Conversation and
   Contact totals use `meta.total` (including the current normalized Contact
   search scope), while Labels use the bare-array length; none derive totals from
-  page length. Directory resource tabs intentionally omit counts so inactive
-  projections are not fetched merely to populate navigation.
+  page length. The Label catalog reports its loaded filtered count only while
+  open, so its projection is never fetched merely to populate navigation.
   Private message images use the shared framed Image language when ready and a
   stable square Status placeholder while pending, failed, expired, deleted, or
   capability-gated. `not_ready` remains pending; only the message inspector adds
@@ -286,14 +286,16 @@ resource models, or rendered diagnostics.
   outcomes keep the selected Conversation in place. If a pending navigation
   finishes with a clean Composer, the stale block resets instead of being
   mislabeled as an unknown outcome.
-- The Messaging Directory owns Contacts and Labels as page-level resource tabs,
-  not modes inside the Conversation list. Only the active resource projection is
-  queried. At 900px and wider it uses the shared 320px list + remaining detail
-  split; below 900px the selected resource replaces the list with a full Back
-  action. Contact search/cursor/selection and Label filter/selection remain
-  URL-backed. Contact detail preserves canonical/compatibility rollout semantics; Label
-  detail remains a read-only projected definition and never infers Conversation
-  or Message associations.
+- The Contacts workspace owns canonical Contacts as a full-width responsive
+  registry table, deliberately distinct from the Conversation split workspace.
+  Selecting a row opens URL-backed Contact detail in the shared Drawer. The
+  projected Label catalog is a mutually exclusive utility Drawer, not a peer
+  resource tab, and is fetched only while open. Contact
+  search/cursor/selection and Label catalog/filter/selection have independent
+  URL-backed state. Contact detail preserves canonical/compatibility rollout
+  semantics and explicitly reports that authoritative Contact–Label associations
+  are unavailable; Label detail remains a read-only projected definition and
+  never infers Conversation or Message associations.
 - Multi-selection directories compose the shared `SelectionBar` directly above
   the canonical `Table`. Bulk labels always state their page scope; selection
   totals may span pages, while eligibility and selectable-row rules stay in the

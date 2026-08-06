@@ -15,8 +15,15 @@ export function legacyDirectoryTarget(searchParams: URLSearchParams): string | u
   if (view !== 'contacts' && view !== 'labels') return undefined;
   const selected = readOptionalSearchParam(searchParams, 'selected');
   const next = omitSearchParams(searchParams, ['view', 'selected', 'message', 'messageCursor', 'details', ...(view === 'labels' ? ['cursor'] : [])]);
-  const base = `/directory/${view}`;
-  return withSearchParams(selected ? `${base}/${encodeURIComponent(selected)}` : base, next);
+  if (view === 'labels') {
+    next.set('panel', 'labels');
+    if (selected) next.set('label', selected);
+    const search = next.get('search');
+    if (search) next.set('labelSearch', search);
+    next.delete('search');
+    return withSearchParams('/contacts', next);
+  }
+  return withSearchParams(selected ? `/contacts/${encodeURIComponent(selected)}` : '/contacts', next);
 }
 
 export function setConversationParam(searchParams: URLSearchParams, key: string, value?: string): URLSearchParams {

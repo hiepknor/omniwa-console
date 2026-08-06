@@ -1,62 +1,46 @@
 import { useMemo, useState } from 'react';
-import { ContactList, LabelList } from '@/features/directory/DirectoryView';
+import { ContactTable, LabelList } from '@/features/directory/DirectoryView';
 import { DirectoryDetails } from '@/features/directory/Details';
-import { CountBadge, Field, FilterToolbar, IconButton, Input, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton, Input, WorkspacePageFrame } from '@/ui';
 import { contactsFixture, labelsFixture } from './preview-fixtures';
 
-/** Dev-only: projected Contacts and Labels directory with responsive list/detail behavior. */
+/** Dev-only: full-width Contacts registry with the projected Label catalog open. */
 export function PreviewDirectory() {
-  const [view, setView] = useState<'contacts' | 'labels'>('contacts');
-  const [selectedId, setSelectedId] = useState<string>();
+  const [contactId, setContactId] = useState<string>();
+  const [labelId, setLabelId] = useState<string>();
+  const [labelsOpen, setLabelsOpen] = useState(true);
   const [search, setSearch] = useState('');
-  const { compactHeadingRef, rememberFocusOrigin } = useWorkspacePageFocus(selectedId);
-  const items = view === 'contacts' ? contactsFixture : labelsFixture;
-  const filtered = useMemo(() => items.filter((item) => !search || JSON.stringify(item).toLocaleLowerCase().includes(search.toLocaleLowerCase())), [items, search]);
-  const contact = view === 'contacts' ? contactsFixture.find((item) => item.id === selectedId) : undefined;
-  const label = view === 'labels' ? labelsFixture.find((item) => item.id === selectedId) : undefined;
-  const selectedName = contact?.displayName ?? label?.name;
-  const switchView = (next: string) => { setView(next as 'contacts' | 'labels'); setSelectedId(undefined); setSearch(''); };
-  const select = (id: string) => { rememberFocusOrigin(); setSelectedId(id); };
+  const [labelSearch, setLabelSearch] = useState('');
+  const contacts = useMemo(() => contactsFixture.filter((item) => !search || JSON.stringify(item).toLocaleLowerCase().includes(search.toLocaleLowerCase())), [search]);
+  const labels = useMemo(() => labelsFixture.filter((item) => !labelSearch || JSON.stringify(item).toLocaleLowerCase().includes(labelSearch.toLocaleLowerCase())), [labelSearch]);
+  const contact = contactsFixture.find((item) => item.id === contactId);
+  const label = labelsFixture.find((item) => item.id === labelId);
+  const closeDrawer = () => {
+    if (labelsOpen) {
+      setLabelsOpen(false);
+      setLabelId(undefined);
+    } else setContactId(undefined);
+  };
+  const labelCatalog = label ? (
+    <div className="grid gap-4"><div><IconButton icon="arrow-left" label="Back to labels" onClick={() => setLabelId(undefined)} /></div><DirectoryDetails label={label} loading={false} onRetry={() => {}} /></div>
+  ) : (
+    <div className="grid gap-3">
+      <FilterToolbar as="form" className="border" onSubmit={(event) => event.preventDefault()}><Field label="Filter labels" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" value={labelSearch} placeholder="Name or label ID" onChange={(event) => setLabelSearch(event.target.value)} />}</Field><div className="flex items-end"><IconButton type="submit" icon="search" label="Apply label filter" /></div></FilterToolbar>
+      <div className="flex items-center justify-between gap-3 border-b border-line pb-2"><strong className="text-sm font-semibold">Label definitions</strong><CountBadge count={labels.length} /></div>
+      <LabelList items={labels} selectedId={labelId} onSelect={setLabelId} />
+    </div>
+  );
   return (
     <main className="h-dvh overflow-hidden bg-bg">
-      <WorkspacePageFrame
-        eyebrow="Messaging"
-        title="Directory"
-        description="Inspect canonical contacts and projected label definitions."
-        secondaryActions={<IconButton icon="refresh" label="Refresh directory" />}
-        compactTitle={selectedId ? selectedName ?? `${view === 'contacts' ? 'Contact' : 'Label'} details` : 'Directory'}
-        compactDescription={selectedId ? `Projected ${view === 'contacts' ? 'contact' : 'label'}` : view === 'contacts' ? 'Contacts' : 'Labels'}
-        compactLeadingAction={selectedId ? <IconButton icon="arrow-left" label="Back to directory" onClick={() => setSelectedId(undefined)} /> : undefined}
-        compactActions={<IconButton icon="refresh" label="Refresh directory" />}
-        compactHeadingRef={compactHeadingRef}
-      >
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <Tabs className={selectedId ? 'max-[900px]:hidden' : undefined} active={view} onChange={switchView} tabs={[{ id: 'contacts', label: 'Contacts', panelId: 'directory-preview' }, { id: 'labels', label: 'Labels', panelId: 'directory-preview' }]} />
-          <div id="directory-preview" role="tabpanel" aria-labelledby={`directory-preview-${view}-tab`} className="flex min-h-0 min-w-0 flex-1">
-          <SplitWorkspace
-            frame="attached"
-            detailOpen={Boolean(selectedId)}
-            directoryLabel={`${view} directory preview`}
-            detailLabel={`${view} detail preview`}
-            directoryScrollKey={`${view}:${search}`}
-            detailScrollKey={selectedId}
-            directory={<>
-              <div className="sticky top-0 z-10 bg-surface">
-                <WorkspacePaneHeader title={<span className="inline-flex items-center gap-2">{view === 'contacts' ? 'Contacts' : 'Labels'}<CountBadge count={filtered.length} /></span>} description={view === 'contacts' ? 'Canonical projected identities' : 'Projected definitions'} />
-                <FilterToolbar as="form" className="border-b-0" onSubmit={(event) => event.preventDefault()}>
-                  <Field label={view === 'contacts' ? 'Search contacts' : 'Filter labels'} className="min-w-48 flex-1">{(id) => <Input id={id} type="search" value={search} placeholder={view === 'contacts' ? 'Name, ID, alias, or username' : 'Name or label ID'} onChange={(event) => setSearch(event.target.value)} />}</Field>
-                  <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply directory search" /></div>
-                </FilterToolbar>
-              </div>
-              {view === 'contacts' ? <ContactList items={filtered as typeof contactsFixture} selectedId={selectedId} onSelect={select} /> : <LabelList items={filtered as typeof labelsFixture} selectedId={selectedId} onSelect={select} />}
-            </>}
-            detail={<>
-              <WorkspacePaneHeader className="max-[900px]:hidden" title={selectedName ?? `${view === 'contacts' ? 'Contact' : 'Label'} details`} description={selectedId ? `Projected ${view === 'contacts' ? 'contact identity' : 'label definition'}` : `Select a projected ${view === 'contacts' ? 'contact' : 'label'}`} />
-              {selectedId ? <DirectoryDetails contact={contact} label={label} loading={false} onRetry={() => {}} /> : null}
-            </>}
-          />
-          </div>
-        </div>
+      <WorkspacePageFrame eyebrow="Messaging" title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>} description="Search and inspect canonical contact records." secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>} compactTitle="Contacts" compactDescription="Canonical contact registry" compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 max-sm:p-3"><div className="grid gap-3">
+          <FilterToolbar as="form" className="border" onSubmit={(event) => event.preventDefault()}><Field label="Search contacts" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" value={search} placeholder="Name, phone, ID, alias, or username" onChange={(event) => setSearch(event.target.value)} />}</Field><div className="flex items-end"><IconButton type="submit" icon="search" label="Apply contact search" /></div></FilterToolbar>
+          <ContactTable items={contacts} selectedId={contactId} onSelect={(id) => { setLabelsOpen(false); setContactId(id); }} />
+          <CursorPagination nextCursor="contacts-next" info={`${contacts.length} shown on this page`} onCursor={() => {}} />
+        </div></div>
+        <Drawer open={labelsOpen || Boolean(contactId)} onClose={closeDrawer} title={labelsOpen ? label?.name ?? 'Label catalog' : contact?.displayName ?? 'Contact details'} subtitle={labelsOpen ? label?.id : contact?.id}>
+          {labelsOpen ? labelCatalog : contact ? <DirectoryDetails contact={contact} loading={false} onRetry={() => {}} /> : null}
+        </Drawer>
       </WorkspacePageFrame>
     </main>
   );

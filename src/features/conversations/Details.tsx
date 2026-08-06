@@ -37,7 +37,7 @@ export function ConversationDetailsContent({ conversation }: { conversation: Con
       : 'None';
   return (
     <div className="grid gap-4">
-      <Panel headingLevel={3} title="Canonical identity" description="Backend-projected identity; Console does not merge Conversations or derive a display name." actions={conversation.contactId ? <ButtonLink to={`/directory/contacts/${encodeURIComponent(conversation.contactId)}`}>Open contact</ButtonLink> : undefined} bodyPadding="compact-top">
+      <Panel headingLevel={3} title="Canonical identity" description="Backend-projected identity; Console does not merge Conversations or derive a display name." actions={conversation.contactId ? <ButtonLink to={`/contacts/${encodeURIComponent(conversation.contactId)}`}>Open contact</ButtonLink> : undefined} bodyPadding="compact-top">
         <DescriptionList>
           <DescriptionItem label="Display name">{conversation.displayName ?? 'Not reported'}</DescriptionItem>
           <DescriptionItem label="Phone" mono><CopyableFact value={conversation.phoneNumber} label="Phone number" /></DescriptionItem>
