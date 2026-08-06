@@ -135,19 +135,25 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   visibly marked and natively disabled. Button labels never shrink or clip;
   responsive action rows wrap or stack around their intrinsic width. One primary
   action per view.
-- **CloseButton** — the only icon-only X/dismiss control. It is a fully framed
-  square: 36×36px desktop and 40×40px mobile, with a 14px stroked X. Rest is
-  the ghost Button treatment and it inherits the same hover lift, hard shadow,
-  active return, keyboard focus, and disabled behavior. It never rounds or
-  stretches to match its container. Dialogs, drawers, and notifications all use
-  this primitive with an explicit non-visual accessible label.
+- **IconButton / CloseButton** — secondary utility actions use an icon-only,
+  fully framed square: 36×36px desktop and 40×40px mobile, with a canonical
+  14px stroked glyph. Refresh, search/filter submission, compact Back, inspector
+  disclosure, copy, clear/remove, pagination, and dismiss actions belong here.
+  Rest is the ghost Button treatment and inherits the same hover lift, hard
+  shadow, active return, keyboard focus, busy, and disabled behavior. Every
+  IconButton has a specific accessible name and a matching tooltip on hover and
+  keyboard focus. CloseButton is the semantic X/dismiss composition. Neither
+  primitive rounds or stretches to match its container. Primary actions,
+  commands, confirmations, cancellation, and destructive intent retain visible
+  labels and never use IconButton.
 - **Logo / Icon** — brand identity remains in `Logo`; every interface glyph is
   drawn by `Icon`. Icons use the canonical 12/14/18px sizes, 1.75px square-cap
   monochrome stroke, no emoji, text glyph, filled icon library, or feature-local
   SVG. Icons are decorative and never supply an accessible name themselves;
   icon-only controls require an explicit accessible name and tooltip. Visible
-  labels remain the default, with the compact rail and the pinned compact footer
-  controls as the frozen space-constrained exceptions. Navigation uses
+  labels remain the default for primary actions and server commands; secondary
+  utility actions use IconButton, and the compact rail and pinned compact footer
+  controls remain navigation-specific exceptions. Navigation uses
   `NavigationItemContent` so full rail, compact rail, and mobile bottom nav cannot
   drift independently.
   Connection uses the canonical chain-link glyph; Directory uses the canonical

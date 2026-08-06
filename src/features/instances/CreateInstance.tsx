@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { InstanceCredentialSecret } from '@/api/instances';
-import { Button, Dialog, Field, Input, StateNotice } from '@/ui';
+import { Button, Dialog, Field, IconButton, Input, StateNotice } from '@/ui';
 import { FailureNotice } from './ui';
 
 export function CreateInstance({ open, pending, error, created, onCreate, onClose }: {
@@ -33,7 +33,7 @@ export function CreateInstance({ open, pending, error, created, onCreate, onClos
         closeDisabled={pending || Boolean(created)}
         title={created ? 'Store the instance token now' : 'Create instance'}
         footer={created
-          ? <><Button onClick={() => void copyToken()}>Copy token</Button><Button variant="danger" onClick={() => setDiscardOpen(true)}>Discard without storing…</Button><Button variant="primary" onClick={onClose}>I stored the token</Button></>
+          ? <><IconButton icon={copyState === 'copied' ? 'check' : 'copy'} label={copyState === 'copied' ? 'Token copied' : copyState === 'failed' ? 'Retry copying token' : 'Copy token'} onClick={() => void copyToken()} /><Button variant="danger" onClick={() => setDiscardOpen(true)}>Discard without storing…</Button><Button variant="primary" onClick={onClose}>I stored the token</Button></>
           : <><Button onClick={onClose} disabled={pending}>Cancel</Button><Button variant="primary" onClick={submit} disabled={!name.trim() || pending}>{pending ? 'Creating…' : 'Create instance'}</Button></>}
       >
         <div className="grid gap-3">

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { OverviewResource, ProjectionHealthResource, ServerHealthResource } from '@/api/overview';
 import { formatCount, humanizeToken, relativeTime } from '@/lib/format';
-import { Button, ButtonLink, Field, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { ButtonLink, Field, IconButton, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
 
 function projectionTone(status: string): Tone {
   if (status === 'healthy' || status === 'ready') return 'ok';
@@ -43,7 +43,7 @@ export function OverviewView(props: OverviewViewProps) {
               </>
             )
           : 'Monitor server, instance, projection, and messaging health.'}
-        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        secondaryActions={<IconButton icon="refresh" label="Refresh overview" onClick={props.onRefresh} busy={props.refreshing} />}
       />
 
       {props.notices}

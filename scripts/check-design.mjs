@@ -49,8 +49,13 @@ if (connectPage.includes('font-mono text-[11px] opacity')) {
 }
 
 const closeButton = await read('src/ui/CloseButton.tsx');
-for (const marker of ["buttonClassName('ghost'", 'size-9', 'max-sm:size-10', '<Icon name="close"']) {
+for (const marker of ['<IconButton', 'icon="close"', 'label={label}', 'disabled={disabled}']) {
   if (!closeButton.includes(marker)) failures.push(`src/ui/CloseButton.tsx: close-control contract is missing ${marker}`);
+}
+
+const iconButton = await read('src/ui/IconButton.tsx');
+for (const marker of ["buttonClassName(variant", 'size-9', 'max-sm:size-10', 'aria-label={label}', 'aria-describedby={tooltipId}', 'role="tooltip"', 'onFocus=', 'tooltipOpen ?', 'busy || undefined']) {
+  if (!iconButton.includes(marker)) failures.push(`src/ui/IconButton.tsx: icon-only utility contract is missing ${marker}`);
 }
 
 const icon = await read('src/ui/Icon.tsx');
@@ -110,7 +115,7 @@ if (!uiGallery.includes("['connection', 'Connection']") || !uiGallery.includes("
 if (!uiGallery.includes('const sessionUtilityItems') || !uiGallery.includes('Mobile navigation example')) {
   failures.push('src/app/UiGallery.tsx: compact session utilities must remain separate from navigation fixtures');
 }
-for (const marker of ['<ResponsiveInspector', '<ConversationDetailsContent', 'setConversationDetailsOpen(true)', '>Details</Button>']) {
+for (const marker of ['<ResponsiveInspector', '<ConversationDetailsContent', 'setConversationDetailsOpen(true)', 'label="Open conversation details"']) {
   if (!uiGallery.includes(marker)) failures.push(`src/app/UiGallery.tsx: responsive Conversation inspector fixture is missing ${marker}`);
 }
 
@@ -140,7 +145,7 @@ for (const marker of ['role="group"', '<Checkbox', 'indeterminate={indeterminate
 }
 
 const selectionReview = await read('src/ui/SelectionReview.tsx');
-for (const marker of ['aria-label=', 'aria-live="polite"', '<CountBadge', 'selected ${items.length === 1', 'max-h-56 overflow-y-auto', '<Status', '<Button', 'Remove selected item', 'max-sm:grid-cols-1']) {
+for (const marker of ['aria-label=', 'aria-live="polite"', '<CountBadge', 'selected ${items.length === 1', 'max-h-56 overflow-y-auto', '<Status', '<IconButton', 'Remove selected item', 'max-sm:grid-cols-1']) {
   if (!selectionReview.includes(marker)) failures.push(`src/ui/SelectionReview.tsx: retained-selection contract is missing ${marker}`);
 }
 
@@ -244,7 +249,7 @@ for (const marker of ['<footer', 'aria-label="Console runtime context"', 'h-10',
 }
 
 const conversationsPreview = await read('src/app/PreviewConversations.tsx');
-for (const marker of ['<main', '<WorkspacePageFrame', 'secondaryActions={<Button>Refresh</Button>}', 'compactDescription={conversation ?', 'Last activity ${conversation.lastActivityAt ?', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', 'detailScrollerRef={messageScrollerRef}', '<CountBadge count={217}', 'placeholder="Name or ID on this page"', '<SelectedConversationHeader', 'className="max-[900px]:hidden"', '>Back</Button>', '>Details</Button>', '<ConversationDetailsContent', 'className="flex min-h-full flex-col"', 'conversationType={conversation.type}', 'scrollContainerRef={messageScrollerRef}', 'anchorToEnd', 'detailFooter={conversation ? <><ConversationMessagePagination']) {
+for (const marker of ['<main', '<WorkspacePageFrame', 'secondaryActions={<IconButton icon="refresh"', 'compactDescription={conversation ?', 'Last activity ${conversation.lastActivityAt ?', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailOpen={Boolean(conversation)}', 'detailInitialPosition="end"', 'detailScrollerRef={messageScrollerRef}', '<CountBadge count={217}', 'placeholder="Name or ID on this page"', '<SelectedConversationHeader', 'className="max-[900px]:hidden"', 'icon="arrow-left"', 'icon="panel-right"', '<ConversationDetailsContent', 'className="flex min-h-full flex-col"', 'conversationType={conversation.type}', 'scrollContainerRef={messageScrollerRef}', 'anchorToEnd', 'detailFooter={conversation ? <><ConversationMessagePagination']) {
   if (!conversationsPreview.includes(marker)) failures.push(`src/app/PreviewConversations.tsx: responsive split-workspace fixture is missing ${marker}`);
 }
 if (conversationsPreview.includes('WorkspacePaneHeader title={<span className="inline-flex items-center gap-2">Conversations')) {
@@ -272,7 +277,7 @@ for (const marker of ['grid-cols-[320px_minmax(0,1fr)]', 'max-[900px]:grid-cols-
 }
 
 const conversationsPage = await read('src/features/conversations/ConversationsPage.tsx');
-for (const marker of ['<WorkspacePageFrame', 'const pageTitle =', 'secondaryActions={<Button', 'onClick={refreshPage}', "omitSearchParams(searchParams, ['message', 'messageCursor', 'details'])", 'compactDescription={hasConversation ?', 'selectedProjectionAttention', 'useBeforeUnload', 'useBlocker', 'resolveComposerBlocker', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', 'detailScrollerRef={messageScrollerRef}', '<WorkspacePaneHeader', '<CountBadge count={conversations.data.resource.total}', 'Filter conversations', 'placeholder="Name or ID on this page"', 'nextLabel="Next page"', 'Selected Conversation is outside this page', '<SelectedConversationHeader', 'projectionAttention={<ProjectionAttentionStatus', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', '>Back</Button>', '>Details</Button>', '<ConversationDetailsContent', '<MessageInspectorContent', 'className="flex min-h-full flex-col"', 'conversationType={selectedConversation.type}', 'scrollContainerRef={messageScrollerRef}', 'anchorToEnd={!route.messageCursor}', 'No projected messages', "details: 'conversation'", 'detailFooter={selectedConversation ? <>', '<ConversationMessagePagination', '<Navigate replace to={target}']) {
+for (const marker of ['<WorkspacePageFrame', 'const pageTitle =', 'secondaryActions={<IconButton icon="refresh"', 'onClick={refreshPage}', "omitSearchParams(searchParams, ['message', 'messageCursor', 'details'])", 'compactDescription={hasConversation ?', 'selectedProjectionAttention', 'useBeforeUnload', 'useBlocker', 'resolveComposerBlocker', '<ResponsiveInspector', '<SplitWorkspace', 'frame="attached"', 'detailInitialPosition={route.messageCursor ?', 'detailScrollerRef={messageScrollerRef}', '<WorkspacePaneHeader', '<CountBadge count={conversations.data.resource.total}', 'Filter conversations', 'placeholder="Name or ID on this page"', 'nextLabel="Next page"', 'Selected Conversation is outside this page', '<SelectedConversationHeader', 'projectionAttention={<ProjectionAttentionStatus', 'className="max-[900px]:hidden"', 'useWorkspacePageFocus', 'rememberFocusOrigin', 'icon="arrow-left"', 'icon="panel-right"', '<ConversationDetailsContent', '<MessageInspectorContent', 'className="flex min-h-full flex-col"', 'conversationType={selectedConversation.type}', 'scrollContainerRef={messageScrollerRef}', 'anchorToEnd={!route.messageCursor}', 'No projected messages', "details: 'conversation'", 'detailFooter={selectedConversation ? <>', '<ConversationMessagePagination', '<Navigate replace to={target}']) {
   if (!conversationsPage.includes(marker)) failures.push(`src/features/conversations/ConversationsPage.tsx: production split workspace is missing ${marker}`);
 }
 if (conversationsPage.includes('<WorkspacePaneHeader\n                  title={<span className="inline-flex items-center gap-2">Conversations')) {
@@ -297,12 +302,12 @@ for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '
 }
 
 const directoryPreview = await read('src/app/PreviewDirectory.tsx');
-for (const marker of ['<WorkspacePageFrame', 'Label catalog', '<Drawer', '<ContactTable', '<CursorPagination', 'Back to labels', '<CountBadge count={contactsFixture.length}', '<LabelList', '<DirectoryDetails']) {
+for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', 'icon="refresh"', '<Drawer', '<ContactTable', '<CursorPagination', 'label="Back to labels"', '<CountBadge count={contactsFixture.length}', '<LabelList', '<DirectoryDetails']) {
   if (!directoryPreview.includes(marker)) failures.push(`src/app/PreviewDirectory.tsx: Contacts workspace preview is missing ${marker}`);
 }
 
 const directoryPage = await read('src/features/directory/DirectoryPage.tsx');
-for (const marker of ['<WorkspacePageFrame', 'Label catalog', '<Drawer', '<ContactTable', '<CursorPagination', 'Back to labels', 'contacts.data.resource.total', 'Search contacts', 'Filter labels', '<LabelList', '<DirectoryDetails', 'labelsOpen && labelsReady', "cap('contacts_projection')", "cap('labels_projection')", "cap('canonical_contact_identity')"]) {
+for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', 'icon="refresh"', '<Drawer', '<ContactTable', '<CursorPagination', 'label="Back to labels"', 'contacts.data.resource.total', 'Search contacts', 'Filter labels', '<LabelList', '<DirectoryDetails', 'labelsOpen && labelsReady', "cap('contacts_projection')", "cap('labels_projection')", "cap('canonical_contact_identity')"]) {
   if (!directoryPage.includes(marker)) failures.push(`src/features/directory/DirectoryPage.tsx: Contacts workspace is missing ${marker}`);
 }
 

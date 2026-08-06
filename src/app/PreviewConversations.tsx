@@ -6,7 +6,7 @@ import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
 import { buildParticipantDisplayIndex } from '@/features/conversations/participant-identity';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, CountBadge, Field, FilterToolbar, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { CountBadge, Field, FilterToolbar, IconButton, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { contactsFixture, conversationsFixture, messagesFixture } from './preview-fixtures';
 
 const participantDisplayIndex = buildParticipantDisplayIndex(contactsFixture);
@@ -26,11 +26,11 @@ export function PreviewConversations() {
         eyebrow="Messaging"
         title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
         description="Review projected history and submit outbound messages."
-        secondaryActions={<Button>Refresh</Button>}
+        secondaryActions={<IconButton icon="refresh" label="Refresh conversations" />}
         compactTitle={conversation?.displayName ?? <span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
         compactDescription={conversation ? `${humanizeToken(conversation.type)} · Last activity ${conversation.lastActivityAt ? relativeTime(conversation.lastActivityAt) : 'unreported'}` : undefined}
-        compactLeadingAction={conversation ? <Button onClick={() => setConversationId(undefined)}>Back</Button> : undefined}
-        compactActions={conversation ? <><Button>Refresh</Button><Button onClick={() => setDetailsOpen(true)}>Details</Button></> : <Button>Refresh</Button>}
+        compactLeadingAction={conversation ? <IconButton icon="arrow-left" label="Back to conversations" onClick={() => setConversationId(undefined)} /> : undefined}
+        compactActions={conversation ? <><IconButton icon="refresh" label="Refresh conversation" /><IconButton icon="panel-right" label="Open conversation details" onClick={() => setDetailsOpen(true)} /></> : <IconButton icon="refresh" label="Refresh conversations" />}
         compactHeadingRef={compactHeadingRef}
       >
         <ResponsiveInspector
@@ -53,7 +53,7 @@ export function PreviewConversations() {
               <div className="sticky top-0 z-10 border-b border-line bg-surface">
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(e) => e.preventDefault()}>
                   <Field label="Filter conversations" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" placeholder="Name or ID on this page" />}</Field>
-                  <div className="flex items-end"><Button type="submit">Apply</Button></div>
+                  <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply conversation search" /></div>
                 </FilterToolbar>
               </div>
               <ConversationList items={conversationsFixture} selectedId={conversationId} onSelect={openConversation} />

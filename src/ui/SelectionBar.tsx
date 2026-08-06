@@ -1,6 +1,6 @@
-import { Button } from './Button';
 import { Checkbox } from './ChoiceControls';
 import { cn } from './cn';
+import { IconButton } from './IconButton';
 
 /** Page-scoped bulk selection with a separate cross-page total and clear action. */
 export function SelectionBar({
@@ -58,7 +58,7 @@ export function SelectionBar({
         <span aria-live="polite" aria-atomic="true" className="whitespace-nowrap text-xs text-fg-3">
           <strong className="font-mono font-medium tabular-nums text-fg">{selectedCount}</strong> selected total
         </span>
-        {selectedCount > 0 ? <Button disabled={clearDisabled} onClick={onClear}>{clearLabel}</Button> : null}
+        {selectedCount > 0 ? <IconButton icon="close" label={clearLabel} disabled={clearDisabled} onClick={onClear} /> : null}
       </div>
     </div>
   );

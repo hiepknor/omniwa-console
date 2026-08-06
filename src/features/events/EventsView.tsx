@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import type { EventResource } from '@/api/events-api';
 import { relativeTime } from '@/lib/format';
-import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, Panel, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
+import { CursorPagination, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
 
 export function retentionLabel(seconds?: number) {
   if (!seconds) return 'Retention unreported';
@@ -37,7 +37,7 @@ export function EventsView(props: EventsViewProps) {
         eyebrow="Observability"
         title="Events"
         description="Inspect durable operational events and audit context."
-        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        secondaryActions={<IconButton icon="refresh" label="Refresh events" onClick={props.onRefresh} busy={props.refreshing} />}
       />
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 p-3 border border-line bg-surface">
@@ -49,7 +49,7 @@ export function EventsView(props: EventsViewProps) {
       <Panel title="Event history" description="Exact type filter, opaque cursor, and selected event remain URL-addressable." bodyPadding="none">
         <FilterToolbar as="form" onSubmit={props.onApply}>
           <Field label="Exact event type" className="min-w-56 flex-1">{(id) => <Input id={id} type="search" maxLength={64} value={props.typeDraft} placeholder="Message" onChange={(e) => props.onTypeDraft(e.target.value)} />}</Field>
-          <div className="flex items-end"><Button type="submit" disabled={props.applyDisabled}>Apply filter</Button></div>
+          <div className="flex items-end"><IconButton type="submit" icon="filter" label="Apply event filter" disabled={props.applyDisabled} /></div>
         </FilterToolbar>
 
         {props.errorSlot ? <div className="p-4">{props.errorSlot}</div> : null}

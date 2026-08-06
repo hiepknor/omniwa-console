@@ -84,8 +84,8 @@ const hardcodedHexAllowlist = new Set([
   ...gradientAllowlist,
 ]);
 
-// Hard zero-blur lift is reserved for action buttons and the open select menu.
-const shadowAllowlist = new Set(['src/ui/Button.tsx', 'src/ui/Select.tsx']);
+// Hard zero-blur lift is reserved for actions, their utility tooltips, and the open select menu.
+const shadowAllowlist = new Set(['src/ui/Button.tsx', 'src/ui/IconButton.tsx', 'src/ui/Select.tsx']);
 const chromaUtility = /\b(?:red|blue|green|yellow|orange|purple|pink|cyan|teal|indigo|violet|lime|amber|emerald|sky|rose|fuchsia)-\d+/g;
 
 for (const path of await sourceFiles('src')) {

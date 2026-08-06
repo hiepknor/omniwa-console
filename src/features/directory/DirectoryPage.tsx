@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
-import { Button, CountBadge, CursorPagination, Drawer, Field, FilterToolbar, Input, PageHeader, StateNotice, WorkspacePageFrame } from '@/ui';
+import { CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton, Input, PageHeader, StateNotice, WorkspacePageFrame } from '@/ui';
 import { DirectoryDetails } from './Details';
 import { ContactTable, LabelList } from './DirectoryView';
 import { useContact, useContacts, useLabel, useLabels } from './hooks';
@@ -81,7 +81,7 @@ export function ContactsPage() {
 
   const labelCatalog = route.labelId ? (
     <div className="grid gap-4">
-      <div><Button onClick={closeLabel}>Back to labels</Button></div>
+      <div><IconButton icon="arrow-left" label="Back to labels" onClick={closeLabel} /></div>
       {!labelsSupported || (!labelsReady && !label.data?.resource) ? <StateNotice kind="empty" title="Label projection unavailable" detail="The selected definition cannot be read because labels_projection is not advertised." /> : <DirectoryDetails label={label.data?.resource} meta={label.data?.meta} error={label.error} loading={label.isPending} onRetry={refreshLabels} />}
     </div>
   ) : (
@@ -90,7 +90,7 @@ export function ContactsPage() {
         <Field label="Filter labels" className="min-w-48 flex-1">
           {(id) => <Input id={id} type="search" value={labelSearchDraft} placeholder="Name or label ID" onChange={(event) => setLabelSearchDraft(event.target.value)} />}
         </Field>
-        <div className="flex items-end"><Button type="submit" disabled={labelSearchDraft.trim() === route.labelSearch}>Apply</Button></div>
+        <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply label filter" disabled={labelSearchDraft.trim() === route.labelSearch} /></div>
       </FilterToolbar>
       {!labelsSupported ? <StateNotice kind="empty" title="Label projection unavailable" detail="The backend does not currently advertise labels_projection. Contacts remain available independently." /> : null}
       {labelsSupported && !labelsReady ? <StateNotice kind="empty" title="Label capability changed" detail="Keeping the last usable label snapshot visible while capability discovery no longer advertises this projection." /> : null}
@@ -111,10 +111,10 @@ export function ContactsPage() {
       eyebrow="Messaging"
       title={<span className="inline-flex items-center gap-2">Contacts{typeof contacts.data?.resource.total === 'number' ? <CountBadge count={contacts.data.resource.total} /> : null}</span>}
       description="Inspect canonical contacts and consult projected label definitions."
-      secondaryActions={<><Button onClick={openLabels}>Label catalog</Button><Button disabled={!contactsReady || contactsRefreshing} onClick={refreshPage}>{contactsRefreshing ? 'Refreshing…' : 'Refresh'}</Button></>}
+      secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={openLabels} /><IconButton icon="refresh" label="Refresh contacts" disabled={!contactsReady} busy={contactsRefreshing} onClick={refreshPage} /></>}
       compactTitle="Contacts"
       compactDescription="Canonical projected identities"
-      compactActions={<><Button onClick={openLabels}>Labels</Button><Button disabled={!contactsReady || contactsRefreshing} onClick={refreshContacts}>{contactsRefreshing ? 'Refreshing…' : 'Refresh'}</Button></>}
+      compactActions={<><IconButton icon="tag" label="Open Labels" onClick={openLabels} /><IconButton icon="refresh" label="Refresh contacts" disabled={!contactsReady} busy={contactsRefreshing} onClick={refreshContacts} /></>}
     >
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-4 max-sm:p-3">
         <div className="grid gap-3">
@@ -122,7 +122,7 @@ export function ContactsPage() {
             <Field label="Search contacts" className="min-w-48 flex-1">
               {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name, phone, ID, alias, or username" onChange={(event) => setSearchDraft(event.target.value)} />}
             </Field>
-            <div className="flex items-end"><Button type="submit" disabled={searchDraft.trim() === route.search}>Apply</Button></div>
+            <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply contact search" disabled={searchDraft.trim() === route.search} /></div>
           </FilterToolbar>
           {!contactsSupported ? <StateNotice kind="empty" title="Projection unavailable" detail="The backend does not currently advertise contacts_projection; capability polling continues because the projection may be unsupported or waiting for readiness." /> : null}
           {contactsSupported && !contactsReady ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable Contact projection snapshot visible." /> : null}

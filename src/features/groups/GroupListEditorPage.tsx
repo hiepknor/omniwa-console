@@ -8,7 +8,7 @@ import { eligibilityIssues, type GroupEligibility, type GroupListEntry } from '@
 import { humanizeToken } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, Checkbox, CursorPagination, DateTimeInput, DescriptionItem, DescriptionList, Dialog, Field, FilterToolbar, Input, MetadataBadge, PageHeader, Panel, SelectionBar, SelectionReview, StateNotice, Status, Table, Td, Textarea, Th, Tr, type SelectionReviewItem, type Tone } from '@/ui';
+import { Button, Checkbox, CursorPagination, DateTimeInput, DescriptionItem, DescriptionList, Dialog, Field, FilterToolbar, IconButton, Input, MetadataBadge, PageHeader, Panel, SelectionBar, SelectionReview, StateNotice, Status, Table, Td, Textarea, Th, Tr, type SelectionReviewItem, type Tone } from '@/ui';
 import { GroupSectionTabs } from './GroupSectionTabs';
 import { GroupTargetEligibility, GroupTargetIdentity, ProjectedMemberCount } from './GroupTargetCells';
 import { groupStatusTone } from './group-status-tone';
@@ -212,7 +212,7 @@ export function GroupListEditorPage() {
       </div></Panel>
       <Panel title="Target groups" description="Eligibility comes from the persisted Groups projection; members are never expanded." actions={editing && detail.data ? <MetadataBadge>Version {detail.data.version}</MetadataBadge> : undefined}><div className="grid gap-4">
         {!eligibilityEnabled ? <StateNotice kind="info" title="Eligibility preflight unavailable" detail="This backend version will validate every selected group when the list is submitted." /> : null}
-        <FilterToolbar><Field label="Group prefix" className="flex-1">{(id) => <Input id={id} type="search" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); applyGroupSearch(); } }} />}</Field><div className="flex items-end"><Button disabled={searchDraft.trim() === route.groupSearch || groups.isFetching} onClick={applyGroupSearch}>Search</Button></div></FilterToolbar>
+        <FilterToolbar><Field label="Group prefix" className="flex-1">{(id) => <Input id={id} type="search" value={searchDraft} onChange={(event) => setSearchDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); applyGroupSearch(); } }} />}</Field><div className="flex items-end"><IconButton icon="search" label="Apply group prefix search" disabled={searchDraft.trim() === route.groupSearch || groups.isFetching} onClick={applyGroupSearch} /></div></FilterToolbar>
         {groups.error ? <ApiFailureNotice error={groups.error} onRetry={() => groups.refetch()} /> : null}
         {eligibility.error ? <ApiFailureNotice error={eligibility.error} title="Eligibility check failed" onRetry={() => eligibility.refetch()} /> : null}
         {hasBlockedSelection ? <StateNotice kind="empty" title="Selection requires review" detail={`${selectedCounts.unavailable + selectedCounts.unknown} selected ${selectedCounts.unavailable + selectedCounts.unknown === 1 ? 'group is' : 'groups are'} unavailable or not yet verified. Remove them before saving.`} /> : null}

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Campaign, CampaignStatus } from '@/api/campaigns';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, ButtonLink, CursorPagination, Field, FilterToolbar, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
+import { ButtonLink, CursorPagination, Field, FilterToolbar, IconButton, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr, type Tone } from '@/ui';
 import { CampaignProgressSummary, campaignTargetLabel } from './CampaignProgress';
 
 const statuses: CampaignStatus[] = ['draft', 'scheduled', 'running', 'paused', 'completed', 'aborted', 'failed'];
@@ -41,7 +41,7 @@ export function CampaignsView(props: CampaignsViewProps) {
         eyebrow="Messaging"
         title="Campaigns"
         description="Create and monitor Group List campaigns with factual progress and outcomes."
-        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        secondaryActions={<IconButton icon="refresh" label="Refresh campaigns" onClick={props.onRefresh} busy={props.refreshing} />}
         primaryAction={props.newHref ? <ButtonLink to={props.newHref} variant="primary">New campaign</ButtonLink> : undefined}
       />
 

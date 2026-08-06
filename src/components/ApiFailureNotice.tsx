@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ApiFailure, apiFailureDetail } from '@/api/envelopes';
-import { Button, StateNotice } from '@/ui';
+import { IconButton, StateNotice } from '@/ui';
 
 export function rateLimitPresentation(error: unknown, now = Date.now()): {
   rateLimited: boolean;
@@ -87,7 +87,7 @@ export function ApiFailureNotice({
       title={title}
       detail={`${apiFailureDetail(error)}${rateLimit.suffix}`}
       requestId={failure?.requestId}
-      action={onRetry && rateLimit.retryAllowed ? <Button disabled={retryScheduled} onClick={retry}>{retryScheduled ? 'Retry scheduled…' : retryLabel}</Button> : undefined}
+      action={onRetry && rateLimit.retryAllowed ? <IconButton icon="refresh" label={retryScheduled ? `${retryLabel} scheduled` : retryLabel} busy={retryScheduled} onClick={retry} /> : undefined}
     />
   );
 }

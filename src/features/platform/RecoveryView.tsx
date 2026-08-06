@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import type { ProjectionFailure } from '@/api/recovery';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, CursorPagination, Field, FilterToolbar, Input, PageHeader, Panel, Select, StateNotice, Table, Td, Th, Tr } from '@/ui';
+import { CursorPagination, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, Select, StateNotice, Table, Td, Th, Tr } from '@/ui';
 
 export function failureIdentity(failure: ProjectionFailure): string {
   return JSON.stringify([failure.instanceId, failure.resource, failure.eventKey]);
@@ -35,7 +35,7 @@ export function RecoveryView(props: RecoveryViewProps) {
         eyebrow="Platform"
         title="Projection recovery"
         description="Review failed projections and submit audited recovery actions."
-        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        secondaryActions={<IconButton icon="refresh" label="Refresh recovery failures" onClick={props.onRefresh} busy={props.refreshing} />}
       />
 
       {props.notices}
@@ -53,7 +53,7 @@ export function RecoveryView(props: RecoveryViewProps) {
               {[25, 50, 100, 200].map((n) => <option key={n} value={String(n)}>{n}</option>)}
             </Select>
           )}</Field>
-          <div className="flex items-end"><Button variant="primary" type="submit" className="w-full">Apply filters</Button></div>
+          <div className="flex items-end"><IconButton type="submit" icon="filter" label="Apply recovery filters" /></div>
         </FilterToolbar>
 
         {props.initialLoading ? <div className="p-4"><StateNotice kind="loading" title="Reading projection failures" /></div> : null}

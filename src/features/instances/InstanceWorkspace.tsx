@@ -4,7 +4,7 @@ import { useInstanceCredential, useSetInstanceCredential } from '@/api/ApiProvid
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { completeAdvancedSettings, type CompleteInstanceAdvancedSettings, type InstanceResource } from '@/api/instances';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, DescriptionItem, DescriptionList, Dialog, Field, Input, Panel, StateNotice, Status, Switch } from '@/ui';
+import { Button, DescriptionItem, DescriptionList, Dialog, Field, IconButton, Input, Panel, StateNotice, Status, Switch } from '@/ui';
 import { Drawer } from '@/ui';
 import {
   useAdvancedSettings,
@@ -217,7 +217,7 @@ export function InstanceWorkspace({ instance, refreshError, onRetry, onClose, on
         title={rotate.data ? 'Store the replacement token' : 'Rotate instance token?'}
         footer={
           rotate.data ? (
-            <><Button onClick={() => void copyRotationToken()}>Copy token</Button><Button variant="danger" onClick={() => setRotationDiscardOpen(true)}>Discard without storing…</Button><Button variant="primary" onClick={() => setRotationOpen(false)}>I stored the token</Button></>
+            <><IconButton icon={rotationCopyState === 'copied' ? 'check' : 'copy'} label={rotationCopyState === 'copied' ? 'Token copied' : rotationCopyState === 'failed' ? 'Retry copying token' : 'Copy token'} onClick={() => void copyRotationToken()} /><Button variant="danger" onClick={() => setRotationDiscardOpen(true)}>Discard without storing…</Button><Button variant="primary" onClick={() => setRotationOpen(false)}>I stored the token</Button></>
           ) : (
             <>
               <Button disabled={rotate.isPending} onClick={() => setRotationOpen(false)}>Cancel</Button>

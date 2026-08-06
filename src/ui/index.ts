@@ -1,6 +1,7 @@
 export { cn } from './cn';
 export { Button, ButtonLink, buttonClassName, type ButtonVariant } from './Button';
 export { CloseButton } from './CloseButton';
+export { IconButton } from './IconButton';
 export { Icon, type IconName, type IconSize, type NavigationIconName } from './Icon';
 export { Image, type ImageAspect, type ImageFit, type ImageState } from './Image';
 export { ProgressBar, type ProgressStatus } from './ProgressBar';

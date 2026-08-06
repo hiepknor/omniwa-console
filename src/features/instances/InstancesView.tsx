@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { InstanceResource } from '@/api/instances';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, Field, FilterToolbar, Input, Panel, PageHeader, Select, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
+import { Button, Field, FilterToolbar, IconButton, Input, Panel, PageHeader, Select, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
 
 export type InstancesViewProps = {
   search: string;
@@ -29,7 +29,7 @@ export function InstancesView(props: InstancesViewProps) {
         eyebrow="Platform"
         title="Instances"
         description="Manage instances, credentials, pairing, and lifecycle."
-        secondaryActions={<Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        secondaryActions={<IconButton icon="refresh" label="Refresh instances" onClick={props.onRefresh} busy={props.refreshing} />}
         primaryAction={<Button variant="primary" onClick={props.onNew}>New instance</Button>}
       />
 

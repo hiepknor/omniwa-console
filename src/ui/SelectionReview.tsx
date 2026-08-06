@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { CountBadge } from './Badge';
-import { Button } from './Button';
+import { IconButton } from './IconButton';
 import { Status, type Tone } from './Status';
 import { cn } from './cn';
 
@@ -55,7 +55,7 @@ export function SelectionReview({
             </span>
             <span className="flex flex-wrap items-center justify-end gap-2 max-sm:w-full max-sm:justify-between">
               {item.status ? <Status tone={item.tone ?? 'neutral'}>{item.status}</Status> : null}
-              <Button disabled={disabled} aria-label={`Remove selected item ${typeof item.label === 'string' ? item.label : item.id}`} onClick={() => onRemove(item.id)}>Remove</Button>
+              <IconButton icon="close" disabled={disabled} label={`Remove selected item ${typeof item.label === 'string' ? item.label : item.id}`} onClick={() => onRemove(item.id)} />
             </span>
           </li>
         ))}

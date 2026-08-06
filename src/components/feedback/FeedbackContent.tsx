@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/ui/Button';
 import { CloseButton } from '@/ui/CloseButton';
+import { IconButton } from '@/ui/IconButton';
 import { statusMarkStyle, type StatusMarkTone } from '@/ui/statusMarks';
 import type { FeedbackAction, FeedbackKind } from './feedback-types';
 
@@ -51,7 +52,7 @@ export function FeedbackContent({
         {requestId && (
           <div className="flex items-center gap-2 mt-0.5">
             <span className="font-mono text-xs text-fg-3 truncate" title={requestId}>{requestId}</span>
-            <Button className="h-6 shrink-0 text-[11px] max-sm:h-8" onClick={() => { void copyRequestId(); }}>{copied ? 'Copied' : 'Copy'}</Button>
+            <IconButton className="size-7 max-sm:size-9" icon={copied ? 'check' : 'copy'} label={copied ? 'Request ID copied' : 'Copy request ID'} onClick={() => { void copyRequestId(); }} />
           </div>
         )}
         {action && <Button className="mt-1 h-8 justify-self-start text-xs" onClick={action.run}>{action.label}</Button>}

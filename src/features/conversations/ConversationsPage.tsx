@@ -7,7 +7,7 @@ import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { projectionAttentionLabel, ProjectionAttentionStatus, ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
-import { Button, CountBadge, CursorPagination, Dialog, Field, FilterToolbar, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { Button, CountBadge, CursorPagination, Dialog, Field, FilterToolbar, IconButton, Input, PageHeader, ResponsiveInspector, SplitWorkspace, StateNotice, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { Composer } from './Composer';
 import { composerNavigationBlock, IDLE_COMPOSER_STATE, resolveComposerBlocker, shouldBlockConversationNavigation, type ComposerInteractionState, type ComposerNavigationBlock } from './composer-state';
 import { canonicalConversationLocation, canonicalConversationReadsEnabled, resolveConversationRecipient } from './conversation-identity';
@@ -138,13 +138,13 @@ function ConversationWorkspace() {
         eyebrow="Messaging"
         title={pageTitle}
         description="Review projected history and submit outbound messages."
-        secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+        secondaryActions={<IconButton icon="refresh" label="Refresh conversations" disabled={!viewSupported} busy={routeRefreshing} onClick={refreshPage} />}
         compactTitle={hasConversation ? selectedConversation?.displayName ?? selectedConversation?.phoneNumber ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : pageTitle}
         compactDescription={hasConversation ? (selectedConversation ? `${humanizeToken(selectedConversation.type)} · ${selectedProjectionAttention ?? `Last activity ${selectedConversation.lastActivityAt ? relativeTime(selectedConversation.lastActivityAt) : 'unreported'}`}` : 'Message timeline') : undefined}
-        compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
+        compactLeadingAction={hasConversation ? <IconButton icon="arrow-left" label="Back to conversations" onClick={closeConversation} /> : undefined}
         compactActions={hasConversation && selectedConversation
-          ? <><Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button><Button onClick={openConversationDetails}>Details</Button></>
-          : <Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+          ? <><IconButton icon="refresh" label="Refresh conversation" disabled={!viewSupported} busy={routeRefreshing} onClick={refreshPage} /><IconButton icon="panel-right" label="Open conversation details" onClick={openConversationDetails} /></>
+          : <IconButton icon="refresh" label="Refresh conversations" disabled={!viewSupported} busy={routeRefreshing} onClick={refreshPage} />}
         compactHeadingRef={compactHeadingRef}
       >
         <ResponsiveInspector
@@ -177,7 +177,7 @@ function ConversationWorkspace() {
                   <Field label="Filter conversations" className="min-w-48 flex-1">
                     {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name or ID on this page" onChange={(e) => setSearchDraft(e.target.value)} />}
                   </Field>
-                  <div className="flex items-end"><Button type="submit" disabled={searchDraft === route.search}>Apply</Button></div>
+                  <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply conversation search" disabled={searchDraft === route.search} /></div>
                 </FilterToolbar>
               </div>
             {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail="The backend does not currently advertise canonical_conversation_identity; capability polling continues because the projection may be unsupported or waiting for readiness." /></div> : null}
@@ -188,7 +188,7 @@ function ConversationWorkspace() {
               <>
                 {conversations.error ? <div className="p-3"><FailureNotice error={conversations.error} stale onRetry={refreshDirectory} /></div> : null}
                 <div className="px-3"><ProjectionStatus meta={conversations.data.meta} /></div>
-                {selectedOutsidePage ? <div className="px-3 pb-3"><StateNotice kind="info" title="Selected Conversation is outside this page" detail="The selected canonical Conversation remains open while the directory shows a different bounded page or filter." action={route.search ? <Button onClick={() => { setSearchDraft(''); replaceParams(updateSearchParams(searchParams, { search: undefined, cursor: undefined })); }}>Clear filter</Button> : route.cursor ? <Button onClick={() => replaceParams(updateSearchParams(searchParams, { cursor: undefined }))}>First page</Button> : undefined} /></div> : null}
+                {selectedOutsidePage ? <div className="px-3 pb-3"><StateNotice kind="info" title="Selected Conversation is outside this page" detail="The selected canonical Conversation remains open while the directory shows a different bounded page or filter." action={route.search ? <IconButton icon="close" label="Clear conversation filter" onClick={() => { setSearchDraft(''); replaceParams(updateSearchParams(searchParams, { search: undefined, cursor: undefined })); }} /> : route.cursor ? <IconButton icon="chevrons-left" label="Return to first conversation page" onClick={() => replaceParams(updateSearchParams(searchParams, { cursor: undefined }))} /> : undefined} /></div> : null}
                 <ConversationList items={filteredConversations} selectedId={canonicalConversationId ?? activeConversationRef} onSelect={openConversation} />
                 {emptyDirectory ? <div className="p-3"><StateNotice kind="empty" title="Empty" detail={route.search ? 'No projected Conversation on this loaded page matches the URL-backed filter.' : 'The ready Conversation projection contains no items.'} /></div> : null}
               </>
