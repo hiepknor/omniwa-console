@@ -416,7 +416,7 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   - **Admin** → *Platform*: Overview · Recovery (only when the server advertises
     `projection_failure_operations`) · Instances.
   - **API** → *Runtime*: Overview plus the pinned **Connection** destination ·
-    *Messaging*: Conversations, Directory, Groups, Campaigns · *Observability*: Events.
+    *Messaging*: Conversations, Contacts, Groups, Campaigns · *Observability*: Events.
     Connection owns active-runtime identity, transport, pairing, lifecycle, and
     the explicit memory-only Console-session exit.
   - **Unknown** → *Runtime*: Overview.
@@ -455,10 +455,12 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   Conversations add the shared non-modal third inspector only when their actual
   workspace container reaches 1560px; desktop below that threshold, tablet, and
   mobile retain Drawer disclosure.
-  Messaging Directory uses this canonical two-pane recipe directly: Contacts
-  and Labels are page-level tabs without counts, the active list header owns its
-  authoritative `CountBadge`, and selected resource detail replaces the list
-  below 900px. It never fetches an inactive resource solely to populate tabs.
+  Contacts intentionally does not use this two-pane recipe. It is a full-width
+  responsive registry Table; selecting a row opens Contact detail in the shared
+  Drawer. Labels are an on-demand, mutually exclusive utility Drawer with
+  internal list/detail navigation. Contact and Label URL state remain
+  independent, and the inactive Label projection is never fetched solely to
+  populate navigation.
 - **Feedback placement:** `SurfaceNotice` is the framed inline/workspace banner;
   `ToastViewport` is fixed bottom-right and becomes full inset-width on mobile.
   Its inline placement exists only for deterministic `/__ui` review. Toast
@@ -492,7 +494,7 @@ or `border-*` utilities and rely on generated CSS order.
 | Shell navigation | 224px full rail, 64px icon rail, fixed mobile bottom nav, pinned instance Connection, admin/unknown Session utility + dialog |
 | Console footer | ready capabilities, discovery pending, discovery failure, version absent, compact tablet, hidden mobile |
 | Workspace page / split workspace | PageHeader + two panes ≥900px, optional third inspector at ≥1560px container width, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px, newest/older scroll alignment |
-| Messaging Directory | Contacts ready/search/pagination/detail, Labels ready/filter/detail, capability unavailable, projection non-ready/stale/error, desktop split, tablet/mobile replacement + Back |
+| Contacts workspace | full-width responsive registry table, Contacts ready/search/pagination/detail Drawer, Label catalog closed/open/list/detail Drawer, independent capability unavailable, projection non-ready/stale/error, compact labelled records |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer / responsive inspector | 1920px docked third column, 1440px desktop Drawer, tablet Drawer, 390px bottom sheet, bounded scroll, pending-close, one-time-secret dismissal, Conversation/Message replacement |
 

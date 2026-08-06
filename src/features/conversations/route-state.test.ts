@@ -19,8 +19,8 @@ describe('Conversations route state', () => {
   });
 
   it('normalizes legacy directory URLs without preserving unrelated Conversation state', () => {
-    expect(legacyDirectoryTarget(new URLSearchParams('view=contacts&selected=contact-1&search=mai&cursor=opaque%3A1&message=m1'))).toBe('/directory/contacts/contact-1?search=mai&cursor=opaque%3A1');
-    expect(legacyDirectoryTarget(new URLSearchParams('view=labels&selected=label-1&cursor=old'))).toBe('/directory/labels/label-1');
+    expect(legacyDirectoryTarget(new URLSearchParams('view=contacts&selected=contact-1&search=mai&cursor=opaque%3A1&message=m1'))).toBe('/contacts/contact-1?search=mai&cursor=opaque%3A1');
+    expect(legacyDirectoryTarget(new URLSearchParams('view=labels&selected=label-1&search=priority&cursor=old'))).toBe('/contacts?panel=labels&label=label-1&labelSearch=priority');
     expect(legacyDirectoryTarget(new URLSearchParams('view=unknown'))).toBeUndefined();
   });
 });
