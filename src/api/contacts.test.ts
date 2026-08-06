@@ -21,6 +21,7 @@ const contact = {
   PhoneJID: '100@s.whatsapp.net',
   LID: '123@lid',
   Username: 'ada',
+  phoneNumber: '+84977450514',
   RedactedPhone: '+•••100',
   About: 'Analytical engine',
 };
@@ -58,7 +59,15 @@ describe('contacts projection adapter', () => {
       identityStatus: 'complete',
       displayName: 'Ada Canonical',
       displayNameSource: 'full_name',
+      phoneNumber: contact.phoneNumber,
     });
+  });
+
+  it('does not expose a canonical phone number before the canonical identity gate is active', async () => {
+    const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [contact], meta: { total: 1 } }));
+    const result = await listContacts({ GET } as unknown as ApiClient);
+    expect(result.resource.items[0]?.phoneNumber).toBeUndefined();
+    expect(result.resource.items[0]?.redactedPhone).toBe('+•••100');
   });
 
   it('preserves canonical aliases without normalizing malformed identity material', async () => {

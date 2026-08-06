@@ -12,6 +12,7 @@ const conversation = {
   aliases: ['100@s.whatsapp.net', '123@lid', '100@s.whatsapp.net'],
   addressingJid: '123@lid',
   type: 'direct',
+  phoneNumber: '+84977450514',
   displayName: 'Ada',
   displayNameSource: 'full_name',
   displayNameUpdatedAt: '2026-07-22T07:59:00Z',
@@ -43,6 +44,7 @@ describe('canonical conversations projection adapter', () => {
       aliasesReported: true,
       addressingJid: conversation.addressingJid,
       type: 'direct',
+      phoneNumber: conversation.phoneNumber,
       unreadCount: 2,
       unreadAuthoritative: true,
     })]);

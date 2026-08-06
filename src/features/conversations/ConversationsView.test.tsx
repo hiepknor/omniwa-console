@@ -49,6 +49,13 @@ describe('ConversationList', () => {
     expect(html).toContain('border-l-transparent');
     expect(html).not.toContain('aria-current');
   });
+
+  it('uses only the backend-reported phone number when a display name is absent', () => {
+    const html = renderToStaticMarkup(<ConversationList items={[{ ...conversation, displayName: undefined, phoneNumber: '+84977450514' }]} onSelect={() => {}} />);
+
+    expect(html).toContain('+84977450514');
+    expect(html).not.toContain('Unknown Group conversation');
+  });
 });
 
 describe('SelectedConversationHeader', () => {
@@ -163,6 +170,21 @@ describe('MessageTimeline', () => {
 
     expect(html).toContain('Unknown participant');
     expect(html).toContain('Still visible');
+    expect(html).not.toContain('unmatched@lid');
+  });
+
+  it('uses a backend-reported participant phone when no canonical Contact name matches', () => {
+    const html = renderToStaticMarkup(
+      <MessageTimeline
+        items={[message({ participantJid: 'unmatched@lid', participantPhoneNumber: '+84977450514', contentText: 'Still visible' })]}
+        conversationType="group"
+        participantDisplayIndex={new Map()}
+        onSelect={() => {}}
+      />,
+    );
+
+    expect(html).toContain('+84977450514');
+    expect(html).not.toContain('Unknown participant');
     expect(html).not.toContain('unmatched@lid');
   });
 

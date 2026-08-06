@@ -21,7 +21,7 @@ export function SelectedConversationHeader({ conversation, projectionAttention, 
   onDetails: () => void;
   className?: string;
 }) {
-  const name = conversation.displayName ?? `Unknown ${humanizeToken(conversation.type)} conversation`;
+  const name = conversation.displayName ?? conversation.phoneNumber ?? `Unknown ${humanizeToken(conversation.type)} conversation`;
   const activity = conversation.lastActivityAt ? relativeTime(conversation.lastActivityAt) : 'unreported';
   return (
     <WorkspacePaneHeader
@@ -60,7 +60,7 @@ export function ConversationList({ items, selectedId, onSelect }: { items: Conve
           key={item.conversationId}
           selected={item.conversationId === selectedId}
           onClick={() => onSelect(item.conversationId)}
-          primary={item.displayName ?? `Unknown ${humanizeToken(item.type)} conversation`}
+          primary={item.displayName ?? item.phoneNumber ?? `Unknown ${humanizeToken(item.type)} conversation`}
           secondary={`${humanizeToken(item.type)} · ${item.lastActivityAt ? relativeTime(item.lastActivityAt) : 'activity unreported'}`}
           trailing={<ConversationUnreadCount count={item.unreadCount} authoritative={item.unreadAuthoritative} />}
         />
@@ -193,7 +193,7 @@ export function MessageTimeline({ items, selectedId, onSelect, renderMedia, conv
         const directionLabel = humanizeToken(item.direction);
         const statusLabel = item.status ? humanizeToken(item.status) : 'Unreported';
         const groupParticipantLabel = conversationType === 'group' && item.direction === 'incoming'
-          ? resolveParticipantDisplay(item.participantJid, participantDisplayIndex) ?? 'Unknown participant'
+          ? resolveParticipantDisplay(item.participantJid, participantDisplayIndex) ?? item.participantPhoneNumber ?? 'Unknown participant'
           : undefined;
         return (
           <li key={item.id} className="grid gap-3">

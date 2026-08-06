@@ -15,6 +15,7 @@ export type ConversationResource = {
   aliasesReported: boolean;
   addressingJid?: string;
   type: ConversationType;
+  phoneNumber?: string;
   displayName?: string;
   displayNameSource?: ConversationDisplayNameSource;
   displayNameUpdatedAt?: string;
@@ -119,6 +120,7 @@ function toConversation(value: unknown, fail: (message: string) => never): Conve
     aliasesReported,
     addressingJid: optionalString(payload.addressingJid),
     type,
+    phoneNumber: optionalString(payload.phoneNumber),
     displayName: optionalString(payload.displayName),
     displayNameSource: displayNameSource(payload.displayNameSource),
     displayNameUpdatedAt: optionalString(payload.displayNameUpdatedAt),

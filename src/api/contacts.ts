@@ -21,6 +21,7 @@ export type ContactResource = {
   phoneJid?: string;
   lid?: string;
   username?: string;
+  phoneNumber?: string;
   redactedPhone?: string;
   pictureId?: string;
   pictureRemoved?: boolean;
@@ -75,6 +76,7 @@ function toContact(payload: ContactPayload, fallbackId = '', canonicalIdentity =
     phoneJid: nonEmpty(payload.PhoneJID),
     lid: nonEmpty(payload.LID),
     username,
+    phoneNumber: canonicalId ? nonEmpty(payload.phoneNumber) : undefined,
     redactedPhone,
     pictureId: nonEmpty(payload.PictureID),
     pictureRemoved: payload.PictureRemoved,

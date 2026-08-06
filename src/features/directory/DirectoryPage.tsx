@@ -57,7 +57,7 @@ export function DirectoryPage() {
   const total = view === 'contacts' ? contacts.data?.resource.total : labels.data?.resource.length;
   const empty = Boolean(viewSupported && currentQuery.data && authoritative && items.length === 0);
   const selectedName = view === 'contacts'
-    ? contact.data?.resource.displayName ?? (contact.data?.resource ? 'Unknown contact' : undefined)
+    ? contact.data?.resource.displayName ?? contact.data?.resource.phoneNumber ?? (contact.data?.resource ? 'Unknown contact' : undefined)
     : label.data?.resource.name ?? (label.data?.resource ? 'Unknown label' : undefined);
   const basePath = `/directory/${view}`;
   const switchView = (next: string) => navigate(`/directory/${next}`);
