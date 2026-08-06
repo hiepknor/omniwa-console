@@ -137,15 +137,16 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   action per view.
 - **IconButton / CloseButton** — secondary utility actions use an icon-only,
   fully framed square: 36×36px desktop and 40×40px mobile, with a canonical
-  14px stroked glyph. Refresh, search/filter submission, compact Back, inspector
+  14px stroked glyph. Search/filter submission, compact Back, inspector
   disclosure, copy, clear/remove, pagination, and dismiss actions belong here.
   Rest is the ghost Button treatment and inherits the same hover lift, hard
   shadow, active return, keyboard focus, busy, and disabled behavior. Every
   IconButton has a specific accessible name and a matching tooltip on hover and
-  keyboard focus. CloseButton is the semantic X/dismiss composition. Neither
+  keyboard-visible focus; pointer focus alone never leaves a tooltip open.
+  CloseButton is the semantic X/dismiss composition. Neither
   primitive rounds or stretches to match its container. Primary actions,
-  commands, confirmations, cancellation, and destructive intent retain visible
-  labels and never use IconButton.
+  commands, confirmations, cancellation, destructive intent, and Refresh retain
+  visible labels and never use IconButton.
 - **Logo / Icon** — brand identity remains in `Logo`; every interface glyph is
   drawn by `Icon`. Icons use the canonical 12/14/18px sizes, 1.75px square-cap
   monochrome stroke, no emoji, text glyph, filled icon library, or feature-local

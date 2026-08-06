@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import type { ProjectionFailure } from '@/api/recovery';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { CursorPagination, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, Select, StateNotice, Table, Td, Th, Tr } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, Select, StateNotice, Table, Td, Th, Tr } from '@/ui';
 
 export function failureIdentity(failure: ProjectionFailure): string {
   return JSON.stringify([failure.instanceId, failure.resource, failure.eventKey]);
@@ -35,7 +35,7 @@ export function RecoveryView(props: RecoveryViewProps) {
         eyebrow="Platform"
         title="Projection recovery"
         description="Review failed projections and submit audited recovery actions."
-        secondaryActions={<IconButton icon="refresh" label="Refresh recovery failures" onClick={props.onRefresh} busy={props.refreshing} />}
+        secondaryActions={<Button onClick={props.onRefresh} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
       />
 
       {props.notices}

@@ -205,7 +205,7 @@ export function UiGallery() {
           eyebrow="Locked design system"
           title="UI Gallery"
           description="Manga · ink on white paper · dense · square · semantic screentone · hard lift only."
-          secondaryActions={<IconButton icon="refresh" label="Refresh UI Gallery" />}
+          secondaryActions={<Button>Refresh</Button>}
           primaryAction={<Button variant="primary">Primary action</Button>}
         />
 
@@ -267,11 +267,10 @@ export function UiGallery() {
             <Button aria-busy>Working…</Button>
             <ButtonLink to="/__ui">Button link</ButtonLink>
             <CloseButton label="Close example" onClick={() => undefined} />
-            <IconButton icon="refresh" label="Refresh example" />
             <IconButton icon="search" label="Search example" />
             <IconButton icon="panel-right" label="Open details example" />
             <IconButton icon="copy" label="Copy example" />
-            <IconButton icon="refresh" label="Refreshing example" busy />
+            <Button aria-busy>Refreshing…</Button>
             <Button onClick={() => setDrawer(true)}>Open drawer</Button>
             <Button onClick={() => setDialogMode('ready')}>Open dialog</Button>
             <Button onClick={() => setDialogMode('pending')}>Pending dialog</Button>
@@ -579,11 +578,11 @@ export function UiGallery() {
               eyebrow="Messaging"
               title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
               description="Review projected history and submit outbound messages."
-              secondaryActions={<IconButton icon="refresh" label="Refresh conversations" />}
+              secondaryActions={<Button>Refresh</Button>}
               compactTitle={workspaceDetail ? 'conversation_01' : <span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
               compactDescription={workspaceDetail ? 'Projected detail' : undefined}
               compactLeadingAction={workspaceDetail ? <IconButton icon="arrow-left" label="Back to conversations" onClick={() => { setWorkspaceDetail(false); setConversationDetailsOpen(false); }} /> : undefined}
-              compactActions={<IconButton icon="refresh" label="Refresh conversations" />}
+              compactActions={<Button>Refresh</Button>}
             >
               <ResponsiveInspector
                 open={conversationDetailsOpen}
@@ -620,13 +619,13 @@ export function UiGallery() {
               eyebrow="Messaging"
               title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>}
               description="Inspect canonical contacts and consult projected label definitions."
-              secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setDirectoryLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}
+              secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setDirectoryLabelsOpen(true)} /><Button>Refresh</Button></>}
               compactTitle={directorySelection ? contactsFixture.find((item) => item.id === directorySelection)?.displayName ?? 'Contact details' : 'Contacts'}
               compactDescription={directorySelection ? 'Projected contact identity' : 'Canonical projected identities'}
               compactLeadingAction={directorySelection ? <IconButton icon="arrow-left" label="Back to contacts" onClick={() => setDirectorySelection(undefined)} /> : undefined}
-              compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setDirectoryLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}
+              compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setDirectoryLabelsOpen(true)} /><Button>Refresh</Button></>}
             >
-              <div className="min-h-0 flex-1 overflow-y-auto p-4"><ContactTable items={contactsFixture} selectedId={directorySelection} onSelect={(id) => { setDirectoryLabelsOpen(false); setDirectorySelection(id); }} /></div>
+              <div className="min-h-0 flex-1 overflow-y-auto p-4"><Panel title="Contact directory" description="Applied search, opaque cursor, and selected Contact remain URL-addressable." bodyPadding="none"><ContactTable className="border-0" items={contactsFixture} selectedId={directorySelection} onSelect={(id) => { setDirectoryLabelsOpen(false); setDirectorySelection(id); }} /></Panel></div>
               <Drawer open={directoryLabelsOpen || Boolean(directorySelection)} onClose={() => { if (directoryLabelsOpen) { setDirectoryLabelsOpen(false); setDirectoryLabelSelection(undefined); } else setDirectorySelection(undefined); }} title={directoryLabelsOpen ? labelsFixture.find((item) => item.id === directoryLabelSelection)?.name ?? 'Label catalog' : contactsFixture.find((item) => item.id === directorySelection)?.displayName ?? 'Contact details'}>
                 {directoryLabelsOpen ? directoryLabelSelection ? <div className="grid gap-4"><IconButton icon="arrow-left" label="Back to labels" onClick={() => setDirectoryLabelSelection(undefined)} /><DirectoryDetails label={labelsFixture.find((item) => item.id === directoryLabelSelection)} loading={false} onRetry={() => {}} /></div> : <div className="grid gap-3"><div className="flex items-center justify-between border-b border-line pb-2"><strong className="text-sm">Label definitions</strong><CountBadge count={labelsFixture.length} /></div><LabelList items={labelsFixture} onSelect={setDirectoryLabelSelection} /></div> : <DirectoryDetails contact={contactsFixture.find((item) => item.id === directorySelection)} loading={false} onRetry={() => {}} />}
               </Drawer>
@@ -636,7 +635,7 @@ export function UiGallery() {
 
         <Section title="Implementation recipes">
           <div className="grid gap-4 md:grid-cols-2">
-            <Panel title="List" description="Filter → state → rows → cursor." actions={<IconButton icon="refresh" label="Refresh list" />}>
+            <Panel title="List" description="Filter → state → rows → cursor." actions={<Button>Refresh</Button>}>
               <p className="text-sm text-fg-2">Use the complete list recipe above for every paginated projection.</p>
             </Panel>
             <Panel title="Inspector" description="Selection opens a bounded detail surface." actions={<IconButton icon="panel-right" label="Inspect item" onClick={() => setDrawer(true)} />}>

@@ -18,18 +18,17 @@ function ResourceButton({ selected, onClick, primary, secondary, trailing }: { s
     </li>
   );
 }
-export function ContactTable({ items, selectedId, onSelect }: { items: ContactResource[]; selectedId?: string; onSelect: (id: string) => void }) {
+export function ContactTable({ items, selectedId, onSelect, className }: { items: ContactResource[]; selectedId?: string; onSelect: (id: string) => void; className?: string }) {
   return (
-    <Table>
-      <thead><tr><Th>Contact</Th><Th>Phone</Th><Th priority="supporting">Identity</Th><Th>WhatsApp</Th><Th priority="detail">Updated</Th><Th priority="detail">Contact ID</Th></tr></thead>
+    <Table className={className}>
+      <thead><tr><Th>Contact</Th><Th>Phone</Th><Th priority="supporting">Identity</Th><Th>WhatsApp</Th><Th priority="detail">Updated</Th></tr></thead>
       <tbody>{items.map((item) => (
         <Tr key={item.id} selected={item.id === selectedId} onClick={() => onSelect(item.id)}>
-          <Td mobileLabel="Contact" className="font-medium">{item.displayName ?? item.phoneNumber ?? 'Unknown contact'}</Td>
+          <Td mobileLabel="Contact"><div className="grid gap-0.5"><span className="font-medium">{item.displayName ?? item.phoneNumber ?? 'Unknown contact'}</span><small className="font-mono text-xs text-fg-3">{item.id}</small></div></Td>
           <Td mobileLabel="Phone" className="font-mono text-xs text-fg-2">{item.phoneNumber ?? item.redactedPhone ?? 'Not reported'}</Td>
           <Td mobileLabel="Identity" priority="supporting"><Status tone={item.identityStatus === 'complete' ? 'ok' : item.identityStatus === 'partial' ? 'pending' : 'neutral'}>{humanizeToken(item.identityStatus)}</Status></Td>
           <Td mobileLabel="WhatsApp"><Status tone={item.found === true ? 'ok' : 'neutral'}>{item.found === undefined ? 'Unreported' : item.found ? 'Found' : 'Not found'}</Status></Td>
           <Td mobileLabel="Updated" priority="detail" className="text-fg-2">{item.identityUpdatedAt ? <time dateTime={item.identityUpdatedAt} title={item.identityUpdatedAt}>{relativeTime(item.identityUpdatedAt) || item.identityUpdatedAt}</time> : 'Not reported'}</Td>
-          <Td mobileLabel="Contact ID" priority="detail" className="font-mono text-xs text-fg-2">{item.id}</Td>
         </Tr>
       ))}</tbody>
     </Table>

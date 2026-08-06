@@ -42,7 +42,7 @@ export function GroupsView(props: GroupsViewProps) {
         eyebrow="Messaging"
         title="Groups"
         description="Inspect projected WhatsApp groups and run available management actions."
-        secondaryActions={<><IconButton icon="refresh" label="Refresh groups" onClick={props.onRefresh} busy={props.refreshing} /><Button disabled={props.joinEnabled === false} onClick={props.onJoin}>Join group</Button></>}
+        secondaryActions={<><Button onClick={props.onRefresh} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button><Button disabled={props.joinEnabled === false} onClick={props.onJoin}>Join group</Button></>}
         primaryAction={<Button variant="primary" disabled={props.commandsEnabled === false} onClick={props.onNew}>New group</Button>}
       />
 

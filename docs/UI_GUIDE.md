@@ -207,10 +207,10 @@ resource models, or rendered diagnostics.
 - Buttons preserve a clear ghost/primary/danger hierarchy, expose pressed and
   keyboard-focus feedback, and use `ButtonLink` for navigation styled as an action.
   Secondary utility actions use the shared icon-only `IconButton` with a specific
-  accessible name and matching hover/focus tooltip. This includes refresh,
-  search/filter submission, compact Back, inspector disclosure, copy,
+  accessible name and matching hover/keyboard-focus tooltip. Pointer focus does
+  not keep the tooltip visible. This includes search/filter submission, compact Back, inspector disclosure, copy,
   clear/remove, and cursor navigation. Primary actions, server commands,
-  confirmations, cancellation, and destructive intent retain visible labels.
+  confirmations, cancellation, destructive intent, and Refresh retain visible labels.
 - Count chips use the shared `CountBadge`; count-bearing Tabs apply it
   automatically. Numeric table cells, metrics, selection prose, and counts stated
   inside an operational Status remain in their context instead of becoming chips.
@@ -225,6 +225,9 @@ resource models, or rendered diagnostics.
   search scope), while Labels use the bare-array length; none derive totals from
   page length. The Label catalog reports its loaded filtered count only while
   open, so its projection is never fetched merely to populate navigation.
+  The Contacts registry uses the same `Panel → FilterToolbar → borderless Table
+  → CursorPagination` directory recipe as Groups. Contact ID is supporting
+  identity beneath the Contact name rather than a duplicate terminal column.
   Private message images use the shared framed Image language when ready and a
   stable square Status placeholder while pending, failed, expired, deleted, or
   capability-gated. `not_ready` remains pending; only the message inspector adds
