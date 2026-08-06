@@ -55,7 +55,7 @@ export function GroupListsPage() {
   return (
     <>
       <div className="grid gap-6 p-6 max-sm:p-4">
-        <PageHeader eyebrow="Messaging" title="Group Lists" description="Build and maintain reusable group targets for campaigns." secondaryActions={<IconButton icon="refresh" label="Refresh Group Lists" busy={query.isFetching} onClick={() => query.refetch()} />} primaryAction={commandsEnabled ? <ButtonLink to={withSearchParams('/groups/lists/new', directoryParams)} variant="primary">New group list</ButtonLink> : <Button variant="primary" disabled>New group list</Button>} />
+        <PageHeader eyebrow="Messaging" title="Group Lists" description="Build and maintain reusable group targets for campaigns." secondaryActions={<Button aria-busy={query.isFetching || undefined} onClick={() => query.refetch()}>{query.isFetching ? 'Refreshing…' : 'Refresh'}</Button>} primaryAction={commandsEnabled ? <ButtonLink to={withSearchParams('/groups/lists/new', directoryParams)} variant="primary">New group list</ButtonLink> : <Button variant="primary" disabled>New group list</Button>} />
         <GroupSectionTabs />
         {deleteAck ? <StateNotice kind="info" title={`${deleteAck.name} deleted`} detail={deleteAck.result.message || 'The server completed the deletion. Existing campaign snapshots remain unchanged.'} /> : null}
         {!commandsEnabled && query.data ? <StateNotice kind={capabilities.isError ? 'error' : 'empty'} title={capabilities.isError ? 'Showing last known capabilities' : 'Capability changed'} detail="Keeping the last usable list page visible; create, edit, and delete commands remain unavailable until capability discovery is authoritative." /> : null}

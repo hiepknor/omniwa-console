@@ -20,4 +20,13 @@ describe('ContactTable', () => {
     expect(html).toContain('+84977450514');
     expect(html).not.toContain('Unknown contact');
   });
+
+  it('uses the shared borderless directory-table recipe and nests identity under the Contact name', () => {
+    const html = renderToStaticMarkup(<ContactTable className="border-0" items={[contact()]} onSelect={() => {}} />);
+
+    expect(html).toContain('border-0');
+    expect(html).toContain('<span class="font-medium">Unknown contact</span>');
+    expect(html).toContain('<small class="font-mono text-xs text-fg-3">contact-1</small>');
+    expect(html).not.toContain('>Contact ID<');
+  });
 });
