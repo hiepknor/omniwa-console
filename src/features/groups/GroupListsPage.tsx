@@ -8,10 +8,11 @@ import { GroupEligibilitySummary } from '@/components/GroupEligibilitySummary';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { omitSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { Button, ButtonLink, CursorPagination, DescriptionItem, DescriptionList, Dialog, Drawer, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, StateNotice, Status, Table, Tabs, Td, Th, Tr } from '@/ui';
+import { Button, ButtonLink, CopyValue, CursorPagination, DescriptionItem, DescriptionList, Dialog, Drawer, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, StateNotice, Status, Table, Tabs, Td, Th, Tr } from '@/ui';
 import { GroupSectionTabs } from './GroupSectionTabs';
 import { groupListRouteState, setGroupListParam } from './group-list-route-state';
 import { useDeleteGroupList, useGroupList, useGroupListAudit, useGroupListEligibility, useGroupListEntries, useGroupLists } from '@/api/group-list-hooks';
+import type { GroupListEntry } from '@/api/group-lists';
 
 function Failure({ error, onRetry, stale }: { error: unknown; onRetry?: () => void; stale?: boolean }) { return <ApiFailureNotice error={error} title={stale ? 'Showing last known data' : 'Group List request failed'} onRetry={onRetry} />; }
 
@@ -25,6 +26,23 @@ function ProjectionNotice({ meta, resource }: { meta?: ProjectionMeta; resource:
   } as const;
   const [title, detail] = labels[meta.syncStatus as keyof typeof labels] ?? [`${resource} unavailable`, 'Projection status is not authoritative.'];
   return <StateNotice kind={meta.syncStatus === 'failed' ? 'error' : meta.syncStatus === 'syncing' ? 'loading' : 'empty'} title={title} detail={detail} />;
+}
+
+function TargetGroupRow({ entry }: { entry: GroupListEntry }) {
+  const renamed = entry.currentName && entry.snapshotName && entry.currentName !== entry.snapshotName;
+  return (
+    <li className="grid min-w-0 gap-2 border-b border-line py-3 last:border-b-0">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+        <div className="grid min-w-0 gap-1">
+          <strong className="min-w-0 break-words text-sm leading-snug">{entry.currentName ?? entry.snapshotName ?? entry.groupJid}</strong>
+          {renamed ? <small className="min-w-0 break-words text-xs text-fg-3">Previously: {entry.snapshotName}</small> : null}
+        </div>
+        <Status tone={entry.eligibility === 'eligible' ? 'ok' : entry.eligibility === 'unavailable' ? 'failed' : 'degraded'}>{humanizeToken(entry.eligibility)}</Status>
+      </div>
+      <CopyValue value={entry.groupJid} label="Group JID"><code className="min-w-0 break-all text-xs text-fg-3">{entry.groupJid}</code></CopyValue>
+      {entry.eligibilityReason ? <small className="min-w-0 break-words text-xs text-danger">{humanizeToken(entry.eligibilityReason)}</small> : null}
+    </li>
+  );
 }
 
 export function GroupListsPage() {
@@ -132,7 +150,7 @@ function GroupListInspector({ id, readEnabled, commandsEnabled, eligibilityEnabl
                 {entries.isPending ? <StateNotice kind="loading" title="Loading target groups" /> : entries.error && !entries.data ? <Failure error={entries.error} onRetry={() => entries.refetch()} /> : entries.data ? <>
                   <ProjectionNotice meta={entries.data.meta} resource="Target groups" />
                   {entries.error ? <Failure error={entries.error} stale onRetry={() => entries.refetch()} /> : null}
-                  {entries.data.items.length ? <ul className="grid min-w-0">{entries.data.items.map((entry) => <li key={entry.groupJid} className="grid min-w-0 gap-1 border-b border-line py-3 last:border-b-0"><div className="flex min-w-0 items-center justify-between gap-3"><strong className="min-w-0 truncate text-sm">{entry.currentName ?? entry.snapshotName ?? entry.groupJid}</strong><Status tone={entry.eligibility === 'eligible' ? 'ok' : entry.eligibility === 'unavailable' ? 'failed' : 'degraded'}>{humanizeToken(entry.eligibility)}</Status></div><code className="min-w-0 truncate text-xs text-fg-3">{entry.groupJid}</code>{entry.currentName && entry.snapshotName && entry.currentName !== entry.snapshotName ? <small className="min-w-0 truncate text-xs text-fg-3">Previously: {entry.snapshotName}</small> : null}{entry.eligibilityReason ? <small className="min-w-0 break-words text-xs text-danger">{humanizeToken(entry.eligibilityReason)}</small> : null}</li>)}</ul> : !entries.data.meta?.syncStatus || entries.data.meta.syncStatus === 'ready' ? <StateNotice kind="empty" title="No groups" /> : null}
+                  {entries.data.items.length ? <ul className="grid min-w-0">{entries.data.items.map((entry) => <TargetGroupRow key={entry.groupJid} entry={entry} />)}</ul> : !entries.data.meta?.syncStatus || entries.data.meta.syncStatus === 'ready' ? <StateNotice kind="empty" title="No groups" /> : null}
                   <CursorPagination cursor={route.groupCursor} nextCursor={entries.data.nextCursor ?? undefined} onCursor={(value) => setParam('groupCursor', value)} />
                 </> : null}
               </div>
