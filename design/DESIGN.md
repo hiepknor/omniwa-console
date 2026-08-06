@@ -229,7 +229,9 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   cell. ≤640px becomes an 85dvh full-width bottom sheet. The body scrolls without
   moving the page. An optional contextual-action footer remains outside that
   scroll container, so the primary next action is visible without competing with
-  destructive actions at the end of long inspector content.
+  destructive actions at the end of long inspector content. The Drawer body owns
+  its 16px content inset; inspector content does not add a second outer inset.
+  Framed sections beneath the dialog's `h2` title use `h3` headings.
 - **ResponsiveInspector** — one shared inspector slot that measures its owning
   workspace rather than the browser viewport. At 1560px of available workspace
   width it docks as a non-modal 440px third column beside the 320px directory

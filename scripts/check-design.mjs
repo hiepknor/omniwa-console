@@ -312,7 +312,7 @@ for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', '>Ref
 }
 
 const directoryDetails = await read('src/features/directory/Details.tsx');
-for (const marker of ['DirectoryDetails', '<CopyValue', 'Canonical identity', 'Projected definition', 'Associations unavailable', 'headingLevel={2}', '<DescriptionList']) {
+for (const marker of ['DirectoryDetails', '<CopyValue', 'Canonical identity', 'Projected definition', 'Associations unavailable', 'headingLevel={3}', 'className="grid gap-4"', '<DescriptionList']) {
   if (!directoryDetails.includes(marker)) failures.push(`src/features/directory/Details.tsx: projected resource detail is missing ${marker}`);
 }
 

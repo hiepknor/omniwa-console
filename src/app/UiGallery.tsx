@@ -619,11 +619,11 @@ export function UiGallery() {
               eyebrow="Messaging"
               title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>}
               description="Inspect canonical contacts and consult projected label definitions."
-              secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setDirectoryLabelsOpen(true)} /><Button>Refresh</Button></>}
+              secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => { setDirectorySelection(undefined); setDirectoryLabelsOpen(true); }} /><Button>Refresh</Button></>}
               compactTitle={directorySelection ? contactsFixture.find((item) => item.id === directorySelection)?.displayName ?? 'Contact details' : 'Contacts'}
               compactDescription={directorySelection ? 'Projected contact identity' : 'Canonical projected identities'}
               compactLeadingAction={directorySelection ? <IconButton icon="arrow-left" label="Back to contacts" onClick={() => setDirectorySelection(undefined)} /> : undefined}
-              compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setDirectoryLabelsOpen(true)} /><Button>Refresh</Button></>}
+              compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => { setDirectorySelection(undefined); setDirectoryLabelsOpen(true); }} /><Button>Refresh</Button></>}
             >
               <div className="min-h-0 flex-1 overflow-y-auto p-4"><section aria-label="Contact registry example" className="border border-line-strong bg-surface"><header className="border-b border-line p-4"><div className="grid min-w-0 gap-1"><h2 className="text-sm font-semibold text-fg">Contact registry</h2><p className="text-xs text-fg-3">Canonical identities available in the current instance projection.</p></div></header><ContactTable className="border-0" items={contactsFixture} selectedId={directorySelection} onSelect={(id) => { setDirectoryLabelsOpen(false); setDirectorySelection(id); }} /></section></div>
               <Drawer open={directoryLabelsOpen || Boolean(directorySelection)} onClose={() => { if (directoryLabelsOpen) { setDirectoryLabelsOpen(false); setDirectoryLabelSelection(undefined); } else setDirectorySelection(undefined); }} title={directoryLabelsOpen ? labelsFixture.find((item) => item.id === directoryLabelSelection)?.name ?? 'Label catalog' : contactsFixture.find((item) => item.id === directorySelection)?.displayName ?? 'Contact details'}>

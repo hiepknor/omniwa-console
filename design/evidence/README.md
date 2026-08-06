@@ -2,7 +2,8 @@
 
 Chrome DevTools evidence captured on 2026-08-06 from the development-only
 `/__preview/contacts` route using production components and deterministic
-fixtures.
+fixtures. Desktop uses `?drawer=contact`; mobile retains the default Label
+catalog fixture.
 
 ## Desktop — 1920 × 1080
 
@@ -10,9 +11,10 @@ fixtures.
 
 - Contacts use the full-width responsive registry table rather than the
   Conversation split composition.
-- The Label catalog is a closable modal Drawer and does not resize the registry.
+- Contact detail uses one 16px Drawer inset, with framed identity and association
+  sections nested beneath the dialog heading.
 - Contact and Label details replace one another in the bounded Drawer instead
-  of stacking overlays.
+  of stacking overlays; opening Labels clears Contact selection.
 
 ## Mobile — 390 × 844
 

@@ -297,7 +297,8 @@ resource models, or rendered diagnostics.
   registry table, deliberately distinct from the Conversation split workspace.
   Selecting a row opens URL-backed Contact detail in the shared Drawer. The
   projected Label catalog is a mutually exclusive utility Drawer, not a peer
-  resource tab, and is fetched only while open. Contact
+  resource tab, and is fetched only while open. Opening it clears any active
+  Contact detail selection so closing it returns directly to the registry. Contact
   search/cursor/selection and Label catalog/filter/selection have independent
   URL-backed state. Contact detail preserves canonical/compatibility rollout
   semantics and explicitly reports that authoritative Contact–Label associations
