@@ -25,6 +25,7 @@ export function PreviewEvents() {
         nextCursor="cursor_next"
         onCursor={() => {}}
         generatedInfo="Generated just now"
+        historyState="active"
       />
       {open ? <EventInspector event={eventDetailFixture} onClose={() => setOpen(false)} /> : null}
     </div>

@@ -417,6 +417,15 @@ for (const marker of ['<Drawer', '<Panel', 'title="Failure facts"', 'label="Even
   if (!recoveryInspector.includes(marker)) failures.push(`src/features/platform/RecoveryInspector.tsx: recovery inspector contract is missing ${marker}`);
 }
 
+const eventsPage = await read('src/features/events/EventsPage.tsx');
+for (const marker of ['title="Event facts"', 'headingLevel={3}', '<CopyValue value={event.id}', 'title="Safe summary"', "historyState = !enabled ? 'paused'"]) {
+  if (!eventsPage.includes(marker)) failures.push(`src/features/events/EventsPage.tsx: Events inspector/state contract is missing ${marker}`);
+}
+const eventsView = await read('src/features/events/EventsView.tsx');
+for (const marker of ['historyStatus', 'Durable history polling degraded', '<time dateTime={e.occurredAt}', '<time dateTime={e.ingestedAt}']) {
+  if (!eventsView.includes(marker)) failures.push(`src/features/events/EventsView.tsx: Events status/timestamp contract is missing ${marker}`);
+}
+
 for (const path of ['src/features/instances/CreateInstance.tsx', 'src/features/instances/InstanceWorkspace.tsx']) {
   const source = await read(path);
   for (const marker of ['Discard without storing…', 'Copying does not confirm durable storage.', 'closeDisabled=']) {

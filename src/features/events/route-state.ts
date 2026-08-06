@@ -9,5 +9,5 @@ export function eventRouteState(searchParams: URLSearchParams) {
 }
 
 export function setEventParam(searchParams: URLSearchParams, key: string, value?: string) {
-  return updateSearchParams(searchParams, { [key]: value }, key === 'type' ? ['cursor', 'event'] : []);
+  return updateSearchParams(searchParams, { [key]: value }, key === 'type' ? ['cursor', 'event'] : key === 'cursor' ? ['event'] : []);
 }

@@ -7,7 +7,7 @@ import { ApiFailureNotice } from '@/components/ApiFailureNotice';
 import type { EventResource } from '@/api/events-api';
 import { humanizeToken, relativeTime } from '@/lib/format';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
-import { DescriptionItem, DescriptionList, Drawer, PageHeader, StateNotice, Status } from '@/ui';
+import { CopyValue, DescriptionItem, DescriptionList, Drawer, PageHeader, Panel, StateNotice, Status } from '@/ui';
 import { EventsView } from './EventsView';
 import { useEvents } from './hooks';
 import { eventRouteState, setEventParam } from './route-state';
@@ -38,13 +38,14 @@ export function EventInspector({ event, onClose }: { event: EventResource; onClo
   return (
     <Drawer open onClose={onClose} title={event.type} subtitle={event.id}>
       <div className="grid gap-4">
-        <Status tone="neutral">Normalized</Status>
-        <DescriptionList>
-          <DescriptionItem label="Occurred">{event.occurredAt ?? 'Not reported'}</DescriptionItem>
-          <DescriptionItem label="Ingested">{event.ingestedAt ?? 'Not reported'}</DescriptionItem>
-        </DescriptionList>
-        <div className="grid gap-2">
-          <h3 className="text-[11px] font-medium uppercase tracking-wider text-fg-3">Safe summary</h3>
+        <Panel headingLevel={3} title="Event facts" description="Durable normalized identity and timestamps." actions={<Status tone="neutral">Normalized</Status>} bodyPadding="compact-top">
+          <DescriptionList>
+            <DescriptionItem label="Event ID" mono><CopyValue value={event.id} label="Event ID" /></DescriptionItem>
+            <DescriptionItem label="Occurred">{event.occurredAt ? <time dateTime={event.occurredAt}>{event.occurredAt}</time> : 'Not reported'}</DescriptionItem>
+            <DescriptionItem label="Ingested">{event.ingestedAt ? <time dateTime={event.ingestedAt}>{event.ingestedAt}</time> : 'Not reported'}</DescriptionItem>
+          </DescriptionList>
+        </Panel>
+        <Panel headingLevel={3} title="Safe summary" description="Normalized public-safe fields reported by the durable event projection." bodyPadding="compact-top">
           {summary.length ? (
             <DescriptionList>
               {summary.map(([key, value]) => (
@@ -52,7 +53,7 @@ export function EventInspector({ event, onClose }: { event: EventResource; onClo
               ))}
             </DescriptionList>
           ) : <StateNotice kind="empty" title="No summary" detail="This event contains no normalized summary fields." />}
-        </div>
+        </Panel>
       </div>
     </Drawer>
   );
@@ -70,6 +71,7 @@ export function EventsPage() {
   const events = useEvents(route.type, route.cursor, enabled);
   const items = useMemo(() => events.data?.resource.items ?? [], [events.data]);
   const selected = items.find((item) => item.id === route.event);
+  const historyState = !enabled ? 'paused' : events.isFetching ? 'refreshing' : events.error ? 'degraded' : 'active';
   const setParam = (key: string, value?: string) => setSearchParams(setEventParam(searchParams, key, value), { replace: true });
 
   useInvalidCursorReset(events.error, route.cursor, () => {
@@ -93,7 +95,7 @@ export function EventsPage() {
         applyDisabled={events.isFetching || typeDraft.trim() === route.type}
         errorSlot={!enabled && events.data || events.error ? <div className="grid gap-2">{!enabled && events.data ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable durable event snapshot visible while events_projection is absent." /> : null}{events.error && !events.data ? <Fail error={events.error} onRetry={() => events.refetch()} /> : events.error ? <Fail error={events.error} stale onRetry={() => events.refetch()} /> : null}</div> : undefined}
         initialLoading={events.isPending}
-        empty={Boolean(events.data) && items.length === 0}
+        empty={Boolean(events.data) && items.length === 0 && enabled && !events.error}
         emptyDetail={route.type ? `No durable events have the exact type “${route.type}”.` : 'No durable event history has been retained yet.'}
         items={items}
         selectedId={route.event}
@@ -102,6 +104,7 @@ export function EventsPage() {
         nextCursor={events.data?.resource.pagination.nextCursor ?? undefined}
         onCursor={(v) => setParam('cursor', v)}
         generatedInfo={events.data ? `Generated ${relativeTime(events.data.meta.generatedAt) || 'at an unreported time'}` : undefined}
+        historyState={historyState}
       />
       {selected ? <EventInspector event={selected} onClose={() => setParam('event')} /> : null}
     </>
