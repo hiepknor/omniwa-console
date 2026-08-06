@@ -189,6 +189,9 @@ resource models, or rendered diagnostics.
   place facts and commands in separate canonical Panel surfaces. Preview
   fixtures reuse the same production inspector composition and may not invent
   contradictory live states. Copyable diagnostics use the shared CopyValue.
+- Dense Group member rows wrap canonical display names and identifiers instead
+  of truncating the only operator-visible identity. Action controls remain on a
+  separate wrapping row.
 - Interactive table rows support keyboard activation and expose selection.
 - Responsive tables use the shared container-width contract: compact records at
   640px table width and below, essential columns through 768px, supporting facts

@@ -156,7 +156,7 @@ for ≤11px labels. Numbers that align vertically use `tabular-nums`.
   controls remain navigation-specific exceptions. Navigation uses
   `NavigationItemContent` so full rail, compact rail, and mobile bottom nav cannot
   drift independently.
-  Connection uses the canonical chain-link glyph; Directory uses the canonical
+  Connection uses the canonical chain-link glyph; Contacts uses the canonical
   contact-with-index-lines glyph; the browser-session utility uses the canonical
   key glyph. None reuses the instance-fleet server glyph.
 - **Status** — the canonical framed ink stamp from §2. All usages share the
@@ -501,6 +501,7 @@ or `border-*` utilities and rely on generated CSS order.
 | Console footer | ready capabilities, discovery pending, discovery failure, version absent, compact tablet, hidden mobile |
 | Workspace page / split workspace | PageHeader + two panes ≥900px, optional third inspector at ≥1560px container width, compact directory bar, compact detail bar + Back, long title, contextual busy action <900px, newest/older scroll alignment |
 | Contacts workspace | full-width responsive registry table, Contacts ready/search/pagination/detail Drawer, Label catalog closed/open/list/detail Drawer, independent capability unavailable, projection non-ready/stale/error, compact labelled records |
+| Workflow forms | Create Campaign and Create/Edit Group List two-column desktop composition, single-column mobile composition, target table/selection, readiness, validation copy, responsive footer actions |
 | Feedback placement | surface banner, persistent error toast, dismiss, paused timer |
 | Dialog / Drawer / responsive inspector | 1920px docked third column, 1440px desktop Drawer, tablet Drawer, 390px bottom sheet, bounded scroll, pending-close, one-time-secret dismissal, Conversation/Message replacement |
 

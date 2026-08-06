@@ -122,7 +122,7 @@ export function ConnectPage({ notice, onConnected }: { notice?: ConnectNotice; o
                     aria-controls="connect-api-key"
                     aria-pressed={flow.showApiKey}
                     onClick={() => { flow.setShowApiKey((s) => !s); flow.apiKeyInput.current?.focus(); }}
-                    className="text-[11px] font-medium text-fg-2 hover:text-fg underline underline-offset-2 disabled:opacity-40"
+                    className="inline-flex min-h-9 items-center px-2 text-[11px] font-medium text-fg-2 underline underline-offset-2 hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-40 max-sm:min-h-10"
                   >
                     {flow.showApiKey ? 'Hide' : 'Show'}
                   </button>

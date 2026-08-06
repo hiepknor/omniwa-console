@@ -47,6 +47,9 @@ const connectPage = await read('src/app/ConnectPage.tsx');
 if (connectPage.includes('font-mono text-[11px] opacity')) {
   failures.push('src/app/ConnectPage.tsx: connection-step labels must retain AA contrast');
 }
+for (const marker of ['aria-pressed={flow.showApiKey}', 'min-h-9', 'max-sm:min-h-10', 'focus-visible:outline-2']) {
+  if (!connectPage.includes(marker)) failures.push(`src/app/ConnectPage.tsx: API-key visibility action is missing ${marker}`);
+}
 
 const closeButton = await read('src/ui/CloseButton.tsx');
 for (const marker of ['<IconButton', 'icon="close"', 'label={label}', 'disabled={disabled}']) {
@@ -109,8 +112,8 @@ const uiGallery = await read('src/app/UiGallery.tsx');
 if (!uiGallery.includes('<ApiFailureNotice error={galleryRateLimit}')) {
   failures.push('src/app/UiGallery.tsx: locked feedback fixtures must include the shared rate-limit notice');
 }
-if (!uiGallery.includes("['connection', 'Connection']") || !uiGallery.includes("['session', 'Session']")) {
-  failures.push('src/app/UiGallery.tsx: locked iconography registry must include Connection and Session');
+if (!uiGallery.includes("['connection', 'Connection']") || !uiGallery.includes("['directory', 'Contacts']") || !uiGallery.includes("['session', 'Session']")) {
+  failures.push('src/app/UiGallery.tsx: locked iconography registry must include Connection, Contacts, and Session');
 }
 if (!uiGallery.includes('const sessionUtilityItems') || !uiGallery.includes('Mobile navigation example')) {
   failures.push('src/app/UiGallery.tsx: compact session utilities must remain separate from navigation fixtures');
@@ -306,6 +309,11 @@ for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', 'icon
   if (!directoryPreview.includes(marker)) failures.push(`src/app/PreviewDirectory.tsx: Contacts workspace preview is missing ${marker}`);
 }
 
+const workflowFormsPreview = await read('src/app/PreviewWorkflowForms.tsx');
+for (const marker of ['Create campaign draft', 'Edit Group List', 'xl:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)]', '<SelectionBar', '<Table', 'max-sm:flex-1', '[overflow-wrap:anywhere]']) {
+  if (!workflowFormsPreview.includes(marker)) failures.push(`src/app/PreviewWorkflowForms.tsx: workflow form evidence is missing ${marker}`);
+}
+
 const directoryPage = await read('src/features/directory/DirectoryPage.tsx');
 for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', 'icon="refresh"', '<Drawer', '<ContactTable', '<CursorPagination', 'label="Back to labels"', 'contacts.data.resource.total', 'Search contacts', 'Filter labels', '<LabelList', '<DirectoryDetails', 'labelsOpen && labelsReady', "cap('contacts_projection')", "cap('labels_projection')", "cap('canonical_contact_identity')"]) {
   if (!directoryPage.includes(marker)) failures.push(`src/features/directory/DirectoryPage.tsx: Contacts workspace is missing ${marker}`);
@@ -327,6 +335,11 @@ if (/<Status\b[^>]*>[^<]*unread/.test(conversationsView) || /<Status\b[^>]*>[^<]
 const groupsView = await read('src/features/groups/GroupsView.tsx');
 for (const marker of ['<FilterToolbar as="form"', '<StateNotice kind="loading"', '<StateNotice kind="empty"']) {
   if (!groupsView.includes(marker)) failures.push(`src/features/groups/GroupsView.tsx: list recipe is missing ${marker}`);
+}
+
+const groupWorkspace = await read('src/features/groups/GroupWorkspace.tsx');
+for (const marker of ['break-words text-[13px] font-medium', 'font-mono text-xs text-fg-3 [overflow-wrap:anywhere]']) {
+  if (!groupWorkspace.includes(marker)) failures.push(`src/features/groups/GroupWorkspace.tsx: member identity is missing ${marker}`);
 }
 
 const groupListEditor = await read('src/features/groups/GroupListEditorPage.tsx');

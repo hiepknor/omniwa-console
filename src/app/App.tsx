@@ -148,6 +148,13 @@ const developmentRoutes = import.meta.env.DEV
           return { Component: PreviewEvents };
         },
       },
+      {
+        path: '/__preview/workflow-forms',
+        lazy: async () => {
+          const { PreviewWorkflowForms } = await import('./PreviewWorkflowForms');
+          return { Component: PreviewWorkflowForms };
+        },
+      },
     ]
   : [];
 

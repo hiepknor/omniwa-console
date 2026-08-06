@@ -99,7 +99,7 @@ const navigationItems = [
   ['overview', 'Overview'],
   ['connection', 'Connection'],
   ['conversations', 'Conversations'],
-  ['directory', 'Directory'],
+  ['directory', 'Contacts'],
   ['groups', 'Groups'],
   ['campaigns', 'Campaigns'],
   ['events', 'Events'],
