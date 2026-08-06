@@ -10,4 +10,9 @@ describe('Events route state', () => {
     const source = new URLSearchParams('cursor=opaque&event=event-1');
     expect(setEventParam(source, 'type', 'Message').toString()).toBe('type=Message');
   });
+
+  it('clears stale selection when the cursor page changes', () => {
+    const source = new URLSearchParams('type=Message&cursor=old&event=event-1');
+    expect(setEventParam(source, 'cursor', 'opaque/next').toString()).toBe('type=Message&cursor=opaque%2Fnext');
+  });
 });

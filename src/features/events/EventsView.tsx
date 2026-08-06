@@ -28,9 +28,18 @@ export type EventsViewProps = {
   nextCursor?: string;
   onCursor: (v?: string) => void;
   generatedInfo?: string;
+  historyState: 'active' | 'refreshing' | 'degraded' | 'paused';
 };
 
+export function historyStatus(state: EventsViewProps['historyState']): { label: string; tone: 'ok' | 'pending' | 'degraded' | 'neutral' } {
+  if (state === 'refreshing') return { label: 'Refreshing durable history', tone: 'pending' };
+  if (state === 'degraded') return { label: 'Durable history polling degraded', tone: 'degraded' };
+  if (state === 'paused') return { label: 'Durable history polling paused', tone: 'neutral' };
+  return { label: 'Polling durable history', tone: 'ok' };
+}
+
 export function EventsView(props: EventsViewProps) {
+  const polling = historyStatus(props.historyState);
   return (
     <div className="grid gap-6 p-6 max-sm:p-4">
       <PageHeader
@@ -41,7 +50,7 @@ export function EventsView(props: EventsViewProps) {
       />
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 p-3 border border-line bg-surface">
-        <Status tone="ok">Polling durable history</Status>
+        <Status tone={polling.tone}>{polling.label}</Status>
         <Status tone="neutral">{retentionLabel(props.retentionSeconds)}</Status>
         <Status tone="neutral">No historical backfill</Status>
       </div>
@@ -63,8 +72,8 @@ export function EventsView(props: EventsViewProps) {
                 <Tr key={e.id} selected={e.id === props.selectedId} onClick={() => props.onOpen(e.id)}>
                   <Td mobileLabel="Type" className="font-mono text-xs text-fg">{e.type}</Td>
                   <Td mobileLabel="Durable ID" priority="supporting" className="font-mono text-xs text-fg-2">{e.id}</Td>
-                  <Td mobileLabel="Occurred" className="text-fg-2">{relativeTime(e.occurredAt) || 'Not reported'}</Td>
-                  <Td mobileLabel="Ingested" priority="detail" className="text-fg-2">{relativeTime(e.ingestedAt) || 'Not reported'}</Td>
+                  <Td mobileLabel="Occurred" className="text-fg-2">{e.occurredAt ? <time dateTime={e.occurredAt} title={e.occurredAt}>{relativeTime(e.occurredAt) || e.occurredAt}</time> : 'Not reported'}</Td>
+                  <Td mobileLabel="Ingested" priority="detail" className="text-fg-2">{e.ingestedAt ? <time dateTime={e.ingestedAt} title={e.ingestedAt}>{relativeTime(e.ingestedAt) || e.ingestedAt}</time> : 'Not reported'}</Td>
                 </Tr>
               ))}
             </tbody>
