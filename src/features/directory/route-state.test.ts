@@ -1,12 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { directoryRouteState, updateDirectoryParams } from './route-state';
+import { contactsRouteState, updateContactsParams } from './route-state';
 
-describe('Directory route state', () => {
-  it('preserves opaque Contact cursors and normalized search text', () => {
-    expect(directoryRouteState(new URLSearchParams('search=%20mai%20&cursor=opaque%3A1'))).toEqual({ search: 'mai', cursor: 'opaque:1' });
+describe('Contacts route state', () => {
+  it('keeps Contact and Label catalog scopes independent', () => {
+    expect(contactsRouteState(new URLSearchParams('search=%20mai%20&cursor=opaque%3A1&panel=labels&label=priority&labelSearch=%20vip%20'))).toEqual({
+      search: 'mai',
+      cursor: 'opaque:1',
+      panel: 'labels',
+      labelId: 'priority',
+      labelSearch: 'vip',
+    });
   });
 
   it('resets cursor when search scope changes', () => {
-    expect(updateDirectoryParams(new URLSearchParams('search=old&cursor=opaque%3A1'), { search: 'new' }, ['cursor']).toString()).toBe('search=new');
+    expect(updateContactsParams(new URLSearchParams('search=old&cursor=opaque%3A1&panel=labels'), { search: 'new' }, ['cursor']).toString()).toBe('search=new&panel=labels');
   });
 });

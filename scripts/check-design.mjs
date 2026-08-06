@@ -292,22 +292,22 @@ for (const marker of ['resolveComposerBlocker', "blockerState !== 'blocked'", "{
 }
 
 const conversationDetails = await read('src/features/conversations/Details.tsx');
-for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '<CopyValue', 'headingLevel={3}', 'Canonical identity', 'Provider routing', 'Projected state', 'conversation.unreadCount.toLocaleString', '<DescriptionList', '<Panel', 'Open contact', '/directory/contacts/']) {
+for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '<CopyValue', 'headingLevel={3}', 'Canonical identity', 'Provider routing', 'Projected state', 'conversation.unreadCount.toLocaleString', '<DescriptionList', '<Panel', 'Open contact', '/contacts/']) {
   if (!conversationDetails.includes(marker)) failures.push(`src/features/conversations/Details.tsx: Conversation details inspector is missing ${marker}`);
 }
 
 const directoryPreview = await read('src/app/PreviewDirectory.tsx');
-for (const marker of ['<WorkspacePageFrame', 'title="Directory"', '<Tabs', 'panelId: \'directory-preview\'', '<SplitWorkspace', 'detailOpen={Boolean(selectedId)}', '>Back</Button>', '<CountBadge count={filtered.length}', '<ContactList', '<LabelList', '<DirectoryDetails']) {
-  if (!directoryPreview.includes(marker)) failures.push(`src/app/PreviewDirectory.tsx: Messaging Directory preview is missing ${marker}`);
+for (const marker of ['<WorkspacePageFrame', 'Label catalog', '<Drawer', '<ContactTable', '<CursorPagination', 'Back to labels', '<CountBadge count={contactsFixture.length}', '<LabelList', '<DirectoryDetails']) {
+  if (!directoryPreview.includes(marker)) failures.push(`src/app/PreviewDirectory.tsx: Contacts workspace preview is missing ${marker}`);
 }
 
 const directoryPage = await read('src/features/directory/DirectoryPage.tsx');
-for (const marker of ['<WorkspacePageFrame', 'title="Directory"', '<Tabs', 'panelId: \'directory-panel\'', 'role="tabpanel"', '<SplitWorkspace', 'detailOpen={Boolean(selectedId)}', '>Back</Button>', '<CountBadge count={total}', 'Search contacts', 'Filter labels', '<ContactList', '<LabelList', '<DirectoryDetails', "cap('contacts_projection')", "cap('labels_projection')", "cap('canonical_contact_identity')"]) {
-  if (!directoryPage.includes(marker)) failures.push(`src/features/directory/DirectoryPage.tsx: Messaging Directory workspace is missing ${marker}`);
+for (const marker of ['<WorkspacePageFrame', 'Label catalog', '<Drawer', '<ContactTable', '<CursorPagination', 'Back to labels', 'contacts.data.resource.total', 'Search contacts', 'Filter labels', '<LabelList', '<DirectoryDetails', 'labelsOpen && labelsReady', "cap('contacts_projection')", "cap('labels_projection')", "cap('canonical_contact_identity')"]) {
+  if (!directoryPage.includes(marker)) failures.push(`src/features/directory/DirectoryPage.tsx: Contacts workspace is missing ${marker}`);
 }
 
 const directoryDetails = await read('src/features/directory/Details.tsx');
-for (const marker of ['DirectoryDetails', '<CopyValue', 'Canonical identity', 'Projected definition', 'headingLevel={2}', '<DescriptionList']) {
+for (const marker of ['DirectoryDetails', '<CopyValue', 'Canonical identity', 'Projected definition', 'Associations unavailable', 'headingLevel={2}', '<DescriptionList']) {
   if (!directoryDetails.includes(marker)) failures.push(`src/features/directory/Details.tsx: projected resource detail is missing ${marker}`);
 }
 

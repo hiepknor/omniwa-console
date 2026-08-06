@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { matchRoutes } from 'react-router-dom';
-import { authenticatedRoutes } from './App';
+import { authenticatedRoutes, legacyDirectoryLocation } from './App';
 
 describe('authenticated route manifest', () => {
   it('owns campaigns under the canonical campaigns namespace only', () => {
@@ -19,9 +19,15 @@ describe('authenticated route manifest', () => {
     expect(paths).toEqual(expect.arrayContaining(['/conversations', '/conversations/:conversationRef']));
   });
 
-  it('owns canonical Directory resource routes', () => {
+  it('owns canonical Contacts routes and compatibility Directory redirects', () => {
     const paths = authenticatedRoutes.flatMap((route) => route.path ?? []);
-    expect(paths).toEqual(expect.arrayContaining(['/directory', '/directory/contacts', '/directory/contacts/:contactId', '/directory/labels', '/directory/labels/:labelId']));
+    expect(paths).toEqual(expect.arrayContaining(['/contacts', '/contacts/:contactId', '/directory', '/directory/contacts', '/directory/contacts/:contactId', '/directory/labels', '/directory/labels/:labelId']));
+  });
+
+  it('preserves applicable legacy Directory context in canonical Contacts URLs', () => {
+    expect(legacyDirectoryLocation('contacts', 'contact 1', '?search=mai&cursor=opaque')).toBe('/contacts/contact%201?search=mai&cursor=opaque');
+    expect(legacyDirectoryLocation('labels', 'label-1', '?search=priority&cursor=ignored')).toBe('/contacts?panel=labels&label=label-1&labelSearch=priority');
+    expect(legacyDirectoryLocation(undefined, undefined, '?search=mai')).toBe('/contacts?search=mai');
   });
 
   it.each([
@@ -34,6 +40,8 @@ describe('authenticated route manifest', () => {
     ['/campaigns/campaign-1', '/campaigns/:campaignId'],
     ['/conversations', '/conversations'],
     ['/conversations/conversation-1', '/conversations/:conversationRef'],
+    ['/contacts', '/contacts'],
+    ['/contacts/contact-1', '/contacts/:contactId'],
     ['/directory', '/directory'],
     ['/directory/contacts', '/directory/contacts'],
     ['/directory/contacts/contact-1', '/directory/contacts/:contactId'],

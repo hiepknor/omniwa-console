@@ -27,6 +27,9 @@ export function DirectoryDetails({ contact, label, meta, error, loading, onRetry
           <DescriptionItem label="WhatsApp contact found">{contact.found === undefined ? 'Not reported' : contact.found ? 'Yes' : 'No'}</DescriptionItem>
         </DescriptionList>
       </Panel>
+      <Panel headingLevel={2} title="Labels" description="Projected label definitions are available from the page-level catalog.">
+        <StateNotice kind="empty" title="Associations unavailable" detail="The backend does not report authoritative Contact–Label associations. The Console does not infer assignments from provider identifiers." />
+      </Panel>
     </div>
   );
   if (label) return (

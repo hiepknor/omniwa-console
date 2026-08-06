@@ -47,7 +47,7 @@ describe('ConversationDetailsContent', () => {
     expect(html).toContain('<h3');
     expect(html).toContain('aria-label="Copy Conversation ID"');
     expect(html).toContain('aria-label="Copy Provider aliases"');
-    expect(html).toContain('href="/directory/contacts/9c37e2c7-875c-48ff-a298-00b853409cb1"');
+    expect(html).toContain('href="/contacts/9c37e2c7-875c-48ff-a298-00b853409cb1"');
   });
 
   it('keeps missing optional provider and state fields unreported', () => {

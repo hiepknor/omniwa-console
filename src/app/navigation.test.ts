@@ -10,7 +10,8 @@ describe('scope navigation', () => {
     expect(routes).not.toContain('/instances');
     expect(routes).not.toContain('/messages');
     expect(routes).toContain('/conversations');
-    expect(routes).toContain('/directory');
+    expect(routes).toContain('/contacts');
+    expect(items.find((item) => item.to === '/contacts')?.label).toBe('Contacts');
     expect(pinnedNavigationForKeyKind('api')).toEqual({ to: '/connection', label: 'Connection', icon: 'connection', end: true });
     expect(items.find((item) => item.to === '/campaigns')?.label).toBe('Campaigns');
   });
@@ -19,7 +20,7 @@ describe('scope navigation', () => {
     const routes = navigationForKeyKind('admin').flatMap((section) => section.items.map((item) => item.to));
     expect(routes).toContain('/instances');
     expect(routes).not.toContain('/connection');
-    expect(routes).not.toContain('/directory');
+    expect(routes).not.toContain('/contacts');
     expect(pinnedNavigationForKeyKind('admin')).toBeUndefined();
   });
 });

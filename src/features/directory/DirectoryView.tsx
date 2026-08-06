@@ -1,8 +1,8 @@
 import type { ContactResource } from '@/api/contacts';
 import type { LabelResource } from '@/api/labels';
 import type { ReactNode } from 'react';
-import { humanizeToken } from '@/lib/format';
-import { Status } from '@/ui';
+import { humanizeToken, relativeTime } from '@/lib/format';
+import { Status, Table, Td, Th, Tr } from '@/ui';
 import { cn } from '@/ui/cn';
 
 function ResourceButton({ selected, onClick, primary, secondary, trailing }: { selected?: boolean; onClick: () => void; primary: string; secondary: string; trailing: ReactNode }) {
@@ -18,17 +18,22 @@ function ResourceButton({ selected, onClick, primary, secondary, trailing }: { s
     </li>
   );
 }
-export function ContactList({ items, selectedId, onSelect }: { items: ContactResource[]; selectedId?: string; onSelect: (id: string) => void }) {
-  return <ul className="grid">{items.map((item) => (
-    <ResourceButton
-      key={item.id}
-      selected={item.id === selectedId}
-      onClick={() => onSelect(item.id)}
-      primary={item.displayName ?? item.phoneNumber ?? 'Unknown contact'}
-      secondary={item.identityStatus === 'legacy' ? 'Legacy identity' : `${humanizeToken(item.identityStatus)} identity`}
-      trailing={<Status tone={item.found === true ? 'ok' : 'neutral'}>{item.found === undefined ? 'Unreported' : item.found ? 'Found' : 'Not found'}</Status>}
-    />
-  ))}</ul>;
+export function ContactTable({ items, selectedId, onSelect }: { items: ContactResource[]; selectedId?: string; onSelect: (id: string) => void }) {
+  return (
+    <Table>
+      <thead><tr><Th>Contact</Th><Th>Phone</Th><Th priority="supporting">Identity</Th><Th>WhatsApp</Th><Th priority="detail">Updated</Th><Th priority="detail">Contact ID</Th></tr></thead>
+      <tbody>{items.map((item) => (
+        <Tr key={item.id} selected={item.id === selectedId} onClick={() => onSelect(item.id)}>
+          <Td mobileLabel="Contact" className="font-medium">{item.displayName ?? item.phoneNumber ?? 'Unknown contact'}</Td>
+          <Td mobileLabel="Phone" className="font-mono text-xs text-fg-2">{item.phoneNumber ?? item.redactedPhone ?? 'Not reported'}</Td>
+          <Td mobileLabel="Identity" priority="supporting"><Status tone={item.identityStatus === 'complete' ? 'ok' : item.identityStatus === 'partial' ? 'pending' : 'neutral'}>{humanizeToken(item.identityStatus)}</Status></Td>
+          <Td mobileLabel="WhatsApp"><Status tone={item.found === true ? 'ok' : 'neutral'}>{item.found === undefined ? 'Unreported' : item.found ? 'Found' : 'Not found'}</Status></Td>
+          <Td mobileLabel="Updated" priority="detail" className="text-fg-2">{item.identityUpdatedAt ? <time dateTime={item.identityUpdatedAt} title={item.identityUpdatedAt}>{relativeTime(item.identityUpdatedAt) || item.identityUpdatedAt}</time> : 'Not reported'}</Td>
+          <Td mobileLabel="Contact ID" priority="detail" className="font-mono text-xs text-fg-2">{item.id}</Td>
+        </Tr>
+      ))}</tbody>
+    </Table>
+  );
 }
 
 export function LabelList({ items, selectedId, onSelect }: { items: LabelResource[]; selectedId?: string; onSelect: (id: string) => void }) {
