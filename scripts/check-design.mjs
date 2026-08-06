@@ -24,6 +24,12 @@ const groupListsPage = await read('src/features/groups/GroupListsPage.tsx');
 for (const marker of ['footer={item ?', 'min-w-0', 'Group List facts', 'Danger zone']) {
   if (!groupListsPage.includes(marker)) failures.push(`src/features/groups/GroupListsPage.tsx: detail inspector contract is missing ${marker}`);
 }
+for (const marker of ['function TargetGroupRow', '<CopyValue value={entry.groupJid}', 'break-all text-xs text-fg-3', 'min-w-0 break-words text-sm', 'grid-cols-[minmax(0,1fr)_auto]', 'Previously: {entry.snapshotName}']) {
+  if (!groupListsPage.includes(marker)) failures.push(`src/features/groups/GroupListsPage.tsx: target identity wrapping contract is missing ${marker}`);
+}
+if (/entry\.(?:currentName|snapshotName|groupJid)[^\n]*truncate|truncate[^\n]*entry\.(?:currentName|snapshotName|groupJid)/.test(groupListsPage)) {
+  failures.push('src/features/groups/GroupListsPage.tsx: target names and JIDs must wrap instead of truncating');
+}
 
 const modalFocus = await read('src/ui/useModalFocus.ts');
 for (const marker of ["document.body.style.overflow = 'hidden'", 'modalStack.length === 0']) {
