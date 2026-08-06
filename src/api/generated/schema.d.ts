@@ -2478,6 +2478,7 @@ export interface paths {
         };
         /**
          * Get my groups
+         * @deprecated
          * @description Get my groups
          */
         get: {
@@ -2492,6 +2493,12 @@ export interface paths {
                 /** @description success */
                 200: {
                     headers: {
+                        /** @description RFC 9745 structured deprecation date */
+                        Deprecation?: string;
+                        /** @description Bounded successor endpoint */
+                        Link?: string;
+                        /** @description RFC 8594 sunset date */
+                        Sunset?: string;
                         [name: string]: unknown;
                     };
                     content: {
@@ -2500,9 +2507,30 @@ export interface paths {
                         };
                     };
                 };
+                /** @description Legacy endpoint disabled; use /group/search */
+                410: {
+                    headers: {
+                        /** @description RFC 9745 structured deprecation date */
+                        Deprecation?: string;
+                        /** @description Bounded successor endpoint */
+                        Link?: string;
+                        /** @description RFC 8594 sunset date */
+                        Sunset?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Information query rate limited; see Retry-After header */
                 429: {
                     headers: {
+                        /** @description RFC 9745 structured deprecation date */
+                        Deprecation?: string;
+                        /** @description Bounded successor endpoint */
+                        Link?: string;
+                        /** @description RFC 8594 sunset date */
+                        Sunset?: string;
                         [name: string]: unknown;
                     };
                     content: {
@@ -2512,6 +2540,12 @@ export interface paths {
                 /** @description Internal server error */
                 500: {
                     headers: {
+                        /** @description RFC 9745 structured deprecation date */
+                        Deprecation?: string;
+                        /** @description Bounded successor endpoint */
+                        Link?: string;
+                        /** @description RFC 8594 sunset date */
+                        Sunset?: string;
                         [name: string]: unknown;
                     };
                     content: {
@@ -3405,7 +3439,7 @@ export interface paths {
         put?: never;
         /**
          * Create a new instance
-         * @description Creates a new instance with the provided data including optional advanced settings
+         * @description Creates a new instance with optional advanced settings. Omit token to receive a server-generated 256-bit credential; custom tokens must contain 32 to 512 visible ASCII characters.
          */
         post: {
             parameters: {
@@ -4460,6 +4494,24 @@ export interface paths {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
                     };
                 };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Instance credential cannot target another instance */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
                 /** @description Instance not found */
                 404: {
                     headers: {
@@ -4512,6 +4564,24 @@ export interface paths {
                 };
                 /** @description Invalid request data */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not authorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Instance credential cannot target another instance */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -7532,6 +7602,168 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/server/external-event-failures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List external event delivery dead letters */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Instance ID filter */
+                    instanceId?: string;
+                    /** @description Transport filter (webhook, rabbitmq, nats) */
+                    transport?: string;
+                    /** @description Page size (1-200) */
+                    limit?: number;
+                    /** @description Opaque pagination cursor */
+                    cursor?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_events_outbox.DeadLetterList"];
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/external-event-failures/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replay external event delivery dead letter */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            /** @description Delivery identity and audit reason */
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["pkg_server_handler.ExternalEventReplayRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
+                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_events_outbox.ReplayResult"];
+                        };
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+                /** @description Internal Server Error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/server/health": {
         parameters: {
             query?: never;
@@ -7556,7 +7788,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.SuccessResponse"] & {
-                            data?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.ServerHealth"];
+                            data?: components["schemas"]["pkg_server_handler.ServerHealthResponse"];
                         };
                     };
                 };
@@ -7576,6 +7808,54 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get process liveness
+         * @description Returns no dependency or topology detail.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["pkg_server_handler.RuntimeStatusResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["pkg_server_handler.RuntimeStatusResponse"];
                     };
                 };
             };
@@ -7940,6 +8220,54 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["apidocs.ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/server/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get process readiness
+         * @description Returns ready only for the active process role.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["pkg_server_handler.RuntimeStatusResponse"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["pkg_server_handler.RuntimeStatusResponse"];
                     };
                 };
             };
@@ -9491,6 +9819,33 @@ export interface components {
         "github_com_evolution-foundation_evolution-go_pkg_community_service.CreateCommunityStruct": {
             communityName?: string;
         };
+        "github_com_evolution-foundation_evolution-go_pkg_events_outbox.DeadLetterItem": {
+            attemptCount?: number;
+            createdAt?: string;
+            deadLetteredAt?: string;
+            destination?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_events_outbox.Destination"];
+            id?: string;
+            instanceId?: string;
+            lastAttemptAt?: string;
+            lastErrorCode?: string;
+            maxAttempts?: number;
+            transport?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_events_outbox.Transport"];
+        };
+        "github_com_evolution-foundation_evolution-go_pkg_events_outbox.DeadLetterList": {
+            items?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_events_outbox.DeadLetterItem"][];
+            nextCursor?: string;
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_events_outbox.Destination": "instance" | "global";
+        "github_com_evolution-foundation_evolution-go_pkg_events_outbox.ReplayResult": {
+            id?: string;
+            occurredAt?: string;
+            status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_events_outbox.Status"];
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_events_outbox.Status": "pending" | "processing" | "delivered" | "dead_letter";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_events_outbox.Transport": "webhook" | "rabbitmq" | "nats";
         "github_com_evolution-foundation_evolution-go_pkg_groupList_repository.EligibilityIssue": {
             canSend?: boolean;
             checkedAt?: string;
@@ -10043,6 +10398,7 @@ export interface components {
             lastMessageAt?: string;
             lastMessageId?: string;
             mutedUntil?: string;
+            phoneNumber?: string;
             pinned?: boolean;
             /** @enum {unknown} */
             type: "direct" | "group" | "newsletter" | "broadcast" | "unknown";
@@ -10071,6 +10427,7 @@ export interface components {
             messageId: string;
             messageType: string;
             participantJid?: string;
+            participantPhoneNumber?: string;
             playedAt?: string;
             provenance: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.MessageProvenance"];
             providerChatId?: string;
@@ -10078,8 +10435,10 @@ export interface components {
             quotedMessageId?: string;
             readAt?: string;
             recipientJid?: string;
+            recipientPhoneNumber?: string;
             retentionExpiresAt?: string;
             senderJid?: string;
+            senderPhoneNumber?: string;
             sentAt?: string;
             status?: string;
         };
@@ -10088,6 +10447,7 @@ export interface components {
             receiptAt?: string;
             receiptType?: string;
             recipientJid?: string;
+            recipientPhoneNumber?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionFailureItem": {
             deadLetteredAt?: string;
@@ -10141,11 +10501,6 @@ export interface components {
             storedSyncStatus?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"];
             syncStatus?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_model.SyncStatus"];
             workLagSeconds?: number;
-        };
-        "github_com_evolution-foundation_evolution-go_pkg_projection_service.ServerHealth": {
-            api?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.HealthDimension"];
-            generatedAt?: string;
-            instances?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.InstanceHealth"][];
         };
         "github_com_evolution-foundation_evolution-go_pkg_projection_service.ThrottlingHealth": {
             circuitState?: string;
@@ -10500,6 +10855,17 @@ export interface components {
             quoted?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_sendMessage_service.QuotedStruct"];
             text?: string;
         };
+        "github_com_evolution-foundation_evolution-go_pkg_server_service.DependencyHealth": {
+            checkedAt?: string;
+            errorCode?: string;
+            lastSuccessAt?: string;
+            name?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_server_service.DependencyName"];
+            status?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_server_service.DependencyStatus"];
+        };
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_server_service.DependencyName": "users_database" | "external_event_outbox" | "rabbitmq" | "legacy_media" | "media_assets" | "campaign_media";
+        /** @enum {string} */
+        "github_com_evolution-foundation_evolution-go_pkg_server_service.DependencyStatus": "unknown" | "healthy" | "unavailable";
         "github_com_evolution-foundation_evolution-go_pkg_user_service.BlockStruct": {
             number?: string;
         };
@@ -10535,6 +10901,7 @@ export interface components {
             /** @enum {string} */
             identityStatus: "complete" | "partial";
             identityUpdatedAt: string;
+            phoneNumber?: string;
         };
         "github_com_evolution-foundation_evolution-go_pkg_user_service.GetAvatarStruct": {
             number?: string;
@@ -10556,6 +10923,7 @@ export interface components {
             isInWhatsapp?: boolean;
             jid?: string;
             lid?: string;
+            phoneNumber?: string;
             query?: string;
             remoteJID?: string;
             verifiedName?: string;
@@ -10569,6 +10937,7 @@ export interface components {
             devices?: components["schemas"]["types.JID"][];
             /** @description The local ID (if available) */
             lid?: string;
+            phoneNumber?: string;
             pictureID?: string;
             status?: string;
             verifiedName?: components["schemas"]["types.VerifiedName"];
@@ -10679,11 +11048,24 @@ export interface components {
             expectedVersion: number;
             reason: string;
         };
+        "pkg_server_handler.ExternalEventReplayRequest": {
+            id: string;
+            reason: string;
+        };
         "pkg_server_handler.ProjectionFailureOperationRequest": {
             eventKey: string;
             instanceId: string;
             reason: string;
             resource: string;
+        };
+        "pkg_server_handler.RuntimeStatusResponse": {
+            status?: string;
+        };
+        "pkg_server_handler.ServerHealthResponse": {
+            api?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.HealthDimension"];
+            dependencies?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_server_service.DependencyHealth"][];
+            generatedAt?: string;
+            instances?: components["schemas"]["github_com_evolution-foundation_evolution-go_pkg_projection_service.InstanceHealth"][];
         };
         /** @enum {string} */
         "types.AddressingMode": "pn" | "lid";
@@ -10852,8 +11234,13 @@ export interface components {
             url?: string;
         };
         "types.VerifiedName": {
+            actualActors?: number;
             certificate?: components["schemas"]["waVnameCert.VerifiedNameCertificate"];
             details?: components["schemas"]["waVnameCert.VerifiedNameCertificate_Details"];
+            hostStorage?: number;
+            privacyModeTS?: string;
+            verifiedLevel?: string;
+            version?: number;
         };
         "types.WebAuthnResponse": {
             id?: string;
@@ -10881,6 +11268,14 @@ export interface components {
         };
         "waAICommon.AIMetadataOperation": {
             hatchMetadataSync?: components["schemas"]["waAICommon.HatchMetadataSync"];
+        };
+        "waAICommon.AIProvenance": {
+            c2PaMetadata?: components["schemas"]["waAICommon.AIProvenance_Metadata"];
+            iptcMetadata?: components["schemas"]["waAICommon.AIProvenance_Metadata"];
+        };
+        "waAICommon.AIProvenance_Metadata": {
+            createdWithGenAi?: boolean;
+            editedWithGenAi?: boolean;
         };
         "waAICommon.AIRegenerateMetadata": {
             messageKey?: components["schemas"]["waCommon.MessageKey"];
@@ -10915,6 +11310,7 @@ export interface components {
         /** @enum {integer} */
         "waAICommon.BotAgeCollectionMetadata_AgeCollectionType": 0 | 1;
         "waAICommon.BotAgentDeepLinkMetadata": {
+            clientPublicKey?: number[];
             token?: string;
         };
         "waAICommon.BotAgentMetadata": {
@@ -10924,7 +11320,7 @@ export interface components {
             capabilities?: components["schemas"]["waAICommon.BotCapabilityMetadata_BotCapabilityType"][];
         };
         /** @enum {integer} */
-        "waAICommon.BotCapabilityMetadata_BotCapabilityType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64 | 65;
+        "waAICommon.BotCapabilityMetadata_BotCapabilityType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64 | 65 | 66 | 67 | 68 | 69;
         "waAICommon.BotCommandMetadata": {
             commandDescription?: string;
             commandName?: string;
@@ -10996,6 +11392,9 @@ export interface components {
         "waAICommon.BotGroupParticipantMetadata": {
             botFbid?: string;
         };
+        "waAICommon.BotHistoryShareMetadata": {
+            participantsMetadata?: components["schemas"]["waAICommon.BotGroupParticipantMetadata"][];
+        };
         "waAICommon.BotImagineMetadata": {
             imagineType?: components["schemas"]["waAICommon.BotImagineMetadata_ImagineType"];
             shortPrompt?: string;
@@ -11060,6 +11459,7 @@ export interface components {
             botAgeCollectionMetadata?: components["schemas"]["waAICommon.BotAgeCollectionMetadata"];
             botDocumentMessageMetadata?: components["schemas"]["waAICommon.BotDocumentMessageMetadata"];
             botGroupMetadata?: components["schemas"]["waAICommon.BotGroupMetadata"];
+            botHistoryShareMetadata?: components["schemas"]["waAICommon.BotHistoryShareMetadata"];
             botInfrastructureDiagnostics?: components["schemas"]["waAICommon.BotInfrastructureDiagnostics"];
             botLinkedAccountsMetadata?: components["schemas"]["waAICommon.BotLinkedAccountsMetadata"];
             botMessageOriginMetadata?: components["schemas"]["waAICommon.BotMessageOriginMetadata"];
@@ -11099,7 +11499,7 @@ export interface components {
             verificationMetadata?: components["schemas"]["waAICommon.BotSignatureVerificationMetadata"];
         };
         /** @enum {integer} */
-        "waAICommon.BotMetricsEntryPoint": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 45 | 46 | 47 | 54 | 55 | 56;
+        "waAICommon.BotMetricsEntryPoint": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 45 | 46 | 47 | 54 | 55 | 56 | 57;
         "waAICommon.BotMetricsMetadata": {
             destinationEntryPoint?: components["schemas"]["waAICommon.BotMetricsEntryPoint"];
             destinationID?: string;
@@ -11434,6 +11834,11 @@ export interface components {
         };
         /** @enum {integer} */
         "waAdv.ADVEncryptionType": 0 | 1;
+        "waAea.NonE2EEAttestation": {
+            accountType?: components["schemas"]["waAea.NonE2EEAttestation_AccountType"];
+        };
+        /** @enum {integer} */
+        "waAea.NonE2EEAttestation_AccountType": 0 | 1 | 2;
         "waCommon.LimitSharing": {
             initiatedByMe?: boolean;
             limitSharingSettingTimestamp?: number;
@@ -11547,6 +11952,11 @@ export interface components {
         };
         /** @enum {integer} */
         "waE2E.BCallMessage_MediaType": 0 | 1 | 2;
+        "waE2E.BotHistoryShareSyncMetadata": {
+            botJID?: string;
+            historyShareCutoffTimestamp?: number;
+            historyShareMessages?: components["schemas"]["waE2E.HistoryShareMessageEntry"][];
+        };
         "waE2E.ButtonsMessage": {
             buttons?: components["schemas"]["waE2E.ButtonsMessage_Button"][];
             contentText?: string;
@@ -11597,6 +12007,7 @@ export interface components {
         "waE2E.Call": {
             callEntryPoint?: number;
             callKey?: number[];
+            callReason?: string;
             contextInfo?: components["schemas"]["waE2E.ContextInfo"];
             conversionData?: number[];
             conversionDelaySeconds?: number;
@@ -11683,6 +12094,7 @@ export interface components {
         "waE2E.ContextInfo": {
             actionLink?: components["schemas"]["waE2E.ActionLink"];
             afterReadDuration?: number;
+            aiProvenance?: components["schemas"]["waAICommon.AIProvenance"];
             alwaysShowAdAttribution?: boolean;
             botMessageSharingInfo?: components["schemas"]["waAICommon.BotMessageSharingInfo"];
             businessInteractionPills?: components["schemas"]["waE2E.ContextInfo_BusinessInteractionPills"];
@@ -11711,6 +12123,7 @@ export interface components {
             forwardingScore?: number;
             groupMentions?: components["schemas"]["waE2E.GroupMention"][];
             groupSubject?: string;
+            instagramThreadLink?: components["schemas"]["waE2E.ContextInfo_InstagramThreadLink"];
             isForwarded?: boolean;
             isGroupStatus?: boolean;
             isQuestion?: boolean;
@@ -11758,6 +12171,7 @@ export interface components {
             pills?: components["schemas"]["waE2E.ContextInfo_BusinessInteractionPills_Pill"][];
             signatureEnvelope?: components["schemas"]["waAICommon.BotSignatureVerificationMetadata"];
             signedPayload?: number[];
+            unauthenticatedBusinessMetadata?: components["schemas"]["waE2E.ContextInfo_BusinessInteractionPills_UnauthenticatedBusinessMetadata"];
         };
         /** @enum {integer} */
         "waE2E.ContextInfo_BusinessInteractionPills_EntryPoint": 0 | 1 | 2 | 3 | 4 | 5;
@@ -11767,6 +12181,12 @@ export interface components {
         };
         /** @enum {integer} */
         "waE2E.ContextInfo_BusinessInteractionPills_PillType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+        "waE2E.ContextInfo_BusinessInteractionPills_UnauthenticatedBusinessMetadata": {
+            businessCategory?: string;
+            businessIsOpen?: boolean;
+            businessIsOpenSnapshotMS?: number;
+            businessName?: string;
+        };
         "waE2E.ContextInfo_BusinessMessageForwardInfo": {
             businessOwnerJID?: string;
         };
@@ -11842,6 +12262,9 @@ export interface components {
         };
         /** @enum {integer} */
         "waE2E.ContextInfo_ForwardedNewsletterMessageInfo_ContentType": 1 | 2 | 3;
+        "waE2E.ContextInfo_InstagramThreadLink": {
+            URL?: string;
+        };
         /** @enum {integer} */
         "waE2E.ContextInfo_PairedMediaType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
         "waE2E.ContextInfo_PartiallySelectedContent": {
@@ -11992,7 +12415,7 @@ export interface components {
             description?: string;
             doNotPlayInline?: boolean;
             endCardTiles?: components["schemas"]["waE2E.VideoEndCard"][];
-            faviconMMSMetadata?: components["schemas"]["waE2E.MMSThumbnailMetadata"];
+            faviconMmsMetadata?: components["schemas"]["waE2E.MMSThumbnailMetadata"];
             font?: components["schemas"]["waE2E.ExtendedTextMessage_FontType"];
             inviteLinkGroupType?: components["schemas"]["waE2E.ExtendedTextMessage_InviteLinkGroupType"];
             inviteLinkGroupTypeV2?: components["schemas"]["waE2E.ExtendedTextMessage_InviteLinkGroupType"];
@@ -12082,6 +12505,10 @@ export interface components {
              *     	*HighlyStructuredMessage_HSMLocalizableParameter_DateTime
              */
             paramOneof?: unknown;
+        };
+        "waE2E.HistoryShareMessageEntry": {
+            messageSecretProof?: number[];
+            stanzaID?: string;
         };
         "waE2E.HistorySyncMessageAccessStatus": {
             completeAccessGranted?: boolean;
@@ -12362,6 +12789,12 @@ export interface components {
             thumbnailSHA256?: number[];
             thumbnailWidth?: number;
         };
+        "waE2E.MarkAsVerifiedAction": {
+            actionSeq?: number;
+            userJIDString?: string;
+            verified?: boolean;
+            verifiedIdentityKey?: number[];
+        };
         "waE2E.MediaDomainInfo": {
             e2EeMediaKey?: number[];
             mediaKeyDomain?: components["schemas"]["waE2E.MediaKeyDomain"];
@@ -12469,6 +12902,7 @@ export interface components {
             sendPaymentMessage?: components["schemas"]["waE2E.SendPaymentMessage"];
             senderKeyDistributionMessage?: components["schemas"]["waE2E.SenderKeyDistributionMessage"];
             splitPaymentMessage?: components["schemas"]["waE2E.SplitPaymentMessage"];
+            splitPaymentUpdateMessage?: components["schemas"]["waE2E.SplitPaymentUpdateMessage"];
             spoilerMessage?: components["schemas"]["waE2E.FutureProofMessage"];
             statusAddYours?: components["schemas"]["waE2E.FutureProofMessage"];
             statusMentionMessage?: components["schemas"]["waE2E.FutureProofMessage"];
@@ -12494,6 +12928,8 @@ export interface components {
         /** @enum {integer} */
         "waE2E.MessageAssociation_AssociationType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20;
         "waE2E.MessageContextInfo": {
+            accountEncryptionAttestation?: components["schemas"]["waAea.NonE2EEAttestation"];
+            associatedPrimaryIdentityKey?: number[];
             botMessageSecret?: number[];
             botMetadata?: components["schemas"]["waAICommon.BotMetadata"];
             capiCreatedGroup?: boolean;
@@ -12532,6 +12968,7 @@ export interface components {
             oldestMessageTimestampInWindow?: number;
         };
         "waE2E.MessageHistoryNotice": {
+            botHistoryShareSyncMetadata?: components["schemas"]["waE2E.BotHistoryShareSyncMetadata"];
             contextInfo?: components["schemas"]["waE2E.ContextInfo"];
             messageHistoryMetadata?: components["schemas"]["waE2E.MessageHistoryMetadata"];
         };
@@ -12598,6 +13035,7 @@ export interface components {
         /** @enum {integer} */
         "waE2E.PaymentBackground_Type": 0 | 1;
         "waE2E.PaymentExtendedMetadata": {
+            messageParamsJSON?: string;
             platform?: string;
             type?: number;
         };
@@ -12718,6 +13156,7 @@ export interface components {
             bizBroadcastInsightsContactListResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_BizBroadcastInsightsContactListResponse"];
             companionCanonicalUserNonceFetchRequestResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_CompanionCanonicalUserNonceFetchResponse"];
             companionMetaNonceFetchRequestResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_CompanionMetaNonceFetchResponse"];
+            contactRefreshResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_ContactRefreshResponse"];
             flowResponsesCsvBundle?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FlowResponsesCsvBundle"];
             fullHistorySyncOnDemandRequestResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FullHistorySyncOnDemandRequestResponse"];
             historySyncChunkRetryResponse?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_HistorySyncChunkRetryResponse"];
@@ -12744,6 +13183,13 @@ export interface components {
         };
         "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_CompanionMetaNonceFetchResponse": {
             nonce?: string;
+        };
+        "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_ContactRefreshResponse": {
+            collectionVersion?: number;
+            coveredRequestIDs?: string[];
+            primaryProcessEndTimestampMS?: number;
+            primaryProcessStartTimestampMS?: number;
+            uploadedContactCount?: number;
         };
         "waE2E.PeerDataOperationRequestResponseMessage_PeerDataOperationResult_FlowResponsesCsvBundle": {
             directPath?: string;
@@ -12810,7 +13256,7 @@ export interface components {
             waEntFbid?: string;
         };
         /** @enum {integer} */
-        "waE2E.PeerDataOperationRequestType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
+        "waE2E.PeerDataOperationRequestType": 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
         "waE2E.PinInChatMessage": {
             key?: components["schemas"]["waCommon.MessageKey"];
             senderTimestampMS?: number;
@@ -12930,6 +13376,7 @@ export interface components {
             botFeedbackMessage?: components["schemas"]["waAICommon.BotFeedbackMessage"];
             chatThemeSetting?: components["schemas"]["waE2E.ChatThemeSetting"];
             cloudApiThreadControlNotification?: components["schemas"]["waE2E.CloudAPIThreadControlNotification"];
+            coexStateSync?: components["schemas"]["waServerSync.CoexStateSync"];
             disappearingMode?: components["schemas"]["waE2E.DisappearingMode"];
             editedMessage?: components["schemas"]["waE2E.Message"];
             ephemeralExpiration?: number;
@@ -12940,16 +13387,18 @@ export interface components {
             key?: components["schemas"]["waCommon.MessageKey"];
             lidMigrationMappingSyncMessage?: components["schemas"]["waE2E.LIDMigrationMappingSyncMessage"];
             limitSharing?: components["schemas"]["waCommon.LimitSharing"];
+            markAsVerifiedAction?: components["schemas"]["waE2E.MarkAsVerifiedAction"];
             mediaNotifyMessage?: components["schemas"]["waE2E.MediaNotifyMessage"];
             memberLabel?: components["schemas"]["waE2E.MemberLabel"];
             peerDataOperationRequestMessage?: components["schemas"]["waE2E.PeerDataOperationRequestMessage"];
             peerDataOperationRequestResponseMessage?: components["schemas"]["waE2E.PeerDataOperationRequestResponseMessage"];
             requestWelcomeMessageMetadata?: components["schemas"]["waE2E.RequestWelcomeMessageMetadata"];
+            syncRequestMutationRetry?: components["schemas"]["waE2E.SyncRequestMutationRetry"];
             timestampMS?: number;
             type?: components["schemas"]["waE2E.ProtocolMessage_Type"];
         };
         /** @enum {integer} */
-        "waE2E.ProtocolMessage_Type": 0 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 14 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 34 | 35;
+        "waE2E.ProtocolMessage_Type": 0 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 14 | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 34 | 35 | 36 | 37 | 38;
         "waE2E.QuestionResponseMessage": {
             key?: components["schemas"]["waCommon.MessageKey"];
             text?: string;
@@ -13032,6 +13481,10 @@ export interface components {
         };
         /** @enum {integer} */
         "waE2E.SplitPaymentParticipant_SplitPaymentStatus": 0 | 1;
+        "waE2E.SplitPaymentUpdateMessage": {
+            participantJID?: string;
+            splitID?: string;
+        };
         "waE2E.StatusNotificationMessage": {
             originalMessageKey?: components["schemas"]["waCommon.MessageKey"];
             responseMessageKey?: components["schemas"]["waCommon.MessageKey"];
@@ -13121,6 +13574,14 @@ export interface components {
             filehash?: string[];
             requestTimestamp?: number;
             rmrSource?: string;
+        };
+        "waE2E.SyncRequestMutationRetry": {
+            collections?: components["schemas"]["waE2E.SyncRequestMutationRetry_Collection"][];
+            count?: number;
+        };
+        "waE2E.SyncRequestMutationRetry_Collection": {
+            name?: string;
+            storedSyncdVersion?: number;
         };
         "waE2E.TemplateButtonReplyMessage": {
             contextInfo?: components["schemas"]["waE2E.ContextInfo"];
@@ -13223,6 +13684,27 @@ export interface components {
         "waE2E.WebLinkRenderConfig": 0 | 1;
         /** @enum {integer} */
         "waMmsRetry.MediaRetryNotification_ResultType": 0 | 1 | 2 | 3;
+        "waServerSync.CoexStateSync": {
+            collectionMutations?: components["schemas"]["waServerSync.CoexStateSync_CollectionMutations"][];
+        };
+        "waServerSync.CoexStateSync_CollectionMutations": {
+            collection?: string;
+            mutations?: components["schemas"]["waServerSync.CoexStateSync_Mutation"][];
+        };
+        "waServerSync.CoexStateSync_Mutation": {
+            dirtyVersion?: number;
+            index?: components["schemas"]["waServerSync.SyncdIndex"];
+            operation?: components["schemas"]["waServerSync.SyncdMutation_SyncdOperation"];
+            value?: components["schemas"]["waServerSync.SyncdValue"];
+        };
+        "waServerSync.SyncdIndex": {
+            blob?: number[];
+        };
+        /** @enum {integer} */
+        "waServerSync.SyncdMutation_SyncdOperation": 0 | 1;
+        "waServerSync.SyncdValue": {
+            blob?: number[];
+        };
         "waStatusAttributions.StatusAttribution": {
             actionURL?: string;
             /**
