@@ -620,11 +620,11 @@ export function UiGallery() {
               eyebrow="Messaging"
               title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>}
               description="Inspect canonical contacts and consult projected label definitions."
-              secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setDirectoryLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}
+              secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => { setDirectorySelection(undefined); setDirectoryLabelsOpen(true); }} /><IconButton icon="refresh" label="Refresh contacts" /></>}
               compactTitle={directorySelection ? contactsFixture.find((item) => item.id === directorySelection)?.displayName ?? 'Contact details' : 'Contacts'}
               compactDescription={directorySelection ? 'Projected contact identity' : 'Canonical projected identities'}
               compactLeadingAction={directorySelection ? <IconButton icon="arrow-left" label="Back to contacts" onClick={() => setDirectorySelection(undefined)} /> : undefined}
-              compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setDirectoryLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}
+              compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => { setDirectorySelection(undefined); setDirectoryLabelsOpen(true); }} /><IconButton icon="refresh" label="Refresh contacts" /></>}
             >
               <div className="min-h-0 flex-1 overflow-y-auto p-4"><ContactTable items={contactsFixture} selectedId={directorySelection} onSelect={(id) => { setDirectoryLabelsOpen(false); setDirectorySelection(id); }} /></div>
               <Drawer open={directoryLabelsOpen || Boolean(directorySelection)} onClose={() => { if (directoryLabelsOpen) { setDirectoryLabelsOpen(false); setDirectoryLabelSelection(undefined); } else setDirectorySelection(undefined); }} title={directoryLabelsOpen ? labelsFixture.find((item) => item.id === directoryLabelSelection)?.name ?? 'Label catalog' : contactsFixture.find((item) => item.id === directorySelection)?.displayName ?? 'Contact details'}>

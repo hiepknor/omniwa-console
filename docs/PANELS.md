@@ -261,7 +261,9 @@ Contacts render as a full-width responsive registry table rather than the
 Conversation-style directory/detail split. Selecting a row opens URL-backed
 Contact detail in the shared Drawer; compact tables become labelled records.
 The Label catalog uses the same bounded Drawer as a mutually exclusive utility
-view, with list/detail navigation inside it. Compatibility `/directory/*` routes redirect to the canonical Contacts URL
+view, with list/detail navigation inside it. Opening the catalog clears the
+active Contact detail path, and closing it returns directly to the registry
+rather than revealing a second inspector. Compatibility `/directory/*` routes redirect to the canonical Contacts URL
 while preserving applicable search context. Label definitions remain read-only
 and Contact detail states that associations are unavailable because the public
 Contact and Conversation projections do not publish authoritative label

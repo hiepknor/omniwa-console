@@ -1,4 +1,6 @@
-import { readOptionalSearchParam, readSearchText, updateSearchParams } from '@/lib/url-search-state';
+import { omitSearchParams, readOptionalSearchParam, readSearchText, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
+
+const LABEL_PARAMS = ['panel', 'label', 'labelSearch'];
 
 export function contactsRouteState(searchParams: URLSearchParams) {
   return {
@@ -12,4 +14,12 @@ export function contactsRouteState(searchParams: URLSearchParams) {
 
 export function updateContactsParams(searchParams: URLSearchParams, updates: Record<string, string | undefined>, reset: string[] = []): URLSearchParams {
   return updateSearchParams(searchParams, updates, reset);
+}
+
+export function contactRegistryLocation(searchParams: URLSearchParams): string {
+  return withSearchParams('/contacts', omitSearchParams(searchParams, LABEL_PARAMS));
+}
+
+export function labelCatalogLocation(searchParams: URLSearchParams): string {
+  return withSearchParams('/contacts', updateSearchParams(searchParams, { panel: 'labels' }));
 }

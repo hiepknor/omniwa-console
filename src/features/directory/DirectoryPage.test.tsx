@@ -57,9 +57,10 @@ describe('ContactsPage', () => {
     expect(html).not.toContain('Label definitions');
   });
 
-  it('keeps Contacts active while the URL-backed Label catalog is open', () => {
+  it('keeps the Contact projection active without retaining a Contact detail selection while Labels are open', () => {
     const html = renderRoute('/contacts/contact-1?panel=labels');
     expect(useContacts).toHaveBeenCalledWith('', undefined, true, true);
+    expect(useContact).toHaveBeenCalledWith(undefined, true, true);
     expect(useLabels).toHaveBeenCalledWith(true);
     expect(html).toContain('>2</span>');
     expect(html).toContain('Filter labels');

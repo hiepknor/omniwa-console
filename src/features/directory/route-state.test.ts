@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { contactsRouteState, updateContactsParams } from './route-state';
+import { contactRegistryLocation, contactsRouteState, labelCatalogLocation, updateContactsParams } from './route-state';
 
 describe('Contacts route state', () => {
   it('keeps Contact and Label catalog scopes independent', () => {
@@ -14,5 +14,13 @@ describe('Contacts route state', () => {
 
   it('resets cursor when search scope changes', () => {
     expect(updateContactsParams(new URLSearchParams('search=old&cursor=opaque%3A1&panel=labels'), { search: 'new' }, ['cursor']).toString()).toBe('search=new&panel=labels');
+  });
+
+  it('keeps Contact and Label drawers mutually exclusive while preserving registry scope', () => {
+    const contactLocation = new URLSearchParams('search=mai&cursor=opaque%3A1');
+    expect(labelCatalogLocation(contactLocation)).toBe('/contacts?search=mai&cursor=opaque%3A1&panel=labels');
+
+    const labelLocation = new URLSearchParams('search=mai&cursor=opaque%3A1&panel=labels&label=priority&labelSearch=vip');
+    expect(contactRegistryLocation(labelLocation)).toBe('/contacts?search=mai&cursor=opaque%3A1');
   });
 });

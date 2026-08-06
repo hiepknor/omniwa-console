@@ -6,15 +6,20 @@ import { contactsFixture, labelsFixture } from './preview-fixtures';
 
 /** Dev-only: full-width Contacts registry with the projected Label catalog open. */
 export function PreviewDirectory() {
-  const [contactId, setContactId] = useState<string>();
+  const contactEvidence = new URLSearchParams(window.location.search).get('drawer') === 'contact';
+  const [contactId, setContactId] = useState<string | undefined>(() => contactEvidence ? contactsFixture[0]?.id : undefined);
   const [labelId, setLabelId] = useState<string>();
-  const [labelsOpen, setLabelsOpen] = useState(true);
+  const [labelsOpen, setLabelsOpen] = useState(!contactEvidence);
   const [search, setSearch] = useState('');
   const [labelSearch, setLabelSearch] = useState('');
   const contacts = useMemo(() => contactsFixture.filter((item) => !search || JSON.stringify(item).toLocaleLowerCase().includes(search.toLocaleLowerCase())), [search]);
   const labels = useMemo(() => labelsFixture.filter((item) => !labelSearch || JSON.stringify(item).toLocaleLowerCase().includes(labelSearch.toLocaleLowerCase())), [labelSearch]);
   const contact = contactsFixture.find((item) => item.id === contactId);
   const label = labelsFixture.find((item) => item.id === labelId);
+  const openLabels = () => {
+    setContactId(undefined);
+    setLabelsOpen(true);
+  };
   const closeDrawer = () => {
     if (labelsOpen) {
       setLabelsOpen(false);
@@ -32,7 +37,7 @@ export function PreviewDirectory() {
   );
   return (
     <main className="h-dvh overflow-hidden bg-bg">
-      <WorkspacePageFrame eyebrow="Messaging" title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>} description="Search and inspect canonical contact records." secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>} compactTitle="Contacts" compactDescription="Canonical contact registry" compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}>
+      <WorkspacePageFrame eyebrow="Messaging" title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>} description="Search and inspect canonical contact records." secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={openLabels} /><IconButton icon="refresh" label="Refresh contacts" /></>} compactTitle="Contacts" compactDescription="Canonical contact registry" compactActions={<><IconButton icon="tag" label="Open Labels" onClick={openLabels} /><IconButton icon="refresh" label="Refresh contacts" /></>}>
         <div className="min-h-0 flex-1 overflow-y-auto p-4 max-sm:p-3"><div className="grid gap-3">
           <FilterToolbar as="form" className="border" onSubmit={(event) => event.preventDefault()}><Field label="Search contacts" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" value={search} placeholder="Name, phone, ID, alias, or username" onChange={(event) => setSearch(event.target.value)} />}</Field><div className="flex items-end"><IconButton type="submit" icon="search" label="Apply contact search" /></div></FilterToolbar>
           <ContactTable items={contacts} selectedId={contactId} onSelect={(id) => { setLabelsOpen(false); setContactId(id); }} />

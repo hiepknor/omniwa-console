@@ -9,7 +9,7 @@ import { CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton,
 import { DirectoryDetails } from './Details';
 import { ContactTable, LabelList } from './DirectoryView';
 import { useContact, useContacts, useLabel, useLabels } from './hooks';
-import { contactsRouteState, updateContactsParams } from './route-state';
+import { contactRegistryLocation, contactsRouteState, labelCatalogLocation, updateContactsParams } from './route-state';
 
 function BlockedPage({ title, detail }: { title: string; detail: string }) {
   return <div className="grid gap-6 p-6 max-sm:p-4"><PageHeader eyebrow="Messaging" title="Contacts" description="Inspect canonical contacts and the projected label catalog." /><StateNotice kind="empty" title={title} detail={detail} /></div>;
@@ -23,6 +23,7 @@ export function ContactsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const route = contactsRouteState(searchParams);
   const labelsOpen = route.panel === 'labels';
+  const selectedContactId = labelsOpen ? undefined : contactId;
   const [searchDraft, setSearchDraft] = useState(route.search);
   const [labelSearchDraft, setLabelSearchDraft] = useState(route.labelSearch);
   useEffect(() => setSearchDraft(route.search), [route.search]);
@@ -34,7 +35,7 @@ export function ContactsPage() {
   const labelsReady = instanceScope && cap('labels_projection');
   const canonicalIdentity = cap('canonical_contact_identity');
   const contacts = useContacts(route.search, route.cursor, contactsReady, canonicalIdentity);
-  const contact = useContact(contactId, contactsReady, canonicalIdentity);
+  const contact = useContact(selectedContactId, contactsReady, canonicalIdentity);
   const labels = useLabels(labelsOpen && labelsReady);
   const label = useLabel(labelsOpen ? route.labelId : undefined, labelsReady);
   const loadedLabels = labels.data?.resource ?? [];
@@ -53,16 +54,16 @@ export function ContactsPage() {
   const selectedLabelName = label.data?.resource.name ?? (label.data?.resource ? 'Unknown label' : undefined);
   const replaceParams = (next: URLSearchParams) => setSearchParams(next, { replace: true });
   const replaceContactList = (next: URLSearchParams) => navigate(withSearchParams('/contacts', next), { replace: true });
-  const selectContact = (id: string) => navigate(withSearchParams(`/contacts/${encodeURIComponent(id)}`, searchParams));
-  const closeContact = () => navigate(withSearchParams('/contacts', searchParams));
-  const openLabels = () => replaceParams(updateSearchParams(searchParams, { panel: 'labels' }));
-  const closeLabels = () => replaceParams(omitSearchParams(searchParams, ['panel', 'label', 'labelSearch']));
+  const selectContact = (id: string) => navigate(withSearchParams(`/contacts/${encodeURIComponent(id)}`, omitSearchParams(searchParams, ['panel', 'label', 'labelSearch'])));
+  const closeContact = () => navigate(contactRegistryLocation(searchParams));
+  const openLabels = () => navigate(labelCatalogLocation(searchParams), { replace: true });
+  const closeLabels = () => navigate(contactRegistryLocation(searchParams), { replace: true });
   const selectLabel = (id: string) => replaceParams(updateSearchParams(searchParams, { panel: 'labels', label: id }));
   const closeLabel = () => replaceParams(updateSearchParams(searchParams, { label: undefined }));
   const applySearch = () => replaceContactList(updateContactsParams(searchParams, { search: searchDraft.trim() }, ['cursor']));
   const applyLabelSearch = () => replaceParams(updateContactsParams(searchParams, { panel: 'labels', labelSearch: labelSearchDraft.trim(), label: undefined }));
   const refreshContacts = () => { if (contactsReady) void contacts.refetch(); };
-  const refreshContact = () => { if (contactsReady && contactId) void contact.refetch(); };
+  const refreshContact = () => { if (contactsReady && selectedContactId) void contact.refetch(); };
   const refreshPage = () => { refreshContacts(); refreshContact(); };
   const refreshLabels = () => { if (labelsReady) void labels.refetch(); if (labelsReady && route.labelId) void label.refetch(); };
   const contactsRefreshing = contacts.isFetching || contact.isFetching;
@@ -70,10 +71,14 @@ export function ContactsPage() {
 
   useEffect(() => {
     const returnedId = contact.data?.resource.id;
-    if (canonicalIdentity && contactId && returnedId && returnedId !== contactId) {
+    if (canonicalIdentity && selectedContactId && returnedId && returnedId !== selectedContactId) {
       navigate(withSearchParams(`/contacts/${encodeURIComponent(returnedId)}`, searchParams), { replace: true });
     }
-  }, [canonicalIdentity, contact.data?.resource.id, contactId, navigate, searchParams]);
+  }, [canonicalIdentity, contact.data?.resource.id, navigate, searchParams, selectedContactId]);
+
+  useEffect(() => {
+    if (labelsOpen && contactId) navigate(labelCatalogLocation(searchParams), { replace: true });
+  }, [contactId, labelsOpen, navigate, searchParams]);
 
   if (!instanceScope) return <BlockedPage title="Instance credential required" detail="Contacts requires an instance credential. Admin scope cannot read token-scoped projections, and no request was sent." />;
   if (capabilities.isPending) return <BlockedPage title="Discovering capabilities" detail="Discovering instance capabilities before enabling projection reads." />;
@@ -138,10 +143,10 @@ export function ContactsPage() {
         </div>
       </div>
       <Drawer
-        open={labelsOpen || Boolean(contactId)}
+        open={labelsOpen || Boolean(selectedContactId)}
         onClose={labelsOpen ? closeLabels : closeContact}
         title={labelsOpen ? route.labelId ? selectedLabelName ?? 'Label details' : 'Label catalog' : selectedName ?? 'Contact details'}
-        subtitle={labelsOpen ? route.labelId : contactId}
+        subtitle={labelsOpen ? route.labelId : selectedContactId}
       >
         {labelsOpen ? labelCatalog : !contactsSupported || (!contactsReady && !contact.data?.resource) ? <StateNotice kind="empty" title="Contact detail unavailable" detail="The cached directory remains visible, but this Contact cannot be read while contacts_projection is not advertised." /> : <DirectoryDetails contact={contact.data?.resource} meta={contact.data?.meta} error={contact.error} loading={contact.isPending} onRetry={refreshContact} />}
       </Drawer>
