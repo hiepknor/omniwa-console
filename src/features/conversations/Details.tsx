@@ -40,6 +40,7 @@ export function ConversationDetailsContent({ conversation }: { conversation: Con
       <Panel headingLevel={3} title="Canonical identity" description="Backend-projected identity; Console does not merge Conversations or derive a display name." actions={conversation.contactId ? <ButtonLink to={`/directory/contacts/${encodeURIComponent(conversation.contactId)}`}>Open contact</ButtonLink> : undefined} bodyPadding="compact-top">
         <DescriptionList>
           <DescriptionItem label="Display name">{conversation.displayName ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Phone" mono><CopyableFact value={conversation.phoneNumber} label="Phone number" /></DescriptionItem>
           <DescriptionItem label="Name source">{conversation.displayNameSource ? humanizeToken(conversation.displayNameSource) : 'Not reported'}</DescriptionItem>
           <DescriptionItem label="Name updated"><ReportedTime value={conversation.displayNameUpdatedAt} /></DescriptionItem>
           <DescriptionItem label="Type">{humanizeToken(conversation.type)}</DescriptionItem>
@@ -105,8 +106,11 @@ export function MessageInspectorContent({ messageId, loadedConversation, enabled
                 <DescriptionItem label="Provenance">{humanizeToken(resource.provenance)}</DescriptionItem>
                 <DescriptionItem label="Message timestamp">{relativeTime(resource.createdAt) || resource.createdAt}</DescriptionItem>
                 <DescriptionItem label="Sender" mono>{resource.senderJid ?? 'Not reported'}</DescriptionItem>
+                <DescriptionItem label="Sender phone" mono><CopyableFact value={resource.senderPhoneNumber} label="Sender phone number" /></DescriptionItem>
                 <DescriptionItem label="Recipient" mono>{resource.recipientJid ?? 'Not reported'}</DescriptionItem>
+                <DescriptionItem label="Recipient phone" mono><CopyableFact value={resource.recipientPhoneNumber} label="Recipient phone number" /></DescriptionItem>
                 <DescriptionItem label="Participant" mono>{resource.participantJid ?? 'Not reported'}</DescriptionItem>
+                <DescriptionItem label="Participant phone" mono><CopyableFact value={resource.participantPhoneNumber} label="Participant phone number" /></DescriptionItem>
                 <DescriptionItem label="Media asset" mono>{resource.mediaAssetId ?? 'Not reported'}</DescriptionItem>
                 <DescriptionItem label="Media MIME">{resource.mediaMimeType ?? 'Not reported'}</DescriptionItem>
                 <DescriptionItem label="Media size">{resource.mediaSize === undefined ? 'Not reported' : `${resource.mediaSize.toLocaleString()} bytes`}</DescriptionItem>
@@ -135,9 +139,9 @@ export function MessageInspectorContent({ messageId, loadedConversation, enabled
                 {receipts.data.resource.length ? (
                 <ul className="grid">
                   {receipts.data.resource.map((r) => (
-                    <li key={`${r.recipientJid}-${r.receiptType}-${r.receiptAt}`} className="flex items-center justify-between gap-3 py-1.5 border-b border-line last:border-b-0">
+                    <li key={`${r.recipientJid ?? r.recipientPhoneNumber}-${r.receiptType}-${r.receiptAt}`} className="flex items-center justify-between gap-3 py-1.5 border-b border-line last:border-b-0">
                       <Status tone={receiptTone(r.receiptType)}>{humanizeToken(r.receiptType)}</Status>
-                      <span className="font-mono text-xs text-fg-2 truncate">{r.recipientJid}</span>
+                      <span className="font-mono text-xs text-fg-2 truncate">{r.recipientPhoneNumber ?? r.recipientJid}</span>
                       <time className="text-xs text-fg-3" title={r.receiptAt}>{relativeTime(r.receiptAt)}</time>
                     </li>
                   ))}

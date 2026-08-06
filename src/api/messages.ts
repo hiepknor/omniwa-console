@@ -15,8 +15,11 @@ export type MessageResource = {
   /** Provider Chat ID retained only as backend-reported provenance. */
   providerChatId?: string;
   senderJid?: string;
+  senderPhoneNumber?: string;
   recipientJid?: string;
+  recipientPhoneNumber?: string;
   participantJid?: string;
+  participantPhoneNumber?: string;
   direction: MessageDirection;
   type: string;
   contentText?: string;
@@ -45,7 +48,8 @@ export type MessageResource = {
 export type MessageReceiptResource = {
   resourceType: 'messageReceipt';
   messageId: string;
-  recipientJid: string;
+  recipientJid?: string;
+  recipientPhoneNumber?: string;
   receiptType: string;
   receiptAt: string;
 };
@@ -127,8 +131,11 @@ function toMessage(value: unknown, fail: (message: string) => never): MessageRes
     conversationId,
     providerChatId: optionalString(payload.providerChatId),
     senderJid: optionalString(payload.senderJid),
+    senderPhoneNumber: optionalString(payload.senderPhoneNumber),
     recipientJid: optionalString(payload.recipientJid),
+    recipientPhoneNumber: optionalString(payload.recipientPhoneNumber),
     participantJid: optionalString(payload.participantJid),
+    participantPhoneNumber: optionalString(payload.participantPhoneNumber),
     direction: direction(payload.direction),
     type: optionalString(payload.messageType) ?? 'unknown',
     contentText: optionalString(payload.contentText),
@@ -195,11 +202,12 @@ export async function listMessageReceipts(client: ApiClient, messageId: string):
       const receipt = {
         resourceType: 'messageReceipt' as const,
         messageId: nonEmpty(payload.messageId) ?? messageId,
-        recipientJid: nonEmpty(payload.recipientJid) ?? '',
+        recipientJid: nonEmpty(payload.recipientJid),
+        recipientPhoneNumber: nonEmpty(payload.recipientPhoneNumber),
         receiptType: nonEmpty(payload.receiptType) ?? '',
         receiptAt: nonEmpty(payload.receiptAt) ?? '',
       };
-      return receipt.recipientJid && receipt.receiptType && receipt.receiptAt ? [receipt] : [];
+      return (receipt.recipientJid || receipt.recipientPhoneNumber) && receipt.receiptType && receipt.receiptAt ? [receipt] : [];
     }),
     meta: projection.meta,
   };

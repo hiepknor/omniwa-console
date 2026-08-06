@@ -139,7 +139,7 @@ function ConversationWorkspace() {
         title={pageTitle}
         description="Review projected history and submit outbound messages."
         secondaryActions={<Button disabled={!viewSupported || routeRefreshing} onClick={refreshPage}>{routeRefreshing ? 'Refreshing…' : 'Refresh'}</Button>}
-        compactTitle={hasConversation ? selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : pageTitle}
+        compactTitle={hasConversation ? selectedConversation?.displayName ?? selectedConversation?.phoneNumber ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : pageTitle}
         compactDescription={hasConversation ? (selectedConversation ? `${humanizeToken(selectedConversation.type)} · ${selectedProjectionAttention ?? `Last activity ${selectedConversation.lastActivityAt ? relativeTime(selectedConversation.lastActivityAt) : 'unreported'}`}` : 'Message timeline') : undefined}
         compactLeadingAction={hasConversation ? <Button onClick={closeConversation}>Back</Button> : undefined}
         compactActions={hasConversation && selectedConversation
@@ -151,7 +151,7 @@ function ConversationWorkspace() {
           open={Boolean(inspectedMessageId || (route.details === 'conversation' && selectedConversation))}
           persistent={Boolean(selectedConversation)}
           onClose={() => inspectedMessageId ? replaceParams(setConversationParam(searchParams, 'message')) : closeConversationDetails()}
-          title={inspectedMessageId ? 'Message details' : selectedConversation?.displayName ?? (selectedConversation ? `Unknown ${humanizeToken(selectedConversation.type)} conversation` : 'Conversation details')}
+          title={inspectedMessageId ? 'Message details' : selectedConversation?.displayName ?? selectedConversation?.phoneNumber ?? (selectedConversation ? `Unknown ${humanizeToken(selectedConversation.type)} conversation` : 'Conversation details')}
           subtitle={inspectedMessageId}
           inspector={inspectedMessageId && selectedConversation
             ? <MessageInspectorContent messageId={inspectedMessageId} loadedConversation={selectedConversation} enabled={messagesReady} mediaEnabled={conversationMedia} />
@@ -252,7 +252,7 @@ function ConversationWorkspace() {
             key={selectedConversation.conversationId}
             conversationId={selectedConversation.conversationId}
             addressingJid={sendRecipient ?? ''}
-            conversationName={selectedConversation.displayName ?? `Unknown ${selectedConversation.type} conversation`}
+            conversationName={selectedConversation.displayName ?? selectedConversation.phoneNumber ?? `Unknown ${selectedConversation.type} conversation`}
             enabled={messagesReady && outboundReady && Boolean(sendRecipient)}
             mediaEnabled={conversationMedia}
             unavailableDetail={recipientUnavailableDetail}

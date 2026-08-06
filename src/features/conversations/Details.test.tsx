@@ -12,6 +12,7 @@ const conversation: ConversationResource = {
   aliasesReported: true,
   addressingJid: '731002@lid',
   type: 'direct',
+  phoneNumber: '+84977450514',
   displayName: 'Anna Nguyen',
   displayNameSource: 'full_name',
   displayNameUpdatedAt: '2026-07-30T07:00:00Z',
@@ -34,6 +35,8 @@ describe('ConversationDetailsContent', () => {
     const html = renderDetails(conversation);
 
     expect(html).toContain('Canonical identity');
+    expect(html).toContain('+84977450514');
+    expect(html).toContain('aria-label="Copy Phone number"');
     expect(html).toContain('Provider routing');
     expect(html).toContain('Projected state');
     expect(html).toContain('731002@lid');

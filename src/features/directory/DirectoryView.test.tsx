@@ -13,4 +13,11 @@ describe('ContactList', () => {
     expect(unreported).not.toContain('Not found');
     expect(notFound).toContain('Not found');
   });
+
+  it('uses the canonical backend-reported phone number when a display name is absent', () => {
+    const html = renderToStaticMarkup(<ContactList items={[{ ...contact(), phoneNumber: '+84977450514' }]} onSelect={() => {}} />);
+
+    expect(html).toContain('+84977450514');
+    expect(html).not.toContain('Unknown contact');
+  });
 });

@@ -21,7 +21,7 @@ export function DirectoryDetails({ contact, label, meta, error, loading, onRetry
           <DescriptionItem label="Display source">{contact.displayNameSource ? humanizeToken(contact.displayNameSource) : 'Compatibility projection'}</DescriptionItem>
           <DescriptionItem label="Aliases" mono>{contact.aliases.length ? <CopyValue value={contact.aliases.join(', ')} label="Contact aliases" /> : 'None reported'}</DescriptionItem>
           <DescriptionItem label="Username">{contact.username ?? 'Not reported'}</DescriptionItem>
-          <DescriptionItem label="Phone">{contact.redactedPhone ?? 'Not reported'}</DescriptionItem>
+          <DescriptionItem label="Phone" mono>{contact.phoneNumber ? <CopyValue value={contact.phoneNumber} label="Phone number" /> : contact.redactedPhone ?? 'Not reported'}</DescriptionItem>
           <DescriptionItem label="Business">{contact.businessName ?? 'Not reported'}</DescriptionItem>
           <DescriptionItem label="About">{contact.about ?? 'Not reported'}</DescriptionItem>
           <DescriptionItem label="WhatsApp contact found">{contact.found === undefined ? 'Not reported' : contact.found ? 'Yes' : 'No'}</DescriptionItem>

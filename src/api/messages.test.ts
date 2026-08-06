@@ -11,7 +11,11 @@ const message = {
   conversationId: '4c2a5707-95f6-4565-87db-20d983bbd555',
   providerChatId: '100@s.whatsapp.net',
   senderJid: '100@s.whatsapp.net',
+  senderPhoneNumber: '+84100',
+  recipientJid: '200@s.whatsapp.net',
+  recipientPhoneNumber: '+84200',
   participantJid: '731002@lid',
+  participantPhoneNumber: '+84300',
   direction: 'incoming',
   messageType: 'text',
   contentText: 'Hello',
@@ -27,7 +31,7 @@ describe('messages projection adapter', () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [message], meta: { source: 'projection', syncStatus: 'stale', nextCursor: 'opaque/older' } }));
     const result = await listMessages({ GET } as unknown as ApiClient, message.conversationId, { cursor: 'opaque/current', limit: 25 });
     expect(GET).toHaveBeenCalledWith('/conversations/{conversationRef}/messages', { params: { path: { conversationRef: message.conversationId }, query: { cursor: 'opaque/current', limit: 25 } } });
-    expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', conversationId: message.conversationId, providerChatId: message.providerChatId, participantJid: message.participantJid, contentText: 'Hello', mediaAssetId: 'asset-1', provenance: 'history_sync' })]);
+    expect(result.resource.items).toEqual([expect.objectContaining({ resourceType: 'message', id: 'message-1', conversationId: message.conversationId, providerChatId: message.providerChatId, senderPhoneNumber: '+84100', recipientPhoneNumber: '+84200', participantJid: message.participantJid, participantPhoneNumber: '+84300', contentText: 'Hello', mediaAssetId: 'asset-1', provenance: 'history_sync' })]);
     expect(result.resource.pagination.nextCursor).toBe('opaque/older');
     expect(result.meta?.syncStatus).toBe('stale');
   });
@@ -69,11 +73,15 @@ describe('messages projection adapter', () => {
 
   it('normalizes ordered receipt rows and discards malformed rows', async () => {
     const GET = vi.fn().mockResolvedValue(ok({ message: 'success', data: [
-      { messageId: 'message-1', recipientJid: '200@s.whatsapp.net', receiptType: 'delivered', receiptAt: '2026-07-22T08:01:00Z' },
+      { messageId: 'message-1', recipientJid: '200@s.whatsapp.net', recipientPhoneNumber: '+84200', receiptType: 'delivered', receiptAt: '2026-07-22T08:01:00Z' },
+      { messageId: 'message-1', recipientPhoneNumber: '+84300', receiptType: 'read', receiptAt: '2026-07-22T08:02:00Z' },
       { messageId: 'message-1', receiptType: 'read' },
     ], meta: { syncStatus: 'ready' } }));
     const result = await listMessageReceipts({ GET } as unknown as ApiClient, 'message-1');
-    expect(result.resource).toEqual([expect.objectContaining({ resourceType: 'messageReceipt', receiptType: 'delivered' })]);
+    expect(result.resource).toEqual([
+      expect.objectContaining({ resourceType: 'messageReceipt', recipientJid: '200@s.whatsapp.net', recipientPhoneNumber: '+84200', receiptType: 'delivered' }),
+      expect.objectContaining({ resourceType: 'messageReceipt', recipientPhoneNumber: '+84300', receiptType: 'read' }),
+    ]);
   });
 
   it('maps a text send to the existing command without claiming delivery', async () => {
