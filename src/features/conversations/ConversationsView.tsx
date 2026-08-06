@@ -2,7 +2,7 @@ import type { ConversationResource } from '@/api/conversations';
 import type { MessageResource } from '@/api/messages';
 import { useEffect, useLayoutEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { calendarDayKey, calendarDayLabel, humanizeToken, relativeTime } from '@/lib/format';
-import { Button, CountBadge, CursorPagination, Status, WorkspacePaneHeader } from '@/ui';
+import { Button, CountBadge, CursorPagination, IconButton, Status, WorkspacePaneHeader } from '@/ui';
 import { cn } from '@/ui/cn';
 import { resolveParticipantDisplay, type ParticipantDisplayIndex } from './participant-identity';
 
@@ -28,7 +28,7 @@ export function SelectedConversationHeader({ conversation, projectionAttention, 
       className={className}
       title={name}
       description={`${humanizeToken(conversation.type)} · Last activity ${activity}`}
-      actions={<>{projectionAttention}<Button className="@min-[1560px]/responsive-inspector:hidden" onClick={onDetails}>Details</Button></>}
+      actions={<>{projectionAttention}<IconButton icon="panel-right" label="Open conversation details" className="@min-[1560px]/responsive-inspector:hidden" onClick={onDetails} /></>}
     />
   );
 }

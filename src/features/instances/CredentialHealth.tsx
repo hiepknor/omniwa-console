@@ -1,7 +1,7 @@
 import { useApiSession } from '@/api/ApiProvider';
 import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { relativeTime } from '@/lib/format';
-import { Button, MetricGrid, Panel, StateNotice } from '@/ui';
+import { IconButton, MetricGrid, Panel, StateNotice } from '@/ui';
 import { useCredentialHealth } from './hooks';
 import { FailureNotice } from './ui';
 
@@ -25,7 +25,7 @@ export function CredentialHealth() {
     <Panel
       title="Credential health"
       description="C3 observation facts only; Console never derives safeToRemove."
-      actions={supported ? <Button onClick={() => query.refetch()} disabled={query.isFetching}>{query.isFetching ? 'Refreshing…' : 'Refresh health'}</Button> : undefined}
+      actions={supported ? <IconButton icon="refresh" label="Refresh credential health" onClick={() => query.refetch()} busy={query.isFetching} /> : undefined}
       bodyPadding={query.data ? 'none' : 'default'}
     >
       {capabilities.isPending ? (

@@ -74,7 +74,8 @@ describe('SelectedConversationHeader', () => {
     expect(html).toContain('Operations');
     expect(html).toContain('Group · Last activity unreported');
     expect(html).not.toContain('Refresh');
-    expect(html).toContain('Details');
+    expect(html).toContain('aria-label="Open conversation details"');
+    expect(html).toContain('role="tooltip"');
     expect(html).not.toContain('12 unread');
     expect(html).not.toContain('>12</span>');
   });

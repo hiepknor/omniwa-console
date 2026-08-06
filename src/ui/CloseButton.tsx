@@ -1,5 +1,4 @@
-import { buttonClassName } from './Button';
-import { Icon } from './Icon';
+import { IconButton } from './IconButton';
 
 export function CloseButton({
   label,
@@ -10,15 +9,5 @@ export function CloseButton({
   onClick: () => void;
   disabled?: boolean;
 }) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      disabled={disabled}
-      onClick={onClick}
-      className={buttonClassName('ghost', 'size-9 shrink-0 p-0 max-sm:size-10')}
-    >
-      <Icon name="close" />
-    </button>
-  );
+  return <IconButton label={label} icon="close" disabled={disabled} onClick={onClick} />;
 }

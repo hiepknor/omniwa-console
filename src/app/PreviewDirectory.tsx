@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ContactList, LabelList } from '@/features/directory/DirectoryView';
 import { DirectoryDetails } from '@/features/directory/Details';
-import { Button, CountBadge, Field, FilterToolbar, Input, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { CountBadge, Field, FilterToolbar, IconButton, Input, SplitWorkspace, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { contactsFixture, labelsFixture } from './preview-fixtures';
 
 /** Dev-only: projected Contacts and Labels directory with responsive list/detail behavior. */
@@ -23,11 +23,11 @@ export function PreviewDirectory() {
         eyebrow="Messaging"
         title="Directory"
         description="Inspect canonical contacts and projected label definitions."
-        secondaryActions={<Button>Refresh</Button>}
+        secondaryActions={<IconButton icon="refresh" label="Refresh directory" />}
         compactTitle={selectedId ? selectedName ?? `${view === 'contacts' ? 'Contact' : 'Label'} details` : 'Directory'}
         compactDescription={selectedId ? `Projected ${view === 'contacts' ? 'contact' : 'label'}` : view === 'contacts' ? 'Contacts' : 'Labels'}
-        compactLeadingAction={selectedId ? <Button onClick={() => setSelectedId(undefined)}>Back</Button> : undefined}
-        compactActions={<Button>Refresh</Button>}
+        compactLeadingAction={selectedId ? <IconButton icon="arrow-left" label="Back to directory" onClick={() => setSelectedId(undefined)} /> : undefined}
+        compactActions={<IconButton icon="refresh" label="Refresh directory" />}
         compactHeadingRef={compactHeadingRef}
       >
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -45,7 +45,7 @@ export function PreviewDirectory() {
                 <WorkspacePaneHeader title={<span className="inline-flex items-center gap-2">{view === 'contacts' ? 'Contacts' : 'Labels'}<CountBadge count={filtered.length} /></span>} description={view === 'contacts' ? 'Canonical projected identities' : 'Projected definitions'} />
                 <FilterToolbar as="form" className="border-b-0" onSubmit={(event) => event.preventDefault()}>
                   <Field label={view === 'contacts' ? 'Search contacts' : 'Filter labels'} className="min-w-48 flex-1">{(id) => <Input id={id} type="search" value={search} placeholder={view === 'contacts' ? 'Name, ID, alias, or username' : 'Name or label ID'} onChange={(event) => setSearch(event.target.value)} />}</Field>
-                  <div className="flex items-end"><Button type="submit">Apply</Button></div>
+                  <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply directory search" /></div>
                 </FilterToolbar>
               </div>
               {view === 'contacts' ? <ContactList items={filtered as typeof contactsFixture} selectedId={selectedId} onSelect={select} /> : <LabelList items={filtered as typeof labelsFixture} selectedId={selectedId} onSelect={select} />}

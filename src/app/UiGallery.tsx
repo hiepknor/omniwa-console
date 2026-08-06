@@ -27,6 +27,7 @@ import {
   FilterChip,
   FilterToolbar,
   Icon,
+  IconButton,
   Image,
   Input,
   Logo,
@@ -203,7 +204,7 @@ export function UiGallery() {
           eyebrow="Locked design system"
           title="UI Gallery"
           description="Manga · ink on white paper · dense · square · semantic screentone · hard lift only."
-          secondaryActions={<Button>Secondary action</Button>}
+          secondaryActions={<IconButton icon="refresh" label="Refresh UI Gallery" />}
           primaryAction={<Button variant="primary">Primary action</Button>}
         />
 
@@ -265,6 +266,11 @@ export function UiGallery() {
             <Button aria-busy>Working…</Button>
             <ButtonLink to="/__ui">Button link</ButtonLink>
             <CloseButton label="Close example" onClick={() => undefined} />
+            <IconButton icon="refresh" label="Refresh example" />
+            <IconButton icon="search" label="Search example" />
+            <IconButton icon="panel-right" label="Open details example" />
+            <IconButton icon="copy" label="Copy example" />
+            <IconButton icon="refresh" label="Refreshing example" busy />
             <Button onClick={() => setDrawer(true)}>Open drawer</Button>
             <Button onClick={() => setDialogMode('ready')}>Open dialog</Button>
             <Button onClick={() => setDialogMode('pending')}>Pending dialog</Button>
@@ -342,7 +348,7 @@ export function UiGallery() {
                   </Select>
                 )}
               </Field>
-              <Button variant="primary">Apply filters</Button>
+              <IconButton icon="filter" label="Apply filters" />
             </FilterToolbar>
             <div className="flex min-h-14 flex-wrap items-center gap-2 p-3">
               {filterVisible ? <FilterChip label="Status" value="connected" onRemove={() => setFilterVisible(false)} /> : <span className="text-xs text-fg-3">No active filters.</span>}
@@ -524,7 +530,7 @@ export function UiGallery() {
                   </Select>
                 )}
               </Field>
-              <Button type="submit" disabled={listStatusDraft === listStatus}>Apply filters</Button>
+              <IconButton type="submit" icon="filter" label="Apply list filters" disabled={listStatusDraft === listStatus} />
             </FilterToolbar>
             <div className="flex min-h-14 flex-wrap items-center gap-2 border-b border-line p-3">
               {listStatus ? (
@@ -572,11 +578,11 @@ export function UiGallery() {
               eyebrow="Messaging"
               title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
               description="Review projected history and submit outbound messages."
-              secondaryActions={<Button>Refresh</Button>}
+              secondaryActions={<IconButton icon="refresh" label="Refresh conversations" />}
               compactTitle={workspaceDetail ? 'conversation_01' : <span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
               compactDescription={workspaceDetail ? 'Projected detail' : undefined}
-              compactLeadingAction={workspaceDetail ? <Button onClick={() => { setWorkspaceDetail(false); setConversationDetailsOpen(false); }}>Back</Button> : undefined}
-              compactActions={<Button>Refresh</Button>}
+              compactLeadingAction={workspaceDetail ? <IconButton icon="arrow-left" label="Back to conversations" onClick={() => { setWorkspaceDetail(false); setConversationDetailsOpen(false); }} /> : undefined}
+              compactActions={<IconButton icon="refresh" label="Refresh conversations" />}
             >
               <ResponsiveInspector
                 open={conversationDetailsOpen}
@@ -597,7 +603,7 @@ export function UiGallery() {
                 }
                 detail={
                   <>
-                    <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Individual · Last activity 2m ago" actions={<Button className="@min-[1560px]/responsive-inspector:hidden" onClick={() => setConversationDetailsOpen(true)}>Details</Button>} />
+                    <WorkspacePaneHeader className="max-[900px]:hidden" title="conversation_01" description="Individual · Last activity 2m ago" actions={<IconButton icon="panel-right" label="Open conversation details" className="@min-[1560px]/responsive-inspector:hidden" onClick={() => setConversationDetailsOpen(true)} />} />
                   </>
                 }
                 detailFooter={<><CursorPagination nextCursor="older_messages" resetLabel="Newest" nextLabel="Older messages" info="Showing one bounded message page." compactOnSmall onCursor={() => {}} /><ComposerUnavailable detail="No authoritative command target is available." /></>}
@@ -613,11 +619,11 @@ export function UiGallery() {
               eyebrow="Messaging"
               title="Directory"
               description="Inspect canonical contacts and projected label definitions."
-              secondaryActions={<Button>Refresh</Button>}
+              secondaryActions={<IconButton icon="refresh" label="Refresh directory" />}
               compactTitle={directorySelection ? (directoryView === 'contacts' ? contactsFixture.find((item) => item.id === directorySelection)?.displayName : labelsFixture.find((item) => item.id === directorySelection)?.name) ?? 'Directory details' : 'Directory'}
               compactDescription={directorySelection ? `Projected ${directoryView === 'contacts' ? 'contact' : 'label'}` : directoryView === 'contacts' ? 'Contacts' : 'Labels'}
-              compactLeadingAction={directorySelection ? <Button onClick={() => setDirectorySelection(undefined)}>Back</Button> : undefined}
-              compactActions={<Button>Refresh</Button>}
+              compactLeadingAction={directorySelection ? <IconButton icon="arrow-left" label="Back to directory" onClick={() => setDirectorySelection(undefined)} /> : undefined}
+              compactActions={<IconButton icon="refresh" label="Refresh directory" />}
             >
               <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                 <Tabs active={directoryView} onChange={(id) => { setDirectoryView(id as 'contacts' | 'labels'); setDirectorySelection(undefined); }} tabs={[{ id: 'contacts', label: 'Contacts', panelId: 'gallery-directory' }, { id: 'labels', label: 'Labels', panelId: 'gallery-directory' }]} />
@@ -644,16 +650,16 @@ export function UiGallery() {
 
         <Section title="Implementation recipes">
           <div className="grid gap-4 md:grid-cols-2">
-            <Panel title="List" description="Filter → state → rows → cursor." actions={<Button>Refresh</Button>}>
+            <Panel title="List" description="Filter → state → rows → cursor." actions={<IconButton icon="refresh" label="Refresh list" />}>
               <p className="text-sm text-fg-2">Use the complete list recipe above for every paginated projection.</p>
             </Panel>
-            <Panel title="Inspector" description="Selection opens a bounded detail surface." actions={<Button onClick={() => setDrawer(true)}>Inspect</Button>}>
+            <Panel title="Inspector" description="Selection opens a bounded detail surface." actions={<IconButton icon="panel-right" label="Inspect item" onClick={() => setDrawer(true)} />}>
               <p className="text-sm text-fg-2">Keep identity, status, facts, and narrow actions together.</p>
             </Panel>
             <Panel title="Command / recovery" description="Explain impact before explicit intent." actions={<Button variant="danger" onClick={() => setDialogMode('ready')}>Review command</Button>}>
               <p className="text-sm text-fg-2">Lock dismissal while pending and render acknowledgement honestly.</p>
             </Panel>
-            <Panel title="Split workspace" description="Directory and detail share one responsive frame." actions={<Button onClick={() => setWorkspaceDetail(true)}>Open detail</Button>}>
+            <Panel title="Split workspace" description="Directory and detail share one responsive frame." actions={<IconButton icon="panel-right" label="Open detail" onClick={() => setWorkspaceDetail(true)} />}>
               <p className="text-sm text-fg-2">At tablet and mobile widths, detail replaces the directory and always exposes Back.</p>
             </Panel>
           </div>

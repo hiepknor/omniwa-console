@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { Button } from './Button';
 import { cn } from './cn';
+import { IconButton } from './IconButton';
 
 /** Cursor pager: freshness/shown text on the left, First-page + Load-more on the right. */
 export function CursorPagination({
@@ -24,9 +24,9 @@ export function CursorPagination({
   return (
     <div className={cn('flex items-center justify-between gap-3 p-3 border-t border-line', compactOnSmall ? 'max-sm:flex-row' : 'max-sm:flex-col max-sm:items-stretch')}>
       <div className={cn('text-xs text-fg-3', compactOnSmall && 'max-sm:sr-only')}>{info}</div>
-      <div className={cn('flex gap-2 max-sm:grid max-sm:grid-cols-2', compactOnSmall && 'max-sm:flex-1')}>
-        <Button disabled={!cursor} onClick={() => onCursor(undefined)}>{resetLabel}</Button>
-        <Button disabled={!nextCursor} onClick={() => onCursor(nextCursor)}>{nextLabel}</Button>
+      <div className={cn('flex gap-2', compactOnSmall && 'max-sm:flex-1 max-sm:justify-end')}>
+        <IconButton icon="chevrons-left" label={resetLabel} disabled={!cursor} onClick={() => onCursor(undefined)} />
+        <IconButton icon="chevron-right" label={nextLabel} disabled={!nextCursor} onClick={() => onCursor(nextCursor)} />
       </div>
     </div>
   );

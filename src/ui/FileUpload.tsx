@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useId, useRef } from 'react';
-import { Button, buttonClassName } from './Button';
+import { buttonClassName } from './Button';
+import { IconButton } from './IconButton';
 import { cn } from './cn';
 
 function formatFileSize(bytes: number): string {
@@ -101,7 +102,7 @@ export function FileUpload({
               {file ? replaceLabel : chooseLabel}
             </span>
           </label>
-          {file ? <Button className="max-sm:w-full" disabled={disabled} onClick={clear}>Clear</Button> : null}
+          {file ? <IconButton icon="close" label={`Clear ${label}`} disabled={disabled} onClick={clear} /> : null}
         </span>
       </div>
       {description ? <p id={descriptionId} className="text-xs text-fg-3">{description}</p> : null}

@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
-import { Button, CountBadge, CursorPagination, Field, FilterToolbar, Input, PageHeader, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { CountBadge, CursorPagination, Field, FilterToolbar, IconButton, Input, PageHeader, SplitWorkspace, StateNotice, Tabs, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { DirectoryDetails } from './Details';
 import { ContactList, LabelList } from './DirectoryView';
 import { useContact, useContacts, useLabel, useLabels } from './hooks';
@@ -86,11 +86,11 @@ export function DirectoryPage() {
       eyebrow="Messaging"
       title="Directory"
       description="Inspect canonical contacts and projected label definitions."
-      secondaryActions={<Button disabled={!advertised || refreshing} onClick={refresh}>{refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+      secondaryActions={<IconButton icon="refresh" label="Refresh directory" disabled={!advertised} busy={refreshing} onClick={refresh} />}
       compactTitle={selectedId ? selectedName ?? `${view === 'contacts' ? 'Contact' : 'Label'} details` : 'Directory'}
       compactDescription={selectedId ? (view === 'contacts' ? 'Projected contact' : 'Projected label') : view === 'contacts' ? 'Contacts' : 'Labels'}
-      compactLeadingAction={selectedId ? <Button onClick={close}>Back</Button> : undefined}
-      compactActions={<Button disabled={!advertised || refreshing} onClick={selectedId ? refreshDetail : refreshDirectory}>{refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
+      compactLeadingAction={selectedId ? <IconButton icon="arrow-left" label="Back to directory" onClick={close} /> : undefined}
+      compactActions={<IconButton icon="refresh" label={selectedId ? 'Refresh selected directory item' : 'Refresh directory'} disabled={!advertised} busy={refreshing} onClick={selectedId ? refreshDetail : refreshDirectory} />}
       compactHeadingRef={compactHeadingRef}
     >
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -114,7 +114,7 @@ export function DirectoryPage() {
                   <Field label={view === 'contacts' ? 'Search contacts' : 'Filter labels'} className="min-w-48 flex-1">
                     {(id) => <Input id={id} type="search" value={searchDraft} placeholder={view === 'contacts' ? 'Name, ID, alias, or username' : 'Name or label ID'} onChange={(event) => setSearchDraft(event.target.value)} />}
                   </Field>
-                  <div className="flex items-end"><Button type="submit" disabled={searchDraft.trim() === route.search}>Apply</Button></div>
+                  <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply directory search" disabled={searchDraft.trim() === route.search} /></div>
                 </FilterToolbar>
               </div>
               {!viewSupported ? <div className="p-3"><StateNotice kind="empty" title="Projection unavailable" detail={`The backend does not currently advertise ${view === 'contacts' ? 'contacts_projection' : 'labels_projection'}; capability polling continues because the projection may be unsupported or waiting for readiness.`} /></div> : null}

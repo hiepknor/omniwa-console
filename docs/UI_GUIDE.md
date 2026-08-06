@@ -206,6 +206,11 @@ resource models, or rendered diagnostics.
   shared `panelId` contract instead of cloning tab keyboard behavior.
 - Buttons preserve a clear ghost/primary/danger hierarchy, expose pressed and
   keyboard-focus feedback, and use `ButtonLink` for navigation styled as an action.
+  Secondary utility actions use the shared icon-only `IconButton` with a specific
+  accessible name and matching hover/focus tooltip. This includes refresh,
+  search/filter submission, compact Back, inspector disclosure, copy,
+  clear/remove, and cursor navigation. Primary actions, server commands,
+  confirmations, cancellation, and destructive intent retain visible labels.
 - Count chips use the shared `CountBadge`; count-bearing Tabs apply it
   automatically. Numeric table cells, metrics, selection prose, and counts stated
   inside an operational Status remain in their context instead of becoming chips.

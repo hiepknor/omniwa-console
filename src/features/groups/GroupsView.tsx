@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import type { GroupDirectorySummary, GroupMembershipState, GroupMyRole, GroupResource, GroupSendMode, GroupState, GroupType } from '@/api/groups';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { Button, CursorPagination, Field, FilterToolbar, Input, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, IconButton, Input, MetricGrid, PageHeader, Panel, Select, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
 import { groupStatusTone } from './group-status-tone';
 import { groupMembershipStates, groupRoles, groupSendModes, groupStates, groupTypes } from './route-state';
 
@@ -42,7 +42,7 @@ export function GroupsView(props: GroupsViewProps) {
         eyebrow="Messaging"
         title="Groups"
         description="Inspect projected WhatsApp groups and run available management actions."
-        secondaryActions={<><Button onClick={props.onRefresh} disabled={props.refreshing} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button><Button disabled={props.joinEnabled === false} onClick={props.onJoin}>Join group</Button></>}
+        secondaryActions={<><IconButton icon="refresh" label="Refresh groups" onClick={props.onRefresh} busy={props.refreshing} /><Button disabled={props.joinEnabled === false} onClick={props.onJoin}>Join group</Button></>}
         primaryAction={<Button variant="primary" disabled={props.commandsEnabled === false} onClick={props.onNew}>New group</Button>}
       />
 
@@ -63,7 +63,7 @@ export function GroupsView(props: GroupsViewProps) {
       <Panel title="Group directory" description="Applied prefix search, opaque cursor, and selected group remain URL-addressable." bodyPadding="none">
         <FilterToolbar as="form" onSubmit={props.onApply}>
           <Field label="Prefix search" className="min-w-56 flex-1">{(id) => <Input id={id} type="search" value={props.searchDraft} placeholder="Group name or JID prefix" onChange={(e) => props.onSearchDraft(e.target.value)} />}</Field>
-          <div className="flex items-end"><Button type="submit" disabled={props.applyDisabled}>Apply search</Button></div>
+          <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply group search" disabled={props.applyDisabled} /></div>
         </FilterToolbar>
         {props.normalized ? <FilterToolbar>
           <DirectoryFilter label="Type" value={props.filters.type} values={groupTypes} onValue={(value) => props.onFilter('type', value)} />
