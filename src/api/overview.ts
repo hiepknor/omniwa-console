@@ -3,7 +3,7 @@ import { unwrap } from './envelopes';
 import type { components } from './generated/schema';
 
 type OverviewPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.Overview'];
-type HealthPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ServerHealth'];
+type HealthPayload = components['schemas']['pkg_server_handler.ServerHealthResponse'];
 type ProjectionPayload = components['schemas']['github_com_evolution-foundation_evolution-go_pkg_projection_service.ProjectionHealth'];
 
 export type OverviewResource = {
