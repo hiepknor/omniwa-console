@@ -1,7 +1,17 @@
-import { useId, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes } from 'react';
 import { buttonClassName, type ButtonVariant } from './Button';
 import { cn } from './cn';
 import { Icon, type IconName } from './Icon';
+
+let keyboardModality = false;
+let modalityListenersInstalled = false;
+
+function installModalityListeners() {
+  if (modalityListenersInstalled) return;
+  modalityListenersInstalled = true;
+  window.addEventListener('keydown', () => { keyboardModality = true; }, true);
+  window.addEventListener('pointerdown', () => { keyboardModality = false; }, true);
+}
 
 export function IconButton({
   label,
@@ -24,6 +34,8 @@ export function IconButton({
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ left: 0, top: 0 });
 
+  useEffect(installModalityListeners, []);
+
   useLayoutEffect(() => {
     if (!tooltipOpen || !buttonRef.current || !tooltipRef.current) return;
     const buttonRect = buttonRef.current.getBoundingClientRect();
@@ -44,7 +56,7 @@ export function IconButton({
     <span
       className="relative inline-flex shrink-0"
       onMouseEnter={() => setTooltipOpen(true)}
-      onMouseLeave={() => setTooltipOpen(false)}
+      onMouseLeave={() => setTooltipOpen(keyboardModality && (buttonRef.current?.matches(':focus-visible') ?? false))}
     >
       <button
         {...props}
@@ -55,7 +67,7 @@ export function IconButton({
         aria-describedby={tooltipId}
         aria-busy={busy || undefined}
         disabled={disabled || busy}
-        onFocus={(event) => { setTooltipOpen(true); props.onFocus?.(event); }}
+        onFocus={(event) => { setTooltipOpen(keyboardModality && event.currentTarget.matches(':focus-visible')); props.onFocus?.(event); }}
         onBlur={(event) => { setTooltipOpen(false); props.onBlur?.(event); }}
         className={buttonClassName(variant, cn('size-9 p-0 max-sm:size-10', className))}
       >

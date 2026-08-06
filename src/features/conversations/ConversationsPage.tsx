@@ -138,13 +138,13 @@ function ConversationWorkspace() {
         eyebrow="Messaging"
         title={pageTitle}
         description="Review projected history and submit outbound messages."
-        secondaryActions={<IconButton icon="refresh" label="Refresh conversations" disabled={!viewSupported} busy={routeRefreshing} onClick={refreshPage} />}
+        secondaryActions={<Button disabled={!viewSupported} aria-busy={routeRefreshing || undefined} onClick={refreshPage}>Refresh</Button>}
         compactTitle={hasConversation ? selectedConversation?.displayName ?? selectedConversation?.phoneNumber ?? (selectedConversation ? `Unknown ${selectedConversation.type} conversation` : 'Message timeline') : pageTitle}
         compactDescription={hasConversation ? (selectedConversation ? `${humanizeToken(selectedConversation.type)} · ${selectedProjectionAttention ?? `Last activity ${selectedConversation.lastActivityAt ? relativeTime(selectedConversation.lastActivityAt) : 'unreported'}`}` : 'Message timeline') : undefined}
         compactLeadingAction={hasConversation ? <IconButton icon="arrow-left" label="Back to conversations" onClick={closeConversation} /> : undefined}
         compactActions={hasConversation && selectedConversation
-          ? <><IconButton icon="refresh" label="Refresh conversation" disabled={!viewSupported} busy={routeRefreshing} onClick={refreshPage} /><IconButton icon="panel-right" label="Open conversation details" onClick={openConversationDetails} /></>
-          : <IconButton icon="refresh" label="Refresh conversations" disabled={!viewSupported} busy={routeRefreshing} onClick={refreshPage} />}
+          ? <><Button disabled={!viewSupported} aria-busy={routeRefreshing || undefined} onClick={refreshPage}>Refresh</Button><IconButton icon="panel-right" label="Open conversation details" onClick={openConversationDetails} /></>
+          : <Button disabled={!viewSupported} aria-busy={routeRefreshing || undefined} onClick={refreshPage}>Refresh</Button>}
         compactHeadingRef={compactHeadingRef}
       >
         <ResponsiveInspector

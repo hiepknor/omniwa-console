@@ -1,7 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import type { EventResource } from '@/api/events-api';
 import { relativeTime } from '@/lib/format';
-import { CursorPagination, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
+import { Button, CursorPagination, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, StateNotice, Status, Table, Td, Th, Tr } from '@/ui';
 
 export function retentionLabel(seconds?: number) {
   if (!seconds) return 'Retention unreported';
@@ -37,7 +37,7 @@ export function EventsView(props: EventsViewProps) {
         eyebrow="Observability"
         title="Events"
         description="Inspect durable operational events and audit context."
-        secondaryActions={<IconButton icon="refresh" label="Refresh events" onClick={props.onRefresh} busy={props.refreshing} />}
+        secondaryActions={<Button onClick={props.onRefresh} aria-busy={props.refreshing || undefined}>{props.refreshing ? 'Refreshing…' : 'Refresh'}</Button>}
       />
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-2 p-3 border border-line bg-surface">

@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
-import { CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton, Input, PageHeader, StateNotice, WorkspacePageFrame } from '@/ui';
+import { Button, CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton, Input, PageHeader, StateNotice, WorkspacePageFrame } from '@/ui';
 import { DirectoryDetails } from './Details';
 import { ContactTable, LabelList } from './DirectoryView';
 import { useContact, useContacts, useLabel, useLabels } from './hooks';
@@ -111,31 +111,37 @@ export function ContactsPage() {
       eyebrow="Messaging"
       title={<span className="inline-flex items-center gap-2">Contacts{typeof contacts.data?.resource.total === 'number' ? <CountBadge count={contacts.data.resource.total} /> : null}</span>}
       description="Inspect canonical contacts and consult projected label definitions."
-      secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={openLabels} /><IconButton icon="refresh" label="Refresh contacts" disabled={!contactsReady} busy={contactsRefreshing} onClick={refreshPage} /></>}
+      secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={openLabels} /><Button disabled={!contactsReady} aria-busy={contactsRefreshing || undefined} onClick={refreshPage}>Refresh</Button></>}
       compactTitle="Contacts"
       compactDescription="Canonical projected identities"
-      compactActions={<><IconButton icon="tag" label="Open Labels" onClick={openLabels} /><IconButton icon="refresh" label="Refresh contacts" disabled={!contactsReady} busy={contactsRefreshing} onClick={refreshContacts} /></>}
+      compactActions={<><IconButton icon="tag" label="Open Labels" onClick={openLabels} /><Button disabled={!contactsReady} aria-busy={contactsRefreshing || undefined} onClick={refreshContacts}>Refresh</Button></>}
     >
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-4 max-sm:p-3">
-        <div className="grid gap-3">
-          <FilterToolbar as="form" className="border" onSubmit={(event) => { event.preventDefault(); applySearch(); }}>
+        <section aria-label="Contact registry" className="border border-line-strong bg-surface">
+          <header className="border-b border-line p-4">
+            <div className="grid min-w-0 gap-1">
+              <h2 className="text-sm font-semibold text-fg">Contact registry</h2>
+              <p className="text-xs text-fg-3">Canonical identities available in the current instance projection.</p>
+            </div>
+          </header>
+          <FilterToolbar as="form" className="border-0 border-b border-line" onSubmit={(event) => { event.preventDefault(); applySearch(); }}>
             <Field label="Search contacts" className="min-w-48 flex-1">
               {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name, phone, ID, alias, or username" onChange={(event) => setSearchDraft(event.target.value)} />}
             </Field>
             <div className="flex items-end"><IconButton type="submit" icon="search" label="Apply contact search" disabled={searchDraft.trim() === route.search} /></div>
           </FilterToolbar>
-          {!contactsSupported ? <StateNotice kind="empty" title="Projection unavailable" detail="The backend does not currently advertise contacts_projection; capability polling continues because the projection may be unsupported or waiting for readiness." /> : null}
-          {contactsSupported && !contactsReady ? <StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable Contact projection snapshot visible." /> : null}
-          {contactsSupported && contacts.isPending ? <StateNotice kind="loading" title="Loading contacts" /> : null}
-          {contactsSupported && contacts.error && !contacts.data ? <FailureNotice error={contacts.error} onRetry={refreshContacts} /> : null}
+          {!contactsSupported ? <div className="p-4"><StateNotice kind="empty" title="Projection unavailable" detail="The backend does not currently advertise contacts_projection; capability polling continues because the projection may be unsupported or waiting for readiness." /></div> : null}
+          {contactsSupported && !contactsReady ? <div className="p-4"><StateNotice kind="empty" title="Capability changed" detail="Keeping the last usable Contact projection snapshot visible." /></div> : null}
+          {contactsSupported && contacts.isPending ? <div className="p-4"><StateNotice kind="loading" title="Loading contacts" /></div> : null}
+          {contactsSupported && contacts.error && !contacts.data ? <div className="p-4"><FailureNotice error={contacts.error} onRetry={refreshContacts} /></div> : null}
           {contactsSupported && contacts.data ? <>
-            {contacts.error ? <FailureNotice error={contacts.error} stale onRetry={refreshContacts} /> : null}
-            <ProjectionStatus meta={contacts.data.meta} />
-            <ContactTable items={contacts.data.resource.items} selectedId={contactId} onSelect={selectContact} />
-            {contactsEmpty ? <StateNotice kind="empty" title="No contacts" detail={route.search ? 'No projected Contact matches the URL-backed search.' : 'The ready Contact projection contains no items.'} /> : null}
+            {contacts.error ? <div className="p-4"><FailureNotice error={contacts.error} stale onRetry={refreshContacts} /></div> : null}
+            <div className="px-4"><ProjectionStatus meta={contacts.data.meta} /></div>
+            <ContactTable className="border-0" items={contacts.data.resource.items} selectedId={contactId} onSelect={selectContact} />
+            {contactsEmpty ? <div className="p-4"><StateNotice kind="empty" title="No contacts" detail={route.search ? 'No projected Contact matches the URL-backed search.' : 'The ready Contact projection contains no items.'} /></div> : null}
             <CursorPagination cursor={route.cursor} nextCursor={contacts.data.resource.pagination.nextCursor ?? undefined} info={`${contacts.data.resource.items.length} shown on this page`} onCursor={(cursor) => replaceContactList(updateSearchParams(searchParams, { cursor }))} />
           </> : null}
-        </div>
+        </section>
       </div>
       <Drawer
         open={labelsOpen || Boolean(contactId)}

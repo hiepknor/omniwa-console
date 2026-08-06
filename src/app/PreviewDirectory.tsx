@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ContactTable, LabelList } from '@/features/directory/DirectoryView';
 import { DirectoryDetails } from '@/features/directory/Details';
-import { CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton, Input, WorkspacePageFrame } from '@/ui';
+import { Button, CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton, Input, WorkspacePageFrame } from '@/ui';
 import { contactsFixture, labelsFixture } from './preview-fixtures';
 
 /** Dev-only: full-width Contacts registry with the projected Label catalog open. */
@@ -32,12 +32,13 @@ export function PreviewDirectory() {
   );
   return (
     <main className="h-dvh overflow-hidden bg-bg">
-      <WorkspacePageFrame eyebrow="Messaging" title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>} description="Search and inspect canonical contact records." secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>} compactTitle="Contacts" compactDescription="Canonical contact registry" compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setLabelsOpen(true)} /><IconButton icon="refresh" label="Refresh contacts" /></>}>
-        <div className="min-h-0 flex-1 overflow-y-auto p-4 max-sm:p-3"><div className="grid gap-3">
-          <FilterToolbar as="form" className="border" onSubmit={(event) => event.preventDefault()}><Field label="Search contacts" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" value={search} placeholder="Name, phone, ID, alias, or username" onChange={(event) => setSearch(event.target.value)} />}</Field><div className="flex items-end"><IconButton type="submit" icon="search" label="Apply contact search" /></div></FilterToolbar>
-          <ContactTable items={contacts} selectedId={contactId} onSelect={(id) => { setLabelsOpen(false); setContactId(id); }} />
+      <WorkspacePageFrame eyebrow="Messaging" title={<span className="inline-flex items-center gap-2">Contacts<CountBadge count={contactsFixture.length} /></span>} description="Search and inspect canonical contact records." secondaryActions={<><IconButton icon="tag" label="Open Label catalog" onClick={() => setLabelsOpen(true)} /><Button>Refresh</Button></>} compactTitle="Contacts" compactDescription="Canonical contact registry" compactActions={<><IconButton icon="tag" label="Open Labels" onClick={() => setLabelsOpen(true)} /><Button>Refresh</Button></>}>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 max-sm:p-3"><section aria-label="Contact registry" className="border border-line-strong bg-surface">
+          <header className="border-b border-line p-4"><div className="grid min-w-0 gap-1"><h2 className="text-sm font-semibold text-fg">Contact registry</h2><p className="text-xs text-fg-3">Canonical identities available in the current instance projection.</p></div></header>
+          <FilterToolbar as="form" className="border-0 border-b border-line" onSubmit={(event) => event.preventDefault()}><Field label="Search contacts" className="min-w-48 flex-1">{(id) => <Input id={id} type="search" value={search} placeholder="Name, phone, ID, alias, or username" onChange={(event) => setSearch(event.target.value)} />}</Field><div className="flex items-end"><IconButton type="submit" icon="search" label="Apply contact search" /></div></FilterToolbar>
+          <ContactTable className="border-0" items={contacts} selectedId={contactId} onSelect={(id) => { setLabelsOpen(false); setContactId(id); }} />
           <CursorPagination nextCursor="contacts-next" info={`${contacts.length} shown on this page`} onCursor={() => {}} />
-        </div></div>
+        </section></div>
         <Drawer open={labelsOpen || Boolean(contactId)} onClose={closeDrawer} title={labelsOpen ? label?.name ?? 'Label catalog' : contact?.displayName ?? 'Contact details'} subtitle={labelsOpen ? label?.id : contact?.id}>
           {labelsOpen ? labelCatalog : contact ? <DirectoryDetails contact={contact} loading={false} onRetry={() => {}} /> : null}
         </Drawer>

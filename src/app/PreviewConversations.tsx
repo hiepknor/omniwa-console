@@ -6,7 +6,7 @@ import { ConversationDetailsContent } from '@/features/conversations/Details';
 import { ConversationMediaPlaceholder } from '@/features/conversations/Media';
 import { buildParticipantDisplayIndex } from '@/features/conversations/participant-identity';
 import { humanizeToken, relativeTime } from '@/lib/format';
-import { CountBadge, Field, FilterToolbar, IconButton, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
+import { Button, CountBadge, Field, FilterToolbar, IconButton, Image, Input, ResponsiveInspector, SplitWorkspace, useWorkspacePageFocus, WorkspacePageFrame, WorkspacePaneHeader } from '@/ui';
 import { contactsFixture, conversationsFixture, messagesFixture } from './preview-fixtures';
 
 const participantDisplayIndex = buildParticipantDisplayIndex(contactsFixture);
@@ -26,11 +26,11 @@ export function PreviewConversations() {
         eyebrow="Messaging"
         title={<span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
         description="Review projected history and submit outbound messages."
-        secondaryActions={<IconButton icon="refresh" label="Refresh conversations" />}
+        secondaryActions={<Button>Refresh</Button>}
         compactTitle={conversation?.displayName ?? <span className="inline-flex items-center gap-2">Conversations<CountBadge count={217} /></span>}
         compactDescription={conversation ? `${humanizeToken(conversation.type)} · Last activity ${conversation.lastActivityAt ? relativeTime(conversation.lastActivityAt) : 'unreported'}` : undefined}
         compactLeadingAction={conversation ? <IconButton icon="arrow-left" label="Back to conversations" onClick={() => setConversationId(undefined)} /> : undefined}
-        compactActions={conversation ? <><IconButton icon="refresh" label="Refresh conversation" /><IconButton icon="panel-right" label="Open conversation details" onClick={() => setDetailsOpen(true)} /></> : <IconButton icon="refresh" label="Refresh conversations" />}
+        compactActions={conversation ? <><Button>Refresh</Button><IconButton icon="panel-right" label="Open conversation details" onClick={() => setDetailsOpen(true)} /></> : <Button>Refresh</Button>}
         compactHeadingRef={compactHeadingRef}
       >
         <ResponsiveInspector
