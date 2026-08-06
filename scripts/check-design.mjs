@@ -302,12 +302,12 @@ for (const marker of ['ConversationDetailsContent', 'MessageInspectorContent', '
 }
 
 const directoryPreview = await read('src/app/PreviewDirectory.tsx');
-for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', '>Refresh</Button>', '<Drawer', '<ContactTable', '<CursorPagination', 'label="Back to labels"', '<CountBadge count={contactsFixture.length}', '<LabelList', '<DirectoryDetails']) {
+for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', '>Refresh</Button>', '<Drawer', '<ContactTable', '<CursorPagination', 'label="Back to labels"', '<CountBadge count={contactsFixture.length}', '<h2 className="text-sm font-semibold text-fg">Contact registry</h2>', '<LabelList', '<DirectoryDetails']) {
   if (!directoryPreview.includes(marker)) failures.push(`src/app/PreviewDirectory.tsx: Contacts workspace preview is missing ${marker}`);
 }
 
 const directoryPage = await read('src/features/directory/DirectoryPage.tsx');
-for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', '>Refresh</Button>', '<Drawer', '<ContactTable', '<CursorPagination', 'label="Back to labels"', 'contacts.data.resource.total', 'Search contacts', 'Filter labels', '<LabelList', '<DirectoryDetails', 'labelsOpen && labelsReady', "cap('contacts_projection')", "cap('labels_projection')", "cap('canonical_contact_identity')"]) {
+for (const marker of ['<WorkspacePageFrame', 'label="Open Label catalog"', '>Refresh</Button>', '<Drawer', '<ContactTable', '<CursorPagination', 'label="Back to labels"', 'contacts.data.resource.total', '<h2 className="text-sm font-semibold text-fg">Contact registry</h2>', 'Search contacts', 'Filter labels', '<LabelList', '<DirectoryDetails', 'labelsOpen && labelsReady', "cap('contacts_projection')", "cap('labels_projection')", "cap('canonical_contact_identity')"]) {
   if (!directoryPage.includes(marker)) failures.push(`src/features/directory/DirectoryPage.tsx: Contacts workspace is missing ${marker}`);
 }
 

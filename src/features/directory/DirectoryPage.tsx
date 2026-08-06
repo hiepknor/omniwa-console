@@ -5,7 +5,7 @@ import { useServerCapabilities } from '@/api/CapabilitiesProvider';
 import { omitSearchParams, updateSearchParams, withSearchParams } from '@/lib/url-search-state';
 import { useInvalidCursorReset } from '@/lib/useInvalidCursorReset';
 import { ProjectionFailureNotice as FailureNotice, ProjectionStatus } from '@/components/ProjectionReadState';
-import { Button, CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton, Input, PageHeader, Panel, StateNotice, WorkspacePageFrame } from '@/ui';
+import { Button, CountBadge, CursorPagination, Drawer, Field, FilterToolbar, IconButton, Input, PageHeader, StateNotice, WorkspacePageFrame } from '@/ui';
 import { DirectoryDetails } from './Details';
 import { ContactTable, LabelList } from './DirectoryView';
 import { useContact, useContacts, useLabel, useLabels } from './hooks';
@@ -117,8 +117,14 @@ export function ContactsPage() {
       compactActions={<><IconButton icon="tag" label="Open Labels" onClick={openLabels} /><Button disabled={!contactsReady} aria-busy={contactsRefreshing || undefined} onClick={refreshContacts}>Refresh</Button></>}
     >
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain p-4 max-sm:p-3">
-        <Panel title="Contact directory" description="Applied search, opaque cursor, and selected Contact remain URL-addressable." bodyPadding="none">
-          <FilterToolbar as="form" onSubmit={(event) => { event.preventDefault(); applySearch(); }}>
+        <section aria-label="Contact registry" className="border border-line-strong bg-surface">
+          <header className="border-b border-line p-4">
+            <div className="grid min-w-0 gap-1">
+              <h2 className="text-sm font-semibold text-fg">Contact registry</h2>
+              <p className="text-xs text-fg-3">Canonical identities available in the current instance projection.</p>
+            </div>
+          </header>
+          <FilterToolbar as="form" className="border-0 border-b border-line" onSubmit={(event) => { event.preventDefault(); applySearch(); }}>
             <Field label="Search contacts" className="min-w-48 flex-1">
               {(id) => <Input id={id} type="search" value={searchDraft} placeholder="Name, phone, ID, alias, or username" onChange={(event) => setSearchDraft(event.target.value)} />}
             </Field>
@@ -135,7 +141,7 @@ export function ContactsPage() {
             {contactsEmpty ? <div className="p-4"><StateNotice kind="empty" title="No contacts" detail={route.search ? 'No projected Contact matches the URL-backed search.' : 'The ready Contact projection contains no items.'} /></div> : null}
             <CursorPagination cursor={route.cursor} nextCursor={contacts.data.resource.pagination.nextCursor ?? undefined} info={`${contacts.data.resource.items.length} shown on this page`} onCursor={(cursor) => replaceContactList(updateSearchParams(searchParams, { cursor }))} />
           </> : null}
-        </Panel>
+        </section>
       </div>
       <Drawer
         open={labelsOpen || Boolean(contactId)}

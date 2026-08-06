@@ -225,9 +225,13 @@ resource models, or rendered diagnostics.
   search scope), while Labels use the bare-array length; none derive totals from
   page length. The Label catalog reports its loaded filtered count only while
   open, so its projection is never fetched merely to populate navigation.
-  The Contacts registry uses the same `Panel → FilterToolbar → borderless Table
-  → CursorPagination` directory recipe as Groups. Contact ID is supporting
-  identity beneath the Contact name rather than a duplicate terminal column.
+  The Contacts registry remains a distinct full-width Contacts workspace; it
+  does not copy the Groups panel hierarchy. It shares the canonical frame,
+  surface header, filter, table, row-density, typography, status, and cursor
+  primitives so the two routes speak one visual language. Its own surface header
+  names and describes the registry without adopting the Groups panel layout.
+  Contact ID is supporting identity beneath the Contact name rather than a
+  duplicate terminal column.
   Private message images use the shared framed Image language when ready and a
   stable square Status placeholder while pending, failed, expired, deleted, or
   capability-gated. `not_ready` remains pending; only the message inspector adds
